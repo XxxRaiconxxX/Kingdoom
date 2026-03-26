@@ -31,7 +31,7 @@ export function EventCard({ event }: { event: RealmEvent }) {
 
   return (
     <article className="overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/80">
-      <div className="relative aspect-[16/10] bg-stone-950">
+      <div className="relative aspect-[16/10] bg-stone-950 lg:aspect-[16/9]">
         {!imageFailed ? (
           <img
             src={event.imageUrl}
@@ -58,7 +58,7 @@ export function EventCard({ event }: { event: RealmEvent }) {
         </div>
       </div>
 
-      <div className="space-y-4 p-4">
+      <div className="space-y-4 p-4 md:p-5">
         <div>
           <h3 className="text-xl font-bold text-stone-100">{event.title}</h3>
           <p className="mt-2 text-sm leading-6 text-stone-400">
@@ -94,7 +94,7 @@ export function EventCard({ event }: { event: RealmEvent }) {
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="overflow-hidden"
             >
-              <div className="grid gap-3 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4">
+              <div className="grid gap-3 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4 lg:grid-cols-2">
                 <DetailRow label="Cronica" value={event.longDescription} />
                 <DetailRow
                   label="Facciones"
@@ -132,3 +132,4 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

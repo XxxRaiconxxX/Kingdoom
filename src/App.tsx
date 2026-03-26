@@ -59,7 +59,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-300">
-      <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-28 pt-5">
+      <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-28 pt-5 md:px-6 md:pb-12 md:pt-28 xl:px-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -76,8 +76,8 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-800/80 bg-stone-950/90 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-2 px-3 pt-3 pb-safe">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-800/80 bg-stone-950/90 backdrop-blur-xl md:top-4 md:bottom-auto md:mx-auto md:w-fit md:max-w-4xl md:rounded-3xl md:border md:border-stone-800/80 md:bg-stone-950/85 md:px-2 md:py-2 md:shadow-2xl md:shadow-black/30">
+        <div className="mx-auto grid max-w-md grid-cols-4 gap-2 px-3 pt-3 pb-safe md:max-w-none md:gap-3 md:px-0 md:pt-0 md:pb-0">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
 
@@ -86,7 +86,7 @@ export default function App() {
                 key={id}
                 type="button"
                 onClick={() => setActiveTab(id)}
-                className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-[11px] font-semibold transition ${
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-[11px] font-semibold transition md:min-h-0 md:flex-row md:gap-2 md:px-4 md:py-3 md:text-sm ${
                   isActive
                     ? "border-amber-400/30 bg-amber-500/12 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.12)]"
                     : "border-transparent bg-stone-900/70 text-stone-400"
@@ -114,23 +114,23 @@ function HomeSection() {
 
   return (
     <section className="space-y-6">
-      <div className="overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30">
+      <div className="overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30 md:p-8">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
           <Castle className="h-4 w-4" />
           Reino vivo por WhatsApp
         </div>
 
-        <h1 className="text-4xl font-black leading-none text-stone-100">
+        <h1 className="text-4xl font-black leading-none text-stone-100 md:max-w-3xl md:text-5xl">
           Reino de las Sombras
         </h1>
 
-        <p className="mt-4 text-sm leading-6 text-stone-300/90">
+        <p className="mt-4 text-sm leading-6 text-stone-300/90 md:max-w-3xl md:text-base">
           Intrigas de corte, guerra entre facciones y reliquias prohibidas en un
           reino donde cada decision puede convertirte en leyenda o condenarte al
           olvido.
         </p>
 
-        <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="mt-5 grid grid-cols-3 gap-3 md:max-w-2xl md:gap-4">
           {HOME_STATS.map((stat) => (
             <StatCard
               key={stat.label}
@@ -145,13 +145,13 @@ function HomeSection() {
           href={WHATSAPP_JOIN_URL}
           target="_blank"
           rel="noreferrer"
-          className="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
+          className="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 md:max-w-sm"
         >
           Unirse al Gremio (WhatsApp)
         </a>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-3xl border border-stone-800 bg-stone-900/75 p-5">
           <h2 className="text-lg font-bold text-stone-100">La noche se mueve</h2>
           <p className="mt-2 text-sm leading-6 text-stone-400">
@@ -206,7 +206,7 @@ function HomeSection() {
           </div>
         ) : null}
 
-        <div className="space-y-4">
+        <div className="grid gap-4 xl:grid-cols-2">
           {ACTIVE_EVENTS.map((event) => (
             <EventCard key={event.title} event={event} />
           ))}
@@ -219,7 +219,7 @@ function HomeSection() {
           title="Anuncios del reino"
           description="Pequenos bloques para mantener la home con movimiento sin tocar la logica."
         />
-        <div className="grid gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           {KINGDOM_ANNOUNCEMENTS.map((announcement) => (
             <div
               key={announcement.title}
@@ -242,7 +242,7 @@ function HomeSection() {
           title="Como unirse"
           description="Una ruta corta para nuevos jugadores."
         />
-        <div className="grid gap-4">
+        <div className="grid gap-4 md:grid-cols-3">
           {JOIN_STEPS.map((step, index) => (
             <div
               key={step.title}
@@ -289,7 +289,7 @@ function LoreSection() {
         </p>
       </header>
 
-      <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-3">
         {LORE_RULES.map((rule) => {
           const Icon = rule.icon;
 
@@ -323,7 +323,7 @@ function LoreSection() {
           description="Cada bloque se puede ampliar para leer la historia con mas detalle."
         />
 
-        <div className="space-y-4">
+        <div className="grid gap-4 xl:grid-cols-2">
           {LORE_CHAPTERS.map((chapter) => {
             const isOpen = openChapter === chapter.title;
 
@@ -386,7 +386,7 @@ function LoreSection() {
           description="Mini fichas para presentar el tono y la identidad de cada grupo."
         />
 
-        <div className="grid gap-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {REALM_FACTIONS.map((faction) => (
             <div
               key={faction.name}
@@ -450,8 +450,18 @@ function MarketSection() {
         </p>
       </header>
 
+      <div className="rounded-[2rem] border border-amber-500/15 bg-amber-500/6 p-4 text-sm leading-6 text-stone-400">
+        <p className="font-semibold text-amber-300">Nota sobre imagenes externas</p>
+        <p className="mt-2">
+          Puedes usar URLs directas de imagen en cada producto. Si quieres usar
+          Pinterest, la URL debe apuntar al archivo de imagen, por ejemplo
+          `https://i.pinimg.com/...jpg`, no a una pagina `pinterest.com/pin/...`.
+          Si Pinterest bloquea el hotlink, la tarjeta mostrara un fallback visual.
+        </p>
+      </div>
+
       <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-4">
-        <div className="space-y-4">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
           <label className="space-y-2">
             <span className="text-sm font-semibold text-stone-200">Buscar</span>
             <input
@@ -572,7 +582,7 @@ function MarketSection() {
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className="overflow-hidden border-t border-stone-800"
                   >
-                    <div className="grid gap-4 p-4 sm:grid-cols-2">
+                    <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">
                       {items.length > 0 ? (
                         items.map((item) => (
                           <MarketItemCard
@@ -660,7 +670,7 @@ function RankingSection() {
       ) : null}
 
       <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-4">
-        <div className="space-y-4">
+        <div className="grid gap-4 lg:grid-cols-2">
           <div className="space-y-2">
             <p className="text-sm font-semibold text-stone-200">Estado</p>
             <div className="flex flex-wrap gap-2">
@@ -702,7 +712,7 @@ function RankingSection() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-2">
         {filteredPlayers.length > 0 ? (
           filteredPlayers.map((player, index) => (
             <RankingCard key={player.name} player={player} index={index} />

@@ -126,14 +126,14 @@ export function PurchaseModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[70] bg-black/70 px-4 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-[70] bg-black/70 px-4 py-6 backdrop-blur-sm md:px-6 md:py-10"
     >
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 24 }}
         transition={{ duration: 0.22, ease: "easeOut" }}
-        className="mx-auto flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/40"
+        className="mx-auto flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/40 md:max-w-3xl"
       >
         <div className="flex items-start justify-between gap-4 border-b border-stone-800 px-5 py-4">
           <div>
@@ -154,7 +154,7 @@ export function PurchaseModal({
           </button>
         </div>
 
-        <div className="overflow-y-auto px-5 py-5">
+        <div className="overflow-y-auto px-5 py-5 md:px-6">
           <div className="mb-5 overflow-hidden rounded-[1.6rem] border border-stone-800 bg-stone-900/80">
             <div className="aspect-[16/10] bg-stone-950">
               <img
@@ -199,7 +199,7 @@ export function PurchaseModal({
             </div>
           ) : (
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid gap-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-stone-200">
                     Nombre
@@ -349,3 +349,4 @@ function PurchaseReadonlyField({
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Castle,
@@ -9,6 +9,7 @@ import {
   Flame,
   Gem,
   Home,
+  PackageCheck,
   Shield,
   ShieldAlert,
   Skull,
@@ -18,6 +19,7 @@ import {
   Sword,
   Trophy,
   Users,
+  X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -49,6 +51,13 @@ type MarketItem = {
   category: MarketCategoryId;
 };
 
+type PurchaseFormValues = {
+  buyerName: string;
+  whatsapp: string;
+  quantity: number;
+  gotcha: string;
+};
+
 type RankingPlayer = {
   name: string;
   faction: string;
@@ -67,6 +76,8 @@ type RealmEvent = {
 };
 
 const WHATSAPP_JOIN_URL = "https://chat.whatsapp.com/TU-ENLACE-DE-INVITACION";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xkopndnl";
+const MIN_PURCHASE_DELAY_MS = 3000;
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -505,6 +516,7 @@ function MarketSection() {
   const [openCategory, setOpenCategory] = useState<MarketCategoryId | null>(
     "potions"
   );
+  const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
 
   return (
     <section className="space-y-5">
@@ -585,7 +597,11 @@ function MarketSection() {
                   >
                     <div className="grid gap-4 p-4 sm:grid-cols-2">
                       {items.map((item) => (
-                        <MarketItemCard key={item.name} item={item} />
+                        <MarketItemCard
+                          key={item.name}
+                          item={item}
+                          onBuy={() => setSelectedItem(item)}
+                        />
                       ))}
                     </div>
                   </motion.div>
@@ -595,6 +611,15 @@ function MarketSection() {
           );
         })}
       </div>
+
+      <AnimatePresence>
+        {selectedItem && (
+          <PurchaseModal
+            item={selectedItem}
+            onClose={() => setSelectedItem(null)}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
@@ -660,7 +685,13 @@ function RankingSection() {
   );
 }
 
-function MarketItemCard({ item }: { item: MarketItem }) {
+function MarketItemCard({
+  item,
+  onBuy,
+}: {
+  item: MarketItem;
+  onBuy: () => void;
+}) {
   const [imageFailed, setImageFailed] = useState(false);
   const style = rarityStyles[item.rarity];
 
@@ -705,8 +736,320 @@ function MarketItemCard({ item }: { item: MarketItem }) {
           <Coins className="h-4 w-4" />
           {item.price} de oro
         </div>
+
+        <button
+          type="button"
+          onClick={onBuy}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
+        >
+          <PackageCheck className="h-4 w-4" />
+          Comprar
+        </button>
       </div>
     </article>
+  );
+}
+
+function PurchaseModal({
+  item,
+  onClose,
+}: {
+  item: MarketItem;
+  onClose: () => void;
+}) {
+  const [formValues, setFormValues] = useState<PurchaseFormValues>({
+    buyerName: "",
+    whatsapp: "",
+    quantity: 1,
+    gotcha: "",
+  });
+  const [openedAt] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
+  const [submitState, setSubmitState] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+    }, 250);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const remainingDelayMs = Math.max(
+    0,
+    MIN_PURCHASE_DELAY_MS - (now - openedAt)
+  );
+  const remainingDelaySeconds = Math.ceil(remainingDelayMs / 1000);
+  const isDelayActive = remainingDelayMs > 0;
+  const category = MARKET_CATEGORIES.find((entry) => entry.id === item.category);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (formValues.gotcha.trim() !== "") {
+      setSubmitState("success");
+      setFeedbackMessage("Pedido enviado.");
+      return;
+    }
+
+    if (isDelayActive) {
+      setSubmitState("error");
+      setFeedbackMessage(
+        "Espera un momento antes de enviar el pedido para validar la compra."
+      );
+      return;
+    }
+
+    setSubmitState("submitting");
+    setFeedbackMessage("");
+
+    const data = new FormData();
+    data.append("nombre", formValues.buyerName);
+    data.append("whatsapp", formValues.whatsapp);
+    data.append("producto", item.name);
+    data.append("categoria", category?.title ?? item.category);
+    data.append("precio", `${item.price}`);
+    data.append("cantidad", `${formValues.quantity}`);
+    data.append("_gotcha", formValues.gotcha);
+
+    try {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        body: data,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        setSubmitState("success");
+        setFeedbackMessage(
+          "Pedido enviado con exito. Revisa tu correo objetivo en Formspree para ver la solicitud."
+        );
+        return;
+      }
+
+      const payload = (await response.json().catch(() => null)) as
+        | { errors?: Array<{ message?: string }> }
+        | null;
+      const apiMessage =
+        payload?.errors?.map((error) => error.message).filter(Boolean).join(", ") ??
+        "";
+
+      setSubmitState("error");
+      setFeedbackMessage(
+        apiMessage || "No se pudo enviar el pedido. Intentalo otra vez."
+      );
+    } catch {
+      setSubmitState("error");
+      setFeedbackMessage(
+        "No se pudo conectar con el sistema de pedidos. Intenta nuevamente."
+      );
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[70] bg-black/70 px-4 py-6 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 24 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="mx-auto flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/40"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-stone-800 px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
+              Pedido del mercado
+            </p>
+            <h3 className="mt-2 text-2xl font-black text-stone-100">
+              Confirmar compra
+            </h3>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-stone-200"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto px-5 py-5">
+          <div className="mb-5 overflow-hidden rounded-[1.6rem] border border-stone-800 bg-stone-900/80">
+            <div className="aspect-[16/10] bg-stone-950">
+              <img
+                src={item.imageUrl}
+                alt={item.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="space-y-2 p-4">
+              <h4 className="text-lg font-bold text-stone-100">{item.name}</h4>
+              <p className="text-sm leading-6 text-stone-400">
+                {item.description}
+              </p>
+            </div>
+          </div>
+
+          {submitState === "success" ? (
+            <div className="space-y-4">
+              <div className="rounded-[1.6rem] border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <p className="text-sm font-bold text-emerald-300">
+                  Compra enviada
+                </p>
+                <p className="mt-2 text-sm leading-6 text-stone-300">
+                  {feedbackMessage}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
+              >
+                Cerrar
+              </button>
+            </div>
+          ) : (
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="grid gap-4">
+                <label className="space-y-2">
+                  <span className="text-sm font-semibold text-stone-200">
+                    Nombre
+                  </span>
+                  <input
+                    required
+                    type="text"
+                    value={formValues.buyerName}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        buyerName: event.target.value,
+                      }))
+                    }
+                    className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+                    placeholder="Tu nombre"
+                  />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-semibold text-stone-200">
+                    WhatsApp
+                  </span>
+                  <input
+                    required
+                    type="tel"
+                    inputMode="tel"
+                    value={formValues.whatsapp}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        whatsapp: event.target.value,
+                      }))
+                    }
+                    className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+                    placeholder="+595 9xx xxx xxx"
+                  />
+                </label>
+
+                <PurchaseReadonlyField
+                  label="Producto"
+                  value={item.name}
+                />
+                <PurchaseReadonlyField
+                  label="Categoria"
+                  value={category?.title ?? item.category}
+                />
+                <PurchaseReadonlyField
+                  label="Precio"
+                  value={`${item.price} de oro`}
+                />
+
+                <label className="space-y-2">
+                  <span className="text-sm font-semibold text-stone-200">
+                    Cantidad
+                  </span>
+                  <input
+                    required
+                    min={1}
+                    max={99}
+                    type="number"
+                    value={formValues.quantity}
+                    onChange={(event) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        quantity: Number(event.target.value || 1),
+                      }))
+                    }
+                    className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                  />
+                </label>
+
+                <div className="hidden">
+                  <label>
+                    No completar
+                    <input
+                      type="text"
+                      name="_gotcha"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={formValues.gotcha}
+                      onChange={(event) =>
+                        setFormValues((current) => ({
+                          ...current,
+                          gotcha: event.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="rounded-[1.35rem] border border-stone-800 bg-stone-900/70 p-4 text-sm leading-6 text-stone-400">
+                <p className="font-semibold text-amber-300">Proteccion anti-spam</p>
+                <p className="mt-2">
+                  El formulario usa filtro honeypot y un breve retraso antes de
+                  habilitar el envio. Formspree tambien aplica proteccion propia
+                  del lado del servicio.
+                </p>
+              </div>
+
+              {feedbackMessage && submitState === "error" && (
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                  {feedbackMessage}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitState === "submitting" || isDelayActive}
+                className={`w-full rounded-2xl px-4 py-3 text-sm font-extrabold transition ${
+                  submitState === "submitting" || isDelayActive
+                    ? "cursor-not-allowed bg-stone-800 text-stone-500"
+                    : "bg-amber-500 text-stone-950 hover:bg-amber-400"
+                }`}
+              >
+                {submitState === "submitting"
+                  ? "Enviando pedido..."
+                  : isDelayActive
+                    ? `Preparando formulario... ${remainingDelaySeconds}s`
+                    : "Enviar pedido"}
+              </button>
+            </form>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -835,3 +1178,19 @@ function RankingMetric({
   );
 }
 
+function PurchaseReadonlyField({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <span className="text-sm font-semibold text-stone-200">{label}</span>
+      <div className="rounded-2xl border border-stone-800 bg-stone-950/60 px-4 py-3 text-sm text-stone-300">
+        {value}
+      </div>
+    </div>
+  );
+}

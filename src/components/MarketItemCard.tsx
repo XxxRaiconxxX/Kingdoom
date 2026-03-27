@@ -110,6 +110,17 @@ export function MarketItemCard({
 
         <p className="text-sm leading-6 text-stone-300/90">{item.description}</p>
 
+        {item.ability ? (
+          <div className="rounded-2xl border border-amber-500/10 bg-stone-950/45 px-4 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-300">
+              Habilidad
+            </p>
+            <p className="mt-2 text-sm leading-6 text-stone-300/85">
+              {item.ability}
+            </p>
+          </div>
+        ) : null}
+
         <div className="flex items-center justify-between gap-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-stone-950/55 px-3 py-2 text-sm font-bold text-amber-300 ring-1 ring-inset ring-amber-500/10">
             <Coins className="h-4 w-4" />

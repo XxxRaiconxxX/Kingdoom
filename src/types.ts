@@ -23,6 +23,7 @@ export type MarketCategory = {
 export type MarketItem = {
   name: string;
   description: string;
+  ability?: string;
   price: number;
   rarity: Rarity;
   imageUrl: string;

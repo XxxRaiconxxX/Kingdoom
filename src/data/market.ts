@@ -41,7 +41,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     stockStatus: "available",
     featured: true,
     imageUrl:
-      "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=900&q=80",
+      "",
   },
   {
     category: "potions",
@@ -54,61 +54,9 @@ export const MARKET_ITEMS: MarketItem[] = [
     rarity: "epic",
     stockStatus: "limited",
     imageUrl:
-      "https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=900&q=80",
+      "",
   },
-  {
-    category: "armors",
-    name: "Coraza del Bastion Negro",
-    description:
-      "Armadura pesada que absorbe el primer impacto serio de un duelo.",
-    ability:
-      "Muro de hierro: reduce una herida grave a herida media una vez por combate oficial.",
-    price: 940,
-    rarity: "epic",
-    stockStatus: "limited",
-    imageUrl:
-      "https://images.unsplash.com/photo-1608889175123-8ee362201f81?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    category: "armors",
-    name: "Manto del Vigia Gris",
-    description:
-      "Defensa ligera para patrullas nocturnas y misiones de sigilo.",
-    ability:
-      "Paso velado: mejora infiltracion y tiradas de vigilancia en terreno urbano o fronterizo.",
-    price: 410,
-    rarity: "common",
-    stockStatus: "available",
-    imageUrl:
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    category: "swords",
-    name: "Espada del Eclipse",
-    description:
-      "Hoja maldita capaz de ignorar armaduras comunes y sembrar miedo.",
-    ability:
-      "Sombra cortante: el primer golpe exitoso del duelo impone temor o retroceso al rival.",
-    price: 1250,
-    rarity: "legendary",
-    stockStatus: "limited",
-    featured: true,
-    imageUrl:
-      "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    category: "swords",
-    name: "Sable de la Marca Ceniza",
-    description:
-      "Acero rapido con bonificacion narrativa en persecuciones y duelos.",
-    ability:
-      "Marca ardiente: si hiere primero, gana prioridad en persecuciones o intercambios rapidos.",
-    price: 560,
-    rarity: "rare",
-    stockStatus: "available",
-    imageUrl:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80",
-  },
+  
   {
     category: "others",
     name: "Sello de Obsidiana",
@@ -120,7 +68,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     rarity: "epic",
     stockStatus: "available",
     imageUrl:
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=900&q=80",
+      "",
   },
   {
     category: "others",
@@ -133,7 +81,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     rarity: "common",
     stockStatus: "sold-out",
     imageUrl:
-      "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80",
+      "",
   },
   {
     category: "swords",

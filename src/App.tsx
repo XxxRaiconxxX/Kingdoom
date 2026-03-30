@@ -4,6 +4,7 @@ import {
   Bell,
   Castle,
   ChevronDown,
+  Dices,
   Home,
   Map,
   ScrollText,
@@ -19,6 +20,7 @@ import { PurchaseModal } from "./components/PurchaseModal";
 import { RankingCard } from "./components/RankingCard";
 import { SectionHeader } from "./components/SectionHeader";
 import { StatCard } from "./components/StatCard";
+import { TavernGame } from "./components/TavernGame";
 import { ACTIVE_EVENTS } from "./data/events";
 import {
   HOME_STATS,
@@ -478,6 +480,28 @@ function MarketSection() {
           }
         />
       </div>
+
+      <details className="group rounded-[2rem] border border-rose-500/20 bg-stone-900/75 p-6 shadow-xl relative overflow-hidden">
+        <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-rose-500/10 p-3 text-rose-400">
+              <Dices className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-stone-100">Taberna Clandestina</h3>
+              <p className="mt-2 text-sm leading-6 text-stone-400">
+                Apuestas de Doble o Nada. Multiplica tu oro o pierdelo todo en manos de los enanos.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-stone-800 p-3 text-stone-300 transition group-open:rotate-180 group-open:text-rose-300">
+            <ChevronDown className="h-5 w-5" />
+          </div>
+        </summary>
+        <div className="mt-6 border-t border-stone-800 pt-6">
+          <TavernGame />
+        </div>
+      </details>
 
       {featuredItems.length > 0 ? (
         <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">

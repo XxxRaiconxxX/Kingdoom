@@ -9,22 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
-
-    "dependencies": {
-  "framer-motion": "^12.23.12",
-  "lucide-react": "^0.542.0",
-  "react": "^18.3.1",
-  "react-dom": "^18.3.1",
-  "@supabase/supabase-js": "^2.49.4" 
-},
-    
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.13",
+    "@tailwindcss/vite": "^^4.1.13",
     "@types/react": "^18.3.24",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^5.0.2",

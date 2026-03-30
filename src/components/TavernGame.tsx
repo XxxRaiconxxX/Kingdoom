@@ -1,7 +1,7 @@
 // src/components/TavernGame.tsx
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HandCoins, AlertOctagon, User, Loader2 } from "lucide-react";
+import { HandCoins, AlertOctagon, User, Loader2, RefreshCw } from "lucide-react";
 import { TavernCashoutModal } from "./TavernCashoutModal";
 import { supabase } from "../utils/supabaseClient";
 
@@ -95,6 +95,15 @@ export function TavernGame() {
     setConsecutiveSpins(0);
     setChestResults([null, null, null]);
     setSelectedChest(null);
+  };
+
+  // Refresca el saldo manualmente desde Supabase
+  const refreshBalance = async () => {
+    if (!player || updating) return;
+    setUpdating(true);
+    const fresh = await fetchPlayer(player.username);
+    if (fresh) setPlayer(fresh);
+    setUpdating(false);
   };
 
   // ── Actualiza oro en Supabase y en estado local ──────────
@@ -238,10 +247,19 @@ export function TavernGame() {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
               {player.username}
             </p>
-            <p className="mt-1 text-2xl font-black text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.2)]">
-              {player.gold} 🪙
-              {updating && <Loader2 className="inline ml-2 h-4 w-4 animate-spin opacity-50" />}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="mt-1 text-2xl font-black text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                {player.gold} 🪙
+              </p>
+              <button
+                onClick={refreshBalance}
+                disabled={updating}
+                className="mt-1 rounded-lg p-1 text-stone-500 transition hover:text-amber-400 disabled:opacity-30"
+                title="Actualizar saldo"
+              >
+                <RefreshCw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
+              </button>
+            </div>
           </div>
           <div className="flex gap-2">
             {balance > 0 && (
@@ -412,5 +430,3 @@ export function TavernGame() {
     </div>
   );
 }
-
-

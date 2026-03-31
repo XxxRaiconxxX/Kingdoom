@@ -43,6 +43,17 @@ Su propósito es mantener un historial claro de los cambios en el proyecto **Kin
 ```
 
 ---
+### [Fecha: 31/03/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/App.tsx`, `src/components/TavernRoulette.tsx` (Nuevo), `src/components/TavernCards.tsx` (Nuevo)
+*   **Resumen de Tareas:** Adición de dos nuevos minijuegos a la Taberna Clandestina (Ruleta y Cartas) con integración a Supabase.
+*   **Cambios Clave:** 
+    *   Creación de `TavernRoulette.tsx`: Juego de ruleta con multiplicadores aleatorios y animación de giro fluida preparada para usar una imagen personalizada (`ruleta.png`).
+    *   Creación de `TavernCards.tsx`: Juego de adivinar si la siguiente carta será mayor o menor.
+    *   Modificación de `App.tsx`: Se añadió un selector de juegos (pestañas) en la sección del Mercado para alternar entre Cofres, Ruleta y Cartas.
+    *   Integración directa con Supabase en ambos juegos para descontar la apuesta y sumar los premios al oro del jugador en tiempo real.
+*   **Notas/Advertencias:** El usuario debe subir su archivo pixel art `ruleta.png` a la carpeta `src/assets/` para reemplazar el placeholder temporal que se dejó configurado.
+
+---
 ### [Fecha: 30/03/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/App.tsx`, `src/components/TavernGame.tsx` (Nuevo), `src/components/TavernCashoutModal.tsx` (Nuevo)
 *   **Resumen de Tareas:** Integración de "Taberna Clandestina", minijuego de apuestas Doble o Nada con Formspree.

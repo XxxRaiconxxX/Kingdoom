@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollText, Store, Trophy, Home as HomeIcon, Sword, Shield, Coins, Users, Skull, Crown, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import avatarsImg from 'Kingdoom/src/public/avatars.png';
 
 // --- Mock Data ---
 const MARKET_ITEMS = [
@@ -155,7 +156,7 @@ function Ranking() {
         <div 
           className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-stone-800 bg-stone-900 relative z-10 overflow-hidden"
           style={{
-            backgroundImage: "url('/avatars.png')",
+            backgroundImage: `url(${avatarsImg})`,
             backgroundSize: '500% 300%',
             backgroundPosition: `${player.avatar.x * 25}% ${player.avatar.y * 50}%`,
           }}
@@ -220,7 +221,7 @@ function Ranking() {
             <div 
               className="w-10 h-10 rounded-full border border-stone-700 bg-stone-950 shrink-0 overflow-hidden"
               style={{
-                backgroundImage: "url('/avatars.png')",
+                backgroundImage: `url(${avatarsImg})`,
                 backgroundSize: '500% 300%',
                 backgroundPosition: `${player.avatar.x * 25}% ${player.avatar.y * 50}%`,
               }}

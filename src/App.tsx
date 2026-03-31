@@ -21,6 +21,8 @@ import { RankingCard } from "./components/RankingCard";
 import { SectionHeader } from "./components/SectionHeader";
 import { StatCard } from "./components/StatCard";
 import { TavernGame } from "./components/TavernGame";
+import { TavernRoulette } from "./components/TavernRoulette";
+import { TavernCards } from "./components/TavernCards";
 import { ACTIVE_EVENTS } from "./data/events";
 import {
   HOME_STATS,
@@ -444,6 +446,7 @@ function MarketSection() {
     MarketCategoryId | "all"
   >("all");
   const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
+  const [activeGame, setActiveGame] = useState<"chests" | "roulette" | "cards">("chests");
 
   const categoriesToRender = useMemo(
     () =>
@@ -499,7 +502,35 @@ function MarketSection() {
           </div>
         </summary>
         <div className="mt-6 border-t border-stone-800 pt-6">
-          <TavernGame />
+          <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setActiveGame("chests")}
+              className={`shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition ${
+                activeGame === "chests" ? "bg-rose-500 text-stone-900" : "bg-stone-800 text-stone-400 hover:bg-stone-700"
+              }`}
+            >
+              Cofres Enanos
+            </button>
+            <button
+              onClick={() => setActiveGame("roulette")}
+              className={`shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition ${
+                activeGame === "roulette" ? "bg-amber-500 text-stone-900" : "bg-stone-800 text-stone-400 hover:bg-stone-700"
+              }`}
+            >
+              Ruleta del Destino
+            </button>
+            <button
+              onClick={() => setActiveGame("cards")}
+              className={`shrink-0 rounded-xl px-4 py-2 text-sm font-bold transition ${
+                activeGame === "cards" ? "bg-indigo-500 text-stone-100" : "bg-stone-800 text-stone-400 hover:bg-stone-700"
+              }`}
+            >
+              Cartas del Oráculo
+            </button>
+          </div>
+          {activeGame === "chests" && <TavernGame />}
+          {activeGame === "roulette" && <TavernRoulette />}
+          {activeGame === "cards" && <TavernCards />}
         </div>
       </details>
 

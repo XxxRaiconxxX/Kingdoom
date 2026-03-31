@@ -97,7 +97,7 @@ function Lore() {
 }
 
 function Market() {
-  const getRarityColor = (rarity: string) => {
+  const getRarityColor = (rarity) => {
     switch(rarity) {
       case 'legendary': return 'text-amber-500 border-amber-500/30 bg-amber-500/5';
       case 'epic': return 'text-purple-500 border-purple-500/30 bg-purple-500/5';
@@ -144,7 +144,7 @@ function Ranking() {
   const top3 = RANKING_PLAYERS.slice(0, 3);
   const rest = RANKING_PLAYERS.slice(3);
 
-  const PodiumItem = ({ player, rank, height, color, delay }: any) => (
+  const PodiumItem = ({ player, rank, height, color, delay }) => (
     <motion.div 
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
@@ -153,14 +153,8 @@ function Ranking() {
     >
       <div className="relative mb-3 z-10">
         <div className={`absolute inset-0 rounded-full blur-md bg-gradient-to-br ${color} opacity-40`} />
-        <div 
-          className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-stone-800 bg-stone-900 relative z-10 overflow-hidden"
-          style={{
-            backgroundImage: `url(${avatarsImg})`,
-            backgroundSize: '500% 300%',
-            backgroundPosition: `${player.avatar.x * 25}% ${player.avatar.y * 50}%`,
-          }}
-        />
+        {/* AVATAR LIMPIO - SIN VARIABLE INEXISTENTE */}
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-stone-800 bg-stone-900 relative z-10 overflow-hidden" />
         <div className={`absolute -bottom-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-br ${color} text-stone-950 border-2 border-stone-900 z-20 shadow-lg`}>
           {rank === 1 ? <Crown size={14} /> : rank}
         </div>
@@ -211,21 +205,14 @@ function Ranking() {
             transition={{ delay: 0.4 + index * 0.1 }}
             className={`bg-stone-900/80 border border-stone-800 rounded-xl p-3 flex items-center gap-3 relative overflow-hidden group hover:border-stone-700 transition-colors ${player.status === 'dead' ? 'opacity-60 grayscale' : ''}`}
           >
-            {/* Background accent */}
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-stone-800 group-hover:bg-amber-900/50 transition-colors" />
             
             <div className="w-6 text-center font-serif font-bold text-stone-500 text-sm">
               {index + 4}
             </div>
             
-            <div 
-              className="w-10 h-10 rounded-full border border-stone-700 bg-stone-950 shrink-0 overflow-hidden"
-              style={{
-                backgroundImage: `url(${avatarsImg})`,
-                backgroundSize: '500% 300%',
-                backgroundPosition: `${player.avatar.x * 25}% ${player.avatar.y * 50}%`,
-              }}
-            />
+            {/* AVATAR LISTA LIMPIO - SIN VARIABLE INEXISTENTE */}
+            <div className="w-10 h-10 rounded-full border border-stone-700 bg-stone-950 shrink-0 overflow-hidden" />
             
             <div className="flex-1 min-w-0">
               <h3 className="font-serif font-bold text-stone-200 flex items-center gap-2 truncate text-sm">
@@ -273,14 +260,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-stone-950 text-stone-300 font-sans selection:bg-amber-900 selection:text-amber-100">
       
-      {/* Main Content Area */}
       <main className="max-w-md mx-auto min-h-screen relative">
         <AnimatePresence mode="wait">
           {renderContent()}
         </AnimatePresence>
       </main>
 
-      {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-stone-950/90 backdrop-blur-md border-t border-stone-800 pb-safe z-50">
         <div className="max-w-md mx-auto flex justify-around items-center p-2">
           <button 
@@ -317,7 +302,6 @@ export default function App() {
         </div>
       </nav>
       
-      {/* Global CSS for safe area (iPhone bottom bar) */}
       <style dangerouslySetInnerHTML={{__html: `
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
       `}} />

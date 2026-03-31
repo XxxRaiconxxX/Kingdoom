@@ -4,6 +4,7 @@ import { PackageCheck, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { MarketCategory, MarketItem, PurchaseFormValues } from "../types";
 import { createOrderId } from "../utils/orders";
+import { supabase } from "../utils/supabaseClient";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xkopndnl";
 const MIN_PURCHASE_DELAY_MS = 3000;
@@ -71,20 +72,60 @@ export function PurchaseModal({
     setSubmitState("submitting");
     setFeedbackMessage("");
 
-    const nextOrderId = createOrderId();
-    const data = new FormData();
-    data.append("nombre", formValues.buyerName);
-    data.append("whatsapp", formValues.whatsapp);
-    data.append("producto", item.name);
-    data.append("categoria", category?.title ?? item.category);
-    data.append("precio", `${item.price}`);
-    data.append("cantidad", `${formValues.quantity}`);
-    data.append("total", `${totalPrice}`);
-    data.append("pedido_id", nextOrderId);
-    data.append("_subject", `Nuevo pedido ${nextOrderId} - ${item.name}`);
-    data.append("_gotcha", formValues.gotcha);
-
     try {
+      // 1. Verificar si el jugador existe en Supabase
+      const { data: player, error: playerError } = await supabase
+        .from("players")
+        .select("id, username, gold")
+        .ilike("username", formValues.buyerName.trim())
+        .single();
+
+      if (playerError || !player) {
+        setSubmitState("error");
+        setFeedbackMessage(
+          "Jugador no encontrado. Verifica que el nombre sea exactamente el que está registrado."
+        );
+        return;
+      }
+
+      // 2. Verificar si tiene oro suficiente
+      if (player.gold < totalPrice) {
+        setSubmitState("error");
+        setFeedbackMessage(
+          `No tienes suficiente oro. Necesitas ${totalPrice} 🪙 y tienes ${player.gold} 🪙.`
+        );
+        return;
+      }
+
+      // 3. Descontar el oro de la base de datos primero (para evitar que gaste más de lo que tiene)
+      const newGold = player.gold - totalPrice;
+      const { error: updateError } = await supabase
+        .from("players")
+        .update({ gold: newGold })
+        .eq("id", player.id);
+
+      if (updateError) {
+        setSubmitState("error");
+        setFeedbackMessage(
+          "Hubo un error al procesar el pago en la base de datos. Intenta nuevamente."
+        );
+        return;
+      }
+
+      // 4. Enviar el pedido a Formspree
+      const nextOrderId = createOrderId();
+      const data = new FormData();
+      data.append("nombre", formValues.buyerName);
+      data.append("whatsapp", formValues.whatsapp);
+      data.append("producto", item.name);
+      data.append("categoria", category?.title ?? item.category);
+      data.append("precio", `${item.price}`);
+      data.append("cantidad", `${formValues.quantity}`);
+      data.append("total", `${totalPrice}`);
+      data.append("pedido_id", nextOrderId);
+      data.append("_subject", `Nuevo pedido ${nextOrderId} - ${item.name}`);
+      data.append("_gotcha", formValues.gotcha);
+
       const response = await fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
         body: data,
@@ -97,10 +138,16 @@ export function PurchaseModal({
         setOrderId(nextOrderId);
         setSubmitState("success");
         setFeedbackMessage(
-          "Pedido enviado con exito. Te llegara al correo configurado en Formspree."
+          `Pedido enviado con éxito. Se han descontado ${totalPrice} 🪙 de tu cuenta.`
         );
         return;
       }
+
+      // Si Formspree falla, le devolvemos el oro al jugador
+      await supabase
+        .from("players")
+        .update({ gold: player.gold })
+        .eq("id", player.id);
 
       const payload = (await response.json().catch(() => null)) as
         | { errors?: Array<{ message?: string }> }
@@ -111,12 +158,12 @@ export function PurchaseModal({
 
       setSubmitState("error");
       setFeedbackMessage(
-        apiMessage || "No se pudo enviar el pedido. Intentalo otra vez."
+        apiMessage || "No se pudo enviar el pedido. Se ha devuelto tu oro a la cuenta."
       );
     } catch {
       setSubmitState("error");
       setFeedbackMessage(
-        "No se pudo conectar con el sistema de pedidos. Intenta nuevamente."
+        "No se pudo conectar con el sistema. Intenta nuevamente."
       );
     }
   }
@@ -157,11 +204,17 @@ export function PurchaseModal({
         <div className="overflow-y-auto px-5 py-5 md:px-6">
           <div className="mb-5 overflow-hidden rounded-[1.6rem] border border-stone-800 bg-stone-900/80">
             <div className="aspect-[16/10] bg-stone-950">
-              <img
-                src={item.imageUrl}
-                alt={item.name}
-                className="h-full w-full object-cover"
-              />
+              {item.imageUrl ? (
+                <img
+                  src={item.imageUrl}
+                  alt={item.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <PackageCheck className="h-10 w-10 text-amber-400" />
+                </div>
+              )}
             </div>
             <div className="space-y-2 p-4">
               <h4 className="text-lg font-bold text-stone-100">{item.name}</h4>
@@ -202,7 +255,7 @@ export function PurchaseModal({
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-stone-200">
-                    Nombre
+                    Nombre (Jugador registrado)
                   </span>
                   <input
                     required
@@ -215,7 +268,7 @@ export function PurchaseModal({
                       }))
                     }
                     className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
-                    placeholder="Tu nombre"
+                    placeholder="Tu nombre en el juego"
                   />
                 </label>
 

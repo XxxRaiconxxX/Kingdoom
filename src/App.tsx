@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollText, Store, Trophy, Home as HomeIcon, Sword, Shield, Coins, Users, Skull, Crown, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import avatarsImg from 'Kingdoom/src/public/avatars.png';
+
 
 // --- Mock Data ---
 const MARKET_ITEMS = [

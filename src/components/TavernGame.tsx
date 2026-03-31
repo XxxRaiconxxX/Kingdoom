@@ -150,13 +150,14 @@ export function TavernGame() {
     setSelectedChest(index);
     setPhase("revealed");
 
-    // El balance ya tiene el bet descontado
+    // balanceAfterBet = saldo real en Supabase después de descontar la apuesta
+    const balanceAfterBet = balance; // balance ya tiene el bet descontado (se actualizó en startRound)
     setUpdating(true);
     if (actualResult === "x2") {
-      await updateGold(player.gold + bet * 2); // devuelve apuesta x2
+      await updateGold(balanceAfterBet + bet * 2); // devuelve apuesta x2
       setConsecutiveSpins((p) => p + 1);
     } else if (actualResult === "x1") {
-      await updateGold(player.gold + bet); // devuelve solo la apuesta
+      await updateGold(balanceAfterBet + bet); // devuelve solo la apuesta
       setConsecutiveSpins((p) => p + 1);
     } else {
       // x0: apuesta ya descontada, no se devuelve nada

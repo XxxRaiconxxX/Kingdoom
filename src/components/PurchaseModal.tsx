@@ -9,6 +9,12 @@ import { supabase } from "../utils/supabaseClient";
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xkopndnl";
 const MIN_PURCHASE_DELAY_MS = 3000;
 
+type PlayerRecord = {
+  id: string;
+  username: string;
+  gold: number;
+};
+
 export function PurchaseModal({
   item,
   category,
@@ -31,6 +37,7 @@ export function PurchaseModal({
   >("idle");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [orderId, setOrderId] = useState("");
+  const [remainingGold, setRemainingGold] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -51,13 +58,21 @@ export function PurchaseModal({
   const remainingDelaySeconds = Math.ceil(remainingDelayMs / 1000);
   const isDelayActive = remainingDelayMs > 0;
 
+  async function restoreGold(player: PlayerRecord | null) {
+    if (!player) {
+      return;
+    }
+
+    await supabase.from("players").update({ gold: player.gold }).eq("id", player.id);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (formValues.gotcha.trim() !== "") {
       setSubmitState("success");
       setOrderId(createOrderId());
-      setFeedbackMessage("Pedido enviado.");
+      setFeedbackMessage("Pedido registrado.");
       return;
     }
 
@@ -71,38 +86,42 @@ export function PurchaseModal({
 
     setSubmitState("submitting");
     setFeedbackMessage("");
+    setRemainingGold(null);
+
+    const normalizedBuyerName = formValues.buyerName.trim();
+    let playerSnapshot: PlayerRecord | null = null;
+    let goldWasDeducted = false;
 
     try {
-      // 1. Verificar si el jugador existe en Supabase
       const { data: player, error: playerError } = await supabase
         .from("players")
         .select("id, username, gold")
-        .ilike("username", formValues.buyerName.trim())
+        .ilike("username", normalizedBuyerName)
         .single();
 
       if (playerError || !player) {
         setSubmitState("error");
         setFeedbackMessage(
-          "Jugador no encontrado. Verifica que el nombre sea exactamente el que está registrado."
+          "Jugador no encontrado. Verifica que el nombre sea exactamente el que esta registrado."
         );
         return;
       }
 
-      // 2. Verificar si tiene oro suficiente
-      if (player.gold < totalPrice) {
+      playerSnapshot = player as PlayerRecord;
+
+      if (playerSnapshot.gold < totalPrice) {
         setSubmitState("error");
         setFeedbackMessage(
-          `No tienes suficiente oro. Necesitas ${totalPrice} 🪙 y tienes ${player.gold} 🪙.`
+          `No tienes suficiente oro. Necesitas ${totalPrice} de oro y tienes ${playerSnapshot.gold} de oro.`
         );
         return;
       }
 
-      // 3. Descontar el oro de la base de datos primero (para evitar que gaste más de lo que tiene)
-      const newGold = player.gold - totalPrice;
+      const newGold = playerSnapshot.gold - totalPrice;
       const { error: updateError } = await supabase
         .from("players")
         .update({ gold: newGold })
-        .eq("id", player.id);
+        .eq("id", playerSnapshot.id);
 
       if (updateError) {
         setSubmitState("error");
@@ -112,10 +131,11 @@ export function PurchaseModal({
         return;
       }
 
-      // 4. Enviar el pedido a Formspree
+      goldWasDeducted = true;
+
       const nextOrderId = createOrderId();
       const data = new FormData();
-      data.append("nombre", formValues.buyerName);
+      data.append("nombre", normalizedBuyerName);
       data.append("whatsapp", formValues.whatsapp);
       data.append("producto", item.name);
       data.append("categoria", category?.title ?? item.category);
@@ -136,34 +156,40 @@ export function PurchaseModal({
 
       if (response.ok) {
         setOrderId(nextOrderId);
+        setRemainingGold(newGold);
         setSubmitState("success");
         setFeedbackMessage(
-          `Pedido enviado con éxito. Se han descontado ${totalPrice} 🪙 de tu cuenta.`
+          `Pedido enviado con exito. Se descontaron ${totalPrice} de oro de tu cuenta.`
         );
         return;
       }
 
-      // Si Formspree falla, le devolvemos el oro al jugador
-      await supabase
-        .from("players")
-        .update({ gold: player.gold })
-        .eq("id", player.id);
+      if (goldWasDeducted) {
+        await restoreGold(playerSnapshot);
+      }
 
       const payload = (await response.json().catch(() => null)) as
         | { errors?: Array<{ message?: string }> }
         | null;
       const apiMessage =
-        payload?.errors?.map((entry) => entry.message).filter(Boolean).join(", ") ??
-        "";
+        payload?.errors
+          ?.map((entry) => entry.message)
+          .filter(Boolean)
+          .join(", ") ?? "";
 
       setSubmitState("error");
       setFeedbackMessage(
-        apiMessage || "No se pudo enviar el pedido. Se ha devuelto tu oro a la cuenta."
+        apiMessage ||
+          "No se pudo enviar el pedido. El oro fue restaurado en tu cuenta."
       );
     } catch {
+      if (goldWasDeducted) {
+        await restoreGold(playerSnapshot);
+      }
+
       setSubmitState("error");
       setFeedbackMessage(
-        "No se pudo conectar con el sistema. Intenta nuevamente."
+        "No se pudo conectar con el sistema. Si el oro ya se habia descontado, se intento restaurar automaticamente."
       );
     }
   }
@@ -209,6 +235,10 @@ export function PurchaseModal({
                   src={item.imageUrl}
                   alt={item.name}
                   className="h-full w-full object-cover"
+                  style={{
+                    objectFit: item.imageFit ?? "cover",
+                    objectPosition: item.imagePosition ?? "center",
+                  }}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
@@ -233,12 +263,18 @@ export function PurchaseModal({
                 <p className="mt-2 text-sm leading-6 text-stone-300">
                   {feedbackMessage}
                 </p>
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
                   <PurchaseReadonlyField label="Pedido" value={orderId} />
                   <PurchaseReadonlyField
                     label="Total"
                     value={`${totalPrice} de oro`}
                   />
+                  {remainingGold !== null ? (
+                    <PurchaseReadonlyField
+                      label="Oro restante"
+                      value={`${remainingGold} de oro`}
+                    />
+                  ) : null}
                 </div>
               </div>
 
@@ -255,7 +291,7 @@ export function PurchaseModal({
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-stone-200">
-                    Nombre (Jugador registrado)
+                    Nombre del jugador registrado
                   </span>
                   <input
                     required
@@ -268,7 +304,7 @@ export function PurchaseModal({
                       }))
                     }
                     className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
-                    placeholder="Tu nombre en el juego"
+                    placeholder="Tu nombre en la base de datos"
                   />
                 </label>
 
@@ -348,11 +384,11 @@ export function PurchaseModal({
               </div>
 
               <div className="rounded-[1.35rem] border border-stone-800 bg-stone-900/70 p-4 text-sm leading-6 text-stone-400">
-                <p className="font-semibold text-amber-300">Proteccion anti-spam</p>
+                <p className="font-semibold text-amber-300">Validacion del pago</p>
                 <p className="mt-2">
-                  El formulario usa filtro honeypot, un retraso breve antes del
-                  envio y bloqueo mientras procesa. Si el proyecto crece, puedes
-                  activar captcha desde Formspree.
+                  Antes de enviar el pedido, el sistema comprueba que el jugador
+                  exista en la base de datos y que tenga suficiente oro. Si
+                  Formspree falla, se intenta restaurar el saldo automaticamente.
                 </p>
               </div>
 

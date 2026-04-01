@@ -44,6 +44,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 01/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/PurchaseModal.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Integracion de compras del mercado con verificacion y descuento de oro en Supabase.
+*   **Cambios Clave:**
+    *   El modal de compra ahora busca al jugador en la tabla `players`, valida saldo suficiente y descuenta el total antes de enviar el pedido.
+    *   Si Formspree falla o hay un error de red tras el descuento, se intenta restaurar automaticamente el oro en la base de datos.
+*   **Notas/Advertencias:** El build y TypeScript pasaron correctamente. Sigue quedando una advertencia de bundle grande por assets y minijuegos, pero no bloquea el deploy.
+
+---
+### [Fecha: 01/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Restauracion de la SPA completa con lore, mundo, mercado funcional y taberna integrada.
 *   **Cambios Clave:**

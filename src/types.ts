@@ -7,6 +7,12 @@ export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
 export type EventStatus = "active" | "in-production" | "finished";
 export type StockStatus = "available" | "limited" | "sold-out";
 
+export type PlayerAccount = {
+  id: string;
+  username: string;
+  gold: number;
+};
+
 export type NavItem = {
   id: TabId;
   label: string;
@@ -106,7 +112,6 @@ export type GeopoliticalNote = {
 };
 
 export type PurchaseFormValues = {
-  buyerName: string;
   whatsapp: string;
   quantity: number;
   gotcha: string;

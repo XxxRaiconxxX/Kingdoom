@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { PackageCheck, X } from "lucide-react";
+import { PackageCheck, UserRound, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { usePlayerSession } from "../context/PlayerSessionContext";
 import { createOrderId } from "../utils/orders";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvzvavvd";
@@ -16,8 +17,8 @@ export function TavernCashoutModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  const { player } = usePlayerSession();
   const [formValues, setFormValues] = useState({
-    buyerName: "",
     whatsapp: "",
     gotcha: "",
   });
@@ -54,6 +55,14 @@ export function TavernCashoutModal({
       return;
     }
 
+    if (!player) {
+      setSubmitState("error");
+      setFeedbackMessage(
+        "Conecta primero tu perfil del reino antes de pedir un retiro."
+      );
+      return;
+    }
+
     if (isDelayActive) {
       setSubmitState("error");
       setFeedbackMessage(
@@ -67,7 +76,7 @@ export function TavernCashoutModal({
 
     const nextOrderId = createOrderId();
     const data = new FormData();
-    data.append("nombre", formValues.buyerName);
+    data.append("nombre", player.username);
     data.append("whatsapp", formValues.whatsapp);
     data.append("producto", "Retiro de Taberna");
     data.append("categoria", "Apuestas / Doble o Nada");
@@ -85,18 +94,17 @@ export function TavernCashoutModal({
         },
       });
 
-      if (response.ok) {
-        setOrderId(nextOrderId);
-        setSubmitState("success");
-        setFeedbackMessage(
-          "Tu solicitud de retiro fue enviada al consejo. Contacta a un administrador en WhatsApp con tu código de retiro."
-        );
-        onSuccess();
+      if (!response.ok) {
+        setSubmitState("error");
+        setFeedbackMessage("No se pudo enviar el retiro. Intentalo otra vez.");
         return;
       }
 
-      setSubmitState("error");
-      setFeedbackMessage("No se pudo enviar el retiro. Intentalo otra vez.");
+      setOrderId(nextOrderId);
+      setSubmitState("success");
+      setFeedbackMessage(
+        "Tu solicitud de retiro fue enviada al consejo. Contacta a un administrador por WhatsApp con tu codigo de retiro."
+      );
     } catch {
       setSubmitState("error");
       setFeedbackMessage(
@@ -125,7 +133,7 @@ export function TavernCashoutModal({
               Corredor de apuestas
             </p>
             <h3 className="mt-2 text-2xl font-black text-stone-100">
-              Retirar Ganancias
+              Retirar ganancias
             </h3>
           </div>
           <button
@@ -142,90 +150,101 @@ export function TavernCashoutModal({
             <div className="space-y-4">
               <div className="rounded-[1.6rem] border border-amber-500/30 bg-amber-500/10 p-5 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
                 <p className="text-lg font-black text-amber-400">
-                  Retiro Confirmado
+                  Retiro confirmado
                 </p>
                 <p className="mt-2 text-sm leading-6 text-stone-300">
                   {feedbackMessage}
                 </p>
                 <div className="mt-5 grid gap-3 md:grid-cols-2">
-                  <ReadonlyField label="Código de retiro" value={orderId} />
-                  <ReadonlyField label="Oro cobrado" value={`${balance} 🪙`} />
+                  <ReadonlyField label="Codigo de retiro" value={orderId} />
+                  <ReadonlyField label="Oro cobrado" value={`${balance} de oro`} />
                 </div>
               </div>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={() => {
+                  onSuccess();
+                  onClose();
+                }}
                 className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm font-bold text-stone-200 transition hover:bg-stone-800 hover:text-white"
               >
-                Cerrar y salir de la mesa
+                Cerrar
               </button>
             </div>
           ) : (
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="rounded-2xl border border-stone-800 bg-stone-900/50 p-4 pb-6 text-center">
                 <p className="text-sm text-stone-400">Estas a punto de retirar</p>
-                <p className="mt-2 text-4xl font-black text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-                  {balance} 🪙
+                <p className="mt-2 text-4xl font-black text-amber-400">
+                  {balance} de oro
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <label className="block space-y-2">
-                  <span className="text-sm font-semibold text-stone-200">
-                    Tu Nombre / Personaje
-                  </span>
-                  <input
-                    required
-                    type="text"
-                    value={formValues.buyerName}
-                    onChange={(e) =>
-                      setFormValues({ ...formValues, buyerName: e.target.value })
-                    }
-                    className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/40"
-                    placeholder="Ej. Kaelen D'Aris"
-                  />
-                </label>
-                <label className="block space-y-2">
-                  <span className="text-sm font-semibold text-stone-200">
-                    WhatsApp (Para verificar el retiro)
-                  </span>
-                  <input
-                    required
-                    type="tel"
-                    value={formValues.whatsapp}
-                    onChange={(e) =>
-                      setFormValues({ ...formValues, whatsapp: e.target.value })
-                    }
-                    className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/40"
-                    placeholder="+595 9xx xxx xxx"
-                  />
-                </label>
-                <div className="hidden">
-                  <input
-                    type="text"
-                    name="_gotcha"
-                    tabIndex={-1}
-                    value={formValues.gotcha}
-                    onChange={(e) =>
-                      setFormValues({ ...formValues, gotcha: e.target.value })
-                    }
-                  />
+              {player ? (
+                <div className="rounded-[1.35rem] border border-stone-800 bg-stone-900/70 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+                      <UserRound className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                        Perfil activo
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-stone-100">
+                        {player.username}
+                      </p>
+                    </div>
+                  </div>
                 </div>
+              ) : null}
+
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-stone-200">
+                  WhatsApp para verificar el retiro
+                </span>
+                <input
+                  required
+                  type="tel"
+                  value={formValues.whatsapp}
+                  onChange={(event) =>
+                    setFormValues((current) => ({
+                      ...current,
+                      whatsapp: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/40"
+                  placeholder="+595 9xx xxx xxx"
+                />
+              </label>
+
+              <div className="hidden">
+                <input
+                  type="text"
+                  name="_gotcha"
+                  tabIndex={-1}
+                  value={formValues.gotcha}
+                  onChange={(event) =>
+                    setFormValues((current) => ({
+                      ...current,
+                      gotcha: event.target.value,
+                    }))
+                  }
+                />
               </div>
 
-              {feedbackMessage && submitState === "error" && (
+              {feedbackMessage && submitState === "error" ? (
                 <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
                   {feedbackMessage}
                 </div>
-              )}
+              ) : null}
 
               <button
                 type="submit"
-                disabled={submitState === "submitting" || isDelayActive}
+                disabled={!player || submitState === "submitting" || isDelayActive}
                 className={`flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-4 text-sm font-black transition ${
-                  submitState === "submitting" || isDelayActive
+                  !player || submitState === "submitting" || isDelayActive
                     ? "cursor-not-allowed bg-stone-800 text-stone-500"
-                    : "bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:from-amber-400 hover:to-amber-300 hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]"
+                    : "bg-gradient-to-r from-amber-500 to-amber-400 text-stone-950 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:from-amber-400 hover:to-amber-300"
                 }`}
               >
                 <PackageCheck className="h-5 w-5" />

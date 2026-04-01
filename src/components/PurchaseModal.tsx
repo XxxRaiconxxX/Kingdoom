@@ -1,19 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { PackageCheck, X } from "lucide-react";
+import { PackageCheck, UserRound, WalletCards, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { MarketCategory, MarketItem, PurchaseFormValues } from "../types";
+import { usePlayerSession } from "../context/PlayerSessionContext";
 import { createOrderId } from "../utils/orders";
-import { supabase } from "../utils/supabaseClient";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xkopndnl";
 const MIN_PURCHASE_DELAY_MS = 3000;
-
-type PlayerRecord = {
-  id: string;
-  username: string;
-  gold: number;
-};
 
 export function PurchaseModal({
   item,
@@ -24,8 +18,8 @@ export function PurchaseModal({
   category: MarketCategory | undefined;
   onClose: () => void;
 }) {
+  const { player, refreshPlayer, setPlayerGold } = usePlayerSession();
   const [formValues, setFormValues] = useState<PurchaseFormValues>({
-    buyerName: "",
     whatsapp: "",
     quantity: 1,
     gotcha: "",
@@ -58,14 +52,6 @@ export function PurchaseModal({
   const remainingDelaySeconds = Math.ceil(remainingDelayMs / 1000);
   const isDelayActive = remainingDelayMs > 0;
 
-  async function restoreGold(player: PlayerRecord | null) {
-    if (!player) {
-      return;
-    }
-
-    await supabase.from("players").update({ gold: player.gold }).eq("id", player.id);
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -73,6 +59,14 @@ export function PurchaseModal({
       setSubmitState("success");
       setOrderId(createOrderId());
       setFeedbackMessage("Pedido registrado.");
+      return;
+    }
+
+    if (!player) {
+      setSubmitState("error");
+      setFeedbackMessage(
+        "Conecta primero tu perfil del reino para poder comprar en el mercado."
+      );
       return;
     }
 
@@ -88,64 +82,49 @@ export function PurchaseModal({
     setFeedbackMessage("");
     setRemainingGold(null);
 
-    const normalizedBuyerName = formValues.buyerName.trim();
-    let playerSnapshot: PlayerRecord | null = null;
-    let goldWasDeducted = false;
+    const latestPlayer = await refreshPlayer();
+
+    if (!latestPlayer) {
+      setSubmitState("error");
+      setFeedbackMessage(
+        "No se pudo refrescar tu perfil. Reconectalo y prueba nuevamente."
+      );
+      return;
+    }
+
+    if (latestPlayer.gold < totalPrice) {
+      setSubmitState("error");
+      setFeedbackMessage(
+        `No tienes suficiente oro. Necesitas ${totalPrice} de oro y tu perfil solo tiene ${latestPlayer.gold}.`
+      );
+      return;
+    }
+
+    const nextGold = latestPlayer.gold - totalPrice;
+    const discountedPlayer = await setPlayerGold(nextGold);
+
+    if (!discountedPlayer) {
+      setSubmitState("error");
+      setFeedbackMessage(
+        "No se pudo descontar el oro en la base de datos. Intenta nuevamente."
+      );
+      return;
+    }
+
+    const nextOrderId = createOrderId();
+    const data = new FormData();
+    data.append("nombre", latestPlayer.username);
+    data.append("whatsapp", formValues.whatsapp);
+    data.append("producto", item.name);
+    data.append("categoria", category?.title ?? item.category);
+    data.append("precio", `${item.price}`);
+    data.append("cantidad", `${formValues.quantity}`);
+    data.append("total", `${totalPrice}`);
+    data.append("pedido_id", nextOrderId);
+    data.append("_subject", `Nuevo pedido ${nextOrderId} - ${item.name}`);
+    data.append("_gotcha", formValues.gotcha);
 
     try {
-      const { data: player, error: playerError } = await supabase
-        .from("players")
-        .select("id, username, gold")
-        .ilike("username", normalizedBuyerName)
-        .single();
-
-      if (playerError || !player) {
-        setSubmitState("error");
-        setFeedbackMessage(
-          "Jugador no encontrado. Verifica que el nombre sea exactamente el que esta registrado."
-        );
-        return;
-      }
-
-      playerSnapshot = player as PlayerRecord;
-
-      if (playerSnapshot.gold < totalPrice) {
-        setSubmitState("error");
-        setFeedbackMessage(
-          `No tienes suficiente oro. Necesitas ${totalPrice} de oro y tienes ${playerSnapshot.gold} de oro.`
-        );
-        return;
-      }
-
-      const newGold = playerSnapshot.gold - totalPrice;
-      const { error: updateError } = await supabase
-        .from("players")
-        .update({ gold: newGold })
-        .eq("id", playerSnapshot.id);
-
-      if (updateError) {
-        setSubmitState("error");
-        setFeedbackMessage(
-          "Hubo un error al procesar el pago en la base de datos. Intenta nuevamente."
-        );
-        return;
-      }
-
-      goldWasDeducted = true;
-
-      const nextOrderId = createOrderId();
-      const data = new FormData();
-      data.append("nombre", normalizedBuyerName);
-      data.append("whatsapp", formValues.whatsapp);
-      data.append("producto", item.name);
-      data.append("categoria", category?.title ?? item.category);
-      data.append("precio", `${item.price}`);
-      data.append("cantidad", `${formValues.quantity}`);
-      data.append("total", `${totalPrice}`);
-      data.append("pedido_id", nextOrderId);
-      data.append("_subject", `Nuevo pedido ${nextOrderId} - ${item.name}`);
-      data.append("_gotcha", formValues.gotcha);
-
       const response = await fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
         body: data,
@@ -154,42 +133,37 @@ export function PurchaseModal({
         },
       });
 
-      if (response.ok) {
-        setOrderId(nextOrderId);
-        setRemainingGold(newGold);
-        setSubmitState("success");
+      if (!response.ok) {
+        await setPlayerGold(latestPlayer.gold);
+
+        const payload = (await response.json().catch(() => null)) as
+          | { errors?: Array<{ message?: string }> }
+          | null;
+        const apiMessage =
+          payload?.errors
+            ?.map((entry) => entry.message)
+            .filter(Boolean)
+            .join(", ") ?? "";
+
+        setSubmitState("error");
         setFeedbackMessage(
-          `Pedido enviado con exito. Se descontaron ${totalPrice} de oro de tu cuenta.`
+          apiMessage ||
+            "No se pudo enviar el pedido. El oro fue restaurado en tu cuenta."
         );
         return;
       }
 
-      if (goldWasDeducted) {
-        await restoreGold(playerSnapshot);
-      }
-
-      const payload = (await response.json().catch(() => null)) as
-        | { errors?: Array<{ message?: string }> }
-        | null;
-      const apiMessage =
-        payload?.errors
-          ?.map((entry) => entry.message)
-          .filter(Boolean)
-          .join(", ") ?? "";
-
-      setSubmitState("error");
+      setOrderId(nextOrderId);
+      setRemainingGold(nextGold);
+      setSubmitState("success");
       setFeedbackMessage(
-        apiMessage ||
-          "No se pudo enviar el pedido. El oro fue restaurado en tu cuenta."
+        `Pedido enviado con exito. Se descontaron ${totalPrice} de oro de tu perfil activo.`
       );
     } catch {
-      if (goldWasDeducted) {
-        await restoreGold(playerSnapshot);
-      }
-
+      await setPlayerGold(latestPlayer.gold);
       setSubmitState("error");
       setFeedbackMessage(
-        "No se pudo conectar con el sistema. Si el oro ya se habia descontado, se intento restaurar automaticamente."
+        "No se pudo conectar con el sistema. Se intento restaurar tu oro automaticamente."
       );
     }
   }
@@ -288,26 +262,48 @@ export function PurchaseModal({
             </div>
           ) : (
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-stone-200">
-                    Nombre del jugador registrado
-                  </span>
-                  <input
-                    required
-                    type="text"
-                    value={formValues.buyerName}
-                    onChange={(event) =>
-                      setFormValues((current) => ({
-                        ...current,
-                        buyerName: event.target.value,
-                      }))
-                    }
-                    className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
-                    placeholder="Tu nombre en la base de datos"
-                  />
-                </label>
+              {player ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-[1.35rem] border border-stone-800 bg-stone-900/70 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+                        <UserRound className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                          Perfil activo
+                        </p>
+                        <p className="mt-1 text-sm font-bold text-stone-100">
+                          {player.username}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
+                  <div className="rounded-[1.35rem] border border-stone-800 bg-stone-900/70 p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+                        <WalletCards className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                          Oro actual
+                        </p>
+                        <p className="mt-1 text-sm font-bold text-amber-300">
+                          {player.gold} de oro
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                  Conecta tu perfil del reino antes de comprar para que el sistema
+                  pueda verificar y descontar el oro.
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-stone-200">
                     WhatsApp
@@ -386,9 +382,10 @@ export function PurchaseModal({
               <div className="rounded-[1.35rem] border border-stone-800 bg-stone-900/70 p-4 text-sm leading-6 text-stone-400">
                 <p className="font-semibold text-amber-300">Validacion del pago</p>
                 <p className="mt-2">
-                  Antes de enviar el pedido, el sistema comprueba que el jugador
-                  exista en la base de datos y que tenga suficiente oro. Si
-                  Formspree falla, se intenta restaurar el saldo automaticamente.
+                  Antes de enviar el pedido, el sistema refresca tu perfil activo,
+                  comprueba que tengas suficiente oro y descuenta el total en la
+                  base de datos. Si Formspree falla, se intenta restaurar el saldo
+                  automaticamente.
                 </p>
               </div>
 
@@ -400,9 +397,9 @@ export function PurchaseModal({
 
               <button
                 type="submit"
-                disabled={submitState === "submitting" || isDelayActive}
+                disabled={!player || submitState === "submitting" || isDelayActive}
                 className={`flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold transition ${
-                  submitState === "submitting" || isDelayActive
+                  !player || submitState === "submitting" || isDelayActive
                     ? "cursor-not-allowed bg-stone-800 text-stone-500"
                     : "bg-amber-500 text-stone-950 hover:bg-amber-400"
                 }`}

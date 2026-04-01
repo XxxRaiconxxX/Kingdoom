@@ -16,6 +16,7 @@ import { EventCard } from "./components/EventCard";
 import { ExpandableText } from "./components/ExpandableText";
 import { FilterPill } from "./components/FilterPill";
 import { MarketItemCard } from "./components/MarketItemCard";
+import { PlayerProfilePanel } from "./components/PlayerProfilePanel";
 import { PurchaseModal } from "./components/PurchaseModal";
 import { RankingCard } from "./components/RankingCard";
 import { SectionHeader } from "./components/SectionHeader";
@@ -94,6 +95,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-stone-950 text-stone-300">
       <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6 md:pt-8">
+        <div className="mb-5">
+          <PlayerProfilePanel />
+        </div>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -509,7 +514,7 @@ function MarketSection() {
         <SectionHeader
           eyebrow="Mercado negro"
           title="Catalogos del reino"
-          description="La compra vuelve a funcionar desde el modal con Formspree, y cada categoria queda organizada como un catalogo desplegable."
+          description="La compra usa tu perfil conectado para verificar y descontar el oro en Supabase, y cada categoria queda organizada como un catalogo desplegable."
           rightSlot={
             <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
               {MARKET_ITEMS.length} articulos

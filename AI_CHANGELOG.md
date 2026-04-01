@@ -45,6 +45,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 01/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Restauracion de la SPA completa con lore, mundo, mercado funcional y taberna integrada.
+*   **Cambios Clave:**
+    *   Se recupero la estructura rica de la aplicacion con las pestanias `Inicio`, `Lore`, `Mundo`, `Mercado` y `Ranking` usando los datos actuales de `src/data`.
+    *   Se reintegro la `Taberna Clandestina` dentro de `Mercado` con selector entre `Cofres`, `Ruleta` y `Cartas`, manteniendo tambien el catalogo de compra y el modal de pedidos.
+*   **Notas/Advertencias:** El build paso correctamente. Quedo una advertencia de bundle grande por assets y minijuegos, pero no bloquea el deploy.
+
+---
+### [Fecha: 01/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/App.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Correccion del fallo de deploy en Vercel y limpieza de texto con codificacion rota.
 *   **Cambios Clave:**
     *   Se reemplazo el import invalido `motion/react` por `framer-motion` en `src/App.tsx`, que era la causa directa del error de build.

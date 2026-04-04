@@ -4,6 +4,7 @@ export type TabId = "home" | "lore" | "world" | "market" | "ranking";
 export type Rarity = "legendary" | "epic" | "rare" | "common";
 export type PlayerStatus = "alive" | "dead";
 export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
+export type InventoryCategoryId = Exclude<MarketCategoryId, "potions">;
 export type EventStatus = "active" | "in-production" | "finished";
 export type StockStatus = "available" | "limited" | "sold-out";
 
@@ -27,6 +28,7 @@ export type MarketCategory = {
 };
 
 export type MarketItem = {
+  id: string;
   name: string;
   description: string;
   ability?: string;
@@ -38,6 +40,23 @@ export type MarketItem = {
   category: MarketCategoryId;
   stockStatus: StockStatus;
   featured?: boolean;
+};
+
+export type InventoryEntry = {
+  id: string;
+  playerId: string;
+  itemId: string;
+  itemName: string;
+  itemCategory: InventoryCategoryId;
+  itemDescription: string;
+  itemAbility?: string;
+  itemImageUrl: string;
+  itemImageFit?: "cover" | "contain";
+  itemImagePosition?: string;
+  itemRarity: Rarity;
+  quantity: number;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type RankingPlayer = {

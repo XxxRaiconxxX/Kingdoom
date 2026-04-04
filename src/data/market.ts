@@ -30,6 +30,7 @@ export const MARKET_CATEGORIES: MarketCategory[] = [
 
 export const MARKET_ITEMS: MarketItem[] = [
   {
+    id: "potion-red-mist",
     category: "potions",
     name: "Pocion de Niebla Roja",
     description:
@@ -44,6 +45,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center top",
   },
   {
+    id: "potion-raven-elixir",
     category: "potions",
     name: "Elixir del Cuervo",
     description:
@@ -57,6 +59,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center top",
   },
   {
+    id: "other-obsidian-seal",
     category: "others",
     name: "Sello de Obsidiana",
     description:
@@ -71,6 +74,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center",
   },
   {
+    id: "other-gray-rations",
     category: "others",
     name: "Raciones del Camino Gris",
     description:
@@ -85,6 +89,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center",
   },
   {
+    id: "sword-gravedigger-requiem",
     category: "swords",
     name: "Requiem del Sepulturero",
     description:
@@ -101,6 +106,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center",
   },
   {
+    id: "sword-six-embers-greatblade",
     category: "swords",
     name: "Mandoble de las Seis Brasas",
     description:
@@ -116,6 +122,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center",
   },
   {
+    id: "sword-empty-throne-needle",
     category: "swords",
     name: "Aguja del Trono Vacio",
     description:
@@ -131,6 +138,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center",
   },
   {
+    id: "sword-crimson-pilgrim-blade",
     category: "swords",
     name: "Filo del Peregrino Carmesi",
     description:
@@ -146,6 +154,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center",
   },
   {
+    id: "armor-ashen-lion",
     category: "armors",
     name: "Armadura del Leon de Ceniza",
     description:
@@ -162,6 +171,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center top",
   },
   {
+    id: "armor-scarlet-vigil",
     category: "armors",
     name: "Coraza de la Vigilia Escarlata",
     description:
@@ -177,6 +187,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     imagePosition: "center top",
   },
   {
+    id: "armor-celestial-warden",
     category: "armors",
     name: "Placas del Custodio Celestial",
     description:

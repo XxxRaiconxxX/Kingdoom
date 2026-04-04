@@ -17,10 +17,12 @@ type PlayerSessionContextValue = {
   isHydrating: boolean;
   isSubmittingProfile: boolean;
   profileError: string;
+  inventoryRefreshToken: number;
   connectPlayer: (username: string) => Promise<PlayerAccount | null>;
   clearPlayer: () => void;
   refreshPlayer: () => Promise<PlayerAccount | null>;
   setPlayerGold: (nextGold: number) => Promise<PlayerAccount | null>;
+  notifyInventoryChanged: () => void;
   setProfileError: (message: string) => void;
 };
 
@@ -31,11 +33,17 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   const [profileError, setProfileError] = useState("");
+  const [inventoryRefreshToken, setInventoryRefreshToken] = useState(0);
 
   const clearPlayer = useCallback(() => {
     setPlayer(null);
     setProfileError("");
+    setInventoryRefreshToken(0);
     window.localStorage.removeItem(PLAYER_STORAGE_KEY);
+  }, []);
+
+  const notifyInventoryChanged = useCallback(() => {
+    setInventoryRefreshToken((current) => current + 1);
   }, []);
 
   const connectPlayer = useCallback(
@@ -170,17 +178,21 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       isHydrating,
       isSubmittingProfile,
       profileError,
+      inventoryRefreshToken,
       connectPlayer,
       clearPlayer,
       refreshPlayer,
       setPlayerGold,
+      notifyInventoryChanged,
       setProfileError,
     }),
     [
       clearPlayer,
       connectPlayer,
+      inventoryRefreshToken,
       isHydrating,
       isSubmittingProfile,
+      notifyInventoryChanged,
       player,
       profileError,
       refreshPlayer,

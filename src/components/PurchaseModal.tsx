@@ -4,6 +4,10 @@ import { PackageCheck, UserRound, WalletCards, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { MarketCategory, MarketItem, PurchaseFormValues } from "../types";
 import { usePlayerSession } from "../context/PlayerSessionContext";
+import {
+  addItemToInventory,
+  restoreInventoryItem,
+} from "../utils/inventory";
 import { createOrderId } from "../utils/orders";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xkopndnl";
@@ -18,7 +22,8 @@ export function PurchaseModal({
   category: MarketCategory | undefined;
   onClose: () => void;
 }) {
-  const { player, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, refreshPlayer, setPlayerGold, notifyInventoryChanged } =
+    usePlayerSession();
   const [formValues, setFormValues] = useState<PurchaseFormValues>({
     whatsapp: "",
     quantity: 1,
@@ -102,6 +107,9 @@ export function PurchaseModal({
 
     const nextGold = latestPlayer.gold - totalPrice;
     const discountedPlayer = await setPlayerGold(nextGold);
+    let inventorySyncResult:
+      | Awaited<ReturnType<typeof addItemToInventory>>
+      | null = null;
 
     if (!discountedPlayer) {
       setSubmitState("error");
@@ -110,6 +118,12 @@ export function PurchaseModal({
       );
       return;
     }
+
+    inventorySyncResult = await addItemToInventory(
+      latestPlayer.id,
+      item,
+      formValues.quantity
+    );
 
     const nextOrderId = createOrderId();
     const data = new FormData();
@@ -136,6 +150,14 @@ export function PurchaseModal({
       if (!response.ok) {
         await setPlayerGold(latestPlayer.gold);
 
+        if (inventorySyncResult?.status === "synced") {
+          await restoreInventoryItem(
+            latestPlayer.id,
+            item,
+            inventorySyncResult.previousQuantity
+          );
+        }
+
         const payload = (await response.json().catch(() => null)) as
           | { errors?: Array<{ message?: string }> }
           | null;
@@ -156,11 +178,32 @@ export function PurchaseModal({
       setOrderId(nextOrderId);
       setRemainingGold(nextGold);
       setSubmitState("success");
+
+      if (inventorySyncResult?.status === "synced") {
+        notifyInventoryChanged();
+      }
+
+      const inventoryMessage =
+        inventorySyncResult?.status === "unavailable"
+          ? ` ${inventorySyncResult.message}`
+          : item.category === "potions"
+            ? " Las pociones no se guardan en el inventario persistente."
+            : " El objeto ya aparece en tu inventario.";
+
       setFeedbackMessage(
-        `Pedido enviado con exito. Se descontaron ${totalPrice} de oro de tu perfil activo.`
+        `Pedido enviado con exito. Se descontaron ${totalPrice} de oro de tu perfil activo.${inventoryMessage}`
       );
     } catch {
       await setPlayerGold(latestPlayer.gold);
+
+      if (inventorySyncResult?.status === "synced") {
+        await restoreInventoryItem(
+          latestPlayer.id,
+          item,
+          inventorySyncResult.previousQuantity
+        );
+      }
+
       setSubmitState("error");
       setFeedbackMessage(
         "No se pudo conectar con el sistema. Se intento restaurar tu oro automaticamente."

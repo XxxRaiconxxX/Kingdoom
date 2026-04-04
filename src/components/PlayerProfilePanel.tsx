@@ -1,6 +1,15 @@
 import { useState } from "react";
-import { Coins, Loader2, RefreshCw, UserRound, WalletCards } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import {
+  Backpack,
+  Coins,
+  Loader2,
+  RefreshCw,
+  UserRound,
+  WalletCards,
+} from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
+import { PlayerInventorySheet } from "./PlayerInventorySheet";
 
 export function PlayerProfilePanel() {
   const {
@@ -15,6 +24,7 @@ export function PlayerProfilePanel() {
   } = usePlayerSession();
   const [usernameInput, setUsernameInput] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,16 +88,26 @@ export function PlayerProfilePanel() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    clearPlayer();
-                    setUsernameInput(player.username);
-                  }}
-                  className="rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-400 transition hover:border-stone-500 hover:text-stone-200"
-                >
-                  Cambiar jugador
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsInventoryOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-400 transition hover:border-stone-500 hover:text-stone-200"
+                  >
+                    <Backpack className="h-3.5 w-3.5" />
+                    Inventario
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearPlayer();
+                      setUsernameInput(player.username);
+                    }}
+                    className="rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-400 transition hover:border-stone-500 hover:text-stone-200"
+                  >
+                    Cambiar
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -171,6 +191,12 @@ export function PlayerProfilePanel() {
           </form>
         )}
       </div>
+
+      <AnimatePresence>
+        {isInventoryOpen && player ? (
+          <PlayerInventorySheet onClose={() => setIsInventoryOpen(false)} />
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }

@@ -569,6 +569,7 @@ function MarketSection() {
                 key={`featured-${item.name}`}
                 item={item}
                 onBuy={() => setSelectedItem(item)}
+                hideImage
               />
             ))}
           </div>

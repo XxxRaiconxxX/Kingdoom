@@ -56,9 +56,11 @@ const stockStyles: Record<
 export function MarketItemCard({
   item,
   onBuy,
+  hideImage = false,
 }: {
   item: MarketItem;
   onBuy: () => void;
+  hideImage?: boolean;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const style = rarityStyles[item.rarity];
@@ -66,36 +68,38 @@ export function MarketItemCard({
 
   return (
     <article className={`overflow-hidden rounded-[1.5rem] border ${style.card}`}>
-      <div className="relative aspect-[4/5] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950">
-        {!imageFailed ? (
-          <img
-            src={item.imageUrl}
-            alt={item.name}
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            onError={() => setImageFailed(true)}
-            style={{
-              objectFit: item.imageFit ?? "cover",
-              objectPosition: item.imagePosition ?? "center",
-            }}
-            className={`h-full w-full ring-1 ring-inset ${style.imageRing}`}
-          />
-        ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-stone-900 to-stone-950 p-6 text-center">
-            <ShieldAlert className="h-8 w-8 text-amber-400" />
-            <p className="text-sm font-semibold text-stone-200">
-              Imagen externa no disponible
-            </p>
-            <p className="text-xs leading-5 text-stone-500">
-              Revisa que la URL apunte directo a una imagen publica.
-            </p>
-          </div>
-        )}
+      {!hideImage ? (
+        <div className="relative aspect-[4/5] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950">
+          {!imageFailed ? (
+            <img
+              src={item.imageUrl}
+              alt={item.name}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={() => setImageFailed(true)}
+              style={{
+                objectFit: item.imageFit ?? "cover",
+                objectPosition: item.imagePosition ?? "center",
+              }}
+              className={`h-full w-full ring-1 ring-inset ${style.imageRing}`}
+            />
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-stone-900 to-stone-950 p-6 text-center">
+              <ShieldAlert className="h-8 w-8 text-amber-400" />
+              <p className="text-sm font-semibold text-stone-200">
+                Imagen externa no disponible
+              </p>
+              <p className="text-xs leading-5 text-stone-500">
+                Revisa que la URL apunte directo a una imagen publica.
+              </p>
+            </div>
+          )}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-stone-950 via-stone-950/55 to-transparent" />
-      </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-stone-950 via-stone-950/55 to-transparent" />
+        </div>
+      ) : null}
 
-      <div className="space-y-3 p-4">
+      <div className={`space-y-3 ${hideImage ? "p-5" : "p-4"}`}>
         <div className="flex flex-wrap items-start justify-between gap-2">
           <h4 className="text-lg font-bold text-stone-100">{item.name}</h4>
           <div className="flex flex-wrap justify-end gap-2">

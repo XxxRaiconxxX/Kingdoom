@@ -83,26 +83,26 @@
 @keyframes market-neon-legendary-pulse {
   0%,
   100% {
-    opacity: 0.78;
-    filter: saturate(1) brightness(1);
+    opacity: 0.86;
+    filter: saturate(1.06) brightness(1.02);
   }
 
   50% {
     opacity: 1;
-    filter: saturate(1.24) brightness(1.14);
+    filter: saturate(1.36) brightness(1.22);
   }
 }
 
 @keyframes market-neon-epic-pulse {
   0%,
   100% {
-    opacity: 0.74;
-    filter: saturate(1) brightness(1);
+    opacity: 0.8;
+    filter: saturate(1.04) brightness(1.02);
   }
 
   50% {
-    opacity: 0.98;
-    filter: saturate(1.2) brightness(1.1);
+    opacity: 1;
+    filter: saturate(1.28) brightness(1.16);
   }
 }
 
@@ -113,15 +113,15 @@
   }
 
   20% {
-    opacity: 0.28;
+    opacity: 0.34;
   }
 
   50% {
-    opacity: 0.52;
+    opacity: 0.62;
   }
 
   80% {
-    opacity: 0.24;
+    opacity: 0.3;
   }
 
   100% {
@@ -132,18 +132,18 @@
 
 @layer utilities {
   .market-neon-legendary {
-    animation: market-neon-legendary-pulse 4.6s ease-in-out infinite;
+    animation: market-neon-legendary-pulse 3.9s ease-in-out infinite;
   }
 
   .market-neon-epic {
-    animation: market-neon-epic-pulse 5.1s ease-in-out infinite;
+    animation: market-neon-epic-pulse 4.5s ease-in-out infinite;
   }
 
   .market-sheen-legendary {
-    animation: market-sheen-sweep 6.8s ease-in-out infinite;
+    animation: market-sheen-sweep 5.8s ease-in-out infinite;
   }
 
   .market-sheen-epic {
-    animation: market-sheen-sweep 7.6s ease-in-out infinite;
+    animation: market-sheen-sweep 6.6s ease-in-out infinite;
   }
 }

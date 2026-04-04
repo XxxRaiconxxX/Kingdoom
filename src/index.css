@@ -83,35 +83,67 @@
 @keyframes market-neon-legendary-pulse {
   0%,
   100% {
-    opacity: 0.72;
+    opacity: 0.78;
     filter: saturate(1) brightness(1);
   }
 
   50% {
     opacity: 1;
-    filter: saturate(1.18) brightness(1.08);
+    filter: saturate(1.24) brightness(1.14);
   }
 }
 
 @keyframes market-neon-epic-pulse {
   0%,
   100% {
-    opacity: 0.7;
+    opacity: 0.74;
     filter: saturate(1) brightness(1);
   }
 
   50% {
-    opacity: 0.96;
-    filter: saturate(1.16) brightness(1.06);
+    opacity: 0.98;
+    filter: saturate(1.2) brightness(1.1);
+  }
+}
+
+@keyframes market-sheen-sweep {
+  0% {
+    transform: translateX(-58%) translateY(-8%) rotate(-8deg);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.28;
+  }
+
+  50% {
+    opacity: 0.52;
+  }
+
+  80% {
+    opacity: 0.24;
+  }
+
+  100% {
+    transform: translateX(58%) translateY(8%) rotate(-8deg);
+    opacity: 0;
   }
 }
 
 @layer utilities {
   .market-neon-legendary {
-    animation: market-neon-legendary-pulse 3.8s ease-in-out infinite;
+    animation: market-neon-legendary-pulse 4.6s ease-in-out infinite;
   }
 
   .market-neon-epic {
-    animation: market-neon-epic-pulse 4.4s ease-in-out infinite;
+    animation: market-neon-epic-pulse 5.1s ease-in-out infinite;
+  }
+
+  .market-sheen-legendary {
+    animation: market-sheen-sweep 6.8s ease-in-out infinite;
+  }
+
+  .market-sheen-epic {
+    animation: market-sheen-sweep 7.6s ease-in-out infinite;
   }
 }

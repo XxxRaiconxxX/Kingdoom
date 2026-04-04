@@ -12,29 +12,37 @@ const rarityStyles: Record<
     glow?: string;
     glowBorder?: string;
     glowAnimation?: string;
+    sheen?: string;
+    sheenAnimation?: string;
   }
 > = {
   legendary: {
     label: "Legendario",
-    card: "border-amber-400/70 bg-amber-500/10 shadow-[0_0_30px_rgba(245,158,11,0.12)]",
+    card: "border-amber-300/70 bg-amber-500/10 shadow-[0_0_26px_rgba(245,158,11,0.16)]",
     badge: "bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/25",
     imageRing: "ring-amber-400/45",
     glow:
-      "bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.18),transparent_58%)] shadow-[0_0_18px_rgba(245,158,11,0.22),0_0_34px_rgba(251,191,36,0.14)]",
+      "bg-[radial-gradient(circle_at_top,rgba(253,224,71,0.24),transparent_52%),radial-gradient(circle_at_bottom,rgba(245,158,11,0.12),transparent_46%)] shadow-[0_0_20px_rgba(245,158,11,0.28),0_0_46px_rgba(251,191,36,0.18)]",
     glowBorder:
-      "border border-amber-300/35 shadow-[inset_0_0_10px_rgba(251,191,36,0.18)]",
+      "border border-amber-200/40 shadow-[inset_0_0_14px_rgba(253,224,71,0.2)]",
     glowAnimation: "market-neon-legendary",
+    sheen:
+      "bg-[linear-gradient(115deg,transparent_18%,rgba(255,251,235,0.02)_28%,rgba(253,224,71,0.18)_44%,rgba(255,255,255,0.08)_51%,rgba(245,158,11,0.12)_58%,transparent_76%)] opacity-60 blur-xl",
+    sheenAnimation: "market-sheen-legendary",
   },
   epic: {
     label: "Epico",
-    card: "border-fuchsia-400/55 bg-fuchsia-500/10",
+    card: "border-fuchsia-300/60 bg-fuchsia-500/10 shadow-[0_0_22px_rgba(192,38,211,0.14)]",
     badge: "bg-fuchsia-400/15 text-fuchsia-200 ring-1 ring-fuchsia-400/25",
     imageRing: "ring-fuchsia-400/40",
     glow:
-      "bg-[radial-gradient(circle_at_top,rgba(217,70,239,0.16),transparent_58%)] shadow-[0_0_16px_rgba(192,38,211,0.18),0_0_30px_rgba(217,70,239,0.14)]",
+      "bg-[radial-gradient(circle_at_top,rgba(232,121,249,0.22),transparent_52%),radial-gradient(circle_at_bottom,rgba(168,85,247,0.12),transparent_46%)] shadow-[0_0_18px_rgba(192,38,211,0.24),0_0_40px_rgba(217,70,239,0.16)]",
     glowBorder:
-      "border border-fuchsia-300/30 shadow-[inset_0_0_10px_rgba(217,70,239,0.16)]",
+      "border border-fuchsia-200/32 shadow-[inset_0_0_12px_rgba(232,121,249,0.16)]",
     glowAnimation: "market-neon-epic",
+    sheen:
+      "bg-[linear-gradient(115deg,transparent_16%,rgba(255,255,255,0.02)_28%,rgba(232,121,249,0.16)_42%,rgba(255,255,255,0.06)_50%,rgba(168,85,247,0.12)_58%,transparent_76%)] opacity-55 blur-xl",
+    sheenAnimation: "market-sheen-epic",
   },
   rare: {
     label: "Raro",
@@ -96,6 +104,11 @@ export function MarketItemCard({
           <div
             className={`pointer-events-none absolute inset-[1px] rounded-[calc(1.5rem-1px)] ${style.glowBorder} ${style.glowAnimation ?? ""}`}
           />
+          {style.sheen ? (
+            <div
+              className={`pointer-events-none absolute inset-0 rounded-[inherit] ${style.sheen} ${style.sheenAnimation ?? ""}`}
+            />
+          ) : null}
         </>
       ) : null}
 

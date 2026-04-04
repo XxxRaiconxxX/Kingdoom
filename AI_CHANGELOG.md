@@ -45,6 +45,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 04/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/MarketItemCard.tsx`, `src/index.css`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se llevo el acabado de rareza a un look mas premium con reflejo de metal encantado y un pulso mejor balanceado.
+*   **Cambios Clave:**
+    *   Los bordes legendarios y epicos ahora tienen un brillo mas profundo y un reflejo suave que recorre la tarjeta.
+    *   Se ajustaron tiempos e intensidad para que el efecto se vea elegante, no estridente.
+*   **Notas/Advertencias:** La animacion sigue limitada a legendarios y epicos para mantener el resto del mercado sobrio.
+
+---
+### [Fecha: 04/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/MarketItemCard.tsx`, `src/index.css`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se convirtio el brillo de rareza en una animacion suave para objetos legendarios y epicos.
 *   **Cambios Clave:**
     *   Se anadieron keyframes globales para un pulso lento del borde neon.

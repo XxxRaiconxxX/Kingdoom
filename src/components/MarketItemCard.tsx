@@ -11,6 +11,7 @@ const rarityStyles: Record<
     imageRing: string;
     glow?: string;
     glowBorder?: string;
+    glowAnimation?: string;
   }
 > = {
   legendary: {
@@ -22,6 +23,7 @@ const rarityStyles: Record<
       "bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.18),transparent_58%)] shadow-[0_0_18px_rgba(245,158,11,0.22),0_0_34px_rgba(251,191,36,0.14)]",
     glowBorder:
       "border border-amber-300/35 shadow-[inset_0_0_10px_rgba(251,191,36,0.18)]",
+    glowAnimation: "market-neon-legendary",
   },
   epic: {
     label: "Epico",
@@ -32,6 +34,7 @@ const rarityStyles: Record<
       "bg-[radial-gradient(circle_at_top,rgba(217,70,239,0.16),transparent_58%)] shadow-[0_0_16px_rgba(192,38,211,0.18),0_0_30px_rgba(217,70,239,0.14)]",
     glowBorder:
       "border border-fuchsia-300/30 shadow-[inset_0_0_10px_rgba(217,70,239,0.16)]",
+    glowAnimation: "market-neon-epic",
   },
   rare: {
     label: "Raro",
@@ -88,10 +91,10 @@ export function MarketItemCard({
       {style.glow ? (
         <>
           <div
-            className={`pointer-events-none absolute inset-0 rounded-[inherit] ${style.glow}`}
+            className={`pointer-events-none absolute inset-0 rounded-[inherit] ${style.glow} ${style.glowAnimation ?? ""}`}
           />
           <div
-            className={`pointer-events-none absolute inset-[1px] rounded-[calc(1.5rem-1px)] ${style.glowBorder}`}
+            className={`pointer-events-none absolute inset-[1px] rounded-[calc(1.5rem-1px)] ${style.glowBorder} ${style.glowAnimation ?? ""}`}
           />
         </>
       ) : null}

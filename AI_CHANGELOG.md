@@ -44,6 +44,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 04/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/MarketItemCard.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se anadio un brillo especial tipo neon para los objetos legendarios y epicos del mercado.
+*   **Cambios Clave:**
+    *   Las tarjetas `legendary` ahora tienen un resplandor dorado suave en el borde.
+    *   Las tarjetas `epic` ahora tienen un resplandor fucsia suave en el borde.
+*   **Notas/Advertencias:** El efecto se aplico solo a las tarjetas del mercado para no recargar otras zonas de la interfaz.
+
+---
+### [Fecha: 04/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/MarketItemCard.tsx`, `src/App.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se compactaron los objetos destacados del mercado para que no muestren imagen y ocupen menos espacio visual.
 *   **Cambios Clave:**

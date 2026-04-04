@@ -4,19 +4,34 @@ import type { MarketItem, Rarity, StockStatus } from "../types";
 
 const rarityStyles: Record<
   Rarity,
-  { label: string; card: string; badge: string; imageRing: string }
+  {
+    label: string;
+    card: string;
+    badge: string;
+    imageRing: string;
+    glow?: string;
+    glowBorder?: string;
+  }
 > = {
   legendary: {
     label: "Legendario",
     card: "border-amber-400/70 bg-amber-500/10 shadow-[0_0_30px_rgba(245,158,11,0.12)]",
     badge: "bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/25",
     imageRing: "ring-amber-400/45",
+    glow:
+      "bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.18),transparent_58%)] shadow-[0_0_18px_rgba(245,158,11,0.22),0_0_34px_rgba(251,191,36,0.14)]",
+    glowBorder:
+      "border border-amber-300/35 shadow-[inset_0_0_10px_rgba(251,191,36,0.18)]",
   },
   epic: {
     label: "Epico",
     card: "border-fuchsia-400/55 bg-fuchsia-500/10",
     badge: "bg-fuchsia-400/15 text-fuchsia-200 ring-1 ring-fuchsia-400/25",
     imageRing: "ring-fuchsia-400/40",
+    glow:
+      "bg-[radial-gradient(circle_at_top,rgba(217,70,239,0.16),transparent_58%)] shadow-[0_0_16px_rgba(192,38,211,0.18),0_0_30px_rgba(217,70,239,0.14)]",
+    glowBorder:
+      "border border-fuchsia-300/30 shadow-[inset_0_0_10px_rgba(217,70,239,0.16)]",
   },
   rare: {
     label: "Raro",
@@ -67,7 +82,20 @@ export function MarketItemCard({
   const stock = stockStyles[item.stockStatus];
 
   return (
-    <article className={`overflow-hidden rounded-[1.5rem] border ${style.card}`}>
+    <article
+      className={`relative overflow-hidden rounded-[1.5rem] border ${style.card}`}
+    >
+      {style.glow ? (
+        <>
+          <div
+            className={`pointer-events-none absolute inset-0 rounded-[inherit] ${style.glow}`}
+          />
+          <div
+            className={`pointer-events-none absolute inset-[1px] rounded-[calc(1.5rem-1px)] ${style.glowBorder}`}
+          />
+        </>
+      ) : null}
+
       {!hideImage ? (
         <div className="relative aspect-[4/5] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950">
           {!imageFailed ? (

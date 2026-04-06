@@ -1,9 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Analytics } from "@vercel/analytics/react";
+import { injectSpeedInsights } from "@vercel/speed-insights";
 import App from "./App";
 import { PlayerSessionProvider } from "./context/PlayerSessionContext";
 import "./index.css";
+
+injectSpeedInsights();
 
 const rootElement = document.getElementById("root");
 

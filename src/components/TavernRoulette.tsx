@@ -209,7 +209,7 @@ export function TavernRoulette() {
                 src={ruletaImg}
                 alt="Ruleta"
                 animate={{ rotate: spinDegrees }}
-                transition={{ duration: 3, ease: "circOut" }}
+                transition={{ duration: 6, ease: "circOut" }}
                 className="h-full w-full rounded-full object-cover shadow-[0_0_40px_rgba(245,158,11,0.3)]"
               />
             </div>

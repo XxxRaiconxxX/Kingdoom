@@ -14,6 +14,7 @@ import { ADMIN_WEEKLY_TEMPLATES } from "../data/adminTemplates";
 import { fetchAllPlayers } from "../utils/players";
 import {
   fetchAdminWeeklyRankingRows,
+  seedCurrentWeeklyRanking,
   upsertAdminWeeklyRankingEntry,
 } from "../utils/adminRanking";
 import { formatRankingWindow } from "../utils/weeklyRanking";
@@ -40,6 +41,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [formStreak, setFormStreak] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isSeedingWeek, setIsSeedingWeek] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +70,20 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       cancelled = true;
     };
   }, []);
+
+  async function reloadAdminData() {
+    setStatus("loading");
+    const [playersList, rankingResult] = await Promise.all([
+      fetchAllPlayers(),
+      fetchAdminWeeklyRankingRows(),
+    ]);
+
+    setPlayers(playersList);
+    setRankingRows(rankingResult.rows);
+    setRankingMessage(rankingResult.message);
+    setWindowLabel(formatRankingWindow(rankingResult.window));
+    setStatus(rankingResult.status === "ready" ? "ready" : "unavailable");
+  }
 
   const selectedPlayer = useMemo(
     () => players.find((entry) => entry.id === formPlayerId) ?? null,
@@ -122,12 +138,17 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setFeedback(result.message);
 
     if (result.status === "saved") {
-      const refreshed = await fetchAdminWeeklyRankingRows();
-      setRankingRows(refreshed.rows);
-      setRankingMessage(refreshed.message);
-      setWindowLabel(formatRankingWindow(refreshed.window));
-      setStatus(refreshed.status === "ready" ? "ready" : "unavailable");
+      await reloadAdminData();
     }
+  }
+
+  async function handleSeedWeek() {
+    setIsSeedingWeek(true);
+    setFeedback("");
+    const result = await seedCurrentWeeklyRanking();
+    setIsSeedingWeek(false);
+    setFeedback(result.message);
+    await reloadAdminData();
   }
 
   return (
@@ -220,6 +241,30 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     {rankingMessage}
                   </p>
                 ) : null}
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => void handleSeedWeek()}
+                    disabled={isSeedingWeek}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSeedingWeek ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creando semana...
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="h-4 w-4" />
+                        Nueva semana
+                      </>
+                    )}
+                  </button>
+                  <p className="max-w-md text-sm leading-6 text-stone-400">
+                    Clona la ultima temporada con puntos reiniciados. Si no hay
+                    historial previo, usa la tabla `players` como base inicial.
+                  </p>
+                </div>
                 <div className="mt-4 rounded-[1.3rem] border border-stone-800 bg-stone-950/50 p-4">
                   <p className="text-sm font-bold text-stone-100">
                     Recomendacion tecnica
@@ -421,7 +466,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                             #{index + 1} {row.name}
                           </p>
                           <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
-                            {row.missionsCompleted} misiones · {row.eventsJoined} eventos
+                            {row.missionsCompleted} misiones / {row.eventsJoined} eventos
                           </p>
                         </div>
                         <div className="text-right">

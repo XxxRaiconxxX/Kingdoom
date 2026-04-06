@@ -1,6 +1,7 @@
 import type { PlayerAccount, RankingPlayer } from "../types";
 import { supabase } from "./supabaseClient";
 import { getCurrentRankingWindow } from "./weeklyRanking";
+import { fetchAllPlayers } from "./players";
 
 // SQL sugerido para reforzar acceso admin en players:
 //
@@ -167,5 +168,126 @@ export async function upsertAdminWeeklyRankingEntry(
   return {
     status: "saved" as const,
     message: "Jugador agregado a la semana activa.",
+  };
+}
+
+export async function seedCurrentWeeklyRanking() {
+  const window = getCurrentRankingWindow();
+
+  const { data: currentRows, error: currentError } = await supabase
+    .from("weekly_activity_rankings")
+    .select("id")
+    .eq("week_starts_at", window.weekStartsAt)
+    .eq("week_ends_at", window.weekEndsAt);
+
+  if (currentError) {
+    return {
+      status: "unavailable" as const,
+      message:
+        "No se pudo comprobar la semana activa en weekly_activity_rankings.",
+    };
+  }
+
+  if (currentRows && currentRows.length > 0) {
+    return {
+      status: "skipped" as const,
+      message: "La semana actual ya tiene jugadores cargados.",
+    };
+  }
+
+  const { data: previousRows, error: previousError } = await supabase
+    .from("weekly_activity_rankings")
+    .select(
+      "player_id, display_name, faction, status, week_starts_at, week_ends_at"
+    )
+    .lt("week_ends_at", window.weekStartsAt)
+    .order("week_starts_at", { ascending: false });
+
+  if (previousError) {
+    return {
+      status: "unavailable" as const,
+      message:
+        "No se pudo leer la semana anterior para sembrar la nueva temporada.",
+    };
+  }
+
+  let payload:
+    | Array<{
+        player_id: string | null;
+        display_name: string;
+        faction: string;
+        status: RankingPlayer["status"];
+        activity_points: number;
+        missions_completed: number;
+        events_joined: number;
+        streak_days: number;
+        week_starts_at: string;
+        week_ends_at: string;
+      }>
+    | [];
+
+  if (previousRows && previousRows.length > 0) {
+    const latestWeekStart = previousRows[0].week_starts_at;
+    const latestWeekEnd = previousRows[0].week_ends_at;
+    const latestSeasonRows = previousRows.filter(
+      (row) =>
+        row.week_starts_at === latestWeekStart && row.week_ends_at === latestWeekEnd
+    );
+
+    payload = latestSeasonRows.map((row) => ({
+      player_id: row.player_id ?? null,
+      display_name: row.display_name,
+      faction: row.faction,
+      status: row.status ?? "alive",
+      activity_points: 0,
+      missions_completed: 0,
+      events_joined: 0,
+      streak_days: 0,
+      week_starts_at: window.weekStartsAt,
+      week_ends_at: window.weekEndsAt,
+    }));
+  } else {
+    const players = await fetchAllPlayers();
+
+    if (players.length === 0) {
+      return {
+        status: "skipped" as const,
+        message:
+          "No hay jugadores base en la tabla players para sembrar la nueva semana.",
+      };
+    }
+
+    payload = players.map((player) => ({
+      player_id: player.id,
+      display_name: player.username,
+      faction: "Sin faccion",
+      status: "alive" as const,
+      activity_points: 0,
+      missions_completed: 0,
+      events_joined: 0,
+      streak_days: 0,
+      week_starts_at: window.weekStartsAt,
+      week_ends_at: window.weekEndsAt,
+    }));
+  }
+
+  const { error: insertError } = await supabase
+    .from("weekly_activity_rankings")
+    .insert(payload);
+
+  if (insertError) {
+    return {
+      status: "unavailable" as const,
+      message:
+        "No se pudo crear la nueva semana en weekly_activity_rankings.",
+    };
+  }
+
+  return {
+    status: "seeded" as const,
+    message:
+      previousRows && previousRows.length > 0
+        ? "Semana nueva creada tomando la ultima temporada como base."
+        : "Semana nueva creada usando la tabla players como semilla inicial.",
   };
 }

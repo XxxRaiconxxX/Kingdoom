@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   Coins,
   Crown,
+  Flag,
   Loader2,
   ScrollText,
   ShieldCheck,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { ADMIN_WEEKLY_TEMPLATES } from "../data/adminTemplates";
+import { fetchRealmEvents, upsertRealmEvent } from "../utils/events";
 import {
   createPlayerAccount,
   fetchAllPlayers,
@@ -25,9 +27,9 @@ import {
   upsertAdminWeeklyRankingEntry,
 } from "../utils/adminRanking";
 import { formatRankingWindow } from "../utils/weeklyRanking";
-import type { PlayerAccount, RankingPlayer } from "../types";
+import type { EventStatus, PlayerAccount, RankingPlayer, RealmEvent } from "../types";
 
-type AdminTab = "overview" | "activity" | "players" | "templates";
+type AdminTab = "overview" | "activity" | "players" | "events" | "templates";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
@@ -59,6 +61,20 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [goldPlayerId, setGoldPlayerId] = useState("");
   const [goldMode, setGoldMode] = useState<GoldAdjustmentMode>("add");
   const [goldAmount, setGoldAmount] = useState(0);
+  const [events, setEvents] = useState<RealmEvent[]>([]);
+  const [eventFeedback, setEventFeedback] = useState("");
+  const [isSavingEvent, setIsSavingEvent] = useState(false);
+  const [eventId, setEventId] = useState("");
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [eventLongDescription, setEventLongDescription] = useState("");
+  const [eventImageUrl, setEventImageUrl] = useState("");
+  const [eventStartDate, setEventStartDate] = useState("");
+  const [eventEndDate, setEventEndDate] = useState("");
+  const [eventStatus, setEventStatus] = useState<EventStatus>("in-production");
+  const [eventFactions, setEventFactions] = useState("");
+  const [eventRewards, setEventRewards] = useState("");
+  const [eventRequirements, setEventRequirements] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -69,6 +85,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
         fetchAllPlayers(),
         fetchAdminWeeklyRankingRows(),
       ]);
+      const eventsResult = await fetchRealmEvents();
 
       if (cancelled) {
         return;
@@ -78,6 +95,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       setRankingRows(rankingResult.rows);
       setRankingMessage(rankingResult.message);
       setWindowLabel(formatRankingWindow(rankingResult.window));
+      setEvents(eventsResult.events);
       setStatus(rankingResult.status === "ready" ? "ready" : "unavailable");
     }
 
@@ -94,11 +112,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       fetchAllPlayers(),
       fetchAdminWeeklyRankingRows(),
     ]);
+    const eventsResult = await fetchRealmEvents();
 
     setPlayers(playersList);
     setRankingRows(rankingResult.rows);
     setRankingMessage(rankingResult.message);
     setWindowLabel(formatRankingWindow(rankingResult.window));
+    setEvents(eventsResult.events);
     setStatus(rankingResult.status === "ready" ? "ready" : "unavailable");
   }
 
@@ -230,6 +250,63 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     }
   }
 
+  function preloadEvent(event: RealmEvent) {
+    setEventId(event.id ?? "");
+    setEventTitle(event.title);
+    setEventDescription(event.description);
+    setEventLongDescription(event.longDescription);
+    setEventImageUrl(event.imageUrl);
+    setEventStartDate(event.startDate);
+    setEventEndDate(event.endDate);
+    setEventStatus(event.status);
+    setEventFactions(event.factions.join(", "));
+    setEventRewards(event.rewards);
+    setEventRequirements(event.requirements);
+    setActiveTab("events");
+  }
+
+  function resetEventForm() {
+    setEventId("");
+    setEventTitle("");
+    setEventDescription("");
+    setEventLongDescription("");
+    setEventImageUrl("");
+    setEventStartDate("");
+    setEventEndDate("");
+    setEventStatus("in-production");
+    setEventFactions("");
+    setEventRewards("");
+    setEventRequirements("");
+  }
+
+  async function handleSaveEvent(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSavingEvent(true);
+    setEventFeedback("");
+
+    const result = await upsertRealmEvent({
+      id: eventId || undefined,
+      title: eventTitle,
+      description: eventDescription,
+      longDescription: eventLongDescription,
+      imageUrl: eventImageUrl,
+      startDate: eventStartDate,
+      endDate: eventEndDate,
+      status: eventStatus,
+      factions: eventFactions.split(","),
+      rewards: eventRewards,
+      requirements: eventRequirements,
+    });
+
+    setIsSavingEvent(false);
+    setEventFeedback(result.message);
+
+    if (result.status === "saved") {
+      resetEventForm();
+      await reloadAdminData();
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -282,6 +359,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
               label="Jugadores"
               active={activeTab === "players"}
               onClick={() => setActiveTab("players")}
+            />
+            <AdminTabButton
+              label="Eventos"
+              active={activeTab === "events"}
+              onClick={() => setActiveTab("events")}
             />
             <AdminTabButton
               label="Plantillas"
@@ -784,6 +866,177 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             </div>
           ) : null}
 
+          {activeTab === "events" ? (
+            <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <Flag className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Gestor del inicio
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Crear o editar eventos
+                    </h4>
+                  </div>
+                </div>
+
+                <form className="mt-5 space-y-4" onSubmit={handleSaveEvent}>
+                  <LabeledInput
+                    label="Titulo"
+                    value={eventTitle}
+                    onChange={setEventTitle}
+                    placeholder="Nombre del evento"
+                  />
+                  <LabeledTextArea
+                    label="Descripcion corta"
+                    value={eventDescription}
+                    onChange={setEventDescription}
+                    placeholder="Resumen visible en la tarjeta"
+                  />
+                  <LabeledTextArea
+                    label="Cronica o descripcion larga"
+                    value={eventLongDescription}
+                    onChange={setEventLongDescription}
+                    placeholder="Detalle desplegable del evento"
+                    rows={4}
+                  />
+                  <LabeledInput
+                    label="URL de imagen"
+                    value={eventImageUrl}
+                    onChange={setEventImageUrl}
+                    placeholder="https://..."
+                  />
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <LabeledInput
+                      label="Fecha de inicio"
+                      value={eventStartDate}
+                      onChange={setEventStartDate}
+                      placeholder="18 de abril"
+                    />
+                    <LabeledInput
+                      label="Fecha de cierre"
+                      value={eventEndDate}
+                      onChange={setEventEndDate}
+                      placeholder="21 de abril"
+                    />
+                  </div>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-semibold text-stone-200">
+                      Estado
+                    </span>
+                    <select
+                      value={eventStatus}
+                      onChange={(event) =>
+                        setEventStatus(event.target.value as EventStatus)
+                      }
+                      className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                    >
+                      <option value="active">Activo</option>
+                      <option value="in-production">En produccion</option>
+                      <option value="finished">Finalizado</option>
+                    </select>
+                  </label>
+
+                  <LabeledInput
+                    label="Facciones (separadas por coma)"
+                    value={eventFactions}
+                    onChange={setEventFactions}
+                    placeholder="Cuervos del Norte, Guardianes del Umbral"
+                  />
+                  <LabeledTextArea
+                    label="Recompensas"
+                    value={eventRewards}
+                    onChange={setEventRewards}
+                    placeholder="Prestigio, oro, reliquias..."
+                  />
+                  <LabeledTextArea
+                    label="Requisitos"
+                    value={eventRequirements}
+                    onChange={setEventRequirements}
+                    placeholder="Personaje activo, inscripcion previa..."
+                  />
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="submit"
+                      disabled={isSavingEvent}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSavingEvent ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          <Flag className="h-4 w-4" />
+                          {eventId ? "Actualizar evento" : "Crear evento"}
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={resetEventForm}
+                      className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                    >
+                      Limpiar formulario
+                    </button>
+                  </div>
+
+                  {eventFeedback ? (
+                    <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+                      {eventFeedback}
+                    </p>
+                  ) : null}
+                </form>
+              </section>
+
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <ScrollText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Agenda visible
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Eventos del inicio
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {events.map((entry) => (
+                    <button
+                      key={entry.id ?? entry.title}
+                      type="button"
+                      onClick={() => preloadEvent(entry)}
+                      className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-stone-100">
+                          {entry.title}
+                        </p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                          {entry.startDate} / {entry.endDate}
+                        </p>
+                      </div>
+                      <div className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300">
+                        {entry.status}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </div>
+          ) : null}
+
           {activeTab === "templates" ? (
             <div className="space-y-4">
               <AdminInfoCard
@@ -922,6 +1175,33 @@ function LabeledInput({
       <input
         type="text"
         value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+      />
+    </label>
+  );
+}
+
+function LabeledTextArea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  rows?: number;
+}) {
+  return (
+    <label className="space-y-2">
+      <span className="text-sm font-semibold text-stone-200">{label}</span>
+      <textarea
+        value={value}
+        rows={rows}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"

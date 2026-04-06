@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 06/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/App.tsx`, `src/types.ts`, `src/utils/events.ts`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se anadio un gestor de eventos desde el panel admin manteniendo el mismo formato visual de las tarjetas que aparecen en Inicio.
+*   **Cambios Clave:**
+    *   La Home ahora intenta leer eventos desde Supabase y, si no hay tabla o datos, cae con seguridad al archivo local `src/data/events.ts`.
+    *   Se agrego una pestaña `Eventos` al panel admin para crear y editar los eventos visibles del inicio sin tocar codigo manualmente.
+    *   El diseño publico de los eventos no cambia: solo cambia el origen del contenido cuando Supabase esta disponible.
+*   **Notas/Advertencias:** Para administrarlos desde la web hace falta crear manualmente la tabla `realm_events` usando el SQL sugerido en `src/utils/events.ts`.
+
+---
+### [Fecha: 06/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/players.ts`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se anadio la pestaña `Jugadores` al panel admin para crear perfiles nuevos y corregir oro sin entrar manualmente a Supabase.
 *   **Cambios Clave:**

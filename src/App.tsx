@@ -46,6 +46,7 @@ import {
   formatCountdown,
   formatRankingWindow,
 } from "./utils/weeklyRanking";
+import { fetchRealmEvents } from "./utils/events";
 import type {
   MarketCategory, MarketCategoryId, MarketItem, NavItem, RankingPlayer, RankingWindow, TabId,
 } from "./types";
@@ -149,6 +150,27 @@ export default function App() {
 
 function HomeSection() {
   const StatusIcon = KINGDOM_STATUS.icon;
+  const [events, setEvents] = useState(ACTIVE_EVENTS);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEvents() {
+      const result = await fetchRealmEvents();
+
+      if (cancelled) {
+        return;
+      }
+
+      setEvents(result.events);
+    }
+
+    void loadEvents();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <section className="space-y-5">
@@ -225,12 +247,12 @@ function HomeSection() {
           description="Cada evento conserva imagen, cronica, fechas y estado para que el calendario del rol siempre se sienta vivo."
           rightSlot={
             <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
-              {ACTIVE_EVENTS.length} eventos
+              {events.length} eventos
             </span>
           }
         />
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {ACTIVE_EVENTS.map((event) => (
+          {events.map((event) => (
             <EventCard key={event.title} event={event} />
           ))}
         </div>

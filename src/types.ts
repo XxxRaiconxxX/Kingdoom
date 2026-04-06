@@ -96,6 +96,7 @@ export type AdminTemplate = {
 };
 
 export type RealmEvent = {
+  id?: string;
   title: string;
   description: string;
   longDescription: string;

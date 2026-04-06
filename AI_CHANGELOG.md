@@ -45,6 +45,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 06/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `package.json`, `src/main.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se integro Vercel Speed Insights para medir rendimiento real del despliegue sin tocar la arquitectura de la app.
+*   **Cambios Clave:**
+    *   Se anadio la dependencia `@vercel/speed-insights` al proyecto.
+    *   Se monto `<SpeedInsights />` junto a `<Analytics />` en `main.tsx` para capturar metricas globales.
+*   **Notas/Advertencias:** Funciona en el despliegue de Vercel; GitHub Pages seguira operativo aunque no aproveche este panel.
+
+---
+### [Fecha: 06/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `package.json`, `src/main.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se integro Vercel Analytics de forma global para empezar a medir visitas en el despliegue de Vercel sin tocar la estructura principal de la SPA.
 *   **Cambios Clave:**
     *   Se anadio la dependencia `@vercel/analytics` al proyecto.

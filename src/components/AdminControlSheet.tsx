@@ -31,6 +31,7 @@ import type { EventStatus, PlayerAccount, RankingPlayer, RealmEvent } from "../t
 
 type AdminTab = "overview" | "activity" | "players" | "events" | "templates";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
+type EventListFilter = "all" | EventStatus;
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const { player, refreshPlayer } = usePlayerSession();
@@ -49,6 +50,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [formMissions, setFormMissions] = useState(0);
   const [formEvents, setFormEvents] = useState(0);
   const [formStreak, setFormStreak] = useState(0);
+  const [isActivityEditMode, setIsActivityEditMode] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isSeedingWeek, setIsSeedingWeek] = useState(false);
@@ -58,12 +60,15 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [newUsername, setNewUsername] = useState("");
   const [newGold, setNewGold] = useState(0);
   const [newIsAdmin, setNewIsAdmin] = useState(false);
+  const [playerSearch, setPlayerSearch] = useState("");
   const [goldPlayerId, setGoldPlayerId] = useState("");
   const [goldMode, setGoldMode] = useState<GoldAdjustmentMode>("add");
   const [goldAmount, setGoldAmount] = useState(0);
   const [events, setEvents] = useState<RealmEvent[]>([]);
   const [eventFeedback, setEventFeedback] = useState("");
   const [isSavingEvent, setIsSavingEvent] = useState(false);
+  const [eventSearch, setEventSearch] = useState("");
+  const [eventListFilter, setEventListFilter] = useState<EventListFilter>("all");
   const [eventId, setEventId] = useState("");
   const [eventTitle, setEventTitle] = useState("");
   const [eventDescription, setEventDescription] = useState("");
@@ -130,11 +135,48 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     () => players.find((entry) => entry.id === goldPlayerId) ?? null,
     [goldPlayerId, players]
   );
+  const filteredPlayers = useMemo(() => {
+    const normalizedSearch = playerSearch.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return players;
+    }
+
+    return players.filter((entry) =>
+      entry.username.toLowerCase().includes(normalizedSearch)
+    );
+  }, [playerSearch, players]);
+  const filteredEvents = useMemo(() => {
+    const normalizedSearch = eventSearch.trim().toLowerCase();
+
+    return events.filter((entry) => {
+      const matchesSearch =
+        normalizedSearch.length === 0
+          ? true
+          : entry.title.toLowerCase().includes(normalizedSearch);
+      const matchesStatus =
+        eventListFilter === "all" ? true : entry.status === eventListFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [eventListFilter, eventSearch, events]);
 
   function applyTemplate(points: number, missions: number, events: number) {
     setFormPoints(points);
     setFormMissions(missions);
     setFormEvents(events);
+  }
+
+  function resetActivityForm() {
+    setFormPlayerId("");
+    setFormFaction("");
+    setFormStatus("alive");
+    setFormPoints(0);
+    setFormMissions(0);
+    setFormEvents(0);
+    setFormStreak(0);
+    setIsActivityEditMode(false);
+    setFeedback("");
   }
 
   function preloadFromExisting(row: RankingPlayer) {
@@ -151,6 +193,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setFormMissions(row.missionsCompleted);
     setFormEvents(row.eventsJoined);
     setFormStreak(row.streakDays ?? 0);
+    setIsActivityEditMode(true);
+    setFeedback("");
     setActiveTab("activity");
   }
 
@@ -179,6 +223,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setFeedback(result.message);
 
     if (result.status === "saved") {
+      setIsActivityEditMode(false);
       await reloadAdminData();
     }
   }
@@ -262,6 +307,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventFactions(event.factions.join(", "));
     setEventRewards(event.rewards);
     setEventRequirements(event.requirements);
+    setEventFeedback("");
     setActiveTab("events");
   }
 
@@ -277,6 +323,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventFactions("");
     setEventRewards("");
     setEventRequirements("");
+    setEventFeedback("");
   }
 
   async function handleSaveEvent(event: React.FormEvent<HTMLFormElement>) {
@@ -594,6 +641,15 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       </>
                     )}
                   </button>
+                  {isActivityEditMode ? (
+                    <button
+                      type="button"
+                      onClick={resetActivityForm}
+                      className="ml-3 rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                    >
+                      Cancelar edicion
+                    </button>
+                  ) : null}
 
                   {feedback ? (
                     <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
@@ -675,6 +731,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
                 <form className="mt-5 space-y-4" onSubmit={handleCreatePlayer}>
                   <LabeledInput
+                    label="Buscar jugador registrado"
+                    value={playerSearch}
+                    onChange={setPlayerSearch}
+                    placeholder="Filtra por nombre"
+                  />
+                  <LabeledInput
                     label="Nombre del jugador"
                     value={newUsername}
                     onChange={setNewUsername}
@@ -752,7 +814,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
                       >
                         <option value="">Selecciona un jugador</option>
-                        {players.map((entry) => (
+                        {filteredPlayers.map((entry) => (
                           <option key={entry.id} value={entry.id}>
                             {entry.username}
                           </option>
@@ -840,27 +902,35 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  {players.map((entry) => (
+                  {filteredPlayers.length > 0 ? (
+                    filteredPlayers.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className="flex items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-stone-100">
+                            {entry.username}
+                          </p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                            {entry.isAdmin ? "Admin" : "Jugador"}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-black text-amber-300">{entry.gold}</p>
+                          <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
+                            oro
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
                     <div
-                      key={entry.id}
-                      className="flex items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3"
+                      className="rounded-[1.2rem] border border-dashed border-stone-700 bg-stone-950/40 px-4 py-4 text-sm leading-6 text-stone-400"
                     >
-                      <div>
-                        <p className="text-sm font-bold text-stone-100">
-                          {entry.username}
-                        </p>
-                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
-                          {entry.isAdmin ? "Admin" : "Jugador"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-black text-amber-300">{entry.gold}</p>
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
-                          oro
-                        </p>
-                      </div>
+                      No se encontraron jugadores con ese nombre.
                     </div>
-                  ))}
+                  )}
                 </div>
               </section>
             </div>
@@ -979,6 +1049,15 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         </>
                       )}
                     </button>
+                    {eventId ? (
+                      <button
+                        type="button"
+                        onClick={resetEventForm}
+                        className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                      >
+                        Cancelar edicion
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={resetEventForm}
@@ -1011,27 +1090,72 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
 
+                <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+                  <LabeledInput
+                    label="Buscar evento"
+                    value={eventSearch}
+                    onChange={setEventSearch}
+                    placeholder="Filtra por titulo"
+                  />
+                  <div className="space-y-2">
+                    <span className="text-sm font-semibold text-stone-200">
+                      Estado
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      <AdminModeButton
+                        label="Todos"
+                        active={eventListFilter === "all"}
+                        onClick={() => setEventListFilter("all")}
+                      />
+                      <AdminModeButton
+                        label="Activo"
+                        active={eventListFilter === "active"}
+                        onClick={() => setEventListFilter("active")}
+                      />
+                      <AdminModeButton
+                        label="Produccion"
+                        active={eventListFilter === "in-production"}
+                        onClick={() => setEventListFilter("in-production")}
+                      />
+                      <AdminModeButton
+                        label="Finalizado"
+                        active={eventListFilter === "finished"}
+                        onClick={() => setEventListFilter("finished")}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="mt-4 space-y-3">
-                  {events.map((entry) => (
+                  {filteredEvents.length > 0 ? (
+                    filteredEvents.map((entry) => (
+                      <button
+                        key={entry.id ?? entry.title}
+                        type="button"
+                        onClick={() => preloadEvent(entry)}
+                        className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-stone-100">
+                            {entry.title}
+                          </p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                            {entry.startDate} / {entry.endDate}
+                          </p>
+                        </div>
+                        <div className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300">
+                          {entry.status}
+                        </div>
+                      </button>
+                    ))
+                  ) : (
                     <button
-                      key={entry.id ?? entry.title}
                       type="button"
-                      onClick={() => preloadEvent(entry)}
-                      className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                      className="w-full rounded-[1.2rem] border border-dashed border-stone-700 bg-stone-950/40 px-4 py-4 text-left text-sm leading-6 text-stone-400"
                     >
-                      <div>
-                        <p className="text-sm font-bold text-stone-100">
-                          {entry.title}
-                        </p>
-                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
-                          {entry.startDate} / {entry.endDate}
-                        </p>
-                      </div>
-                      <div className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300">
-                        {entry.status}
-                      </div>
+                      No se encontraron eventos para ese filtro.
                     </button>
-                  ))}
+                  )}
                 </div>
               </section>
             </div>

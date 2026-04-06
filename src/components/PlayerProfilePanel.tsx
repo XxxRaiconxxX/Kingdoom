@@ -5,15 +5,18 @@ import {
   Coins,
   Loader2,
   RefreshCw,
+  ShieldCheck,
   UserRound,
   WalletCards,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
+import { AdminControlSheet } from "./AdminControlSheet";
 import { PlayerInventorySheet } from "./PlayerInventorySheet";
 
 export function PlayerProfilePanel() {
   const {
     player,
+    isAdmin,
     isHydrating,
     isSubmittingProfile,
     profileError,
@@ -25,6 +28,7 @@ export function PlayerProfilePanel() {
   const [usernameInput, setUsernameInput] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -89,6 +93,16 @@ export function PlayerProfilePanel() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
+                  {isAdmin ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsAdminOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-300 transition hover:border-amber-400/35 hover:bg-amber-500/14"
+                    >
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      Admin
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => setIsInventoryOpen(true)}
@@ -193,6 +207,9 @@ export function PlayerProfilePanel() {
       </div>
 
       <AnimatePresence>
+        {isAdminOpen && player && isAdmin ? (
+          <AdminControlSheet onClose={() => setIsAdminOpen(false)} />
+        ) : null}
         {isInventoryOpen && player ? (
           <PlayerInventorySheet onClose={() => setIsInventoryOpen(false)} />
         ) : null}

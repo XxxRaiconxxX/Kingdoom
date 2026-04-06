@@ -12,6 +12,7 @@ export type PlayerAccount = {
   id: string;
   username: string;
   gold: number;
+  isAdmin?: boolean;
 };
 
 export type NavItem = {
@@ -82,6 +83,16 @@ export type WeeklyRankingState = {
   message: string;
   window: RankingWindow;
   players: RankingPlayer[];
+};
+
+export type AdminTemplate = {
+  id: string;
+  title: string;
+  description: string;
+  scoring: Array<{
+    label: string;
+    points: number;
+  }>;
 };
 
 export type RealmEvent = {

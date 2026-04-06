@@ -1,6 +1,22 @@
 import { supabase } from "./supabaseClient";
 import type { PlayerAccount } from "../types";
 
+type PlayerRow = {
+  id: string;
+  username: string;
+  gold: number;
+  is_admin?: boolean | null;
+};
+
+function mapPlayerRow(row: PlayerRow): PlayerAccount {
+  return {
+    id: row.id,
+    username: row.username,
+    gold: row.gold,
+    isAdmin: row.is_admin ?? row.username.trim().toLowerCase() === "nothing",
+  };
+}
+
 export async function fetchPlayerByUsername(
   username: string
 ): Promise<PlayerAccount | null> {
@@ -8,6 +24,16 @@ export async function fetchPlayerByUsername(
 
   if (!normalizedUsername) {
     return null;
+  }
+
+  const adminAttempt = await supabase
+    .from("players")
+    .select("id, username, gold, is_admin")
+    .ilike("username", normalizedUsername)
+    .single();
+
+  if (!adminAttempt.error && adminAttempt.data) {
+    return mapPlayerRow(adminAttempt.data as PlayerRow);
   }
 
   const { data, error } = await supabase
@@ -20,7 +46,7 @@ export async function fetchPlayerByUsername(
     return null;
   }
 
-  return data as PlayerAccount;
+  return mapPlayerRow(data as PlayerRow);
 }
 
 export async function updatePlayerGold(
@@ -33,4 +59,26 @@ export async function updatePlayerGold(
     .eq("id", playerId);
 
   return !error;
+}
+
+export async function fetchAllPlayers(): Promise<PlayerAccount[]> {
+  const adminAttempt = await supabase
+    .from("players")
+    .select("id, username, gold, is_admin")
+    .order("username", { ascending: true });
+
+  if (!adminAttempt.error && adminAttempt.data) {
+    return (adminAttempt.data as PlayerRow[]).map(mapPlayerRow);
+  }
+
+  const { data, error } = await supabase
+    .from("players")
+    .select("id, username, gold")
+    .order("username", { ascending: true });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return (data as PlayerRow[]).map(mapPlayerRow);
 }

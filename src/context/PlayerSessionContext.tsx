@@ -14,6 +14,7 @@ const PLAYER_STORAGE_KEY = "kingdoom.active-player";
 
 type PlayerSessionContextValue = {
   player: PlayerAccount | null;
+  isAdmin: boolean;
   isHydrating: boolean;
   isSubmittingProfile: boolean;
   profileError: string;
@@ -175,6 +176,9 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       player,
+      isAdmin: Boolean(
+        player?.isAdmin ?? player?.username.trim().toLowerCase() === "nothing"
+      ),
       isHydrating,
       isSubmittingProfile,
       profileError,
@@ -191,9 +195,9 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       connectPlayer,
       inventoryRefreshToken,
       isHydrating,
+      player,
       isSubmittingProfile,
       notifyInventoryChanged,
-      player,
       profileError,
       refreshPlayer,
       setPlayerGold,

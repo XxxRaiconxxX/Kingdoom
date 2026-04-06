@@ -1,0 +1,591 @@
+import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Crown,
+  Loader2,
+  ScrollText,
+  ShieldCheck,
+  Sparkles,
+  Swords,
+  X,
+} from "lucide-react";
+import { usePlayerSession } from "../context/PlayerSessionContext";
+import { ADMIN_WEEKLY_TEMPLATES } from "../data/adminTemplates";
+import { fetchAllPlayers } from "../utils/players";
+import {
+  fetchAdminWeeklyRankingRows,
+  upsertAdminWeeklyRankingEntry,
+} from "../utils/adminRanking";
+import { formatRankingWindow } from "../utils/weeklyRanking";
+import type { PlayerAccount, RankingPlayer } from "../types";
+
+type AdminTab = "overview" | "activity" | "templates";
+
+export function AdminControlSheet({ onClose }: { onClose: () => void }) {
+  const { player } = usePlayerSession();
+  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+  const [players, setPlayers] = useState<PlayerAccount[]>([]);
+  const [rankingRows, setRankingRows] = useState<RankingPlayer[]>([]);
+  const [rankingMessage, setRankingMessage] = useState("");
+  const [windowLabel, setWindowLabel] = useState("");
+  const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(
+    "loading"
+  );
+  const [formPlayerId, setFormPlayerId] = useState("");
+  const [formFaction, setFormFaction] = useState("");
+  const [formStatus, setFormStatus] = useState<RankingPlayer["status"]>("alive");
+  const [formPoints, setFormPoints] = useState(0);
+  const [formMissions, setFormMissions] = useState(0);
+  const [formEvents, setFormEvents] = useState(0);
+  const [formStreak, setFormStreak] = useState(0);
+  const [feedback, setFeedback] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAdminData() {
+      setStatus("loading");
+      const [playersList, rankingResult] = await Promise.all([
+        fetchAllPlayers(),
+        fetchAdminWeeklyRankingRows(),
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      setPlayers(playersList);
+      setRankingRows(rankingResult.rows);
+      setRankingMessage(rankingResult.message);
+      setWindowLabel(formatRankingWindow(rankingResult.window));
+      setStatus(rankingResult.status === "ready" ? "ready" : "unavailable");
+    }
+
+    void loadAdminData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const selectedPlayer = useMemo(
+    () => players.find((entry) => entry.id === formPlayerId) ?? null,
+    [formPlayerId, players]
+  );
+
+  function applyTemplate(points: number, missions: number, events: number) {
+    setFormPoints(points);
+    setFormMissions(missions);
+    setFormEvents(events);
+  }
+
+  function preloadFromExisting(row: RankingPlayer) {
+    const matchingPlayer =
+      players.find((entry) => entry.username === row.name) ?? null;
+
+    if (matchingPlayer) {
+      setFormPlayerId(matchingPlayer.id);
+    }
+
+    setFormFaction(row.faction);
+    setFormStatus(row.status);
+    setFormPoints(row.activityPoints);
+    setFormMissions(row.missionsCompleted);
+    setFormEvents(row.eventsJoined);
+    setFormStreak(row.streakDays ?? 0);
+    setActiveTab("activity");
+  }
+
+  async function handleSave(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!selectedPlayer) {
+      setFeedback("Selecciona un jugador para cargar o actualizar su semana.");
+      return;
+    }
+
+    setIsSaving(true);
+    setFeedback("");
+
+    const result = await upsertAdminWeeklyRankingEntry({
+      player: selectedPlayer,
+      faction: formFaction.trim() || "Sin faccion",
+      status: formStatus,
+      activityPoints: formPoints,
+      missionsCompleted: formMissions,
+      eventsJoined: formEvents,
+      streakDays: formStreak,
+    });
+
+    setIsSaving(false);
+    setFeedback(result.message);
+
+    if (result.status === "saved") {
+      const refreshed = await fetchAdminWeeklyRankingRows();
+      setRankingRows(refreshed.rows);
+      setRankingMessage(refreshed.message);
+      setWindowLabel(formatRankingWindow(refreshed.window));
+      setStatus(refreshed.status === "ready" ? "ready" : "unavailable");
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[80] bg-black/70 px-4 py-4 backdrop-blur-md md:px-6 md:py-6"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 18 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/50"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-stone-800 px-5 py-4 md:px-6">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-400/75">
+              Modo administrador
+            </p>
+            <h3 className="mt-2 text-2xl font-black text-stone-100 md:text-3xl">
+              Centro de control del reino
+            </h3>
+            <p className="mt-2 text-sm text-stone-400">
+              Acceso activo para {player?.username ?? "admin"}.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-stone-200"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="border-b border-stone-800 px-5 py-4 md:px-6">
+          <div className="flex flex-wrap gap-2">
+            <AdminTabButton
+              label="Resumen"
+              active={activeTab === "overview"}
+              onClick={() => setActiveTab("overview")}
+            />
+            <AdminTabButton
+              label="Actividad"
+              active={activeTab === "activity"}
+              onClick={() => setActiveTab("activity")}
+            />
+            <AdminTabButton
+              label="Plantillas"
+              active={activeTab === "templates"}
+              onClick={() => setActiveTab("templates")}
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-5 md:px-6">
+          {status === "loading" ? (
+            <AdminInfoCard
+              title="Cargando modo admin"
+              message="Leyendo jugadores y temporada semanal actual..."
+            />
+          ) : null}
+
+          {activeTab === "overview" ? (
+            <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Semana activa
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      {windowLabel || "Semana actual"}
+                    </h4>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm leading-6 text-stone-400">
+                  Este panel administra la tabla `weekly_activity_rankings`. Si el
+                  jugador conectado es `Nothing` o tiene `is_admin = true`, vera
+                  este acceso.
+                </p>
+                {rankingMessage ? (
+                  <p className="mt-4 rounded-[1.2rem] border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
+                    {rankingMessage}
+                  </p>
+                ) : null}
+                <div className="mt-4 rounded-[1.3rem] border border-stone-800 bg-stone-950/50 p-4">
+                  <p className="text-sm font-bold text-stone-100">
+                    Recomendacion tecnica
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-stone-400">
+                    Cuando puedas, anade `is_admin` a la tabla `players` y marca a
+                    `Nothing` con `true`. Mientras tanto, el nombre `Nothing`
+                    sigue funcionando como llave visual de admin.
+                  </p>
+                </div>
+              </section>
+
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <Crown className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Podio administrable
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Temporada en curso
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {rankingRows.slice(0, 5).map((row, index) => (
+                    <button
+                      key={`${row.id}-${index}`}
+                      type="button"
+                      onClick={() => preloadFromExisting(row)}
+                      className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-stone-100">
+                          #{index + 1} {row.name}
+                        </p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                          {row.faction}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-black text-amber-300">
+                          {row.activityPoints}
+                        </p>
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
+                          puntos
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+
+                  {rankingRows.length === 0 ? (
+                    <AdminInfoCard
+                      title="Sin filas semanales"
+                      message="Todavia no cargaste jugadores en la tabla semanal actual. Usa la pestana Actividad para crear los primeros registros."
+                    />
+                  ) : null}
+                </div>
+              </section>
+            </div>
+          ) : null}
+
+          {activeTab === "activity" ? (
+            <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <Swords className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Carga manual
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Subir o ajustar ranking
+                    </h4>
+                  </div>
+                </div>
+
+                <form className="mt-5 space-y-4" onSubmit={handleSave}>
+                  <label className="space-y-2">
+                    <span className="text-sm font-semibold text-stone-200">
+                      Jugador
+                    </span>
+                    <select
+                      value={formPlayerId}
+                      onChange={(event) => {
+                        const nextId = event.target.value;
+                        setFormPlayerId(nextId);
+                        if (nextId && !formFaction) {
+                          setFormFaction("Sin faccion");
+                        }
+                      }}
+                      className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                    >
+                      <option value="">Selecciona un jugador</option>
+                      {players.map((entry) => (
+                        <option key={entry.id} value={entry.id}>
+                          {entry.username}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <LabeledInput
+                      label="Faccion"
+                      value={formFaction}
+                      onChange={setFormFaction}
+                      placeholder="Cuervos del Norte"
+                    />
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">
+                        Estado
+                      </span>
+                      <select
+                        value={formStatus}
+                        onChange={(event) =>
+                          setFormStatus(event.target.value as RankingPlayer["status"])
+                        }
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="alive">Vivo</option>
+                        <option value="dead">Muerto</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <NumericInput label="Puntos" value={formPoints} onChange={setFormPoints} />
+                    <NumericInput
+                      label="Misiones"
+                      value={formMissions}
+                      onChange={setFormMissions}
+                    />
+                    <NumericInput
+                      label="Eventos"
+                      value={formEvents}
+                      onChange={setFormEvents}
+                    />
+                    <NumericInput label="Racha" value={formStreak} onChange={setFormStreak} />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="h-4 w-4" />
+                        Guardar semana actual
+                      </>
+                    )}
+                  </button>
+
+                  {feedback ? (
+                    <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+                      {feedback}
+                    </p>
+                  ) : null}
+                </form>
+              </section>
+
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <ScrollText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Temporada actual
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      {windowLabel || "Semana actual"}
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {rankingRows.length > 0 ? (
+                    rankingRows.map((row, index) => (
+                      <button
+                        key={`${row.id}-${row.name}`}
+                        type="button"
+                        onClick={() => preloadFromExisting(row)}
+                        className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-stone-100">
+                            #{index + 1} {row.name}
+                          </p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                            {row.missionsCompleted} misiones · {row.eventsJoined} eventos
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-black text-amber-300">
+                            {row.activityPoints}
+                          </p>
+                          <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
+                            puntos
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <AdminInfoCard
+                      title="Semana vacia"
+                      message="Aun no hay registros semanales. Puedes crear el primero desde el formulario."
+                    />
+                  )}
+                </div>
+              </section>
+            </div>
+          ) : null}
+
+          {activeTab === "templates" ? (
+            <div className="space-y-4">
+              <AdminInfoCard
+                title="Plantillas de semana"
+                message="Usalas como referencia rapida para decidir cuantos puntos otorgar sin improvisar cada vez."
+              />
+              <div className="grid gap-4 xl:grid-cols-3">
+                {ADMIN_WEEKLY_TEMPLATES.map((template) => (
+                  <article
+                    key={template.id}
+                    className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                        <Sparkles className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black text-stone-100">
+                          {template.title}
+                        </h4>
+                        <p className="mt-2 text-sm leading-6 text-stone-400">
+                          {template.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      {template.scoring.map((entry) => (
+                        <button
+                          key={`${template.id}-${entry.label}`}
+                          type="button"
+                          onClick={() =>
+                            applyTemplate(
+                              entry.points,
+                              entry.label.toLowerCase().includes("mision") ? 1 : 0,
+                              entry.label.toLowerCase().includes("evento") ? 1 : 0
+                            )
+                          }
+                          className="flex w-full items-center justify-between rounded-[1.1rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                        >
+                          <span className="text-sm text-stone-300">{entry.label}</span>
+                          <span className="text-sm font-black text-amber-300">
+                            +{entry.points}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function AdminTabButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
+        active
+          ? "border-amber-400/30 bg-amber-500/10 text-amber-300"
+          : "border-stone-700 bg-stone-900/70 text-stone-400"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function AdminInfoCard({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
+  return (
+    <div className="rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-5">
+      <p className="text-sm font-bold text-stone-100">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-stone-400">{message}</p>
+    </div>
+  );
+}
+
+function LabeledInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <label className="space-y-2">
+      <span className="text-sm font-semibold text-stone-200">{label}</span>
+      <input
+        type="text"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+      />
+    </label>
+  );
+}
+
+function NumericInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="space-y-2">
+      <span className="text-sm font-semibold text-stone-200">{label}</span>
+      <input
+        type="number"
+        min="0"
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value) || 0)}
+        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+      />
+    </label>
+  );
+}

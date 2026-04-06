@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Analytics } from "@vercel/analytics/react";
 import App from "./App";
 import { PlayerSessionProvider } from "./context/PlayerSessionContext";
 import "./index.css";
@@ -14,6 +15,7 @@ createRoot(rootElement).render(
   <StrictMode>
     <PlayerSessionProvider>
       <App />
+      <Analytics />
     </PlayerSessionProvider>
   </StrictMode>
 );

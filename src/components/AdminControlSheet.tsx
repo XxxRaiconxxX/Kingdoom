@@ -1,17 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
+  Coins,
   Crown,
   Loader2,
   ScrollText,
   ShieldCheck,
   Sparkles,
   Swords,
+  UserPlus,
+  Users,
   X,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { ADMIN_WEEKLY_TEMPLATES } from "../data/adminTemplates";
-import { fetchAllPlayers } from "../utils/players";
+import {
+  createPlayerAccount,
+  fetchAllPlayers,
+  updatePlayerGold,
+} from "../utils/players";
 import {
   fetchAdminWeeklyRankingRows,
   seedCurrentWeeklyRanking,
@@ -20,10 +27,11 @@ import {
 import { formatRankingWindow } from "../utils/weeklyRanking";
 import type { PlayerAccount, RankingPlayer } from "../types";
 
-type AdminTab = "overview" | "activity" | "templates";
+type AdminTab = "overview" | "activity" | "players" | "templates";
+type GoldAdjustmentMode = "add" | "subtract" | "set";
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
-  const { player } = usePlayerSession();
+  const { player, refreshPlayer } = usePlayerSession();
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [players, setPlayers] = useState<PlayerAccount[]>([]);
   const [rankingRows, setRankingRows] = useState<RankingPlayer[]>([]);
@@ -42,6 +50,15 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [feedback, setFeedback] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isSeedingWeek, setIsSeedingWeek] = useState(false);
+  const [playerFeedback, setPlayerFeedback] = useState("");
+  const [isCreatingPlayer, setIsCreatingPlayer] = useState(false);
+  const [isUpdatingGold, setIsUpdatingGold] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [newGold, setNewGold] = useState(0);
+  const [newIsAdmin, setNewIsAdmin] = useState(false);
+  const [goldPlayerId, setGoldPlayerId] = useState("");
+  const [goldMode, setGoldMode] = useState<GoldAdjustmentMode>("add");
+  const [goldAmount, setGoldAmount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,6 +105,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const selectedPlayer = useMemo(
     () => players.find((entry) => entry.id === formPlayerId) ?? null,
     [formPlayerId, players]
+  );
+  const selectedGoldPlayer = useMemo(
+    () => players.find((entry) => entry.id === goldPlayerId) ?? null,
+    [goldPlayerId, players]
   );
 
   function applyTemplate(points: number, missions: number, events: number) {
@@ -151,6 +172,64 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     await reloadAdminData();
   }
 
+  async function handleCreatePlayer(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsCreatingPlayer(true);
+    setPlayerFeedback("");
+
+    const result = await createPlayerAccount({
+      username: newUsername,
+      gold: newGold,
+      isAdmin: newIsAdmin,
+    });
+
+    setIsCreatingPlayer(false);
+    setPlayerFeedback(result.message);
+
+    if (result.status === "created") {
+      setNewUsername("");
+      setNewGold(0);
+      setNewIsAdmin(false);
+      await reloadAdminData();
+    }
+  }
+
+  async function handleUpdateGold(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!selectedGoldPlayer) {
+      setPlayerFeedback("Selecciona un jugador para editar su oro.");
+      return;
+    }
+
+    const sanitizedAmount = Math.max(0, goldAmount);
+    const nextGold =
+      goldMode === "set"
+        ? sanitizedAmount
+        : goldMode === "add"
+          ? selectedGoldPlayer.gold + sanitizedAmount
+          : Math.max(0, selectedGoldPlayer.gold - sanitizedAmount);
+
+    setIsUpdatingGold(true);
+    setPlayerFeedback("");
+
+    const updated = await updatePlayerGold(selectedGoldPlayer.id, nextGold);
+
+    setIsUpdatingGold(false);
+
+    if (!updated) {
+      setPlayerFeedback("No se pudo actualizar el oro del jugador.");
+      return;
+    }
+
+    setPlayerFeedback("Oro actualizado correctamente.");
+    await reloadAdminData();
+
+    if (player?.id === selectedGoldPlayer.id) {
+      await refreshPlayer();
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -198,6 +277,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
               label="Actividad"
               active={activeTab === "activity"}
               onClick={() => setActiveTab("activity")}
+            />
+            <AdminTabButton
+              label="Jugadores"
+              active={activeTab === "players"}
+              onClick={() => setActiveTab("players")}
             />
             <AdminTabButton
               label="Plantillas"
@@ -490,6 +574,216 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             </div>
           ) : null}
 
+          {activeTab === "players" ? (
+            <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <UserPlus className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Formulario de alta
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Crear jugador
+                    </h4>
+                  </div>
+                </div>
+
+                <form className="mt-5 space-y-4" onSubmit={handleCreatePlayer}>
+                  <LabeledInput
+                    label="Nombre del jugador"
+                    value={newUsername}
+                    onChange={setNewUsername}
+                    placeholder="Nombre exacto del personaje o usuario"
+                  />
+
+                  <div className="grid gap-4 md:grid-cols-[0.8fr_1.2fr]">
+                    <NumericInput
+                      label="Oro inicial"
+                      value={newGold}
+                      onChange={setNewGold}
+                    />
+                    <label className="flex items-end">
+                      <div className="flex w-full items-center justify-between rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3">
+                        <div>
+                          <p className="text-sm font-semibold text-stone-200">
+                            Crear como admin
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-stone-500">
+                            Solo si quieres que este jugador vea el panel de administracion.
+                          </p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={newIsAdmin}
+                          onChange={(event) => setNewIsAdmin(event.target.checked)}
+                          className="h-4 w-4 rounded border-stone-600 bg-stone-950 text-amber-400"
+                        />
+                      </div>
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isCreatingPlayer}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isCreatingPlayer ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creando...
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-4 w-4" />
+                        Crear jugador
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                <div className="mt-6 border-t border-stone-800 pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                      <Coins className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                        Correcciones y premios
+                      </p>
+                      <h4 className="mt-1 text-xl font-black text-stone-100">
+                        Editar oro
+                      </h4>
+                    </div>
+                  </div>
+
+                  <form className="mt-5 space-y-4" onSubmit={handleUpdateGold}>
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">
+                        Jugador
+                      </span>
+                      <select
+                        value={goldPlayerId}
+                        onChange={(event) => setGoldPlayerId(event.target.value)}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="">Selecciona un jugador</option>
+                        {players.map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            {entry.username}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <div className="flex flex-wrap gap-2">
+                      <AdminModeButton
+                        label="Sumar"
+                        active={goldMode === "add"}
+                        onClick={() => setGoldMode("add")}
+                      />
+                      <AdminModeButton
+                        label="Restar"
+                        active={goldMode === "subtract"}
+                        onClick={() => setGoldMode("subtract")}
+                      />
+                      <AdminModeButton
+                        label="Fijar"
+                        active={goldMode === "set"}
+                        onClick={() => setGoldMode("set")}
+                      />
+                    </div>
+
+                    <NumericInput
+                      label={
+                        goldMode === "set"
+                          ? "Nuevo total de oro"
+                          : goldMode === "add"
+                            ? "Oro a sumar"
+                            : "Oro a restar"
+                      }
+                      value={goldAmount}
+                      onChange={setGoldAmount}
+                    />
+
+                    {selectedGoldPlayer ? (
+                      <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+                        Oro actual de <span className="font-bold text-stone-100">{selectedGoldPlayer.username}</span>:{" "}
+                        <span className="font-black text-amber-300">{selectedGoldPlayer.gold}</span>
+                      </div>
+                    ) : null}
+
+                    <button
+                      type="submit"
+                      disabled={isUpdatingGold}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isUpdatingGold ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          <Coins className="h-4 w-4" />
+                          Actualizar oro
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+
+                {playerFeedback ? (
+                  <p className="mt-5 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+                    {playerFeedback}
+                  </p>
+                ) : null}
+              </section>
+
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Base actual
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Jugadores registrados
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {players.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3"
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-stone-100">
+                          {entry.username}
+                        </p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                          {entry.isAdmin ? "Admin" : "Jugador"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-black text-amber-300">{entry.gold}</p>
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
+                          oro
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          ) : null}
+
           {activeTab === "templates" ? (
             <div className="space-y-4">
               <AdminInfoCard
@@ -549,6 +843,30 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 }
 
 function AdminTabButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
+        active
+          ? "border-amber-400/30 bg-amber-500/10 text-amber-300"
+          : "border-stone-700 bg-stone-900/70 text-stone-400"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function AdminModeButton({
   active,
   label,
   onClick,

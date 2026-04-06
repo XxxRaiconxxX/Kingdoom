@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 06/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/players.ts`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se anadio la pestaña `Jugadores` al panel admin para crear perfiles nuevos y corregir oro sin entrar manualmente a Supabase.
+*   **Cambios Clave:**
+    *   El panel ahora incluye un formulario de alta para crear jugadores con oro inicial y opcion de admin.
+    *   Se agrego una herramienta para sumar, restar o fijar el oro de cualquier jugador registrado.
+    *   Si el admin edita su propio saldo, la sesion activa se refresca para reflejar el cambio al instante.
+*   **Notas/Advertencias:** La creacion como admin aprovecha `is_admin` si la columna existe; si aun no esta disponible, el jugador se crea como normal sin romper el flujo.
+
+---
+### [Fecha: 06/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/adminRanking.ts`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se anadio el boton `Nueva semana` al panel admin para sembrar la temporada actual sin recargar manualmente a todos los jugadores.
 *   **Cambios Clave:**

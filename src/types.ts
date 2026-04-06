@@ -60,11 +60,28 @@ export type InventoryEntry = {
 };
 
 export type RankingPlayer = {
+  id: string;
   name: string;
   faction: string;
-  level: number;
-  gold: number;
+  activityPoints: number;
+  missionsCompleted: number;
+  eventsJoined: number;
+  streakDays?: number;
   status: PlayerStatus;
+  weekStartsAt?: string;
+  weekEndsAt?: string;
+};
+
+export type RankingWindow = {
+  weekStartsAt: string;
+  weekEndsAt: string;
+};
+
+export type WeeklyRankingState = {
+  status: "ready" | "fallback";
+  message: string;
+  window: RankingWindow;
+  players: RankingPlayer[];
 };
 
 export type RealmEvent = {

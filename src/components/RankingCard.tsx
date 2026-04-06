@@ -31,12 +31,23 @@ export function RankingCard({
           <p className="mt-1 text-sm text-stone-400">{player.faction}</p>
 
           <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-            <RankingMetric label="Nivel" value={player.level} />
-            <RankingMetric label="Oro" value={player.gold} />
+            <RankingMetric label="Puntos" value={player.activityPoints} />
+            <RankingMetric label="Misiones" value={player.missionsCompleted} />
             <RankingMetric
-              label="Estado"
-              value={isDead ? "Muerto" : "Vivo"}
+              label="Eventos"
+              value={player.eventsJoined}
             />
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-stone-700 bg-stone-950/55 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300">
+              {isDead ? "Muerto" : "Vivo"}
+            </span>
+            {player.streakDays ? (
+              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-300">
+                Racha {player.streakDays}d
+              </span>
+            ) : null}
           </div>
         </div>
       </div>

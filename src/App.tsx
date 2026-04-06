@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   Bell,
@@ -24,6 +24,7 @@ import { StatCard } from "./components/StatCard";
 import { TavernCards } from "./components/TavernCards";
 import { TavernGame } from "./components/TavernGame";
 import { TavernRoulette } from "./components/TavernRoulette";
+import { WeeklyRankingPodium } from "./components/WeeklyRankingPodium";
 import { ACTIVE_EVENTS } from "./data/events";
 import {
   HOME_STATS,
@@ -34,20 +35,19 @@ import {
 } from "./data/home";
 import { LORE_CHAPTERS, LORE_RULES, REALM_FACTIONS } from "./data/lore";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "./data/market";
-import { RANKING_PLAYERS } from "./data/ranking";
 import {
   COMMON_THREATS,
   DEMOGRAPHIC_BLOCS,
   DIPLOMATIC_TENSIONS,
   WORLD_STATUS,
 } from "./data/world";
+import {
+  fetchWeeklyRanking,
+  formatCountdown,
+  formatRankingWindow,
+} from "./utils/weeklyRanking";
 import type {
-  MarketCategory,
-  MarketCategoryId,
-  MarketItem,
-  NavItem,
-  PlayerStatus,
-  TabId,
+  MarketCategory, MarketCategoryId, MarketItem, NavItem, RankingPlayer, RankingWindow, TabId,
 } from "./types";
 
 type TavernMode = "chests" | "roulette" | "cards";
@@ -624,79 +624,150 @@ function MarketSection() {
 }
 
 function RankingSection() {
-  const [statusFilter, setStatusFilter] = useState<"all" | PlayerStatus>("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [rankingMessage, setRankingMessage] = useState("");
+  const [rankingWindow, setRankingWindow] = useState<RankingWindow | null>(null);
+  const [players, setPlayers] = useState<RankingPlayer[]>([]);
+  const [timeLeft, setTimeLeft] = useState("");
   const [factionFilter, setFactionFilter] = useState<string>("all");
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadRanking() {
+      setIsLoading(true);
+      const ranking = await fetchWeeklyRanking();
+
+      if (cancelled) {
+        return;
+      }
+
+      setPlayers(ranking.players);
+      setRankingWindow(ranking.window);
+      setRankingMessage(ranking.message);
+      setTimeLeft(formatCountdown(ranking.window.weekEndsAt));
+      setIsLoading(false);
+    }
+
+    void loadRanking();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!rankingWindow) {
+      return;
+    }
+
+    setTimeLeft(formatCountdown(rankingWindow.weekEndsAt));
+
+    const intervalId = window.setInterval(() => {
+      setTimeLeft(formatCountdown(rankingWindow.weekEndsAt));
+    }, 60000);
+
+    return () => window.clearInterval(intervalId);
+  }, [rankingWindow]);
+
   const factions = useMemo(
-    () => Array.from(new Set(RANKING_PLAYERS.map((player) => player.faction))),
-    []
+    () => Array.from(new Set(players.map((player) => player.faction))),
+    [players]
   );
 
   const filteredPlayers = useMemo(
     () =>
-      RANKING_PLAYERS.filter((player) => {
-        const matchesStatus =
-          statusFilter === "all" ? true : player.status === statusFilter;
-        const matchesFaction =
-          factionFilter === "all" ? true : player.faction === factionFilter;
-
-        return matchesStatus && matchesFaction;
-      }),
-    [factionFilter, statusFilter]
+      players.filter((player) =>
+        factionFilter === "all" ? true : player.faction === factionFilter
+      ),
+    [factionFilter, players]
   );
+
+  const podiumPlayers = useMemo(() => filteredPlayers.slice(0, 3), [filteredPlayers]);
+  const rankingLabel = rankingWindow ? formatRankingWindow(rankingWindow) : "";
 
   return (
     <section className="space-y-5">
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 md:p-7">
         <SectionHeader
-          eyebrow="Salon de la fama"
-          title="Ranking de jugadores"
-          description="Filtra por estado o por faccion para que la tabla no se vuelva pesada cuando el reino crezca."
+          eyebrow="Temporada semanal"
+          title="Ranking de actividad"
+          description="El podio premia a quienes mas participan en misiones y eventos oficiales durante la semana actual."
+          rightSlot={
+            <div className="rounded-[1.4rem] border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-right">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+                Cierra en
+              </p>
+              <p className="mt-1 text-lg font-black text-stone-100">
+                {timeLeft || "--"}
+              </p>
+            </div>
+          }
         />
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-stone-400">
+          <span className="rounded-full border border-stone-700 bg-stone-950/55 px-3 py-2">
+            {rankingLabel || "Semana actual"}
+          </span>
+          <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-amber-300">
+            Misiones + eventos
+          </span>
+        </div>
+        {rankingMessage ? (
+          <p className="mt-4 text-sm leading-6 text-stone-400">{rankingMessage}</p>
+        ) : null}
       </div>
 
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-        <SectionHeader eyebrow="Filtros" title="Ordenar la tabla" />
-        <div className="mt-4 flex flex-wrap gap-2">
-          <FilterPill
-            label="Todos"
-            active={statusFilter === "all"}
-            onClick={() => setStatusFilter("all")}
-          />
-          <FilterPill
-            label="Vivos"
-            active={statusFilter === "alive"}
-            onClick={() => setStatusFilter("alive")}
-          />
-          <FilterPill
-            label="Muertos"
-            active={statusFilter === "dead"}
-            onClick={() => setStatusFilter("dead")}
-          />
+      {isLoading ? (
+        <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 text-sm text-stone-400">
+          Cargando la temporada semanal...
         </div>
+      ) : (
+        <>
+          <WeeklyRankingPodium players={podiumPlayers} />
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <FilterPill
-            label="Todas las facciones"
-            active={factionFilter === "all"}
-            onClick={() => setFactionFilter("all")}
-          />
-          {factions.map((faction) => (
-            <FilterPill
-              key={faction}
-              label={faction}
-              active={factionFilter === faction}
-              onClick={() => setFactionFilter(faction)}
+          <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+            <SectionHeader
+              eyebrow="Filtro tactico"
+              title="Enfocar por faccion"
+              description="El ranking se reordena solo para la faccion elegida, sin tocar la tabla general."
             />
-          ))}
-        </div>
-      </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <FilterPill
+                label="Todas las facciones"
+                active={factionFilter === "all"}
+                onClick={() => setFactionFilter("all")}
+              />
+              {factions.map((faction) => (
+                <FilterPill
+                  key={faction}
+                  label={faction}
+                  active={factionFilter === faction}
+                  onClick={() => setFactionFilter(faction)}
+                />
+              ))}
+            </div>
+          </div>
 
-      <div className="space-y-4">
-        {filteredPlayers.map((player, index) => (
-          <RankingCard key={player.name} player={player} index={index} />
-        ))}
-      </div>
+          <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+            <SectionHeader
+              eyebrow="Tabla completa"
+              title="Participacion acumulada"
+              description="Cada punto refleja presencia en misiones, eventos y racha de actividad dentro de la semana."
+            />
+            <div className="mt-5 space-y-4">
+              {filteredPlayers.length > 0 ? (
+                filteredPlayers.map((player, index) => (
+                  <RankingCard key={player.id} player={player} index={index} />
+                ))
+              ) : (
+                <div className="rounded-[1.6rem] border border-dashed border-stone-700 bg-stone-950/45 p-5 text-sm leading-6 text-stone-400">
+                  No hay jugadores cargados para esa faccion en la temporada actual.
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }

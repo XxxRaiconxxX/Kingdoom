@@ -5,7 +5,7 @@ import { usePlayerSession } from "../context/PlayerSessionContext";
 import ruletaImg from "../assets/ruleta.png";
 
 const MULTIPLIERS = [0, 0.5, 1.5, 2, 5, 10];
-const PROBABILITIES = [0.45, 0.25, 0.15, 0.1, 0.04, 0.01];
+const PROBABILITIES = [0.45, 0.35, 0.25, 0.15, 0.1, 0.05];
 
 type GamePhase = "betting" | "spinning" | "result";
 

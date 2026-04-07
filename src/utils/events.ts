@@ -150,3 +150,28 @@ export async function upsertRealmEvent(input: AdminRealmEventInput) {
     message: "Evento creado correctamente.",
   };
 }
+
+export async function deleteRealmEvent(id: string) {
+  const normalizedId = id.trim();
+
+  if (!normalizedId) {
+    return {
+      status: "error" as const,
+      message: "Selecciona un evento valido para borrarlo.",
+    };
+  }
+
+  const { error } = await supabase.from("realm_events").delete().eq("id", normalizedId);
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: "No se pudo borrar el evento en Supabase.",
+    };
+  }
+
+  return {
+    status: "deleted" as const,
+    message: "Evento borrado correctamente.",
+  };
+}

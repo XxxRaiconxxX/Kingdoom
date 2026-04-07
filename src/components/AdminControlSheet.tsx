@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { ADMIN_WEEKLY_TEMPLATES } from "../data/adminTemplates";
-import { fetchRealmEvents, upsertRealmEvent } from "../utils/events";
+import { deleteRealmEvent, fetchRealmEvents, upsertRealmEvent } from "../utils/events";
 import {
   createPlayerAccount,
   fetchAllPlayers,
@@ -67,6 +67,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [events, setEvents] = useState<RealmEvent[]>([]);
   const [eventFeedback, setEventFeedback] = useState("");
   const [isSavingEvent, setIsSavingEvent] = useState(false);
+  const [isDeletingEvent, setIsDeletingEvent] = useState(false);
   const [eventSearch, setEventSearch] = useState("");
   const [eventListFilter, setEventListFilter] = useState<EventListFilter>("all");
   const [eventId, setEventId] = useState("");
@@ -349,6 +350,34 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventFeedback(result.message);
 
     if (result.status === "saved") {
+      resetEventForm();
+      await reloadAdminData();
+    }
+  }
+
+  async function handleDeleteEvent() {
+    if (!eventId) {
+      setEventFeedback("Selecciona un evento antes de intentar borrarlo.");
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      "¿Seguro que quieres borrar este evento? Esta accion no se puede deshacer."
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setIsDeletingEvent(true);
+    setEventFeedback("");
+
+    const result = await deleteRealmEvent(eventId);
+
+    setIsDeletingEvent(false);
+    setEventFeedback(result.message);
+
+    if (result.status === "deleted") {
       resetEventForm();
       await reloadAdminData();
     }
@@ -1034,7 +1063,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   <div className="flex flex-wrap gap-3">
                     <button
                       type="submit"
-                      disabled={isSavingEvent}
+                      disabled={isSavingEvent || isDeletingEvent}
                       className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isSavingEvent ? (
@@ -1053,14 +1082,26 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       <button
                         type="button"
                         onClick={resetEventForm}
+                        disabled={isDeletingEvent}
                         className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
                       >
                         Cancelar edicion
                       </button>
                     ) : null}
+                    {eventId ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteEvent()}
+                        disabled={isSavingEvent || isDeletingEvent}
+                        className="rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isDeletingEvent ? "Borrando..." : "Borrar evento"}
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={resetEventForm}
+                      disabled={isDeletingEvent}
                       className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
                     >
                       Limpiar formulario

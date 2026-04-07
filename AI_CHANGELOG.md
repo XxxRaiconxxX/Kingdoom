@@ -43,6 +43,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 07/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/utils/events.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se anadio la opcion de borrar eventos desde el panel admin cuando un evento esta cargado en modo edicion.
+*   **Cambios Clave:**
+    *   El formulario de eventos ahora muestra un boton `Borrar evento` solo si hay un evento seleccionado.
+    *   Antes de eliminar, el admin debe confirmar la accion para evitar borrados accidentales.
+    *   Tras borrar un evento, el formulario se limpia y la lista se recarga para reflejar el cambio tambien en Inicio.
+*   **Notas/Advertencias:** El borrado afecta la tabla `realm_events` en Supabase. Si la Home esta leyendo desde Supabase, el evento desaparecera del inicio despues de recargar.
+
+---
 ### [Fecha: 06/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se afino el panel admin con busqueda de jugadores, busqueda y filtro de estado para eventos, y salidas claras del modo edicion.

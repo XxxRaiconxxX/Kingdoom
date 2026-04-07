@@ -46,7 +46,7 @@ import type {
   MarketCategory, MarketCategoryId, MarketItem, NavItem, RankingPlayer, RankingWindow, TabId,
 } from "./types";
 
-type TavernMode = "chests" | "roulette" | "cards";
+type TavernMode = "chests" | "roulette" | "cards" | "scratch";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -76,6 +76,11 @@ const TAVERN_MODES: {
     label: "Cartas",
     description: "Adivina si la siguiente carta sube o baja para llevarte el pozo.",
   },
+  {
+    id: "scratch",
+    label: "Rasca",
+    description: "Compra un rasca y gana y prueba suerte por un premio entre 500 y 1000 de oro.",
+  },
 ];
 
 const pageTransition = {
@@ -98,6 +103,11 @@ const TavernRoulette = lazy(() =>
 const TavernCards = lazy(() =>
   import("./components/TavernCards").then((module) => ({
     default: module.TavernCards,
+  }))
+);
+const TavernScratch = lazy(() =>
+  import("./components/TavernScratch").then((module) => ({
+    default: module.TavernScratch,
   }))
 );
 const PurchaseModal = lazy(() =>
@@ -548,6 +558,8 @@ function MarketSection() {
         return <TavernRoulette />;
       case "cards":
         return <TavernCards />;
+      case "scratch":
+        return <TavernScratch />;
       default:
         return <TavernGame />;
     }

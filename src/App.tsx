@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, startTransition } from "react";
 import type { ReactNode } from "react";
 import {
   Bell,
@@ -17,14 +17,9 @@ import { ExpandableText } from "./components/ExpandableText";
 import { FilterPill } from "./components/FilterPill";
 import { MarketItemCard } from "./components/MarketItemCard";
 import { PlayerProfilePanel } from "./components/PlayerProfilePanel";
-import { PurchaseModal } from "./components/PurchaseModal";
 import { RankingCard } from "./components/RankingCard";
 import { SectionHeader } from "./components/SectionHeader";
 import { StatCard } from "./components/StatCard";
-import { TavernCards } from "./components/TavernCards";
-import { TavernGame } from "./components/TavernGame";
-import { TavernRoulette } from "./components/TavernRoulette";
-import { WeeklyRankingPodium } from "./components/WeeklyRankingPodium";
 import { ACTIVE_EVENTS } from "./data/events";
 import {
   HOME_STATS,
@@ -90,6 +85,32 @@ const pageTransition = {
   transition: { duration: 0.28, ease: "easeOut" as const },
 };
 
+const TavernGame = lazy(() =>
+  import("./components/TavernGame").then((module) => ({
+    default: module.TavernGame,
+  }))
+);
+const TavernRoulette = lazy(() =>
+  import("./components/TavernRoulette").then((module) => ({
+    default: module.TavernRoulette,
+  }))
+);
+const TavernCards = lazy(() =>
+  import("./components/TavernCards").then((module) => ({
+    default: module.TavernCards,
+  }))
+);
+const PurchaseModal = lazy(() =>
+  import("./components/PurchaseModal").then((module) => ({
+    default: module.PurchaseModal,
+  }))
+);
+const WeeklyRankingPodium = lazy(() =>
+  import("./components/WeeklyRankingPodium").then((module) => ({
+    default: module.WeeklyRankingPodium,
+  }))
+);
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
 
@@ -126,7 +147,9 @@ export default function App() {
               <button
                 key={id}
                 type="button"
-                onClick={() => setActiveTab(id)}
+                onClick={() => {
+                  startTransition(() => setActiveTab(id));
+                }}
                 className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-[10px] font-semibold transition md:min-h-14 md:flex-row md:gap-2 md:text-xs ${
                   isActive
                     ? "border-amber-400/30 bg-amber-500/12 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.12)]"
@@ -576,7 +599,11 @@ function MarketSection() {
           </p>
         </div>
 
-        <div className="mt-5">{tavernContent}</div>
+        <div className="mt-5">
+          <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la mesa de juego..." />}>
+            {tavernContent}
+          </Suspense>
+        </div>
       </div>
 
       {featuredItems.length > 0 ? (
@@ -634,11 +661,13 @@ function MarketSection() {
 
       <AnimatePresence>
         {selectedItem ? (
-          <PurchaseModal
-            item={selectedItem}
-            category={modalCategory}
-            onClose={() => setSelectedItem(null)}
-          />
+          <Suspense fallback={<FullscreenLoadingOverlay message="Preparando el pedido del mercado..." />}>
+            <PurchaseModal
+              item={selectedItem}
+              category={modalCategory}
+              onClose={() => setSelectedItem(null)}
+            />
+          </Suspense>
         ) : null}
       </AnimatePresence>
     </section>
@@ -745,7 +774,15 @@ function RankingSection() {
         </div>
       ) : (
         <>
-          <WeeklyRankingPodium players={podiumPlayers} />
+          <Suspense
+            fallback={
+              <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 text-sm text-stone-400">
+                Preparando el podio semanal...
+              </div>
+            }
+          >
+            <WeeklyRankingPodium players={podiumPlayers} />
+          </Suspense>
 
           <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
             <SectionHeader
@@ -868,5 +905,26 @@ function CollapsiblePanel({
       </summary>
       <div className="mt-4 border-t border-stone-800 pt-4">{children}</div>
     </details>
+  );
+}
+
+function EmbeddedLoadingCard({ message }: { message: string }) {
+  return (
+    <div className="rounded-[1.6rem] border border-stone-800 bg-stone-950/45 p-5 text-sm leading-6 text-stone-400">
+      {message}
+    </div>
+  );
+}
+
+function FullscreenLoadingOverlay({ message }: { message: string }) {
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-[2rem] border border-stone-800 bg-stone-950 px-5 py-6 text-center shadow-2xl shadow-black/40">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
+          Cargando
+        </p>
+        <p className="mt-3 text-sm leading-6 text-stone-300">{message}</p>
+      </div>
+    </div>
   );
 }

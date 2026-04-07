@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import {
   Backpack,
@@ -10,8 +10,17 @@ import {
   WalletCards,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import { AdminControlSheet } from "./AdminControlSheet";
-import { PlayerInventorySheet } from "./PlayerInventorySheet";
+
+const AdminControlSheet = lazy(() =>
+  import("./AdminControlSheet").then((module) => ({
+    default: module.AdminControlSheet,
+  }))
+);
+const PlayerInventorySheet = lazy(() =>
+  import("./PlayerInventorySheet").then((module) => ({
+    default: module.PlayerInventorySheet,
+  }))
+);
 
 export function PlayerProfilePanel() {
   const {
@@ -208,12 +217,37 @@ export function PlayerProfilePanel() {
 
       <AnimatePresence>
         {isAdminOpen && player && isAdmin ? (
-          <AdminControlSheet onClose={() => setIsAdminOpen(false)} />
+          <Suspense
+            fallback={
+              <ProfileSheetFallback message="Abriendo el centro de control del reino..." />
+            }
+          >
+            <AdminControlSheet onClose={() => setIsAdminOpen(false)} />
+          </Suspense>
         ) : null}
         {isInventoryOpen && player ? (
-          <PlayerInventorySheet onClose={() => setIsInventoryOpen(false)} />
+          <Suspense
+            fallback={
+              <ProfileSheetFallback message="Abriendo el inventario del jugador..." />
+            }
+          >
+            <PlayerInventorySheet onClose={() => setIsInventoryOpen(false)} />
+          </Suspense>
         ) : null}
       </AnimatePresence>
     </section>
+  );
+}
+
+function ProfileSheetFallback({ message }: { message: string }) {
+  return (
+    <div className="fixed inset-0 z-[75] flex items-center justify-center bg-black/70 px-4 py-4 backdrop-blur-md md:px-6 md:py-6">
+      <div className="w-full max-w-sm rounded-[2rem] border border-stone-800 bg-stone-950 px-5 py-6 text-center shadow-2xl shadow-black/40">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
+          Cargando
+        </p>
+        <p className="mt-3 text-sm leading-6 text-stone-300">{message}</p>
+      </div>
+    </div>
   );
 }

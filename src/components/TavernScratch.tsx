@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Coins, RefreshCw, Sparkles, Ticket, UserRound } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import scratchLoseSheet from "../assets/scratch-lose-sheet.png";
-import scratchWinSheet from "../assets/scratch-win-sheet.png";
+import scratchLoseCard from "../assets/scratch-lose-card.png";
+import scratchPristineCard from "../assets/scratch-pristine-card.png";
+import scratchWinCard from "../assets/scratch-win-card.png";
 
 const SCRATCH_COST = 250;
 const WIN_CHANCE = 0.2;
@@ -292,22 +293,31 @@ function ScratchArtwork({
   interactive?: boolean;
   onScratch?: () => void;
 }) {
-  const sheet = mode === "lose" ? scratchLoseSheet : scratchWinSheet;
-  const backgroundPosition =
-    mode === "pristine" ? "left top" : "right top";
+  const artwork =
+    mode === "pristine"
+      ? scratchPristineCard
+      : mode === "win"
+        ? scratchWinCard
+        : scratchLoseCard;
 
   const content = (
-    <div
-      className="relative aspect-[1.52/1] overflow-hidden rounded-[1.8rem] border border-stone-800 bg-stone-950"
-      style={{
-        backgroundImage: `url(${sheet})`,
-        backgroundPosition,
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "200% auto",
-      }}
-    >
+    <div className="mx-auto w-full max-w-[320px] rounded-[1.6rem] border border-stone-800 bg-stone-950/70 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.25)] md:max-w-[360px] md:p-4">
+      <div className="relative overflow-hidden rounded-[1.2rem] border border-stone-800/80 bg-stone-950">
+        <img
+          src={artwork}
+          alt={
+            mode === "pristine"
+              ? "Ticket intacto de rasca y gana"
+              : mode === "win"
+                ? "Ticket premiado de rasca y gana"
+                : "Ticket perdedor de rasca y gana"
+          }
+          className="block h-auto w-full object-contain"
+          style={{ imageRendering: "pixelated" }}
+        />
+      </div>
       {interactive ? (
-        <div className="absolute inset-x-4 bottom-4 rounded-full border border-amber-400/25 bg-stone-950/75 px-3 py-2 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-amber-300 backdrop-blur-sm">
+        <div className="mt-3 rounded-full border border-amber-400/25 bg-stone-950/75 px-3 py-2 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-amber-300 backdrop-blur-sm">
           Toca para rascar
         </div>
       ) : null}

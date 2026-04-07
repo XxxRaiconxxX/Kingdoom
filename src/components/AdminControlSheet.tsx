@@ -8,6 +8,7 @@ import {
   ScrollText,
   ShieldCheck,
   Sparkles,
+  Store,
   Swords,
   UserPlus,
   Users,
@@ -27,9 +28,15 @@ import {
   upsertAdminWeeklyRankingEntry,
 } from "../utils/adminRanking";
 import { formatRankingWindow } from "../utils/weeklyRanking";
-import type { EventStatus, PlayerAccount, RankingPlayer, RealmEvent } from "../types";
+import {
+  deleteMarketItem,
+  fetchMarketItems,
+  slugifyMarketItem,
+  upsertMarketItem,
+} from "../utils/market";
+import type { EventStatus, MarketCategoryId, MarketItem, PlayerAccount, RankingPlayer, Rarity, RealmEvent, StockStatus } from "../types";
 
-type AdminTab = "overview" | "activity" | "players" | "events" | "templates";
+type AdminTab = "overview" | "activity" | "players" | "events" | "market" | "templates";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
 type EventListFilter = "all" | EventStatus;
 
@@ -81,6 +88,24 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [eventFactions, setEventFactions] = useState("");
   const [eventRewards, setEventRewards] = useState("");
   const [eventRequirements, setEventRequirements] = useState("");
+  const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
+  const [marketFeedback, setMarketFeedback] = useState("");
+  const [isSavingMarketItem, setIsSavingMarketItem] = useState(false);
+  const [isDeletingMarketItem, setIsDeletingMarketItem] = useState(false);
+  const [marketSearch, setMarketSearch] = useState("");
+  const [marketCategoryFilter, setMarketCategoryFilter] = useState<MarketCategoryId | "all">("all");
+  const [marketItemId, setMarketItemId] = useState("");
+  const [marketItemName, setMarketItemName] = useState("");
+  const [marketItemDescription, setMarketItemDescription] = useState("");
+  const [marketItemAbility, setMarketItemAbility] = useState("");
+  const [marketItemPrice, setMarketItemPrice] = useState(0);
+  const [marketItemRarity, setMarketItemRarity] = useState<Rarity>("common");
+  const [marketItemImageUrl, setMarketItemImageUrl] = useState("");
+  const [marketItemImageFit, setMarketItemImageFit] = useState<"cover" | "contain" | "">("contain");
+  const [marketItemImagePosition, setMarketItemImagePosition] = useState("center");
+  const [marketItemCategory, setMarketItemCategory] = useState<MarketCategoryId>("swords");
+  const [marketItemStockStatus, setMarketItemStockStatus] = useState<StockStatus>("available");
+  const [marketItemFeatured, setMarketItemFeatured] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,6 +117,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
         fetchAdminWeeklyRankingRows(),
       ]);
       const eventsResult = await fetchRealmEvents();
+      const marketResult = await fetchMarketItems();
 
       if (cancelled) {
         return;
@@ -102,6 +128,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       setRankingMessage(rankingResult.message);
       setWindowLabel(formatRankingWindow(rankingResult.window));
       setEvents(eventsResult.events);
+      setMarketItems(marketResult.items);
       setStatus(rankingResult.status === "ready" ? "ready" : "unavailable");
     }
 
@@ -119,12 +146,14 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       fetchAdminWeeklyRankingRows(),
     ]);
     const eventsResult = await fetchRealmEvents();
+    const marketResult = await fetchMarketItems();
 
     setPlayers(playersList);
     setRankingRows(rankingResult.rows);
     setRankingMessage(rankingResult.message);
     setWindowLabel(formatRankingWindow(rankingResult.window));
     setEvents(eventsResult.events);
+    setMarketItems(marketResult.items);
     setStatus(rankingResult.status === "ready" ? "ready" : "unavailable");
   }
 
@@ -161,6 +190,21 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       return matchesSearch && matchesStatus;
     });
   }, [eventListFilter, eventSearch, events]);
+
+  const filteredMarketItems = useMemo(() => {
+    const normalizedSearch = marketSearch.trim().toLowerCase();
+
+    return marketItems.filter((item) => {
+      const matchesSearch =
+        normalizedSearch.length === 0
+          ? true
+          : item.name.toLowerCase().includes(normalizedSearch);
+      const matchesCategory =
+        marketCategoryFilter === "all" ? true : item.category === marketCategoryFilter;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [marketSearch, marketCategoryFilter, marketItems]);
 
   function applyTemplate(points: number, missions: number, events: number) {
     setFormPoints(points);
@@ -327,6 +371,103 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventFeedback("");
   }
 
+  function resetMarketForm() {
+    setMarketItemId("");
+    setMarketItemName("");
+    setMarketItemDescription("");
+    setMarketItemAbility("");
+    setMarketItemPrice(0);
+    setMarketItemRarity("common");
+    setMarketItemImageUrl("");
+    setMarketItemImageFit("contain");
+    setMarketItemImagePosition("center");
+    setMarketItemCategory("swords");
+    setMarketItemStockStatus("available");
+    setMarketItemFeatured(false);
+    setMarketFeedback("");
+  }
+
+  function preloadMarketItem(item: MarketItem) {
+    setMarketItemId(item.id);
+    setMarketItemName(item.name);
+    setMarketItemDescription(item.description);
+    setMarketItemAbility(item.ability ?? "");
+    setMarketItemPrice(item.price);
+    setMarketItemRarity(item.rarity);
+    setMarketItemImageUrl(item.imageUrl);
+    setMarketItemImageFit(item.imageFit ?? "contain");
+    setMarketItemImagePosition(item.imagePosition ?? "center");
+    setMarketItemCategory(item.category);
+    setMarketItemStockStatus(item.stockStatus);
+    setMarketItemFeatured(item.featured ?? false);
+    setMarketFeedback("");
+    setActiveTab("market");
+  }
+
+  async function handleSaveMarketItem(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!marketItemName.trim()) {
+      setMarketFeedback("El nombre del item es obligatorio.");
+      return;
+    }
+
+    const id = marketItemId || slugifyMarketItem(marketItemName, marketItemCategory);
+    setIsSavingMarketItem(true);
+    setMarketFeedback("");
+
+    const result = await upsertMarketItem({
+      id,
+      name: marketItemName,
+      description: marketItemDescription,
+      ability: marketItemAbility,
+      price: marketItemPrice,
+      rarity: marketItemRarity,
+      imageUrl: marketItemImageUrl,
+      imageFit: marketItemImageFit,
+      imagePosition: marketItemImagePosition,
+      category: marketItemCategory,
+      stockStatus: marketItemStockStatus,
+      featured: marketItemFeatured,
+    });
+
+    setIsSavingMarketItem(false);
+    setMarketFeedback(result.message);
+
+    if (result.status === "saved") {
+      resetMarketForm();
+      await reloadAdminData();
+    }
+  }
+
+  async function handleDeleteMarketItem() {
+    if (!marketItemId) {
+      setMarketFeedback("Selecciona un item antes de intentar borrarlo.");
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `¿Seguro que quieres borrar "${marketItemName}"? Esta accion no se puede deshacer.`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setIsDeletingMarketItem(true);
+    setMarketFeedback("");
+
+    const result = await deleteMarketItem(marketItemId);
+
+    setIsDeletingMarketItem(false);
+    setMarketFeedback(result.message);
+
+    if (result.status === "deleted") {
+      resetMarketForm();
+      await reloadAdminData();
+    }
+  }
+
   async function handleSaveEvent(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSavingEvent(true);
@@ -440,6 +581,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
               label="Eventos"
               active={activeTab === "events"}
               onClick={() => setActiveTab("events")}
+            />
+            <AdminTabButton
+              label="Mercado"
+              active={activeTab === "market"}
+              onClick={() => setActiveTab("market")}
             />
             <AdminTabButton
               label="Plantillas"
@@ -1196,6 +1342,269 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     >
                       No se encontraron eventos para ese filtro.
                     </button>
+                  )}
+                </div>
+              </section>
+            </div>
+          ) : null}
+
+          {activeTab === "market" ? (
+            <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <Store className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Gestor del catalogo
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Crear o editar item
+                    </h4>
+                  </div>
+                </div>
+
+                <form className="mt-5 space-y-4" onSubmit={handleSaveMarketItem}>
+                  <LabeledInput
+                    label="Nombre del item"
+                    value={marketItemName}
+                    onChange={setMarketItemName}
+                    placeholder="Espada del Umbral"
+                  />
+                  <LabeledTextArea
+                    label="Descripcion"
+                    value={marketItemDescription}
+                    onChange={setMarketItemDescription}
+                    placeholder="Descripcion visible en la tarjeta del mercado"
+                  />
+                  <LabeledTextArea
+                    label="Habilidad (opcional)"
+                    value={marketItemAbility}
+                    onChange={setMarketItemAbility}
+                    placeholder="Nombre: efecto en combate o narrativa"
+                  />
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Categoria</span>
+                      <select
+                        value={marketItemCategory}
+                        onChange={(e) => setMarketItemCategory(e.target.value as MarketCategoryId)}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="potions">Pociones</option>
+                        <option value="armors">Armaduras</option>
+                        <option value="swords">Espadas</option>
+                        <option value="others">Otros</option>
+                      </select>
+                    </label>
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Rareza</span>
+                      <select
+                        value={marketItemRarity}
+                        onChange={(e) => setMarketItemRarity(e.target.value as Rarity)}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="legendary">Legendario</option>
+                        <option value="epic">Epico</option>
+                        <option value="rare">Raro</option>
+                        <option value="common">Comun</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Stock</span>
+                      <select
+                        value={marketItemStockStatus}
+                        onChange={(e) => setMarketItemStockStatus(e.target.value as StockStatus)}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="available">Disponible</option>
+                        <option value="limited">Limitado</option>
+                        <option value="sold-out">Agotado</option>
+                      </select>
+                    </label>
+                    <NumericInput
+                      label="Precio (oro)"
+                      value={marketItemPrice}
+                      onChange={setMarketItemPrice}
+                    />
+                  </div>
+
+                  <LabeledInput
+                    label="URL de imagen"
+                    value={marketItemImageUrl}
+                    onChange={setMarketItemImageUrl}
+                    placeholder="https://..."
+                  />
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Ajuste de imagen</span>
+                      <select
+                        value={marketItemImageFit}
+                        onChange={(e) => setMarketItemImageFit(e.target.value as "cover" | "contain" | "")}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="contain">Contener (contain)</option>
+                        <option value="cover">Cubrir (cover)</option>
+                        <option value="">Sin ajuste</option>
+                      </select>
+                    </label>
+                    <LabeledInput
+                      label="Posicion de imagen"
+                      value={marketItemImagePosition}
+                      onChange={setMarketItemImagePosition}
+                      placeholder="center top"
+                    />
+                  </div>
+
+                  <label className="flex items-center justify-between rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3">
+                    <div>
+                      <p className="text-sm font-semibold text-stone-200">Destacado</p>
+                      <p className="mt-1 text-xs leading-5 text-stone-500">
+                        Aparece en la seccion de objetos destacados del mercado.
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={marketItemFeatured}
+                      onChange={(e) => setMarketItemFeatured(e.target.checked)}
+                      className="h-4 w-4 rounded border-stone-600 bg-stone-950 text-amber-400"
+                    />
+                  </label>
+
+                  {marketItemId ? (
+                    <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-xs text-stone-400">
+                      ID actual:{" "}
+                      <span className="font-mono text-stone-300">{marketItemId}</span>
+                    </div>
+                  ) : (
+                    <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-xs text-stone-400">
+                      El ID se genera como slug del nombre y la categoria al guardar.
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="submit"
+                      disabled={isSavingMarketItem || isDeletingMarketItem}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSavingMarketItem ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          <Store className="h-4 w-4" />
+                          {marketItemId ? "Actualizar item" : "Crear item"}
+                        </>
+                      )}
+                    </button>
+                    {marketItemId ? (
+                      <button
+                        type="button"
+                        onClick={resetMarketForm}
+                        disabled={isDeletingMarketItem}
+                        className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                      >
+                        Cancelar edicion
+                      </button>
+                    ) : null}
+                    {marketItemId ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteMarketItem()}
+                        disabled={isSavingMarketItem || isDeletingMarketItem}
+                        className="rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isDeletingMarketItem ? "Borrando..." : "Borrar item"}
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={resetMarketForm}
+                      disabled={isDeletingMarketItem}
+                      className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                    >
+                      Limpiar formulario
+                    </button>
+                  </div>
+
+                  {marketFeedback ? (
+                    <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+                      {marketFeedback}
+                    </p>
+                  ) : null}
+                </form>
+              </section>
+
+              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <ScrollText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Catalogo actual
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Items del mercado
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3">
+                  <LabeledInput
+                    label="Buscar item"
+                    value={marketSearch}
+                    onChange={setMarketSearch}
+                    placeholder="Filtra por nombre"
+                  />
+                  <div className="space-y-2">
+                    <span className="text-sm font-semibold text-stone-200">Categoria</span>
+                    <div className="flex flex-wrap gap-2">
+                      <AdminModeButton label="Todos" active={marketCategoryFilter === "all"} onClick={() => setMarketCategoryFilter("all")} />
+                      <AdminModeButton label="Pociones" active={marketCategoryFilter === "potions"} onClick={() => setMarketCategoryFilter("potions")} />
+                      <AdminModeButton label="Armaduras" active={marketCategoryFilter === "armors"} onClick={() => setMarketCategoryFilter("armors")} />
+                      <AdminModeButton label="Espadas" active={marketCategoryFilter === "swords"} onClick={() => setMarketCategoryFilter("swords")} />
+                      <AdminModeButton label="Otros" active={marketCategoryFilter === "others"} onClick={() => setMarketCategoryFilter("others")} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {filteredMarketItems.length > 0 ? (
+                    filteredMarketItems.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => preloadMarketItem(item)}
+                        className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                      >
+                        <div>
+                          <p className="text-sm font-bold text-stone-100">{item.name}</p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                            {item.category} &middot; {item.rarity}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-black text-amber-300">{item.price}</p>
+                          <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
+                            oro &middot; {item.stockStatus}
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="rounded-[1.2rem] border border-dashed border-stone-700 bg-stone-950/40 px-4 py-4 text-sm leading-6 text-stone-400">
+                      No se encontraron items para ese filtro.
+                    </div>
                   )}
                 </div>
               </section>

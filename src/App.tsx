@@ -42,6 +42,7 @@ import {
   formatRankingWindow,
 } from "./utils/weeklyRanking";
 import { fetchRealmEvents } from "./utils/events";
+import { fetchMarketItems } from "./utils/market";
 import type {
   MarketCategory, MarketCategoryId, MarketItem, NavItem, RankingPlayer, RankingWindow, TabId,
 } from "./types";
@@ -526,6 +527,27 @@ function MarketSection() {
   >("all");
   const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
   const [tavernMode, setTavernMode] = useState<TavernMode>("chests");
+  const [marketItems, setMarketItems] = useState<MarketItem[]>(MARKET_ITEMS);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMarketItems() {
+      const result = await fetchMarketItems();
+
+      if (cancelled) {
+        return;
+      }
+
+      setMarketItems(result.items);
+    }
+
+    void loadMarketItems();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const categoriesToRender = useMemo(
     () =>
@@ -538,8 +560,8 @@ function MarketSection() {
   );
 
   const featuredItems = useMemo(
-    () => MARKET_ITEMS.filter((item) => item.featured),
-    []
+    () => marketItems.filter((item) => item.featured),
+    [marketItems]
   );
 
   const modalCategory = useMemo(
@@ -574,7 +596,7 @@ function MarketSection() {
           description="La compra usa tu perfil conectado para verificar y descontar el oro en Supabase, y cada categoria queda organizada como un catalogo desplegable."
           rightSlot={
             <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
-              {MARKET_ITEMS.length} articulos
+              {marketItems.length} articulos
             </span>
           }
         />
@@ -665,7 +687,7 @@ function MarketSection() {
           <MarketCategoryPanel
             key={category.id}
             category={category}
-            items={MARKET_ITEMS.filter((item) => item.category === category.id)}
+            items={marketItems.filter((item) => item.category === category.id)}
             onBuy={(item) => setSelectedItem(item)}
           />
         ))}

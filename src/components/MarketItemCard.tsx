@@ -89,6 +89,8 @@ export function MarketItemCard({
   hideImage?: boolean;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isAbilityExpanded, setIsAbilityExpanded] = useState(false);
   const style = rarityStyles[item.rarity];
   const stock = stockStyles[item.stockStatus];
 
@@ -113,7 +115,7 @@ export function MarketItemCard({
       ) : null}
 
       {!hideImage ? (
-        <div className="relative aspect-[4/5] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950">
+        <div className="relative aspect-[5/4] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950 md:aspect-[4/5]">
           {!imageFailed ? (
             <img
               src={item.imageUrl}
@@ -143,43 +145,84 @@ export function MarketItemCard({
         </div>
       ) : null}
 
-      <div className={`space-y-3 ${hideImage ? "p-5" : "p-4"}`}>
+      <div className={`space-y-3 ${hideImage ? "p-4 md:p-5" : "p-3.5 md:p-4"}`}>
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <h4 className="text-lg font-bold text-stone-100">{item.name}</h4>
-          <div className="flex flex-wrap justify-end gap-2">
+          <h4 className="text-base font-bold text-stone-100 md:text-lg">{item.name}</h4>
+          <div className="flex flex-wrap justify-end gap-1.5 md:gap-2">
             <span
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${style.badge}`}
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold md:px-3 md:text-xs ${style.badge}`}
             >
               {style.label}
             </span>
             <span
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${stock.badge}`}
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold md:px-3 md:text-xs ${stock.badge}`}
             >
               {stock.label}
             </span>
           </div>
         </div>
 
-        <p className="text-sm leading-6 text-stone-300/90">{item.description}</p>
+        <div className="space-y-2">
+          <p
+            className={`text-sm leading-6 text-stone-300/90 md:hidden ${
+              isDescriptionExpanded ? "" : "line-clamp-2"
+            }`}
+          >
+            {item.description}
+          </p>
+          <p className="hidden text-sm leading-6 text-stone-300/90 md:block">
+            {item.description}
+          </p>
+          {item.description.length > 90 ? (
+            <button
+              type="button"
+              onClick={() => setIsDescriptionExpanded((current) => !current)}
+              className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-300 transition hover:text-amber-200 md:hidden"
+            >
+              {isDescriptionExpanded ? "Ver menos" : "Ver mas"}
+            </button>
+          ) : null}
+        </div>
 
         {item.ability ? (
-          <div className="rounded-2xl border border-amber-500/10 bg-stone-950/45 px-4 py-3">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-300">
-              Habilidad
-            </p>
-            <p className="mt-2 text-sm leading-6 text-stone-300/85">
-              {item.ability}
-            </p>
-          </div>
+          <>
+            <div className="rounded-2xl border border-amber-500/10 bg-stone-950/45 px-3.5 py-3 md:hidden">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-300">
+                  Habilidad
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsAbilityExpanded((current) => !current)}
+                  className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-400 transition hover:text-stone-200"
+                >
+                  {isAbilityExpanded ? "Ocultar" : "Ver"}
+                </button>
+              </div>
+              {isAbilityExpanded ? (
+                <p className="mt-2 text-sm leading-6 text-stone-300/85">
+                  {item.ability}
+                </p>
+              ) : null}
+            </div>
+            <div className="hidden rounded-2xl border border-amber-500/10 bg-stone-950/45 px-4 py-3 md:block">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-300">
+                Habilidad
+              </p>
+              <p className="mt-2 text-sm leading-6 text-stone-300/85">
+                {item.ability}
+              </p>
+            </div>
+          </>
         ) : null}
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
           <div className="inline-flex items-center gap-2 rounded-full bg-stone-950/55 px-3 py-2 text-sm font-bold text-amber-300 ring-1 ring-inset ring-amber-500/10">
             <Coins className="h-4 w-4" />
             {item.price} de oro
           </div>
           {item.featured ? (
-            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-amber-300">
+            <span className="w-fit rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-amber-300">
               Destacado
             </span>
           ) : null}
@@ -189,7 +232,7 @@ export function MarketItemCard({
           type="button"
           onClick={onBuy}
           disabled={stock.buttonDisabled}
-          className={`flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold transition ${
+          className={`flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition md:py-3 ${
             stock.buttonDisabled
               ? "cursor-not-allowed bg-stone-800 text-stone-500"
               : "bg-amber-500 text-stone-950 hover:bg-amber-400"

@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { AlertOctagon, HandCoins, RefreshCw, UserRound } from "lucide-react";
+import { motion } from "framer-motion";
+import { AlertOctagon, RefreshCw, UserRound } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import { TavernCashoutModal } from "./TavernCashoutModal";
 import type { PlayerAccount } from "../types";
 import cofreCerrado from "../assets/cofre-cerrado.png";
 import cofreOro from "../assets/cofre-oro.png";
@@ -22,7 +21,6 @@ export function TavernGame() {
     null,
     null,
   ]);
-  const [showCashout, setShowCashout] = useState(false);
   const [updating, setUpdating] = useState(false);
 
   const balance = player?.gold ?? 0;
@@ -174,7 +172,6 @@ export function TavernGame() {
           player={player}
           updating={updating}
           onRefresh={refreshBalance}
-          onCashout={() => setShowCashout(true)}
         />
 
         {balance <= 0 && phase === "betting" ? (
@@ -357,19 +354,6 @@ export function TavernGame() {
           </div>
         ) : null}
       </motion.div>
-
-      <AnimatePresence>
-        {showCashout && balance > 0 ? (
-          <TavernCashoutModal
-            balance={balance}
-            onClose={() => setShowCashout(false)}
-            onSuccess={() => {
-              setShowCashout(false);
-              void refreshBalance();
-            }}
-          />
-        ) : null}
-      </AnimatePresence>
     </div>
   );
 }
@@ -378,12 +362,10 @@ function PlayerBalanceHeader({
   player,
   updating,
   onRefresh,
-  onCashout,
 }: {
   player: PlayerAccount;
   updating: boolean;
   onRefresh: () => void;
-  onCashout: () => void;
 }) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/50 p-4">
@@ -396,29 +378,21 @@ function PlayerBalanceHeader({
             {player.username}
           </p>
           <div className="mt-1 flex items-center gap-2">
-            <p className="text-2xl font-black text-amber-400">
-              {player.gold} de oro
+            <p className="text-2xl font-black text-amber-300">
+              {player.gold}
             </p>
-            <button
-              type="button"
-              onClick={onRefresh}
-              disabled={updating}
-              className="rounded-lg p-1 text-stone-500 transition hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-30"
-              title="Actualizar saldo"
-            >
-              <RefreshCw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
-            </button>
           </div>
         </div>
       </div>
 
       <button
         type="button"
-        onClick={onCashout}
-        className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm font-bold text-amber-400 transition hover:bg-amber-500/20"
+        onClick={onRefresh}
+        disabled={updating}
+        className="rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+        title="Actualizar saldo"
       >
-        <HandCoins className="h-4 w-4" />
-        Retirarse
+        <RefreshCw className={`h-5 w-5 ${updating ? "animate-spin" : ""}`} />
       </button>
     </div>
   );

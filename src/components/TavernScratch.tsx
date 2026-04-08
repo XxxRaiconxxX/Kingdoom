@@ -24,6 +24,8 @@ interface ScratchBatchResult {
   wins: number;
   loses: number;
   totalPrize: number;
+  refundedTickets: number;
+  refundedGold: number;
 }
 
 export function TavernScratch() {
@@ -88,8 +90,18 @@ export function TavernScratch() {
       let normalWins = 0;
       let vipWins = 0;
       let totalPrize = 0;
+      
+      let usedTickets = 0;
 
       for (let i = 0; i < quantity; i++) {
+        // Frenar el bucle inmediatamente si ya se alcanzó el límite.
+        if (dailyGrossWins + totalPrize >= MAX_DAILY_WIN_LIMIT) {
+          totalPrize = MAX_DAILY_WIN_LIMIT - dailyGrossWins; 
+          break; 
+        }
+
+        usedTickets++;
+
         let wonOnThisTicket = false;
         if (Math.random() < dailyConfig.winChance) {
           normalWins++;
@@ -105,23 +117,31 @@ export function TavernScratch() {
       }
 
       let cappedTotalPrize = totalPrize;
-      
       if (dailyGrossWins + totalPrize > MAX_DAILY_WIN_LIMIT) {
         cappedTotalPrize = Math.max(0, MAX_DAILY_WIN_LIMIT - dailyGrossWins);
       }
+      
+      const refundedTickets = quantity - usedTickets;
+      const refundedGold = refundedTickets * dailyConfig.cost;
 
       setBatchResult({
         totalCost,
         quantity,
         wins: normalWins + vipWins,
-        loses: quantity - normalWins, 
-        totalPrize: cappedTotalPrize
+        loses: usedTickets - normalWins, 
+        totalPrize: cappedTotalPrize,
+        refundedTickets,
+        refundedGold
       });
 
-      if (cappedTotalPrize > 0) {
+      const goldToDeposit = cappedTotalPrize + refundedGold;
+
+      if (goldToDeposit > 0) {
         setUpdating(true);
-        addPlayerDailyScratchGrossWins(player.id, dailyConfig.dateKey, cappedTotalPrize);
-        await setPlayerGold((player?.gold ?? 0) + cappedTotalPrize);
+        if (cappedTotalPrize > 0) {
+           addPlayerDailyScratchGrossWins(player.id, dailyConfig.dateKey, cappedTotalPrize);
+        }
+        await setPlayerGold((player?.gold ?? 0) + goldToDeposit);
         setUpdating(false);
       }
 
@@ -368,8 +388,14 @@ export function TavernScratch() {
                 <div className="mx-auto mt-4 max-w-sm rounded-[1rem] bg-stone-950/40 p-5 text-sm text-stone-300">
                   <div className="flex items-center justify-between border-b border-stone-800/60 pb-3">
                     <span className="text-stone-400">Tickets Jugados</span>
-                    <span className="font-bold text-stone-100 text-base">{batchResult.quantity}</span>
+                    <span className="font-bold text-stone-100 text-base">{batchResult.quantity - batchResult.refundedTickets}</span>
                   </div>
+                  {batchResult.refundedTickets > 0 ? (
+                    <div className="flex items-center justify-between border-b border-stone-800/60 py-3">
+                      <span className="font-bold text-amber-500">Límite Diario Alcanzado</span>
+                      <span className="font-bold text-stone-100">{batchResult.refundedTickets} no usados</span>
+                    </div>
+                  ) : null}
                   <div className="flex items-center justify-between border-b border-stone-800/60 py-3">
                     <span className="text-stone-400">Tickets Premiados</span>
                     <span className="font-black text-emerald-400">{batchResult.wins} WIN</span>
@@ -379,6 +405,14 @@ export function TavernScratch() {
                     <span className="font-black text-rose-500">{batchResult.loses} LOSE</span>
                   </div>
                 </div>
+
+                {batchResult.refundedGold > 0 ? (
+                  <div className="mx-auto mt-3 max-w-sm rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm">
+                    <p className="text-center text-amber-300">
+                      Se ha reembolsado a tu cuenta <span className="font-bold text-amber-400">+{batchResult.refundedGold} ORO</span> de los tickets devueltos.
+                    </p>
+                  </div>
+                ) : null}
 
                 <div className="mt-5 flex flex-col items-center justify-center gap-1">
                   <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Premio depositado</p>

@@ -561,7 +561,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="border-b border-stone-800 px-0 py-4 md:px-6">
-          <div className="flex items-center gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:px-0 [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-full max-w-[100vw] items-center gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:max-w-full md:px-0 [&::-webkit-scrollbar]:hidden">
             <div className="flex-shrink-0">
               <AdminTabButton
                 label="Resumen"
@@ -1011,7 +1011,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       </select>
                     </label>
 
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+                    <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       <div className="flex-shrink-0">
                         <AdminModeButton
                           label="Sumar"
@@ -1304,11 +1304,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     onChange={setEventSearch}
                     placeholder="Filtra por titulo"
                   />
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0 max-w-full">
                     <span className="text-sm font-semibold text-stone-200">
                       Estado
                     </span>
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+                    <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       <div className="flex-shrink-0">
                         <AdminModeButton
                           label="Todos"
@@ -1594,9 +1594,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     onChange={setMarketSearch}
                     placeholder="Filtra por nombre"
                   />
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0 max-w-full">
                     <span className="text-sm font-semibold text-stone-200">Categoria</span>
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+                    <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       <div className="flex-shrink-0">
                         <AdminModeButton label="Todos" active={marketCategoryFilter === "all"} onClick={() => setMarketCategoryFilter("all")} />
                       </div>

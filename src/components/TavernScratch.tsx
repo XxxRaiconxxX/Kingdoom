@@ -5,11 +5,16 @@ import { usePlayerSession } from "../context/PlayerSessionContext";
 import scratchLoseCard from "../assets/scratch-lose-card.png";
 import scratchPristineCard from "../assets/scratch-pristine-card.png";
 import scratchWinCard from "../assets/scratch-win-card.png";
-
-const SCRATCH_COST = 400;
-const WIN_CHANCE = 0.20;
-const MIN_PRIZE = 500;
-const MAX_PRIZE = 1000;
+import {
+  addPlayerDailyScratchGrossWins,
+  getDailyScratchConfig,
+  getPlayerDailyScratchGrossWins,
+  MAX_DAILY_WIN_LIMIT,
+  NORMAL_MAX_PRIZE,
+  NORMAL_MIN_PRIZE,
+  VIP_JACKPOT_CHANCE,
+  VIP_JACKPOT_PRIZE,
+} from "../utils/scratchUtils";
 
 type ScratchPhase = "buy" | "ready" | "scratching" | "revealed";
 
@@ -28,9 +33,17 @@ export function TavernScratch() {
   const [batchResult, setBatchResult] = useState<ScratchBatchResult | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  const totalCost = SCRATCH_COST * quantity;
-  const canBuy = Boolean(player && player.gold >= totalCost && !updating && quantity > 0);
-  const maxBuyQuantity = player ? Math.floor(player.gold / SCRATCH_COST) : 0;
+  const dailyConfig = useMemo(() => getDailyScratchConfig(), []);
+  
+  const dailyGrossWins = player 
+    ? getPlayerDailyScratchGrossWins(player.id, dailyConfig.dateKey) 
+    : 0;
+  
+  const limitReached = dailyGrossWins >= MAX_DAILY_WIN_LIMIT;
+
+  const totalCost = dailyConfig.cost * quantity;
+  const canBuy = Boolean(player && player.gold >= totalCost && !updating && quantity > 0 && !limitReached);
+  const maxBuyQuantity = player ? Math.floor(player.gold / dailyConfig.cost) : 0;
 
   const projectedGold = useMemo(() => {
     if (!player) {
@@ -72,28 +85,43 @@ export function TavernScratch() {
     setPhase("scratching");
 
     window.setTimeout(async () => {
-      let wins = 0;
+      let normalWins = 0;
+      let vipWins = 0;
       let totalPrize = 0;
 
       for (let i = 0; i < quantity; i++) {
-        const didWin = Math.random() < WIN_CHANCE;
-        if (didWin) {
-          wins++;
-          totalPrize += Math.floor(Math.random() * (MAX_PRIZE - MIN_PRIZE + 1)) + MIN_PRIZE;
+        let wonOnThisTicket = false;
+        if (Math.random() < dailyConfig.winChance) {
+          normalWins++;
+          totalPrize += Math.floor(Math.random() * (NORMAL_MAX_PRIZE - NORMAL_MIN_PRIZE + 1)) + NORMAL_MIN_PRIZE;
+          wonOnThisTicket = true;
         }
+        
+        if (Math.random() < VIP_JACKPOT_CHANCE) {
+          vipWins++;
+          totalPrize += VIP_JACKPOT_PRIZE;
+          wonOnThisTicket = true;
+        }
+      }
+
+      let cappedTotalPrize = totalPrize;
+      
+      if (dailyGrossWins + totalPrize > MAX_DAILY_WIN_LIMIT) {
+        cappedTotalPrize = Math.max(0, MAX_DAILY_WIN_LIMIT - dailyGrossWins);
       }
 
       setBatchResult({
         totalCost,
         quantity,
-        wins,
-        loses: quantity - wins,
-        totalPrize
+        wins: normalWins + vipWins,
+        loses: quantity - normalWins, 
+        totalPrize: cappedTotalPrize
       });
 
-      if (totalPrize > 0) {
+      if (cappedTotalPrize > 0) {
         setUpdating(true);
-        await setPlayerGold((player?.gold ?? 0) + totalPrize);
+        addPlayerDailyScratchGrossWins(player.id, dailyConfig.dateKey, cappedTotalPrize);
+        await setPlayerGold((player?.gold ?? 0) + cappedTotalPrize);
         setUpdating(false);
       }
 
@@ -130,6 +158,15 @@ export function TavernScratch() {
     );
   }
 
+  if (limitReached) {
+    return (
+      <ScratchMessage
+        title="Límite Diario Alcanzado"
+        description={`¡El Reino ha visto suficiente suerte de tu parte! Ya has ganado ${dailyGrossWins} de oro hoy, acercándote o superando el límite de ${MAX_DAILY_WIN_LIMIT}. La taberna cierra esta mesa por hoy. Vuelve mañana a las 00:00.`}
+      />
+    );
+  }
+
   return (
     <div className="rounded-[2rem] border border-stone-800 bg-stone-900/80 p-6 shadow-[inset_0_4px_30px_rgba(0,0,0,0.5)] md:p-8">
       <div className="flex flex-col gap-6">
@@ -162,9 +199,9 @@ export function TavernScratch() {
         </div>
 
         <div className="grid gap-4 rounded-[1.6rem] border border-stone-800 bg-stone-950/45 p-4 text-sm text-stone-300 md:grid-cols-3">
-          <StatBubble label="Costo" value={`${SCRATCH_COST} oro`} />
-          <StatBubble label="Probabilidad" value={`${Math.round(WIN_CHANCE * 100)}%`} />
-          <StatBubble label="Premio" value={`${MIN_PRIZE}-${MAX_PRIZE}`} />
+          <StatBubble label="Costo del Día" value={`${dailyConfig.cost} oro`} />
+          <StatBubble label="Probabilidad" value={`${Math.round(dailyConfig.winChance * 100)}%`} />
+          <StatBubble label="Premio Base" value={`${NORMAL_MIN_PRIZE}-${NORMAL_MAX_PRIZE}`} />
         </div>
 
         <AnimatePresence mode="wait">
@@ -183,9 +220,9 @@ export function TavernScratch() {
                   Compra un ticket de fortuna
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-stone-400">
-                  Pagas <span className="font-bold text-amber-300">{SCRATCH_COST} de oro</span> y
-                  tienes un <span className="font-bold text-amber-300">{Math.round(WIN_CHANCE * 100)}%</span> de
-                  sacar un premio entre {MIN_PRIZE} y {MAX_PRIZE} monedas.
+                  Pagas <span className="font-bold text-amber-300">{dailyConfig.cost} de oro</span> y
+                  tienes un <span className="font-bold text-amber-300">{Math.round(dailyConfig.winChance * 100)}%</span> de
+                  sacar un premio entre {NORMAL_MIN_PRIZE} y {NORMAL_MAX_PRIZE} monedas. Ademas, TODOS los tickets tienen un <span className="font-bold text-emerald-400">5% extra fijo de ganar 10,000 oro (Jackpot).</span>
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/40 p-4">

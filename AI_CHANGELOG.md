@@ -43,6 +43,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 08/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se separo visualmente el bloque de `Editar oro` en el panel admin para que los controles no queden apretados en movil.
+*   **Cambios Clave:**
+    *   Se agrupo el selector de modo (Sumar/Restar/Fijar) con el input dentro de una caja secundaria con mas aire.
+    *   El boton de accion pasa a ancho completo en movil para evitar saturacion.
+*   **Notas/Advertencias:** Cambio solo de layout/estilos; no modifica la logica de actualizacion de oro.
+
+---
 ### [Fecha: 08/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/scratchUtils.ts` (Nuevo), `src/components/TavernScratch.tsx`, `src/App.tsx`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Implementación de la Lotería Dinámica 24h con límites de fortuna, reembolsos automáticos y optimizaciones de interfaz móvil.

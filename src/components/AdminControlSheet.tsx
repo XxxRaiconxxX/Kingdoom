@@ -992,7 +992,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     </div>
                   </div>
 
-                  <form className="mt-5 space-y-4" onSubmit={handleUpdateGold}>
+                  <form className="mt-5 space-y-5" onSubmit={handleUpdateGold}>
                     <label className="space-y-2">
                       <span className="text-sm font-semibold text-stone-200">
                         Jugador
@@ -1011,41 +1011,48 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       </select>
                     </label>
 
-                    <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                      <div className="flex-shrink-0">
-                        <AdminModeButton
-                          label="Sumar"
-                          active={goldMode === "add"}
-                          onClick={() => setGoldMode("add")}
-                        />
+                    <div className="space-y-3 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
+                      <div className="space-y-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
+                          Modo
+                        </p>
+                        <div className="flex w-full max-w-full items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          <div className="flex-shrink-0">
+                            <AdminModeButton
+                              label="Sumar"
+                              active={goldMode === "add"}
+                              onClick={() => setGoldMode("add")}
+                            />
+                          </div>
+                          <div className="flex-shrink-0">
+                            <AdminModeButton
+                              label="Restar"
+                              active={goldMode === "subtract"}
+                              onClick={() => setGoldMode("subtract")}
+                            />
+                          </div>
+                          <div className="flex-shrink-0">
+                            <AdminModeButton
+                              label="Fijar"
+                              active={goldMode === "set"}
+                              onClick={() => setGoldMode("set")}
+                            />
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-shrink-0">
-                        <AdminModeButton
-                          label="Restar"
-                          active={goldMode === "subtract"}
-                          onClick={() => setGoldMode("subtract")}
-                        />
-                      </div>
-                      <div className="flex-shrink-0">
-                        <AdminModeButton
-                          label="Fijar"
-                          active={goldMode === "set"}
-                          onClick={() => setGoldMode("set")}
-                        />
-                      </div>
-                    </div>
 
-                    <NumericInput
-                      label={
-                        goldMode === "set"
-                          ? "Nuevo total de oro"
-                          : goldMode === "add"
-                            ? "Oro a sumar"
-                            : "Oro a restar"
-                      }
-                      value={goldAmount}
-                      onChange={setGoldAmount}
-                    />
+                      <NumericInput
+                        label={
+                          goldMode === "set"
+                            ? "Nuevo total de oro"
+                            : goldMode === "add"
+                              ? "Oro a sumar"
+                              : "Oro a restar"
+                        }
+                        value={goldAmount}
+                        onChange={setGoldAmount}
+                      />
+                    </div>
 
                     {selectedGoldPlayer ? (
                       <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
@@ -1057,7 +1064,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     <button
                       type="submit"
                       disabled={isUpdatingGold}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto md:justify-start"
                     >
                       {isUpdatingGold ? (
                         <>

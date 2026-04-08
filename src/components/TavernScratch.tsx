@@ -5,7 +5,6 @@ import { usePlayerSession } from "../context/PlayerSessionContext";
 import scratchLoseCard from "../assets/scratch-lose-card.png";
 import scratchPristineCard from "../assets/scratch-pristine-card.png";
 import scratchWinCard from "../assets/scratch-win-card.png";
-<<<<<<< HEAD
 import {
   addPlayerDailyScratchGrossWins,
   getDailyScratchConfig,
@@ -16,13 +15,6 @@ import {
   VIP_JACKPOT_CHANCE,
   VIP_JACKPOT_PRIZE,
 } from "../utils/scratchUtils";
-=======
-
-const SCRATCH_COST = 300;
-const WIN_CHANCE = 0.20;
-const MIN_PRIZE = 500;
-const MAX_PRIZE = 2500;
->>>>>>> 72eb5e9790c035fba0e264b6d4ab251400627f67
 
 type ScratchPhase = "buy" | "ready" | "scratching" | "revealed";
 

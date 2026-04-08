@@ -9,7 +9,7 @@ import scratchWinCard from "../assets/scratch-win-card.png";
 const SCRATCH_COST = 400;
 const WIN_CHANCE = 0.20;
 const MIN_PRIZE = 500;
-const MAX_PRIZE = 1000;
+const MAX_PRIZE = 2500;
 
 type ScratchPhase = "buy" | "ready" | "scratching" | "revealed";
 

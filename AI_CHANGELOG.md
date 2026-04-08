@@ -43,6 +43,19 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 08/04/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/utils/scratchUtils.ts` (Nuevo), `src/components/TavernScratch.tsx`, `src/App.tsx`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Implementación de la Lotería Dinámica 24h con límites de fortuna, reembolsos automáticos y optimizaciones de interfaz móvil.
+*   **Cambios Clave:**
+    *   **Lotería Dinámica (24h)**: Se creó `scratchUtils.ts` para generar precios (200-500) y probabilidades (10-40%) deterministas basados en la fecha actual (semilla diaria).
+    *   **Multi-Scratch & Jackpot**: Se añadió la compra múltiple de tickets con "Auto-Scrape" y un Jackpot VIP fijo del 5% (10,000 oro) independiente de la racha diaria.
+    *   **Control de Inflación (Límite 50k)**: Se implementó un tope de ganancias brutas diarias de 50,000 oro. Al alcanzarlo, el juego se bloquea hasta el día siguiente.
+    *   **Sistema de Reembolsos**: Si una compra masiva choca con el límite de 50k antes de terminar, los tickets sobrantes se cancelan automáticamente y el oro se devuelve íntegro al jugador con una auditoría visual en el recibo.
+    *   **Mobile-First Admin**: Se refactorizaron los grupos de botones y filtros del panel de administración para evitar desbordamientos en pantallas pequeñas mediante scroll horizontal y flex-wrap.
+    *   **UX Pulido**: Se ajustó la lógica de renderizado para permitir ver los resultados finales y reembolsos antes de que aparezca el mensaje bloqueante de "Límite Alcanzado".
+*   **Notas/Advertencias:** El sistema de semillas asegura que todos los jugadores vean la misma "suerte" cada día. El límite de 50k se persiste en `localStorage` vinculado al ID del jugador y la fecha. `npx tsc --noEmit` verificado sin errores.
+
+---
 ### [Fecha: 07/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/market.ts` (Nuevo), `src/components/AdminControlSheet.tsx`, `src/App.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se anadio una pestana `Mercado` al panel de administracion para crear, editar y borrar productos del catalogo desde la interfaz sin tocar codigo.

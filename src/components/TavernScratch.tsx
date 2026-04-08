@@ -6,7 +6,7 @@ import scratchLoseCard from "../assets/scratch-lose-card.png";
 import scratchPristineCard from "../assets/scratch-pristine-card.png";
 import scratchWinCard from "../assets/scratch-win-card.png";
 
-const SCRATCH_COST = 270;
+const SCRATCH_COST = 300;
 const WIN_CHANCE = 0.20;
 const MIN_PRIZE = 500;
 const MAX_PRIZE = 2500;

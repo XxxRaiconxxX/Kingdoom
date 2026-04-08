@@ -178,7 +178,7 @@ export function TavernScratch() {
     );
   }
 
-  if (limitReached) {
+  if (limitReached && phase === "buy") {
     return (
       <ScratchMessage
         title="Límite Diario Alcanzado"

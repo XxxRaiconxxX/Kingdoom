@@ -602,43 +602,58 @@ function MarketSection() {
         />
       </div>
 
-      <div className="rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6">
-        <SectionHeader
-          eyebrow="Taberna clandestina"
-          title="Juegos de azar"
-          description="La mesa sigue viva dentro del mercado. Cambia entre cofres, ruleta o cartas sin salir de la taberna."
-          rightSlot={
+      <details className="group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6">
+        <summary className="flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-4">
             <div className="rounded-2xl bg-rose-500/10 p-3 text-rose-300">
               <Dices className="h-5 w-5" />
             </div>
-          }
-        />
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-amber-400/80">
+                Taberna clandestina
+              </p>
+              <h3 className="mt-2 text-xl font-bold text-stone-100">
+                Juegos de azar
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-stone-400">
+                La mesa sigue viva dentro del mercado. Cambia entre cofres, ruleta o cartas sin salir de la taberna.
+              </p>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center justify-end sm:justify-start">
+            <div className="rounded-2xl bg-stone-800 p-3 text-stone-300 transition group-open:rotate-180 group-open:text-rose-300">
+              <ChevronDown className="h-5 w-5" />
+            </div>
+          </div>
+        </summary>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          {TAVERN_MODES.map((mode) => (
-            <FilterPill
-              key={mode.id}
-              label={mode.label}
-              active={tavernMode === mode.id}
-              onClick={() => setTavernMode(mode.id)}
-            />
-          ))}
-        </div>
+        <div className="border-t border-stone-800 pt-5 mt-5">
+          <div className="flex flex-wrap gap-2">
+            {TAVERN_MODES.map((mode) => (
+              <FilterPill
+                key={mode.id}
+                label={mode.label}
+                active={tavernMode === mode.id}
+                onClick={() => setTavernMode(mode.id)}
+              />
+            ))}
+          </div>
 
-        <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
-          <p className="text-sm leading-6 text-stone-400">
-            {
-              TAVERN_MODES.find((mode) => mode.id === tavernMode)?.description
-            }
-          </p>
-        </div>
+          <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
+            <p className="text-sm leading-6 text-stone-400">
+              {
+                TAVERN_MODES.find((mode) => mode.id === tavernMode)?.description
+              }
+            </p>
+          </div>
 
-        <div className="mt-5">
-          <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la mesa de juego..." />}>
-            {tavernContent}
-          </Suspense>
+          <div className="mt-5">
+            <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la mesa de juego..." />}>
+              {tavernContent}
+            </Suspense>
+          </div>
         </div>
-      </div>
+      </details>
 
       {featuredItems.length > 0 ? (
         <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">

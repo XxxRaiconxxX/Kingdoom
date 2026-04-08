@@ -12,23 +12,33 @@ const MIN_PRIZE = 500;
 const MAX_PRIZE = 1000;
 
 type ScratchPhase = "buy" | "ready" | "scratching" | "revealed";
-type ScratchResult = "win" | "lose" | null;
+
+interface ScratchBatchResult {
+  totalCost: number;
+  quantity: number;
+  wins: number;
+  loses: number;
+  totalPrize: number;
+}
 
 export function TavernScratch() {
   const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
   const [phase, setPhase] = useState<ScratchPhase>("buy");
-  const [result, setResult] = useState<ScratchResult>(null);
-  const [prize, setPrize] = useState(0);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [batchResult, setBatchResult] = useState<ScratchBatchResult | null>(null);
   const [updating, setUpdating] = useState(false);
 
-  const canBuy = Boolean(player && player.gold >= SCRATCH_COST && !updating);
+  const totalCost = SCRATCH_COST * quantity;
+  const canBuy = Boolean(player && player.gold >= totalCost && !updating && quantity > 0);
+  const maxBuyQuantity = player ? Math.floor(player.gold / SCRATCH_COST) : 0;
+
   const projectedGold = useMemo(() => {
     if (!player) {
       return null;
     }
 
-    return Math.max(0, player.gold - SCRATCH_COST);
-  }, [player]);
+    return Math.max(0, player.gold - totalCost);
+  }, [player, totalCost]);
 
   async function handleRefresh() {
     setUpdating(true);
@@ -42,7 +52,7 @@ export function TavernScratch() {
     }
 
     setUpdating(true);
-    const nextGold = player.gold - SCRATCH_COST;
+    const nextGold = player.gold - totalCost;
     const deducted = await setPlayerGold(nextGold);
     setUpdating(false);
 
@@ -50,8 +60,7 @@ export function TavernScratch() {
       return;
     }
 
-    setPrize(0);
-    setResult(null);
+    setBatchResult(null);
     setPhase("ready");
   }
 
@@ -60,31 +69,47 @@ export function TavernScratch() {
       return;
     }
 
-    const didWin = Math.random() < WIN_CHANCE;
-    const nextPrize = didWin
-      ? Math.floor(Math.random() * (MAX_PRIZE - MIN_PRIZE + 1)) + MIN_PRIZE
-      : 0;
-
     setPhase("scratching");
 
     window.setTimeout(async () => {
-      setResult(didWin ? "win" : "lose");
-      setPrize(nextPrize);
+      let wins = 0;
+      let totalPrize = 0;
 
-      if (didWin) {
+      for (let i = 0; i < quantity; i++) {
+        const didWin = Math.random() < WIN_CHANCE;
+        if (didWin) {
+          wins++;
+          totalPrize += Math.floor(Math.random() * (MAX_PRIZE - MIN_PRIZE + 1)) + MIN_PRIZE;
+        }
+      }
+
+      setBatchResult({
+        totalCost,
+        quantity,
+        wins,
+        loses: quantity - wins,
+        totalPrize
+      });
+
+      if (totalPrize > 0) {
         setUpdating(true);
-        await setPlayerGold((player?.gold ?? 0) + nextPrize);
+        await setPlayerGold((player?.gold ?? 0) + totalPrize);
         setUpdating(false);
       }
 
       setPhase("revealed");
-    }, 950);
+    }, quantity > 1 ? 2000 : 950);
   }
 
   function resetScratch() {
     setPhase("buy");
-    setResult(null);
-    setPrize(0);
+    setBatchResult(null);
+  }
+
+  function handleQuantityChange(value: number) {
+    if (value < 1) setQuantity(1);
+    else if (maxBuyQuantity > 0 && value > maxBuyQuantity) setQuantity(maxBuyQuantity);
+    else setQuantity(value);
   }
 
   if (isHydrating) {
@@ -163,9 +188,44 @@ export function TavernScratch() {
                   sacar un premio entre {MIN_PRIZE} y {MAX_PRIZE} monedas.
                 </p>
 
+                <div className="mt-6 flex flex-col gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/40 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-semibold text-stone-300">Cantidad de tickets:</p>
+                    <div className="flex items-center gap-1 mx-auto sm:mx-0">
+                      <button
+                        type="button"
+                        onClick={() => handleQuantityChange(quantity - 1)}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-800 text-stone-300 transition hover:bg-stone-700"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        max={maxBuyQuantity || 1}
+                        value={quantity}
+                        onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                        className="w-16 rounded-xl border border-stone-700 bg-stone-900 px-2 py-2 text-center font-bold text-amber-300 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleQuantityChange(quantity + 1)}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-800 text-stone-300 transition hover:bg-stone-700"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button type="button" onClick={() => handleQuantityChange(1)} className="rounded-lg bg-stone-800/80 py-2 text-xs font-bold text-stone-300 transition hover:bg-stone-700">x1</button>
+                    <button type="button" onClick={() => handleQuantityChange(5)} className="rounded-lg bg-stone-800/80 py-2 text-xs font-bold text-stone-300 transition hover:bg-stone-700">x5</button>
+                    <button type="button" disabled={maxBuyQuantity <= 0} onClick={() => handleQuantityChange(maxBuyQuantity)} className="rounded-lg border border-amber-500/20 bg-amber-500/10 py-2 text-xs font-bold text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-50">MAX</button>
+                  </div>
+                </div>
+
                 {projectedGold !== null ? (
-                  <p className="mt-3 text-xs uppercase tracking-[0.16em] text-stone-500">
-                    Si compras ahora, te quedarian {projectedGold} de oro antes del resultado
+                  <p className="mt-4 text-xs uppercase tracking-[0.16em] text-stone-500">
+                    Costo: <span className="font-bold text-amber-400">{totalCost} oro</span> &bull; Te quedarian {projectedGold} de oro
                   </p>
                 ) : null}
 
@@ -173,14 +233,14 @@ export function TavernScratch() {
                   type="button"
                   onClick={() => void buyTicket()}
                   disabled={!canBuy}
-                  className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold transition md:w-auto md:min-w-72 ${
+                  className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-4 text-sm font-extrabold transition md:w-auto md:min-w-72 ${
                     canBuy
                       ? "bg-amber-500 text-stone-950 hover:bg-amber-400"
                       : "cursor-not-allowed bg-stone-800 text-stone-500"
                   }`}
                 >
                   <Ticket className="h-4 w-4" />
-                  {player.gold < SCRATCH_COST ? "Oro insuficiente" : "Comprar rasca"}
+                  {player.gold < totalCost ? "Oro insuficiente" : `Comprar x${quantity} rasca`}
                 </button>
               </div>
             </motion.div>
@@ -197,9 +257,11 @@ export function TavernScratch() {
               <ScratchArtwork mode="pristine" interactive onScratch={() => void scratchTicket()} />
 
               <div className="rounded-[1.5rem] border border-amber-500/15 bg-amber-500/10 p-4 text-center">
-                <p className="text-sm font-bold text-amber-300">Ticket listo</p>
+                <p className="text-sm font-bold text-amber-300">{quantity === 1 ? "Ticket listo" : "Tickets listos"}</p>
                 <p className="mt-2 text-sm leading-6 text-stone-300">
-                  Toca la carta o usa el boton para rascar y descubrir si el reino te sonrie.
+                  {quantity === 1 
+                    ? "Toca la carta o usa el boton para rascar y descubrir si el reino te sonrie."
+                    : `Tienes un talonario de ${quantity} tickets preparado para ser escaneado internamente.`}
                 </p>
                 <button
                   type="button"
@@ -208,7 +270,7 @@ export function TavernScratch() {
                   className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-stone-100 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-white"
                 >
                   <Sparkles className="h-4 w-4" />
-                  Rascar ahora
+                  {quantity === 1 ? "Rascar ahora" : "Rascar todo automaticamente"}
                 </button>
               </div>
             </motion.div>
@@ -224,12 +286,14 @@ export function TavernScratch() {
             >
               <motion.div
                 animate={{ rotate: [0, -1.5, 1.5, 0], scale: [1, 1.01, 0.99, 1] }}
-                transition={{ duration: 0.55, repeat: Infinity, ease: "easeInOut" }}
+                transition={{ duration: quantity > 1 ? 0.2 : 0.55, repeat: Infinity, ease: "easeInOut" }}
               >
                 <ScratchArtwork mode="pristine" />
               </motion.div>
               <div className="rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-5 text-center">
-                <p className="text-lg font-bold text-stone-100">Rascando la suerte...</p>
+                <p className="text-lg font-bold text-stone-100">
+                  {quantity === 1 ? "Rascando la suerte..." : `Scrapeando ${quantity} tickets velozmente...`}
+                </p>
                 <p className="mt-2 text-sm leading-6 text-stone-400">
                   La carta esta revelando su destino. Cruza los dedos.
                 </p>
@@ -237,7 +301,7 @@ export function TavernScratch() {
             </motion.div>
           ) : null}
 
-          {phase === "revealed" ? (
+          {phase === "revealed" && batchResult ? (
             <motion.div
               key="revealed"
               initial={{ opacity: 0, scale: 0.98 }}
@@ -245,34 +309,54 @@ export function TavernScratch() {
               exit={{ opacity: 0, scale: 0.98 }}
               className="space-y-5"
             >
-              <ScratchArtwork mode={result === "win" ? "win" : "lose"} />
+              <ScratchArtwork 
+                mode={quantity === 1 && batchResult.wins === 0 ? "lose" : batchResult.wins > 0 ? "win" : "pristine"} 
+              />
 
               <div
-                className={`rounded-[1.5rem] border p-5 text-center ${
-                  result === "win"
+                className={`rounded-[1.5rem] border p-6 text-center ${
+                  batchResult.totalPrize > 0
                     ? "border-emerald-500/20 bg-emerald-500/10"
                     : "border-rose-500/20 bg-rose-500/10"
                 }`}
               >
                 <p
-                  className={`text-lg font-black ${
-                    result === "win" ? "text-emerald-300" : "text-rose-300"
+                  className={`text-xl font-black uppercase tracking-wider ${
+                    batchResult.totalPrize > 0 ? "text-emerald-400" : "text-rose-400"
                   }`}
                 >
-                  {result === "win" ? "¡Ticket premiado!" : "No hubo premio"}
+                  {batchResult.totalPrize > 0 ? "¡Recibo Ganador!" : "Sin suerte esta vez"}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-stone-300">
-                  {result === "win"
-                    ? `Ganaste ${prize} de oro y ya fue acreditado a tu perfil.`
-                    : `Perdiste los ${SCRATCH_COST} de oro del ticket, pero siempre puedes intentarlo otra vez.`}
-                </p>
+
+                <div className="mx-auto mt-4 max-w-sm rounded-[1rem] bg-stone-950/40 p-5 text-sm text-stone-300">
+                  <div className="flex items-center justify-between border-b border-stone-800/60 pb-3">
+                    <span className="text-stone-400">Tickets Jugados</span>
+                    <span className="font-bold text-stone-100 text-base">{batchResult.quantity}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-stone-800/60 py-3">
+                    <span className="text-stone-400">Tickets Premiados</span>
+                    <span className="font-black text-emerald-400">{batchResult.wins} WIN</span>
+                  </div>
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-stone-400">Tickets Vacios</span>
+                    <span className="font-black text-rose-500">{batchResult.loses} LOSE</span>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-col items-center justify-center gap-1">
+                  <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Premio depositado</p>
+                  <p className={`text-3xl font-black ${batchResult.totalPrize > batchResult.totalCost ? "text-emerald-400" : "text-emerald-500"}`}>
+                    {batchResult.totalPrize} <span className="text-lg font-bold opacity-70">ORO</span>
+                  </p>
+                </div>
+
                 <button
                   type="button"
                   onClick={resetScratch}
-                  className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-stone-100 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-white"
+                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-100 px-6 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-white md:w-auto"
                 >
-                  <Coins className="h-4 w-4" />
-                  Comprar otro ticket
+                  <Coins className="h-5 w-5" />
+                  Jugar otra transaccion
                 </button>
               </div>
             </motion.div>

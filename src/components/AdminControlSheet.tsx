@@ -560,38 +560,50 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <div className="border-b border-stone-800 px-5 py-4 md:px-6">
-          <div className="flex flex-wrap gap-2">
-            <AdminTabButton
-              label="Resumen"
-              active={activeTab === "overview"}
-              onClick={() => setActiveTab("overview")}
-            />
-            <AdminTabButton
-              label="Actividad"
-              active={activeTab === "activity"}
-              onClick={() => setActiveTab("activity")}
-            />
-            <AdminTabButton
-              label="Jugadores"
-              active={activeTab === "players"}
-              onClick={() => setActiveTab("players")}
-            />
-            <AdminTabButton
-              label="Eventos"
-              active={activeTab === "events"}
-              onClick={() => setActiveTab("events")}
-            />
-            <AdminTabButton
-              label="Mercado"
-              active={activeTab === "market"}
-              onClick={() => setActiveTab("market")}
-            />
-            <AdminTabButton
-              label="Plantillas"
-              active={activeTab === "templates"}
-              onClick={() => setActiveTab("templates")}
-            />
+        <div className="border-b border-stone-800 px-0 py-4 md:px-6">
+          <div className="flex items-center gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:px-0 [&::-webkit-scrollbar]:hidden">
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Resumen"
+                active={activeTab === "overview"}
+                onClick={() => setActiveTab("overview")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Actividad"
+                active={activeTab === "activity"}
+                onClick={() => setActiveTab("activity")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Jugadores"
+                active={activeTab === "players"}
+                onClick={() => setActiveTab("players")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Eventos"
+                active={activeTab === "events"}
+                onClick={() => setActiveTab("events")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Mercado"
+                active={activeTab === "market"}
+                onClick={() => setActiveTab("market")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Plantillas"
+                active={activeTab === "templates"}
+                onClick={() => setActiveTab("templates")}
+              />
+            </div>
           </div>
         </div>
 
@@ -629,12 +641,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     {rankingMessage}
                   </p>
                 ) : null}
-                <div className="mt-4 flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <button
                     type="button"
                     onClick={() => void handleSeedWeek()}
                     disabled={isSeedingWeek}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                   >
                     {isSeedingWeek ? (
                       <>
@@ -799,32 +811,34 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     <NumericInput label="Racha" value={formStreak} onChange={setFormStreak} />
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Guardando...
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="h-4 w-4" />
-                        Guardar semana actual
-                      </>
-                    )}
-                  </button>
-                  {isActivityEditMode ? (
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
                     <button
-                      type="button"
-                      onClick={resetActivityForm}
-                      className="ml-3 rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                      type="submit"
+                      disabled={isSaving}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                     >
-                      Cancelar edicion
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          <Crown className="h-4 w-4" />
+                          Guardar semana
+                        </>
+                      )}
                     </button>
-                  ) : null}
+                    {isActivityEditMode ? (
+                      <button
+                        type="button"
+                        onClick={resetActivityForm}
+                        className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
+                      >
+                        Cancelar edicion
+                      </button>
+                    ) : null}
+                  </div>
 
                   {feedback ? (
                     <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
@@ -997,22 +1011,28 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       </select>
                     </label>
 
-                    <div className="flex flex-wrap gap-2">
-                      <AdminModeButton
-                        label="Sumar"
-                        active={goldMode === "add"}
-                        onClick={() => setGoldMode("add")}
-                      />
-                      <AdminModeButton
-                        label="Restar"
-                        active={goldMode === "subtract"}
-                        onClick={() => setGoldMode("subtract")}
-                      />
-                      <AdminModeButton
-                        label="Fijar"
-                        active={goldMode === "set"}
-                        onClick={() => setGoldMode("set")}
-                      />
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+                      <div className="flex-shrink-0">
+                        <AdminModeButton
+                          label="Sumar"
+                          active={goldMode === "add"}
+                          onClick={() => setGoldMode("add")}
+                        />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton
+                          label="Restar"
+                          active={goldMode === "subtract"}
+                          onClick={() => setGoldMode("subtract")}
+                        />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton
+                          label="Fijar"
+                          active={goldMode === "set"}
+                          onClick={() => setGoldMode("set")}
+                        />
+                      </div>
                     </div>
 
                     <NumericInput
@@ -1206,11 +1226,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     placeholder="Personaje activo, inscripcion previa..."
                   />
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="mt-4 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
                     <button
                       type="submit"
                       disabled={isSavingEvent || isDeletingEvent}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                     >
                       {isSavingEvent ? (
                         <>
@@ -1229,9 +1249,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         type="button"
                         onClick={resetEventForm}
                         disabled={isDeletingEvent}
-                        className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                        className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
                       >
-                        Cancelar edicion
+                        Cancelar
                       </button>
                     ) : null}
                     {eventId ? (
@@ -1239,18 +1259,18 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         type="button"
                         onClick={() => void handleDeleteEvent()}
                         disabled={isSavingEvent || isDeletingEvent}
-                        className="rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                       >
-                        {isDeletingEvent ? "Borrando..." : "Borrar evento"}
+                        {isDeletingEvent ? "Borrando..." : "Borrar"}
                       </button>
                     ) : null}
                     <button
                       type="button"
                       onClick={resetEventForm}
                       disabled={isDeletingEvent}
-                      className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                      className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
                     >
-                      Limpiar formulario
+                      Limpiar
                     </button>
                   </div>
 
@@ -1288,27 +1308,35 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     <span className="text-sm font-semibold text-stone-200">
                       Estado
                     </span>
-                    <div className="flex flex-wrap gap-2">
-                      <AdminModeButton
-                        label="Todos"
-                        active={eventListFilter === "all"}
-                        onClick={() => setEventListFilter("all")}
-                      />
-                      <AdminModeButton
-                        label="Activo"
-                        active={eventListFilter === "active"}
-                        onClick={() => setEventListFilter("active")}
-                      />
-                      <AdminModeButton
-                        label="Produccion"
-                        active={eventListFilter === "in-production"}
-                        onClick={() => setEventListFilter("in-production")}
-                      />
-                      <AdminModeButton
-                        label="Finalizado"
-                        active={eventListFilter === "finished"}
-                        onClick={() => setEventListFilter("finished")}
-                      />
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+                      <div className="flex-shrink-0">
+                        <AdminModeButton
+                          label="Todos"
+                          active={eventListFilter === "all"}
+                          onClick={() => setEventListFilter("all")}
+                        />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton
+                          label="Activo"
+                          active={eventListFilter === "active"}
+                          onClick={() => setEventListFilter("active")}
+                        />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton
+                          label="Produccion"
+                          active={eventListFilter === "in-production"}
+                          onClick={() => setEventListFilter("in-production")}
+                        />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton
+                          label="Finalizado"
+                          active={eventListFilter === "finished"}
+                          onClick={() => setEventListFilter("finished")}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1488,11 +1516,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     </div>
                   )}
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="mt-4 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
                     <button
                       type="submit"
                       disabled={isSavingMarketItem || isDeletingMarketItem}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                     >
                       {isSavingMarketItem ? (
                         <>
@@ -1511,9 +1539,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         type="button"
                         onClick={resetMarketForm}
                         disabled={isDeletingMarketItem}
-                        className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                        className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
                       >
-                        Cancelar edicion
+                        Cancelar
                       </button>
                     ) : null}
                     {marketItemId ? (
@@ -1521,18 +1549,18 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         type="button"
                         onClick={() => void handleDeleteMarketItem()}
                         disabled={isSavingMarketItem || isDeletingMarketItem}
-                        className="rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                       >
-                        {isDeletingMarketItem ? "Borrando..." : "Borrar item"}
+                        {isDeletingMarketItem ? "Borrando..." : "Borrar"}
                       </button>
                     ) : null}
                     <button
                       type="button"
                       onClick={resetMarketForm}
                       disabled={isDeletingMarketItem}
-                      className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                      className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
                     >
-                      Limpiar formulario
+                      Limpiar
                     </button>
                   </div>
 
@@ -1568,12 +1596,22 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   />
                   <div className="space-y-2">
                     <span className="text-sm font-semibold text-stone-200">Categoria</span>
-                    <div className="flex flex-wrap gap-2">
-                      <AdminModeButton label="Todos" active={marketCategoryFilter === "all"} onClick={() => setMarketCategoryFilter("all")} />
-                      <AdminModeButton label="Pociones" active={marketCategoryFilter === "potions"} onClick={() => setMarketCategoryFilter("potions")} />
-                      <AdminModeButton label="Armaduras" active={marketCategoryFilter === "armors"} onClick={() => setMarketCategoryFilter("armors")} />
-                      <AdminModeButton label="Espadas" active={marketCategoryFilter === "swords"} onClick={() => setMarketCategoryFilter("swords")} />
-                      <AdminModeButton label="Otros" active={marketCategoryFilter === "others"} onClick={() => setMarketCategoryFilter("others")} />
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+                      <div className="flex-shrink-0">
+                        <AdminModeButton label="Todos" active={marketCategoryFilter === "all"} onClick={() => setMarketCategoryFilter("all")} />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton label="Pociones" active={marketCategoryFilter === "potions"} onClick={() => setMarketCategoryFilter("potions")} />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton label="Armaduras" active={marketCategoryFilter === "armors"} onClick={() => setMarketCategoryFilter("armors")} />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton label="Espadas" active={marketCategoryFilter === "swords"} onClick={() => setMarketCategoryFilter("swords")} />
+                      </div>
+                      <div className="flex-shrink-0">
+                        <AdminModeButton label="Otros" active={marketCategoryFilter === "others"} onClick={() => setMarketCategoryFilter("others")} />
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -108,33 +108,32 @@ export function TavernScratch() {
   return (
     <div className="rounded-[2rem] border border-stone-800 bg-stone-900/80 p-6 shadow-[inset_0_4px_30px_rgba(0,0,0,0.5)] md:p-8">
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/50 px-4 py-3">
+        <div className="flex items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/50 p-4 md:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-800 text-stone-300">
+            <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
               <UserRound className="h-5 w-5" />
             </div>
-            <div className="text-left">
-              <p className="text-xs text-stone-500">Jugador</p>
-              <p className="font-bold text-stone-200">{player.username}</p>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+                {player.username}
+              </p>
+              <div className="mt-1 flex items-center gap-2">
+                <p className="text-2xl font-black text-amber-300">
+                  {player.gold}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="text-right">
-            <p className="text-xs text-stone-500">Oro disponible</p>
-            <div className="mt-1 flex items-center gap-2">
-              <p className="font-mono text-lg font-bold text-amber-400">
-                {player.gold} de oro
-              </p>
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={updating}
-                className="rounded-lg p-1 text-stone-500 transition hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-30"
-              >
-                <RefreshCw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
-              </button>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={updating}
+            className="rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+            title="Actualizar saldo"
+          >
+            <RefreshCw className={`h-5 w-5 ${updating ? "animate-spin" : ""}`} />
+          </button>
         </div>
 
         <div className="grid gap-4 rounded-[1.6rem] border border-stone-800 bg-stone-950/45 p-4 text-sm text-stone-300 md:grid-cols-3">

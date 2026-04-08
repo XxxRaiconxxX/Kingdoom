@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   UserRound,
   WalletCards,
+  Send,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 
@@ -19,6 +20,11 @@ const AdminControlSheet = lazy(() =>
 const PlayerInventorySheet = lazy(() =>
   import("./PlayerInventorySheet").then((module) => ({
     default: module.PlayerInventorySheet,
+  }))
+);
+const PlayerTradeSheet = lazy(() =>
+  import("./PlayerTradeSheet").then((module) => ({
+    default: module.PlayerTradeSheet,
   }))
 );
 
@@ -38,6 +44,7 @@ export function PlayerProfilePanel() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isTradeOpen, setIsTradeOpen] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -119,6 +126,14 @@ export function PlayerProfilePanel() {
                   >
                     <Backpack className="h-3.5 w-3.5" />
                     Inventario
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsTradeOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/25 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-300 transition hover:border-cyan-400/35 hover:bg-cyan-500/14"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    Intercambiar
                   </button>
                   <button
                     type="button"
@@ -232,6 +247,15 @@ export function PlayerProfilePanel() {
             }
           >
             <PlayerInventorySheet onClose={() => setIsInventoryOpen(false)} />
+          </Suspense>
+        ) : null}
+        {isTradeOpen && player ? (
+          <Suspense
+            fallback={
+              <ProfileSheetFallback message="Abriendo el centro de intercambios..." />
+            }
+          >
+            <PlayerTradeSheet onClose={() => setIsTradeOpen(false)} />
           </Suspense>
         ) : null}
       </AnimatePresence>

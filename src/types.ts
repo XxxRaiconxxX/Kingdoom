@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-export type TabId = "home" | "lore" | "world" | "market" | "ranking";
+export type TabId = "home" | "grimoire" | "library" | "market" | "ranking";
 export type Rarity = "legendary" | "epic" | "rare" | "common";
 export type PlayerStatus = "alive" | "dead";
 export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
@@ -163,4 +163,28 @@ export type PurchaseFormValues = {
   whatsapp: string;
   quantity: number;
   gotcha: string;
+};
+
+// --- GRIMORIO TYPES ---
+
+export type AbilityLevel = {
+  level: number;
+  name: string;
+  effect: string;
+  cd: string;
+  limit: string;
+  antiManoNegra: string;
+};
+
+export type MagicStyle = {
+  id: string;
+  title: string;
+  description: string;
+  levels: Record<number, AbilityLevel[]>;
+};
+
+export type GrimoireCategory = {
+  id: string;
+  title: string;
+  styles: MagicStyle[];
 };

@@ -5,7 +5,8 @@ import {
   Castle,
   Users,
   Compass,
-  AlertCircle
+  AlertCircle,
+  X
 } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { ExpandableText } from "./ExpandableText";
@@ -23,6 +24,8 @@ import {
 } from "../data/world";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ReactNode } from "react";
+import mapVyralis from "../assets/maps/vyralis-map.jpeg";
+import mapGeopolitica from "../assets/maps/geopolitica-map.jpeg";
 
 type LibraryTab = "lore" | "world";
 
@@ -143,8 +146,77 @@ function LoreSubSection() {
 }
 
 function WorldSubSection() {
+  const [activeMap, setActiveMap] = useState<"vyralis" | "geopolitica">("vyralis");
+  const [mapViewerOpen, setMapViewerOpen] = useState(false);
+
+  const mapInfo =
+    activeMap === "vyralis"
+      ? {
+          title: "Mapa del continente de Vyralis",
+          subtitle: "Poder, recursos y tensiones",
+          src: mapVyralis,
+          alt: "Mapa del continente de Vyralis",
+        }
+      : {
+          title: "Geopolitica del continente",
+          subtitle: "Fronteras y rutas",
+          src: mapGeopolitica,
+          alt: "Mapa geopolitico del continente",
+        };
+
   return (
     <div className="space-y-5">
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <SectionHeader
+            eyebrow="Mapa del reino"
+            title={mapInfo.title}
+            description={mapInfo.subtitle}
+          />
+          <div className="flex flex-wrap gap-2">
+            <FilterPill
+              label="Vyralis"
+              active={activeMap === "vyralis"}
+              onClick={() => setActiveMap("vyralis")}
+            />
+            <FilterPill
+              label="Geopolitica"
+              active={activeMap === "geopolitica"}
+              onClick={() => setActiveMap("geopolitica")}
+            />
+            <button
+              onClick={() => setMapViewerOpen(true)}
+              className="ml-auto rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-200 transition hover:bg-amber-500/15"
+              type="button"
+            >
+              Ver en grande
+            </button>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setMapViewerOpen(true)}
+          type="button"
+          className="mt-5 w-full overflow-hidden rounded-[1.6rem] border border-stone-800 bg-stone-950/40 text-left shadow-inner shadow-black/20"
+        >
+          <img
+            src={mapInfo.src}
+            alt={mapInfo.alt}
+            loading="lazy"
+            decoding="async"
+            className="h-auto w-full object-cover"
+          />
+          <div className="flex items-center justify-between gap-4 border-t border-stone-800 px-4 py-3">
+            <p className="text-xs leading-5 text-stone-400">
+              Toca el mapa para ampliarlo y leer los detalles.
+            </p>
+            <span className="shrink-0 rounded-full border border-stone-800 bg-stone-900/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-stone-300">
+              Zoom
+            </span>
+          </div>
+        </button>
+      </div>
+
       <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
         <SectionHeader
           eyebrow="Estado del mundo"
@@ -197,6 +269,69 @@ function WorldSubSection() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {mapViewerOpen ? (
+          <motion.div
+            className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ y: 18, opacity: 0, scale: 0.98 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 18, opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/50"
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="flex items-start justify-between gap-4 border-b border-stone-800 px-5 py-4">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-400/80">
+                    Mapa y mundo
+                  </p>
+                  <p className="mt-1 truncate text-sm font-bold text-stone-100">
+                    {mapInfo.title}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMapViewerOpen(false)}
+                  type="button"
+                  className="rounded-2xl border border-stone-800 bg-stone-900/60 p-2 text-stone-300 transition hover:bg-stone-900"
+                  aria-label="Cerrar"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="max-h-[78vh] overflow-auto bg-black/20">
+                <img
+                  src={mapInfo.src}
+                  alt={mapInfo.alt}
+                  className="block h-auto w-full select-none object-contain"
+                  draggable={false}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-800 px-5 py-4">
+                <p className="text-xs leading-5 text-stone-400">
+                  Consejo: en movil, puedes hacer zoom con los gestos del navegador.
+                </p>
+                <a
+                  href={mapInfo.src}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-stone-800 bg-stone-900/70 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-stone-200 transition hover:bg-stone-900"
+                >
+                  Abrir archivo
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

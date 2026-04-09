@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/LibrarySection.tsx`, `src/assets/maps/vyralis-map.jpeg`, `src/assets/maps/geopolitica-map.jpeg`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se agregaron los mapas del continente a la pestaña `Mapa y Mundo` dentro de `Biblioteca`, con selector y visor en grande para movil.
+*   **Cambios Clave:**
+    *   Nuevo bloque de mapa al inicio de `Mapa y Mundo` con botones para alternar entre "Vyralis" y "Geopolitica".
+    *   El mapa se puede tocar/abrir en un modal de pantalla completa para leer detalles sin saturar la UI.
+    *   Los assets quedan versionados en `src/assets/maps/` para que Vite los empaquete y no haya 404 en deploy.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` verificados sin errores (advertencia conocida por bundle grande, sin bloquear).
+
+---
+### [Fecha: 09/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Conversion automatica de unidades cientificas (N, kg, J, km/h, m/s, °C) a "puntos" estilo D&D para que las habilidades se entiendan como stats (Fuerza, Velocidad, Danio).
 *   **Cambios Clave:**

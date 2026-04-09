@@ -143,6 +143,27 @@ export type RealmFaction = {
   description: string;
 };
 
+export type FactionRelation = {
+  realm: string;
+  description: string;
+};
+
+export type FactionDossier = {
+  id: string;
+  name: string;
+  motto: string;
+  alignedRealm: string;
+  history: string;
+  specialization: string;
+  tactics: string;
+  equipment: string;
+  headquarters: string;
+  relations: FactionRelation[];
+  playerDetails: string;
+  startingItem?: string;
+  bonuses?: string[];
+};
+
 export type PopulationGroup = {
   title: string;
   races: string[];

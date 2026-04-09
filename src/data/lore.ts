@@ -1,5 +1,5 @@
 import { Dice5, ScrollText, Skull } from "lucide-react";
-import type { LoreChapter, LoreRule, RealmFaction } from "../types";
+import type { FactionDossier, LoreChapter, LoreRule, RealmFaction } from "../types";
 
 export const LORE_RULES: LoreRule[] = [
   {
@@ -67,5 +67,151 @@ export const REALM_FACTIONS: RealmFaction[] = [
     motto: "Toda corona paga peaje.",
     description:
       "Comerciantes armados, escoltas y capitanes que venden acero, rutas y favores.",
+  },
+];
+
+export const FACTION_DOSSIERS: FactionDossier[] = [
+  {
+    id: "cuervos-del-norte",
+    name: "Cuervos del Norte",
+    motto: "Ven primero, golpea despues.",
+    alignedRealm: "Kaelum-Gard (Fronteras)",
+    history:
+      "Nacieron como unidades de reconocimiento de elite enviadas a marcar rutas seguras dentro de zonas infectadas por la Fractura de Cristal. Con el tiempo entendieron que el Imperio los consideraba prescindibles, asi que cortaron la cadena de mando y se volvieron una hermandad independiente. Hoy operan desde las sombras, vendiendo informacion al mejor postor con un codigo de honor estricto: la informacion nunca se falsea.",
+    specialization:
+      "Espionaje de Eter: usan fragmentos de cristal refinado para crear sensores que detectan vibraciones magicas a gran distancia.",
+    tactics:
+      "Evitan el choque frontal. Prefieren sabotaje, asesinato selectivo y guerra de guerrillas, siempre con rutas de escape preparadas.",
+    equipment:
+      "Capas de plumas de Arpias de las Cumbres para camuflaje en nieve y roca. Dagas con veneno de Aracnida, capaces de paralizar a objetivos grandes en segundos.",
+    headquarters:
+      "El Nido de Sombras: tuneles y puestos de vigia en los picos mas altos entre Kaelum-Gard y los Paramos, con control visual sobre rutas comerciales terrestres.",
+    relations: [
+      {
+        realm: "Kaelum-Gard",
+        description:
+          "Oficialmente son traidores, pero se los contrata en secreto para misiones que el ejercito regular no puede realizar sin hacer ruido.",
+      },
+      {
+        realm: "Oakhaven",
+        description:
+          "Tregua tacita con los Elfos Silvanos: no cazan en el bosque a cambio de informacion sobre movimientos imperiales.",
+      },
+      {
+        realm: "Union de los Paramos",
+        description:
+          "Sus mejores clientes: las caravanas pagan por reportes de nidos de monstruos activos antes de avanzar.",
+      },
+    ],
+    playerDetails:
+      "Un Cuervo del Norte destaca en rastreo, infiltracion y lectura del terreno. Su ventaja real es la informacion: saber por donde entrar, por donde salir y a quien evitar.",
+    startingItem: "Cristal de Resonancia (deteccion de monstruos o magia en radio corto).",
+    bonuses: ["Supervivencia", "Sigilo", "Percepcion"],
+  },
+  {
+    id: "orden-del-sol-marchito",
+    name: "La Orden del Sol Marchito",
+    motto: "La fe no muere, se endurece.",
+    alignedRealm: "Frontera Arcania / Kaelum-Gard",
+    history:
+      "La orden nacio en los limites exteriores de Arcania, formada por clerigos y guerreros que sobrevivieron a la Fractura. Consideran la energia del cristal una enfermedad sagrada: el sol 'murio' ese dia y la luz actual es solo un reflejo palido. Su mision es limpiar el mundo de corrupcion magica, lo que los lleva a incinerar monstruos mutantes y experimentos fallidos por igual.",
+    specialization:
+      "Piromancia estatica y combate de primera linea. Emplean resonancias que desestabilizan cristales cercanos.",
+    tactics:
+      "Tierra quemada. Entran con estandartes que emiten una frecuencia capaz de hacer fallar o explotar armas magicas cercanas.",
+    equipment:
+      "Armaduras de placas con soles eclipsados. Maza y mandoble bendecidos con aceites alquimicos de Oakhaven que arden con fuego blanco, dificil de extinguir.",
+    headquarters:
+      "La Ciudad Calcinada: asentamiento reconstruido con piedra refractaria en la frontera entre Arcania y Kaelum-Gard, una cuarentena no oficial frente a brotes de cristal.",
+    relations: [
+      {
+        realm: "Arcania",
+        description:
+          "Los considera fanatismo peligroso; la orden responde tratando a los magos como pecadores originales.",
+      },
+      {
+        realm: "Kaelum-Gard",
+        description:
+          "El Imperio los tolera porque purgan nidos de monstruos sin costo y ahorran recursos militares.",
+      },
+      {
+        realm: "Oakhaven",
+        description:
+          "Relacion hostil: la orden quema bosques enteros si detecta infeccion magica, chocando con driadas y elfos.",
+      },
+    ],
+    playerDetails:
+      "Un miembro suele tener voluntad de hierro y disciplina marcial. Es temido por su determinacion: la purga primero, las preguntas despues.",
+    bonuses: ["Resistencia a fuego/quemadura", "Ventaja vs. control mental"],
+  },
+  {
+    id: "guardianes-del-umbral",
+    name: "Guardianes del Umbral",
+    motto: "Lo sellado no debe abrirse.",
+    alignedRealm: "Catacumbas y enclaves sellados",
+    history:
+      "Pendiente: comparte el lore e historia de esta faccion y lo integro con el mismo formato que las demas.",
+    specialization:
+      "Guardiania de reliquias y sellos antiguos.",
+    tactics:
+      "Pendiente: tacticas y estilo de combate.",
+    equipment:
+      "Pendiente: equipo y artefactos caracteristicos.",
+    headquarters:
+      "Pendiente: sede y presencia en el mapa.",
+    relations: [
+      {
+        realm: "Kaelum-Gard",
+        description:
+          "Pendiente: relacion con el Imperio.",
+      },
+      {
+        realm: "Oakhaven",
+        description:
+          "Pendiente: relacion con el Protectorado.",
+      },
+      {
+        realm: "Union de los Paramos",
+        description:
+          "Pendiente: relacion con la Union.",
+      },
+    ],
+    playerDetails:
+      "Pendiente: detalles mecanicos para el jugador (bonos, item inicial, etc.).",
+  },
+  {
+    id: "mercenarios-del-hierro",
+    name: "Mercenarios del Hierro",
+    motto: "Toda corona paga peaje.",
+    alignedRealm: "Rutas comerciales y peajes",
+    history:
+      "Pendiente: comparte el lore e historia de esta faccion y lo integro con el mismo formato que las demas.",
+    specialization:
+      "Escolta, comercio armado y control de rutas.",
+    tactics:
+      "Pendiente: tacticas y estilo de combate.",
+    equipment:
+      "Pendiente: equipo, marcas de compania y arsenal.",
+    headquarters:
+      "Pendiente: sede y presencia en el mapa.",
+    relations: [
+      {
+        realm: "Kaelum-Gard",
+        description:
+          "Pendiente: relacion con el Imperio.",
+      },
+      {
+        realm: "Arcania",
+        description:
+          "Pendiente: relacion con el Nexo.",
+      },
+      {
+        realm: "Union de los Paramos",
+        description:
+          "Pendiente: relacion con la Union.",
+      },
+    ],
+    playerDetails:
+      "Pendiente: detalles mecanicos para el jugador (bonos, item inicial, etc.).",
   },
 ];

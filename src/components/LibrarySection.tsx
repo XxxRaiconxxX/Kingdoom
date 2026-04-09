@@ -14,7 +14,8 @@ import { FilterPill } from "./FilterPill";
 import { 
   LORE_RULES, 
   LORE_CHAPTERS, 
-  REALM_FACTIONS 
+  REALM_FACTIONS,
+  FACTION_DOSSIERS
 } from "../data/lore";
 import { 
   WORLD_STATUS, 
@@ -129,17 +130,100 @@ function LoreSubSection() {
           title="Fuerzas del relato"
           description="Las principales facciones del rol quedan resumidas para que el jugador nuevo no se pierda."
         />
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
           {REALM_FACTIONS.map((faction) => (
-            <article key={faction.name} className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-5">
+            <article
+              key={faction.name}
+              className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-5"
+            >
               <h3 className="text-lg font-bold text-stone-100">{faction.name}</h3>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-300">{faction.motto}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-300">
+                {faction.motto}
+              </p>
               <div className="mt-3">
                 <ExpandableText text={faction.description} lines={3} />
               </div>
             </article>
           ))}
         </div>
+
+        <div className="mt-6 space-y-3">
+          {FACTION_DOSSIERS.map((dossier) => (
+            <CollapsiblePanel
+              key={dossier.id}
+              title={dossier.name}
+              subtitle={`${dossier.motto} · ${dossier.alignedRealm}`}
+            >
+              <div className="grid gap-3">
+                <DossierBlock label="Lore e historia" text={dossier.history} />
+                <DossierBlock
+                  label="Especializacion y combate"
+                  text={`${dossier.specialization}\n\nTacticas: ${dossier.tactics}`}
+                />
+                <DossierBlock label="Equipo" text={dossier.equipment} />
+                <DossierBlock label="Sede y presencia" text={dossier.headquarters} />
+
+                <div className="rounded-[1.35rem] border border-stone-800 bg-stone-950/45 p-4">
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-stone-400">
+                    Relaciones con reinos
+                  </p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-3">
+                    {dossier.relations.map((rel) => (
+                      <div
+                        key={`${dossier.id}-${rel.realm}`}
+                        className="rounded-[1.2rem] border border-stone-800 bg-stone-900/40 p-3"
+                      >
+                        <p className="text-xs font-bold text-stone-100">{rel.realm}</p>
+                        <p className="mt-2 text-sm leading-6 text-stone-400">
+                          {rel.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-[1.35rem] border border-amber-500/15 bg-amber-500/5 p-4">
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-300/80">
+                    Detalles para el jugador
+                  </p>
+                  <div className="mt-3">
+                    <ExpandableText text={dossier.playerDetails} lines={4} />
+                  </div>
+                  {(dossier.bonuses?.length || dossier.startingItem) ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {dossier.bonuses?.map((bonus) => (
+                        <span
+                          key={`${dossier.id}-${bonus}`}
+                          className="rounded-full border border-amber-500/15 bg-stone-950/40 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-amber-200/80"
+                        >
+                          {bonus}
+                        </span>
+                      ))}
+                      {dossier.startingItem ? (
+                        <span className="rounded-full border border-stone-800 bg-stone-950/40 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-stone-200/80">
+                          Inicio: {dossier.startingItem}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </CollapsiblePanel>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DossierBlock({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="rounded-[1.35rem] border border-stone-800 bg-stone-950/45 p-4">
+      <p className="text-[11px] font-black uppercase tracking-[0.22em] text-stone-400">
+        {label}
+      </p>
+      <div className="mt-3">
+        <ExpandableText text={text} lines={4} />
       </div>
     </div>
   );

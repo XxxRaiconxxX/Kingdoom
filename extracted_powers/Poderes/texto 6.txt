@@ -1,0 +1,87 @@
+Siguiendo el orden del catálogo de **Magia de Invocación**, el siguiente poder es la **Invocación de Sombras** (también conocida como Umbrakinesis Aplicada o Invocación de Vacío).
+
+---
+
+### --Invocación de Sombras--
+
+Desde la **física de la materia oscura** y la **óptica no lineal**, la Invocación de Sombras se define como la capacidad de dar masa y coherencia a las regiones de baja densidad de fotones. Científicamente, el usuario no invoca "oscuridad" (que es solo la ausencia de luz), sino que utiliza las sombras como puntos de anclaje para filtrar **energía de vacío** o materia exótica de una dimensión paralela de baja entropía. Al manipular el **índice de refracción** del aire y concentrar partículas de materia oscura, el invocador crea estructuras tangibles que absorben la radiación electromagnética circundante.
+
+Físicamente, los entes de sombra son **sumideros térmicos** perfectos; no reflejan luz y absorben el calor, lo que explica por qué la temperatura desciende drásticamente durante su aparición. Estas entidades operan bajo una lógica de "física negativa": su masa aumenta en proporción a la oscuridad del entorno. En niveles avanzados, el usuario puede programar las sombras para que actúen como extensiones de su propio subconsciente, permitiendo que las criaturas atraviesen superficies sólidas al "desfasar" su estructura molecular entre las brechas de la materia bariónica.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Zarcillo Umbrío:** El usuario manifiesta un tentáculo de sombra que emerge de su propia sombra o de una cercana.
+    * **Efecto:** Puede sujetar objetos pequeños, tropezar a un enemigo o servir como una cuerda de 2 metros.
+    * **CD:** 1 turno.
+    * **Limitante:** Tiene la fuerza de un brazo humano débil ($80 N$) y se disipa ante una luz intensa.
+    * **Anti-Mano Negra:** No puede infligir daño por corte ni perforación; solo sirve para sujeción o manipulación leve.
+2. **Mancha de Ocultamiento:** Una sombra que se adhiere a la cara de un objetivo.
+    * **Efecto:** Ciega temporalmente al enemigo por 1 segundo (el tiempo de un parpadeo largo).
+    * **CD:** 2 turnos.
+    * **Limitante:** Solo funciona si el objetivo ya se encuentra en una zona con iluminación media o baja.
+    * **Anti-Mano Negra:** Un simple destello de fuego o luz mágica elimina el efecto al instante.
+
+#### Habilidades de Lv2
+1. **Acechador de Sombras (Familiar):** Invoca a una pequeña criatura cuadrúpeda o rastrera hecha de oscuridad densa.
+    * **Efecto:** Es casi invisible en la penumbra. Sirve para espionaje y puede realizar un ataque de "quemadura por frío" ($20 J$).
+    * **CD:** 3 turnos.
+    * **Limitante:** Si entra en contacto con luz solar directa, la criatura se evapora en 1 turno.
+    * **Anti-Mano Negra:** El usuario debe permanecer en silencio para recibir los datos sensoriales del acechador; el ruido rompe la conexión.
+2. **Manto de Penumbra:** El usuario invoca sombras que se envuelven alrededor de su cuerpo.
+    * **Efecto:** Otorga un bono masivo al sigilo y hace que el contorno del usuario sea difícil de enfocar.
+    * **CD:** 3 turnos.
+    * **Limitante:** El usuario siente un letargo físico (frío interno) que reduce su agilidad un 10%.
+    * **Anti-Mano Negra:** La sombra emite un ligero rastro de humo negro que puede ser detectado por rastreadores expertos.
+
+#### Habilidades de Lv3
+1. **Soldado de Ébano:** Invoca una figura humanoide armada, con una solidez similar a la del caucho endurecido.
+    * **Efecto:** Ataca con una fuerza de $400 N$ y puede regenerar extremidades perdidas consumiendo la oscuridad del entorno.
+    * **CD:** 4 turnos.
+    * **Limitante:** Su eficacia depende de la luz ambiental: en penumbra total es Lv3, bajo luz solar baja a Lv1.
+    * **Anti-Mano Negra:** No tiene voluntad propia; si el usuario no le da órdenes constantes, el soldado se queda estático y defensivo.
+2. **Prisión de Sombras:** Las sombras del suelo se vuelven sólidas y atrapan los pies de los enemigos en un radio de 5 metros.
+    * **Efecto:** Inmoviliza a los objetivos por 2 turnos o hasta que apliquen una fuerza superior a $800 N$.
+    * **CD:** 5 turnos.
+    * **Limitante:** Requiere que el suelo sea una superficie sólida donde se proyecten sombras.
+    * **Anti-Mano Negra:** Los enemigos pueden liberarse quemando las sombras con fuego o luz intensa.
+
+#### Habilidades de Lv4
+1. **Bestia de Vacío:** Invoca una criatura monstruosa de 3 metros de altura que absorbe la luz a su alrededor.
+    * **Efecto:** Crea un aura de "Oscuridad Mágica" (radio 10m) que apaga cualquier fuente de luz no mágica. Sus ataques causan daño por necrosis.
+    * **CD:** 6 turnos.
+    * **Limitante:** El mantenimiento de la bestia drena la energía vital (HP) del usuario lentamente.
+    * **Anti-Mano Negra:** La bestia es vulnerable a ataques de elemento Luz o Sagrado, recibiendo un $200\%$ de daño adicional.
+2. **Salto de Sombra (Teletransporte):** El usuario se sumerge en una sombra y emerge de otra a menos de 50 metros.
+    * **Efecto:** Movilidad instantánea y evasión perfecta.
+    * **CD:** 5 turnos.
+    * **Limitante:** Ambas sombras (origen y destino) deben tener al menos el tamaño del usuario.
+    * **Anti-Mano Negra:** Hay un retraso de 0.5 segundos al emerger, dejando al usuario vulnerable a un contraataque si el destino es predecible.
+3. **Reflejo Oscuro (Doppelgänger):** Invoca una copia de sombra del oponente.
+    * **Efecto:** La copia tiene las mismas estadísticas físicas que el original pero solo el 50% de su HP.
+    * **CD:** Una vez por combate.
+    * **Limitante:** La copia solo puede usar habilidades físicas, no magia compleja del original.
+    * **Anti-Mano Negra:** Si el original es bañado en luz intensa, la copia pierde su forma y se debilita.
+
+#### Habilidades de Lv5
+1. **Monarca del Abismo:** Invoca a una entidad colosal que actúa como un agujero negro localizado.
+    * **Efecto:** Atrae a todos los enemigos hacia su centro y drena su energía vital y maná por contacto. La fuerza gravitatoria es de $10^4 N$.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario no puede distinguir entre aliados y enemigos una vez que el Monarca es invocado.
+    * **Anti-Mano Negra:** Requiere 2 turnos de preparación donde el usuario debe estar rodeado de oscuridad absoluta.
+2. **Eclipse Mental:** El usuario invoca sombras que no atacan el cuerpo, sino la percepción.
+    * **Efecto:** Borra al usuario y a sus aliados de la memoria visual de los enemigos en un área de 30 metros.
+    * **CD:** Global.
+    * **Limitante:** Cualquier acción ofensiva directa (atacar) rompe el efecto para el individuo que ataca.
+    * **Anti-Mano Negra:** Los enemigos con habilidades de detección no visual (olfato, oído, radar térmico) no se ven afectados.
+3. **Consunción de la Sombra Propia:** El usuario sacrifica su propia sombra física para transformarse en un ser de vacío puro.
+    * **Efecto:** Se vuelve intangible a ataques físicos y duplica su capacidad de daño por sombra durante 3 turnos.
+    * **CD:** Global (Uso único por evento).
+    * **Limitante:** Tras el efecto, el usuario no tiene sombra por 24 horas, lo que le impide usar cualquier magia de este tipo y reduce su resistencia física al 50%.
+    * **Anti-Mano Negra:** Durante la transformación, el usuario es extremadamente sensible a la luz; un ataque lumínico potente puede causar la muerte instantánea por desintegración.
+
+
+
+¿Continuamos con **Invocación de Espíritus de la Naturaleza**?

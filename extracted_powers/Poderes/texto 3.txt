@@ -1,0 +1,87 @@
+Siguiendo el orden del catálogo de **Magia de Invocación**, el siguiente poder es **Armas Espirituales**.
+
+---
+
+### --Armas Espirituales--
+
+Desde la perspectiva de la **ciencia de materiales cuánticos** y la **proyección de estados sólidos**, las Armas Espirituales se definen como la condensación de maná en estructuras de **materia degenerada** o "luz sólida". A diferencia de un arma física, estas no se forjan mediante procesos térmicos, sino mediante la alineación de espines electrónicos en un campo magnético de alta intensidad generado por la mente del invocador. Esto crea un objeto con una red cristalina perfecta, carente de impurezas atómicas, lo que le otorga una dureza y capacidad de corte superiores a cualquier aleación convencional.
+
+Físicamente, el arma espiritual es un **solenoide de energía** que interactúa con la materia bariónica a través de fuerzas electrostáticas de gran magnitud. La masa del arma es variable; el invocador puede alterar la densidad de flujo energético para que el arma se comporte como un objeto ligero durante el movimiento y adquiera una inercia masiva ($p = m \cdot v$) en el instante del impacto. Además, al estar vinculadas al sistema nervioso del usuario, estas armas actúan como extensiones sensoriales, permitiendo una precisión de ataque calculada a nivel de micras.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Manifestación de Filo Menor:** Crea un arma blanca simple (daga, punta de lanza) de corta duración.
+    * **Efecto:** El arma tiene una dureza de 5 en la escala de Mohs y desaparece tras 2 ataques exitosos.
+    * **CD:** 2 turnos.
+    * **Limitante:** El tamaño del arma no puede exceder los 30 cm.
+    * **Anti-Mano Negra:** No puede ser lanzada con precisión; si sale de la mano del usuario, se disipa instantáneamente.
+2. **Refuerzo de Empuñadura:** Imbuye un objeto cotidiano con una capa de energía espiritual.
+    * **Efecto:** Convierte un palo o una piedra en un arma contundente capaz de infligir daño por impacto de $150 N$.
+    * **CD:** 1 turno.
+    * **Limitante:** El refuerzo dura 1 turno y el objeto original puede romperse tras el uso.
+    * **Anti-Mano Negra:** No otorga filo a objetos romos, solo aumenta su resistencia estructural.
+
+#### Habilidades de Lv2
+1. **Armamento de Clase Infantería:** Invoca un arma de tamaño estándar (espada larga, hacha, maza).
+    * **Efecto:** El arma dura todo el combate mientras el usuario mantenga el contacto físico. Posee un filo capaz de cortar cuero y maderas blandas.
+    * **CD:** 3 turnos si el arma es destruida o disipada.
+    * **Limitante:** El peso del arma drena estamina de forma constante.
+    * **Anti-Mano Negra:** El arma brilla intensamente, eliminando cualquier posibilidad de ataque sigiloso en la oscuridad.
+2. **Vínculo de Retorno:** Permite lanzar el arma espiritual y que esta regrese a la mano del usuario.
+    * **Efecto:** El arma viaja a una velocidad de $40 km/h$ en el aire.
+    * **CD:** 2 turnos después de recuperar el arma.
+    * **Limitante:** Si el arma es bloqueada por un escudo de mayor nivel, el vínculo se rompe y el arma se disipa.
+    * **Anti-Mano Negra:** El retorno no es instantáneo; el usuario debe esperar el trayecto físico de regreso, quedando desarmado ese lapso.
+
+#### Habilidades de Lv3
+1. **Multi-Armamento Suspendido:** Invoca hasta 3 armas pequeñas que flotan alrededor del usuario.
+    * **Efecto:** Las armas pueden atacar o defender automáticamente en un radio de 2 metros. Fuerza de ataque: $500 N$ cada una.
+    * **CD:** 4 turnos.
+    * **Limitante:** Dividir la atención en 3 ejes reduce la precisión del usuario en un 20%.
+    * **Anti-Mano Negra:** Las armas no pueden alejarse del usuario para perseguir enemigos; son puramente defensivas/reactivas.
+2. **Alteración de Fase:** El arma puede volverse intangible por una fracción de segundo.
+    * **Efecto:** Permite que el arma atraviese un escudo físico o un bloqueo para golpear directamente al objetivo.
+    * **CD:** 5 turnos.
+    * **Limitante:** Solo puede atravesar objetos inanimados; no atraviesa armaduras que toquen la piel del oponente.
+    * **Anti-Mano Negra:** El daño se reduce en un 50% al realizar esta maniobra debido a la pérdida de cohesión molecular en el impacto.
+
+#### Habilidades de Lv4
+1. **Arma de Asedio Personal:** Invoca un arma masiva (Gran Espada, Martillo de Guerra gigante) con propiedades cinéticas aumentadas.
+    * **Efecto:** Cada golpe genera una onda de choque de $3000 N$, capaz de romper huesos y muros de piedra.
+    * **CD:** 6 turnos.
+    * **Limitante:** Reduce la velocidad de movimiento del usuario en un 40% debido a la carga gravitatoria inducida.
+    * **Anti-Mano Negra:** El arma tarda 1 turno de "carga" antes de poder realizar un golpe de máxima potencia.
+2. **Fragmentación Explosiva:** El arma se rompe en cientos de esquirlas espirituales al impactar.
+    * **Efecto:** Daño de área en un radio de 5 metros. Cada esquirla viaja a $200 m/s$ con una fuerza de penetración de $800 J$.
+    * **CD:** Una vez por combate (destruye el arma invocada).
+    * **Limitante:** El usuario recibe un 10% del daño por retroceso de la explosión energética.
+    * **Anti-Mano Negra:** Las esquirlas son de energía pura; armaduras mágicas o escudos de maná las bloquean con mayor eficacia que las físicas.
+3. **Arsenal de la Mente:** El usuario puede cambiar la forma de su arma espiritual instantáneamente (de espada a lanza, de lanza a escudo).
+    * **Efecto:** Permite adaptarse a cualquier estilo de combate del enemigo en tiempo real.
+    * **CD:** 4 turnos.
+    * **Limitante:** Requiere un cálculo mental constante; si el usuario es distraído, el arma queda en una forma amorfa e inútil.
+    * **Anti-Mano Negra:** El cambio de forma consume una pequeña porción de maná cada vez; no es infinito.
+
+#### Habilidades de Lv5
+1. **Hoja de Eventos (Corte Dimensional):** El arma vibra a una frecuencia que rompe los enlaces del espacio-tiempo.
+    * **Efecto:** Puede cortar cualquier material existente, ignorando el 100% de la defensa física y mágica en un solo tajo.
+    * **CD:** Global (Una vez por día de rol).
+    * **Limitante:** El alcance es de apenas el largo del filo; requiere una proximidad extrema.
+    * **Anti-Mano Negra:** El usuario debe permanecer inmóvil durante 2 turnos acumulando energía en el filo antes de ejecutar el corte. Es evadible si el enemigo se aleja.
+2. **Tormenta de Mil Hojas:** Crea un domo de espadas espirituales que caen del cielo en un área de 20 metros.
+    * **Efecto:** Saturación total del área con proyectiles de energía que impactan con una fuerza colectiva de $10^5$ Joules.
+    * **CD:** Global.
+    * **Limitante:** El usuario queda ciego y exhausto tras la invocación masiva.
+    * **Anti-Mano Negra:** Las hojas tardan 3 segundos en caer desde que aparece el círculo de invocación, dando tiempo a los oponentes para usar habilidades de huida o teletransporte.
+3. **Arma Autómata Primordial:** Invoca un arma de tamaño colosal que posee voluntad propia y flota independientemente.
+    * **Efecto:** El arma ataca por su cuenta con una fuerza de $15,000 N$ y puede perseguir enemigos hasta 50 metros del usuario.
+    * **CD:** Una vez por semana de rol.
+    * **Limitante:** Consume el 80% del maná total del usuario para mantenerse activa durante 5 turnos.
+    * **Anti-Mano Negra:** El arma puede ser "aturdida" por ataques directos de gran magnitud, obligándola a regresar al lado del invocador para recargarse.
+
+
+
+¿Continuamos con **Bestias Divinas**?

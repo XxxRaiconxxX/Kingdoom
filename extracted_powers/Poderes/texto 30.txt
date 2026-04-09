@@ -1,0 +1,83 @@
+Entramos en la **Magia de la Naturaleza** (o Druidismo), la rama que sintoniza con el pulso vital del planeta.
+
+Es el arte de la **simbiosis orgánica**. No se trata de dominar la vida, sino de actuar como su catalizador. Utilizas el maná para hablar el idioma de las raíces, el viento y la sangre, acelerando procesos evolutivos de milenios en segundos. Es una magia de equilibrio: obtienes un poder inmenso sobre el entorno, pero estás ligado a sus ciclos. Si la naturaleza sufre, tú sufres; si ella florece, tu poder no tiene límites.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Zarcillo de Constricción:** Brotes de raíces o enredaderas emergen para sujetar los pies del enemigo.
+    * **Efecto:** Reduce la agilidad del objetivo en un $20\%$ durante 1 turno.
+    * **Detalle Técnico:** Aumento hiperbárico de la turgencia celular en plantas cercanas para forzar un crecimiento direccional acelerado.
+    * **CD:** 2 turnos.
+    * **Limitante:** Requiere suelo fértil o presencia de flora previa; inútil en metal o piedra lisa.
+    * **Anti-Mano Negra:** El movimiento de la tierra al brotar la planta alerta al enemigo con un segundo de antelación.
+2. **Sentido de la Selva:** El usuario "ve" a través de las vibraciones en el suelo y el aire.
+    * **Efecto:** Detecta seres vivos ocultos en un radio de 15 metros.
+    * **Detalle Técnico:** Interfaz quimiosensorial con las micorrizas (redes de hongos) del subsuelo.
+    * **CD:** 1 turno.
+    * **Limitante:** El exceso de ruido ambiental (tormentas o explosiones) ensordece este sentido.
+    * **Anti-Mano Negra:** Criaturas que no toquen el suelo (vuelo) son totalmente invisibles para esta habilidad.
+
+#### Habilidades de Lv2
+1. **Esporas Somníferas/Paralizantes:** Una nube de polen denso que afecta el sistema respiratorio.
+    * **Efecto:** Provoca mareo o parálisis leve, reduciendo la precisión del enemigo en un $30\%$.
+    * **Detalle Técnico:** Síntesis acelerada de alcaloides neurotóxicos derivados de hongos del género *Amanita*.
+    * **CD:** 3 turnos.
+    * **Limitante:** El viento puede soplar la nube de vuelta hacia el usuario.
+    * **Anti-Mano Negra:** La nube es de un color amarillo brillante muy llamativo; un enemigo con una máscara o pañuelo húmedo reduce el efecto a la mitad.
+2. **Piel de Corteza:** La epidermis del usuario se endurece y adquiere una textura leñosa.
+    * **Efecto:** Otorga protección contra cortes y flechas (daño físico menor).
+    * **Detalle Técnico:** Depósito rápido de lignina y suberina en las capas externas del tejido epitelial.
+    * **CD:** 3 turnos.
+    * **Limitante:** Reduce la flexibilidad del usuario, disminuyendo su velocidad de carrera en un $10\%$.
+    * **Anti-Mano Negra:** El usuario se vuelve extremadamente inflamable; los ataques de fuego causan el doble de daño.
+
+#### Habilidades de Lv3
+1. **Llamado de la Manada:** Invoca a animales locales (lobos, aves, serpientes) para atacar.
+    * **Efecto:** 2 a 3 criaturas de nivel bajo distraen y dañan al enemigo durante 2 turnos.
+    * **Detalle Técnico:** Emisión de feromonas de comando de alta frecuencia que sobrescriben el instinto de supervivencia animal.
+    * **CD:** 5 turnos.
+    * **Limitante:** Si no hay animales en la zona (ej. una mazmorra cerrada), la habilidad falla.
+    * **Anti-Mano Negra:** Si el usuario es golpeado, pierde el control feromonal y los animales pueden volverse erráticos o atacar a aliados por confusión.
+2. **Crecimiento Exponencial:** Convierte una semilla pequeña en un árbol adulto en segundos.
+    * **Efecto:** Crea una barrera física infranqueable o una plataforma de altura instantánea.
+    * **Detalle Técnico:** Manipulación del ciclo del carbono para captar $CO_2$ atmosférico y convertirlo en biomasa sólida a velocidad supersónica.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4
+1. **Furia del Bosque (Antropomorfismo):** Las plantas cercanas cobran conciencia y atacan de forma autónoma.
+    * **Efecto:** Árboles que usan ramas como látigos o flores que disparan espinas ácidas. Fuerza de impacto: $2500 N$.
+    * **Detalle Técnico:** Animación de tejidos vegetales mediante la infusión de maná en el sistema vascular de la planta (xilema/floema).
+    * **CD:** 6 turnos.
+    * **Limitante:** El usuario debe canalizar el hechizo; si se mueve o ataca por su cuenta, las plantas vuelven a su estado inerte.
+    * **Anti-Mano Negra:** Las plantas animadas emiten un chirrido de madera crujiendo que es audible a 50 metros.
+2. **Mimetismo Quimérico:** El usuario adquiere rasgos de un depredador (garras de oso, visión de halcón, veneno de víbora).
+    * **Efecto:** Mejora drástica de estadísticas físicas según el animal elegido.
+    * **Detalle Técnico:** Reconfiguración epigenética temporal para expresar fenotipos animales en el cuerpo humano.
+    * **CD:** 6 turnos.
+
+#### Habilidades de Lv5
+1. **Avatar de Gaia:** El usuario se funde con el ecosistema, convirtiéndose en un gigante de piedra, lodo y madera.
+    * **Efecto:** Invulnerabilidad a armas convencionales y capacidad de manipular el terreno en un radio de 100 metros.
+    * **Detalle Técnico:** Integración de la conciencia en la red biológica global (Wood Wide Web).
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** Tras la forma (3 turnos), el usuario queda "enraizado" al suelo, incapaz de moverse por 24 horas.
+    * **Anti-Mano Negra:** En este estado, el usuario es un objetivo gigante; ataques masivos de fuego o contaminación química (ácidos fuertes) pueden causar un daño espiritual permanente.
+2. **Extinción/Renacimiento Verde:** Mata toda la vida vegetal en un área para curar a un aliado, o viceversa.
+    * **Efecto:** Puede sanar heridas mortales drenando la vida de un bosque entero.
+    * **Detalle Técnico:** Transferencia masiva de biofotones y energía química a través de un puente de maná.
+    * **CD:** Global.
+3. **Plaga de la Naturaleza:** Crea una enfermedad vegetal/animal que devora solo lo que sea artificial (metal, plástico, concreto).
+    * **Efecto:** Desintegra ciudades o fortalezas enemigas en cuestión de minutos, devolviendo el área a su estado natural original.
+    * **Detalle Técnico:** Ingeniería de extremófilos acelerada para degradar polímeros y aleaciones metálicas.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+Con esto concluimos la **Magia de la Naturaleza**. El siguiente y último gran bloque de tu lista original es la **Magia de Sangre** (Hemo-alquimia y Vitalismo), o bien podemos pasar a las **Magias Especiales** si lo prefieres.
+
+¿Deseas que avancemos con la **Magia de Sangre**?

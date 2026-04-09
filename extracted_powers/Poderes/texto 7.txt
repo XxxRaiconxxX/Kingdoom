@@ -1,0 +1,87 @@
+Siguiendo el orden del catálogo de **Magia de Invocación**, el siguiente poder es la **Invocación de Espíritus de la Naturaleza** (o Invocación Biótica).
+
+---
+
+### --Espíritus de la Naturaleza--
+
+Desde la **biología cuántica** y la **teoría de sistemas complejos**, esta habilidad se define como la capacidad de interactuar con el **biocampo** o la red de información compartida de los ecosistemas (la "Internet biológica" de las micorrizas y señales químicas). El invocador no atrae entes del espacio exterior, sino que utiliza su maná como un neurotransmisor de largo alcance para despertar y dar forma física a la conciencia colectiva de la flora y fauna local.
+
+Científicamente, los espíritus de la naturaleza son **conglomerados de biomasa y energía biofotónica**. El usuario actúa como un nodo central que organiza las moléculas de carbono, celulosa o quitina del entorno para construir organismos temporales. La eficacia de la invocación está intrínsecamente ligada al **índice de biodiversidad** del lugar: en un bosque virgen, la densidad de información biológica es máxima, permitiendo invocaciones de gran complejidad, mientras que en un entorno estéril o urbano, el costo de energía aumenta drásticamente al tener que sintetizar la estructura desde cero.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Espíritu de Polen/Esporas:** Invoca una nube de micro-entes que flotan en el aire.
+    * **Efecto:** Actúan como una pantalla de humo biológica que irrita los ojos y la nariz del enemigo, reduciendo su visibilidad.
+    * **CD:** 2 turnos.
+    * **Limitante:** El viento fuerte disipa la nube rápidamente.
+    * **Anti-Mano Negra:** No causa daño real, solo una molestia física que puede ser mitigada cubriéndose el rostro.
+2. **Murmullo de la Hierba:** El usuario invoca la conciencia de las plantas pequeñas para obtener información.
+    * **Efecto:** Detecta si alguien ha pisado el suelo en un radio de 10 metros en los últimos 5 minutos.
+    * **CD:** 1 turno.
+    * **Limitante:** Las plantas solo transmiten sensaciones de "presión" o "peso", no descripciones visuales.
+    * **Anti-Mano Negra:** Si el enemigo levita o vuela, esta habilidad no detecta nada.
+
+#### Habilidades de Lv2
+1. **Dríada Menor (Brotación):** Invoca a una pequeña entidad humanoide hecha de raíces y flores.
+    * **Efecto:** Puede curar heridas leves ($5\%$ HP) de un aliado mediante la aplicación de savia medicinal.
+    * **CD:** 3 turnos.
+    * **Limitante:** La dríada es muy frágil; un ataque de fuego la elimina al instante.
+    * **Anti-Mano Negra:** El proceso de curación es lento (requiere que el aliado esté quieto durante 1 turno).
+2. **Enjambre de Distracción:** Invoca un grupo de insectos espirituales (mariposas o luciérnagas).
+    * **Efecto:** Rodean a un enemigo, interfiriendo con sus hechizos de precisión o ataques a distancia.
+    * **CD:** 4 turnos.
+    * **Limitante:** No atacan, solo ocupan el espacio visual y auditivo.
+    * **Anti-Mano Negra:** Desaparecen si se usa cualquier hechizo de área, incluso uno aliado.
+
+#### Habilidades de Lv3
+1. **Guardián de la Arboleda:** Invoca a una criatura similar a un ciervo o lobo hecho de madera reforzada y musgo.
+    * **Efecto:** Ataca con una fuerza de $300 N$ y puede enredar los pies del enemigo con raíces al golpear.
+    * **CD:** 5 turnos.
+    * **Limitante:** Su velocidad es superior en terrenos naturales, pero se reduce un 30% en piedra o metal.
+    * **Anti-Mano Negra:** El guardián tiene una "semilla núcleo"; si esta es destruida, el cuerpo de madera se desmorona.
+2. **Velo Fotosintético:** El espíritu de la naturaleza se funde con el usuario, permitiéndole regenerar energía bajo la luz.
+    * **Efecto:** Recupera un pequeño porcentaje de maná y salud por turno si el usuario está expuesto a luz solar o luz mágica intensa.
+    * **CD:** 6 turnos.
+    * **Limitante:** Reduce la movilidad del usuario al hacerlo "echar raíces" parcialmente.
+    * **Anti-Mano Negra:** El usuario se vuelve doblemente vulnerable al fuego mientras el velo esté activo.
+
+#### Habilidades de Lv4
+1. **Ent de Combate (Titán Vegetal):** Invoca a un espíritu de 4 metros de altura compuesto de troncos de madera densa.
+    * **Efecto:** Posee una fuerza de $5000 N$ y puede resistir impactos de proyectiles balísticos.
+    * **CD:** Una vez por encuentro.
+    * **Limitante:** Extremadamente lento ($5 km/h$). Tarda 1 turno completo en emerger del suelo.
+    * **Anti-Mano Negra:** Su tamaño lo hace un blanco prioritario para ataques incendiarios, los cuales le causan daño crítico ($x2$).
+2. **Llamado de la Manada Espectral:** Invoca a 5 espíritus animales medianos simultáneamente.
+    * **Efecto:** Pueden flanquear enemigos y realizar ataques coordinados.
+    * **CD:** 6 turnos.
+    * **Limitante:** Los espíritus comparten una sola barra de vida colectiva; si el daño total es alto, todos desaparecen.
+    * **Anti-Mano Negra:** El usuario debe emitir un sonido (silbido o grito) para coordinar a la manada, revelando su posición.
+3. **Miasma Fúngico:** El espíritu libera una nube de esporas alucinógenas en un radio de 15 metros.
+    * **Efecto:** Los enemigos sufren de desorientación espacial y ven "aliados" donde hay "enemigos".
+    * **CD:** Global.
+    * **Limitante:** Afecta a cualquier ser biológico que respire, incluidos aliados si no tienen protección.
+    * **Anti-Mano Negra:** El efecto desaparece si el objetivo recibe daño físico, ya que el dolor "rompe" la alucinación.
+
+#### Habilidades de Lv5
+1. **Génesis del Ecosistema:** El usuario invoca el espíritu de un bosque antiguo en una zona urbana o desértica.
+    * **Efecto:** En segundos, el terreno se llena de árboles gigantes, lianas y vida silvestre agresiva, alterando el mapa permanentemente.
+    * **CD:** Global (Una vez por semana).
+    * **Limitante:** Requiere que el usuario sacrifique una gran cantidad de su propia energía vital para alimentar la "explosión de vida".
+    * **Anti-Mano Negra:** El crecimiento es tan violento que puede destruir estructuras civiles, lo que podría traer consecuencias legales o morales al personaje.
+2. **Avatar de Gaia:** El usuario se transforma en una entidad de pura energía biótica de 6 metros.
+    * **Efecto:** Inmunidad a venenos y enfermedades; capacidad de manipular cualquier planta en un radio de 100 metros como si fueran sus propios dedos.
+    * **CD:** Global.
+    * **Limitante:** Solo dura 3 turnos. Tras el uso, el usuario entra en un estado de hibernación (sueño profundo) por 12 horas.
+    * **Anti-Mano Negra:** Aunque es poderoso, el Avatar es un ser puramente biológico; ataques de frío extremo o desecación molecular pueden paralizarlo.
+3. **Reencarnación Natural:** Si el usuario muere, su espíritu de la naturaleza consume su cuerpo y lo hace "brotar" de nuevo en un lugar seguro.
+    * **Efecto:** El personaje revive con el 50% de su salud en el último bosque o jardín que visitó.
+    * **CD:** Una vez por campaña.
+    * **Limitante:** El personaje pierde todos sus recuerdos del día de su muerte y adquiere un rasgo físico vegetal permanente (ej. piel verdosa, hojas en lugar de cabello).
+    * **Anti-Mano Negra:** El proceso tarda 24 horas; el personaje no vuelve a la batalla de inmediato.
+
+
+
+¿Continuamos con **Invocación de Espíritus Heroicos**?

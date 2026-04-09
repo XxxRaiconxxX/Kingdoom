@@ -1,0 +1,84 @@
+Cerramos el catálogo de **Magia de Alquimia** con su aplicación más compleja y éticamente debatida: la creación de **Homúnculos y Vida Artificial** (o Ingeniería Biomecánica Alquímica).
+
+---
+
+### --Homúnculos y Vida Artificial--
+
+Desde la **biología sintética** y la **teoría de la información biológica**, la creación de homúnculos se define como la síntesis de organismos autónomos mediante el ensamblaje de **polímeros biológicos programables**. Científicamente, el alquimista no "crea un alma", sino que diseña un **sistema operativo bioquímico** que reside en un cerebro artificial (generalmente una matriz de silicio y tejido neuronal cultivado).
+
+Físicamente, el homúnculo es una entidad de **biomasa optimizada**. A diferencia de los seres naturales, su estructura interna no es fruto de la evolución, sino de un diseño deliberado: huesos reforzados con depósitos minerales, sistemas circulatorios de doble bombeo y una red nerviosa con latencia reducida. El anclaje de la conciencia en estas criaturas requiere una **interfaz de maná constante**; si el flujo de energía del creador se interrumpe, el homúnculo puede sufrir un colapso sistémico o, en el peor de los casos, una desestabilización de su código de comportamiento (locura alquímica).
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Micro-Autómata Mensajero:** Crea una pequeña criatura (tamaño insecto) con una tarea única.
+    * **Efecto:** Puede entregar una nota, espiar una conversación corta o activar una palanca a distancia.
+    * **CD:** 2 turnos de síntesis.
+    * **Limitante:** Tiene una vida útil de solo 1 hora antes de deshacerse en lodo orgánico.
+    * **Anti-Mano Negra:** Su inteligencia es nula; si encuentra un obstáculo no previsto, se detendrá por completo.
+2. **Tejido de Repuesto:** Sintetiza una masa de células indiferenciadas para cerrar una herida.
+    * **Efecto:** Actúa como un injerto instantáneo que acelera la cicatrización sin dejar marca.
+    * **CD:** 3 turnos.
+    * **Limitante:** No recupera HP de forma masiva, solo evita infecciones y sangrado persistente.
+    * **Anti-Mano Negra:** El tejido nuevo tiene un color ligeramente distinto, siendo detectable visualmente.
+
+#### Habilidades de Lv2
+1. **Homúnculo de Laboratorio (Servidor):** Crea una entidad humanoide pequeña (50 cm) para tareas domésticas o técnicas.
+    * **Efecto:** Puede manipular herramientas alquímicas, cocinar o cuidar el equipo con una precisión del $95\%$.
+    * **CD:** 5 turnos.
+    * **Limitante:** Es físicamente débil y huye ante cualquier señal de combate.
+    * **Anti-Mano Negra:** El homúnculo requiere una "alimentación" de maná diaria; si el usuario olvida cargar su núcleo, la criatura muere.
+2. **Sensor Biótico Autónomo:** Una masa ocular o auditiva que puede adherirse a superficies.
+    * **Efecto:** Transmite audio o video de baja resolución al alquimista en un radio de 30 metros.
+    * **CD:** 4 turnos.
+    * **Limitante:** Es vulnerable a ataques de Magia Mental que pueden "cegar" al usuario a través del sensor.
+
+#### Habilidades de Lv3
+1. **Guardián de Carne (Sustituto):** Invoca a un homúnculo de combate de tamaño humano.
+    * **Efecto:** Ataca con una fuerza de $600 N$ y posee una resistencia al dolor absoluta (no tiene receptores de nocicepción).
+    * **CD:** 6 turnos.
+    * **Limitante:** El alquimista debe dedicar el $20\%$ de su capacidad mental a controlarlo; si deja de dar órdenes, el guardián solo se defiende.
+    * **Anti-Mano Negra:** Al no sentir dolor, el guardián suele autodestruirse por sobreesfuerzo si el combate se alarga demasiado.
+2. **Transferencia Sensorial:** El usuario vincula sus sentidos a los de su creación.
+    * **Efecto:** Permite ver, oír y oler a través del homúnculo como si fuera el propio cuerpo.
+    * **CD:** 5 turnos.
+    * **Limitante:** El cuerpo real del alquimista queda en estado de trance (indefenso) mientras dure la conexión.
+    * **Anti-Mano Negra:** Si el homúnculo muere mientras la conexión está activa, el usuario sufre un shock nervioso severo.
+
+#### Habilidades de Lv4
+1. **Homúnculo Mimético (Doble):** Crea una copia exacta del usuario o de un objetivo conocido.
+    * **Efecto:** Posee los mismos rasgos físicos y voz. Útil para señuelos o infiltración.
+    * **CD:** Una vez por encuentro largo.
+    * **Limitante:** No posee los recuerdos ni las habilidades mágicas del original.
+    * **Anti-Mano Negra:** Si el doble recibe un corte profundo, se revela que su "sangre" es un fluido sintético de color azulado o transparente.
+2. **Quimera Bioeléctrica:** Una criatura híbrida con capacidades elementales integradas.
+    * **Efecto:** Puede disparar descargas eléctricas o ácido desde glándulas especializadas. Fuerza de ataque: $2500 J$.
+    * **CD:** 7 turnos.
+    * **Limitante:** La criatura es inestable; cada vez que ataca, tiene un $5\%$ de probabilidad de explotar.
+    * **Anti-Mano Negra:** Requiere materiales biológicos frescos (carne o plantas) para su creación.
+
+#### Habilidades de Lv5
+1. **El Primordial (Vida Perfecta):** Crea una entidad con conciencia propia y capacidad de aprendizaje.
+    * **Efecto:** Un aliado permanente de nivel 4 que puede usar una rama de magia básica de forma autónoma.
+    * **CD:** Global (Solo uno activo a la vez).
+    * **Limitante:** El homúnculo puede desarrollar una personalidad propia y, eventualmente, rebelarse contra su creador si es maltratado.
+    * **Anti-Mano Negra:** La creación requiere meses de tiempo de rol y una inversión de recursos equivalente a un tesoro legendario.
+2. **Transferencia de Conciencia (Inmortalidad Alquímica):** El usuario mueve su mente a un cuerpo de homúnculo joven y sano.
+    * **Efecto:** Evita la muerte por vejez o enfermedad terminal.
+    * **CD:** Global (Uso único por personaje).
+    * **Limitante:** Existe un riesgo de pérdida de memoria del $20\%$ y una desconexión emocional con su vida anterior.
+    * **Anti-Mano Negra:** El proceso es irreversible; el cuerpo original muere y el nuevo cuerpo requiere mantenimiento alquímico constante para no degradarse.
+3. **Plaga de Micro-Constructos:** Libera millones de organismos microscópicos que consumen materia orgánica o mineral.
+    * **Efecto:** Puede desintegrar un edificio o un ejército en minutos, convirtiéndolo en biomasa para el alquimista.
+    * **CD:** Global.
+    * **Limitante:** El control sobre la plaga es precario; si el viento cambia, la plaga puede volverse contra el usuario.
+
+
+
+---
+
+Con esto cerramos Alquimia. Tal como acordamos, el siguiente bloque principal es la **Magia de Tiempo**.
+
+¿Deseas comenzar con **Dilatación Temporal**?

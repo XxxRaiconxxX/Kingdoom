@@ -1,0 +1,82 @@
+Iniciamos el catálogo de **Magias Especiales**, aquellas disciplinas que no encajan en los elementos básicos ni en las ramas tradicionales, ya que manipulan leyes fundamentales de la física de forma aislada. El primer pilar es la **Magia de Gravedad** (o Gravitocinesis).
+
+---
+
+## --Magia de Gravedad--
+
+Es el arte de **doblar el peso del mundo**. Imagina que el espacio es una sábana estirada y tú eres quien decide dónde colocar las pesas. Con esta magia, no empujas al enemigo; alteras la atracción que el planeta ejerce sobre él. Puedes hacer que una pluma pese toneladas o que una roca gigante flote como si no tuviera masa, manipulando la curvatura del espacio-tiempo a tu escala.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Alteración de Peso Local:** Aumentas o disminuyes el peso de un objeto pequeño (hasta 5 kg).
+    * **Efecto:** Hace que una flecha caiga antes de tiempo o que un escudo sea demasiado pesado para levantarlo.
+    * **Detalle Técnico:** Modificación del flujo de gravitones en un área de $10 cm^3$.
+    * **CD:** 2 turnos.
+    * **Limitante:** El objeto debe estar dentro del rango visual.
+    * **Anti-Mano Negra:** Al cambiar el peso, el objeto emite un leve zumbido de baja frecuencia que puede alertar a oídos sensibles.
+2. **Caída Pluma Personal:** Reduces tu propia masa relativa respecto al suelo.
+    * **Efecto:** Saltas el triple de alto o aterrizas sin daño desde alturas de hasta 10 metros.
+    * **Detalle Técnico:** Generación de un campo repulsivo débil que contrarresta la aceleración de $9.8 m/s^2$.
+    * **CD:** 1 turno.
+    * **Anti-Mano Negra:** Eres extremadamente vulnerable al viento; una ráfaga fuerte puede desplazarte involuntariamente.
+
+#### Habilidades de Lv2
+1. **Ancla Gravitatoria:** Aumentas la gravedad en un punto específico del suelo.
+    * **Efecto:** Inmoviliza o ralentiza a un enemigo, haciendo que sienta que sus pies pesan $100 kg$ cada uno.
+    * **Detalle Técnico:** Concentración de masa virtual en una superficie de $1 m^2$.
+    * **CD:** 3 turnos.
+    * **Limitante:** El área es fija; si el enemigo logra salir del círculo, recupera su peso normal.
+    * **Anti-Mano Negra:** El suelo bajo el ancla suele agrietarse o hundirse, delatando el punto exacto de la trampa.
+2. **Repulsión Cinética:** Generas un pulso gravitatorio que empuja todo lo que te rodea.
+    * **Efecto:** Aleja a enemigos cuerpo a cuerpo o desvía proyectiles en un radio de 2 metros.
+    * **Detalle Técnico:** Emisión de una onda de choque de energía gravitatoria negativa.
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Esfera de Ingravidez:** Creas una burbuja donde la gravedad es cero.
+    * **Efecto:** Enemigos, objetos y escombros comienzan a flotar sin control, quedando indefensos en el aire.
+    * **Detalle Técnico:** Cancelación total del tensor métrico dentro de un radio de 4 metros.
+    * **CD:** 5 turnos.
+    * **Limitante:** El usuario también pierde el equilibrio si entra en la burbuja sin preparación.
+    * **Anti-Mano Negra:** Al terminar el efecto, todo cae de golpe; si el usuario está debajo, recibirá el impacto de los objetos que flotaban.
+2. **Atracción Magnética de Masas:** Designas dos objetos para que se atraigan violentamente entre sí.
+    * **Efecto:** Puedes hacer que dos enemigos choquen sus cabezas o que una roca vuele hacia un oponente.
+    * **Detalle Técnico:** Creación de un dipolo gravitatorio artificial entre dos coordenadas de masa.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4
+1. **Pozo de Gravedad Aumentada:** Un área donde la gravedad es 10 veces superior a la normal.
+    * **Efecto:** Los enemigos caen al suelo de bruces, sufriendo daño por presión interna y rotura de huesos. Fuerza: $8000 N$.
+    * **Detalle Técnico:** Compresión del tejido espacial mediante una micro-singularidad de masa positiva.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere canalización constante; el usuario no puede correr mientras lo mantiene.
+    * **Anti-Mano Negra:** La luz se curva alrededor del pozo, creando un efecto visual de "lente" que permite a los arqueros enemigos apuntar al centro con ventaja.
+2. **Vuelo Geodésico:** Manipulas la gravedad para "caer" hacia el cielo o hacia cualquier dirección.
+    * **Efecto:** Vuelo a alta velocidad con maniobrabilidad total.
+    * **Detalle Técnico:** Reorientación del vector de aceleración gravitatoria personal.
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5
+1. **Singularidad de Bolsillo:** Creas un punto de atracción infinita (micro-agujero negro).
+    * **Efecto:** Succiona todo lo que no esté anclado en un radio de 15 metros, desintegrando materia al colapsarla.
+    * **Detalle Técnico:** Superación del límite de Oppenheimer-Volkoff en un punto infinitesimal.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** La succión es indiscriminada; aliados y botín también pueden ser consumidos.
+    * **Anti-Mano Negra:** Genera una distorsión temporal: los que están cerca de la singularidad sienten que el tiempo pasa más lento, pero para el resto del mundo están indefensos.
+2. **Colapso Planetario:** Aumentas la gravedad de un área de 50 metros hasta niveles insoportables.
+    * **Efecto:** Aplasta estructuras, fortificaciones y ejércitos enteros contra el suelo en segundos.
+    * **CD:** Global.
+3. **Métrica de Alcubierre:** El usuario dobla el espacio-tiempo de tal manera que puede moverse a velocidades relativistas.
+    * **Efecto:** El usuario ataca y se mueve tan rápido que parece estar en varios lugares a la vez. Inesquivable.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+¿Continuamos con la **Magia de Sonido** (Vibraciones y Acústica)? Es excelente para control de masas y daño interno.
+
+¿Avanzamos?

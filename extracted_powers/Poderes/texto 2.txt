@@ -1,0 +1,84 @@
+
+### --Espíritus Elementales--
+
+La Magia de Invocación de Espíritus Elementales se explica mediante la **física de plasmones** y la **teoría de campos cuánticos de baja energía**. El invocador no crea vida biológica, sino que actúa como un puente de entrelazamiento entre el plano material y el plano elemental, una dimensión donde la energía existe en estado de conciencia pura sin soporte orgánico. Al emitir una frecuencia de maná específica, el usuario "captura" una porción de energía elemental y le otorga una **estructura de confinamiento magnético**, permitiendo que dicha energía interactúe con el mundo físico como un ente semi-autónomo.
+
+Científicamente, el espíritu invocado es una acumulación de **plasma altamente ionizado** o materia en un estado cuántico coherente (como un condensado de Bose-Einstein). La estabilidad del espíritu depende de la **ecuación de continuidad del maná**: el invocador debe proveer un flujo constante de electrones o energía potencial para evitar que la entidad sufra una descompresión termodinámica (se disipe). A niveles altos, el invocador puede programar algoritmos de comportamiento en la matriz energética del espíritu, permitiéndole realizar cálculos de combate avanzados y manipular la entropía del entorno a gran escala.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Familiar Elemental Menor:** El usuario manifiesta una pequeña esfera de energía elemental (fuego, agua, aire o tierra) con conciencia básica.
+    * **Efecto:** Sirve para tareas de utilidad simple: iluminar (fuego), enfriar (agua/hielo), generar una brisa (aire) o remover 1kg de tierra.
+    * **CD:** 2 turnos tras disiparse.
+    * **Limitante:** El espíritu es intangible y no puede atacar; tiene el tamaño de una pelota de tenis.
+    * **Anti-Mano Negra:** No puede usarse para espiar ni atravesar paredes; es puramente una herramienta de utilidad visible.
+2. **Ignición/Condensación de Pulso:** El espíritu realiza una única descarga de su elemento antes de desaparecer.
+    * **Efecto:** Una chispa que quema tela, un chorro de agua de 1 litro o una ráfaga que apaga una antorcha.
+    * **CD:** 3 turnos.
+    * **Limitante:** El alcance máximo es de 2 metros desde el usuario.
+    * **Anti-Mano Negra:** El daño físico es nulo ($<10 J$); solo sirve para interactuar con el ambiente o causar una distracción leve.
+
+#### Habilidades de Lv2
+1. **Espíritu de Apoyo (Forma Animal):** Invoca un espíritu con forma de animal pequeño (halcón, gato, serpiente) hecho de energía elemental.
+    * **Efecto:** Puede moverse de forma autónoma hasta 20 metros y realizar ataques débiles (picotazos de fuego, mordidas de hielo).
+    * **CD:** 4 turnos.
+    * **Limitante:** Tiene 1 HP; cualquier ataque lo devuelve a su plano de origen.
+    * **Anti-Mano Negra:** El usuario debe dar órdenes verbales, permitiendo que el enemigo anticipe los movimientos del espíritu.
+2. **Aura Elemental Compartida:** El espíritu se fusiona con una parte del cuerpo del usuario.
+    * **Efecto:** Otorga resistencia térmica ($50\%$) contra el elemento opuesto o aumenta la fricción del golpe.
+    * **CD:** 3 turnos.
+    * **Limitante:** Dura solo 3 turnos y causa fatiga muscular en la zona fusionada.
+    * **Anti-Mano Negra:** No aumenta el daño base, solo añade un efecto cosmético y de resistencia situacional.
+
+#### Habilidades de Lv3
+1. **Guardián Elemental Medio:** Invoca una entidad humanoide de 1.5 metros de altura compuesta puramente del elemento.
+    * **Efecto:** Posee capacidad ofensiva real ($200 N$ de fuerza) y puede recibir hasta 3 golpes antes de disiparse.
+    * **CD:** 5 turnos.
+    * **Limitante:** El usuario no puede alejarse más de 10 metros del Guardián o la conexión se rompe.
+    * **Anti-Mano Negra:** El espíritu es lento ($10 km/h$); un enemigo ágil puede rodearlo fácilmente para atacar directamente al invocador.
+2. **Sincronía de Sentidos (Ojo del Elemental):** El usuario ve y oye a través del espíritu invocado.
+    * **Efecto:** Permite reconocimiento avanzado hasta a 100 metros de distancia.
+    * **CD:** 4 turnos.
+    * **Limitante:** Mientras el usuario usa los sentidos del espíritu, su propio cuerpo queda sordo y ciego al entorno.
+    * **Anti-Mano Negra:** Si el espíritu es destruido mientras los sentidos están vinculados, el usuario sufre una migraña que anula su magia por 1 turno.
+
+#### Habilidades de Lv4
+1. **Coloso Elemental Transitorio:** Invoca una masa elemental masiva de 3 metros de altura con gran inercia.
+    * **Efecto:** Puede derribar puertas, muros de piedra o aplastar enemigos con una fuerza de $5000 N$.
+    * **CD:** 7 turnos.
+    * **Limitante:** Solo puede realizar 3 acciones antes de colapsar por inestabilidad molecular.
+    * **Anti-Mano Negra:** El coloso emite un ruido masivo (terremoto, rugido de fuego, etc.) 1 turno antes de aparecer, advirtiendo a todos de su llegada.
+2. **Tormenta Elemental Vinculada:** El espíritu se disipa en un área para alterar el clima local.
+    * **Efecto:** Crea una zona de 15 metros de diámetro con lluvia ácida, granizo pesado o calor abrasador ($60°C$).
+    * **CD:** 6 turnos.
+    * **Limitante:** El usuario también sufre los efectos del clima si está dentro del área.
+    * **Anti-Mano Negra:** La tormenta es estática y tarda 1 turno en cargarse, permitiendo la huida de los oponentes.
+3. **Fusión Álmica (Avatar):** El usuario y el espíritu se convierten en una sola entidad.
+    * **Efecto:** El usuario puede transformar partes de su cuerpo en el elemento (brazos de lava, pies de viento) durante 3 turnos.
+    * **CD:** 8 turnos.
+    * **Limitante:** Al terminar la fusión, el usuario sufre una bajada de temperatura corporal peligrosa o quemaduras internas (estrés térmico).
+    * **Anti-Mano Negra:** La transformación no es invulnerabilidad; el usuario sigue teniendo un núcleo físico que puede ser herido.
+
+#### Habilidades de Lv5
+1. **Señor Elemental (Avatar de la Dimensión):** Invoca a una entidad de rango supremo con conciencia superior.
+    * **Efecto:** El espíritu puede manipular la física del mapa (crear ríos, incendios forestales o grietas tectónicas) con un poder de salida de $10^6$ Joules.
+    * **CD:** Global (una vez por sesión).
+    * **Limitante:** El usuario debe permanecer en un círculo ritual y no puede realizar ninguna otra acción.
+    * **Anti-Mano Negra:** El espíritu tiene una personalidad propia y puede negarse a atacar a ciertos objetivos si considera que el equilibrio elemental se rompe.
+2. **Aniquilación por Retroalimentación:** El espíritu se sobrecarga de maná y explota en un vector definido.
+    * **Efecto:** Una explosión termobarica o de presión hidráulica que genera $50,000$ Newtons de fuerza expansiva.
+    * **CD:** Global (destruye al espíritu y agota al usuario).
+    * **Limitante:** Requiere que el espíritu esté a menos de 5 metros del objetivo.
+    * **Anti-Mano Negra:** La carga de explosión es visible (el espíritu brilla intensamente), dando 1 turno de reacción para protegerse o alejarse.
+3. **Puerta de la Gnosis Elemental:** Abre un portal estable al plano elemental del que emergen hordas de pequeños entes.
+    * **Efecto:** Crea un caos absoluto en el campo de batalla, con múltiples fuentes de daño elemental aleatorio en un radio de 50 metros.
+    * **CD:** Global.
+    * **Limitante:** El portal es incontrolable; los entes atacan a cualquier ser vivo que no posea la firma de maná del invocador.
+    * **Anti-Mano Negra:** El portal puede ser cerrado prematuramente si el usuario es golpeado o si se aplica Antimagia directamente sobre el nodo central del portal.
+
+
+
+

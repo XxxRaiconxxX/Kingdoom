@@ -1,0 +1,88 @@
+Entramos en la **Magia de Sangre** (o Hemomancia), una disciplina prohibida que utiliza el fluido vital como conducto para la energía mágica más pura y cruda.
+
+Es el arte del **Vitalismo Forzado**. A diferencia de otras ramas que usan el maná del ambiente, el hemomante utiliza el hierro y el plasma como baterías biológicas. Es una magia de sacrificio y dolor: para obtener poder sobre el cuerpo ajeno, primero debes dominar y, a menudo, derramar el tuyo. Es una conexión visceral con la esencia misma de la vida; donde hay un latido, hay un punto de control para el mago de sangre.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Aguja de Hemoglobina:** Condensas una pequeña cantidad de sangre propia o derramada en un proyectil sólido.
+    * **Efecto:** Disparas un dardo punzante que causa daño físico y puede transmitir infecciones mágicas.
+    * **Detalle Técnico:** Cristalización rápida de las proteínas plasmáticas y el hierro mediante la reducción forzada de la temperatura del fluido a $0°C$.
+    * **CD:** 1 turno.
+    * **Limitante:** Requiere una fuente de sangre líquida (una herida abierta o un vial).
+    * **Anti-Mano Negra:** El dardo se deshace al impactar, dejando una mancha de sangre conspicua que permite rastrear al usuario por el olor.
+
+2. **Percepción del Pulso:** Sientes el latido cardíaco de los seres vivos a tu alrededor.
+    * **Efecto:** Detectas enemigos ocultos tras paredes o en sigilo mediante su ritmo circadiano.
+    * **Detalle Técnico:** Sintonización con las ondas de presión hidrodinámica emitidas por el sistema cardiovascular.
+    * **CD:** 2 turnos.
+    * **Limitante:** Seres sin sistema circulatorio (no-muertos, autómatas) son totalmente invisibles.
+    * **Anti-Mano Negra:** Si el usuario tiene una herida abierta, su propio pulso puede generar interferencia, confundiendo las señales.
+
+#### Habilidades de Lv2
+1. **Coagulación Acelerada:** Detienes el flujo sanguíneo de una herida propia o de un aliado de forma instantánea.
+    * **Efecto:** Cierra cortes y evita que el usuario se desangre, recuperando un $5\%$ del HP.
+    * **Detalle Técnico:** Activación masiva de trombocitos (plaquetas) mediante una descarga de maná de baja frecuencia.
+    * **CD:** 3 turnos.
+    * **Limitante:** El área afectada queda rígida y entumecida durante 2 turnos.
+    * **Anti-Mano Negra:** El coágulo es artificial y quebradizo; un golpe fuerte en la zona puede reabrir la herida con mayor gravedad.
+
+2. **Látigo de Plasma:** Manipulas un flujo de sangre para usarlo como un arma flexible.
+    * **Efecto:** Un látigo de hasta 3 metros que causa cortes profundos y puede atrapar extremidades.
+    * **Detalle Técnico:** Tensión superficial aumentada magnéticamente para mantener la cohesión del fluido en movimiento.
+    * **CD:** 3 turnos.
+    * **Anti-Mano Negra:** El látigo pierde masa con cada golpe, acortándose gradualmente hasta desaparecer.
+
+#### Habilidades de Lv3
+1. **Ebullición Hemática:** Calientas la sangre de un enemigo que tenga una herida abierta.
+    * **Efecto:** Causa dolor insoportable y daño interno por quemaduras, reduciendo su ataque en un $40\%$.
+    * **Detalle Técnico:** Excitación térmica de las moléculas de agua en el plasma mediante microondas de maná.
+    * **CD:** 5 turnos.
+    * **Limitante:** El enemigo debe estar a menos de 5 metros de distancia.
+    * **Anti-Mano Negra:** Si el enemigo usa magia de hielo o agua sobre sí mismo, el efecto se anula y el vapor resultante ciega al usuario.
+
+2. **Transfusión de Vigor:** Transfieres vitalidad de un cuerpo a otro mediante un puente de sangre.
+    * **Efecto:** Curas a un aliado drenando tu propia vida o la de un enemigo capturado.
+    * **Detalle Técnico:** Transferencia de ATP y nutrientes celulares a través de un vínculo osmótico mágico.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4
+1. **Marioneta de Sangre:** Tomas el control de los músculos de un enemigo manipulando el fluido en sus venas.
+    * **Efecto:** Obligas al objetivo a realizar movimientos físicos (atacar a sus aliados, caminar, soltar armas).
+    * **Detalle Técnico:** Control de la presión hidrostática en los capilares para forzar la contracción muscular.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere concentración bimanual; el usuario no puede atacar mientras controla a la marioneta.
+    * **Anti-Mano Negra:** El objetivo puede resistir el control mediante fuerza física bruta ($>800 N$), lo que causa rotura de vasos sanguíneos en sus propias extremidades.
+
+2. **Cosecha de Vitalidad:** Creas una explosión de espinas de sangre desde los cadáveres cercanos.
+    * **Efecto:** Daño de área masivo ($4500 J$) que además drena vida para el usuario.
+    * **Detalle Técnico:** Expansión volumétrica violenta del fluido residual en tejidos muertos.
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5
+1. **Anemia Universal:** El usuario extrae el hierro de la sangre de todos los enemigos en un radio de 20 metros.
+    * **Efecto:** Los enemigos caen en estado de shock hipovolémico o muerte instantánea.
+    * **Detalle Técnico:** Desvinculación atómica del hierro en el grupo hemo de la hemoglobina.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El hierro extraído se condensa en una esfera pesada frente al usuario, impidiéndole moverse rápido.
+    * **Anti-Mano Negra:** Si hay un imán potente o magia de metal cerca, la esfera de hierro puede ser lanzada contra el propio usuario.
+
+2. **Avatar del Corazón Eterno:** El usuario se vuelve inmortal mientras haya sangre en el campo de batalla.
+    * **Efecto:** Cualquier daño recibido se repara al instante absorbiendo la sangre ambiental.
+    * **Detalle Técnico:** Reconfiguración celular continua basada en un banco de ADN externo masivo.
+    * **CD:** Global.
+
+3. **La Gran Purga:** El usuario transmuta su propia sangre en un gas tóxico que desintegra la materia biológica.
+    * **Efecto:** Un área de 50 metros queda libre de toda vida orgánica excepto el usuario.
+    * **CD:** Global (Uso único por evento).
+    * **Anti-Mano Negra:** Tras el uso, el usuario queda anémico crónico, perdiendo permanentemente el $20\%$ de su fuerza física máxima.
+
+
+
+---
+
+Con esto concluimos la **Magia de Sangre** y todos los bloques principales de tu sistema. 
+
+¿Te gustaría que diseñemos las **Magias Especiales** (como Magia de Sonido, Gravedad o Luz Sólida) o prefieres que revisemos alguna estructura de lore para **Aethelgardia**?

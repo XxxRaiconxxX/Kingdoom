@@ -1,0 +1,83 @@
+Entendido. Reenfocamos la **Magia de Gravedad** para un estilo de combate **Cuerpo a Cuerpo Full Rush**. Ya no eres un mago que controla el campo de batalla desde lejos, sino un coloso imparable que usa la gravedad para potenciar cada golpe, adherirse a las superficies y arrollar a cualquiera que se interponga en tu carga. Eres la fuerza imparable y el objeto inamovible, todo en uno.
+
+---
+
+## --Magia de Gravedad (Enfoque: Coloso de Rush)--
+
+Es el arte de **convertirte en una singularidad andante**. Manipulas el peso y la atracción de tu propio cuerpo y el de tus enemigos en el punto de impacto. Usas la gravedad como un exotraje invisible que aumenta tu masa para demoler defensas, o la reduces para moverte a velocidades absurdas en cargas rectilíneas. No controlas el espacio, controlas la inercia de la batalla.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Puño de Impacto Denso:** Concentras micro-gravitones en tus nudillos justo antes del contacto.
+    * **Efecto:** Tu golpe físico ignora la dureza de armaduras ligeras (cuero/mallas) y empuja al enemigo 1 metro atrás.
+    * **Detalle Técnico:** Aumento de la masa efectiva de la extremidad a $50 kg$ en $0.01 s$ sin alterar la velocidad.
+    * **CD:** 1 turno.
+    * **Limitante:** Requiere un ataque cuerpo a cuerpo exitoso.
+    * **Anti-Mano Negra:** El aumento súbito de masa genera un "tirón" en tu hombro, reduciendo tu agilidad un $5\%$ el siguiente turno.
+2. **Adherencia Orbital (Zapatos Magnéticos):** Aumentas la atracción gravitatoria entre tus pies y la superficie que tocas.
+    * **Efecto:** Puedes correr por paredes, techos o superficies resbaladizas (hielo) sin caer, manteniendo el equilibrio total.
+    * **Detalle Técnico:** Generación de un micro-pozo de gravedad positiva en la suela del calzado.
+    * **CD:** 2 turnos de duración.
+    * **Anti-Mano Negra:** Si intentas saltar mientras está activo, la atracción te frena, reduciendo la altura del salto a la mitad.
+
+#### Habilidades de Lv2
+1. **Carga G (Rush Gravitatorio):** Reduces tu masa a cero y generas un vector de atracción hacia un enemigo.
+    * **Efecto:** Te lanzas en línea recta hacia el objetivo a una velocidad que lo hace casi imposible de esquivar. Recorres hasta 10 metros instantáneamente.
+    * **Detalle Técnico:** Cancelación del tensor métrico personal e inducción de una caída libre controlada horizontalmente.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo funciona en línea recta. Si hay obstáculos en medio, chocas contra ellos.
+    * **Anti-Mano Negra:** Al llegar, recuperas tu masa de golpe; si no impactas a nadie, sufres un daño por frenado brusco (whiplash).
+2. **Guardia de Masa Aumentada:** Multiplicas tu peso por 10 mientras bloqueas.
+    * **Efecto:** Te vuelves inmune a ser empujado, derribado o lanzado por aires. Reduce el daño físico recibido en un $25\%$.
+    * **Detalle Técnico:** Anclaje gravitatorio masivo sincronizado con la postura defensiva.
+    * **CD:** 3 turnos.
+    * **Anti-Mano Negra:** Eres totalmente incapaz de moverte mientras la guardia está activa.
+
+#### Habilidades de Lv3
+1. **Martillo de Eventos (Combo Final):** Un golpe descendente con ambas manos que duplica la gravedad en el punto de impacto.
+    * **Efecto:** Causa daño masivo ($2500 J$) y estampa al enemigo contra el suelo, dejándolo propenso y aturdido por 1 turno.
+    * **Detalle Técnico:** Generación de una micro-singularidad transitoria en el punto de colisión de los puños.
+    * **CD:** 5 turnos.
+    * **Limitante:** Requiere que el enemigo esté de pie o más bajo que tú.
+    * **Anti-Mano Negra:** El impacto es tan fuerte que agrieta el suelo en un radio de 2 metros, creando terreno difícil para ti también.
+2. **Abrazo de la Estrella de Neutrones:** Agarras a un enemigo y activas una atracción masiva entre tú y él.
+    * **Efecto:** El enemigo es incapaz de soltarse del agarre. Sus huesos crujen bajo la presión, sufriendo daño continuo.
+    * **Detalle Técnico:** Creación de un dipolo gravitatorio de contacto de alta intensidad.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4
+1. **Coloso Inercial (Juggernaut Mod):** Entras en un estado donde tu inercia es imparable.
+    * **Efecto:** Por 2 turnos, ignoras barreras físicas (muros delgados, escudos pesados) y atraviesas enemigos menores al correr. Tu masa es tan alta que nada te frena.
+    * **Detalle Técnico:** Manipulación del tensor de energía-impulso para mantener un momento lineal constante independientemente de la resistencia.
+    * **CD:** 6 turnos.
+    * **Limitante:** No puedes cambiar de dirección rápidamente; tus giros son muy amplios.
+    * **Anti-Mano Negra:** Al terminar el efecto, tu cuerpo está tan fatigado por la inercia que no puedes usar habilidades de Lv3 o superior por 3 turnos.
+2. **Salto de Singularidad (Ground Pound):** Te lanzas al aire, multiplicas tu masa al máximo y caes.
+    * **Efecto:** Onda de choque de $4000 N$ en 5 metros a la redonda. Derriba y daña a todos los enemigos.
+    * **Detalle Técnico:** Conversión de energía potencial gravitatoria en energía cinética masiva.
+    * **CD:** 6 turnos.
+
+#### Habilidades de Lv5
+1. **Horizonte de Sucesos Personal (Modo Berserker):** Te conviertes en un agujero negro andante por 3 turnos.
+    * **Efecto:** Atraes automáticamente a todos los enemigos en 10 metros hacia ti. Tus golpes causan desintegración molecular en el punto de impacto. Eres inmune al daño físico a distancia.
+    * **Detalle Técnico:** Generación de un horizonte de sucesos transitorio alrededor del cuerpo del usuario.
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** Al terminar, sufres daño por "estiramiento espagueti" equivalente al $30\%$ de tu HP máximo.
+    * **Anti-Mano Negra:** La succión es tan fuerte que también atraes objetos afilados del entorno (espadas sueltas, escombros) que pueden herirte antes de llegar a tus enemigos.
+2. **Colapso del Núcleo (Golpe Final Global):** Concentras toda la gravedad de la zona en un solo puñetazo.
+    * **Efecto:** Un solo golpe inesquivable que causa muerte instantánea (o daño masivo de $10^7 J$ a jefes) y crea un cráter de 20 metros.
+    * **CD:** Global.
+3. **Métrica de Alcubierre (Rush Relativista Cuerpo a Cuerpo):** Usas la burbuja de Alcubierre no para viajar, sino para golpear.
+    * **Efecto:** Golpeas a un enemigo miles de veces en un solo segundo al deformar el espacio alrededor de tus puños.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+¿Deseas continuar con la **Magia de Sonido** (Vibraciones y Acústica)? Esta también puede enfocarse en gritos de batalla y golpes vibratorios de corto alcance si lo prefieres para el estilo rush.
+
+¿Avanzamos?

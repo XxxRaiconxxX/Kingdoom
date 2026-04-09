@@ -1,0 +1,87 @@
+Siguiendo con el catálogo de **Magia de Invocación**, entramos en una de las categorías más poderosas y exigentes: **Bestias Divinas**.
+
+---
+
+### --Bestias Divinas--
+
+Desde la **astrofísica de altas energías** y la **teoría de cuerdas**, la invocación de Bestias Divinas se explica como la manifestación de **Arquetipos Cósmicos** o entidades cuya existencia reside en dimensiones de 10 u 11 dimensiones (espacio de Calabi-Yau). Estas entidades no son animales, sino "conciencias vectoriales" que personifican leyes fundamentales del universo (gravedad, electromagnetismo, entropía). El invocador actúa como un **colisionador de hadrones biológico**, abriendo un agujero de gusano momentáneo para que una fracción de la masa de estas entidades se filtre al plano tridimensional.
+
+Científicamente, mantener a una Bestia Divina requiere una **Sincronización de Fase Neuronal** perfecta. El cuerpo de la bestia está compuesto de **materia extraña** o plasma de quarks-gluones confinado por un campo de fuerza psíquico. Debido a que su existencia desafía la termodinámica local, el entorno sufre distorsiones: el tiempo puede ralentizarse, la luz se refracta de forma anómala (efecto de lente gravitacional) y el aire se ioniza masivamente. El costo para el usuario no es solo energía, sino la integridad de su propia estructura atómica al servir de anclaje para una entidad de masa infinita.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Atavismo de Bestia (Rasgo Divino):** El usuario no invoca a la bestia completa, sino que manifiesta un rasgo físico (garras, escamas, ojos de depredador cósmico).
+    * **Efecto:** Aumenta la percepción o la capacidad de daño físico ($+50 N$) durante 2 turnos.
+    * **CD:** 3 turnos.
+    * **Limitante:** El rasgo causa dolor físico al aparecer, ya que deforma la anatomía del usuario.
+    * **Anti-Mano Negra:** Es una mejora estética y funcional leve; no otorga invulnerabilidad ni fuerza sobrehumana extrema en este nivel.
+2. **Rugido del Firmamento:** Proyecta una onda sónica que emula el grito de una deidad antigua.
+    * **Efecto:** Desorienta a los enemigos en un cono de 5 metros y apaga llamas pequeñas.
+    * **CD:** 3 turnos.
+    * **Limitante:** El usuario pierde la voz durante el turno siguiente debido al estrés en las cuerdas vocales.
+    * **Anti-Mano Negra:** No causa daño físico directo, solo un estado de "aturdimiento" que dura 1 segundo de rol.
+
+#### Habilidades de Lv2
+1. **Invocación de Cría/Avatar Menor:** Manifiesta una versión pequeña (tamaño lobo) de una bestia divina.
+    * **Efecto:** La criatura posee inteligencia táctica y puede realizar ataques de energía pura de $400 J$.
+    * **CD:** 5 turnos.
+    * **Limitante:** La bestia dura solo 3 turnos antes de que su masa se vuelva inestable y se desvanezca.
+    * **Anti-Mano Negra:** La criatura es física; si recibe daño equivalente al 30% de la vida del usuario, desaparece, y el usuario siente ese dolor.
+2. **Presencia Opresora:** El usuario emana el aura de la bestia divina.
+    * **Efecto:** Los animales normales huyen y los enemigos sienten una gravedad aumentada, reduciendo su velocidad un 20%.
+    * **CD:** 4 turnos.
+    * **Limitante:** El aura afecta también a los aliados si no están protegidos por la firma de maná del usuario.
+    * **Anti-Mano Negra:** Es un efecto puramente gravitatorio/mental; no impide que el enemigo use ataques a distancia o magia.
+
+#### Habilidades de Lv3
+1. **Montura Quimérica:** Invoca una bestia divina capaz de transportar al usuario y un aliado.
+    * **Efecto:** Puede volar o correr a velocidades de hasta $120 km/h$ ignorando terreno difícil.
+    * **CD:** 6 turnos tras ser desinvocada.
+    * **Limitante:** La bestia no puede participar en combate activo; si es atacada, prioriza la huida o se disipa.
+    * **Anti-Mano Negra:** Invocarla toma 2 turnos de cánticos/concentración; no es una huida instantánea.
+2. **Escudo de Escamas Sagradas:** La bestia se interpone parcialmente entre el usuario y un ataque.
+    * **Efecto:** Bloquea un ataque mágico o físico de hasta $2000 N$ de fuerza.
+    * **CD:** 5 turnos.
+    * **Limitante:** El escudo es unidireccional y dura una fracción de segundo.
+    * **Anti-Mano Negra:** El impacto genera un retroceso que empuja al usuario 3 metros hacia atrás, incluso si el daño es bloqueado.
+
+#### Habilidades de Lv4
+1. **Bestia de Guerra (Rango Guardián):** Invoca a una entidad de 5 metros de altura con armadura orgánica.
+    * **Efecto:** Posee ataques de área (aliento de plasma, pisotones sísmicos) con una fuerza de $8000 N$.
+    * **CD:** Una vez por encuentro largo.
+    * **Limitante:** El usuario debe permanecer inmóvil y con las manos extendidas para mantener el vínculo con la bestia.
+    * **Anti-Mano Negra:** La bestia es tan grande que es un blanco fácil. Si la bestia es "asesinada", el usuario recibe un penalizador de -50% a todas sus estadísticas por el resto del día.
+2. **Colapso de Probabilidad (Rugido Divino):** La bestia emite una frecuencia que anula los hechizos de bajo nivel en un radio de 20 metros.
+    * **Efecto:** Disipa ilusiones y cancela conjuros en preparación de nivel 1 y 2.
+    * **CD:** 6 turnos.
+    * **Limitante:** Gasta el 40% del maná total del usuario en un solo pulso.
+    * **Anti-Mano Negra:** No afecta a magias de nivel 3 o superior, ni a habilidades físicas o de Ki.
+3. **Mimetismo Divino (Semidiós):** El usuario se recubre con la esencia de la bestia, obteniendo una armadura de energía.
+    * **Efecto:** Aumenta la resistencia física en un 80% y permite realizar un ataque especial de la bestia.
+    * **CD:** 8 turnos.
+    * **Limitante:** Dura 2 turnos. Al terminar, el usuario sufre fatiga crónica y no puede correr.
+    * **Anti-Mano Negra:** La armadura es brillante y ruidosa; el sigilo es imposible y el usuario se vuelve el objetivo principal de todos los enemigos.
+
+#### Habilidades de Lv5
+1. **Manifestación del Primordial:** El cielo se desgarra para permitir la entrada de una porción del cuerpo de una Bestia Divina de tamaño colosal (ej. una garra del tamaño de una casa o un ojo que ocupa el firmamento).
+    * **Efecto:** Un único golpe que genera una presión de $10^7$ Pascales, capaz de borrar un fuerte o un ejército pequeño.
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** El usuario queda con 1 HP y pierde el conocimiento inmediatamente después del ataque.
+    * **Anti-Mano Negra:** El ataque tarda 3 turnos en materializarse (el cielo cambia de color, hay terremotos). Todos los personajes tienen tiempo para intentar cancelar la invocación matando al usuario o huyendo de la zona de impacto.
+2. **Juicio de la Bestia (Campo de Ley):** La bestia impone una regla física en el campo de batalla (ej. "Nadie puede volar" o "El fuego no quema").
+    * **Efecto:** Altera las leyes de la física en un radio de 50 metros durante 5 turnos.
+    * **CD:** Global.
+    * **Limitante:** Mantener esta ley causa daños cerebrales (pérdida de recuerdos o cordura temporal) al usuario.
+    * **Anti-Mano Negra:** La ley afecta al usuario y a sus aliados por igual; es una habilidad puramente táctica de doble filo.
+3. **Resurrección por Sacrificio Divino:** La bestia absorbe el alma de un aliado recién muerto para devolverlo a la vida.
+    * **Efecto:** El aliado revive al 100% de su capacidad.
+    * **CD:** Global (Solo una vez en la historia del personaje).
+    * **Limitante:** El usuario debe ofrecer algo de igual valor (un sentido permanente, un brazo, o su propia capacidad de volver a usar magia de invocación).
+    * **Anti-Mano Negra:** El proceso es un pacto; la Bestia Divina puede imponer condiciones narrativas extremas que el jugador debe aceptar.
+
+
+
+¿Continuamos con **Invocación de Objetos**?

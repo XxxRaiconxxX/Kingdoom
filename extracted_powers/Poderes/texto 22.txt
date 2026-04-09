@@ -1,0 +1,72 @@
+Siguiendo con el catálogo de **Magia de Espacio**, procedemos con la **Distorsión Espacial** (o Manipulación de la Métrica), que consiste en alterar las distancias y los volúmenes sin desplazarse físicamente.
+
+---
+
+### --Distorsión Espacial--
+
+Desde la **geometría no euclidiana** y la **física de la gravitación**, la Distorsión Espacial se define como la capacidad de alterar localmente el **tensor métrico** del espacio. Científicamente, el mago no estira los objetos, sino que comprime o expande el tejido del vacío sobre el que la materia reside. Esto crea efectos ópticos y físicos donde una distancia de un kilómetro puede reducirse a un paso, o un objeto pequeño puede volverse inalcanzable al expandir el espacio entre él y el observador.
+
+Físicamente, este proceso genera **lentes gravitacionales** y fluctuaciones en la densidad del aire. Al comprimir el espacio, la energía térmica se concentra, pudiendo elevar la temperatura, mientras que expandirlo puede enfriar el área súbitamente. El mayor riesgo es la **Torsión de Marea**: si la distorsión no es uniforme, las fuerzas de tracción pueden despedazar objetos sólidos o causar fallos estructurales en edificios cercanos debido a la curvatura extrema.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Lupa/Reductor Óptico:** Curva la luz al distorsionar el espacio frente a los ojos.
+    * **Efecto:** Permite ver objetos lejanos con detalle o ampliar micro-rastros en una escena.
+    * **CD:** 1 turno.
+    * **Limitante:** Distorsiona la visión periférica, dejando al usuario vulnerable a flanqueos.
+    * **Anti-Mano Negra:** Es un efecto puramente visual; no acerca físicamente los objetos.
+2. **Alteración de Alcance:** Alarga o acorta levemente el espacio de un brazo o herramienta.
+    * **Efecto:** Permite alcanzar un objeto que está 20 cm fuera de rango o evitar que una mano toque algo peligroso.
+    * **CD:** 2 turnos.
+
+#### Habilidades de Lv2
+1. **Paso de Gigante (Atajo):** Comprime el espacio frente a los pies del usuario.
+    * **Efecto:** Un solo paso permite recorrer 5 metros de distancia real.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo funciona en línea recta y sobre terreno sólido.
+    * **Anti-Mano Negra:** El usuario parece "deslizarse" a gran velocidad, pero sigue siendo vulnerable a ataques de intercepción durante el movimiento.
+2. **Deflexión Espacial:** Crea una curvatura en el espacio alrededor del usuario.
+    * **Efecto:** Los proyectiles lentos (flechas, piedras) parecen "desviarse" por una curva invisible antes de impactar.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv3
+1. **Horizonte de Sucesos Menor:** Expande el espacio entre el usuario y un atacante.
+    * **Efecto:** El enemigo intenta correr hacia el usuario pero "no avanza", como si corriera en una cinta de correr invisible.
+    * **CD:** 5 turnos.
+    * **Limitante:** Solo afecta a una dirección específica y dura 1 turno.
+    * **Anti-Mano Negra:** No detiene ataques de área ni hechizos que no dependan de una trayectoria física.
+2. **Caja de Dirac:** Crea una distorsión que hace que un objeto parezca más pequeño por fuera pero mantenga su tamaño por dentro.
+    * **Efecto:** Permite guardar objetos grandes en contenedores pequeños (máximo 2 metros cúbicos en una caja de zapatos).
+    * **CD:** Permanente (mantenido con maná).
+
+#### Habilidades de Lv4
+1. **Colapso Espacial (Implosión):** Comprime violentamente un área de 2 metros hacia un punto central.
+    * **Efecto:** Genera una presión de $5000 N$, aplastando armaduras y estructuras.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere 1 turno de canalización visual.
+    * **Anti-Mano Negra:** La distorsión es visible como un efecto de "espejismo" o aire tembloroso antes de activarse.
+2. **Espejo de Espacio:** Dobla el espacio para que la parte frontal del usuario conecte con su espalda.
+    * **Efecto:** Cualquier ataque frontal "sale" por detrás del usuario, golpeando potencialmente al propio atacante si está cerca.
+    * **CD:** 6 turnos.
+3. **Laberinto Geométrico:** Altera las esquinas de una habitación para que todas lleven al mismo punto.
+    * **Efecto:** Desorientación total de un grupo de enemigos en interiores.
+
+#### Habilidades de Lv5
+1. **Singularidad Descalza:** Crea un punto de distorsión infinita que atrae todo en un radio de 20 metros.
+    * **Efecto:** Destrucción total de materia bariónica. Todo lo que toque el centro de la distorsión desaparece de la realidad física.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario debe permanecer a una distancia segura; si la singularidad se sale de control, puede consumirlo a él también.
+    * **Anti-Mano Negra:** Genera una firma gravitatoria tan potente que puede ser detectada desde kilómetros por otros magos espaciales.
+2. **Métrica Inversa:** El usuario expande el espacio interno de un enemigo.
+    * **Efecto:** Los órganos internos intentan ocupar más espacio del que permite la cavidad torácica. Daño interno masivo e inesquivable.
+    * **CD:** Global.
+3. **Arquitectura de Dimensiones Altas:** El usuario crea una zona donde las leyes de la geometría de 3D no se aplican.
+    * **Efecto:** Se puede caminar por las paredes, ver "dentro" de objetos cerrados y atacar desde direcciones imposibles (4ta dimensión).
+    * **CD:** Global (Uso único por evento).
+
+
+
+¿Continuamos con **Creación de Dimensiones de Bolsillo**? Sería el último paso antes de pasar a la **Magia Mental**.

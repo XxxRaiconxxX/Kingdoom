@@ -1,0 +1,70 @@
+Entendido. Ajusto el enfoque: una introducción **mágica y sencilla**, pero manteniendo el **detalle técnico y el rigor** en los niveles y limitaciones para que no pierdas profundidad en el rol.
+
+---
+
+## --Telepatía y Lectura de Mentes--
+
+Es el arte de **unir conciencias**. Imagina que las mentes no son cajas cerradas, sino libros abiertos en una biblioteca invisible. Con esta magia, extiendes hilos de luz desde tu mente para hojear los pensamientos de otros, escuchar sus secretos como si fueran susurros al oído o proyectar tus propias ideas directamente en su cabeza.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Susurro Mental:** Envías una palabra o imagen fugaz a una persona.
+    * **Efecto:** El objetivo escucha tu voz en su cabeza claramente.
+    * **CD:** 1 turno.
+    * **Limitante:** Es unidireccional; no puedes oír lo que ellos piensan.
+    * **Anti-Mano Negra:** Si el objetivo está en pánico, el mensaje llega distorsionado.
+2. **Sentir Presencia:** Detectas "chispas" de conciencia a tu alrededor.
+    * **Efecto:** Sabes cuántas personas hay en una habitación oscura, aunque no las veas.
+    * **CD:** 2 turnos.
+
+#### Habilidades de Lv2
+1. **Escucha Superficial:** Captas el monólogo interno inmediato de alguien.
+    * **Efecto:** Sabes qué va a decir o qué dirección tomará antes de que se mueva.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo captas lo que están pensando *ahora*, no sus secretos profundos.
+    * **Anti-Mano Negra:** Personas con gran voluntad pueden bloquearte pensando en una canción repetitiva.
+2. **Proyección de Emoción:** Envías un sentimiento puro (miedo, calma, alegría).
+    * **Efecto:** Puede calmar a un animal asustado o hacer dudar a un guardia.
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Enlace de Conciencias (Chat de Grupo):** Conectas las mentes de tus aliados.
+    * **Efecto:** Comunicación instantánea y silenciosa. Permite coordinar ataques perfectos.
+    * **CD:** 5 turnos de duración.
+    * **Limitante:** El rango es de 100 metros.
+    * **Anti-Mano Negra:** Si un aliado sufre daño mental, todos sienten un "latigazo" de dolor.
+2. **Sondear Memoria Reciente:** Ves lo que el objetivo hizo en las últimas 24 horas.
+    * **Efecto:** Extraes caras de sospechosos o ubicaciones de objetos perdidos.
+    * **CD:** 5 turnos.
+
+#### Habilidades de Lv4
+1. **Intrusión Profunda:** Buceas en el subconsciente para extraer secretos olvidados.
+    * **Efecto:** Encuentras traumas, contraseñas o verdades que el objetivo juró no decir.
+    * **CD:** 6 turnos.
+    * **Limitante:** El proceso es doloroso para el objetivo (hemorragia nasal).
+    * **Anti-Mano Negra:** El objetivo sabrá exactamente quién entró en su mente y qué se llevó.
+2. **Sugestión Telepática:** Siembras una idea que el objetivo cree que es suya.
+    * **Efecto:** "Debería dejar mi puesto para ir a comer" o "Ese hombre no parece un sospechoso".
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5
+1. **Mente Colmena:** Controlas temporalmente los pensamientos de una multitud.
+    * **Efecto:** Puedes hacer que una plaza entera se arrodille o se disperse en paz.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** Requiere contacto visual con el centro de la masa de gente.
+2. **Reescritura de Identidad:** Borras o cambias la personalidad de alguien permanentemente.
+    * **Efecto:** Un asesino puede olvidar cómo usar un arma o creer que es un granjero.
+    * **CD:** Global (Uso único por personaje).
+    * **Limitante:** El usuario pierde parte de sus propios recuerdos al "cederlos" para rellenar el hueco.
+3. **Omnisciencia Local:** Abres tu mente al "ruido" de toda una ciudad.
+    * **Efecto:** Localizas a cualquier persona basándote en su firma mental en un radio de 10km.
+    * **CD:** Global.
+
+
+
+---
+
+¿Continuamos con **Ilusiones Mentales**? Haré la intro simple y los niveles detallados como esta.

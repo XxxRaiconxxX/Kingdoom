@@ -1,0 +1,80 @@
+Iniciamos el catálogo de **Magia de Tiempo** (o Cronomancia), considerada una de las ramas más peligrosas debido a las paradojas y al estrés que ejerce sobre la causalidad universal. El primer poder es la **Dilatación Temporal**.
+
+---
+
+### --Dilatación Temporal--
+
+Desde la **relatividad especial** y la **mecánica cuántica de campos**, la Dilatación Temporal se define como la manipulación del **flujo local del tiempo propio** ($\tau$). Científicamente, el cronomante no "detiene" el tiempo en todo el universo, sino que crea una burbuja de **métrica de Alcubierre** o una distorsión en el tejido del espacio-tiempo donde la velocidad de los procesos entrópicos varía respecto al observador externo.
+
+Físicamente, acelerar el tiempo para uno mismo requiere una inmensa cantidad de maná para compensar el aumento de la energía cinética y evitar que la fricción con el aire (que se vuelve sólido como el agua a altas velocidades temporales) calcine el cuerpo del usuario. Al ralentizar el tiempo para otros, el usuario está alterando la **frecuencia de oscilación atómica** de los objetivos. El mayor riesgo es el **Efecto de Desfase**: si la burbuja colapsa bruscamente, el cambio repentino en la inercia puede causar daños internos masivos o hemorragias por la diferencia de presión temporal.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Reflejo Acelerado (Micro-Flash):** El usuario acelera su percepción durante una fracción de segundo.
+    * **Efecto:** Permite esquivar un proyectil o ataque físico que el usuario ya ha visto venir.
+    * **CD:** 2 turnos.
+    * **Limitante:** No permite moverse grandes distancias, solo realizar un movimiento evasivo corto.
+    * **Anti-Mano Negra:** El usuario siente un mareo leve tras el uso debido al desajuste del oído interno.
+2. **Ralentización de Caída:** Altera la gravedad local aumentando el tiempo de descenso.
+    * **Efecto:** Reduce la velocidad de caída a $1 m/s$, evitando daño por impacto desde cualquier altura.
+    * **CD:** 3 turnos.
+    * **Limitante:** El usuario es un blanco fácil mientras flota lentamente en el aire.
+    * **Anti-Mano Negra:** No permite volar ni moverse horizontalmente, solo caer despacio.
+
+#### Habilidades de Lv2
+1. **Burbuja de Lento (Slow):** Crea un área de 2 metros donde el tiempo transcurre a la mitad de velocidad.
+    * **Efecto:** Los enemigos dentro del área tienen su velocidad de movimiento y ataque reducida en un $50\%$.
+    * **CD:** 4 turnos.
+    * **Limitante:** La burbuja es fija y dura solo 2 turnos.
+    * **Anti-Mano Negra:** Los ataques a distancia que atraviesan la burbuja recuperan su velocidad normal al salir de ella.
+2. **Eco de Movimiento:** El usuario se acelera lo suficiente para dejar una imagen residual.
+    * **Efecto:** El próximo ataque enemigo tiene un $50\%$ de probabilidad de fallar al golpear la imagen del pasado inmediato.
+    * **CD:** 3 turnos.
+    * **Limitante:** El usuario debe estar en constante movimiento para mantener el eco.
+
+#### Habilidades de Lv3
+1. **Aceleración Metabólica (Haste):** Aumenta el flujo temporal del sistema biológico del usuario.
+    * **Efecto:** Permite realizar dos acciones físicas (ataques o movimientos) en un solo turno.
+    * **CD:** 5 turnos.
+    * **Limitante:** Al terminar el efecto (2 turnos), el usuario sufre fatiga extrema y no puede correr en el turno siguiente.
+    * **Anti-Mano Negra:** No afecta a la velocidad de casteo de hechizos mágicos, solo a acciones físicas.
+2. **Proyectil Crono-Acelerado:** Imbuye un objeto lanzado con una aceleración temporal.
+    * **Efecto:** El proyectil viaja a velocidades supersónicas, volviéndose casi imposible de esquivar para niveles inferiores.
+    * **CD:** 4 turnos.
+    * **Limitante:** El objeto suele desintegrarse tras el impacto debido al estrés cinético.
+
+#### Habilidades de Lv4
+1. **Campo de Estasis Estática:** Detiene el tiempo por completo para un objeto o persona pequeña.
+    * **Efecto:** El objetivo queda congelado e invulnerable durante 2 turnos. Toda la energía cinética acumulada se libera al finalizar.
+    * **CD:** 6 turnos.
+    * **Limitante:** No se puede dañar al objetivo mientras está en estasis.
+    * **Anti-Mano Negra:** Si se aplica sobre un aliado para salvarlo, este no puede realizar ninguna acción ni recibir curación hasta que el efecto expire.
+2. **Dilatación Grupal (Sincronía):** El usuario extiende su burbuja de aceleración a hasta 3 aliados.
+    * **Efecto:** Todo el grupo se mueve un $30\%$ más rápido y tiene ventaja en tiradas de iniciativa.
+    * **CD:** 7 turnos.
+    * **Limitante:** Requiere que los aliados permanezcan a menos de 5 metros del cronomante.
+3. **Senescencia Localizada:** Acelera el tiempo solo para una parte del cuerpo o un objeto del enemigo.
+    * **Efecto:** Puede hacer que una espada de hierro se oxide y rompa instantáneamente o que una herida enemiga se agrave años en segundos.
+    * **CD:** 6 turnos.
+
+#### Habilidades de Lv5
+1. **Mundo de Cristal (Time Stop):** Detiene el flujo temporal en un radio de 50 metros para todos menos para el usuario.
+    * **Efecto:** El usuario tiene 3 "segundos subjetivos" para moverse o posicionarse.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario no puede atacar directamente a seres vivos durante el tiempo detenido; cualquier objeto lanzado se detendrá al salir de su contacto.
+    * **Anti-Mano Negra:** Tras el uso, el usuario sufre de "Tinnitus Temporal", quedando sordo y desorientado por 2 turnos de rol.
+2. **Zona de Tiempo Cero:** Crea un vacío temporal donde nada puede entrar ni salir.
+    * **Efecto:** Una barrera absoluta que detiene incluso ataques de nivel "Dios" al atraparlos en un instante eterno.
+    * **CD:** Global.
+    * **Limitante:** Mantener la zona drena el maná máximo del usuario permanentemente hasta que descanse 24 horas.
+3. **Singularidad de Cronos:** El usuario colapsa su propia línea temporal.
+    * **Efecto:** El usuario existe en todos los puntos de su trayectoria a la vez durante 1 turno, atacando desde todas las direcciones simultáneamente.
+    * **CD:** Global (Uso único por evento).
+    * **Limitante:** El cuerpo físico sufre un desgaste equivalente a 10 años de vida en un instante.
+
+
+
+¿Continuamos con **Retroceso Temporal**?

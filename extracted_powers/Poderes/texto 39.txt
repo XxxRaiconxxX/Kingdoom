@@ -1,0 +1,67 @@
+Entramos en la **Magia de Tiempo** (Cronomancia de Asalto), la disciplina definitiva para el guerrero de *full rush* que busca ser **literalmente** más rápido que la realidad.
+
+Es el arte de **fragmentar el ahora**. No predices el futuro; manipulas el flujo de la cuarta dimensión en un radio cercano a tu cuerpo. Para un asaltante, esto significa que el enemigo se mueve en cámara lenta mientras tú encadenas diez golpes en lo que para el resto del mundo es un parpadeo. Es la magia de la ventaja táctica absoluta y la velocidad relativista.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Aceleración Metabólica Menor:** Forzas a tus nervios a disparar señales más rápido.
+    * **Efecto:** Tu velocidad de reacción aumenta un $15\%$ por 1 turno. Ideal para esquivar un ataque que ya estaba por golpearte.
+    * **Detalle Técnico:** Dilatación temporal biológica subjetiva de $1.2:1$.
+    * **CD:** 2 turnos.
+    * **Limitante:** Al terminar, sientes un breve mareo por el desajuste de tus sentidos.
+    * **Anti-Mano Negra:** Tus movimientos se vuelven erráticos y espasmódicos, lo que facilita que un rastreador visual prediga tu trayectoria de huida.
+2. **Retraso de Impacto:** Pospones el dolor y el daño de un golpe recibido por 3 segundos.
+    * **Efecto:** Te permite seguir atacando sin retroceder por el dolor (ignoras el *stagger*).
+    * **Detalle Técnico:** Suspensión de la transferencia de energía cinética en la red nerviosa.
+    * **CD:** 2 turnos.
+
+#### Habilidades de Lv2
+1. **Flash-Step (Salto Temporal):** Borras el tiempo que te toma recorrer una distancia corta.
+    * **Efecto:** Te "teletransportas" 5 metros instantáneamente en línea recta.
+    * **Detalle Técnico:** Salto cuántico sobre un segmento del eje temporal local.
+    * **CD:** 3 turnos.
+    * **Limitante:** Si hay un objeto sólido en el destino, el salto falla y sufres daño por colisión temporal.
+    * **Anti-Mano Negra:** Dejas una "sombra" azulada en tu posición anterior que dura $0.5 s$, indicando de dónde viniste.
+
+#### Habilidades de Lv3
+1. **Eco de Asalto:** Repites tu último ataque físico de forma automática.
+    * **Efecto:** Un segundo después de golpear, una copia temporal de tu brazo realiza el mismo daño en el mismo punto.
+    * **Detalle Técnico:** Sincronización de una iteración temporal previa con el presente.
+    * **CD:** 5 turnos.
+    * **Limitante:** Si el enemigo se movió más de 1 metro, el eco golpea al aire.
+    * **Anti-Mano Negra:** El eco emite un sonido de cristal rompiéndose que alerta a todos sobre el uso de cronomancia.
+2. **Ralentización de Proyectiles:** Creas un área de 2 metros donde el tiempo corre al $50\%$.
+    * **Efecto:** Las flechas o hechizos que entran en el área parecen flotar, permitiéndote atraparlos o desviarlos con la mano.
+    * **Detalle Técnico:** Campo de distorsión cronostática activa.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4
+1. **Cero Absoluto Temporal (Time Freeze):** Detienes el tiempo para un solo objetivo por 2 segundos.
+    * **Efecto:** El enemigo queda congelado totalmente. Todos los golpes que le des durante ese tiempo se acumulan y se aplican al unísono cuando el tiempo vuelve a correr.
+    * **Detalle Técnico:** Estasis temporal localizada mediante un lazo de retroalimentación infinita.
+    * **CD:** 7 turnos.
+    * **Limitante:** El usuario debe mantener contacto visual o estar a menos de 2 metros.
+    * **Anti-Mano Negra:** Al descongelarse, el objetivo recibe un impulso de adrenalina por el trauma temporal, aumentando su fuerza un $10\%$ brevemente.
+
+#### Habilidades de Lv5
+1. **Dominio del Cronos (Berserker de Tiempo):** El usuario se mueve en un flujo temporal acelerado por 5 segundos.
+    * **Efecto:** Para el usuario, el mundo está quieto. Puede realizar un combo completo de ataques inesquivables.
+    * **Detalle Técnico:** Desfase cronológico de fase de $10:1$.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El cuerpo del usuario envejece físicamente 1 mes por cada uso debido al estrés celular acelerado.
+    * **Anti-Mano Negra:** Durante este estado, el usuario es invisible al ojo humano, pero emite un calor térmico masivo que puede ser detectado por Magia de Fuego o visión infrarroja.
+2. **Rebobinado de Muerte:** Si el usuario muere, el tiempo retrocede 5 segundos automáticamente para él.
+    * **Efecto:** Vuelves a la vida con el HP que tenías antes del golpe fatal, con el conocimiento de lo que iba a pasar.
+    * **CD:** Global (Uso único por evento).
+3. **Paradoja de Existencia:** Borras el "presente" de un enemigo, enviándolo a un bucle infinito de 1 segundo de dolor.
+    * **Efecto:** El enemigo queda fuera de combate permanentemente en un estado catatónico.
+    * **CD:** Global.
+
+---
+
+¿Continuamos con la **Magia de Ácido y Corrosión** (Bio-química de Asalto) o prefieres que cerremos aquí el catálogo de magias y pasemos a otro apartado de **Aethelgardia**?
+
+¿Qué sigue, Axel?

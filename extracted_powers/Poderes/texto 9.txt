@@ -1,0 +1,90 @@
+Concluimos el catálogo de **Magia de Invocación** con la categoría de mayor riesgo y polaridad energética: la **Invocación de Seres Celestiales / Demoníacos** (o Invocación de Entidades de Polaridad Extrema).
+
+---
+
+### --Seres Celestiales / Demoníacos--
+
+Desde la **física de partículas** y la **teoría de la simetría rota**, estas entidades se definen como manifestaciones de **energía altamente coherente (Celestial)** o **entropía caótica concentrada (Demoníaca)**. Científicamente, el invocador no contacta con conceptos morales de "bien" o "mal", sino con fuerzas fundamentales opuestas: el orden absoluto (baja entropía) y el caos absoluto (alta entropía). Estas entidades habitan en planos de existencia con constantes físicas radicalmente distintas a las nuestras.
+
+El proceso de invocación requiere un **colimador de maná** (círculos rúnicos o sellos) que actúe como un regulador térmico y dimensional. Una entidad celestial emite fotones de alta frecuencia que pueden purificar la materia a nivel atómico, mientras que una entidad demoníaca genera un campo de **radiación ionizante** y fluctuaciones de vacío que desintegran los enlaces moleculares. El peligro para el usuario es la **contaminación de polaridad**: su propia firma energética puede verse alterada permanentemente, inclinando su sistema nervioso hacia la rigidez catatónica (orden) o la psicosis maníaca (caos).
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Destello de Virtud / Susurro de Tentación:** El usuario invoca una partícula mínima de energía de polaridad.
+    * **Efecto:** Un destello cegador que quema retina temporalmente o una distracción mental que induce a un enemigo a cometer un error por egoísmo o ira.
+    * **CD:** 2 turnos.
+    * **Limitante:** El efecto dura solo un instante de percepción.
+    * **Anti-Mano Negra:** No causa daño físico, es puramente un vector de influencia sensorial o psicológica.
+2. **Detección de Alineación:** El espíritu invocado revela la firma energética dominante de un objetivo.
+    * **Efecto:** Identifica si alguien es propenso al caos o al orden (útil para detectar traidores o espías).
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo detecta la tendencia actual, no la historia completa del sujeto.
+    * **Anti-Mano Negra:** Personajes con alta Magia Mental pueden enmascarar su firma.
+
+#### Habilidades de Lv2
+1. **Querubín / Diablillo (Familiar de Polaridad):** Invoca a una pequeña entidad con conciencia propia.
+    * **Efecto:** El celestial puede bendecir un objeto (daño sagrado $+10\%$); el demoníaco puede maldecirlo (causa podredumbre lenta).
+    * **CD:** 4 turnos.
+    * **Limitante:** La entidad es físicamente nula; huye ante el primer signo de agresión física.
+    * **Anti-Mano Negra:** La presencia de la entidad es tan intensa que alerta a cualquiera en un radio de 10 metros.
+2. **Círculo de Protección Menor:** Crea un anillo de energía que repele a la polaridad opuesta.
+    * **Efecto:** Reduce el daño recibido por ataques de luz o sombra en un $20\%$.
+    * **CD:** 3 turnos.
+    * **Limitante:** El círculo es estático; si el usuario se mueve, el efecto termina.
+    * **Anti-Mano Negra:** Solo protege contra la polaridad opuesta, no contra ataques físicos neutrales (como una piedra o una espada).
+
+#### Habilidades de Lv3
+1. **Ejecutor Celestial / Súcubo-Íncubo (Entidad de Combate):** Invoca a un guerrero de luz o un ente de manipulación.
+    * **Efecto:** El ejecutor golpea con daño radiante de $600 N$; el demoníaco puede drenar energía vital ($10\%$ HP) por contacto.
+    * **CD:** 5 turnos.
+    * **Limitante:** Si el entorno no coincide con la polaridad del ente (ej. invocar un demonio en una iglesia), su fuerza se reduce a la mitad.
+    * **Anti-Mano Negra:** El ente tiene una agenda propia; si el usuario actúa en contra de su polaridad, el ente puede negarse a obedecer.
+2. **Consagración / Profanación de Terreno:** Altera las propiedades físicas del suelo en un radio de 10m.
+    * **Efecto:** Consagrado: sana a aliados $2\%$ por turno. Profanado: debilita a enemigos reduciendo su resistencia física.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere un sacrificio material (incienso o sangre) para activarse.
+    * **Anti-Mano Negra:** El efecto puede ser revertido por un usuario de la polaridad opuesta usando la misma habilidad.
+
+#### Habilidades de Lv4
+1. **Ángel Exterminador / Demonio de Carga:** Invoca a una entidad de alto rango con armadura de energía.
+    * **Efecto:** El ángel dispara rayos de energía coherente (láseres de $5000 J$); el demonio genera una explosión de fuego oscuro de área.
+    * **CD:** Una vez por encuentro.
+    * **Limitante:** El usuario debe ceder parte de su libre albedrío; el ente toma decisiones tácticas por sí mismo.
+    * **Anti-Mano Negra:** La energía residual que dejan es peligrosa; tras el uso, el área queda "radiactiva" para ambos bandos por 3 turnos.
+2. **Pacto de Sangre / Luz:** El usuario vincula su vida a la del ente invocado.
+    * **Efecto:** El daño recibido por el usuario se divide al $50\%$ con la entidad.
+    * **CD:** 7 turnos.
+    * **Limitante:** Si la entidad es destruida violentamente, el usuario recibe el daño restante de golpe.
+    * **Anti-Mano Negra:** El vínculo es visible como una cadena de luz o sombras; puede ser cortado por habilidades de anulación mágica.
+3. **Resonancia de Sanción:** El ente emite un pulso que aturde a todos los seres de polaridad opuesta en 20m.
+    * **Efecto:** Parálisis cerebral y física durante 1 turno.
+    * **CD:** 6 turnos.
+    * **Limitante:** Consume el $50\%$ del maná total.
+    * **Anti-Mano Negra:** No afecta a seres neutrales o de la misma polaridad.
+
+#### Habilidades de Lv5
+1. **Arcángel / Señor del Abismo (Manifestación Total):** El cielo o el suelo se abren para dar paso a la entidad suprema.
+    * **Efecto:** Alteración masiva de la realidad. El arcángel puede resucitar a un grupo entero; el demonio puede convertir un campo de batalla en un volcán activo.
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** El usuario queda marcado permanentemente (físicamente deformado o con una aureola de luz constante), perdiendo su capacidad de pasar desapercibido entre humanos.
+    * **Anti-Mano Negra:** La entidad exige un precio narrativo: un juramento de servicio eterno o la entrega de un objeto de importancia máxima.
+2. **Armagedón / Juicio Final:** La entidad canaliza toda la energía del entorno para un colapso total.
+    * **Efecto:** El mapa es destruido. Borra toda vida biológica de nivel 3 o inferior en un radio de 1km.
+    * **CD:** Global (Fin de campaña).
+    * **Limitante:** El usuario muere tras la ejecución del hechizo.
+    * **Anti-Mano Negra:** Requiere un tiempo de carga de 5 turnos; durante este tiempo, el usuario es una estatua de cristal vulnerable.
+3. **Ascensión / Caída del Invocador:** El usuario se convierte permanentemente en la entidad.
+    * **Efecto:** El personaje deja de ser jugable como humano y se convierte en un NPC de nivel "Dios" o cambia su hoja de personaje radicalmente.
+    * **CD:** Único.
+    * **Limitante:** El jugador pierde el control del personaje para fines de balance del juego.
+    * **Anti-Mano Negra:** Requiere el consentimiento de todos los jugadores y el Master debido al cambio drástico en la narrativa.
+
+
+
+---
+Hemos concluido el catálogo de **Magia de Invocación**. El siguiente bloque en tu lista es la **Magia Rúnica**.
+
+¿Deseas comenzar con **Runas de Protección**?

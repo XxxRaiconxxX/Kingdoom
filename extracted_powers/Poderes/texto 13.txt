@@ -1,0 +1,86 @@
+Siguiendo con el catálogo de **Magia Rúnica**, entramos en el área de la **Mejora de Equipo** (o Alquimia Rúnica de Objetos). Esta es la aplicación más práctica para un aventurero o artesano, pues permite optimizar herramientas ya existentes.
+
+---
+
+### --Runas de Mejora de Equipo--
+
+Desde la **física del estado sólido** y la **nanotecnología de materiales**, estas runas se definen como "modificadores de red cristalina". Científicamente, la runa actúa como un **dopante energético** que se infiltra en los espacios intersticiales de los átomos del objeto (metal, madera o fibra). Al activarse, la runa altera propiedades físicas fundamentales como el módulo de Young (elasticidad), la conductividad térmica o la dureza de Vickers, permitiendo que un material común se comporte como una aleación exótica de alta tecnología.
+
+Físicamente, la mejora rúnica crea un **revestimiento de campo** que protege el filo o la superficie del desgaste entrópico. En niveles avanzados, las runas pueden inducir estados de **superconductividad** en armas, permitiendo que transmitan energía elemental sin pérdida de calor, o generar efectos de **memoria de forma**, haciendo que un objeto dañado recupere su estructura original automáticamente al detectar una entrada de maná.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Filo Persistente:** Graba una runa en el lomo de un arma blanca.
+    * **Efecto:** El arma ignora el desgaste por uso normal y mantiene un filo de nivel micrométrico durante 24 horas.
+    * **CD:** 1 turno de grabado.
+    * **Limitante:** No aumenta el daño base, solo evita que el arma se melle al chocar contra superficies duras.
+    * **Anti-Mano Negra:** Si el arma se rompe por un impacto masivo, la runa pierde su efecto.
+2. **Refuerzo de Trama:** Se aplica en ropa de tela o cuero.
+    * **Efecto:** Aumenta la resistencia a cortes y desgarros en un $10\%$.
+    * **CD:** 1 turno.
+    * **Limitante:** Sigue siendo vulnerable a ataques de perforación (flechas/lanzas) y fuego.
+    * **Anti-Mano Negra:** El tejido se vuelve un poco más rígido, lo que puede ser incómodo para movimientos de gran elasticidad.
+
+#### Habilidades de Lv2
+1. **Aligeramiento de Carga:** Runa grabada en armaduras pesadas o mochilas.
+    * **Efecto:** Reduce el peso percibido del objeto en un $50\%$ mediante la manipulación local de la masa gravitatoria.
+    * **CD:** 3 turnos.
+    * **Limitante:** El volumen del objeto sigue siendo el mismo; solo afecta a la carga sobre el usuario.
+    * **Anti-Mano Negra:** Si la runa se desactiva bruscamente, el peso real regresa de golpe, pudiendo desequilibrar al usuario.
+2. **Empuñadura de Adherencia:** Se graba en el mango de cualquier herramienta o arma.
+    * **Efecto:** Hace que sea prácticamente imposible desarmar al usuario por medios físicos.
+    * **CD:** 2 turnos.
+    * **Limitante:** No protege contra ataques que corten la mano o el brazo del usuario.
+    * **Anti-Mano Negra:** Puede dificultar el cambio rápido de arma si el usuario no controla bien la desactivación del flujo de maná.
+
+#### Habilidades de Lv3
+1. **Templanza Elemental:** Imbuye el equipo con resistencia a un elemento.
+    * **Efecto:** Un escudo de cuero puede volverse ignífugo o una espada de metal puede dejar de conducir electricidad.
+    * **CD:** 4 turnos.
+    * **Limitante:** Solo puede albergar una resistencia a la vez.
+    * **Anti-Mano Negra:** La runa emite una firma térmica o eléctrica constante que puede ser detectada por rastreadores.
+2. **Equilibrio Dinámico:** Ajusta el centro de masa de un arma en tiempo real.
+    * **Efecto:** Aumenta la velocidad de ataque y la precisión en un $15\%$.
+    * **CD:** 4 turnos.
+    * **Limitante:** Solo funciona en armas de una mano.
+    * **Anti-Mano Negra:** Requiere que el usuario mantenga un ritmo de combate constante; si se detiene, la runa debe recalibrarse.
+
+#### Habilidades de Lv4
+1. **Aura de Impacto Cinético:** La runa acumula la energía de los bloqueos recibidos.
+    * **Efecto:** Tras bloquear 3 ataques, el próximo golpe del usuario libera una onda de choque de $2000 N$.
+    * **CD:** 6 turnos.
+    * **Limitante:** Si el usuario no ataca en los siguientes 2 turnos tras cargar la runa, la energía se disipa peligrosamente como calor.
+    * **Anti-Mano Negra:** El arma vibra y brilla cuando está cargada, alertando al enemigo del inminente ataque potente.
+2. **Auto-Reparación Molecular:** La runa utiliza maná para "tejer" de nuevo los enlaces rotos del objeto.
+    * **Efecto:** Repara grietas, abolladuras o filos mellados en segundos durante el combate.
+    * **CD:** 6 turnos.
+    * **Limitante:** No puede reconstruir partes del objeto que se hayan perdido (trozos de metal desprendidos).
+    * **Anti-Mano Negra:** Consume una cantidad considerable de maná por cada centímetro reparado.
+3. **Visión Telemétrica:** Graba runas en cascos o lentes.
+    * **Efecto:** Permite ver el flujo de maná de los enemigos y predice trayectorias de proyectiles mediante una interfaz rúnica visual.
+    * **CD:** 5 turnos.
+    * **Limitante:** Causa fatiga ocular y mareos tras 3 turnos de uso continuo.
+
+#### Habilidades de Lv5
+1. **Forja del Vacío (Arma indestructible):** El objeto se convierte en un artefacto de nivel maestro.
+    * **Efecto:** El arma o armadura se vuelve absolutamente indestructible por medios convencionales y puede herir a seres de cualquier plano.
+    * **CD:** Global (Una vez por semana).
+    * **Limitante:** El proceso de grabado dura 4 horas y requiere que el objeto se sumerja en maná puro.
+    * **Anti-Mano Negra:** Si el usuario muere, la runa se borra, devolviendo al objeto a su estado normal.
+2. **Sincronía Neuronal de Equipo:** El equipo se convierte en una extensión del sistema nervioso.
+    * **Efecto:** El usuario puede mover su armadura o arma con el pensamiento, permitiendo paradas y ataques a velocidades de $0.05 s$.
+    * **CD:** Global.
+    * **Limitante:** El estrés mental es tan alto que el usuario no puede usar otras magias mientras esta habilidad esté activa.
+    * **Anti-Mano Negra:** Un ataque de Magia Mental exitoso contra el usuario puede hacer que su propia armadura lo "estrangule" o bloquee sus movimientos.
+3. **Evolución Rúnica Adaptativa:** El equipo cambia sus propiedades según el enemigo que enfrenta.
+    * **Efecto:** Si el enemigo usa fuego, la armadura se vuelve de hielo; si el enemigo tiene gran defensa, el arma se vuelve de diamante.
+    * **CD:** Global.
+    * **Limitante:** Tarda 2 turnos en analizar al enemigo y adaptarse.
+    * **Anti-Mano Negra:** El cambio de forma consume materiales del ambiente; si no hay recursos cerca, la runa drena la salud del usuario para compensar la masa.
+
+
+
+¿Continuamos con el último de Magia Rúnica: **Escritura Rúnica en el Aire**?

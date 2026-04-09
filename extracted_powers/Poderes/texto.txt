@@ -1,0 +1,89 @@
+Terminamos el bloque de **Magia Mental** con la **Creación de Tulpa**. Esta es, quizás, la habilidad más compleja de este grupo, ya que implica la manifestación física de la psique.
+
+---
+
+### --Creación de Tulpa--
+
+Desde la **física de la materia condensada** y la **teoría de campos de información**, la creación de un Tulpa se define como la cristalización de un pensamiento en una forma de existencia semi-autónoma. Científicamente, el usuario utiliza su propia red neuronal como un plano arquitectónico para organizar el **vacío cuántico** local. Mediante un proceso de observación sostenida y colapso de función de onda, el usuario logra que una "idea" adquiera una densidad bariónica temporal, otorgándole masa, volumen y una firma energética propia.
+
+El Tulpa no es un espíritu, sino una **entidad de bio-información** alimentada por el exceso de energía electromagnética del cerebro del creador. Para mantener su cohesión atómica, el Tulpa requiere una tasa constante de transferencia de datos y energía desde el lóbulo frontal del usuario. Si esta conexión (el "ancla mental") se debilita, la estructura molecular del Tulpa pierde su estabilidad de fase y se disipa en forma de fotones de baja energía. A niveles avanzados, el Tulpa puede desarrollar un sistema nervioso rudimentario capaz de interactuar con las leyes de la termodinámica de forma independiente al creador por breves periodos.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Tulpa Sensorial (Presencia):** El usuario crea una entidad invisible y sin masa que solo él puede ver y sentir plenamente.
+    * **Efecto:** El Tulpa actúa como un par de ojos extra, permitiendo al usuario mirar en dos direcciones a la vez.
+    * **CD:** 2 turnos después de disiparse.
+    * **Limitante:** No tiene capacidad de interactuar con el mundo físico. Se disipa si el usuario pierde la concentración.
+    * **Anti-Mano Negra:** Otros usuarios de Magia Mental o Radiestesia pueden detectar la "mancha" de energía mental. No puede alejarse más de 3 metros del usuario.
+2. **Voz de la Conciencia:** El Tulpa puede susurrar al oído de un tercero o del propio usuario.
+    * **Efecto:** Sirve para dar mensajes cortos o actuar como un recordatorio mental infalible.
+    * **CD:** 1 turno.
+    * **Limitante:** El mensaje debe ser breve (menos de 10 palabras).
+    * **Anti-Mano Negra:** No es una voz telepática real; es un sonido acústico muy tenue. Puede ser ignorado si hay mucho ruido ambiental.
+
+#### Habilidades de Lv2
+1. **Manifestación de Sombra:** El Tulpa adquiere una forma visual borrosa (como humo o una silueta) visible para todos.
+    * **Efecto:** Puede usarse para distraer enemigos o como señuelo. Tiene una masa de apenas unos gramos.
+    * **CD:** 3 turnos.
+    * **Limitante:** Un solo golpe físico o ráfaga de viento fuerte lo disipa instantáneamente.
+    * **Anti-Mano Negra:** No puede atacar ni bloquear ataques. Solo sirve para engaño visual.
+2. **Tulpa de Carga:** El Tulpa puede sostener o mover un objeto muy ligero (menos de 500g).
+    * **Efecto:** Útil para robar llaves, mover una palanca o entregar una nota discretamente.
+    * **CD:** 3 turnos.
+    * **Limitante:** El objeto parece flotar en el aire, lo que lo hace muy evidente si no hay oscuridad.
+    * **Anti-Mano Negra:** El Tulpa se mueve a velocidad de caminata lenta; cualquier reacción rápida lo intercepta.
+
+#### Habilidades de Lv3
+1. **Estatua de Pensamiento:** El Tulpa adquiere solidez física parcial similar a la densidad de la madera.
+    * **Efecto:** Puede bloquear un camino estrecho o recibir un golpe por el usuario (HP equivalente al 20% del usuario).
+    * **CD:** 4 turnos.
+    * **Limitante:** Es estático; una vez manifestado en un punto, no puede moverse de esa posición.
+    * **Anti-Mano Negra:** Solo puede bloquear un ataque por turno. No tiene habilidades ofensivas.
+2. **Tulpa de Habilidad:** El Tulpa es creado con una pericia técnica específica (ej. saber forzar cerraduras o tocar un instrumento).
+    * **Efecto:** El Tulpa realiza una tarea técnica mientras el usuario hace otra cosa.
+    * **CD:** 5 turnos.
+    * **Limitante:** El usuario sufre un penalizador de -2 en sus propias acciones debido a la división de atención.
+    * **Anti-Mano Negra:** El Tulpa no tiene juicio propio; si la situación cambia (ej. el guardia despierta), el Tulpa seguirá intentando la tarea hasta ser destruido.
+
+#### Habilidades de Lv4
+1. **Duplicado de Combate:** El Tulpa replica la apariencia exacta del usuario y posee masa sólida.
+    * **Efecto:** Puede atacar físicamente aplicando una fuerza de $500 N$. Comparte el inventario visual, pero no puede usar magia.
+    * **CD:** 6 turnos.
+    * **Limitante:** Cualquier daño que reciba el Tulpa se refleja como fatiga mental (pérdida de maná) en el usuario.
+    * **Anti-Mano Negra:** El Tulpa solo dura 3 turnos. Un usuario de Clarividencia puede identificar fácilmente cuál es el original analizando el flujo de calor.
+2. **Tulpa Parásito:** El usuario proyecta el Tulpa para que se "adhiera" a la mente de un enemigo.
+    * **Efecto:** El enemigo sufre alucinaciones constantes y un zumbido de $90 dB$ en sus oídos, reduciendo su precisión un 50%.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere que el Tulpa toque la cabeza del objetivo.
+    * **Anti-Mano Negra:** El objetivo puede expulsar al Tulpa mediante dolor físico autoinfligido o una tirada exitosa de voluntad.
+3. **Manifestación de Armamento:** El Tulpa no es un ser, sino un objeto sólido (espada, escudo, cadena).
+    * **Efecto:** Crea un objeto de energía sólida con una dureza de 7 en la escala de Mohs.
+    * **CD:** 5 turnos tras la rotura del objeto.
+    * **Limitante:** El objeto desaparece si sale de la mano del usuario.
+    * **Anti-Mano Negra:** No puede tener propiedades mágicas adicionales (como fuego o hielo), es solo masa sólida.
+
+#### Habilidades de Lv5
+1. **Tulpa Autónomo (Ego Alter):** Una copia perfecta del usuario con conciencia propia limitada.
+    * **Efecto:** El Tulpa puede usar habilidades de Magia Mental de hasta Lv3 de forma independiente. Tiene su propia reserva de energía (25% de la del usuario).
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** Si el Tulpa es destruido, el usuario cae inconsciente por 1d4 turnos debido al shock de la ruptura de la psique.
+    * **Anti-Mano Negra:** El Tulpa tiene una personalidad ligeramente distinta (a menudo basada en los impulsos reprimidos del usuario), lo que puede generar conflictos de rol si no se le da órdenes claras.
+2. **Ejército de Ideas (Legión):** El usuario manifiesta hasta 10 tulpas menores simultáneamente.
+    * **Efecto:** Crean un enjambre que puede abrumar a múltiples enemigos. Fuerza colectiva estimada en $5000 N$.
+    * **CD:** Global.
+    * **Limitante:** El usuario debe permanecer en trance meditativo; si se mueve, el enjambre se disipa.
+    * **Anti-Mano Negra:** Los Tulpas individuales son débiles; ataques de área (fuego, explosiones) los barren a todos de un solo golpe.
+3. **Tulpa de Realidad Deformada:** El Tulpa se fusiona con el entorno, alterando la física local.
+    * **Efecto:** Crea una zona de 10 metros donde la gravedad es de $0.5g$ o la fricción desaparece, según el deseo del usuario.
+    * **CD:** Global.
+    * **Limitante:** Dura solo 2 turnos y requiere un gasto de maná por segundo.
+    * **Anti-Mano Negra:** El área de efecto es fija y visible (el aire brilla con fractales mentales). Los enemigos pueden simplemente salir del área.
+
+---
+
+Hemos terminado con la **Magia Mental**. El siguiente catálogo en tu lista es la **Magia de Invocación**.
+
+¿Deseas comenzar con **Espíritus Elementales**?

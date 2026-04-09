@@ -1,0 +1,69 @@
+Cerramos el catálogo de **Magia de Espacio** con la habilidad de utilidad y almacenamiento definitiva: la **Creación de Dimensiones de Bolsillo** (o Espacios Extradimensionales).
+
+---
+
+### --Dimensiones de Bolsillo--
+
+Desde la **teoría de cuerdas (M-Theory)** y la **topología de variedades**, las Dimensiones de Bolsillo se definen como el aislamiento de una **brana** o subespacio fuera del tejido continuo de las tres dimensiones convencionales. Científicamente, el mago no "crea un universo", sino que pliega una sección del espacio-tiempo sobre sí misma, conectándola a la realidad primaria mediante un **punto de anclaje** o "puerta" (un objeto, un tatuaje o una coordenada mental).
+
+Físicamente, estos espacios poseen su propia **métrica interna**. El tiempo puede transcurrir de forma distinta (aunque de forma muy leve en niveles bajos) y las leyes de la termodinámica pueden estar parcialmente suspendidas, permitiendo que los objetos no se degraden o que el calor no se disipe. El mayor riesgo es el **Colapso Dimensional**: si el anclaje físico se destruye o el flujo de maná del creador cesa bruscamente, el contenido de la dimensión puede quedar "atrapado" en el vacío o ser expulsado violentamente hacia la realidad primaria con una fuerza explosiva.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Pliegue de Almacén:** Crea un espacio invisible del tamaño de una caja de zapatos vinculado a la palma de la mano.
+    * **Efecto:** Permite ocultar objetos pequeños (una daga, una poción, una llave) que aparecen y desaparecen al cerrar el puño.
+    * **CD:** Instantáneo para acceder.
+    * **Limitante:** Solo puede contener un objeto a la vez.
+    * **Anti-Mano Negra:** Si el usuario es despojado de su maná (antimagia), el objeto queda atrapado hasta que recupere su energía.
+2. **Vacío de Descarte:** Una pequeña fisura espacial para eliminar desechos.
+    * **Efecto:** Cualquier cosa arrojada aquí desaparece permanentemente hacia el vacío interdimensional.
+    * **CD:** 1 turno.
+
+#### Habilidades de Lv2
+1. **Morral Infinito:** Vincula una dimensión de bolsillo a un contenedor físico (bolsa, cofre).
+    * **Efecto:** El contenedor puede albergar hasta 50 kg de equipo sin aumentar su peso real ni su volumen externo.
+    * **CD:** Permanente (mantenido con el objeto).
+    * **Limitante:** Meter objetos afilados sin protección puede dañar el anclaje y destruir el morral.
+    * **Anti-Mano Negra:** Si el morral es cortado físicamente, todos los objetos salen disparados en direcciones aleatorias.
+
+#### Habilidades de Lv3
+1. **Refugio de Emergencia:** El usuario crea una burbuja espacial donde puede entrar y desaparecer del mundo físico.
+    * **Efecto:** El usuario es invisible e intocable para quienes están afuera por 3 turnos.
+    * **CD:** 5 turnos.
+    * **Limitante:** El usuario no puede ver ni interactuar con el mundo exterior mientras esté dentro; es un escondite ciego.
+    * **Anti-Mano Negra:** Deja una perturbación visual (un efecto de aire tembloroso) en el punto donde el usuario "entró".
+
+#### Habilidades de Lv4
+1. **Habitación del Vacío:** Crea un espacio habitable de $10 \times 10$ metros accesible mediante una puerta rúnica.
+    * **Efecto:** Un refugio seguro para descansar, con aire renovable y temperatura constante.
+    * **CD:** Una vez por día de rol.
+    * **Limitante:** No permite llevar a más de 5 personas.
+2. **Prisión Interdimensional:** Envía a un enemigo a una dimensión de bolsillo vacía.
+    * **Efecto:** El objetivo queda fuera del combate durante 2 turnos.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere un impacto físico o de un proyectil mágico para "marcar" al objetivo.
+3. **Arsenal en Suspensión:** El usuario mantiene docenas de armas flotando en su subespacio.
+    * **Efecto:** Puede invocar cualquier arma instantáneamente en su mano, permitiendo cambiar de estilo de combate cada turno sin coste de acción.
+
+#### Habilidades de Lv5
+1. **Dominio Personal (Sanctum):** Crea un ecosistema completo fuera de la realidad.
+    * **Efecto:** Una mansión, un bosque o un laboratorio que el usuario puede moldear a voluntad. El tiempo aquí transcurre a la mitad de velocidad (2 horas dentro = 1 hora fuera).
+    * **CD:** Global (Un solo dominio por usuario).
+    * **Limitante:** Requiere un ritual de 24 horas y el anclaje a un artefacto de nivel legendario.
+2. **Exilio Eterno:** Desplaza a un enemigo permanentemente a un vacío fuera de la existencia.
+    * **Efecto:** Muerte narrativa inmediata (solo contra enemigos no-jefes o con baja resistencia mágica).
+    * **CD:** Global.
+3. **Colapso del Vacío (Big Crunch):** El usuario crea una dimensión de bolsillo dentro de un enemigo y luego la hace colapsar.
+    * **Efecto:** El objetivo implosiona desde su centro de masa. Daño inesquivable de $10^7 J$.
+    * **CD:** Global (Uso único por evento).
+
+---
+
+Con esto finalizamos todos los bloques de **Magia de Espacio**. Hemos cubierto un recorrido inmenso desde los Elementos hasta la geometría del universo.
+
+El siguiente bloque principal es la **Magia Mental**.
+
+¿Deseas que avancemos con **Telepatía y Lectura de Pensamientos**?

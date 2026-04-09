@@ -1,0 +1,87 @@
+Entramos en el catálogo de **Magia Rúnica**. Este tipo de magia se diferencia de las anteriores porque es una **magia programática** y de almacenamiento. El primer poder a desarrollar son las **Runas de Protección**.
+
+---
+
+### --Runas de Protección--
+
+Desde la **física de materiales** y la **ingeniería de campos**, las Runas de Protección se definen como "circuitos lógicos grabados en sustratos físicos". Científicamente, la runa no es un símbolo místico, sino una configuración geométrica que actúa como un **metamaterial artificial**. Al ser grabada sobre una superficie y cargada con maná, la runa altera el tensor de permitividad del espacio circundante, creando una barrera de energía que puede desviar vectores de fuerza cinética o absorber radiación térmica.
+
+Físicamente, la protección rúnica opera bajo el principio de **interferencia destructiva**: cuando un ataque (cinético o mágico) golpea el campo, la runa emite una onda de fase opuesta que anula la energía del impacto. El límite de la protección depende de la integridad estructural del soporte (madera, piedra, metal) y de la "tasa de refresco" del maná inyectado. En niveles avanzados, las runas pueden actuar como **filtros de frecuencia**, permitiendo el paso de objetos aliados mientras bloquean proyectiles enemigos con una precisión de nanosegundos.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Sello de Estabilidad:** Graba una runa básica en un objeto pequeño (un escudo, una puerta, un casco).
+    * **Efecto:** Aumenta la durabilidad del objeto en un $25\%$, evitando que se rompa ante golpes comunes.
+    * **CD:** 1 turno de grabado.
+    * **Limitante:** El efecto desaparece si el objeto recibe un daño estructural mayor al $50\%$.
+    * **Anti-Mano Negra:** No detiene balas ni magia potente; solo refuerza la resistencia física del material.
+2. **Runa de Alerta:** Un glifo que brilla débilmente cuando un ser vivo se acerca a menos de 2 metros.
+    * **Efecto:** Evita emboscadas mientras el usuario duerme o está distraído.
+    * **CD:** 2 turnos de grabado.
+    * **Limitante:** El brillo es visible para el enemigo, revelando que hay una trampa o alarma.
+    * **Anti-Mano Negra:** Solo detecta presencia física; seres astrales o invisibles de nivel alto pueden pasar desapercibidos.
+
+#### Habilidades de Lv2
+1. **Escudo de Inercia:** Una runa grabada en la palma de la mano o en un guantelete.
+    * **Efecto:** Crea una barrera invisible de 50 cm que puede detener un proyectil pequeño (flecha o piedra).
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo puede detener un impacto por turno; el segundo impacto atraviesa la barrera.
+    * **Anti-Mano Negra:** El retroceso del golpe se transfiere al brazo del usuario, pudiendo causar luxaciones si el impacto es muy fuerte.
+2. **Glifo de Repulsión:** Se graba en el suelo o en una pared.
+    * **Efecto:** Empuja con una fuerza de $200 N$ a cualquier individuo que intente cruzar el umbral donde está la runa.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo afecta a seres que pesen menos de 100 kg.
+    * **Anti-Mano Negra:** La runa es fija; una vez colocada, no se puede mover.
+
+#### Habilidades de Lv3
+1. **Runa de Protección Elemental:** Un conjunto de glifos que absorben energía térmica o eléctrica.
+    * **Efecto:** Otorga inmunidad parcial ($50\%$) contra un elemento específico durante 3 turnos.
+    * **CD:** 4 turnos.
+    * **Limitante:** Al absorber energía, la runa se calienta; si absorbe demasiado, el objeto donde está grabada explota.
+    * **Anti-Mano Negra:** Solo protege contra ataques de energía pura, no contra los efectos físicos secundarios (como el humo de un incendio).
+2. **Valla Rúnica de Intercepción:** Crea una red de líneas de energía entre dos puntos marcados.
+    * **Efecto:** Detiene proyectiles mágicos de nivel 1 y 2 que intenten atravesar la línea.
+    * **CD:** 5 turnos.
+    * **Limitante:** Los puntos de anclaje deben estar a menos de 5 metros entre sí.
+    * **Anti-Mano Negra:** La red es visible como hilos de luz; los enemigos pueden saltarla o pasar por debajo.
+
+#### Habilidades de Lv4
+1. **Cúpula de Aislamiento Molecular:** El usuario dibuja una runa en el aire que se expande en una semiesfera de 3 metros.
+    * **Efecto:** Detiene ataques físicos y mágicos con una fuerza de hasta $5000 N$.
+    * **CD:** 6 turnos.
+    * **Limitante:** El usuario debe permanecer en el centro de la cúpula alimentándola con maná constante; si se mueve, la cúpula colapsa.
+    * **Anti-Mano Negra:** La cúpula bloquea el paso en ambas direcciones (los aliados tampoco pueden disparar hacia afuera).
+2. **Runa de Retorno de Daño:** Refleja una porción del impacto hacia el atacante.
+    * **Efecto:** El atacante recibe el $30\%$ del daño físico que intente infligir al portador de la runa.
+    * **CD:** 6 turnos.
+    * **Limitante:** La runa tiene un "límite de carga"; tras reflejar 3 golpes, se desintegra.
+    * **Anti-Mano Negra:** No funciona contra ataques de larga distancia (flechas, hechizos lejanos), solo cuerpo a cuerpo.
+3. **Glifo de Invisibilidad Estática:** Oculta un objeto o a una persona bajo un campo de refracción óptica.
+    * **Efecto:** El objetivo es invisible para el ojo humano mientras no se mueva.
+    * **CD:** 5 turnos.
+    * **Limitante:** Cualquier movimiento brusco rompe la alineación de la runa y revela al objetivo.
+    * **Anti-Mano Negra:** El campo emite un ligero zumbido audible en ambientes silenciosos.
+
+#### Habilidades de Lv5
+1. **Sello del Guardián Eterno:** Una runa de nivel maestro que vincula la protección a la energía vital de la tierra.
+    * **Efecto:** Crea una zona de protección absoluta de 10 metros que dura 24 horas. Regenera el escudo automáticamente.
+    * **CD:** Global (Una vez por semana).
+    * **Limitante:** El grabado requiere materiales costosos (polvo de diamante o sangre de criatura divina) y 1 hora de preparación.
+    * **Anti-Mano Negra:** El sello puede ser corrompido si se vierte gran cantidad de energía de caos/oscuridad sobre él durante varios minutos.
+2. **Runa de Inmunidad Total (Transitoria):** El usuario graba una runa en su propio pecho.
+    * **Efecto:** Durante 1 turno (6 segundos), el usuario es invulnerable a cualquier forma de daño existente.
+    * **CD:** Global.
+    * **Limitante:** Tras el efecto, la runa "quema" la piel, dejando una cicatriz permanente y reduciendo el HP máximo en un $5\%$.
+    * **Anti-Mano Negra:** Durante este turno, el usuario no puede realizar ninguna acción ofensiva; es una técnica de supervivencia pura.
+3. **Malla de Programación Defensiva:** El usuario crea runas que "aprenden" del ataque enemigo.
+    * **Efecto:** Tras ser golpeado por un tipo de magia una vez, las runas se ajustan para otorgar un $90\%$ de resistencia a ese tipo de magia específico por el resto del combate.
+    * **CD:** Global.
+    * **Limitante:** Solo puede aprender un tipo de magia a la vez.
+    * **Anti-Mano Negra:** El proceso de aprendizaje tarda 1 turno de exposición al daño, lo que significa que el primer golpe debe recibirse a potencia completa.
+
+
+
+¿Continuamos con **Runas de Ataque**?

@@ -1,0 +1,86 @@
+Iniciamos el catálogo de **Magia de Alquimia**, una disciplina que combina la química cuántica, la manipulación molecular y la transmutación de energía. El primer poder fundamental es la **Transmutación de Materia**.
+
+---
+
+### --Transmutación de Materia--
+
+Desde la **física nuclear de bajas energías** y la **nanotecnología de ensamblaje atómico**, la Transmutación de Materia se define como la capacidad de reorganizar los protones, neutrones y electrones de un objeto para cambiar su composición elemental. Científicamente, el alquimista no "crea" materia, sino que manipula los **enlaces de valencia** y la **fuerza nuclear fuerte** mediante la aplicación de maná como catalizador energético.
+
+Físicamente, este proceso requiere que el usuario comprenda la **Ley de Intercambio Equivalente**: para crear una masa determinada de un material, se debe partir de una masa equivalente de materia prima con una estructura atómica compatible. El proceso genera una liberación de calor (entalpía de reacción) que debe ser gestionada para evitar accidentes térmicos. En niveles avanzados, el alquimista puede realizar transmutaciones en milisegundos, convirtiendo el aire en sólidos o alterando la densidad de objetos en pleno movimiento.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Alteración Estética de Superficie:** Cambia el color, la textura o el brillo de un objeto pequeño.
+    * **Efecto:** Útil para camuflaje básico o para hacer que un metal común parezca oro (solo visualmente).
+    * **CD:** 1 turno.
+    * **Limitante:** No cambia las propiedades físicas (dureza, conductividad) del material.
+    * **Anti-Mano Negra:** El efecto es temporal y desaparece si el objeto entra en contacto con agua salada o maná hostil.
+2. **Purificación de Sustancias:** Separa impurezas de una mezcla (ej. filtrar sal del agua o veneno de una bebida).
+    * **Efecto:** Convierte una sustancia contaminada en una pura de grado laboratorio.
+    * **CD:** 2 turnos.
+    * **Limitante:** Solo funciona con mezclas líquidas o granulares simples.
+    * **Anti-Mano Negra:** No puede purificar sustancias que estén imbuídas con magia de nivel superior.
+
+#### Habilidades de Lv2
+1. **Modelado de Estado Sólido:** Cambia la forma de un objeto sin alterar su composición química.
+    * **Efecto:** Convierte un trozo de hierro en una llave, o una piedra en una punta de flecha.
+    * **CD:** 3 turnos.
+    * **Limitante:** El volumen final debe ser idéntico al volumen inicial.
+    * **Anti-Mano Negra:** Requiere que el usuario toque físicamente el material durante todo el proceso.
+2. **Endurecimiento Molecular:** Reorganiza la red cristalina de un material blando para hacerlo más resistente.
+    * **Efecto:** Hace que la madera sea tan dura como el bronce o que el vidrio no se astille.
+    * **CD:** 3 turnos.
+    * **Limitante:** El objeto se vuelve más quebradizo (pierde elasticidad) a cambio de la dureza.
+    * **Anti-Mano Negra:** El aumento de dureza es de máximo $+2$ puntos en la escala de Mohs.
+
+#### Habilidades de Lv3
+1. **Transmutación Elemental Simple:** Cambia un elemento por otro de número atómico cercano (ej. Plomo a Cobre).
+    * **Efecto:** Permite crear materiales necesarios para reparaciones o herramientas específicas.
+    * **CD:** 4 turnos.
+    * **Limitante:** Solo funciona con metales no nobles y en cantidades menores a 1 kg.
+    * **Anti-Mano Negra:** La reacción genera una luz intensa y un olor a ozono que revela la posición del alquimista.
+2. **Combustión Instantánea de Materia:** Convierte una porción de materia sólida en gas altamente inflamable y lo ignita.
+    * **Efecto:** Crea una explosión de $800 J$ de energía térmica.
+    * **CD:** 5 turnos.
+    * **Limitante:** Requiere un material base reactivo (materia orgánica o ciertos minerales).
+    * **Anti-Mano Negra:** La explosión es direccional y el usuario debe protegerse del retroceso térmico.
+
+#### Habilidades de Lv4
+1. **Transmutación de Estado (Fase):** Obliga a la materia a cambiar de estado ignorando la temperatura ambiental.
+    * **Efecto:** Convierte el suelo bajo un enemigo en líquido (lodo/arena movediza) o el aire frente al usuario en una pared sólida de nitrógeno.
+    * **CD:** 6 turnos.
+    * **Limitante:** El área afectada es de máximo 3 metros de diámetro.
+    * **Anti-Mano Negra:** El estado alterado solo dura 3 turnos antes de que la entropía natural devuelva la materia a su estado original.
+2. **Síntesis de Aleaciones Exóticas:** Combina materiales convencionales para crear un material con propiedades imposibles.
+    * **Efecto:** Crea un metal que es $100\%$ aislante eléctrico pero extremadamente conductor térmico.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere una concentración mental absoluta; cualquier distracción crea un material inestable que explota.
+    * **Anti-Mano Negra:** El material creado es altamente tóxico si se manipula sin guantes alquímicos.
+3. **Desintegración por Resonancia:** Rompe todos los enlaces moleculares de un objeto de forma instantánea.
+    * **Efecto:** Convierte una puerta de acero o una armadura en polvo fino.
+    * **CD:** 7 turnos.
+    * **Limitante:** No funciona contra seres vivos, solo contra objetos inanimados.
+
+#### Habilidades de Lv5
+1. **Transmutación de "Oro Alquímico" (Materia Perfecta):** Crea un material que posee las mejores propiedades de todos los elementos conocidos.
+    * **Efecto:** El objeto resultante es virtualmente indestructible, ligero como el aire y conductor perfecto de maná.
+    * **CD:** Global (Una vez por semana).
+    * **Limitante:** Requiere el sacrificio de una gema preciosa de gran valor como núcleo de energía.
+    * **Anti-Mano Negra:** Si la materia perfecta es golpeada por antimagia de nivel 5, se deshace en una explosión de radiación gamma.
+2. **Arquitectura Alquímica Masiva:** Transmuta el terreno circundante para crear estructuras complejas (puentes, túneles, fortalezas).
+    * **Efecto:** Modifica el mapa de forma permanente en un radio de 50 metros.
+    * **CD:** Global.
+    * **Limitante:** Tarda 1 hora de ritual y drena el $90\%$ del maná del usuario.
+    * **Anti-Mano Negra:** La estructura es tan estable como el terreno original; si el suelo es arena, la fortaleza será frágil.
+3. **Fusión Atómica Controlada:** El usuario transmuta una pequeña cantidad de materia directamente en energía pura.
+    * **Efecto:** Un rayo de aniquilación que desintegra cualquier objetivo en su trayectoria con una potencia de $10^9 J$.
+    * **CD:** Global (Uso único por evento).
+    * **Limitante:** El brazo con el que el usuario realiza la técnica queda calcinado permanentemente o debe ser reemplazado por una prótesis alquímica.
+    * **Anti-Mano Negra:** El ataque es una línea recta perfecta; un enemigo con reflejos relativistas o teletransporte puede evitarlo.
+
+
+
+¿Continuamos con **Creación de Pociones**?

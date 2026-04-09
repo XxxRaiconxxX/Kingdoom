@@ -1,0 +1,76 @@
+Entramos en la **Magia de Metal** (o Ferrocinesis), la disciplina definitiva para el asalto pesado y la dominación del campo de batalla mediante la materia sólida.
+
+Es el arte de **doblegar la estructura**. No solo mueves trozos de hierro; manipulas los enlaces metálicos a nivel molecular. Para un guerrero de *rush*, el metal es una extensión de su propio cuerpo: puedes densificar tu armadura en el punto de impacto, crear pinchos que brotan de tus guanteletes al golpear o convertir el arma del enemigo en metal líquido con solo tocarla. Es la magia de la persistencia, el peso y la fuerza industrial.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Refuerzo de Tensión:** Endureces instantáneamente una sección de tu armadura o arma.
+    * **Efecto:** El siguiente golpe recibido reduce su daño un $15\%$, o tu siguiente ataque ignora la durabilidad de escudos de madera.
+    * **Detalle Técnico:** Realineación de la estructura cristalina del metal para maximizar el empaquetamiento atómico.
+    * **CD:** 1 turno.
+    * **Limitante:** El metal se vuelve más frágil tras el impacto; no puedes reforzar la misma zona dos veces seguidas.
+    * **Anti-Mano Negra:** El metal emite un brillo cobrizo y un sonido de tensión metálica que delata el punto que estás reforzando.
+2. **Pinchos de Reacción:** Haces que pequeñas púas broten de tu armadura al ser golpeado.
+    * **Efecto:** Devuelve un $5\%$ del daño físico al atacante cuerpo a cuerpo.
+    * **Detalle Técnico:** Extrusión forzada de aleaciones ferrosas mediante presión interna de maná.
+    * **CD:** 2 turnos.
+    * **Anti-Mano Negra:** Los pinchos pueden engancharse en tu propia ropa o equipo si no tienes cuidado al moverte.
+
+#### Habilidades de Lv2
+1. **Guantelete de Plomo (Golpe Pesado):** Aumentas la densidad de tu puño o arma justo antes de impactar.
+    * **Efecto:** El golpe tiene la fuerza de un mazo de guerra, capaz de abollar acero y romper huesos.
+    * **Detalle Técnico:** Alteración transitoria de la masa atómica local mediante infusión de partículas pesadas.
+    * **CD:** 3 turnos.
+    * **Limitante:** Reduce tu velocidad de ataque en un $10\%$ durante la ejecución.
+    * **Anti-Mano Negra:** Tu brazo se vuelve tan pesado que si fallas el golpe, quedarás desequilibrado y expuesto por 1 segundo.
+2. **Desarme Magnético:** Generas un tirón polar sobre el arma metálica del enemigo.
+    * **Efecto:** El enemigo debe superar una tirada de fuerza o su arma volará hacia tu mano o hacia el suelo.
+    * **Detalle Técnico:** Inducción de un campo electromagnético de alta intensidad ($2.0 Tesla$).
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Armadura de Mercurio (Fluidez):** Tu armadura se vuelve semilíquida por unos segundos.
+    * **Efecto:** Te permite esquivar ataques físicos "fluyendo" alrededor de ellos y otorga inmunidad a proyecciones que intenten derribarte.
+    * **Detalle Técnico:** Transición de fase controlada del metal manteniendo la cohesión estructural.
+    * **CD:** 5 turnos.
+    * **Limitante:** Eres vulnerable a ataques eléctricos, que se propagan instantáneamente por todo tu cuerpo.
+    * **Anti-Mano Negra:** En este estado, el metal gotea y deja un rastro brillante en el suelo, permitiendo que te rastreen fácilmente.
+2. **Lluvia de Metralla:** Proyectas fragmentos de metal desde tu cuerpo en todas direcciones.
+    * **Efecto:** Daño de área en un radio de 4 metros. Perfora armaduras ligeras.
+    * **Detalle Técnico:** Fragmentación explosiva de metal excedente mediante repulsión magnética.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4
+1. **Prisión de Hierro (Doncella de Hierro):** Manipulas el metal del entorno (o de la armadura enemiga) para que se cierre sobre el objetivo.
+    * **Efecto:** Inmoviliza al enemigo y le causa daño por compresión ($3000 N$).
+    * **Detalle Técnico:** Soldadura en frío instantánea de componentes metálicos externos.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere que el enemigo lleve metal o que haya metal en el suelo cerca de él.
+    * **Anti-Mano Negra:** Si el enemigo es un maestro de Magia de Fuego, puede calentar el metal y quemarte si estás cerca manteniendo el hechizo.
+2. **Avatar de Ferrum:** Te cubres con una capa externa de metal ultra-denso, aumentando tu tamaño.
+    * **Efecto:** Tu fuerza aumenta un $50\%$ y eres inmune a proyectiles convencionales. Tus pasos agrietan el suelo.
+    * **Detalle Técnico:** Acreción de partículas metálicas ambientales sobre el exoesqueleto de maná.
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5
+1. **Colapso de Ferromagnetismo (Singularidad Metálica):** Conviertes todo el metal en un radio de 20 metros en un torbellino de cuchillas.
+    * **Efecto:** Desintegra cualquier estructura metálica y tritura a los enemigos dentro del área. Daño masivo ($6000 J$).
+    * **Detalle Técnico:** Manipulación de los dominios magnéticos a escala nanométrica.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario no puede usar armas metálicas propias por el resto del combate, ya que se deshacen.
+    * **Anti-Mano Negra:** La fricción del metal genera tal calor que el aire se vuelve irrespirable por el humo metálico tóxico.
+2. **Espada del Fin del Mundo (Materia Degenerada):** Creas un arma tan densa que su gravedad propia atrae al enemigo hacia el filo.
+    * **Efecto:** Un tajo que no se puede bloquear ni esquivar. Corta el espacio mismo.
+    * **CD:** Global.
+3. **Fundición Absoluta:** Conviertes instantáneamente el hierro en la sangre del enemigo en metal sólido.
+    * **Efecto:** Muerte instantánea por bloqueo circulatorio total.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+Con esto cerramos el catálogo de **Magias de Combate**. ¿Deseas que profundicemos en algún sistema de **Lore** para Aethelgardia, o prefieres que diseñemos los **Objetos Mágicos** que potenciarían estas habilidades?

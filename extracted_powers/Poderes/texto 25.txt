@@ -1,0 +1,68 @@
+Entramos en el terreno de las **Ilusiones Mentales**. 
+
+Es el arte de **engańar a los sentidos**. No creas hologramas de luz en el aire, sino que hackeas el cerebro del enemigo para que él mismo proyecte lo que tú deseas. Es una magia de "mentiras reales": el objetivo ve, oye y siente cosas que solo existen dentro de su propia cabeza, pero que para su sistema nervioso son totalmente indistinguibles de la realidad.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Distracción Sensorial:** Generas un sonido repentino o un destello en el borde de la visión.
+    * **Efecto:** El enemigo voltea la cabeza o pierde la concentración un instante.
+    * **CD:** 1 turno.
+    * **Limitante:** El efecto desaparece en cuanto el objetivo se enfoca directamente en el punto del origen.
+    * **Anti-Mano Negra:** No funciona en seres que no dependan de la vista o el oído (como no-muertos básicos).
+2. **Espejismo de Objeto:** Haces que un objeto pequeńo (una llave, una moneda) parezca otra cosa.
+    * **Efecto:** Un cuchillo puede parecer una barra de pan hasta que se toca.
+    * **CD:** 2 turnos.
+
+#### Habilidades de Lv2
+1. **Invisibilidad Mental:** Le dices al cerebro del enemigo que "tú no estás ahí".
+    * **Efecto:** El guardia mira directamente hacia ti pero su mente ignora tu presencia.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo funciona contra un objetivo a la vez. El ruido o el olor pueden delatarte.
+    * **Anti-Mano Negra:** Si realizas una acción hostil o tocas al objetivo, el velo se rompe instantáneamente.
+2. **Camuflaje de Entorno:** Alteras la percepción de una zona pequeńa.
+    * **Efecto:** Una puerta puede parecer una pared sólida.
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Doble Fantasma:** Creas una copia de ti mismo que parece luchar a tu lado.
+    * **Efecto:** El enemigo ataca a la ilusión, desperdiciando su turno. La ilusión incluso "sangra" si es golpeada.
+    * **CD:** 4 turnos.
+    * **Limitante:** La ilusión no puede causar daño físico real.
+    * **Anti-Mano Negra:** Un usuario de Magia Mental de igual nivel puede ver el "parpadeo" de la mentira.
+2. **Pesadilla Despierta:** Proyectas el miedo más profundo del objetivo frente a él.
+    * **Efecto:** El enemigo sufre el estado "Terror", reduciendo su precisión en un $50\%$.
+    * **CD:** 5 turnos.
+
+#### Habilidades de Lv4
+1. **Mundo de Espejos:** Atrapas al objetivo en un paisaje ilusorio completo.
+    * **Efecto:** El enemigo cree estar en un bosque en llamas o en medio del océano, perdiendo la noción de dónde está realmente.
+    * **CD:** 6 turnos.
+    * **Limitante:** El cuerpo real del enemigo sigue en el campo de batalla; puede tropezar o ser golpeado por aliados.
+    * **Anti-Mano Negra:** El dolor físico intenso (un corte real) puede despertar al objetivo de la ilusión.
+2. **Dolor Fantasma:** Engańas a los nervios para que sientan una herida inexistente.
+    * **Efecto:** El objetivo siente que se está quemando o que su brazo ha sido cortado, perdiendo movilidad.
+    * **CD:** 6 turnos.
+
+#### Habilidades de Lv5
+1. **Laberinto del Olvido:** El objetivo olvida quién es y por qué está luchando durante el combate.
+    * **Efecto:** El enemigo se vuelve neutral o se retira del área confundido.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** Requiere mantener contacto visual constante.
+2. **Ilusión de Muerte:** Haces creer al cerebro del objetivo que su corazón se ha detenido.
+    * **Efecto:** El cuerpo entra en shock cardiogénico real. Puede causar la muerte o un estado catatónico.
+    * **CD:** Global.
+    * **Limitante:** Si el objetivo tiene una voluntad de hierro, el choque solo lo deja inconsciente.
+3. **Realidad Persistente:** La ilusión es tan perfecta que se vuelve sólida para el objetivo.
+    * **Efecto:** Si el objetivo cree que hay un muro, chocará contra él y no podrá pasar, aunque no haya nada ahí.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+¿Continuamos con **Control Mental y Sugestión**? Es el arte de dominar la voluntad ajena.
+
+Haría la intro simple y los niveles con el detalle técnico de siempre. ¿Te parece?

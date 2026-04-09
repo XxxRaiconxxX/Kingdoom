@@ -1,0 +1,89 @@
+Siguiendo el orden del catálogo de **Magia de Invocación**, entramos en una de las categorías más raras y cargadas de épica: la **Invocación de Espíritus Heroicos** (o Resonancia de la Memoria Colectiva).
+
+---
+
+### --Espíritus Heroicos--
+
+Desde la **psicología analítica de Jung** y la **teoría del campo morfogenético**, la Invocación de Espíritus Heroicos se define como la capacidad de dar forma física a los "Arquetipos del Inconsciente Colectivo". Científicamente, el usuario no invoca el alma de una persona fallecida (proceso que pertenecería a la Necromancia), sino que accede a la **información residual** de individuos cuyas acciones dejaron una huella indeleble en la historia o la leyenda. El invocador actúa como un sintonizador que traduce mitos y registros históricos en una entidad de **ectoplasma denso** con una firma de maná coherente.
+
+Físicamente, el espíritu heroico es una **proyección de datos biográficos** que posee una red neuronal pre-programada con las habilidades, el estilo de combate y la personalidad del héroe original. La estabilidad de la invocación depende de la "Fama" o la fuerza del mito: cuanto más recordado sea el héroe, más fácil es para el invocador estabilizar su estructura atómica. En niveles altos, el usuario puede invocar "Fragmentos de Leyenda", permitiendo que el espíritu utilice armas o técnicas que desafían las leyes de la física convencional, basándose en la creencia popular de lo que ese héroe era capaz de hacer.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Susurro del Veterano:** El usuario invoca la sombra de un guerrero genérico para recibir un consejo táctico.
+    * **Efecto:** Otorga un bono de $+5\%$ de precisión en el próximo ataque al identificar una falla en la guardia del enemigo.
+    * **CD:** 2 turnos.
+    * **Limitante:** El espíritu es una voz o una imagen semitransparente que no puede luchar.
+    * **Anti-Mano Negra:** El consejo es situacional; si el enemigo cambia de postura, el bono se pierde.
+2. **Postura Heredada:** El usuario emula los movimientos de un esgrimista o luchador histórico.
+    * **Efecto:** Mejora la defensa física durante 1 turno al replicar una técnica de bloqueo perfecta.
+    * **CD:** 3 turnos.
+    * **Limitante:** Causa tensión en las articulaciones al forzar ángulos de movimiento no habituales para el usuario.
+    * **Anti-Mano Negra:** No aumenta la fuerza, solo la técnica de desvío.
+
+#### Habilidades de Lv2
+1. **Sombra de Héroe Menor:** Invoca a un guerrero o artesano de renombre local (tamaño humano).
+    * **Efecto:** Puede realizar una tarea específica (forjar algo rápido, montar guardia, un ataque básico de $150 N$).
+    * **CD:** 4 turnos.
+    * **Limitante:** El espíritu solo dura 2 turnos y tiene una resistencia física muy baja (1-2 golpes).
+    * **Anti-Mano Negra:** El espíritu mantiene su personalidad; si el héroe era arrogante o testarudo, puede cuestionar las órdenes del invocador.
+2. **Estandarte de Ánimo:** Invoca un símbolo heráldico flotante que emite una frecuencia inspiradora.
+    * **Efecto:** Los aliados en un radio de 5 metros ignoran el efecto de fatiga leve por 2 turnos.
+    * **CD:** 4 turnos.
+    * **Limitante:** El estandarte es un blanco visual obvio para los enemigos.
+    * **Anti-Mano Negra:** Si el estandarte es destruido, los aliados sufren un golpe moral (pequeño penalizador de ataque).
+
+#### Habilidades de Lv3
+1. **Paladín Legendario (Cuerpo Sólido):** Invoca a un héroe con armadura y arma propia que puede luchar de forma autónoma.
+    * **Efecto:** Ataca con una fuerza de $500 N$ y posee una habilidad especial de su leyenda (ej. un tajo veloz o un escudo irrompible).
+    * **CD:** 5 turnos.
+    * **Limitante:** El usuario debe mantener contacto visual con el espíritu para coordinar ataques complejos.
+    * **Anti-Mano Negra:** El espíritu es vulnerable a habilidades que afecten la "historia" o la "mente", como la Magia Mental.
+2. **Reliquia Fantasmal:** Invoca una copia del arma de un héroe para uso personal del usuario.
+    * **Efecto:** El arma posee un bono de daño del $+20\%$ y es efectiva contra seres incorpóreos.
+    * **CD:** 5 turnos.
+    * **Limitante:** El peso del arma es "espiritual"; drena maná en lugar de estamina por cada segundo que se empuñe.
+    * **Anti-Mano Negra:** El arma desaparece si el usuario recibe un daño que le haga perder la concentración.
+
+#### Habilidades de Lv4
+1. **Dúo Heroico:** Invoca a dos espíritus que trabajan en pareja (ej. dos hermanos de armas o un jinete y su montura).
+    * **Efecto:** Permite realizar ataques de flanqueo perfectos y cubrir dos frentes simultáneamente.
+    * **CD:** 6 turnos.
+    * **Limitante:** El coste de maná se duplica para mantener ambas estructuras de datos biográficos.
+    * **Anti-Mano Negra:** Si uno de los espíritus es destruido, el otro entra en un estado de "frenesí" incontrolable por 1 turno antes de desaparecer.
+2. **Manifestación de la Proeza:** El espíritu realiza su hazaña más famosa (ej. "Cortar una flecha en el aire" o "Soportar el peso de una montaña").
+    * **Efecto:** Una acción de éxito automático o defensa absoluta contra un ataque de gran magnitud.
+    * **CD:** Una vez por combate.
+    * **Limitante:** El espíritu se desvanece inmediatamente después de realizar la hazaña.
+    * **Anti-Mano Negra:** La hazaña debe ser lógicamente posible dentro del mito del héroe invocado.
+3. **Voz del Comandante:** El espíritu heroico toma el mando táctico del grupo de aliados.
+    * **Efecto:** Todos los aliados obtienen un bono de $+15\%$ en ataques coordinados.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere que los aliados acepten voluntariamente la autoridad del espíritu.
+    * **Anti-Mano Negra:** El efecto se rompe si el espíritu es silenciado o si el grupo se dispersa a más de 20 metros.
+
+#### Habilidades de Lv5
+1. **Ejército de los Caídos (Legión de Héroes):** Invoca una compañía de sombras de héroes para una carga masiva.
+    * **Efecto:** Un ataque de área que barre el campo de batalla con una fuerza de $10^5 J$.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario envejece prematuramente debido al esfuerzo de canalizar tantas memorias a la vez.
+    * **Anti-Mano Negra:** El ejército es una ilusión sólida; no puede mantener posiciones defensivas, es un ataque de "un solo uso" direccional.
+2. **Encarnación del Mito (Posesión):** El usuario permite que el espíritu heroico ocupe su cuerpo físico.
+    * **Efecto:** El usuario obtiene todas las estadísticas, memorias y habilidades del héroe durante 3 turnos.
+    * **CD:** Global.
+    * **Limitante:** El riesgo de pérdida de identidad es alto; el usuario puede quedar con secuelas de personalidad por semanas.
+    * **Anti-Mano Negra:** El cuerpo físico sigue siendo mortal; si el héroe toma riesgos innecesarios, el usuario morirá de verdad.
+3. **Resurrección Épica (Último Stand):** Cuando un aliado cae, un espíritu heroico lo posee momentáneamente para permitirle seguir luchando por 3 turnos más.
+    * **Efecto:** El aliado ignora el estado de muerte y lucha con un bono de $+50\%$ de daño.
+    * **CD:** Global (Una vez por campaña).
+    * **Limitante:** Al finalizar los 3 turnos, el aliado muere definitivamente a menos que se use una magia de resurrección de nivel 5 inmediatamente.
+    * **Anti-Mano Negra:** El aliado es una marioneta del espíritu; no puede hablar ni realizar acciones que no sean de combate.
+
+---
+
+Hemos terminado con la **Invocación de Espíritus Heroicos**. El último punto de este catálogo es la **Invocación de Seres Celestiales / Demoníacos**.
+
+¿Deseas avanzar con este último poder de Invocación?

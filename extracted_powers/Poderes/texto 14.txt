@@ -1,0 +1,89 @@
+Llegamos al final del catálogo de **Magia Rúnica** con la técnica más avanzada y fluida de esta rama: la **Escritura Rúnica en el Aire** (o Glifos Volátiles).
+
+---
+
+### --Escritura Rúnica en el Aire--
+
+Desde la **física de fluidos** y la **óptica de plasma**, esta habilidad se define como la creación de "estructuras de energía cinemática suspendida". A diferencia de las runas grabadas en sólidos, el usuario proyecta maná ionizado directamente en el gas atmosférico, utilizando la humedad y las partículas en suspensión como soporte temporal. Científicamente, el usuario genera un **confinamiento magnético** en el aire que mantiene la geometría del glifo estable frente a la entropía y las corrientes de convección.
+
+Físicamente, estas runas son **vórtices de información pura**. Al no depender de un soporte físico (madera o metal), su velocidad de ejecución es mucho mayor, pero su tasa de decaimiento es acelerada. La energía debe ser proyectada con una precisión de milisegundos para evitar que la runa se disipe antes de completarse. En niveles avanzados, el usuario puede "tejer" varias runas en el aire simultáneamente, creando una **red de lógica espacial** que puede ser activada de forma remota o programada para reaccionar ante estímulos específicos del entorno.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Trazo Lumínico:** El usuario dibuja una runa básica con el dedo o un catalizador en el aire.
+    * **Efecto:** Funciona como una fuente de luz estática o un puntero láser que puede señalar objetivos a 20 metros.
+    * **CD:** 1 turno.
+    * **Limitante:** Dura solo 3 turnos antes de evaporarse.
+    * **Anti-Mano Negra:** No tiene masa física; no puede bloquear ataques ni causar daño.
+2. **Sello de Interrupción:** Una runa fugaz que se lanza hacia un proyectil enemigo.
+    * **Efecto:** Desvía la trayectoria de una flecha o un cuchillo lanzado en un $10\%$.
+    * **CD:** 2 turnos.
+    * **Limitante:** Requiere reflejos excepcionales; debe dibujarse en el momento exacto del ataque.
+    * **Anti-Mano Negra:** Inútil contra proyectiles mágicos pesados o balas de alta velocidad.
+
+#### Habilidades de Lv2
+1. **Glifo de Empuje Atmosférico:** Una runa circular dibujada frente al usuario.
+    * **Efecto:** Libera una ráfaga de aire comprimido de $300 N$ que puede alejar a un enemigo o dispersar gases.
+    * **CD:** 3 turnos.
+    * **Limitante:** El alcance es corto (3 metros).
+    * **Anti-Mano Negra:** El aire comprimido es ruidoso y predecible por el movimiento de la mano.
+2. **Runa de Mensaje Volátil:** Escribe palabras en el aire que se transmiten como un pulso de sonido a un aliado.
+    * **Efecto:** Permite comunicación silenciosa a larga distancia (hasta 100 metros).
+    * **CD:** 2 turnos.
+    * **Limitante:** El mensaje se disipa si atraviesa una zona de fuerte interferencia mágica.
+    * **Anti-Mano Negra:** Un enemigo con Magia Mental o audición aumentada puede interceptar la frecuencia.
+
+#### Habilidades de Lv3
+1. **Escudo de Energía Efímero:** Una runa compleja que crea un plano de plasma sólido de 1 metro cuadrado.
+    * **Efecto:** Bloquea un ataque mágico de nivel 1 o 2.
+    * **CD:** 4 turnos.
+    * **Limitante:** Solo dura 1 turno (6 segundos).
+    * **Anti-Mano Negra:** Al disiparse, la runa libera un destello que puede cegar momentáneamente al propio usuario si no tiene cuidado.
+2. **Cadenas de Confinamiento Aéreo:** El usuario dibuja runas alrededor de las extremidades de un enemigo a distancia.
+    * **Efecto:** Crea grilletes de energía que reducen la agilidad del objetivo un $40\%$.
+    * **CD:** 5 turnos.
+    * **Limitante:** El enemigo debe estar relativamente quieto para que los trazos se completen correctamente.
+    * **Anti-Mano Negra:** Los grilletes pueden ser rotos mediante un estallido de energía interna o fuerza física bruta superior a $600 N$.
+
+#### Habilidades de Lv4
+1. **Bombardeo de Glifos Cinéticos:** El usuario "escribe" múltiples runas pequeñas y las lanza como proyectiles.
+    * **Efecto:** Cada runa impacta con una fuerza de $500 J$, causando daño por energía pura.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere una concentración bimanual (ambas manos dibujando al mismo tiempo).
+    * **Anti-Mano Negra:** Las runas viajan en línea recta; son fáciles de esquivar si el enemigo tiene espacio para moverse.
+2. **Runa de Espejo Óptico:** Crea una lente de energía en el aire que refracta la luz.
+    * **Efecto:** Puede usarse para ver a la vuelta de esquinas o para concentrar luz solar en un rayo térmico ($400°C$).
+    * **CD:** 6 turnos.
+    * **Limitante:** La lente es frágil; un impacto físico la rompe como si fuera cristal.
+    * **Anti-Mano Negra:** El rayo térmico tarda 1 turno en "calentarse" antes de causar daño real.
+3. **Red de Programación Espacial:** Llena el aire de runas invisibles que reaccionan al maná enemigo.
+    * **Efecto:** Si un enemigo lanza magia en el área, las runas se activan y drenan un $20\%$ de ese maná antes de que el hechizo se complete.
+    * **CD:** 7 turnos.
+    * **Limitante:** Afecta a un radio de 10 metros y dura 3 turnos.
+
+#### Habilidades de Lv5
+1. **Sello de Colapso Atmosférico:** Una runa de nivel maestro que "succiona" toda la presión en un punto.
+    * **Efecto:** Genera una implosión de $10^5 Pa$ seguida de una onda de choque expansiva masiva.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario debe permanecer inmóvil durante 3 turnos de escritura compleja.
+    * **Anti-Mano Negra:** Durante la escritura, el aire alrededor del usuario vibra y cambia de color, alertando de una catástrofe inminente.
+2. **Escritura de Ley Universal:** El usuario escribe una "sentencia" en el aire que altera una constante física local temporalmente (ej. "La luz no viaja").
+    * **Efecto:** Puede causar ceguera absoluta o anular la gravedad en un área de 50 metros.
+    * **CD:** Global.
+    * **Limitante:** El costo de maná es tan alto que el usuario cae en coma por 1d6 días de rol.
+    * **Anti-Mano Negra:** La "ley" puede ser cancelada por otro usuario de nivel 5 que escriba una contra-runa de igual complejidad.
+3. **Avatar de Glifos:** El usuario se rodea de una tormenta de runas que escriben y se borran constantemente.
+    * **Efecto:** El usuario puede usar cualquier habilidad de nivel 1 a 3 de este catálogo sin tiempo de reutilización durante 3 turnos.
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** Al terminar, el sistema nervioso del usuario queda "saturado", impidiéndole usar magia por 48 horas.
+
+
+
+---
+
+Con esto concluimos todo el catálogo de **Magia Rúnica**. El siguiente bloque principal de tu lista es la **Magia de Alquimia**.
+
+¿Deseas comenzar con **Transmutación de Materia**?

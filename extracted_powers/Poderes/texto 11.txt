@@ -1,0 +1,87 @@
+Siguiendo el orden del catálogo de **Magia Rúnica**, procedemos con las **Runas de Ataque** (o Glifos de Descarga Ofensiva).
+
+---
+
+### --Runas de Ataque--
+
+Desde la **termodinámica de no-equilibrio** y la **cinética de partículas**, las Runas de Ataque se definen como "condensadores de alta densidad energética". A diferencia de las defensivas, estas runas están diseñadas para la **liberación súbita de entropía**. Científicamente, el glifo actúa como una boquilla de aceleración para el maná, forzando la transición de fase de la energía almacenada hacia estados térmicos, cinéticos o eléctricos de gran magnitud en un vector específico.
+
+Físicamente, una runa de ataque funciona mediante la **ruptura de simetría**: al activarse, el diseño geométrico colapsa, liberando la energía acumulada en forma de un gradiente de presión o un haz de partículas ionizadas. La potencia del ataque está determinada por el "grosor" del trazo rúnico y la calidad del medio conductor. En niveles avanzados, el usuario puede programar **runas encadenadas**, donde la activación de una dispara una secuencia lógica de ataques coordinados que se alimentan de la energía residual del impacto anterior.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Trazo de Ignición:** El usuario dibuja una runa rápida en una superficie o proyectil (flecha, piedra).
+    * **Efecto:** Al impacto, el objeto se enciende, causando daño por fuego leve y quemando materiales inflamables.
+    * **CD:** 1 turno.
+    * **Limitante:** El fuego dura solo 2 turnos y no tiene fuerza explosiva.
+    * **Anti-Mano Negra:** Si el proyectil falla el blanco, la runa se consume inútilmente en el suelo.
+2. **Glifo de Impacto:** Una runa que añade masa inercial al golpe.
+    * **Efecto:** Un golpe físico o con arma empuja al enemigo 2 metros atrás con una fuerza adicional de $100 N$.
+    * **CD:** 2 turnos.
+    * **Limitante:** Solo funciona en ataques de contacto directo.
+    * **Anti-Mano Negra:** No aumenta el daño cortante, solo la fuerza de empuje.
+
+#### Habilidades de Lv2
+1. **Runa de Descarga Eléctrica:** Se graba en un arma o trampa de suelo.
+    * **Efecto:** Al activarse, libera un arco voltaico que paraliza los músculos del objetivo por 1 segundo.
+    * **CD:** 3 turnos.
+    * **Limitante:** La efectividad se reduce drásticamente si el enemigo usa armadura de goma o materiales aislantes.
+    * **Anti-Mano Negra:** La descarga puede afectar al usuario si este está en contacto con agua o metal conectado al enemigo.
+2. **Estallido de Fragmentación:** Una runa grabada en un objeto frágil (cerámica o vidrio).
+    * **Efecto:** El objeto explota en esquirlas que viajan a $50 m/s$ en un radio de 2 metros.
+    * **CD:** 3 turnos.
+    * **Limitante:** Requiere que el objeto sea lanzado y se rompa para activar la runa.
+    * **Anti-Mano Negra:** El daño es principalmente superficial (cortes leves); armaduras pesadas lo ignoran.
+
+#### Habilidades de Lv3
+1. **Runa de Vacío (Succión):** Un glifo que absorbe el aire a su alrededor violentamente.
+    * **Efecto:** Atrae a todos los enemigos en un radio de 4 metros hacia el centro de la runa, dejándolos vulnerables.
+    * **CD:** 4 turnos.
+    * **Limitante:** El efecto dura solo 1 segundo.
+    * **Anti-Mano Negra:** No causa daño directo, solo control de posición. Los enemigos pesados ($>150 kg$) son inmunes.
+2. **Hoja Rúnica Extendida:** Proyecta un filo de energía desde la runa grabada en el arma.
+    * **Efecto:** Aumenta el alcance del ataque en 1 metro con un filo de plasma capaz de cortar metal delgado.
+    * **CD:** 4 turnos.
+    * **Limitante:** El filo dura solo un tajo.
+    * **Anti-Mano Negra:** El brillo del plasma revela la trayectoria del ataque antes de que ocurra.
+
+#### Habilidades de Lv4
+1. **Glifo de Detonación Térmica:** Una runa compleja que sobrecalienta el aire hasta los $1000°C$.
+    * **Efecto:** Una explosión esférica de 5 metros de radio con una fuerza de $3000 N$.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere 1 turno de "trazado" en el aire o suelo, siendo vulnerable durante el proceso.
+    * **Anti-Mano Negra:** La explosión consume el oxígeno del área; si el usuario está dentro, puede sufrir asfixia momentánea.
+2. **Runa de Perforación Molecular:** Imbuye un proyectil con la capacidad de ignorar campos de fuerza.
+    * **Efecto:** El ataque atraviesa escudos mágicos de nivel 1 al 3 sin perder velocidad.
+    * **CD:** 6 turnos.
+    * **Limitante:** Solo funciona en proyectiles individuales, no en ataques de área.
+    * **Anti-Mano Negra:** Tras atravesar el escudo, el proyectil pierde su capacidad de daño crítico, convirtiéndose en un golpe estándar.
+3. **Malla de Rayos Encadenados:** Una serie de runas pequeñas que disparan proyectiles de energía entre sí.
+    * **Efecto:** Crea una "zona de muerte" donde rayos de energía rebotan entre puntos marcados, golpeando a múltiples objetivos.
+    * **CD:** 7 turnos.
+    * **Limitante:** Requiere colocar al menos 3 runas en diferentes puntos antes de activarlas.
+    * **Anti-Mano Negra:** Si una de las runas es destruida físicamente, la cadena se rompe por completo.
+
+#### Habilidades de Lv5
+1. **Sello de Singularidad:** Una runa que genera un punto de gravedad infinita por 3 segundos.
+    * **Efecto:** Aplasta cualquier estructura o enemigo en un radio de 5 metros con una presión de $10^6 Pa$.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario debe sacrificar el arma o el soporte donde grabó la runa, ya que queda pulverizado.
+    * **Anti-Mano Negra:** El tiempo de activación es de 5 segundos, permitiendo a los enemigos con teletransporte escapar.
+2. **Runa de Borrado Estructural:** Un glifo que desestabiliza los enlaces atómicos del objetivo.
+    * **Efecto:** Convierte una sección de 1 metro de cualquier material (o armadura) en polvo fino instantáneamente.
+    * **CD:** Global.
+    * **Limitante:** Requiere contacto físico directo de la mano del usuario (donde está la runa) con el objetivo.
+    * **Anti-Mano Negra:** No funciona contra seres puramente energéticos o astrales; solo contra materia bariónica sólida.
+3. **Calamidad de Glifos Infinitos:** El usuario proyecta miles de runas de ataque minúsculas en el aire.
+    * **Efecto:** Una tormenta de micro-explosiones que satura un área de 30 metros, generando un daño total estimado en $50,000 J$.
+    * **CD:** Global (Una vez por semana).
+    * **Limitante:** El usuario pierde la capacidad de usar Magia Rúnica durante 24 horas tras el despliegue.
+    * **Anti-Mano Negra:** Las runas pueden ser desviadas por un viento fuerte de origen mágico antes de que detonen.
+
+
+
+¿Continuamos con **Runas de Trampa**?

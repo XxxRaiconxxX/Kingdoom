@@ -1,0 +1,75 @@
+Siguiendo con la **Magia de Tiempo**, entramos en la vertiente más compleja y peligrosa para la salud mental del usuario: el **Retroceso Temporal** (o Reversión Causal).
+
+---
+
+### --Retroceso Temporal--
+
+Desde la **termodinámica** y la **flecha del tiempo de Eddington**, el Retroceso Temporal se define como la inversión local de la entropía ($\Delta S < 0$). Científicamente, el cronomante no "viaja al pasado", sino que utiliza el maná para forzar a las partículas de un sistema cerrado a desandar sus trayectorias previas, devolviendo la materia y la energía a un estado de configuración anterior.
+
+Físicamente, este proceso genera una acumulación masiva de **radiación de Hawking residual** y "paradojas de información". Si el usuario intenta revertir un evento de gran magnitud, el universo ejerce una **presión de autoconsistencia** que puede fracturar la psique del mago, provocando que sus recuerdos se mezclen con líneas temporales que "ya no existen". En niveles avanzados, el usuario puede aislar objetos específicos del flujo general, permitiendo que una herida se cierre mientras el resto del mundo sigue avanzando.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Rebobinado de Objeto Menor:** Revierte el estado de un objeto inanimado que quepa en la mano (ej. un vaso roto o una carta quemada).
+    * **Efecto:** El objeto vuelve a estar íntegro. No funciona si faltan piezas clave de la masa original.
+    * **CD:** 2 turnos.
+    * **Limitante:** Solo puede retroceder hasta 10 segundos en el pasado del objeto.
+    * **Anti-Mano Negra:** El objeto recuperado es ligeramente más frágil debido a la fatiga molecular del proceso.
+2. **Eco del Momento:** Permite al usuario "ver" lo que ocurrió en un lugar hace unos segundos.
+    * **Efecto:** Útil para ver qué dirección tomó un enemigo o qué objeto fue movido de una mesa.
+    * **CD:** 1 turno.
+    * **Limitante:** Solo muestra imágenes borrosas sin sonido.
+
+#### Habilidades de Lv2
+1. **Reversión de Impacto:** Retrocede el tiempo de un golpe recibido.
+    * **Efecto:** El usuario anula el daño de un ataque menor ($<100 N$) sufrido en el turno anterior.
+    * **CD:** 3 turnos.
+    * **Limitante:** El dolor del impacto permanece como un "fantasma sensorial", aunque la herida física desaparezca.
+    * **Anti-Mano Negra:** No puede recuperar extremidades perdidas o heridas que causen muerte instantánea.
+2. **Corrección de Proyectil:** Si el usuario falla un disparo (flecha/hechizo), lo devuelve a su mano para intentarlo de nuevo.
+    * **Efecto:** Recupera la munición y permite repetir el ataque con un bono de $+5\%$ de precisión.
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Sanación Cronológica:** Revierte el estado biológico de un aliado a como estaba hace 1 minuto.
+    * **Efecto:** Elimina estados alterados (veneno, parálisis) y recupera un $20\%$ de HP.
+    * **CD:** 5 turnos.
+    * **Limitante:** El aliado pierde la memoria de lo ocurrido en ese minuto (desorientación).
+    * **Anti-Mano Negra:** Si el aliado usó maná en ese minuto, ese maná **no** se recupera; la energía gastada es una constante fuera de la reversión biológica.
+2. **Deshacer Acción:** El usuario obliga a un enemigo a repetir su último turno.
+    * **Efecto:** El enemigo debe realizar exactamente los mismos movimientos, permitiendo al usuario predecirlos y contraatacar.
+    * **CD:** 6 turnos.
+
+#### Habilidades de Lv4
+1. **Bucle Localizado (Loop):** Atrapa a un objetivo en un bucle de 3 segundos de duración.
+    * **Efecto:** El enemigo queda atrapado realizando la misma acción una y otra vez por 2 turnos.
+    * **CD:** 7 turnos.
+    * **Limitante:** Requiere concentración absoluta; si el usuario recibe daño, el bucle se rompe.
+    * **Anti-Mano Negra:** El objetivo acumula "ira cinética"; al salir del bucle, su primer ataque tiene un $20\%$ más de fuerza.
+2. **Restauración de Estructura:** Revierte el tiempo de un objeto grande (una puerta reforzada o un puente).
+    * **Efecto:** Repara daños estructurales masivos instantáneamente.
+    * **CD:** Una vez por encuentro.
+    * **Limitante:** No puede revertir daños causados por Magia de Tiempo opuesta o Magia de Vacío.
+
+#### Habilidades de Lv5
+1. **Reversión de Evento Crítico:** El usuario retrocede el tiempo de todo el campo de batalla 1 turno completo (6 segundos).
+    * **Efecto:** Todos los personajes vuelven a sus posiciones y estados anteriores. Solo el usuario recuerda lo que pasó.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario sufre daño por "Cisizura Temporal" equivalente al $15\%$ de su HP actual.
+    * **Anti-Mano Negra:** Las acciones que dependen del azar (ej. dados o probabilidad) deben ser lanzadas de nuevo; el destino puede cambiar.
+2. **Borrado de Causalidad:** El usuario elimina una acción específica del pasado reciente.
+    * **Efecto:** Puede hacer que un hechizo enemigo nunca haya sido lanzado, aunque el enemigo crea que sí lo hizo.
+    * **CD:** Global.
+    * **Limitante:** Causa una paradoja que aturde al usuario por 1 turno completo.
+3. **Punto de Guardado Real:** El usuario marca un momento en el tiempo al que puede volver si muere.
+    * **Efecto:** Si el usuario recibe un golpe mortal, "despierta" en el momento marcado con sus estadísticas intactas.
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** El punto de guardado solo dura 1 hora de tiempo real. Si no muere en ese lapso, el maná invertido se pierde.
+    * **Anti-Mano Negra:** El usuario conserva las cicatrices mentales del trauma de su "muerte" previa.
+
+
+
+¿Continuamos con **Visión del Futuro (Precognición)**? Sería el último de la Magia de Tiempo.

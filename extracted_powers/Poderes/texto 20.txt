@@ -1,0 +1,80 @@
+Concluimos el catálogo de **Magia de Tiempo** con la vertiente de la **Visión del Futuro** (o Precognición Determinista).
+
+---
+
+### --Visión del Futuro--
+
+Desde la **teoría de cuerdas** y la **interpretación de muchos mundos**, la Visión del Futuro se define como la capacidad de procesar las **líneas de universo** (worldlines) probables. Científicamente, el cronomante no "adivina", sino que utiliza su maná para colapsar la función de onda de la realidad un instante antes de que ocurra, observando el resultado de las variables físicas actuales.
+
+Físicamente, el cerebro del usuario actúa como una **computadora cuántica** que simula billones de interacciones cinéticas y mágicas por segundo. El mayor peligro es la **Ceguera de Posibilidades**: observar demasiados futuros puede fragmentar la percepción del "ahora", haciendo que el mago reaccione ante ataques que aún no han sucedido o que ignore peligros reales al darlos por evitados. En niveles altos, el usuario puede imponer una línea temporal específica, forzando al universo a seguir el camino que él ha visualizado.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Instinto de Presagio:** El usuario percibe una vibración en el aire 1 segundo antes de una agresión.
+    * **Efecto:** Otorga un bono de $+10\%$ a la defensa contra el primer ataque en un combate.
+    * **CD:** 2 turnos.
+    * **Limitante:** Solo funciona si el atacante tiene una intención hostil consciente.
+    * **Anti-Mano Negra:** No detecta trampas automáticas o desastres naturales, solo ataques dirigidos.
+2. **Flash de Probabilidad:** Visualiza la trayectoria de un objeto lento (como una piedra lanzada).
+    * **Efecto:** Permite atrapar o desviar el objeto con éxito automático.
+    * **CD:** 1 turno.
+    * **Limitante:** No funciona con proyectiles de alta velocidad (balas/flechas).
+
+#### Habilidades de Lv2
+1. **Ojo del Destino Menor:** El usuario ve el "fantasma" de los movimientos que el enemigo hará en los próximos 3 segundos.
+    * **Efecto:** Permite posicionarse preventivamente, ganando ventaja en el próximo ataque físico.
+    * **CD:** 3 turnos.
+    * **Limitante:** Si el enemigo es un maestro del engaño (fintas), el fantasma puede mostrar una acción falsa.
+    * **Anti-Mano Negra:** Consume mucha estamina mental; el usuario siente una punzada en las sienes tras el uso.
+2. **Intuición de Elección:** Ante una decisión binaria (ej. dos caminos o dos cofres), el usuario siente cuál es menos peligroso.
+    * **Efecto:** Identifica la opción con menor entropía negativa.
+    * **CD:** Una vez por escena.
+
+#### Habilidades de Lv3
+1. **Precognición de Combate:** El usuario entra en un estado de flujo donde "sabe" lo que ocurrirá en el turno siguiente.
+    * **Efecto:** Puede declarar su acción *después* de que el enemigo haya declarado la suya en el mismo turno.
+    * **CD:** 5 turnos.
+    * **Limitante:** El estado de flujo solo dura 1 turno.
+    * **Anti-Mano Negra:** Si el enemigo cambia su acción usando otra Magia de Tiempo, la visión del usuario se vuelve blanca y queda aturdido.
+2. **Aviso de Fatalidad:** El usuario grita una advertencia a un aliado justo antes de que este reciba un golpe crítico.
+    * **Efecto:** El aliado puede repetir su tirada de salvación o defensa.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4
+1. **Visión de Ramificación:** El usuario observa tres posibles desenlaces de una acción compleja.
+    * **Efecto:** El usuario puede elegir cuál de esos tres desenlaces ocurre realmente (dentro de los límites de la lógica).
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere que la acción ya haya sido iniciada.
+    * **Anti-Mano Negra:** No puede crear resultados imposibles, solo elegir entre los probables.
+2. **Escudo de Causalidad:** El usuario bloquea un ataque basándose en dónde *estará* el impacto, no donde está ahora.
+    * **Efecto:** Defensa absoluta contra un ataque de área o de gran potencia.
+    * **CD:** 6 turnos.
+3. **Lectura de Intenciones Profundas:** Ve el futuro a largo plazo (minutos) de una conversación o evento social.
+    * **Efecto:** Predice si un acuerdo terminará en traición o éxito.
+    * **CD:** Una vez por encuentro largo.
+
+#### Habilidades de Lv5
+1. **Determinismo del Vencedor:** El usuario visualiza el único camino hacia la victoria y lo impone.
+    * **Efecto:** Todas las acciones del usuario y sus aliados en este turno tienen éxito crítico automático.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario queda ciego físicamente por 1 hora tras el uso debido al exceso de información lumínica/temporal.
+    * **Anti-Mano Negra:** Requiere que exista al menos UNA probabilidad de victoria mayor al $0.0001\%$. Si la derrota es físicamente inevitable, la habilidad falla.
+2. **Ancla de Futuro:** El usuario marca un evento futuro que *debe* ocurrir.
+    * **Efecto:** No importa lo que pase en los próximos 3 turnos, al final del tercer turno, el estado del mundo volverá a lo que el usuario "ancló".
+    * **CD:** Global.
+    * **Limitante:** Drena el $95\%$ del maná y requiere que el usuario no reciba daño durante la canalización.
+3. **Omnisciencia Momentánea:** El usuario se funde con el eje del tiempo.
+    * **Efecto:** Conoce la ubicación, estado y debilidad de todos los enemigos en un radio de 1 km.
+    * **CD:** Global (Uso único por evento).
+    * **Limitante:** Tras la desconexión, el usuario pierde la capacidad de hablar en su idioma nativo por 24 horas, balbuceando conceptos temporales ininteligibles.
+
+
+
+---
+
+Con esto finalizamos la **Magia de Tiempo**. El siguiente bloque principal de tu lista es la **Magia de Espacio**.
+
+¿Deseas comenzar con **Teletransportación**?

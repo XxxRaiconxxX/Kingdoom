@@ -1,0 +1,84 @@
+Esta es la versión definitiva de la **Magia de Gravedad: El Coloso Deva**. He fusionado la fuerza bruta del "Full Rush" con el control absoluto de las técnicas de Pain (*Tendo*). Aquí no eres un espectador; eres el epicentro de un desastre natural controlado.
+
+---
+
+## --Magia de Gravedad: El Coloso Deva (Full Rush)--
+
+Es el arte de **convertirse en una singularidad de asalto**. Utilizas la gravedad para anular la distancia, potenciar tus impactos físicos y dominar la inercia del combate. No lanzas hechizos desde lejos; usas la repulsión para impulsarte como un proyectil y la atracción para arrastrar a tus víctimas hacia tu puño. Eres el centro de un campo de fuerza donde tú dictas quién se mueve y quién es aplastado.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Atracción Focalizada (Banshō Ten'in Menor):** Generas un punto de gravedad alta en tu mano abierta.
+    * **Efecto:** Tira de un objeto o enemigo pequeño hacia tu rango de golpe (máximo 5 metros).
+    * **Detalle Técnico:** Creación de un gradiente de aceleración gravitatoria direccional de $20 m/s^2$.
+    * **CD:** 2 turnos.
+    * **Limitante:** Si el enemigo es más pesado que tú y está anclado, tú serás atraído hacia él por efecto de acción-reacción.
+    * **Anti-Mano Negra:** La succión es ruidosa y levanta polvo, revelando tu intención un instante antes del tirón.
+2. **Puño de Impacto Denso:** Concentras micro-gravitones en tus nudillos justo al contactar.
+    * **Efecto:** Tu golpe ignora armaduras ligeras y empuja al enemigo 1 metro atrás por la masa virtual añadida.
+    * **Detalle Técnico:** Aumento súbito de la masa efectiva de la extremidad a $50 kg$ en $0.01 s$.
+    * **CD:** 1 turno.
+    * **Anti-Mano Negra:** El aumento súbito de masa genera un "tirón" inercial en tu propio hombro, reduciendo tu agilidad un $5\%$ el siguiente turno.
+
+#### Habilidades de Lv2
+1. **Carga G (Rush Repulsivo):** Usas una explosión de *Shinra Tensei* en tus pies para impulsarte.
+    * **Efecto:** Te lanzas en línea recta a velocidad de proyectil. Si impactas, el daño se duplica por la inercia masiva.
+    * **Detalle Técnico:** Conversión de energía potencial en cinética mediante un pulso de repulsión contra el suelo.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo funciona en línea recta. Si fallas el impacto, el frenado brusco te causa daño por latigazo cervical.
+    * **Anti-Mano Negra:** El impulso deja un cráter en el punto de origen, delatando tu posición inicial a kilómetros.
+2. **Guardia de Masa Inamovible:** Multiplicas tu peso por 10 mientras bloqueas un ataque.
+    * **Efecto:** Inmunidad a ser empujado o derribado. Reduce el daño físico recibido en un $25\%$.
+    * **Detalle Técnico:** Anclaje gravitatorio masivo sincronizado con la postura defensiva.
+    * **CD:** 3 turnos.
+    * **Anti-Mano Negra:** Eres totalmente incapaz de moverte mientras la guardia está activa; un enemigo rápido puede rodearte fácilmente.
+
+#### Habilidades de Lv3
+1. **Banshō Ten'in (Atracción Universal):** Una fuerza de succión masiva que trae a cualquier enemigo hacia ti.
+    * **Efecto:** Arrastra a un enemigo (hasta 15 metros) directamente hacia tu agarre o la punta de tu arma.
+    * **Detalle Técnico:** Creación de un pozo gravitatorio transitorio en la palma del usuario.
+    * **CD:** 5 turnos.
+    * **Limitante:** Durante la atracción, tu concentración es total; eres vulnerable a ataques de flanco.
+    * **Anti-Mano Negra:** Si el enemigo clava un arma en el suelo, la fuerza del tirón puede romperle los brazos, pero también puede arrancar trozos de suelo que vuelen hacia ti.
+2. **Shinra Tensei (Empuje Divino):** Una onda de choque omnidireccional que repele todo a tu alrededor.
+    * **Efecto:** Lanza a todos los enemigos y proyectiles en un radio de 5 metros a gran distancia ($2500 N$).
+    * **Detalle Técnico:** Expansión violenta del tejido espacial desde el centro del usuario.
+    * **CD:** 5 turnos.
+    * **Anti-Mano Negra:** Tras el uso, hay un "vacío" de presión que te deja sordo por 10 segundos.
+
+#### Habilidades de Lv4
+1. **Cañón Gravitatorio de Contacto (Martillo de Eventos):** Concentras un *Shinra Tensei* en tu puño durante un golpe.
+    * **Efecto:** El impacto genera una explosión repulsiva que desintegra armaduras y lanza al enemigo a 20 metros. Daño: $5000 J$.
+    * **Detalle Técnico:** Punto de singularidad repulsiva colapsado en la superficie de contacto.
+    * **CD:** 6 turnos.
+    * **Limitante:** Si el golpe es bloqueado por un escudo mágico, la energía rebota hacia tu propio brazo.
+    * **Anti-Mano Negra:** Tu brazo emite un brillo violáceo intenso antes del impacto, dando una ventana de $0.5 s$ para esquivar.
+2. **Coloso Inercial (Juggernaut Mod):** Entras en un estado donde tu inercia es físicamente imparable.
+    * **Efecto:** Por 2 turnos, atraviesas muros, escudos y enemigos menores sin frenarte. Nada puede detener tu avance.
+    * **Detalle Técnico:** Manipulación del tensor de energía-impulso para mantener un momento lineal constante.
+    * **CD:** 6 turnos.
+    * **Anti-Mano Negra:** No puedes realizar giros cerrados; tu trayectoria es predecible.
+
+#### Habilidades de Lv5
+1. **Chibaku Tensei (Devastación Planetaria):** Creas un núcleo negro que forma una esfera gigante de roca en el cielo con el enemigo dentro.
+    * **Efecto:** Atrapa al objetivo en una prisión de escombros masiva y luego la hace impactar contra el suelo con fuerza de meteorito.
+    * **Detalle Técnico:** Generación de un núcleo de gravedad infinita que alcanza el equilibrio hidrostático.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El núcleo puede ser destruido si recibe un ataque combinado de gran potencia antes de terminar de atraer rocas.
+    * **Anti-Mano Negra:** El usuario debe mantener una pose ritual; si recibe daño, la esfera cae sobre él mismo.
+2. **Shinra Tensei Máximo (Juicio Final):** Una repulsión de escala catastrófica.
+    * **Efecto:** Borra todo en un radio de 100 metros. Nada orgánico o inorgánico sobrevive al impacto.
+    * **CD:** Global (Drena todo el maná y reduce el HP al $5\%$).
+    * **Anti-Mano Negra:** El usuario queda en estado vegetativo mágico por 24 horas, incapaz de defenderse.
+3. **Métrica de Alcubierre (Rush Relativista):** El usuario deforma el espacio para golpear desde "dentro" del enemigo.
+    * **Efecto:** Un combo de mil puñetazos en un microsegundo. Inesquivable y letal.
+    * **CD:** Global (Uso único por evento).
+
+---
+
+¿Continuamos con la **Magia de Sonido** (Vibraciones y Gritos de Guerra) para complementar este estilo de combate de choque? 
+
+¿Avanzamos?

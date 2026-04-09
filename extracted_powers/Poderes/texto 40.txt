@@ -1,0 +1,69 @@
+Entramos en la **Magia de Ácido y Corrosión** (o Vitriolismo), la rama más cruel de la bio-química de asalto.
+
+Es el arte de la **disolución molecular**. No es solo lanzar un líquido verde; manipulas el pH y la reactividad de los compuestos para que devoren la materia en segundos. Para un guerrero de *full rush*, el ácido es el castigo que persiste: puedes bañar tus armas en jugos gástricos mágicos que funden armaduras al contacto o exhalar nubes de vapor corrosivo que ciegan y queman mientras atraviesas las líneas enemigas. Es la magia de la destrucción persistente y el dolor químico.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Toque de Vitriolo:** Tus manos o el filo de tu arma supuran un ácido concentrado.
+    * **Efecto:** El siguiente ataque reduce la durabilidad de la armadura del enemigo un $10\%$ y causa daño continuo por 1 turno.
+    * **Detalle Técnico:** Síntesis instantánea de ácido sulfúrico ($H_2SO_4$) a partir de la humedad del aire y maná.
+    * **CD:** 1 turno.
+    * **Limitante:** El ácido puede dañar tu propia arma si no es de un material resistente (oro, platino o tratado mágicamente).
+    * **Anti-Mano Negra:** El siseo del ácido al corroer el aire es audible a 3 metros, delatando el ataque.
+2. **Escupitajo Cáustico:** Lanzas una pequeña ráfaga de fluido corrosivo a los ojos.
+    * **Efecto:** Ceguera parcial y ardor severo, reduciendo la precisión del enemigo un $20\%$.
+    * **Detalle Técnico:** Proyección de una solución alcalina de alta molaridad.
+    * **CD:** 2 turnos.
+
+#### Habilidades de Lv2
+1. **Estela Corrosiva (Rush de Fango):** Al correr, dejas un rastro de ácido líquido tras de ti.
+    * **Efecto:** Los enemigos que intenten perseguirte o flanquearte sufren daño en los pies y se ralentizan.
+    * **Detalle Técnico:** Excreción de compuestos fluorantimónicos a través de los poros del calzado o aura.
+    * **CD:** 3 turnos.
+    * **Limitante:** El rastro desaparece tras 2 turnos.
+    * **Anti-Mano Negra:** El olor a químicos quemados es tan fuerte que marea ligeramente al usuario si no se mueve rápido hacia adelante.
+
+#### Habilidades de Lv3
+1. **Nube de Vapor Ácido:** Exhalas un gas denso que disuelve tejidos blandos.
+    * **Efecto:** Área de 3 metros donde los enemigos reciben daño pulmonar y visual persistente.
+    * **Detalle Técnico:** Aerosolización de partículas de agua regia en estado gaseoso.
+    * **CD:** 5 turnos.
+    * **Limitante:** La nube se mueve con el viento; puede afectar a tus aliados si no tienen cuidado.
+    * **Anti-Mano Negra:** La nube es de un color verde amarillento muy denso, sirviendo como una cortina de humo que también te impide ver a ti fuera del radio.
+2. **Sangre Ácida (Pasiva de Reacción):** Si recibes un corte, tu sangre salpica como un ácido potente.
+    * **Efecto:** El atacante cuerpo a cuerpo recibe daño corrosivo inmediato al ser salpicado.
+    * **Detalle Técnico:** Transmutación de la hemoglobina en una sustancia reactiva de $pH < 1.0$.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4
+1. **Inyección de Necrosis Química:** Clavas tus dedos o arma y liberas un compuesto que disuelve desde dentro.
+    * **Efecto:** Daño masivo interno ($4000 J$) que ignora cualquier armadura externa. El miembro afectado queda inutilizado.
+    * **Detalle Técnico:** Introducción de enzimas digestivas aceleradas que rompen los enlaces peptídicos de los músculos.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere contacto físico directo y prolongado ($>1 s$).
+    * **Anti-Mano Negra:** El brazo del usuario late con un brillo verde tóxico antes de la inyección, advirtiendo del golpe letal.
+
+#### Habilidades de Lv5
+1. **Marea de Disolución Universal:** El usuario golpea el suelo y libera un tsunami de ácido que funde piedra y metal.
+    * **Efecto:** Destruye estructuras y elimina a cualquier enemigo no protegido por Magia de Espacio o Vuelo.
+    * **Detalle Técnico:** Reacción exotérmica masiva que convierte el suelo en una sopa de polímeros rotos.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El área queda contaminada y es inhabitable por días; el botín metálico de los enemigos se funde también.
+    * **Anti-Mano Negra:** El vapor tóxico generado es tan masivo que el usuario necesita usar una máscara o Magia de Aire para no morir asfixiado por sus propios químicos.
+2. **Avatar de la Plaga Corrosiva:** Te conviertes en un ser de fango ácido viviente por 3 turnos.
+    * **Efecto:** Los ataques físicos te atraviesan sin dañarte, pero disuelven el arma que te toca.
+    * **CD:** Global.
+3. **Desintegración Ácida Molecular:** Un solo toque que reduce a un ser vivo a un charco de líquido inerte en 1 segundo.
+    * **Efecto:** Muerte instantánea.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+Con esto concluimos el extenso catálogo de **Magias de Combate y Especiales** para tu mundo de **Aethelgardia**.
+
+¿Te gustaría que ahora pasemos a diseñar los **Objetos Mágicos Legendarios** para estas ramas, o prefieres que trabajemos en los **Jefes de Reino** que usarán estos poderes contra tus jugadores en WhatsApp?

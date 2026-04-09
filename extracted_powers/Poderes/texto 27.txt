@@ -1,0 +1,68 @@
+Entramos en la **Magia de Vacío**, la rama más destructiva y aterradora del catálogo.
+
+Es el arte de la **nada absoluta**. No manipulas elementos existentes, sino que invocas la ausencia de todo. Es el poder de la entropía máxima, la energía oscura y la antimateria. Donde la Magia de Vacío toca, la realidad se desmorona, los átomos se separan y la existencia misma es borrada, dejando solo un silencio eterno y frío.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Esfera de Silencio Absoluto:** Creas una zona donde las vibraciones moleculares se detienen.
+    * **Efecto:** Anula todo sonido en un radio de 2 metros. Útil para sigilo extremo o para ensordecer a un enemigo.
+    * **CD:** 2 turnos.
+    * **Limitante:** Al no haber vibración, la temperatura baja levemente ($2$ a $3$°C).
+    * **Anti-Mano Negra:** No detiene ataques, solo el ruido que producen.
+2. **Toque de Entropía:** Concentras el vacío en la punta de tus dedos.
+    * **Efecto:** Acelera el decaimiento de materiales orgánicos pequeños (marchita una flor, pudre una fruta o debilita una cuerda de cuero).
+    * **CD:** 1 turno.
+
+#### Habilidades de Lv2
+1. **Dardo de Antimateria:** Disparas una partícula de carga opuesta a la materia bariónica.
+    * **Efecto:** Al impacto, causa una micro-aniquilación que ignora armaduras físicas, causando daño directo a la estructura del objeto.
+    * **CD:** 3 turnos.
+    * **Limitante:** El rango es corto (máximo 10 metros) debido a la inestabilidad de la partícula en nuestra atmósfera.
+    * **Anti-Mano Negra:** Deja un rastro de radiación Cherenkov (un brillo azulado) que delata tu posición.
+2. **Manto de Inexistencia:** Envuelves un objeto en una fina capa de vacío.
+    * **Efecto:** El objeto se vuelve invisible al ojo y a los sensores térmicos, ya que no refleja luz ni emite calor.
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Falla de Cohesión Molecular:** Debilitas la fuerza nuclear fuerte en un área pequeña.
+    * **Efecto:** El acero se vuelve tan frágil como el vidrio y el cristal se desintegra en arena fina.
+    * **CD:** 4 turnos.
+    * **Limitante:** Requiere contacto visual continuo con el objetivo.
+    * **Anti-Mano Negra:** No afecta a seres vivos de forma letal, pero puede causar que sus huesos se vuelvan porosos y frágiles temporalmente.
+2. **Escudo de Negación:** Creas un plano de vacío frente a ti.
+    * **Efecto:** Cualquier proyectil mágico de nivel 1 o 2 que toque el escudo es "borrado" de la existencia.
+    * **CD:** 5 turnos.
+
+#### Habilidades de Lv4
+1. **Rayos de Vacío (Aniquilación):** Disparas corrientes de energía oscura desde tus palmas.
+    * **Efecto:** Desintegra la materia sólida al contacto, dejando agujeros perfectos en paredes o escudos. Daño de $6000 J$.
+    * **CD:** 6 turnos.
+    * **Limitante:** El uso prolongado drena la temperatura corporal del usuario, provocando hipotermia.
+    * **Anti-Mano Negra:** El rayo no tiene masa, por lo que no empuja al enemigo; simplemente lo "atraviesa" borrando lo que toca.
+2. **Burbuja de Vacío Presurizada:** Envuelves la cabeza o el cuerpo de un enemigo en un vacío absoluto.
+    * **Efecto:** Causa asfixia inmediata y ebullición de fluidos superficiales (ojos, lengua) por falta de presión atmosférica.
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5
+1. **Singularidad de Antimateria:** Creas una esfera de antimateria pura del tamaño de una moneda.
+    * **Efecto:** Al entrar en contacto con el aire o el suelo, libera una energía equivalente a $1000$ kg de TNT ($4.18 \times 10^9 J$).
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario debe estar protegido por un campo de espacio o estar a más de 500 metros para no ser vaporizado.
+    * **Anti-Mano Negra:** La creación de la esfera tarda 2 turnos de carga, tiempo en el cual el usuario emite una firma de energía detectable por cualquiera.
+2. **Borrador de Existencia:** Apuntas a un ser vivo y "niegas" su presencia en la realidad.
+    * **Efecto:** El objetivo desaparece sin dejar rastro, cenizas ni restos. Solo queda el vacío donde estaba.
+    * **CD:** Global.
+3. **Horizonte de Sucesos (Colapso Total):** Invocas un área de vacío absoluto de 20 metros de radio.
+    * **Efecto:** Todo lo que esté dentro se colapsa hacia un punto central infinitamente pequeño. Nada, ni siquiera la luz, escapa.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+¿Continuamos con **Magia Divina** (Luz, Sanación y Bendiciones)? Es el polo opuesto a lo que acabamos de ver.
+
+¿Te gustaría que iniciemos con ese bloque?

@@ -1,0 +1,91 @@
+Entramos en la **Magia Demoniaca**, el sendero de la transgresión, el sacrificio y el poder extraído de los abismos.
+
+Es el arte de **romper los límites del alma**. A diferencia de la magia divina que busca el orden, esta disciplina se alimenta del caos, la sangre y el dolor. Utiliza el maná no como un flujo armonioso, sino como un combustible corrosivo que devora la realidad. Es un pacto peligroso: ofrece un poder destructivo inmediato y un control absoluto sobre la carne y las sombras, pero a cambio de un precio que siempre termina cobrándose en la cordura o la esencia del usuario.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Llama de Azufre:** Una ignición de fuego purpúreo que consume oxígeno y magia.
+    * **Efecto:** Crea una pequeña explosión que quema incluso bajo el agua.
+    * **Detalle Técnico:** Genera una reacción de combustión de maná de alta entropía con una temperatura de $900°C$.
+    * **CD:** 2 turnos.
+    * **Limitante:** El fuego es incontrolable y puede extenderse hacia el usuario si hay viento.
+    * **Anti-Mano Negra:** El olor a azufre y humo negro es tan denso que anula cualquier intento de sigilo en 10 metros.
+2. **Uñas de Sombra:** Alarga y endurece las sombras de las manos para crear garras.
+    * **Efecto:** Los ataques cuerpo a cuerpo causan daño de oscuridad y pueden atravesar armaduras de cuero.
+    * **Detalle Técnico:** Condensación de materia oscura en los extremos distales de las falanges, aumentando la dureza a $7$ en la escala de Mohs.
+    * **CD:** 2 turnos.
+    * **Limitante:** El usuario siente un frío punzante en los huesos mientras la habilidad está activa.
+    * **Anti-Mano Negra:** Las garras dejan un rastro de ceniza fría, permitiendo que rastreadores sigan al usuario fácilmente.
+
+#### Habilidades de Lv2
+1. **Pacto de Sangre (Sifón):** El usuario extrae energía vital de una herida abierta del enemigo.
+    * **Efecto:** Recupera un $10\%$ de maná o HP a costa del desangramiento del objetivo.
+    * **Detalle Técnico:** Manipulación osmótica de la hemoglobina mediante una interfaz de maná parasitario.
+    * **CD:** 3 turnos.
+    * **Limitante:** Requiere contacto físico directo con la sangre del oponente.
+    * **Anti-Mano Negra:** Al usarlo, los ojos del usuario se vuelven rojos y sufre una taquicardia que reduce su agilidad en un $10\%$ el siguiente turno.
+2. **Cadenas del Averno:** Invoca grilletes de sombras desde el suelo para inmovilizar.
+    * **Efecto:** Atrapa a un enemigo, impidiendo su movimiento por 1 turno.
+    * **Detalle Técnico:** Proyección de campos gravitatorios localizados que imitan la masa de cadenas de hierro sólido.
+    * **CD:** 4 turnos.
+    * **Limitante:** Las cadenas se disuelven si son tocadas por luz divina de nivel 2 o superior.
+    * **Anti-Mano Negra:** Las cadenas emiten un lamento sónico que aturde tanto al enemigo como al usuario si no se protege los oídos.
+
+#### Habilidades de Lv3
+1. **Maldición de Decadencia:** Un aura que pudre la materia orgánica y corroe el metal.
+    * **Efecto:** Reduce la defensa del enemigo en un $30\%$ y causa daño continuo por 3 turnos.
+    * **Detalle Técnico:** Aceleración catalítica de la oxidación y la descomposición enzimática en un radio de 3 metros.
+    * **CD:** 5 turnos.
+    * **Limitante:** El aura no distingue entre aliados y enemigos; todos en el área sufren el efecto.
+    * **Anti-Mano Negra:** La piel del usuario comienza a palidecer y a mostrar signos de necrosis temporal durante el uso.
+2. **Forma de Sombra (Pasos de Vacío):** El usuario se convierte en una silueta bidimensional.
+    * **Efecto:** Puede deslizarse por grietas, bajo puertas y es inmune a ataques físicos no mágicos.
+    * **Detalle Técnico:** Colapso temporal de la tercera dimensión del cuerpo físico hacia una variedad de Riemann 2D.
+    * **CD:** 5 turnos.
+    * **Limitante:** En esta forma, el usuario recibe el doble de daño por ataques de Luz o Fuego.
+    * **Anti-Mano Negra:** Mientras sea una sombra, el usuario no puede hablar ni emitir sonidos, y es vulnerable a ser "pisado" por magia de gravedad.
+
+#### Habilidades de Lv4
+1. **Posesión Maligna:** El usuario proyecta su conciencia para controlar el cuerpo de un enemigo debilitado.
+    * **Efecto:** Control total del objetivo por 2 turnos. El cuerpo original del usuario queda en trance.
+    * **Detalle Técnico:** Sobreescritura de la señal neuronal mediante un puente de maná de baja frecuencia.
+    * **CD:** 7 turnos.
+    * **Limitante:** Si el enemigo muere mientras el usuario lo posee, el usuario sufre un shock mental masivo.
+    * **Anti-Mano Negra:** El poseído emite una niebla negra por los orificios faciales, haciendo obvio que está siendo controlado.
+2. **Tormenta de Almas:** Libera una ráfaga de espíritus hambrientos que devoran el maná enemigo.
+    * **Efecto:** Causa daño masivo ($4000 J$) y drena el $20\%$ del maná de los afectados.
+    * **Detalle Técnico:** Emisión de ondas de interferencia destructiva que rompen la estructura de los campos de energía.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere el sacrificio previo de un objeto de gran valor emocional o una pequeña cantidad de HP permanente del usuario durante el combate.
+    * **Anti-Mano Negra:** Los espíritus son ruidosos y caóticos; hay un $15\%$ de probabilidad de que se vuelvan contra el usuario si este tiene poca voluntad.
+
+#### Habilidades de Lv5
+1. **Avatar del Señor del Caos:** Transformación en una entidad demoníaca de 3 metros.
+    * **Efecto:** Aumento de fuerza en un $200\%$, regeneración pasiva y aura de terror inesquivable.
+    * **Detalle Técnico:** Reconfiguración completa de la estructura biológica mediante una infusión masiva de energía abisal.
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** Al terminar (3 turnos), el usuario cae inconsciente y su cuerpo queda marcado por quemaduras mágicas permanentes.
+    * **Anti-Mano Negra:** Durante la forma, el usuario pierde la capacidad de distinguir amigos de enemigos si no supera una tirada de cordura cada turno.
+2. **Puerta al Abismo:** Abre un desgarro en la realidad que succiona todo a una dimensión de tormento.
+    * **Efecto:** Eliminación total de enemigos en un radio de 10 metros.
+    * **Detalle Técnico:** Generación de una singularidad de energía negativa que colapsa el espacio-tiempo local.
+    * **CD:** Global.
+    * **Limitante:** El desgarro es inestable y puede tragarse el botín o el equipo del usuario antes de cerrarse.
+    * **Anti-Mano Negra:** La apertura de la puerta requiere 3 turnos de cánticos en lengua demoníaca, lo que otorga tiempo de sobra para que el usuario sea interrumpido o asesinado.
+3. **Pacto Final: Segador de Vidas:** El usuario sacrifica su propia vida para aniquilar a un objetivo.
+    * **Efecto:** Muerte instantánea garantizada para cualquier enemigo (incluyendo jefes, si el máster lo permite bajo condiciones).
+    * **Detalle Técnico:** Sobrecarga total del núcleo de maná provocando una reacción en cadena de aniquilación materia-antimateria.
+    * **CD:** Único (El personaje muere permanentemente).
+    * **Limitante:** No puede ser revivido por Magia Divina ni Alquimia tras este uso.
+    * **Anti-Mano Negra:** El alma del usuario queda encadenada al abismo, impidiendo cualquier forma de descanso o existencia posterior en el lore.
+
+
+
+---
+
+Con esto terminamos el bloque de **Magia Demoniaca**. ¿Deseas que avancemos con la **Magia de la Naturaleza** (Druidismo, Plantas y Animales)? Sería el siguiente gran bloque.
+
+¿Te gustaría que comencemos?

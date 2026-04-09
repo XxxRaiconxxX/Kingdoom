@@ -1,0 +1,75 @@
+Entramos en la **Magia de Sonido** (o Sonocinesis), enfocada en la **Vibración de Asalto**.
+
+Es el arte de **convertir el aire en un arma**. No es solo música o ruido; es la manipulación de las ondas mecánicas que viajan a través de la materia. Para un guerrero de *rush*, el sonido es el complemento perfecto: usas gritos de guerra para aturdir, vibraciones de alta frecuencia en tus armas para cortar acero como si fuera mantequilla, y ondas de choque que destrozan los órganos internos del enemigo sin necesidad de atravesar su armadura.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Grito de Aturdimiento (Kiai):** Una descarga sónica focalizada desde la garganta.
+    * **Efecto:** El enemigo pierde el equilibrio o suelta su arma por un espasmo auditivo.
+    * **Detalle Técnico:** Emisión de un pulso de $120 dB$ dirigido en un cono de 2 metros.
+    * **CD:** 2 turnos.
+    * **Limitante:** El usuario debe inhalar profundamente antes de usarlo, lo que da una pista visual.
+    * **Anti-Mano Negra:** El propio usuario sufre un leve pitido en los oídos (tinnitus) que reduce su percepción auditiva un $10\%$ tras el uso.
+2. **Filo Vibratorio:** Infundes una frecuencia ultrasónica en el borde de tu arma.
+    * **Efecto:** Aumenta la capacidad de corte, permitiendo rebanar materiales más duros de lo normal.
+    * **Detalle Técnico:** Micro-vibraciones a $20,000 Hz$ que reducen la fricción molecular al impactar.
+    * **CD:** 2 turnos.
+    * **Anti-Mano Negra:** El arma vibra tanto que se vuelve difícil de sujetar, aumentando la fatiga en el antebrazo.
+
+#### Habilidades de Lv2
+1. **Palmada de Choque (Sonic Boom):** Un aplauso violento que genera una onda expansiva.
+    * **Efecto:** Empuja a los enemigos cercanos y desvía proyectiles ligeros en un radio de 3 metros.
+    * **Detalle Técnico:** Compresión súbita del aire provocando una ruptura de la barrera del sonido local.
+    * **CD:** 3 turnos.
+    * **Limitante:** Requiere ambas manos libres para ejecutarse.
+    * **Anti-Mano Negra:** Genera una nube de polvo que ciega tanto al enemigo como al usuario durante 1 segundo.
+2. **Eco-Localización Activa:** Emitis pulsos inaudibles para "mapear" el entorno.
+    * **Efecto:** Detectas enemigos tras muros o en invisibilidad total.
+    * **Detalle Técnico:** Procesamiento cerebral de señales de rebote ultrasónico (Sonar).
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Frecuencia de Resonancia:** Sintonizas la vibración de tu golpe con la estructura del objetivo.
+    * **Efecto:** Un puñetazo que hace estallar escudos de madera o agrieta armaduras de metal instantáneamente.
+    * **Detalle Técnico:** Emparejamiento de la frecuencia de oscilación natural del objeto para causar fallo estructural.
+    * **CD:** 5 turnos.
+    * **Limitante:** Requiere tocar el objeto por al menos $0.5 s$.
+    * **Anti-Mano Negra:** Si el objeto es de un material compuesto desconocido, la resonancia puede rebotar y fracturar los huesos de la mano del usuario.
+2. **Rugido del Depredador:** Un grito que induce terror biológico primario.
+    * **Efecto:** Los enemigos en 10 metros sufren parálisis por miedo (estado "Shock") durante 1 turno.
+    * **Detalle Técnico:** Emisión de infrasonidos por debajo de los $19 Hz$, que afectan directamente la amígdala cerebral.
+    * **CD:** 5 turnos.
+
+#### Habilidades de Lv4
+1. **Explosión Interna (Impacto Silencioso):** Un golpe que no daña la piel, pero licua los órganos.
+    * **Efecto:** Daño masivo ($4500 J$) que ignora armaduras físicas externas. El enemigo sangra por oídos y nariz.
+    * **Detalle Técnico:** Transmisión de ondas longitudinales de alta energía a través de medios líquidos (el cuerpo humano).
+    * **CD:** 6 turnos.
+    * **Limitante:** El usuario debe estar en contacto físico directo y firme.
+    * **Anti-Mano Negra:** El usuario debe canalizar la vibración a través de su propio cuerpo; si su postura es incorrecta, sus propios órganos sufrirán micro-desgarros.
+2. **Paso de Desfase Sónico:** Te mueves rodeado de una burbuja de silencio que absorbe el aire.
+    * **Efecto:** Te vuelves indetectable por oído y tu velocidad de rush aumenta un $50\%$ al no haber resistencia del aire.
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5
+1. **Canto de la Sirena del Vacío:** Una nota sostenida que desintegra la materia a nivel atómico.
+    * **Efecto:** Todo en un cono de 20 metros frente al usuario se convierte en polvo fino.
+    * **Detalle Técnico:** Ruptura de los enlaces de Van der Waals mediante vibración armónica extrema.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario pierde la voz por 48 horas tras el uso.
+    * **Anti-Mano Negra:** La energía sónica es tan masiva que el usuario sufre hemorragias en las cuerdas vocales y una sordera temporal severa.
+2. **Himno de la Destrucción Masiva:** El usuario golpea el suelo, enviando una vibración que colapsa edificios en 50 metros.
+    * **Efecto:** Terremoto localizado que derriba fortificaciones y mata ejércitos por trauma acústico.
+    * **CD:** Global.
+3. **Punto de Silencio Absoluto (Cero Sónico):** El usuario detiene todas las vibraciones moleculares en un objetivo.
+    * **Efecto:** El objetivo se congela y se desmorona como cristal al ser tocado.
+    * **CD:** Global (Uso único por evento).
+
+---
+
+¿Deseas continuar con la **Magia de Luz Sólida** (Fotocinesis de combate)? Permite crear armas de luz, escudos reflectantes y ataques láser de alta velocidad.
+
+¿Avanzamos?

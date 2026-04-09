@@ -1,0 +1,87 @@
+Siguiendo el orden del catálogo de **Magia de Invocación**, el siguiente poder es la **Invocación de Objetos** (también conocida como Aportación o Teletransmisión de Materia).
+
+---
+
+### --Invocación de Objetos--
+
+Desde la **física de la información** y la **teletransportación cuántica de estados**, esta habilidad se define como la capacidad de codificar la estructura atómica de un objeto físico en una señal de maná y reconstruirla instantáneamente en una ubicación diferente. Científicamente, el usuario no "crea" el objeto de la nada (lo cual violaría la ley de conservación de la masa-energía), sino que lo extrae de un "almacén" en una dimensión de bolsillo (espacio plegado) o lo atrae desde una ubicación previamente marcada en el plano físico.
+
+El proceso implica la ruptura de los enlaces moleculares en el origen y su reensamblaje exacto en el destino mediante un **campo de confinamiento bosónico**. La precisión es crítica: un error de nanómetros en la reconstrucción podría resultar en un objeto frágil o con propiedades alteradas. En niveles avanzados, el invocador puede manipular la **entropía local** para "reparar" objetos durante la invocación o imbuirlos de una inercia cinética inicial, permitiendo que un objeto aparezca ya en movimiento.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Aportación Menor:** Invoca un objeto pequeño (que quepa en la palma de la mano) que el usuario posea previamente.
+    * **Efecto:** Útil para recuperar llaves, monedas, una ganzúa o un encendedor.
+    * **CD:** 1 turno.
+    * **Limitante:** El objeto debe estar a menos de 10 metros del usuario originalmente.
+    * **Anti-Mano Negra:** No puede invocar objetos que estén dentro de contenedores cerrados con llave o protegidos por plomo.
+2. **Llamado de Herramienta:** Invoca un utensilio básico de trabajo (martillo, destornillador, soga de 2m).
+    * **Efecto:** El objeto aparece directamente en la mano del usuario.
+    * **CD:** 2 turnos.
+    * **Limitante:** El objeto es temporal; desaparece tras 5 minutos de uso.
+    * **Anti-Mano Negra:** La herramienta es de calidad estándar; no tiene propiedades mágicas ni una durabilidad excepcional.
+
+#### Habilidades de Lv2
+1. **Almacén Dimensional (Bolsillo):** El usuario accede a un espacio de 1 $m^3$ donde guarda objetos personales.
+    * **Efecto:** Permite cargar equipo pesado o prohibido sin que sea visible.
+    * **CD:** 3 turnos para extraer/guardar.
+    * **Limitante:** Extraer un objeto toma un tiempo de acción completo (no es instantáneo en combate).
+    * **Anti-Mano Negra:** Si el usuario queda inconsciente, no puede acceder al almacén. No se pueden guardar seres vivos.
+2. **Invocación de Proyectiles:** Trae munición (flechas, piedras, cuchillos) directamente a su mano o carcaj.
+    * **Efecto:** Asegura que el usuario nunca se quede sin munición básica durante un intercambio.
+    * **CD:** 2 turnos.
+    * **Limitante:** Solo funciona con objetos que el usuario tenga en una "reserva" conocida.
+    * **Anti-Mano Negra:** No aumenta el daño del proyectil, solo facilita su disponibilidad.
+
+#### Habilidades de Lv3
+1. **Equipamiento Instantáneo:** El usuario invoca una pieza de armadura o una túnica directamente sobre su cuerpo.
+    * **Efecto:** Permite reaccionar a un ataque sorpresa vistiendo una protección en milisegundos.
+    * **CD:** 4 turnos.
+    * **Limitante:** Solo puede invocar una pieza a la vez (ej. el peto, luego las grebas).
+    * **Anti-Mano Negra:** El proceso de "ajuste molecular" causa una ligera presión que impide realizar movimientos acrobáticos en el mismo turno.
+2. **Duplicación de Consumibles:** Invoca una copia exacta de un objeto de un solo uso (pociones, pergaminos).
+    * **Efecto:** Permite usar un recurso valioso dos veces.
+    * **CD:** 5 turnos.
+    * **Limitante:** La copia tiene una eficacia reducida al 50% (ej. cura la mitad o dura la mitad de tiempo).
+    * **Anti-Mano Negra:** El objeto duplicado se desvanece si no se usa en los siguientes 2 turnos.
+
+#### Habilidades de Lv4
+1. **Invocación de Maquinaria Compleja:** Trae al campo de batalla un objeto con partes móviles (una ballesta pesada de asedio, una trampa de osos, un motor pequeño).
+    * **Efecto:** Crea una ventaja táctica mecánica inmediata.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere que el usuario conozca perfectamente el funcionamiento interno del objeto (planos mentales).
+    * **Anti-Mano Negra:** Si el objeto es dañado, el usuario sufre un "eco de rotura" que drena su maná.
+2. **Lluvia de Hierro (Ofensiva):** Invoca múltiples objetos pesados (anclas, yunques, rocas de 50kg) sobre una zona.
+    * **Efecto:** Daño por impacto masivo de $4000 N$ en un radio de 5 metros.
+    * **CD:** 6 turnos.
+    * **Limitante:** Los objetos caen desde una altura de 10 metros; son esquivables si el enemigo tiene buenos reflejos.
+    * **Anti-Mano Negra:** El área de invocación brilla en el suelo un segundo antes del impacto, dando oportunidad de huida.
+3. **Intercambio de Masa:** El usuario invoca un objeto en la posición de otro objeto de masa similar.
+    * **Efecto:** Puede reemplazar el arma de un enemigo por una rama de árbol o un jarrón de flores.
+    * **CD:** 5 turnos.
+    * **Limitante:** Requiere contacto visual con ambos objetos.
+    * **Anti-Mano Negra:** Si el objeto del enemigo está imbuido en magia, hay una probabilidad del 50% de que el intercambio falle.
+
+#### Habilidades de Lv5
+1. **Invocación de Fortaleza (Refugio):** Manifiesta una estructura predefinida (una torre de hierro de 5m o una habitación reforzada).
+    * **Efecto:** Proporciona cobertura total y una posición defensiva inexpugnable para el grupo.
+    * **CD:** Global (Una vez por día de rol).
+    * **Limitante:** La estructura desaparece tras 1 hora o si el usuario se aleja más de 100 metros.
+    * **Anti-Mano Negra:** La base de la estructura requiere terreno plano; no puede invocarse en el aire o sobre superficies inestables.
+2. **Bancarrota de la Realidad:** El usuario invoca "el concepto" de un objeto que no posee, forzando al universo a crearlo de la nada.
+    * **Efecto:** Puede invocar cualquier objeto no mágico (una llave maestra, un antídoto específico, una bomba de gran potencia).
+    * **CD:** Global.
+    * **Limitante:** El objeto es "inestable"; tiene un 20% de probabilidad de explotar o fallar en cada uso.
+    * **Anti-Mano Negra:** El usuario pierde permanentemente una cantidad ínfima de maná máximo cada vez que desafía la ley de conservación de esta manera.
+3. **Invocación de Reliquia Perdida:** Trae un objeto de poder legendario desde un lugar remoto o tiempo pasado.
+    * **Efecto:** Obtiene un arma o artefacto de nivel 5 durante 3 turnos.
+    * **CD:** Global (Una vez por semana).
+    * **Limitante:** El objeto ejerce una presión mental inmensa; el usuario recibe daño por turno mientras lo empuña.
+    * **Anti-Mano Negra:** Al terminar los 3 turnos, el objeto regresa a su lugar de origen con tal fuerza que puede arrastrar al usuario si este no lo suelta a tiempo.
+
+
+
+¿Continuamos con **Invocación de Sombras**?

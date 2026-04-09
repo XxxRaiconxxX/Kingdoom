@@ -1,0 +1,67 @@
+Entramos en el terreno del **Control Mental y Sugestión**.
+
+Es el arte de **doblegar la voluntad**. No es un engaño visual, sino una intervención directa en los procesos de toma de decisiones del cerebro. Hackeas el sistema de recompensas y los impulsos motores para que el objetivo obedezca tus órdenes, ya sea mediante una sugerencia sutil que parece un pensamiento propio o mediante una dominación total que convierte al enemigo en una marioneta biológica.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Impulso Motor Primario:** Envías una señal al sistema nervioso para provocar un movimiento involuntario.
+    * **Efecto:** El objetivo suelta lo que tiene en la mano o parpadea bruscamente.
+    * **CD:** 2 turnos.
+    * **Limitante:** Solo afecta a músculos pequeños; no puede obligar a alguien a caminar o atacar.
+    * **Anti-Mano Negra:** El objetivo lo siente como un "tic" nervioso o un calambre, sin sospechar magia necesariamente.
+2. **Sugerencia de Dirección:** Una instrucción de una sola palabra que el cerebro procesa como un instinto.
+    * **Efecto:** Comandos como "Mira", "Párate" o "Calla".
+    * **CD:** 2 turnos.
+
+#### Habilidades de Lv2
+1. **Modulación del Sistema Límbico:** Alteras los niveles de dopamina y cortisol para cambiar el estado de ánimo.
+    * **Efecto:** El objetivo pasa de la agresividad a la pasividad absoluta o viceversa.
+    * **CD:** 3 turnos.
+    * **Limitante:** No da órdenes específicas, solo predispone al objetivo a una actitud.
+    * **Anti-Mano Negra:** La adrenalina de un combate real puede anular el efecto de calma en un solo turno.
+2. **Fijación de Atención (Fascinación):** Bloqueas la capacidad del objetivo de procesar estímulos periféricos.
+    * **Efecto:** El guardia queda hipnotizado por un objeto o por tu voz, ignorando todo lo demás a su alrededor.
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Comando de Acción Compleja:** El usuario sobrescribe la voluntad para obligar a realizar una tarea lógica.
+    * **Efecto:** "Danos la llave", "Abre la puerta" o "Dile a tus hombres que se retiren".
+    * **CD:** 5 turnos.
+    * **Limitante:** El comando debe poder cumplirse en menos de 10 segundos. No puede obligar al suicidio.
+    * **Anti-Mano Negra:** Tras cumplir la orden, el objetivo tiene un $40\%$ de probabilidad de darse cuenta de que fue manipulado.
+2. **Amnesia Retrógrada Selectiva:** Borras los últimos 10 minutos de la memoria operativa.
+    * **Efecto:** El objetivo olvida haberte visto o haber tenido una conversación específica.
+    * **CD:** 5 turnos.
+
+#### Habilidades de Lv4
+1. **Marioneta Neuronal:** Tomas el control total de los nervios motores del objetivo.
+    * **Efecto:** El enemigo ataca a sus propios aliados con sus habilidades físicas de nivel 1 y 2.
+    * **CD:** 6 turnos.
+    * **Limitante:** El usuario debe realizar movimientos con sus manos como si manejara hilos; si es interrumpido, el control se rompe.
+    * **Anti-Mano Negra:** El objetivo está consciente de que no controla su cuerpo, lo que le genera un trauma mental severo.
+2. **Fobia Inducida:** Creas una aversión biológica extrema hacia un objeto, persona o lugar.
+    * **Efecto:** El enemigo es físicamente incapaz de acercarse a menos de 5 metros del foco de la fobia.
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5
+1. **Esclavitud Permanente (Geas):** Impones una orden inamovible en el núcleo de la personalidad.
+    * **Efecto:** El objetivo servirá al usuario hasta que la orden se cumpla o el usuario muera.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El proceso tarda 1 hora de susurros y contacto físico.
+2. **Sobreescritura de Lealtad:** Cambias el concepto de "amigo" y "enemigo" en el cerebro del objetivo.
+    * **Efecto:** Un pelotón entero puede cambiar de bando instantáneamente durante el combate.
+    * **CD:** Global.
+3. **Muerte de la Voluntad (Estado Vegetal):** Apagas por completo el lóbulo frontal del objetivo.
+    * **Efecto:** El objetivo se convierte en un cascarón vacío que solo respira; no tiene pensamientos, deseos ni resistencia.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+¿Continuamos con **Magia de Vacío** (Energía Oscura y Antimateria)? Es la rama más destructiva del catálogo.
+
+Dime si quieres que siga avanzando.

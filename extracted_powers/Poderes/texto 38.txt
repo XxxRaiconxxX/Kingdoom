@@ -1,0 +1,65 @@
+Entramos en la **Magia de Plasma y Energía Pura**, la cúspide de la magia de combate de asalto. Es el estado donde la materia se rompe y solo queda el flujo destructivo de partículas ionizadas.
+
+Es el arte de la **incineración total**. No lanzas fuego común; manipulas el cuarto estado de la materia. Para un guerrero de *full rush*, el plasma es la herramienta definitiva para derretir defensas: puedes envolver tus puños en gas ionizado que atraviesa escudos de energía o lanzar ráfagas de partículas que viajan a velocidades cercanas a la de la luz. Es una magia de alto riesgo y alta recompensa; el calor es tan extremo que el aire mismo se convierte en un conductor de muerte.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Filo de Plasma (Daga de Iones):** Envuelves una parte pequeña de tu arma o tus dedos en un halo azulado.
+    * **Efecto:** El golpe ignora la resistencia de materiales cerámicos y telas mágicas. Causa quemaduras de tercer grado al contacto.
+    * **Detalle Técnico:** Ionización parcial del aire circundante mediante una descarga de $50,000 V$.
+    * **CD:** 1 turno.
+    * **Limitante:** Solo dura un impacto; la energía se disipa tras el choque.
+    * **Anti-Mano Negra:** El sonido es un "chispeo" eléctrico constante que anula cualquier intento de sigilo en un radio de 5 metros.
+2. **Flash de Sobrecarga:** Liberas una pequeña chispa de energía pura frente a los ojos del enemigo.
+    * **Efecto:** Ceguera temporal por sobrecarga de fotorreceptores.
+    * **Detalle Técnico:** Emisión de luz blanca de alta intensidad ($>1,000,000$ candelas).
+    * **CD:** 2 turnos.
+
+#### Habilidades de Lv2
+1. **Propulsor de Plasma (Rush de Calor):** Eyectas chorros de gas ionizado por tus codos o pies.
+    * **Efecto:** Te impulsas con una aceleración violenta. Si golpeas a alguien durante la carga, causas daño de impacto y quemadura simultánea.
+    * **Detalle Técnico:** Aceleración de partículas cargadas mediante un campo magnético de Lorentz.
+    * **CD:** 3 turnos.
+    * **Limitante:** El calor residual puede dañar tu propio equipo si no es resistente a altas temperaturas.
+    * **Anti-Mano Negra:** Deja un rastro de ozono y aire quemado que es fácilmente rastreable por el olfato.
+
+#### Habilidades de Lv3
+1. **Escudo de Contención Magnética:** Creas una burbuja de plasma estabilizado que flota frente a ti.
+    * **Efecto:** Desintegra proyectiles físicos (flechas, balas) antes de que te toquen y absorbe el $30\%$ de ataques mágicos elementales.
+    * **Detalle Técnico:** Suspensión de plasma a $10,000$ K mediante un toroide magnético de maná.
+    * **CD:** 4 turnos.
+    * **Limitante:** El calor es tan intenso que tus aliados no pueden acercarse a menos de 2 metros de ti.
+    * **Anti-Mano Negra:** Si el escudo recibe un ataque de Magia de Agua, se genera una explosión de vapor que te aturde por 1 turno.
+
+#### Habilidades de Lv4
+1. **Cañón de Partículas Manual:** Concentras plasma en la palma de tu mano y lo disparas como un chorro continuo.
+    * **Efecto:** Un rayo destructivo que atraviesa varios enemigos en línea recta. Daño masivo ($4500 J$).
+    * **Detalle Técnico:** Emisión estimulada de radiación y partículas ionizadas colimadas.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere 2 segundos de carga (preparación) donde no puedes moverte.
+    * **Anti-Mano Negra:** Durante la carga, el usuario emite un brillo cegador que lo convierte en un objetivo fácil para arqueros.
+
+#### Habilidades de Lv5
+1. **Nova de Energía Pura:** Liberas toda tu energía contenida en una explosión omnidireccional.
+    * **Efecto:** Todo en un radio de 15 metros es vaporizado o convertido en cenizas.
+    * **Detalle Técnico:** Descompresión violenta de un núcleo de plasma de alta densidad.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario sufre fatiga extrema y su capacidad de canalizar maná se reduce a la mitad por el resto del día.
+    * **Anti-Mano Negra:** La explosión crea un pulso electromagnético (EMP) que desactiva todos tus objetos mágicos y los de tus aliados por 10 minutos.
+2. **Avatar del Sol (Estado Plasmático):** Tu cuerpo se convierte en energía pura por 3 turnos.
+    * **Efecto:** Intocable por armas físicas, vuelo y cada uno de tus golpes genera una micro-explosión de plasma.
+    * **CD:** Global.
+3. **Desintegración Atómica:** Un rayo de energía pura que rompe los enlaces nucleares de un objetivo único.
+    * **Efecto:** Muerte instantánea y borrado físico del enemigo (no quedan restos).
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+¿Continuamos con la **Magia de Tiempo** (Cronomancia de Combate) para un asalto basado en la velocidad relativa, o prefieres cerrar con **Magia Químico-Biológica** (Ácidos y Toxinas)?
+
+¿Qué te gustaría hacer a continuación?

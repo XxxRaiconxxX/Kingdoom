@@ -1,0 +1,84 @@
+Continuamos con el catálogo de **Magia de Alquimia**. El segundo pilar es la **Creación de Pociones** (o Farmacopea Bioenergética).
+
+---
+
+### --Creación de Pociones--
+
+Desde la **bioquímica molecular** y la **cinética enzimática**, la creación de pociones se define como la síntesis de compuestos líquidos que actúan como "vectores de información biológica". Científicamente, una poción no es agua con "magia", sino una solución sobresaturada donde el maná mantiene en suspensión principios activos químicos que, de otro modo, serían inestables o tóxicos.
+
+Físicamente, al ser ingeridas o aplicadas, las pociones actúan como **moduladores alostéricos** a nivel celular, acelerando procesos metabólicos (curación), alterando la sinapsis neuronal (percepción) o modificando la expresión génica temporal (mutaciones). El secreto del alquimista reside en el **potencial zeta** de la solución: la capacidad de evitar que los ingredientes mágicos precipiten y pierdan su carga energética antes de llegar al torrente sanguíneo del objetivo.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Elixir de Coagulación:** Una mezcla básica que acelera la formación de fibrina.
+    * **Efecto:** Detiene hemorragias menores de forma casi instantánea al aplicarse sobre la herida.
+    * **CD:** 1 turno de aplicación.
+    * **Limitante:** No cierra cortes profundos ni regenera tejido perdido.
+    * **Anti-Mano Negra:** Deja una costra rígida que reduce la flexibilidad de la zona afectada en un $5\%$.
+2. **Destilado de Lucidez:** Un estimulante suave para el sistema nervioso central.
+    * **Efecto:** Elimina el sueño y la fatiga leve durante 1 hora de rol.
+    * **CD:** Instantáneo tras ingerir.
+    * **Limitante:** Al terminar el efecto, el usuario sufre un "efecto rebote" de cansancio doble.
+    * **Anti-Mano Negra:** No otorga maná, solo permite ignorar el agotamiento físico.
+
+#### Habilidades de Lv2
+1. **Frasco de Reacción Exotérmica:** Una poción diseñada para romperse al lanzarla.
+    * **Efecto:** Al contacto con el aire, los componentes reaccionan creando una llamarada de $200°C$.
+    * **CD:** 3 turnos para preparar una nueva dosis.
+    * **Limitante:** El radio de explosión es de apenas 1 metro.
+    * **Anti-Mano Negra:** Si el frasco se rompe en el inventario del usuario (por un golpe), este sufrirá las quemaduras.
+2. **Tónico de Reflejos Sinápticos:** Aumenta la velocidad de los impulsos eléctricos entre neuronas.
+    * **Efecto:** Otorga un turno extra de reacción en situaciones de emboscada.
+    * **CD:** 3 turnos de duración.
+    * **Limitante:** Causa temblores leves en las manos tras su uso.
+    * **Anti-Mano Negra:** El aumento de velocidad es perceptual; el cuerpo sigue limitado por sus músculos biológicos.
+
+#### Habilidades de Lv3
+1. **Solución de Regeneración Tisular:** Una poción compleja que induce mitosis acelerada.
+    * **Efecto:** Cura heridas graves y cierra cortes profundos, recuperando un $25\%$ del HP total.
+    * **CD:** 4 turnos para que el metabolismo procese la poción.
+    * **Limitante:** El proceso consume calorías del usuario; provoca un hambre atroz tras su uso.
+    * **Anti-Mano Negra:** No funciona si el usuario tiene venenos activos en la sangre (estos se propagarían más rápido).
+2. **Aceite de Recubrimiento Elemental:** Se aplica sobre armas o armaduras.
+    * **Efecto:** Dota al equipo de una capa de veneno, ácido o aceite inflamable que dura 5 golpes.
+    * **CD:** 4 turnos de aplicación.
+    * **Limitante:** El aceite es volátil; se evapora si no se usa en 10 minutos.
+    * **Anti-Mano Negra:** El olor del componente químico es fuerte, anulando cualquier intento de sigilo.
+
+#### Habilidades de Lv4
+1. **Brebaje de Mutación Transitoria:** Altera la estructura ósea y muscular del bebedor.
+    * **Efecto:** El usuario puede obtener visión nocturna, branquias o un aumento de fuerza de $+1000 N$ por 3 turnos.
+    * **CD:** 6 turnos.
+    * **Limitante:** Existe un $10\%$ de probabilidad de que la mutación sea dolorosa y reste $10$ HP.
+    * **Anti-Mano Negra:** La ropa y armadura pueden romperse si la mutación implica un cambio brusco de tamaño.
+2. **Veneno de Parálisis Neurotóxica:** Una toxina que bloquea los canales de sodio en los nervios.
+    * **Efecto:** Deja al objetivo completamente inmóvil durante 2 turnos si entra en su torrente sanguíneo.
+    * **CD:** 6 turnos.
+    * **Limitante:** Requiere que el alquimista logre una herida abierta en el enemigo para aplicarlo.
+    * **Anti-Mano Negra:** Seres con metabolismos extremadamente rápidos o sistemas circulatorios mágicos pueden resistirlo.
+3. **Poción de Invisibilidad Química:** Reordena los pigmentos de la piel y ropa para imitar el entorno (mimetismo).
+    * **Efecto:** Sigilo perfecto mientras el usuario se mueva lentamente.
+    * **CD:** 5 turnos de duración.
+
+#### Habilidades de Lv5
+1. **Elixir de la Larga Vida (Resurrección Química):** Una poción que reinicia las funciones vitales.
+    * **Efecto:** Puede revivir a una persona muerta hace menos de 5 minutos, restaurando su corazón y pulmones.
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** Requiere ingredientes extremadamente raros y 12 horas de destilación al vacío.
+    * **Anti-Mano Negra:** El revivido sufre una amnesia temporal y una debilidad extrema durante 24 horas.
+2. **Gas de Nervios "Cero Absoluto":** Un compuesto alquímico que, al liberarse, absorbe todo el calor del área.
+    * **Efecto:** Congela instantáneamente todo en un radio de 10 metros, deteniendo incluso reacciones químicas.
+    * **CD:** Global.
+    * **Limitante:** El alquimista debe poseer el antídoto/protector térmico o morirá también.
+    * **Anti-Mano Negra:** La nube de gas es visible y se desplaza con el viento; puede volverse contra el usuario.
+3. **Poción de Panacea Universal:** Un compuesto que elimina CUALQUIER efecto negativo (magia, veneno, enfermedad, maldición).
+    * **Efecto:** Limpieza total del sistema biológico y mágico del usuario.
+    * **CD:** Global.
+    * **Limitante:** El usuario pierde toda su energía de maná acumulada, quedando en "cero" tras la purificación.
+
+
+
+¿Continuamos con **Homúnculos y Vida Artificial**? Al terminar este, pasaremos a la **Magia de Tiempo**, ¿te parece?

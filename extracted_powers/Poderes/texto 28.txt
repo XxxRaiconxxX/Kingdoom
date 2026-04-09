@@ -1,0 +1,91 @@
+Entramos en la **Magia Divina**, el pilar de la luz, la restauración y el orden sagrado.
+
+Es el arte de **canalizar la esencia del cosmos**. A diferencia de otras magias, esta no busca destruir o alterar, sino "corregir" la realidad devolviéndola a su estado de perfección original. Es la frecuencia vibratoria más alta: puede cerrar heridas imposibles, purgar la oscuridad y actuar como un faro de esperanza. Sin embargo, su poder es celoso y exige una armonía interna absoluta por parte del usuario.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Centella de Purificación:** Un pulso de luz blanca que limpia toxinas menores.
+    * **Efecto:** Elimina venenos básicos, detiene infecciones superficiales y neutraliza el alcohol en la sangre.
+    * **Detalle Técnico:** Emite una radiación lumínica de $450 nm$ que desnaturaliza proteínas bacterianas de forma selectiva.
+    * **CD:** 1 turno.
+    * **Limitante:** No recupera puntos de vida, solo elimina el agente nocivo.
+    * **Anti-Mano Negra:** La luz es tan intensa que delata tu posición en la oscuridad y deja una mancha residual en la retina del usuario por 5 segundos.
+2. **Halo de Protección Menor:** Crea un anillo de luz tenue alrededor de un aliado.
+    * **Efecto:** Otorga un bono de $+5\%$ de resistencia al daño físico.
+    * **Detalle Técnico:** Genera un campo de fuerza fotónica de baja intensidad que reduce el momento lineal de objetos pequeños.
+    * **CD:** 2 turnos.
+    * **Limitante:** El halo se rompe tras el primer golpe recibido.
+    * **Anti-Mano Negra:** El brillo del halo hace que el aliado sea imposible de ocultar mediante sigilo.
+
+#### Habilidades de Lv2
+1. **Luz de Verdad (Revelación):** Un destello que anula ilusiones y sombras.
+    * **Efecto:** Revela enemigos invisibles o trampas ocultas en un radio de 5 metros.
+    * **Detalle Técnico:** Emite una frecuencia de maná que "colapsa" las partículas de Magia Mental y Sombras en el área.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo dura un instante; no impide que el enemigo vuelva a ocultarse después.
+    * **Anti-Mano Negra:** Si hay espejos en la zona, el reflejo puede cegar temporalmente al propio usuario.
+2. **Cauterización Sagrada:** Luz concentrada que sella heridas abiertas.
+    * **Efecto:** Recupera un $10\%$ del HP y detiene hemorragias graves.
+    * **Detalle Técnico:** Acelera la síntesis de colágeno y fibrina mediante calor fotónico controlado a $60°C$.
+    * **CD:** 3 turnos.
+    * **Limitante:** El proceso es extremadamente doloroso, el aliado debe superar una tirada de voluntad para no gritar.
+    * **Anti-Mano Negra:** Deja cicatrices blancas permanentes que pueden ser rastreadas por seres de oscuridad.
+
+#### Habilidades de Lv3
+1. **Escudo de Fe (Barrera Radiante):** Una cúpula de geometría sagrada de 2 metros.
+    * **Efecto:** Bloquea proyectiles mágicos y físicos de hasta $1200 N$ de fuerza.
+    * **Detalle Técnico:** Crea una red de interferencia constructiva de maná que repele la materia bariónica.
+    * **CD:** 5 turnos.
+    * **Limitante:** El usuario debe permanecer inmóvil y con las manos alzadas para mantener la cúpula.
+    * **Anti-Mano Negra:** El escudo es vulnerable a ataques de Magia de Vacío, que lo agrietan instantáneamente.
+2. **Bendición de Vigor:** Imbuye los músculos de un aliado con energía divina.
+    * **Efecto:** Aumenta la fuerza física en un $25\%$ y elimina la fatiga por 3 turnos.
+    * **Detalle Técnico:** Sobresatura las mitocondrias celulares con energía pura, eliminando el ácido láctico.
+    * **CD:** 4 turnos.
+    * **Limitante:** Al terminar, el aliado sufre un colapso físico que le impide correr.
+    * **Anti-Mano Negra:** El aura dorada es tan pesada que aumenta el ruido que hace el aliado al caminar.
+
+#### Habilidades de Lv4
+1. **Regeneración Instantánea:** Un torrente de luz que reconstruye órganos o tejidos.
+    * **Efecto:** Recupera un $50\%$ del HP y puede regenerar extremidades pequeñas (dedos, orejas).
+    * **Detalle Técnico:** Realiza una mitosis forzada a nivel cuántico, reconstruyendo el ADN basado en la firma original.
+    * **CD:** 7 turnos.
+    * **Limitante:** Consume una gran cantidad de calorías del objetivo; el aliado queda con un hambre voraz.
+    * **Anti-Mano Negra:** Si se usa en alguien con "Magia Oscura" activa, los dos poderes chocan y causan una explosión interna de $400 J$.
+2. **Martillo de Justicia:** Un pilar de luz sólida que cae desde el cielo.
+    * **Efecto:** Causa daño masivo ($3500 J$) y aturde a los enemigos por 1 turno.
+    * **Detalle Técnico:** Concentración de plasma ionizado dirigido por un vector de gravedad artificial.
+    * **CD:** 6 turnos.
+    * **Limitante:** El radio de impacto es de solo 3 metros; requiere un cielo despejado o techos altos.
+    * **Anti-Mano Negra:** El pilar tarda 1.5 segundos en materializarse, dejando tiempo para esquivarlo si se tiene alta agilidad.
+
+#### Habilidades de Lv5
+1. **Resurrección Divina:** Devuelve el alma al cuerpo.
+    * **Efecto:** Revive a un aliado muerto recientemente con el $100\%$ de su HP.
+    * **Detalle Técnico:** Reinvierte el proceso de muerte celular y reconecta el hilo de conciencia al cuerpo biológico.
+    * **CD:** Global (Una vez por semana de rol).
+    * **Limitante:** El usuario pierde permanentemente $5$ puntos de maná máximo cada vez que lo usa.
+    * **Anti-Mano Negra:** El revivido es vulnerable a la luz solar por 24 horas y pierde todos sus beneficios de "buffs" previos.
+2. **Sentencia del Serafín:** El usuario se convierte en un sol viviente.
+    * **Efecto:** Quema a todos los enemigos en 50 metros y cura a todos los aliados por completo.
+    * **Detalle Técnico:** Emisión masiva de fotones de alta energía sincronizados con la firma biológica de los aliados.
+    * **CD:** Global.
+    * **Limitante:** El usuario queda ciego y sin magia por 3 días de rol tras el uso.
+    * **Anti-Mano Negra:** La luz es tan pura que también destruye cualquier objeto mágico o reliquia antigua en el área, sea amiga o enemiga.
+3. **Ascensión:** El usuario trasciende a una forma de energía pura por 3 turnos.
+    * **Efecto:** Invulnerabilidad total y vuelo. Todas sus habilidades de Lv1 a Lv3 no tienen tiempo de recarga.
+    * **Detalle Técnico:** Desplazamiento de la conciencia a un plano vibratorio superior mientras se proyecta una imagen de luz sólida.
+    * **CD:** Global (Uso único por evento).
+    * **Limitante:** Al terminar, hay un $10\%$ de probabilidad de que el alma del usuario no regrese correctamente al cuerpo (muerte).
+    * **Anti-Mano Negra:** Durante la ascensión, el usuario no puede tocar objetos físicos ni recoger botín.
+
+
+
+---
+
+¿Deseas continuar con la **Magia Demoniaca** (Sombras, Sangre y Maldiciones)? Es la contraparte oscura de lo que acabamos de ver.
+
+¿Te gustaría que avancemos?

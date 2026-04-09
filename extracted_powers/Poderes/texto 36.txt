@@ -1,0 +1,78 @@
+Entramos en la **Magia de Luz Sólida** (o Fotocinesis de Combate), la disciplina que permite condensar los fotones hasta que adquieren masa y dureza física.
+
+Es el arte de **forjar el espectro**. No lanzas simples destellos; utilizas el maná para forzar a las partículas de luz a agruparse en estructuras geométricas ultra-densas. Para un guerrero de asalto, esto significa tener un arsenal infinito: puedes crear una espada que no pesa nada pero corta como el diamante, o un escudo que refleja ataques y ciega al oponente al mismo tiempo. Es la magia de la velocidad y la precisión absoluta.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Daga de Destello:** Condensas luz en un cuchillo arrojadizo que brilla intensamente.
+    * **Efecto:** Al impactar o ser bloqueado, el cuchillo estalla en un flash cegador que reduce la precisión del enemigo un $15\%$.
+    * **Detalle Técnico:** Estabilización de fotones en una matriz de baja energía con un umbral de ruptura por impacto.
+    * **CD:** 1 turno.
+    * **Limitante:** La daga desaparece tras el primer impacto o tras 5 segundos.
+    * **Anti-Mano Negra:** El brillo del arma es tan alto que delata tu posición incluso tras coberturas opacas.
+2. **Escudo de Espejo:** Creas un disco de luz sólida del tamaño de un broquel en tu antebrazo.
+    * **Efecto:** Bloquea proyectiles físicos pequeños y tiene un $20\%$ de probabilidad de reflejar hechizos de rayo o fuego de Lv1.
+    * **Detalle Técnico:** Polarización de una superficie fotónica para alcanzar una dureza de $8$ en la escala de Mohs.
+    * **CD:** 2 turnos.
+    * **Anti-Mano Negra:** Si el escudo recibe un golpe de un arma pesada (mazos), se fragmenta en astillas de luz que pueden causarte cortes leves en el brazo.
+
+#### Habilidades de Lv2
+1. **Lanza Fotónica (Dash de Luz):** Extiendes una vara de luz sólida y te impulsas con ella.
+    * **Efecto:** Un ataque de estocada de largo alcance (4 metros) que atraviesa armaduras de cuero como si fueran papel.
+    * **Detalle Técnico:** Proyección colimada de fotones con una coherencia de fase del $99.9\%$.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo puede atacar en línea recta.
+    * **Anti-Mano Negra:** La lanza genera un rastro de calor térmico que puede quemar tus propias manos si no usas guantes reforzados.
+2. **Abrojos Lumínicos:** Lanzas puñados de partículas que se solidifican en el suelo como espinas de cristal.
+    * **Efecto:** Terreno difícil que causa daño por perforación y ralentiza a quienes lo crucen.
+    * **Detalle Técnico:** Precipitación de luz en estructuras piramidales de alta presión.
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3
+1. **Filo de Frecuencia Crítica:** Tu arma cuerpo a cuerpo se envuelve en un aura de luz blanca pura.
+    * **Efecto:** Ignora el $50\%$ de la defensa física del enemigo y puede cortar estructuras mágicas (barreras).
+    * **Detalle Técnico:** Oscilación de la capa fotónica a frecuencias de rayos gamma para romper enlaces atómicos.
+    * **CD:** 5 turnos.
+    * **Limitante:** El arma original (si es de metal) empieza a derretirse tras 3 turnos de uso continuo.
+    * **Anti-Mano Negra:** El zumbido de la luz es tan agudo que impide que escuches pasos o susurros cercanos durante el combate.
+2. **Cúpula Refractaria:** Una semiesfera de paneles de luz que te rodea.
+    * **Efecto:** Protección total contra ataques a distancia por 1 turno. Los láseres enemigos rebotan hacia direcciones aleatorias.
+    * **Detalle Técnico:** Red de difracción masiva mantenida por un campo magnético de maná.
+    * **CD:** 5 turnos.
+
+#### Habilidades de Lv4
+1. **Alas de Ícaro (Vuelo de Asalto):** Creas planos de luz sólida en tu espalda para impulsarte.
+    * **Efecto:** Te permite realizar "saltos" en el aire y moverte a velocidades de rush extremas, dejando imágenes residuales.
+    * **Detalle Técnico:** Propulsión por presión de radiación amplificada.
+    * **CD:** 6 turnos.
+    * **Limitante:** Maniobrar a tales velocidades requiere una coordinación motriz perfecta; fallar un giro puede causar un impacto letal contra el entorno.
+    * **Anti-Mano Negra:** Las alas emiten una radiación UV que marchita plantas y daña la piel expuesta de aliados cercanos.
+2. **Prisión de Prismas:** Encierras al enemigo en una caja de espejos sólidos de 6 caras.
+    * **Efecto:** El enemigo queda atrapado y cualquier ataque que intente lanzar desde dentro rebota contra él mismo.
+    * **Detalle Técnico:** Confinamiento fotónico en una cavidad resonante de alta Q.
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5
+1. **Exterminio Solar (El Faro de la Muerte):** El usuario se eleva y dispara cientos de estacas de luz sólida hacia el suelo.
+    * **Efecto:** Bombardeo de área masivo ($5000 J$ por impacto) que empala y calcina todo en un radio de 30 metros.
+    * **Detalle Técnico:** Descarga de un condensador de maná en forma de ráfagas de fotones ultra-comprimidos.
+    * **CD:** Global (Una vez por sesión).
+    * **Limitante:** El usuario queda en "oscuridad total" (ciego y sin aura) por 1 hora debido al agotamiento de sus reservas de luz.
+    * **Anti-Mano Negra:** El calor generado es tan alto que puede causar incendios forestales o derretir el equipo que lleven los enemigos (y el tuyo si no tienes cuidado).
+2. **Armadura de Fotones Primordiales:** Te cubres con una capa de luz tan densa que se vuelve negra (luz negra sólida).
+    * **Efecto:** Invulnerabilidad física casi total y tus golpes tienen la masa de una estrella pequeña por 2 turnos.
+    * **CD:** Global.
+3. **Corte del Horizonte (Singularidad Lumínica):** Un solo tajo horizontal que viaja a la velocidad de la luz.
+    * **Efecto:** Corta todo en su camino a lo largo de 1 kilómetro. Es físicamente inesquivable si estás en la trayectoria.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+¿Deseas continuar con la **Magia de Metal** (Ferrocinesis) o prefieres pasar a las **Magias de Estado y Maldiciones**? La de Metal es excelente para un estilo de asalto pesado.
+
+¿Avanzamos?

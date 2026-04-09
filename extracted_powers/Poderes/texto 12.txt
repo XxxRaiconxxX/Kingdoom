@@ -1,0 +1,87 @@
+Siguiendo el orden lógico de la **Magia Rúnica**, el siguiente poder son las **Runas de Trampa** (o Glifos de Activación Condicional).
+
+---
+
+### --Runas de Trampa--
+
+Desde la **lógica computacional** y la **física de sensores**, las Runas de Trampa se definen como "sistemas de ejecución condicional `IF-THEN`". Científicamente, estas runas funcionan mediante un **disparador de perturbación de campo**: el glifo permanece en un estado de equilibrio metaestable hasta que una variable externa (presión, calor, movimiento o firma de maná) altera su estructura, provocando una liberación en cascada de la energía almacenada.
+
+Físicamente, la runa actúa como un sensor de proximidad cuántico. El invocador "programa" la runa para que ignore su propia firma energética (y la de sus aliados), pero que colapse ante cualquier entidad extraña. A diferencia de las runas de ataque directo, las de trampa están optimizadas para la **latencia**: pueden permanecer cargadas durante semanas, consumiendo una cantidad mínima de energía de fondo del entorno, hasta que el umbral de activación es superado.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Abrojo Rúnico:** Una pequeña runa grabada en una piedra o moneda que se activa al ser pisada.
+    * **Efecto:** Genera una pequeña punta sólida que perfora calzado ligero y causa un tropiezo.
+    * **CD:** 1 turno de preparación.
+    * **Limitante:** El daño es mínimo; solo sirve para ralentizar la persecución.
+    * **Anti-Mano Negra:** Es fácil de detectar con una inspección visual simple en superficies despejadas.
+2. **Glifo de Alarma Silenciosa:** Se activa cuando alguien cruza un umbral.
+    * **Efecto:** Envía un "ping" mental directo al usuario en lugar de hacer ruido.
+    * **CD:** 1 turno.
+    * **Limitante:** El rango de la señal es de máximo 50 metros.
+    * **Anti-Mano Negra:** No detiene al intruso, solo notifica su presencia.
+
+#### Habilidades de Lv2
+1. **Lazo de Gravedad:** Una runa de suelo que se activa por peso.
+    * **Efecto:** Aumenta la gravedad local $x5$ en un radio de 1 metro, pegando los pies del objetivo al suelo por 2 segundos.
+    * **CD:** 3 turnos.
+    * **Limitante:** No afecta a objetivos que floten o vuelen.
+    * **Anti-Mano Negra:** La runa emite un tenue zumbido que puede ser escuchado por personajes con alta percepción.
+2. **Runa de Ceguera Flash:** Activación por contacto visual directo.
+    * **Efecto:** Libera un pulso lumínico de $10^6$ candelas, cegando al objetivo por 1 turno.
+    * **CD:** 3 turnos.
+    * **Limitante:** Solo afecta a quienes estén mirando directamente a la runa al activarse.
+    * **Anti-Mano Negra:** Unos lentes oscuros o cerrar los ojos a tiempo anula el efecto.
+
+#### Habilidades de Lv3
+1. **Trampa de Enredo Hidrostático:** Se activa al detectar movimiento rápido a menos de 2 metros.
+    * **Efecto:** Crea látigos de agua densa que envuelven las extremidades del objetivo, aplicando una presión de $500 N$.
+    * **CD:** 4 turnos.
+    * **Limitante:** Requiere que el ambiente tenga al menos un $30\%$ de humedad.
+    * **Anti-Mano Negra:** Los látigos pueden ser cortados con armas de filo encantadas.
+2. **Glifo de Inversión Cinética:** Se coloca en puertas o cofres.
+    * **Efecto:** Devuelve la fuerza del impacto al atacante. Si alguien golpea la puerta con $300 N$, recibe un empuje de vuelta de $300 N$.
+    * **CD:** 4 turnos.
+    * **Limitante:** Solo funciona una vez por cada carga de maná.
+    * **Anti-Mano Negra:** No protege contra hechizos de apertura no físicos (como *Alohomora* o similares).
+
+#### Habilidades de Lv4
+1. **Runa de Estasis Temporal Menor:** Se activa por proximidad (1 metro).
+    * **Efecto:** El objetivo queda "congelado" en el tiempo durante 3 segundos. Su inercia se detiene por completo.
+    * **CD:** 6 turnos.
+    * **Limitante:** Consume una gran cantidad de maná del usuario en el momento de la activación, incluso si está lejos.
+    * **Anti-Mano Negra:** El objetivo es invulnerable mientras está en estasis; no se le puede dañar hasta que el efecto pase.
+2. **Trampa de Succión Dimensional:** El suelo donde está la runa se convierte en un portal temporal.
+    * **Efecto:** Traga la pierna o el arma del enemigo, manteniéndola en una dimensión de bolsillo por 3 turnos.
+    * **CD:** 6 turnos.
+    * **Limitante:** La runa es visible como un remolino negro en el suelo.
+    * **Anti-Mano Negra:** Si el usuario pierde la concentración, el portal se cierra y el objeto o miembro queda "atrapado" o es expulsado violentamente.
+3. **Malla de Descompresión:** Un conjunto de runas que se activan en secuencia.
+    * **Efecto:** Crea una zona donde el oxígeno desaparece instantáneamente, provocando desmayo por hipoxia en 2 turnos.
+    * **CD:** 7 turnos.
+    * **Limitante:** El área de efecto es fija (un círculo de 5 metros).
+    * **Anti-Mano Negra:** No afecta a seres que no necesiten respirar (no-muertos, elementales, autómatas).
+
+#### Habilidades de Lv5
+1. **Sello de Condena del Traidor:** Una runa que se graba en un objeto valioso o documento.
+    * **Efecto:** Si alguien que no sea el usuario toca el objeto, la runa libera una carga de necrosis que desintegra la mano del ladrón.
+    * **CD:** Global (Una vez por día de rol).
+    * **Limitante:** El usuario debe conocer el nombre verdadero o la firma de maná de quien *sí* puede tocarlo.
+    * **Anti-Mano Negra:** Un guantelete de metal sagrado puede retrasar el efecto, pero no anularlo.
+2. **Campo de Minas de Probabilidad:** El usuario siembra el área con 50 runas invisibles.
+    * **Efecto:** Cada paso del enemigo tiene un $50\%$ de probabilidad de activar una explosión de $2000 J$.
+    * **CD:** Global.
+    * **Limitante:** El usuario tampoco puede moverse por esa zona sin riesgo a menos que use Magia Mental para recordar cada posición.
+    * **Anti-Mano Negra:** Las minas se desactivan automáticamente si el usuario cae inconsciente.
+3. **Runa de Replicación de Hechizo:** Una trampa que "captura" el primer hechizo que le lancen.
+    * **Efecto:** Si un enemigo lanza una bola de fuego a la trampa, la runa la absorbe y la dispara de vuelta con el doble de potencia.
+    * **CD:** Global.
+    * **Limitante:** Solo puede almacenar un hechizo a la vez.
+    * **Anti-Mano Negra:** Si el hechizo es de un nivel superior al usuario, la runa estalla dañando al propio invocador.
+
+---
+
+¿Continuamos con **Runas de Mejora de Equipo**?

@@ -1,0 +1,75 @@
+Iniciamos el catálogo de **Magia de Espacio** (o Espaciocinesis), una disciplina que manipula las tres dimensiones físicas y la geometría euclidiana. El primer poder fundamental es la **Teletransportación**.
+
+---
+
+### --Teletransportación--
+
+Desde la **física de partículas** y la **relatividad general**, la Teletransportación se define como el desplazamiento de materia entre dos puntos sin recorrer el espacio intermedio. Científicamente, el mago no "viaja rápido", sino que utiliza el maná para crear un **puente de Einstein-Rosen** (agujero de gusano) microscópico o para realizar un **entrelazamiento cuántico masivo** que reconstruye su estructura atómica en el destino.
+
+Físicamente, el mayor desafío es la **conservación del momento lineal**. Si el usuario se teletransporta desde una plataforma en movimiento a una estática, la inercia se conserva, lo que podría lanzarlo contra una pared a gran velocidad. Además, el espacio de destino debe ser desplazado (aire o líquido) para evitar una **fusión molecular** catastrófica con el entorno. En niveles avanzados, el usuario puede realizar "saltos de fase", existiendo brevemente en un subespacio para evitar ataques físicos.
+
+---
+
+### -Escala de niveles-
+
+#### Habilidades de Lv1
+1. **Parpadeo (Blink):** Un salto instantáneo a una distancia muy corta (máximo 3 metros).
+    * **Efecto:** Útil para atravesar una reja, salir de un agarre o esquivar un ataque cuerpo a cuerpo.
+    * **CD:** 2 turnos.
+    * **Limitante:** Requiere línea de visión directa y que el destino esté vacío.
+    * **Anti-Mano Negra:** Produce un sonido de succión de aire (pop) que delata la posición final.
+2. **Intercambio de Objeto Menor:** Teletransporta un objeto de su mano a un lugar a menos de 5 metros.
+    * **Efecto:** Puedes poner una granada en el bolsillo de un enemigo o recuperar una llave lejana.
+    * **CD:** 3 turnos.
+    * **Limitante:** El objeto no puede pesar más de 1 kg.
+
+#### Habilidades de Lv2
+1. **Salto de Sombra/Reflejo:** Teletransportación a cualquier punto oscuro o superficie reflectante en 15 metros.
+    * **Efecto:** Permite moverse rápidamente entre coberturas sin ser visto.
+    * **CD:** 3 turnos.
+    * **Limitante:** Si la luz cambia o el espejo se rompe durante el proceso, el usuario recibe daño por descompresión.
+    * **Anti-Mano Negra:** El usuario es vulnerable durante los 0.2 segundos de transición.
+2. **Portal de Proyectiles:** Crea un pequeño orificio espacial frente al usuario.
+    * **Efecto:** Desvía una flecha o bala, haciéndola aparecer 2 metros hacia un lado.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv3
+1. **Teletransportación de Combate:** Una serie de 3 saltos rápidos de 5 metros cada uno.
+    * **Efecto:** Permite atacar desde ángulos impredecibles en un solo turno.
+    * **CD:** 5 turnos.
+    * **Limitante:** Provoca una desorientación vestibular severa (mareo) si se usa dos veces seguidas.
+    * **Anti-Mano Negra:** El usuario debe conocer el terreno; si salta a ciegas y hay un obstáculo, el hechizo falla y lo deja aturdido.
+2. **Salto de Aliado:** Teletransporta a una persona que el usuario esté tocando.
+    * **Efecto:** Rescate instantáneo de un compañero en peligro.
+    * **CD:** 5 turnos.
+
+#### Habilidades de Lv4
+1. **Portal Estable:** Crea dos anillos espaciales conectados permanentemente por 3 turnos.
+    * **Efecto:** Permite el paso de personas, proyectiles e incluso luz de un punto a otro (distancia máx. 50m).
+    * **CD:** 6 turnos.
+    * **Limitante:** Cualquier cosa que se quede a medio camino cuando el portal se cierre será cercenada.
+    * **Anti-Mano Negra:** Los enemigos también pueden usar el portal si llegan a él.
+2. **Teletransporte de Masa (Grupal):** Transporta al usuario y hasta 4 aliados a una zona conocida.
+    * **Efecto:** Escape de emergencia o infiltración profunda.
+    * **CD:** Una vez por encuentro.
+3. **Desfase Espacial:** El usuario se vuelve "intangible" al desplazar su cuerpo 1 milímetro fuera de la dimensión física.
+    * **Efecto:** Inmunidad a ataques físicos por 1 turno.
+    * **CD:** 6 turnos.
+
+#### Habilidades de Lv5
+1. **Salto Dimensional (Interplanetario):** Teletransportación a cualquier lugar del mundo o planos conocidos.
+    * **Efecto:** Viaje instantáneo sin límites de distancia.
+    * **CD:** Global (Una vez por día de rol).
+    * **Limitante:** Requiere 10 minutos de meditación y coordenadas exactas.
+    * **Anti-Mano Negra:** Si las coordenadas están ligeramente mal, el usuario puede aparecer a 100 metros de altura o bajo tierra.
+2. **Vórtice de Desplazamiento:** Teletransporta a un enemigo directamente al centro de una zona de peligro (ej. un volcán o el vacío).
+    * **Efecto:** Eliminación instantánea de una amenaza no-jefe.
+    * **CD:** Global.
+    * **Limitante:** El enemigo tiene una tirada de salvación de Voluntad/Resistencia para resistir el tirón espacial.
+3. **Existencia Ubicua:** El usuario crea 10 portales alrededor de un enemigo y ataca a través de todos ellos.
+    * **Efecto:** Daño masivo inesquivable desde todas las direcciones.
+    * **CD:** Global (Uso único por evento).
+
+
+
+¿Continuamos con **Distorsión Espacial**? Sería el siguiente paso para manipular el entorno sin moverse uno mismo.

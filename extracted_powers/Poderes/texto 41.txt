@@ -1,0 +1,81 @@
+No la habíamos detallado formalmente como un bloque independiente, pero es el complemento perfecto para tu sistema de **Aethelgardia**. La **Magia de Soporte (o Eter-Sintonía)** no se trata de atacar, sino de **amplificar la realidad** y mantener al equipo de *full rush* funcionando al 200%.
+
+Para tu grupo de WhatsApp, esto define quién es el "Corazón" del escuadrón. Aquí tienes el bloque de soporte sincronizado con tus escalas de fuerza y con su respectiva **Anti-Mano Negra**.
+
+---
+
+## -- Magia de Soporte: Eter-Sintonía --
+
+Es el arte de la **Resonancia Vital**. El usuario actúa como una batería y un procesador de datos para sus aliados. No solo cura, sino que optimiza el flujo de maná de los demás, permitiéndoles romper sus límites físicos sin morir en el intento. Es la diferencia entre un guerrero cansado y una leyenda imparable.
+
+---
+
+### - Escala de Niveles y Potencia -
+
+#### Habilidades de Lv1
+1. **Sutura de Éter:** Cierra heridas leves y detiene hemorragias menores.
+    * **Efecto:** Recupera un $5\%$ del HP. Equivale a una venda médica perfecta aplicada en un segundo.
+    * **CD:** 1 turno.
+    * **Anti-Mano Negra:** La herida brilla con un azul intenso, delatando al aliado herido en la oscuridad.
+2. **Estímulo de Adrenalina:** Un pulso de energía que elimina el cansancio básico.
+    * **Efecto:** El aliado ignora la fatiga por 2 turnos. Equivale al vigor de un corredor tras un descanso corto.
+    * **CD:** 2 turnos.
+    * **Anti-Mano Negra:** Al terminar el efecto, el aliado sufre un "bajón" de energía, reduciendo su velocidad un $10\%$.
+
+#### Habilidades de Lv2
+1. **Refuerzo de Placas:** Endurece el equipo metálico o de cuero de un aliado.
+    * **Efecto:** Aumenta la resistencia de la armadura en $+500 N$. Equivale a convertir el cuero en acero templado por 2 turnos.
+    * **CD:** 3 turnos.
+    * **Anti-Mano Negra:** El equipo se vuelve un $20\%$ más pesado, dificultando maniobras de evasión.
+2. **Claridad Mental:** Limpia efectos de confusión, miedo o mareo (como el de los químicos o sonidos).
+    * **Efecto:** Anula estados alterados de Lv1 y Lv2.
+    * **CD:** 3 turnos.
+
+#### Habilidades de Lv3 (Poder de Grado Escuadrón)
+1. **Vínculo de Daño (Cadena de Almas):** Enlaza a dos aliados; el daño que reciba uno se divide entre ambos.
+    * **Efecto:** Reduce el impacto recibido en un $50\%$ (Ej: Un golpe de $4000 N$ se siente como dos de $2000 N$).
+    * **Detalle Técnico:** Distribución de la energía cinética a través de un puente de maná.
+    * **CD:** 5 turnos.
+    * **Anti-Mano Negra:** Si uno de los aliados enlazados muere, el otro recibe un shock mental que lo aturde por 2 turnos.
+2. **Amplificación de Impacto:** Imbuyes el arma de un aliado con energía vibratoria.
+    * **Efecto:** Su siguiente ataque aumenta en $+1500 N$. Equivale a que un soldado común pegue con la fuerza de un **martillazo de enano**.
+    * **CD:** 4 turnos.
+
+#### Habilidades de Lv4 (Poder de Grado Asedio)
+1. **Campo de Regeneración Celular:** Un área de 5 metros donde los aliados sanan constantemente.
+    * **Efecto:** Recupera $15\%$ de HP por turno mientras estén dentro. Equivale a tener la vitalidad de un troll regenerándose.
+    * **CD:** 6 turnos.
+    * **Limitante:** El usuario debe permanecer inmóvil canalizando el área con ambas manos.
+    * **Anti-Mano Negra:** El área emite un zumbido constante que impide usar habilidades de "Sigilo" o "Eco-localización".
+2. **Celeridad Grupal:** Acelera el tiempo subjetivo para todo el equipo.
+    * **Efecto:** Todos los aliados obtienen una acción extra de movimiento. Equivale a una **carga de caballería ligera** coordinada.
+    * **CD:** 7 turnos.
+
+#### Habilidades de Lv5 (Poder Legendario)
+1. **Santuario de la Eternidad:** Crea una zona donde la muerte es físicamente imposible por 2 turnos.
+    * **Efecto:** El HP de los aliados no puede bajar de 1. Ignora impactos de hasta $10,000 J$ (Nivel Jefe).
+    * **CD:** Global (Una vez por sesión).
+    * **Anti-Mano Negra:** Al terminar, todos los aliados caen al suelo exhaustos y el usuario pierde la capacidad de usar magia por el resto del día de rol.
+2. **Resurrección Milagrosa:** Trae de vuelta a un aliado caído en batalla.
+    * **Efecto:** Reanima con $50\%$ de HP. Requiere que el cuerpo esté relativamente íntegro.
+    * **CD:** Global.
+3. **Ascensión del Héroe:** Convierte a un aliado en un Avatar por 3 turnos.
+    * **Efecto:** Duplica todas sus estadísticas (Fuerza, Velocidad, HP). Equivale a convertir a un hombre en un **Semidiós de la Guerra**.
+    * **CD:** Global (Uso único por evento).
+
+
+
+---
+
+### - Resumen de Soporte para el Grupo -
+
+| Habilidad | Potencia de Soporte | Comparación Real |
+| :--- | :--- | :--- |
+| **Sutura (Lv1)** | $+5\%$ HP | Un vendaje de campo rápido. |
+| **Refuerzo (Lv2)** | $+500 N$ Defensa | Blindaje extra de placas de hierro. |
+| **Vínculo (Lv3)** | Divisor de $4000 N$ | Repartir el golpe de un ariete entre dos personas. |
+| **Santuario (Lv5)** | Inmune a $10,000 J$ | Sobrevivir al colapso de una montaña o el pisotón de un dragón. |
+
+---
+
+¿Te gustaría que este sea el último bloque o hay alguna otra rama que sientas que falta para que el mundo de **Aethelgardia** esté completo? ¡Dime y avanzamos!

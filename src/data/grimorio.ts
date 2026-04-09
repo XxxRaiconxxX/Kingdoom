@@ -691,7 +691,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
     "styles": [
       {
         "id": "texto-31-txt",
-        "title": "texto 31.txt",
+        "title": "Magia de Sangre (Hemomancia)",
         "description": "Entramos en la **Magia de Sangre** (o Hemomancia), una disciplina prohibida que utiliza el fluido vital como conducto para la energía mágica más pura y cruda.\n\nEs el arte del **Vitalismo Forzado**. A diferencia de otras ramas que usan el maná del ambiente, el hemomante utiliza el hierro y el plasma como baterías biológicas. Es una magia de sacrificio y dolor: para obtener poder sobre el cuerpo ajeno, primero debes dominar y, a menudo, derramar el tuyo. Es una conexión visceral con la esencia misma de la vida; donde hay un latido, hay un punto de control para el mago de sangre.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -796,7 +796,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-37-txt",
-        "title": "texto 37.txt",
+        "title": "Magia de Metal (Ferrocinesis)",
         "description": "Entramos en la **Magia de Metal** (o Ferrocinesis), la disciplina definitiva para el asalto pesado y la dominación del campo de batalla mediante la materia sólida.\n\nEs el arte de **doblegar la estructura**. No solo mueves trozos de hierro; manipulas los enlaces metálicos a nivel molecular. Para un guerrero de *rush*, el metal es una extensión de su propio cuerpo: puedes densificar tu armadura en el punto de impacto, crear pinchos que brotan de tus guanteletes al golpear o convertir el arma del enemigo en metal líquido con solo tocarla. Es la magia de la persistencia, el peso y la fuerza industrial.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -901,7 +901,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-38-txt",
-        "title": "texto 38.txt",
+        "title": "Magia de Plasma y Energia Pura",
         "description": "Entramos en la **Magia de Plasma y Energía Pura**, la cúspide de la magia de combate de asalto. Es el estado donde la materia se rompe y solo queda el flujo destructivo de partículas ionizadas.\n\nEs el arte de la **incineración total**. No lanzas fuego común; manipulas el cuarto estado de la materia. Para un guerrero de *full rush*, el plasma es la herramienta definitiva para derretir defensas: puedes envolver tus puños en gas ionizado que atraviesa escudos de energía o lanzar ráfagas de partículas que viajan a velocidades cercanas a la de la luz. Es una magia de alto riesgo y alta recompensa; el calor es tan extremo que el aire mismo se convierte en un conductor de muerte.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -982,7 +982,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-35-txt",
-        "title": "texto 35.txt",
+        "title": "Magia de Sonido (Sonocinesis)",
         "description": "Entramos en la **Magia de Sonido** (o Sonocinesis), enfocada en la **Vibración de Asalto**.\n\nEs el arte de **convertir el aire en un arma**. No es solo música o ruido; es la manipulación de las ondas mecánicas que viajan a través de la materia. Para un guerrero de *rush*, el sonido es el complemento perfecto: usas gritos de guerra para aturdir, vibraciones de alta frecuencia en tus armas para cortar acero como si fuera mantequilla, y ondas de choque que destrozan los órganos internos del enemigo sin necesidad de atravesar su armadura.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -1868,7 +1868,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-39-txt",
-        "title": "texto 39.txt",
+        "title": "Magia de Tiempo (Cronomancia)",
         "description": "Entramos en la **Magia de Tiempo** (Cronomancia de Asalto), la disciplina definitiva para el guerrero de *full rush* que busca ser **literalmente** más rápido que la realidad.\n\nEs el arte de **fragmentar el ahora**. No predices el futuro; manipulas el flujo de la cuarta dimensión en un radio cercano a tu cuerpo. Para un asaltante, esto significa que el enemigo se mueve en cámara lenta mientras tú encadenas diez golpes en lo que para el resto del mundo es un parpadeo. Es la magia de la ventaja táctica absoluta y la velocidad relativista.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -2385,7 +2385,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-25-txt",
-        "title": "texto 25.txt",
+        "title": "Ilusiones Mentales",
         "description": "Entramos en el terreno de las **Ilusiones Mentales**. \n\nEs el arte de **engańar a los sentidos**. No creas hologramas de luz en el aire, sino que hackeas el cerebro del enemigo para que él mismo proyecte lo que tú deseas. Es una magia de \"mentiras reales\": el objetivo ve, oye y siente cosas que solo existen dentro de su propia cabeza, pero que para su sistema nervioso son totalmente indistinguibles de la realidad.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -2490,7 +2490,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-26-txt",
-        "title": "texto 26.txt",
+        "title": "Control Mental y Sugestion",
         "description": "Entramos en el terreno del **Control Mental y Sugestión**.\n\nEs el arte de **doblegar la voluntad**. No es un engaño visual, sino una intervención directa en los procesos de toma de decisiones del cerebro. Hackeas el sistema de recompensas y los impulsos motores para que el objetivo obedezca tus órdenes, ya sea mediante una sugerencia sutil que parece un pensamiento propio o mediante una dominación total que convierte al enemigo en una marioneta biológica.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -3271,7 +3271,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-28-txt",
-        "title": "texto 28.txt",
+        "title": "Magia Divina",
         "description": "Entramos en la **Magia Divina**, el pilar de la luz, la restauración y el orden sagrado.\n\nEs el arte de **canalizar la esencia del cosmos**. A diferencia de otras magias, esta no busca destruir o alterar, sino \"corregir\" la realidad devolviéndola a su estado de perfección original. Es la frecuencia vibratoria más alta: puede cerrar heridas imposibles, purgar la oscuridad y actuar como un faro de esperanza. Sin embargo, su poder es celoso y exige una armonía interna absoluta por parte del usuario.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -3376,7 +3376,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-36-txt",
-        "title": "texto 36.txt",
+        "title": "Magia de Luz Solida",
         "description": "Entramos en la **Magia de Luz Sólida** (o Fotocinesis de Combate), la disciplina que permite condensar los fotones hasta que adquieren masa y dureza física.\n\nEs el arte de **forjar el espectro**. No lanzas simples destellos; utilizas el maná para forzar a las partículas de luz a agruparse en estructuras geométricas ultra-densas. Para un guerrero de asalto, esto significa tener un arsenal infinito: puedes crear una espada que no pesa nada pero corta como el diamante, o un escudo que refleja ataques y ciega al oponente al mismo tiempo. Es la magia de la velocidad y la precisión absoluta.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -3487,7 +3487,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
     "styles": [
       {
         "id": "texto-29-txt",
-        "title": "texto 29.txt",
+        "title": "Magia Demoniaca",
         "description": "Entramos en la **Magia Demoniaca**, el sendero de la transgresión, el sacrificio y el poder extraído de los abismos.\n\nEs el arte de **romper los límites del alma**. A diferencia de la magia divina que busca el orden, esta disciplina se alimenta del caos, la sangre y el dolor. Utiliza el maná no como un flujo armonioso, sino como un combustible corrosivo que devora la realidad. Es un pacto peligroso: ofrece un poder destructivo inmediato y un control absoluto sobre la carne y las sombras, pero a cambio de un precio que siempre termina cobrándose en la cordura o la esencia del usuario.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -3592,7 +3592,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-40-txt",
-        "title": "texto 40.txt",
+        "title": "Magia de Acido y Corrosion",
         "description": "Entramos en la **Magia de Ácido y Corrosión** (o Vitriolismo), la rama más cruel de la bio-química de asalto.\n\nEs el arte de la **disolución molecular**. No es solo lanzar un líquido verde; manipulas el pH y la reactividad de los compuestos para que devoren la materia en segundos. Para un guerrero de *full rush*, el ácido es el castigo que persiste: puedes bañar tus armas en jugos gástricos mágicos que funden armaduras al contacto o exhalar nubes de vapor corrosivo que ciegan y queman mientras atraviesas las líneas enemigas. Es la magia de la destrucción persistente y el dolor químico.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [
@@ -3681,7 +3681,7 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       },
       {
         "id": "texto-27-txt",
-        "title": "texto 27.txt",
+        "title": "Magia de Vacio",
         "description": "Entramos en la **Magia de Vacío**, la rama más destructiva y aterradora del catálogo.\n\nEs el arte de la **nada absoluta**. No manipulas elementos existentes, sino que invocas la ausencia de todo. Es el poder de la entropía máxima, la energía oscura y la antimateria. Donde la Magia de Vacío toca, la realidad se desmorona, los átomos se separan y la existencia misma es borrada, dejando solo un silencio eterno y frío.\n\n---\n\n### -Escala de niveles-",
         "levels": {
           "1": [

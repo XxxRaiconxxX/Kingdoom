@@ -44,6 +44,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/data/grimorio.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se corrigieron titulos de escuelas del Grimorio que aparecian como nombres de archivo (`texto XX.txt`) y ahora muestran el nombre real de cada magia.
+*   **Cambios Clave:**
+    *   Renombrados: Sangre (Hemomancia), Metal (Ferrocinesis), Plasma, Sonido (Sonocinesis), Ilusiones Mentales, Control Mental y Sugestion, Vacio, Divina, Demoniaca, Luz Solida, Tiempo (Cronomancia), Acido y Corrosion.
+    *   Solo se ajusto `title` para no romper IDs ni niveles.
+*   **Notas/Advertencias:** `npx tsc --noEmit` verificado sin errores.
+
+---
+### [Fecha: 09/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/data/lore.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se completaron los dossiers pendientes de `Mercenarios del Hierro` y `Guardianes del Umbral` con el lore proporcionado, y se actualizaron sus lemas.
 *   **Cambios Clave:**

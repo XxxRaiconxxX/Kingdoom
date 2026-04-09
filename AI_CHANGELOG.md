@@ -45,6 +45,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** El Grimorio ahora entra con los estilos plegados por defecto para que sea mas escaneable (especialmente en movil), con auto-apertura al buscar.
+*   **Cambios Clave:**
+    *   Los paneles de estilos inician cerrados.
+    *   Si se escribe en el buscador, solo se abren automaticamente los estilos que tengan coincidencias.
+*   **Notas/Advertencias:** `npx tsc --noEmit` verificado sin errores.
+
+---
+### [Fecha: 09/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Mejora de tipografia/legibilidad del lore del Grimorio y ajuste responsive para que en movil no se vean tokens tipo markdown (`**`, `---`, `###`) ni layouts apretados.
 *   **Cambios Clave:**
     *   Se agrego un renderizador liviano de texto para soportar `**negrita**`, separadores `---` y headings `###` como elementos visuales, evitando que se vean los caracteres crudos en pantalla.

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { 
   Zap, 
   ChevronDown, 
@@ -168,7 +168,32 @@ function LoreText({ text }: { text: string }) {
 }
 
 function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuery: string }) {
-  const [isOpen, setIsOpen] = useState(true);
+  // Collapsed by default on first load (better scanning on mobile).
+  const [isOpen, setIsOpen] = useState(false);
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const hasMatch = useMemo(() => {
+    if (!normalizedQuery) return false;
+    if (style.title.toLowerCase().includes(normalizedQuery)) return true;
+
+    for (const abilities of Object.values(style.levels)) {
+      for (const ability of abilities || []) {
+        if (
+          ability.name.toLowerCase().includes(normalizedQuery) ||
+          ability.effect.toLowerCase().includes(normalizedQuery)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }, [normalizedQuery, style.levels, style.title]);
+
+  useEffect(() => {
+    if (!normalizedQuery) return;
+    setIsOpen(hasMatch);
+  }, [hasMatch, normalizedQuery]);
 
   return (
     <div className="rounded-[2.5rem] border border-stone-800 bg-stone-900/60 overflow-hidden">

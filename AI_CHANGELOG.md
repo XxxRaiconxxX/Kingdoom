@@ -43,6 +43,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 09/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Mejora de tipografia/legibilidad del lore del Grimorio y ajuste responsive para que en movil no se vean tokens tipo markdown (`**`, `---`, `###`) ni layouts apretados.
+*   **Cambios Clave:**
+    *   Se agrego un renderizador liviano de texto para soportar `**negrita**`, separadores `---` y headings `###` como elementos visuales, evitando que se vean los caracteres crudos en pantalla.
+    *   Se ajusto el grid de habilidades a 1 columna hasta `lg` y los bloques de cooldown/limitante ahora se apilan en pantallas muy chicas (`sm`), mejorando la lectura en movil.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente (persiste la advertencia conocida por bundle grande, sin bloquear).
+
+---
 ### [Fecha: 09/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/types.ts`, `src/data/grimorio.ts` (Nuevo), `src/components/GrimoireSection.tsx` (Nuevo), `src/components/LibrarySection.tsx` (Nuevo), `src/App.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Reestructuración de la arquitectura de la SPA para integrar un sistema de habilidades (Grimorio) y optimizar la navegación móvil mediante la fusión de secciones informativas.

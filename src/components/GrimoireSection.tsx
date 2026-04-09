@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { 
   Zap, 
   ChevronDown, 
@@ -80,6 +80,93 @@ export function GrimoireSection() {
   );
 }
 
+function normalizeLoreText(raw: string) {
+  return raw.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function renderInlineBold(text: string) {
+  // Minimal markdown-like support: **bold**
+  const nodes: Array<string | JSX.Element> = [];
+  let remaining = text;
+  let boldIndex = 0;
+
+  for (;;) {
+    const match = remaining.match(/\*\*(.+?)\*\*/);
+    if (!match) {
+      if (remaining) nodes.push(remaining);
+      break;
+    }
+
+    const full = match[0];
+    const boldText = match[1];
+    const start = remaining.indexOf(full);
+
+    if (start > 0) nodes.push(remaining.slice(0, start));
+    nodes.push(
+      <strong key={`b-${boldIndex++}`} className="font-semibold text-stone-50">
+        {boldText}
+      </strong>
+    );
+
+    remaining = remaining.slice(start + full.length);
+  }
+
+  return nodes;
+}
+
+function LoreText({ text }: { text: string }) {
+  const blocks = useMemo(() => {
+    const normalized = normalizeLoreText(text);
+    if (!normalized) return [];
+    return normalized.split(/\n{2,}/g);
+  }, [text]);
+
+  return (
+    <div className="space-y-4 font-serif text-[14px] sm:text-[15px] leading-7 text-stone-200/85">
+      {blocks.map((rawBlock, idx) => {
+        const block = rawBlock.trim();
+        if (!block) return null;
+
+        if (/^-{3,}$/.test(block)) {
+          return (
+            <div
+              key={`hr-${idx}`}
+              className="h-px w-full bg-gradient-to-r from-transparent via-stone-700/70 to-transparent"
+            />
+          );
+        }
+
+        const headingMatch = block.match(/^(#{1,6})\s*(.+)$/);
+        if (headingMatch) {
+          const content = headingMatch[2]
+            .trim()
+            .replace(/^-+/, "")
+            .replace(/-+$/, "")
+            .trim();
+
+          return (
+            <div key={`h-${idx}`} className="pt-2">
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-stone-800/70" />
+                <div className="text-[10px] font-black uppercase tracking-[0.35em] text-stone-400">
+                  {content}
+                </div>
+                <div className="h-px flex-1 bg-stone-800/70" />
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <p key={`p-${idx}`} className="text-pretty">
+            {renderInlineBold(block)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuery: string }) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -112,12 +199,12 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <div className="px-6 pb-8 md:px-8 border-t border-stone-800/50">
-              <div className="mt-6 p-6 rounded-3xl bg-stone-950/40 border border-stone-800/50 leading-7 text-stone-300 text-sm whitespace-pre-line font-medium backdrop-blur-sm">
+              <div className="mt-6 p-6 rounded-3xl bg-stone-950/40 border border-stone-800/50 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-4 text-amber-400/80 uppercase text-[10px] font-bold tracking-[0.2em]">
                   <Info className="h-3 w-3" />
                   Marco Teorico
                 </div>
-                {style.description}
+                <LoreText text={style.description} />
               </div>
 
               <div className="mt-10 space-y-10">
@@ -141,7 +228,7 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
                         <div className="h-px flex-1 bg-stone-800"></div>
                       </div>
 
-                      <div className="grid gap-4 md:grid-cols-2">
+                      <div className="grid gap-4 lg:grid-cols-2">
                         {(searchQuery ? filtered : levelAbilities).map((ability, idx) => (
                           <AbilityCard key={`${level}-${idx}`} ability={ability} />
                         ))}
@@ -169,15 +256,17 @@ function AbilityCard({ ability }: { ability: AbilityLevel }) {
     }`}>
       <button 
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-5 text-left flex items-center justify-between gap-4"
+        className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl font-black transition-colors ${
             expanded ? "bg-amber-500 text-stone-950" : "bg-stone-800 text-stone-400 group-hover:bg-amber-500/20 group-hover:text-amber-400"
           }`}>
             {ability.level}
           </div>
-          <h4 className="font-bold text-stone-100 group-hover:text-white transition-colors">{ability.name}</h4>
+          <h4 className="min-w-0 font-bold leading-5 text-stone-100 group-hover:text-white transition-colors break-words text-pretty">
+            {ability.name}
+          </h4>
         </div>
         <ChevronDown className={`h-4 w-4 text-stone-500 transition-transform ${expanded ? 'rotate-180 text-amber-400' : ''}`} />
       </button>
@@ -189,12 +278,12 @@ function AbilityCard({ ability }: { ability: AbilityLevel }) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
           >
-            <div className="px-5 pb-5 space-y-4">
+            <div className="px-4 pb-4 sm:px-5 sm:pb-5 space-y-4">
               <div className="p-4 rounded-2xl bg-stone-900/40 text-[13px] leading-6 text-stone-300 border border-stone-800/30">
                 <p>{ability.effect}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-3 rounded-2xl bg-stone-900/40 border border-stone-800/30">
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-amber-500/80 mb-1">
                     <Timer className="h-3 w-3" />

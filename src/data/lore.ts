@@ -58,13 +58,13 @@ export const REALM_FACTIONS: RealmFaction[] = [
   },
   {
     name: "Guardianes del Umbral",
-    motto: "Lo sellado no debe abrirse.",
+    motto: "Ni aqui, ni alla.",
     description:
       "Protectores de reliquias, criptas y secretos que nadie deberia tocar.",
   },
   {
     name: "Mercenarios del Hierro",
-    motto: "Toda corona paga peaje.",
+    motto: "Nuestra sangre, vuestro acero.",
     description:
       "Comerciantes armados, escoltas y capitanes que venden acero, rutas y favores.",
   },
@@ -147,71 +147,75 @@ export const FACTION_DOSSIERS: FactionDossier[] = [
   {
     id: "guardianes-del-umbral",
     name: "Guardianes del Umbral",
-    motto: "Lo sellado no debe abrirse.",
-    alignedRealm: "Catacumbas y enclaves sellados",
+    motto: "Ni aqui, ni alla.",
+    alignedRealm: "Arcania (umbrales y grietas)",
     history:
-      "Pendiente: comparte el lore e historia de esta faccion y lo integro con el mismo formato que las demas.",
+      "Mientras otros buscan cristales en el suelo, los Guardianes observan las grietas en el aire. Esta faccion mistica esta formada por seres con un pie en cada mundo: aasimar, tieflings, ethereals y cuerpos de eter. Su origen se remonta a la Fractura de Cristal, cuando el tejido de la realidad se rasgo. Desde entonces juraron proteger los Umbrales, puntos donde la energia de cristal es tan inestable que abre portales a dimensiones desconocidas. Son vigilantes silenciosos que impiden que entidades del vacio devoren lo que queda del continente.",
     specialization:
-      "Guardiania de reliquias y sellos antiguos.",
+      "Manipulacion de espacio-tiempo: parpadeos, gravedad localizada y cierre de anomalías.",
     tactics:
-      "Pendiente: tacticas y estilo de combate.",
+      "Parpadeo tactico para reposicionarse y aparecer a espaldas del objetivo. Crean zonas de gravedad aumentada para inmovilizar criaturas grandes o cortar retiradas.",
     equipment:
-      "Pendiente: equipo y artefactos caracteristicos.",
+      "Tunicas que parecen hechas de estrellas y Laminas de Fase: hojas capaces de volverse intangibles para atravesar armaduras y cortar directamente la energia vital.",
     headquarters:
-      "Pendiente: sede y presencia en el mapa.",
+      "El Observatorio del Vacio: santuario en una dimension de bolsillo, accesible solo por una grieta especifica en las montanas de Arcania.",
     relations: [
       {
         realm: "Kaelum-Gard",
         description:
-          "Pendiente: relacion con el Imperio.",
+          "Los militares los ven como fantasmas peligrosos imposibles de someter a la ley de los hombres.",
       },
       {
         realm: "Oakhaven",
         description:
-          "Pendiente: relacion con el Protectorado.",
+          "Respeto mutuo: ambos preservan el orden natural, aunque con metodos distintos.",
       },
       {
         realm: "Union de los Paramos",
         description:
-          "Pendiente: relacion con la Union.",
+          "Interaccion limitada: toleran el comercio mientras no se profanen Umbrales en las rutas.",
       },
     ],
     playerDetails:
-      "Pendiente: detalles mecanicos para el jugador (bonos, item inicial, etc.).",
+      "Un Guardian del Umbral domina el control del terreno y el reposicionamiento. Su firma de poder se nota en el aire: no se mide por fuerza bruta, sino por como decide donde y cuando ocurre el combate.",
+    startingItem: "Marca del Umbral (permite detectar fluctuaciones magicas cercanas).",
+    bonuses: ["Paso del Umbral (teletransporte corto 1/combate)", "Percepcion arcana"],
   },
   {
     id: "mercenarios-del-hierro",
     name: "Mercenarios del Hierro",
-    motto: "Toda corona paga peaje.",
-    alignedRealm: "Rutas comerciales y peajes",
+    motto: "Nuestra sangre, vuestro acero.",
+    alignedRealm: "Union de los Paramos (rutas y asedio)",
     history:
-      "Pendiente: comparte el lore e historia de esta faccion y lo integro con el mismo formato que las demas.",
+      "Nacidos de las cenizas de batallas olvidadas, los Mercenarios del Hierro son el pragmatismo puro en un mundo en guerra. Fueron una legion de castigo de Kaelum-Gard compuesta por orcos de hierro y enanos de las montanas que se negaron a ejecutar una orden genocida. Tras desertar, se asentaron en los limites de los Paramos y se convirtieron en la fuerza militar privada mas respetada y temida de Aethelgardia. No luchan por reyes ni por dioses: luchan por el contrato. Se dice que un contrato firmado con el Hierro es mas solido que un muro de castillo.",
     specialization:
-      "Escolta, comercio armado y control de rutas.",
+      "Guerra de desgaste y asedio. Expertos en escoltar caravanas grandes contra fauna colosal y sostener lineas bajo presion prolongada.",
     tactics:
-      "Pendiente: tacticas y estilo de combate.",
+      "Formaciones cerradas tipo testudo con escudos de acero pesado. Controlan el ritmo, ganan por resistencia y protegen el objetivo hasta que el enemigo se agota.",
     equipment:
-      "Pendiente: equipo, marcas de compania y arsenal.",
+      "Armaduras pesadas con remaches de cristal de baja calidad para resistencia fisica aumentada. Hachas a dos manos, martillos de guerra y ballestas de asedio en tripodes.",
     headquarters:
-      "Pendiente: sede y presencia en el mapa.",
+      "El Baluarte de Oxido: fortaleza movil sobre una plataforma de orugas metalicas. Es una ciudad-cuartel que nunca permanece en el mismo lugar, siempre sobre las rutas mas peligrosas.",
     relations: [
       {
         realm: "Kaelum-Gard",
         description:
-          "Pendiente: relacion con el Imperio.",
+          "Odio mutuo, pero el Imperio los contrata en secreto para 'limpiezas' que no puede ejecutar por politica.",
       },
       {
         realm: "Arcania",
         description:
-          "Pendiente: relacion con el Nexo.",
+          "Desconfian de la magia, pero compran suministros de energia para sus armas pesadas.",
       },
       {
         realm: "Union de los Paramos",
         description:
-          "Pendiente: relacion con la Union.",
+          "Socios preferidos: la Union provee combustible y reparaciones; los Mercenarios mantienen los pasos libres de monstruos.",
       },
     ],
     playerDetails:
-      "Pendiente: detalles mecanicos para el jugador (bonos, item inicial, etc.).",
+      "Un Mercenario del Hierro gana por disciplina, cobertura y presion constante. En mesa destaca como muro movil y estratega de asedio: su valor es sostener al grupo cuando la ruta se rompe.",
+    startingItem: "Placa de Contrato (sello del Hierro que acredita tu compania).",
+    bonuses: ["Piel Curtida (reduccion de dano fisico)", "Intimidacion", "Tacticas de asedio"],
   },
 ];

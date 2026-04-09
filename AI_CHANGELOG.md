@@ -43,6 +43,18 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 09/04/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/types.ts`, `src/data/grimorio.ts` (Nuevo), `src/components/GrimoireSection.tsx` (Nuevo), `src/components/LibrarySection.tsx` (Nuevo), `src/App.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Reestructuración de la arquitectura de la SPA para integrar un sistema de habilidades (Grimorio) y optimizar la navegación móvil mediante la fusión de secciones informativas.
+*   **Cambios Clave:**
+    *   **Fusión "Biblioteca"**: Se unificaron las antiguas pestañas `Lore` y `Mundo` en una sola sección de `Biblioteca` con un selector interno (Tabs), liberando espacio en la barra de navegación.
+    *   **Grimorio de Habilidades**: Implementación de una sección dedicada para gestionar poderes y magias, categorizados por escuelas (Invocación, Elemental, etc.).
+    *   **Diseño Técnico-Científico**: Las habilidades incluyen Lore basado en física real, niveles 1-5, tiempos de enfriamiento y limitantes específicas.
+    *   **Capa Anti-Mano Negra**: Se integró una sección visual distintiva en cada habilidad para definir reglas de balanceo y prohibiciones de uso (Anti-Powergaming).
+    *   **Navegación Optimizada**: La barra inferior se mantiene en 5 elementos (Inicio, Grimorio, Biblioteca, Mercado, Ranking), mejorando la UX en dispositivos móviles.
+*   **Notas/Advertencias:** Se dejó `src/data/grimorio.ts` con plantillas y comentarios para facilitar la expansión manual de contenidos sin saturar el contexto de la IA.
+
+---
 ### [Fecha: 08/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se separo visualmente el bloque de `Editar oro` en el panel admin para que los controles no queden apretados en movil.

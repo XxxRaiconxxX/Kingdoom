@@ -1,6 +1,4 @@
-import { GrimoireCategory } from '../types';
-
-export const GRIMOIRE_DATA: GrimoireCategory[] = [
+[
   {
     "id": "invocacion",
     "title": "Invocacion",
@@ -3786,4 +3784,4 @@ export const GRIMOIRE_DATA: GrimoireCategory[] = [
       }
     ]
   }
-];
+]

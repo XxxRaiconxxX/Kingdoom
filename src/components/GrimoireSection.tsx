@@ -84,6 +84,103 @@ function normalizeLoreText(raw: string) {
   return raw.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+function clampInt(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, Math.round(value)));
+}
+
+function parseScientificNumber(raw: string) {
+  const cleaned = raw.trim().replace(/,/g, "");
+  const sci = cleaned.match(/(\d+(?:\.\d+)?)\s*\\times\s*10\^(\d+)/i);
+  if (sci) return Number(sci[1]) * Math.pow(10, Number(sci[2]));
+  const plain = cleaned.match(/-?\d+(?:\.\d+)?/);
+  if (!plain) return null;
+  return Number(plain[0]);
+}
+
+type DndUnitKind = "strength" | "speed" | "damage" | "fire";
+
+function convertUnitToDndPoints(value: number, kind: DndUnitKind) {
+  // These conversions are intentionally simple and editable in one place.
+  // Adjusting these scales will rebalance the entire grimoire instantly.
+  switch (kind) {
+    case "strength":
+      // 2000 N -> ~10 Fuerza, 50 N -> ~1 Fuerza
+      return clampInt(value / 200, 1, 25);
+    case "speed":
+      // 50 m/s -> 10 Velocidad (per user example)
+      return clampInt(value / 5, 1, 25);
+    case "damage":
+      // 400 J -> ~1 Daño, 6000 J -> ~12 Daño (capped for absurd scientific values)
+      return clampInt(value / 500, 1, 25);
+    case "fire":
+      // 200°C -> 10 Daño de Fuego
+      return clampInt(value / 20, 1, 25);
+  }
+}
+
+function formatScientificTokenToDnD(token: string) {
+  const t = token.trim().replace(/\\%/g, "%");
+
+  // Speed
+  if (/km\/h/i.test(t)) {
+    const num = parseScientificNumber(t);
+    if (num === null) return null;
+    // km/h -> m/s
+    const ms = num / 3.6;
+    const pts = convertUnitToDndPoints(ms, "speed");
+    return `(+${pts} Velocidad)`;
+  }
+  if (/m\/s/i.test(t)) {
+    const num = parseScientificNumber(t);
+    if (num === null) return null;
+    const pts = convertUnitToDndPoints(num, "speed");
+    return `(+${pts} Velocidad)`;
+  }
+
+  // Force / Mass
+  if (/\bN\b/i.test(t)) {
+    const num = parseScientificNumber(t);
+    if (num === null) return null;
+    const pts = convertUnitToDndPoints(Math.abs(num), "strength");
+    return `(+${pts} Fuerza)`;
+  }
+  if (/\bkg\b/i.test(t)) {
+    const num = parseScientificNumber(t);
+    if (num === null) return null;
+    // 1 kgf ~ 9.81 N, but we keep the scale friendly.
+    const approxNewtons = Math.abs(num) * 9.81;
+    const pts = convertUnitToDndPoints(approxNewtons, "strength");
+    return `(+${pts} Fuerza)`;
+  }
+
+  // Energy / Temperature
+  if (/\bJ\b/i.test(t)) {
+    const num = parseScientificNumber(t);
+    if (num === null) return null;
+    const pts = convertUnitToDndPoints(Math.abs(num), "damage");
+    return `(+${pts} Danio)`;
+  }
+  if (/°\s*C|°C|C\b/i.test(t) && /°/.test(t)) {
+    const num = parseScientificNumber(t);
+    if (num === null) return null;
+    const pts = convertUnitToDndPoints(Math.abs(num), "fire");
+    return `(+${pts} Danio de Fuego)`;
+  }
+
+  return null;
+}
+
+function formatAbilityText(text: string) {
+  // Convert $...$ scientific tokens into D&D-friendly point language.
+  // Also strips leftover LaTeX-ish escapes used in the dataset.
+  return normalizeLoreText(text)
+    .replace(/\$(.+?)\$/g, (_full, inner) => {
+      const converted = formatScientificTokenToDnD(inner);
+      return converted ?? String(inner).trim().replace(/\\%/g, "%");
+    })
+    .replace(/\\%/g, "%");
+}
+
 function renderInlineBold(text: string) {
   // Minimal markdown-like support: **bold**
   const nodes: Array<string | JSX.Element> = [];
@@ -116,7 +213,7 @@ function renderInlineBold(text: string) {
 
 function LoreText({ text }: { text: string }) {
   const blocks = useMemo(() => {
-    const normalized = normalizeLoreText(text);
+    const normalized = formatAbilityText(text);
     if (!normalized) return [];
     return normalized.split(/\n{2,}/g);
   }, [text]);
@@ -273,6 +370,14 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
 function AbilityCard({ ability }: { ability: AbilityLevel }) {
   const [expanded, setExpanded] = useState(false);
 
+  const effectText = useMemo(() => formatAbilityText(ability.effect), [ability.effect]);
+  const cdText = useMemo(() => formatAbilityText(ability.cd), [ability.cd]);
+  const limitText = useMemo(() => formatAbilityText(ability.limit), [ability.limit]);
+  const antiText = useMemo(
+    () => formatAbilityText(ability.antiManoNegra),
+    [ability.antiManoNegra]
+  );
+
   return (
     <div className={`rounded-3xl border transition-all duration-300 group overflow-hidden ${
       expanded 
@@ -305,7 +410,7 @@ function AbilityCard({ ability }: { ability: AbilityLevel }) {
           >
             <div className="px-4 pb-4 sm:px-5 sm:pb-5 space-y-4">
               <div className="p-4 rounded-2xl bg-stone-900/40 text-[13px] leading-6 text-stone-300 border border-stone-800/30">
-                <p>{ability.effect}</p>
+                <p>{effectText}</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -314,14 +419,14 @@ function AbilityCard({ ability }: { ability: AbilityLevel }) {
                     <Timer className="h-3 w-3" />
                     Cooldown
                   </div>
-                  <p className="text-xs font-semibold text-stone-200">{ability.cd}</p>
+                  <p className="text-xs font-semibold text-stone-200">{cdText}</p>
                 </div>
                 <div className="p-3 rounded-2xl bg-stone-900/40 border border-stone-800/30">
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-rose-400/80 mb-1">
                     <AlertTriangle className="h-3 w-3" />
                     Limitante
                   </div>
-                  <p className="text-xs font-semibold text-stone-200">{ability.limit}</p>
+                  <p className="text-xs font-semibold text-stone-200">{limitText}</p>
                 </div>
               </div>
 
@@ -331,7 +436,7 @@ function AbilityCard({ ability }: { ability: AbilityLevel }) {
                   Anti-Mano Negra
                 </div>
                 <p className="text-xs italic leading-5 text-rose-200/70">
-                  {ability.antiManoNegra}
+                  {antiText}
                 </p>
               </div>
             </div>

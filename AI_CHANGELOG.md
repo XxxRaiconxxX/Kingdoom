@@ -44,6 +44,18 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `src/App.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Implementación del minigame "El Multiplicador del Vacío" (Crash Game).
+*   **Cambios Clave:**
+    *   **Lógica de Tiempo Real**: Sistema basado en `requestAnimationFrame` para un conteo fluido y preciso.
+    *   **Curva Exponencial**: El multiplicador acelera con el tiempo (`1.06^t`), aumentando la presión psicológica.
+    *   **Punto de Colapso Dinámico**: Algoritmo de azar con un 3% de margen de la casa (instant crash).
+    *   **Interfaz de Neón**: Diseño oscuro con efectos de brillo, anillos de energía y respuesta visual al ganar o perder.
+    *   **Integración de Saldo**: Sincronización completa con `usePlayerSession` para apuestas y retiros.
+*   **Notas/Advertencias:** Limpieza de animaciones al desmontar el componente para evitar fugas de memoria.
+
+---
+### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se corrigió y potenció el buscador del Grimorio para permitir búsquedas globales y profundas en todo el catálogo de habilidades.
 *   **Cambios Clave:**

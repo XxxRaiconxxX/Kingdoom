@@ -40,7 +40,7 @@ import type {
   MarketCategory, MarketCategoryId, MarketItem, NavItem, RankingPlayer, RankingWindow, TabId,
 } from "./types";
 
-type TavernMode = "chests" | "roulette" | "cards" | "scratch";
+type TavernMode = "chests" | "roulette" | "cards" | "scratch" | "crash";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -75,6 +75,11 @@ const TAVERN_MODES: {
     label: "Rasca",
     description: "Compra un rasca y gana y prueba suerte por un premio entre 500 y 1000 de oro.",
   },
+  {
+    id: "crash",
+    label: "Multiplicador",
+    description: "El Multiplicador del Vacio: Retira tu apuesta antes de que la energia colapse.",
+  },
 ];
 
 const pageTransition = {
@@ -102,6 +107,11 @@ const TavernCards = lazy(() =>
 const TavernScratch = lazy(() =>
   import("./components/TavernScratch").then((module) => ({
     default: module.TavernScratch,
+  }))
+);
+const TavernCrash = lazy(() =>
+  import("./components/TavernCrash").then((module) => ({
+    default: module.TavernCrash,
   }))
 );
 const PurchaseModal = lazy(() =>
@@ -423,6 +433,8 @@ function MarketSection() {
         return <TavernCards />;
       case "scratch":
         return <TavernScratch />;
+      case "crash":
+        return <TavernCrash />;
       default:
         return <TavernGame />;
     }

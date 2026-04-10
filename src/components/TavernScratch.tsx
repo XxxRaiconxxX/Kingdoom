@@ -9,7 +9,6 @@ import {
   addPlayerDailyScratchGrossWins,
   getDailyScratchConfig,
   getPlayerDailyScratchGrossWins,
-  MAX_DAILY_WIN_LIMIT,
   NORMAL_MAX_PRIZE,
   NORMAL_MIN_PRIZE,
   VIP_JACKPOT_CHANCE,
@@ -41,7 +40,7 @@ export function TavernScratch() {
     ? getPlayerDailyScratchGrossWins(player.id, dailyConfig.dateKey) 
     : 0;
   
-  const limitReached = dailyGrossWins >= MAX_DAILY_WIN_LIMIT;
+  const limitReached = dailyGrossWins >= dailyConfig.maxDailyLimit;
 
   const totalCost = dailyConfig.cost * quantity;
   const canBuy = Boolean(player && player.gold >= totalCost && !updating && quantity > 0 && !limitReached);
@@ -95,8 +94,8 @@ export function TavernScratch() {
 
       for (let i = 0; i < quantity; i++) {
         // Frenar el bucle inmediatamente si ya se alcanzó el límite.
-        if (dailyGrossWins + totalPrize >= MAX_DAILY_WIN_LIMIT) {
-          totalPrize = MAX_DAILY_WIN_LIMIT - dailyGrossWins; 
+        if (dailyGrossWins + totalPrize >= dailyConfig.maxDailyLimit) {
+          totalPrize = dailyConfig.maxDailyLimit - dailyGrossWins; 
           break; 
         }
 
@@ -117,8 +116,8 @@ export function TavernScratch() {
       }
 
       let cappedTotalPrize = totalPrize;
-      if (dailyGrossWins + totalPrize > MAX_DAILY_WIN_LIMIT) {
-        cappedTotalPrize = Math.max(0, MAX_DAILY_WIN_LIMIT - dailyGrossWins);
+      if (dailyGrossWins + totalPrize > dailyConfig.maxDailyLimit) {
+        cappedTotalPrize = Math.max(0, dailyConfig.maxDailyLimit - dailyGrossWins);
       }
       
       const refundedTickets = quantity - usedTickets;
@@ -182,7 +181,7 @@ export function TavernScratch() {
     return (
       <ScratchMessage
         title="Límite Diario Alcanzado"
-        description={`¡El Reino ha visto suficiente suerte de tu parte! Ya has ganado ${dailyGrossWins} de oro hoy, acercándote o superando el límite de ${MAX_DAILY_WIN_LIMIT}. La taberna cierra esta mesa por hoy. Vuelve mañana a las 00:00.`}
+        description={`¡El Reino ha visto suficiente suerte de tu parte! Ya has ganado ${dailyGrossWins} de oro hoy, acercándote o superando el límite de ${dailyConfig.maxDailyLimit}. La taberna cierra esta mesa por hoy. Vuelve mañana a las 00:00.`}
       />
     );
   }

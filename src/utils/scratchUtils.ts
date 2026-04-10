@@ -4,7 +4,8 @@
  */
 
 // Límite de seguridad para evitar quiebres en la economía (Solo para Rasca y Gana)
-export const MAX_DAILY_WIN_LIMIT = 50000;
+// Límite de seguridad dinámico se calcula en getDailyScratchConfig
+// export const MAX_DAILY_WIN_LIMIT = 50000; (Deprecado por límite aleatorio)
 export const VIP_JACKPOT_CHANCE = 0.05;
 export const VIP_JACKPOT_PRIZE = 10000;
 export const NORMAL_MIN_PRIZE = 200;
@@ -14,6 +15,7 @@ export interface DailyScratchConfig {
   cost: number;
   winChance: number;
   dateKey: string;
+  maxDailyLimit: number;
 }
 
 /**
@@ -59,10 +61,14 @@ export function getDailyScratchConfig(): DailyScratchConfig {
     winChance = 0.25 + (normalizedSeed * 0.15);
   }
 
+  // Límite aleatorio: 10,000 - 150,000 (Entero)
+  const maxDailyLimit = Math.floor(seed * (150000 - 10000 + 1)) + 10000;
+
   return {
     cost,
     winChance,
     dateKey,
+    maxDailyLimit,
   };
 }
 

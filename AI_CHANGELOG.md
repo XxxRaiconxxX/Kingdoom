@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/utils/scratchUtils.ts`, `src/components/TavernScratch.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Aleatorización del límite diario de ganancias en el Rasca y Gana.
+*   **Cambios Clave:**
+    *   **Límite Dinámico**: El límite dejó de ser fijo (50,000) y ahora varía cada día entre **10,000 y 150,000 de oro**.
+    *   **Semilla Diaria**: Se utiliza la misma semilla pseudo-aleatoria del día para calcular el límite, asegurando consistencia durante las 24 horas.
+    *   **Feedback Visual**: Se actualizó el mensaje de "Límite Alcanzado" para mostrar dinámicamente el tope del día actual.
+*   **Notas/Advertencias:** El límite es por jugador y por día local.
+
+---
+### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `src/App.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Implementación del minigame "El Multiplicador del Vacío" (Crash Game).
 *   **Cambios Clave:**

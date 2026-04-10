@@ -44,6 +44,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se corrigió y potenció el buscador del Grimorio para permitir búsquedas globales y profundas en todo el catálogo de habilidades.
+*   **Cambios Clave:**
+    *   **Búsqueda Global**: Al buscar una palabra, el sistema ahora ignora la categoría seleccionada y busca en TODO el grimorio simultáneamente.
+    *   **Expansión de Criterios**: El buscador ahora analiza el título, el Marco Teórico (descripción), los nombres de habilidades, sus efectos y las restricciones de Anti-Mano Negra.
+    *   **Auto-Apertura Inteligente**: Las escuelas de magia y las tarjetas de habilidad que contienen la palabra buscada se abren automáticamente para facilitar la lectura.
+    *   **Contexto de Búsqueda**: Se añadieron etiquetas visuales en los resultados que indican a qué categoría (Invocación, Elemental, etc.) pertenece cada estilo encontrado.
+*   **Notas/Advertencias:** `npx tsc --noEmit` verificado. Al limpiar el buscador, la interfaz regresa automáticamente a la categoría que estaba seleccionada previamente.
+
+---
+### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Aumento de dificultad y sistema de rachas para el juego de cartas de la taberna.
 *   **Cambios Clave:**

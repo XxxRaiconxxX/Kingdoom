@@ -18,7 +18,45 @@ export function GrimoireSection() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(GRIMOIRE_DATA[0].id);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const selectedCategory = GRIMOIRE_DATA.find(c => c.id === selectedCategoryId);
+  const isSearching = searchQuery.trim().length > 0;
+
+  const displayStyles = useMemo(() => {
+    if (!isSearching) {
+      return GRIMOIRE_DATA.find(c => c.id === selectedCategoryId)?.styles || [];
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    const results: (MagicStyle & { categoryTitle: string })[] = [];
+
+    GRIMOIRE_DATA.forEach(category => {
+      category.styles.forEach(style => {
+        let match = style.title.toLowerCase().includes(query) || 
+                    style.description.toLowerCase().includes(query);
+        
+        if (!match) {
+          for (const abilities of Object.values(style.levels)) {
+            for (const ability of abilities || []) {
+              if (
+                ability.name.toLowerCase().includes(query) || 
+                ability.effect.toLowerCase().includes(query) ||
+                ability.antiManoNegra.toLowerCase().includes(query)
+              ) {
+                match = true;
+                break;
+              }
+            }
+            if (match) break;
+          }
+        }
+
+        if (match) {
+          results.push({ ...style, categoryTitle: category.title });
+        }
+      });
+    });
+
+    return results;
+  }, [isSearching, searchQuery, selectedCategoryId]);
 
   return (
     <section className="space-y-6">
@@ -33,10 +71,10 @@ export function GrimoireSection() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-500 group-focus-within:text-amber-400 transition" />
             <input 
               type="text"
-              placeholder="Buscar habilidad..."
+              placeholder="Buscar habilidad o fundamento..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-64 rounded-2xl border border-stone-800 bg-stone-950/50 py-3 pl-11 pr-4 text-sm text-stone-100 placeholder:text-stone-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition"
+              className="w-full md:w-80 rounded-2xl border border-stone-800 bg-stone-950/50 py-3.5 pl-11 pr-4 text-sm text-stone-100 placeholder:text-stone-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition"
             />
           </div>
         </div>
@@ -45,9 +83,12 @@ export function GrimoireSection() {
           {GRIMOIRE_DATA.map((category) => (
             <button
               key={category.id}
-              onClick={() => setSelectedCategoryId(category.id)}
+              onClick={() => {
+                setSelectedCategoryId(category.id);
+                setSearchQuery(""); // Clear search when picking a category
+              }}
               className={`px-5 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
-                selectedCategoryId === category.id
+                !isSearching && selectedCategoryId === category.id
                   ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20 scale-105"
                   : "bg-stone-800/50 text-stone-400 hover:bg-stone-800 hover:text-stone-100 border border-stone-700/50"
               }`}
@@ -59,19 +100,34 @@ export function GrimoireSection() {
       </div>
 
       <div className="space-y-4">
-        {selectedCategory?.styles.map((style) => (
+        {isSearching && (
+          <div className="px-4 py-2 flex items-center justify-between">
+            <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">
+              Mostrando {displayStyles.length} resultados globales
+            </p>
+            <button 
+              onClick={() => setSearchQuery("")}
+              className="text-xs font-bold text-amber-500 hover:text-amber-400 uppercase tracking-widest underline underline-offset-4"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        )}
+
+        {displayStyles.map((style) => (
           <MagicStylePanel 
             key={style.id} 
             style={style} 
             searchQuery={searchQuery}
+            showCategoryTag={isSearching}
           />
         ))}
         
-        {selectedCategory?.styles.length === 0 && (
+        {displayStyles.length === 0 && (
           <div className="rounded-[2rem] border border-dashed border-stone-800 bg-stone-900/20 p-12 text-center">
             <BookOpen className="h-10 w-10 text-stone-700 mx-auto mb-4" />
             <p className="text-stone-500 text-sm italic">
-              Esta seccion del grimorio aun no ha sido transcrita por los eruditos del reino...
+              {isSearching ? "No se encontraron coincidencias en el grimorio..." : "Esta seccion del grimorio aun no ha sido transcrita..."}
             </p>
           </div>
         )}
@@ -264,7 +320,15 @@ function LoreText({ text }: { text: string }) {
   );
 }
 
-function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuery: string }) {
+function MagicStylePanel({ 
+  style, 
+  searchQuery, 
+  showCategoryTag 
+}: { 
+  style: MagicStyle & { categoryTitle?: string }, 
+  searchQuery: string,
+  showCategoryTag?: boolean
+}) {
   // Collapsed by default on first load (better scanning on mobile).
   const [isOpen, setIsOpen] = useState(false);
   const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -272,12 +336,14 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
   const hasMatch = useMemo(() => {
     if (!normalizedQuery) return false;
     if (style.title.toLowerCase().includes(normalizedQuery)) return true;
+    if (style.description.toLowerCase().includes(normalizedQuery)) return true;
 
     for (const abilities of Object.values(style.levels)) {
       for (const ability of abilities || []) {
         if (
           ability.name.toLowerCase().includes(normalizedQuery) ||
-          ability.effect.toLowerCase().includes(normalizedQuery)
+          ability.effect.toLowerCase().includes(normalizedQuery) ||
+          ability.antiManoNegra.toLowerCase().includes(normalizedQuery)
         ) {
           return true;
         }
@@ -285,7 +351,7 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
     }
 
     return false;
-  }, [normalizedQuery, style.levels, style.title]);
+  }, [normalizedQuery, style.description, style.levels, style.title]);
 
   useEffect(() => {
     if (!normalizedQuery) return;
@@ -293,21 +359,32 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
   }, [hasMatch, normalizedQuery]);
 
   return (
-    <div className="rounded-[2.5rem] border border-stone-800 bg-stone-900/60 overflow-hidden">
+    <div className={`rounded-[2.5rem] border overflow-hidden transition-all duration-300 ${
+      isOpen ? "border-stone-700 bg-stone-900/60 shadow-xl" : "border-stone-800 bg-stone-900/40"
+    }`}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-start justify-between p-6 md:p-8 text-left hover:bg-stone-800/20 transition"
       >
         <div className="flex items-start gap-5">
-          <div className="rounded-2xl bg-amber-500/10 p-4 text-amber-400 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+          <div className={`rounded-2xl transition-colors p-4 border shadow-[0_0_15px_rgba(245,158,11,0.05)] ${
+            isOpen ? "bg-amber-500 text-stone-950 border-amber-400" : "bg-stone-800 text-stone-400 border-stone-700"
+          }`}>
             <Zap className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="text-2xl font-black text-stone-100 uppercase tracking-tight">{style.title}</h3>
-            <p className="mt-2 text-sm text-amber-500/60 font-medium font-serif italic">Fundamento Arcano</p>
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h3 className="text-2xl font-black text-stone-100 uppercase tracking-tight">{style.title}</h3>
+              {showCategoryTag && style.categoryTitle && (
+                <span className="px-2 py-0.5 rounded-lg bg-stone-800 text-[10px] font-black text-stone-500 uppercase tracking-widest border border-stone-700">
+                  {style.categoryTitle}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-amber-500/60 font-medium font-serif italic">Fundamento Arcano</p>
           </div>
         </div>
-        <div className={`mt-2 rounded-xl bg-stone-800 p-2 text-stone-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+        <div className={`mt-2 rounded-xl bg-stone-800 p-2 text-stone-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-amber-500' : ''}`}>
           <ChevronDown className="h-5 w-5" />
         </div>
       </button>
@@ -323,8 +400,10 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
             <div className="px-6 pb-8 md:px-8 border-t border-stone-800/50">
               <div className="mt-6 p-6 rounded-3xl bg-stone-950/40 border border-stone-800/50 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-4 text-amber-400/80 uppercase text-[10px] font-bold tracking-[0.2em]">
-                  <Info className="h-3 w-3" />
-                  Marco Teorico
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500/20">
+                    <Info className="h-2.5 w-2.5" />
+                  </span>
+                  Marco Teórico
                 </div>
                 <LoreText text={style.description} />
               </div>
@@ -333,12 +412,14 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
                 {[1, 2, 3, 4, 5].map((level) => {
                   const levelAbilities = style.levels[level] || [];
                   const filtered = levelAbilities.filter(a => 
-                    a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    a.effect.toLowerCase().includes(searchQuery.toLowerCase())
+                    a.name.toLowerCase().includes(normalizedQuery) ||
+                    a.effect.toLowerCase().includes(normalizedQuery) ||
+                    a.antiManoNegra.toLowerCase().includes(normalizedQuery)
                   );
 
-                  if (searchQuery && filtered.length === 0) return null;
-                  if (!searchQuery && levelAbilities.length === 0) return null;
+                  const isFiltering = normalizedQuery.length > 0;
+                  if (isFiltering && filtered.length === 0) return null;
+                  if (!isFiltering && levelAbilities.length === 0) return null;
 
                   return (
                     <div key={level} className="space-y-4">
@@ -351,8 +432,8 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
                       </div>
 
                       <div className="grid gap-4 lg:grid-cols-2">
-                        {(searchQuery ? filtered : levelAbilities).map((ability, idx) => (
-                          <AbilityCard key={`${level}-${idx}`} ability={ability} />
+                        {(isFiltering ? filtered : levelAbilities).map((ability, idx) => (
+                          <AbilityCard key={`${level}-${idx}`} ability={ability} query={searchQuery} />
                         ))}
                       </div>
                     </div>
@@ -367,8 +448,19 @@ function MagicStylePanel({ style, searchQuery }: { style: MagicStyle, searchQuer
   );
 }
 
-function AbilityCard({ ability }: { ability: AbilityLevel }) {
+function AbilityCard({ ability, query }: { ability: AbilityLevel, query?: string }) {
   const [expanded, setExpanded] = useState(false);
+  
+  // Auto-expand ability card if the query matches this specific ability
+  useEffect(() => {
+    if (query && (
+      ability.name.toLowerCase().includes(query.toLowerCase()) ||
+      ability.effect.toLowerCase().includes(query.toLowerCase()) ||
+      ability.antiManoNegra.toLowerCase().includes(query.toLowerCase())
+    )) {
+      setExpanded(true);
+    }
+  }, [query, ability]);
 
   const effectText = useMemo(() => formatAbilityText(ability.effect), [ability.effect]);
   const cdText = useMemo(() => formatAbilityText(ability.cd), [ability.cd]);

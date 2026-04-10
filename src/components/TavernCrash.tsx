@@ -14,6 +14,11 @@ import { usePlayerSession } from "../context/PlayerSessionContext";
 
 type GameStatus = "betting" | "starting" | "rising" | "crashed" | "cashed_out";
 
+interface Point {
+  time: number;
+  multiplier: number;
+}
+
 export function TavernCrash() {
   const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
   
@@ -24,15 +29,98 @@ export function TavernCrash() {
   const [updating, setUpdating] = useState(false);
   const [lastWin, setLastWin] = useState(0);
 
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>();
   const startTimeRef = useRef<number>(0);
-  // Security: Keep the point in a ref so it's not visible in standard State DevTools
   const crashPointRef = useRef<number>(0);
+  const pointsRef = useRef<Point[]>([]);
 
+  // House edge and distribution logic
   const generateCrashPoint = () => {
     if (Math.random() < 0.02) return 1.00;
     const point = 0.99 / (1 - Math.random());
     return Math.min(Math.max(point, 1.01), 1000);
+  };
+
+  const drawGraph = (ctx: CanvasRenderingContext2D, width: number, height: number, currentMultiplier: number, elapsed: number) => {
+    ctx.clearRect(0, 0, width, height);
+
+    // Dynamic Scaling
+    const maxX = Math.max(10, elapsed * 1.2);
+    const maxY = Math.max(2, currentMultiplier * 1.3);
+
+    const padding = { left: 40, bottom: 30, right: 20, top: 20 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+
+    // Helper to map data to pixel coordinates
+    const getX = (t: number) => padding.left + (t / maxX) * chartWidth;
+    const getY = (m: number) => height - padding.bottom - ((m - 1) / (maxY - 1)) * chartHeight;
+
+    // Draw Grid
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    
+    // Vertical Lines
+    for (let i = 0; i <= 5; i++) {
+        const x = padding.left + (i / 5) * chartWidth;
+        ctx.moveTo(x, padding.top);
+        ctx.lineTo(x, height - padding.bottom);
+    }
+    // Horizontal Lines
+    for (let i = 0; i <= 5; i++) {
+        const y = padding.top + (i / 5) * chartHeight;
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+    }
+    ctx.stroke();
+
+    // Draw Axes Labels (Simple)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.font = "10px Inter, sans-serif";
+    ctx.fillText(`${maxX.toFixed(0)}s`, width - padding.right - 20, height - 10);
+    ctx.fillText(`${maxY.toFixed(1)}x`, 5, padding.top + 10);
+
+    // Draw the Curve
+    if (pointsRef.current.length > 1) {
+        ctx.strokeStyle = status === "crashed" ? "#e11d48" : status === "cashed_out" ? "rgba(16, 185, 129, 0.6)" : "#f59e0b";
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = ctx.strokeStyle as string;
+        
+        ctx.beginPath();
+        ctx.moveTo(getX(pointsRef.current[0].time), getY(pointsRef.current[0].multiplier));
+        
+        pointsRef.current.forEach(p => {
+            ctx.lineTo(getX(p.time), getY(p.multiplier));
+        });
+        ctx.stroke();
+
+        // Fill under curve
+        ctx.shadowBlur = 0;
+        const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+        gradient.addColorStop(0, status === "crashed" ? "rgba(225, 29, 72, 0.2)" : "rgba(245, 158, 11, 0.2)");
+        gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+        
+        ctx.fillStyle = gradient;
+        ctx.lineTo(getX(pointsRef.current[pointsRef.current.length - 1].time), height - padding.bottom);
+        ctx.lineTo(getX(pointsRef.current[0].time), height - padding.bottom);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw Head Point
+        if (status === "rising" || (status === "cashed_out" && multiplier < crashPointRef.current)) {
+            const head = pointsRef.current[pointsRef.current.length - 1];
+            ctx.fillStyle = "#fff";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#fff";
+            ctx.beginPath();
+            ctx.arc(getX(head.time), getY(head.multiplier), 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
   };
 
   const updateMultiplier = (time: number) => {
@@ -41,18 +129,27 @@ export function TavernCrash() {
     }
     
     const elapsedSeconds = (time - startTimeRef.current) / 1000;
-    
-    // Exponential formula
     const currentMult = Math.pow(1.065, elapsedSeconds);
     
     if (currentMult >= crashPointRef.current) {
       setMultiplier(crashPointRef.current);
       setStatus("crashed");
-      setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10)); // Increased history
+      setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
       return;
     }
 
     setMultiplier(currentMult);
+    pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMult });
+
+    // Handle drawing
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        drawGraph(ctx, canvas.width, canvas.height, currentMult, elapsedSeconds);
+      }
+    }
+
     requestRef.current = requestAnimationFrame(updateMultiplier);
   };
 
@@ -69,7 +166,15 @@ export function TavernCrash() {
     crashPointRef.current = generateCrashPoint();
     setMultiplier(1.0);
     setLastWin(0);
+    pointsRef.current = [{ time: 0, multiplier: 1.0 }];
     
+    // Clear canvas for new game
+    const canvas = canvasRef.current;
+    if (canvas) {
+        const ctx = canvas.getContext("2d");
+        ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
     setStatus("starting");
     setUpdating(false);
     
@@ -83,7 +188,6 @@ export function TavernCrash() {
   const handleCashOut = async () => {
     if (status !== "rising" || updating || !player) return;
 
-    // We DON'T cancel animation frame here, let it continue until crash for FOMO
     const winAmount = Math.floor(bet * multiplier);
     setUpdating(true);
     const success = await setPlayerGold(player.gold + winAmount);
@@ -95,20 +199,34 @@ export function TavernCrash() {
     setUpdating(false);
   };
 
+  // Sync canvas size on mount/resize
   useEffect(() => {
-    return () => {
-      if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current);
-      }
-    };
-  }, []);
+      const updateCanvasSize = () => {
+          const canvas = canvasRef.current;
+          if (canvas && canvas.parentElement) {
+              const rect = canvas.parentElement.getBoundingClientRect();
+              // Device Pixel Ratio for Sharpness
+              const dpr = window.devicePixelRatio || 1;
+              canvas.width = rect.width * dpr;
+              canvas.height = rect.height * dpr;
+              const ctx = canvas.getContext("2d");
+              if (ctx) ctx.scale(dpr, dpr);
+              
+              // Initial static draw if betting
+              if (status === "betting" && ctx) {
+                  ctx.clearRect(0, 0, canvas.width, canvas.height);
+              }
+          }
+      };
 
-  // Calculate SVG curve path based on multiplier
-  const getPathLength = () => {
-      if (status === "betting") return 0;
-      // We map the multiplier range [1, 10] to [0, 1] for visual growth
-      return Math.min(1.2, (multiplier - 1) / 9);
-  };
+      window.addEventListener("resize", updateCanvasSize);
+      updateCanvasSize();
+
+      return () => {
+          window.removeEventListener("resize", updateCanvasSize);
+          if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      };
+  }, []);
 
   if (isHydrating) return <Placeholder title="El Multiplicador" description="Cargando las leyes del Vacío..." />;
   if (!player) return <Placeholder title="El Multiplicador" description="Conéctate para apostar en el Vacío." />;
@@ -135,108 +253,80 @@ export function TavernCrash() {
       </div>
 
       <div className="grid w-full gap-6 lg:grid-cols-[1fr_300px]">
-        <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-stone-800 bg-stone-950 p-8 shadow-2xl flex flex-col items-center justify-center">
-            <div className="absolute inset-0 opacity-10 pointer-events-none" 
-                 style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #444 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+        {/* Graph Area */}
+        <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-stone-800 bg-stone-950 shadow-2xl">
+            <canvas 
+                ref={canvasRef} 
+                className="absolute inset-0 w-full h-full"
+            />
             
-            <AnimatePresence mode="wait">
-              {status === "betting" ? (
-                <motion.div 
-                    key="betting-ui"
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }} 
-                    exit={{ opacity: 0 }}
-                    className="flex flex-col items-center"
-                >
-                    <Zap className="h-12 w-12 text-stone-700 mb-4" />
-                    <p className="text-stone-500 font-bold uppercase tracking-[0.3em] text-sm italic">Esperando Energía...</p>
-                </motion.div>
-              ) : (
-                <motion.div 
-                    key="active-ui"
-                    initial={{ opacity: 0, scale: 0.8 }} 
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center z-10"
-                >
-                    {status === "starting" && (
-                        <p className="absolute -top-12 text-amber-500 font-black animate-pulse uppercase tracking-widest text-xs">Cargando Núcleo...</p>
-                    )}
-                    
-                    <div className="relative">
-                        <motion.h2 
-                            className={`text-6xl md:text-8xl font-black tabular-nums transition-colors duration-200 ${
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <AnimatePresence mode="wait">
+                {status === "betting" ? (
+                    <motion.div 
+                        key="betting-ui"
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }} 
+                        className="flex flex-col items-center"
+                    >
+                        <Zap className="h-12 w-12 text-stone-800 mb-4" />
+                        <p className="text-stone-600 font-black uppercase tracking-[0.3em] text-xs">LISTO PARA EL SALTO</p>
+                    </motion.div>
+                ) : (
+                    <motion.div 
+                        key="active-ui"
+                        initial={{ opacity: 0, scale: 0.8 }} 
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex flex-col items-center"
+                    >
+                        <div className="relative">
+                            <h2 className={`text-6xl md:text-8xl font-black tabular-nums transition-colors duration-300 drop-shadow-[0_0_30px_rgba(0,0,0,0.5)] ${
                                 status === "crashed" ? "text-rose-600" : 
                                 status === "cashed_out" ? "text-emerald-500/50" : "text-stone-50"
-                            }`}
-                        >
-                            {multiplier.toFixed(2)}x
-                        </motion.h2>
-                        
-                        <motion.div 
-                            className="absolute -inset-10 rounded-full border-4 border-amber-500/20 pointer-events-none"
-                            animate={status === "rising" || status === "cashed_out" ? { 
-                                scale: [1, 1.1, 1],
-                                opacity: [0.1, 0.4, 0.1],
-                             } : { scale: 1, opacity: 0 }}
-                        />
-                    </div>
+                            }`}>
+                                {multiplier.toFixed(2)}x
+                            </h2>
+                        </div>
 
-                    {status === "crashed" && (
-                        <motion.div 
-                            initial={{ y: 20, opacity: 0 }} 
-                            animate={{ y: 0, opacity: 1 }}
-                            className="mt-6 rounded-xl bg-rose-600/20 border border-rose-500/30 px-6 py-2"
-                        >
-                            <p className="text-rose-500 font-black uppercase tracking-widest text-lg">¡COLAPSO!</p>
-                        </motion.div>
-                    )}
+                        {status === "crashed" && (
+                            <motion.div 
+                                initial={{ y: 20, opacity: 0 }} 
+                                animate={{ y: 0, opacity: 1 }}
+                                className="mt-4 rounded-xl bg-rose-600/20 border border-rose-500/30 px-6 py-2"
+                            >
+                                <p className="text-rose-500 font-black uppercase tracking-widest text-lg italic">¡COLAPSO!</p>
+                            </motion.div>
+                        )}
 
-                    {status === "cashed_out" && (
-                        <motion.div 
-                            initial={{ y: 20, opacity: 0 }} 
-                            animate={{ y: 0, opacity: 1 }}
-                            className="mt-6 flex flex-col items-center gap-1"
-                        >
-                             <div className="rounded-xl bg-emerald-600/20 border border-emerald-500/30 px-6 py-2">
-                                <p className="text-emerald-500 font-black uppercase tracking-widest text-sm">ENERGÍA ASEGURADA</p>
-                             </div>
-                             <p className="text-amber-400 font-black text-xl flex items-center gap-2 mt-2">
-                                <Coins className="h-5 w-5" />
+                        {status === "cashed_out" && (
+                            <motion.div 
+                                initial={{ y: 20, opacity: 0 }} 
+                                animate={{ y: 0, opacity: 1 }}
+                                className="mt-4 flex flex-col items-center gap-1"
+                            >
+                                <p className="text-emerald-500 font-black uppercase tracking-widest text-xs opacity-80">ENERGÍA ASEGURADA</p>
+                                <p className="text-amber-400 font-black text-2xl flex items-center gap-2">
+                                <Coins className="h-6 w-6" />
                                 +{lastWin}
-                             </p>
-                        </motion.div>
-                    )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Dynamic Curve Visual */}
-            <div className="absolute bottom-10 left-10 right-10 h-40 pointer-events-none overflow-hidden">
-                <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <motion.path 
-                        d="M 0 100 Q 15 100, 30 80 T 60 50 T 100 0" 
-                        fill="none" 
-                        stroke="url(#gradient)" 
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        style={{ pathLength: getPathLength() }}
-                        transition={{ duration: 0.1 }}
-                    />
-                    <defs>
-                        <linearGradient id="gradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#d97706" />
-                            <stop offset="100%" stopColor="#f59e0b" />
-                        </linearGradient>
-                    </defs>
-                </svg>
+                                </p>
+                            </motion.div>
+                        )}
+                    </motion.div>
+                )}
+                </AnimatePresence>
             </div>
+            
+            {status === "starting" && (
+                <div className="absolute inset-0 bg-amber-500/5 animate-pulse pointer-events-none" />
+            )}
         </div>
 
+        {/* Action Panel */}
         <div className="flex flex-col gap-4">
             <div className="rounded-3xl border border-stone-800 bg-stone-900/60 p-6">
                 <div className="flex items-center gap-2 mb-4">
                     <HistoryIcon className="h-4 w-4 text-stone-500" />
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-500">Últimos Colapsos</h4>
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-500">Registros del Vacío</h4>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     {history.length > 0 ? history.map((val, i) => (
@@ -248,14 +338,14 @@ export function TavernCrash() {
                             {val.toFixed(2)}x
                         </div>
                     )) : (
-                        <p className="text-[10px] text-stone-600 italic">No hay profecías aún...</p>
+                        <p className="text-[10px] text-stone-600 italic">Sin datos de colapso...</p>
                     )}
                 </div>
             </div>
 
             <div className="rounded-3xl border border-stone-800 bg-stone-900/60 p-6 flex flex-col justify-between flex-1 relative overflow-hidden">
                 {status === "rising" && (
-                    <div className="absolute inset-0 bg-amber-500/5 transition-opacity" />
+                    <div className="absolute inset-0 bg-emerald-500/5 transition-opacity" />
                 )}
 
                 <div>
@@ -297,13 +387,13 @@ export function TavernCrash() {
                         <button
                             onClick={handleCashOut}
                             disabled={updating}
-                            className="w-full group relative overflow-hidden rounded-2xl bg-emerald-600 py-4 font-black text-white hover:bg-emerald-500 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all"
+                            className="w-full group relative overflow-hidden rounded-2xl bg-emerald-600 py-5 font-black text-white hover:bg-emerald-500 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all"
                         >
                             <span className="relative z-10 flex flex-col items-center">
-                                <span className="text-[10px] opacity-70 mb-0.5">ASEGURAR AHORA</span>
-                                <span className="flex items-center gap-2 text-lg">
+                                <span className="text-[10px] opacity-70 mb-0.5 uppercase tracking-widest">Asegurar ahora</span>
+                                <span className="flex items-center gap-2 text-xl font-black">
                                     <Coins className="h-5 w-5" />
-                                    {Math.floor(bet * multiplier)} ORO
+                                    {Math.floor(bet * multiplier)}
                                 </span>
                             </span>
                         </button>
@@ -311,9 +401,9 @@ export function TavernCrash() {
                         <button
                             onClick={handleStart}
                             disabled={bet <= 0 || bet > player.gold || updating || status === "starting" || (status === "cashed_out" && multiplier < crashPointRef.current)}
-                            className="w-full group relative overflow-hidden rounded-2xl bg-amber-500 py-4 font-black text-stone-950 transition hover:bg-amber-400 active:scale-95 disabled:opacity-30"
+                            className="w-full group relative overflow-hidden rounded-2xl bg-stone-100 py-5 font-black text-stone-900 transition hover:bg-white active:scale-95 disabled:opacity-30"
                         >
-                            <span className="relative z-10 flex items-center justify-center gap-2">
+                            <span className="relative z-10 flex items-center justify-center gap-2 uppercase tracking-tighter">
                                 <TrendingUp className="h-5 w-5" />
                                 {status === "starting" ? "CARGANDO..." : status === "cashed_out" && multiplier < (crashPointRef.current || 0) ? "ESPERANDO COLAPSO..." : "INICIAR RONDA"}
                             </span>
@@ -321,8 +411,8 @@ export function TavernCrash() {
                     )}
                 </div>
                 
-                <p className="mt-4 text-[9px] text-stone-600 uppercase font-bold tracking-[0.2em] text-center leading-normal">
-                    El Vacío colapsa sin avisar.<br/>
+                <p className="mt-4 text-[9px] text-stone-600 uppercase font-black tracking-[0.2em] text-center leading-normal">
+                    El Vacío no perdona la duda.<br/>
                     Retira de forma segura o piérdelo todo.
                 </p>
             </div>

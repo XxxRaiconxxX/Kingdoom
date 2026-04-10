@@ -43,6 +43,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 10/04/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Aumento de dificultad y sistema de rachas para el juego de cartas de la taberna.
+*   **Cambios Clave:**
+    *   **Mazo Ampliado**: El rango de cartas pasó de 1-10 a 1-15, dificultando las predicciones.
+    *   **Sistema de Doble o Nada (Rachas)**: Tras ganar, el premio no se cobra automáticamente. El jugador debe decidir entre "Cobrar" o seguir con "Doble o Nada".
+    *   **Pozo Acumulado**: Las ganancias se acumulan en un pozo que se multiplica x2 con cada acierto. Si se falla, se pierde TODO el pozo acumulado.
+    *   **Optimización Mobile-First**: Rediseño completo de la interfaz con botones más grandes, indicadores de racha/pozo y animaciones fluidas para una experiencia premium en móvil y escritorio.
+*   **Notas/Advertencias:** Los empates mantienen la racha y el pozo (neutral). Se verificó la lógica de persistencia con Supabase.
+
+---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/data/grimorio.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se corrigieron titulos de escuelas del Grimorio que aparecian como nombres de archivo (`texto XX.txt`) y ahora muestran el nombre real de cada magia.

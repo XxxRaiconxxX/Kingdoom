@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowDownCircle, ArrowUpCircle, RefreshCw, UserRound } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, RefreshCw, UserRound, Coins, Trophy, Ban } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 
-type GamePhase = "betting" | "playing" | "result";
+type GamePhase = "betting" | "playing" | "choice" | "gameOver";
 
 function getRandomCard() {
-  return Math.floor(Math.random() * 10) + 1;
+  return Math.floor(Math.random() * 15) + 1;
 }
 
 export function TavernCards() {
@@ -15,7 +15,8 @@ export function TavernCards() {
   const [bet, setBet] = useState(0);
   const [currentCard, setCurrentCard] = useState(0);
   const [nextCard, setNextCard] = useState(0);
-  const [result, setResult] = useState<"win" | "lose" | "tie" | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [pool, setPool] = useState(0);
   const [updating, setUpdating] = useState(false);
 
   async function handleRefresh() {
@@ -38,7 +39,10 @@ export function TavernCards() {
       return;
     }
 
-    setCurrentCard(getRandomCard());
+    const firstCard = getRandomCard();
+    setCurrentCard(firstCard);
+    setPool(bet);
+    setStreak(0);
     setPhase("playing");
     setUpdating(false);
   }
@@ -53,32 +57,53 @@ export function TavernCards() {
     const drawnCard = getRandomCard();
     setNextCard(drawnCard);
 
-    let outcome: "win" | "lose" | "tie" = "lose";
+    let isWin = false;
+    let isTie = false;
 
     if (drawnCard === currentCard) {
-      outcome = "tie";
+      isTie = true;
     } else if (guess === "higher" && drawnCard > currentCard) {
-      outcome = "win";
+      isWin = true;
     } else if (guess === "lower" && drawnCard < currentCard) {
-      outcome = "win";
+      isWin = true;
     }
 
-    setResult(outcome);
-    setPhase("result");
-
-    if (outcome === "win") {
-      await setPlayerGold(player.gold + bet * 2);
-    } else if (outcome === "tie") {
-      await setPlayerGold(player.gold + bet);
+    if (isWin) {
+      setPool((prev) => prev * 2);
+      setStreak((prev) => prev + 1);
+      setPhase("choice");
+    } else if (isTie) {
+      // Empate: El pozo se mantiene, la racha se mantiene
+      setPhase("choice");
+    } else {
+      setPhase("gameOver");
     }
 
     setUpdating(false);
   }
 
+  async function handleCashout() {
+    if (!player || updating) return;
+    setUpdating(true);
+    await setPlayerGold(player.gold + pool);
+    setPhase("betting");
+    setBet(0);
+    setPool(0);
+    setStreak(0);
+    setUpdating(false);
+  }
+
+  function handleContinue() {
+    setCurrentCard(nextCard);
+    setNextCard(0);
+    setPhase("playing");
+  }
+
   function handlePlayAgain() {
     setPhase("betting");
     setBet(0);
-    setResult(null);
+    setPool(0);
+    setStreak(0);
     setCurrentCard(0);
     setNextCard(0);
   }
@@ -86,8 +111,8 @@ export function TavernCards() {
   if (isHydrating) {
     return (
       <CardsMessage
-        title="Cartas del Oraculo"
-        description="Recuperando tu sesion del reino..."
+        title="Cartas del Oráculo"
+        description="Recuperando tu sesión del reino..."
       />
     );
   }
@@ -95,29 +120,30 @@ export function TavernCards() {
   if (!player) {
     return (
       <CardsMessage
-        title="Cartas del Oraculo"
-        description="Conecta tu perfil del reino en el panel superior para jugar sin escribir tu nombre en cada ronda."
+        title="Cartas del Oráculo"
+        description="Conecta tu perfil del reino en el panel superior para jugar."
       />
     );
   }
 
   return (
     <div className="flex flex-col items-center justify-center py-4 text-center">
+      {/* Header Balance */}
       <div className="mb-6 flex w-full items-center justify-between rounded-2xl border border-stone-800 bg-stone-900/80 px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-800 text-stone-300">
             <UserRound className="h-5 w-5" />
           </div>
           <div className="text-left">
-            <p className="text-xs text-stone-500">Jugador</p>
+            <p className="text-[10px] uppercase tracking-wider text-stone-500">Jugador</p>
             <p className="font-bold text-stone-200">{player.username}</p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-stone-500">Oro disponible</p>
+          <p className="text-[10px] uppercase tracking-wider text-stone-500">Oro disponible</p>
           <div className="mt-1 flex items-center gap-2">
             <p className="font-mono text-lg font-bold text-amber-400">
-              {player.gold} de oro
+              {player.gold}
             </p>
             <button
               type="button"
@@ -132,159 +158,240 @@ export function TavernCards() {
       </div>
 
       <AnimatePresence mode="wait">
-        {phase === "betting" ? (
+        {phase === "betting" && (
           <motion.div
             key="betting"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="w-full max-w-xs"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="w-full max-w-sm"
           >
-            <h3 className="mb-4 text-lg font-bold text-stone-100">
-              ¿Cuanto oro apuestas a las cartas?
-            </h3>
-            <div className="mb-6 flex items-center justify-center gap-4">
-              <button
-                type="button"
-                onClick={() => setBet(Math.max(0, bet - 10))}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-800 text-xl font-bold text-stone-300 hover:bg-stone-700 active:scale-95"
-              >
-                -
-              </button>
-              <div className="flex h-16 w-24 items-center justify-center rounded-2xl border-2 border-stone-700 bg-stone-900 text-2xl font-bold text-amber-400">
-                {bet}
+            <div className="mt-2 rounded-2xl border border-stone-800 bg-stone-950/40 p-6">
+              <h3 className="mb-6 text-xl font-black text-stone-100 uppercase tracking-widest">
+                ¿Cuánto apuestas?
+              </h3>
+              
+              <div className="mb-6 flex items-center justify-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setBet(Math.max(0, bet - 10))}
+                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-800 text-xl font-bold text-stone-300 hover:bg-stone-700 active:scale-90 transition-all"
+                >
+                  -
+                </button>
+                <div className="flex h-20 w-32 items-center justify-center rounded-2xl border-2 border-stone-700 bg-stone-900 text-3xl font-black text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+                  {bet}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBet(Math.min(player.gold, bet + 10))}
+                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-800 text-xl font-bold text-stone-300 hover:bg-stone-700 active:scale-90 transition-all"
+                >
+                  +
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setBet(Math.min(player.gold, bet + 10))}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-800 text-xl font-bold text-stone-300 hover:bg-stone-700 active:scale-95"
-              >
-                +
-              </button>
-            </div>
-            <div className="mb-6 flex justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => setBet(Math.min(player.gold, 10))}
-                className="rounded-lg bg-stone-800 px-3 py-1 text-xs text-stone-400 hover:bg-stone-700 hover:text-stone-200"
-              >
-                Min
-              </button>
-              <button
-                type="button"
-                onClick={() => setBet(Math.floor(player.gold / 2))}
-                className="rounded-lg bg-stone-800 px-3 py-1 text-xs text-stone-400 hover:bg-stone-700 hover:text-stone-200"
-              >
-                Mitad
-              </button>
-              <button
-                type="button"
-                onClick={() => setBet(player.gold)}
-                className="rounded-lg bg-stone-800 px-3 py-1 text-xs text-stone-400 hover:bg-stone-700 hover:text-stone-200"
-              >
-                Todo
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => void startGame()}
-              disabled={bet <= 0 || bet > player.gold || updating}
-              className="w-full rounded-xl bg-indigo-600 py-4 font-bold text-stone-100 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
-            >
-              Repartir cartas
-            </button>
-          </motion.div>
-        ) : null}
 
-        {phase === "playing" ? (
+              <div className="mb-8 grid grid-cols-3 gap-2">
+                {[
+                  { label: "10", val: 10 },
+                  { label: "50%", val: Math.floor(player.gold / 2) },
+                  { label: "ALL-IN", val: player.gold }
+                ].map((btn) => (
+                  <button
+                    key={btn.label}
+                    type="button"
+                    onClick={() => setBet(Math.min(player.gold, btn.val))}
+                    className="rounded-xl border border-stone-800 bg-stone-900 py-2 text-xs font-bold text-stone-400 hover:border-amber-500/50 hover:text-amber-400 transition-all"
+                  >
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => void startGame()}
+                disabled={bet <= 0 || bet > player.gold || updating}
+                className="group relative w-full overflow-hidden rounded-2xl bg-indigo-600 py-5 font-black text-white transition-all hover:bg-indigo-500 disabled:opacity-50 active:scale-95 shadow-lg shadow-indigo-900/40"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <Coins className="h-5 w-5" />
+                  REPARTIR CARTA
+                </span>
+                <div className="absolute inset-0 translate-y-full bg-gradient-to-t from-white/10 to-transparent transition-transform group-hover:translate-y-0" />
+              </button>
+              
+              <p className="mt-4 text-[10px] text-stone-500 uppercase font-bold tracking-widest">
+                Rango de cartas: 1 - 15
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {phase === "playing" && (
           <motion.div
             key="playing"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex w-full max-w-xs flex-col items-center py-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex w-full max-w-sm flex-col items-center"
           >
-            <p className="mb-6 text-stone-400">La carta actual es:</p>
-            <div className="mb-8 flex h-40 w-28 items-center justify-center rounded-xl border-2 border-stone-600 bg-stone-100 shadow-xl">
-              <span className="text-6xl font-black text-stone-900">{currentCard}</span>
-            </div>
+            {streak > 0 && (
+              <div className="mb-4 flex gap-2">
+                <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-black text-amber-400">
+                  <Trophy className="h-3.5 w-3.5" />
+                  RACHA x{streak}
+                </div>
+                <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-black text-emerald-400">
+                  POZO: {pool}
+                </div>
+              </div>
+            )}
 
-            <h3 className="mb-4 text-lg font-bold text-stone-100">
-              ¿La siguiente sera mayor o menor?
+            <p className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-stone-500">
+              La carta es
+            </p>
+            
+            <motion.div 
+              layoutId="card"
+              className="mb-8 flex h-48 w-32 items-center justify-center rounded-2xl border-[3px] border-stone-700 bg-stone-100 shadow-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-2 left-2 text-stone-900 font-black text-xl">{currentCard}</div>
+              <div className="text-7xl font-black text-stone-900 drop-shadow-sm">{currentCard}</div>
+              <div className="absolute bottom-2 right-2 rotate-180 text-stone-900 font-black text-xl">{currentCard}</div>
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-stone-900/[0.03] to-transparent" />
+            </motion.div>
+
+            <h3 className="mb-6 text-lg font-black text-stone-100 uppercase tracking-wider">
+              ¿La siguiente será...?
             </h3>
-            <div className="flex w-full gap-4">
+            
+            <div className="grid w-full grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => void handleGuess("higher")}
                 disabled={updating}
-                className="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-emerald-500/50 bg-emerald-600/20 py-4 text-emerald-400 transition hover:bg-emerald-600/30 active:scale-95"
+                className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-emerald-500/40 bg-emerald-600/10 py-6 text-emerald-400 transition-all hover:bg-emerald-600/20 active:scale-95 group"
               >
-                <ArrowUpCircle className="h-8 w-8" />
-                <span className="font-bold">Mayor</span>
+                <ArrowUpCircle className="h-10 w-10 transition-transform group-hover:-translate-y-1" />
+                <span className="font-black uppercase tracking-widest text-sm">Mayor</span>
               </button>
               <button
                 type="button"
                 onClick={() => void handleGuess("lower")}
                 disabled={updating}
-                className="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-rose-500/50 bg-rose-600/20 py-4 text-rose-400 transition hover:bg-rose-600/30 active:scale-95"
+                className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-rose-500/40 bg-rose-600/10 py-6 text-rose-400 transition-all hover:bg-rose-600/20 active:scale-95 group"
               >
-                <ArrowDownCircle className="h-8 w-8" />
-                <span className="font-bold">Menor</span>
+                <ArrowDownCircle className="h-10 w-10 transition-transform group-hover:translate-y-1" />
+                <span className="font-black uppercase tracking-widest text-sm">Menor</span>
               </button>
             </div>
           </motion.div>
-        ) : null}
+        )}
 
-        {phase === "result" ? (
+        {phase === "choice" && (
           <motion.div
-            key="result"
-            initial={{ opacity: 0, scale: 0.8 }}
+            key="choice"
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex w-full max-w-xs flex-col items-center py-4"
+            className="flex w-full max-w-sm flex-col items-center"
           >
-            <div className="mb-6 flex items-center justify-center gap-6">
+            <div className="mb-8 flex items-center justify-center gap-6">
               <div className="flex flex-col items-center">
-                <span className="mb-2 text-xs text-stone-500">Anterior</span>
-                <div className="flex h-24 w-16 items-center justify-center rounded-lg border border-stone-700 bg-stone-800 opacity-50">
-                  <span className="text-3xl font-bold text-stone-400">
-                    {currentCard}
-                  </span>
+                <span className="mb-2 text-[10px] font-black uppercase text-stone-500 tracking-wider">Anterior</span>
+                <div className="flex h-28 w-20 items-center justify-center rounded-xl border border-stone-700 bg-stone-800/50 opacity-40">
+                  <span className="text-3xl font-bold text-stone-400">{currentCard}</span>
                 </div>
               </div>
               <div className="flex flex-col items-center">
-                <span className="mb-2 text-xs font-bold text-amber-400">Nueva</span>
-                <div className="flex h-32 w-24 items-center justify-center rounded-xl border-2 border-amber-400 bg-stone-100 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-                  <span className="text-5xl font-black text-stone-900">
-                    {nextCard}
-                  </span>
+                <span className="mb-2 text-[10px] font-black uppercase text-amber-400 tracking-widest">¡NUEVA!</span>
+                <motion.div 
+                  initial={{ rotateY: 90 }}
+                  animate={{ rotateY: 0 }}
+                  className="flex h-36 w-24 items-center justify-center rounded-xl border-2 border-amber-400 bg-white shadow-[0_0_30px_rgba(245,158,11,0.3)]"
+                >
+                  <span className="text-5xl font-black text-stone-950">{nextCard}</span>
+                </motion.div>
+              </div>
+            </div>
+
+            <div className="mb-8 rounded-2xl bg-emerald-600/10 border border-emerald-500/20 p-6 w-full text-center">
+              <h3 className="text-2xl font-black text-emerald-400 uppercase mb-1">
+                {nextCard === currentCard ? "¡EMPATE!" : "¡ACERTASTE!"}
+              </h3>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-stone-400 text-xs font-bold uppercase">Pozo Acumulado</span>
+                <span className="text-3xl font-black text-amber-400 flex items-center gap-2">
+                  <Coins className="h-6 w-6" />
+                  {pool}
+                </span>
+                <span className="text-stone-500 text-[10px] uppercase font-black mt-2 tracking-widest">
+                  Racha Actual: {streak} aciertos
+                </span>
+              </div>
+            </div>
+
+            <div className="grid w-full gap-4">
+              <button
+                type="button"
+                onClick={handleContinue}
+                className="w-full rounded-2xl bg-amber-500 py-5 font-black text-stone-950 transition-all hover:bg-amber-400 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-amber-900/20"
+              >
+                <RefreshCw className="h-5 w-5" />
+                DOBLE O NADA
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleCashout()}
+                disabled={updating}
+                className="w-full rounded-2xl bg-stone-800 py-4 font-black text-stone-200 transition-all hover:bg-stone-700 active:scale-95 flex items-center justify-center gap-2"
+              >
+                <Trophy className="h-5 w-5 text-amber-400" />
+                PLANTARSE Y COBRAR
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {phase === "gameOver" && (
+          <motion.div
+            key="gameOver"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex w-full max-w-sm flex-col items-center"
+          >
+             <div className="mb-8 flex items-center justify-center gap-6">
+              <div className="flex flex-col items-center">
+                <span className="mb-2 text-[10px] font-black uppercase text-stone-500 tracking-wider">Esperabas</span>
+                <div className="flex h-28 w-20 items-center justify-center rounded-xl border border-stone-700 bg-stone-800/50 opacity-40">
+                  <span className="text-3xl font-bold text-stone-400">{currentCard}</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="mb-2 text-[10px] font-black uppercase text-rose-500 tracking-widest">RESULTADO</span>
+                <div className="flex h-36 w-24 items-center justify-center rounded-xl border-2 border-rose-600 bg-stone-900">
+                  <span className="text-5xl font-black text-rose-500">{nextCard}</span>
                 </div>
               </div>
             </div>
 
-            <h3 className="mb-2 text-2xl font-bold text-stone-100">
-              {result === "win"
-                ? "Acertaste"
-                : result === "tie"
-                  ? "Empate"
-                  : "Fallaste"}
-            </h3>
-
-            <p className="mb-8 text-stone-400">
-              {result === "win"
-                ? `Has ganado ${bet * 2} de oro`
-                : result === "tie"
-                  ? `Recuperas tus ${bet} de oro`
-                  : `Has perdido tus ${bet} de oro`}
-            </p>
+            <div className="mb-8 rounded-2xl bg-rose-600/10 border border-rose-500/20 p-8 w-full text-center">
+              <Ban className="h-12 w-12 text-rose-500 mx-auto mb-4" />
+              <h3 className="text-2xl font-black text-rose-500 uppercase mb-2">FALLASTE</h3>
+              <p className="text-stone-400 text-sm font-bold leading-relaxed">
+                Has perdido tu apuesta inicial y <br/> 
+                <span className="text-stone-200">todo el pozo acumulado.</span>
+              </p>
+            </div>
 
             <button
               type="button"
               onClick={handlePlayAgain}
-              className="w-full rounded-xl bg-stone-800 py-4 font-bold text-stone-200 transition hover:bg-stone-700 active:scale-95"
+              className="w-full rounded-2xl bg-stone-100 py-5 font-black text-stone-900 transition-all hover:bg-white active:scale-95 shadow-lg"
             >
-              Jugar de nuevo
+              INTENTAR DE NUEVO
             </button>
           </motion.div>
-        ) : null}
+        )}
       </AnimatePresence>
     </div>
   );
@@ -298,12 +405,12 @@ function CardsMessage({
   description: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-6 text-center">
-      <div className="mb-4 rounded-full bg-indigo-500/10 p-4 text-indigo-400">
-        <UserRound className="h-8 w-8" />
+    <div className="flex flex-col items-center justify-center py-10 text-center">
+      <div className="mb-6 rounded-3xl bg-indigo-500/10 p-6 text-indigo-400 shadow-inner">
+        <UserRound className="h-10 w-10" />
       </div>
-      <h3 className="mb-2 text-xl font-bold text-stone-100">{title}</h3>
-      <p className="max-w-sm text-sm text-stone-400">{description}</p>
+      <h3 className="mb-3 text-2xl font-black text-stone-100 uppercase tracking-widest">{title}</h3>
+      <p className="max-w-xs text-sm text-stone-400 leading-6">{description}</p>
     </div>
   );
 }

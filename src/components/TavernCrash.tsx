@@ -30,7 +30,7 @@ export function TavernCrash() {
   const crashPointRef = useRef<number>(0);
 
   const generateCrashPoint = () => {
-    if (Math.random() < 0.03) return 1.00;
+    if (Math.random() < 0.02) return 1.00;
     const point = 0.99 / (1 - Math.random());
     return Math.min(Math.max(point, 1.01), 1000);
   };

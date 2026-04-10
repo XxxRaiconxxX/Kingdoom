@@ -34,8 +34,15 @@ export function TavernCrash() {
   const startTimeRef = useRef<number>(0);
   const crashPointRef = useRef<number>(0);
   const pointsRef = useRef<Point[]>([]);
-  // Store logical size for drawing calculations independent of DPR
   const logicalSizeRef = useRef({ width: 0, height: 0 });
+  
+  // Ref to mirror status and avoid stale closures in the animation loop
+  const statusRef = useRef<GameStatus>("betting");
+
+  // Keep ref in sync
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   const generateCrashPoint = () => {
     if (Math.random() < 0.03) return 1.00;
@@ -46,7 +53,6 @@ export function TavernCrash() {
   const drawGraph = (ctx: CanvasRenderingContext2D, width: number, height: number, currentMultiplier: number, elapsed: number) => {
     ctx.clearRect(0, 0, width, height);
 
-    // Dynamic Scaling
     const maxX = Math.max(10, elapsed * 1.25);
     const maxY = Math.max(2, currentMultiplier * 1.3);
 
@@ -56,23 +62,19 @@ export function TavernCrash() {
 
     if (chartWidth <= 0 || chartHeight <= 0) return;
 
-    // Helper to map data to pixel coordinates
     const getX = (t: number) => padding.left + (t / maxX) * chartWidth;
     const getY = (m: number) => height - padding.bottom - ((m - 1) / (maxY - 1)) * chartHeight;
 
-    // Draw Grid
     ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     
-    // Vertical Lines (every 2 units of time approx)
     const xStep = maxX / 5;
     for (let i = 0; i <= 5; i++) {
         const x = getX(i * xStep);
         ctx.moveTo(x, padding.top);
         ctx.lineTo(x, height - padding.bottom);
     }
-    // Horizontal Lines (every 0.5 units of multiplier approx)
     const yStep = (maxY - 1) / 5;
     for (let i = 0; i <= 5; i++) {
         const y = getY(1 + i * yStep);
@@ -81,23 +83,20 @@ export function TavernCrash() {
     }
     ctx.stroke();
 
-    // Draw Axes Labels
     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
     ctx.font = "bold 10px Inter, sans-serif";
     ctx.fillText(`${maxX.toFixed(0)}s`, width - padding.right - 10, height - 15);
     ctx.fillText(`${maxY.toFixed(1)}x`, 10, padding.top + 5);
 
-    // Draw the Curve
     if (pointsRef.current.length > 1) {
-        const isDangerous = status === "crashed";
-        const isSecured = status === "cashed_out";
+        const isDangerous = statusRef.current === "crashed";
+        const isSecured = statusRef.current === "cashed_out";
         
         ctx.strokeStyle = isDangerous ? "#e11d48" : isSecured ? "rgba(16, 185, 129, 0.6)" : "#f59e0b";
         ctx.lineWidth = 3;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
         
-        // Glow effect
         ctx.shadowBlur = 12;
         ctx.shadowColor = ctx.strokeStyle as string;
         
@@ -111,7 +110,6 @@ export function TavernCrash() {
         });
         ctx.stroke();
 
-        // Fill under curve (disable shadow for fill for performance)
         ctx.shadowBlur = 0;
         const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
         gradient.addColorStop(0, isDangerous ? "rgba(225, 29, 72, 0.25)" : "rgba(245, 158, 11, 0.25)");
@@ -123,8 +121,7 @@ export function TavernCrash() {
         ctx.closePath();
         ctx.fill();
 
-        // Draw Animated Head Point
-        if (status === "rising" || (status === "cashed_out" && multiplier < crashPointRef.current)) {
+        if (statusRef.current === "rising" || (statusRef.current === "cashed_out" && currentMultiplier < crashPointRef.current)) {
             const head = pointsRef.current[pointsRef.current.length - 1];
             ctx.fillStyle = "#fff";
             ctx.shadowBlur = 20;
@@ -144,19 +141,18 @@ export function TavernCrash() {
     const elapsedSeconds = (time - startTimeRef.current) / 1000;
     const currentMult = Math.pow(1.065, elapsedSeconds);
     
-    // Always update visual points even after cash out for FOMO
-    if (status === "rising" || status === "cashed_out") {
-        if (currentMult >= crashPointRef.current) {
-          setMultiplier(crashPointRef.current);
-          setStatus("crashed");
-          setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
-          return;
-        }
-        setMultiplier(currentMult);
-        pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMult });
+    // Core game step: Check for crash
+    if (currentMult >= crashPointRef.current) {
+      setMultiplier(crashPointRef.current);
+      setStatus("crashed");
+      setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
+      return; // Stop animation loop
     }
 
-    // Handle drawing using logical size
+    setMultiplier(currentMult);
+    pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMult });
+
+    // Handle physical drawing
     const canvas = canvasRef.current;
     if (canvas && logicalSizeRef.current.width > 0) {
       const ctx = canvas.getContext("2d");
@@ -165,9 +161,8 @@ export function TavernCrash() {
       }
     }
 
-    if (status !== "crashed") {
-        requestRef.current = requestAnimationFrame(updateMultiplier);
-    }
+    // Schedule next frame unless crashed
+    requestRef.current = requestAnimationFrame(updateMultiplier);
   };
 
   const handleStart = async () => {
@@ -205,11 +200,12 @@ export function TavernCrash() {
     if (success) {
       setLastWin(winAmount);
       setStatus("cashed_out");
-      // Multiplier continues updateMultiplier loop until crash
+      // The updateMultiplier loop continues because statusRef.current is not "crashed"
     }
     setUpdating(false);
   };
 
+  // Resize Effect (Static relative to game state)
   useEffect(() => {
       const updateCanvasSize = () => {
           const canvas = canvasRef.current;
@@ -217,19 +213,15 @@ export function TavernCrash() {
               const rect = canvas.parentElement.getBoundingClientRect();
               const dpr = window.devicePixelRatio || 1;
               
-              // Set logical size for drawing
               logicalSizeRef.current = { width: rect.width, height: rect.height };
-              
-              // Set buffer size for sharpness
               canvas.width = rect.width * dpr;
               canvas.height = rect.height * dpr;
               
               const ctx = canvas.getContext("2d");
               if (ctx) {
-                  ctx.scale(dpr, dpr); // Handle scaling for logical coordinates
-                  
-                  // Initial draw of axes if waiting
-                  if (status === "betting") {
+                  ctx.scale(dpr, dpr);
+                  // Refresh draw if betting
+                  if (statusRef.current === "betting") {
                       drawGraph(ctx, rect.width, rect.height, 1, 0);
                   }
               }
@@ -241,9 +233,15 @@ export function TavernCrash() {
 
       return () => {
           window.removeEventListener("resize", updateCanvasSize);
-          if (requestRef.current) cancelAnimationFrame(requestRef.current);
       };
-  }, [status]); // Re-draw axes when status changes to betting
+  }, []); // Only on mount
+
+  // Global cleanup effect
+  useEffect(() => {
+    return () => {
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, []);
 
   if (isHydrating) return <Placeholder title="El Multiplicador" description="Cargando las leyes del Vacío..." />;
   if (!player) return <Placeholder title="El Multiplicador" description="Conéctate para apostar en el Vacío." />;

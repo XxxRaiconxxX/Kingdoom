@@ -34,10 +34,11 @@ export function TavernCrash() {
   const startTimeRef = useRef<number>(0);
   const crashPointRef = useRef<number>(0);
   const pointsRef = useRef<Point[]>([]);
+  // Store logical size for drawing calculations independent of DPR
+  const logicalSizeRef = useRef({ width: 0, height: 0 });
 
-  // House edge and distribution logic
   const generateCrashPoint = () => {
-    if (Math.random() < 0.02) return 1.00;
+    if (Math.random() < 0.03) return 1.00;
     const point = 0.99 / (1 - Math.random());
     return Math.min(Math.max(point, 1.01), 1000);
   };
@@ -46,75 +47,87 @@ export function TavernCrash() {
     ctx.clearRect(0, 0, width, height);
 
     // Dynamic Scaling
-    const maxX = Math.max(10, elapsed * 1.2);
+    const maxX = Math.max(10, elapsed * 1.25);
     const maxY = Math.max(2, currentMultiplier * 1.3);
 
-    const padding = { left: 40, bottom: 30, right: 20, top: 20 };
+    const padding = { left: 45, bottom: 35, right: 25, top: 25 };
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
+
+    if (chartWidth <= 0 || chartHeight <= 0) return;
 
     // Helper to map data to pixel coordinates
     const getX = (t: number) => padding.left + (t / maxX) * chartWidth;
     const getY = (m: number) => height - padding.bottom - ((m - 1) / (maxY - 1)) * chartHeight;
 
     // Draw Grid
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     
-    // Vertical Lines
+    // Vertical Lines (every 2 units of time approx)
+    const xStep = maxX / 5;
     for (let i = 0; i <= 5; i++) {
-        const x = padding.left + (i / 5) * chartWidth;
+        const x = getX(i * xStep);
         ctx.moveTo(x, padding.top);
         ctx.lineTo(x, height - padding.bottom);
     }
-    // Horizontal Lines
+    // Horizontal Lines (every 0.5 units of multiplier approx)
+    const yStep = (maxY - 1) / 5;
     for (let i = 0; i <= 5; i++) {
-        const y = padding.top + (i / 5) * chartHeight;
+        const y = getY(1 + i * yStep);
         ctx.moveTo(padding.left, y);
         ctx.lineTo(width - padding.right, y);
     }
     ctx.stroke();
 
-    // Draw Axes Labels (Simple)
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.font = "10px Inter, sans-serif";
-    ctx.fillText(`${maxX.toFixed(0)}s`, width - padding.right - 20, height - 10);
-    ctx.fillText(`${maxY.toFixed(1)}x`, 5, padding.top + 10);
+    // Draw Axes Labels
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.font = "bold 10px Inter, sans-serif";
+    ctx.fillText(`${maxX.toFixed(0)}s`, width - padding.right - 10, height - 15);
+    ctx.fillText(`${maxY.toFixed(1)}x`, 10, padding.top + 5);
 
     // Draw the Curve
     if (pointsRef.current.length > 1) {
-        ctx.strokeStyle = status === "crashed" ? "#e11d48" : status === "cashed_out" ? "rgba(16, 185, 129, 0.6)" : "#f59e0b";
+        const isDangerous = status === "crashed";
+        const isSecured = status === "cashed_out";
+        
+        ctx.strokeStyle = isDangerous ? "#e11d48" : isSecured ? "rgba(16, 185, 129, 0.6)" : "#f59e0b";
         ctx.lineWidth = 3;
         ctx.lineJoin = "round";
-        ctx.shadowBlur = 10;
+        ctx.lineCap = "round";
+        
+        // Glow effect
+        ctx.shadowBlur = 12;
         ctx.shadowColor = ctx.strokeStyle as string;
         
         ctx.beginPath();
-        ctx.moveTo(getX(pointsRef.current[0].time), getY(pointsRef.current[0].multiplier));
+        const startX = getX(pointsRef.current[0].time);
+        const startY = getY(pointsRef.current[0].multiplier);
+        ctx.moveTo(startX, startY);
         
         pointsRef.current.forEach(p => {
             ctx.lineTo(getX(p.time), getY(p.multiplier));
         });
         ctx.stroke();
 
-        // Fill under curve
+        // Fill under curve (disable shadow for fill for performance)
         ctx.shadowBlur = 0;
         const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
-        gradient.addColorStop(0, status === "crashed" ? "rgba(225, 29, 72, 0.2)" : "rgba(245, 158, 11, 0.2)");
+        gradient.addColorStop(0, isDangerous ? "rgba(225, 29, 72, 0.25)" : "rgba(245, 158, 11, 0.25)");
         gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
         
         ctx.fillStyle = gradient;
         ctx.lineTo(getX(pointsRef.current[pointsRef.current.length - 1].time), height - padding.bottom);
-        ctx.lineTo(getX(pointsRef.current[0].time), height - padding.bottom);
+        ctx.lineTo(startX, height - padding.bottom);
         ctx.closePath();
         ctx.fill();
 
-        // Draw Head Point
+        // Draw Animated Head Point
         if (status === "rising" || (status === "cashed_out" && multiplier < crashPointRef.current)) {
             const head = pointsRef.current[pointsRef.current.length - 1];
             ctx.fillStyle = "#fff";
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 20;
             ctx.shadowColor = "#fff";
             ctx.beginPath();
             ctx.arc(getX(head.time), getY(head.multiplier), 4, 0, Math.PI * 2);
@@ -131,26 +144,30 @@ export function TavernCrash() {
     const elapsedSeconds = (time - startTimeRef.current) / 1000;
     const currentMult = Math.pow(1.065, elapsedSeconds);
     
-    if (currentMult >= crashPointRef.current) {
-      setMultiplier(crashPointRef.current);
-      setStatus("crashed");
-      setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
-      return;
+    // Always update visual points even after cash out for FOMO
+    if (status === "rising" || status === "cashed_out") {
+        if (currentMult >= crashPointRef.current) {
+          setMultiplier(crashPointRef.current);
+          setStatus("crashed");
+          setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
+          return;
+        }
+        setMultiplier(currentMult);
+        pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMult });
     }
 
-    setMultiplier(currentMult);
-    pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMult });
-
-    // Handle drawing
+    // Handle drawing using logical size
     const canvas = canvasRef.current;
-    if (canvas) {
+    if (canvas && logicalSizeRef.current.width > 0) {
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        drawGraph(ctx, canvas.width, canvas.height, currentMult, elapsedSeconds);
+        drawGraph(ctx, logicalSizeRef.current.width, logicalSizeRef.current.height, currentMult, elapsedSeconds);
       }
     }
 
-    requestRef.current = requestAnimationFrame(updateMultiplier);
+    if (status !== "crashed") {
+        requestRef.current = requestAnimationFrame(updateMultiplier);
+    }
   };
 
   const handleStart = async () => {
@@ -168,13 +185,6 @@ export function TavernCrash() {
     setLastWin(0);
     pointsRef.current = [{ time: 0, multiplier: 1.0 }];
     
-    // Clear canvas for new game
-    const canvas = canvasRef.current;
-    if (canvas) {
-        const ctx = canvas.getContext("2d");
-        ctx?.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
     setStatus("starting");
     setUpdating(false);
     
@@ -195,26 +205,33 @@ export function TavernCrash() {
     if (success) {
       setLastWin(winAmount);
       setStatus("cashed_out");
+      // Multiplier continues updateMultiplier loop until crash
     }
     setUpdating(false);
   };
 
-  // Sync canvas size on mount/resize
   useEffect(() => {
       const updateCanvasSize = () => {
           const canvas = canvasRef.current;
           if (canvas && canvas.parentElement) {
               const rect = canvas.parentElement.getBoundingClientRect();
-              // Device Pixel Ratio for Sharpness
               const dpr = window.devicePixelRatio || 1;
+              
+              // Set logical size for drawing
+              logicalSizeRef.current = { width: rect.width, height: rect.height };
+              
+              // Set buffer size for sharpness
               canvas.width = rect.width * dpr;
               canvas.height = rect.height * dpr;
-              const ctx = canvas.getContext("2d");
-              if (ctx) ctx.scale(dpr, dpr);
               
-              // Initial static draw if betting
-              if (status === "betting" && ctx) {
-                  ctx.clearRect(0, 0, canvas.width, canvas.height);
+              const ctx = canvas.getContext("2d");
+              if (ctx) {
+                  ctx.scale(dpr, dpr); // Handle scaling for logical coordinates
+                  
+                  // Initial draw of axes if waiting
+                  if (status === "betting") {
+                      drawGraph(ctx, rect.width, rect.height, 1, 0);
+                  }
               }
           }
       };
@@ -226,7 +243,7 @@ export function TavernCrash() {
           window.removeEventListener("resize", updateCanvasSize);
           if (requestRef.current) cancelAnimationFrame(requestRef.current);
       };
-  }, []);
+  }, [status]); // Re-draw axes when status changes to betting
 
   if (isHydrating) return <Placeholder title="El Multiplicador" description="Cargando las leyes del Vacío..." />;
   if (!player) return <Placeholder title="El Multiplicador" description="Conéctate para apostar en el Vacío." />;
@@ -253,11 +270,10 @@ export function TavernCrash() {
       </div>
 
       <div className="grid w-full gap-6 lg:grid-cols-[1fr_300px]">
-        {/* Graph Area */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-stone-800 bg-stone-950 shadow-2xl">
+        <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-stone-800 bg-stone-950 shadow-2xl overflow-hidden group">
             <canvas 
                 ref={canvasRef} 
-                className="absolute inset-0 w-full h-full"
+                className="absolute inset-0 w-full h-full block"
             />
             
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -269,8 +285,8 @@ export function TavernCrash() {
                         animate={{ opacity: 1 }} 
                         className="flex flex-col items-center"
                     >
-                        <Zap className="h-12 w-12 text-stone-800 mb-4" />
-                        <p className="text-stone-600 font-black uppercase tracking-[0.3em] text-xs">LISTO PARA EL SALTO</p>
+                        <Zap className="h-10 w-10 text-stone-800 mb-2" />
+                        <p className="text-stone-700 font-black uppercase tracking-[0.3em] text-[10px]">PULSACIÓN DETECTADA</p>
                     </motion.div>
                 ) : (
                     <motion.div 
@@ -280,9 +296,9 @@ export function TavernCrash() {
                         className="flex flex-col items-center"
                     >
                         <div className="relative">
-                            <h2 className={`text-6xl md:text-8xl font-black tabular-nums transition-colors duration-300 drop-shadow-[0_0_30px_rgba(0,0,0,0.5)] ${
+                            <h2 className={`text-6xl md:text-8xl font-black tabular-nums transition-colors duration-300 drop-shadow-[0_0_40px_rgba(0,0,0,0.8)] ${
                                 status === "crashed" ? "text-rose-600" : 
-                                status === "cashed_out" ? "text-emerald-500/50" : "text-stone-50"
+                                status === "cashed_out" ? "text-emerald-500/60" : "text-stone-50"
                             }`}>
                                 {multiplier.toFixed(2)}x
                             </h2>
@@ -292,7 +308,7 @@ export function TavernCrash() {
                             <motion.div 
                                 initial={{ y: 20, opacity: 0 }} 
                                 animate={{ y: 0, opacity: 1 }}
-                                className="mt-4 rounded-xl bg-rose-600/20 border border-rose-500/30 px-6 py-2"
+                                className="mt-4 rounded-xl bg-rose-600/20 border border-rose-500/30 px-6 py-2 backdrop-blur-sm"
                             >
                                 <p className="text-rose-500 font-black uppercase tracking-widest text-lg italic">¡COLAPSO!</p>
                             </motion.div>
@@ -304,8 +320,8 @@ export function TavernCrash() {
                                 animate={{ y: 0, opacity: 1 }}
                                 className="mt-4 flex flex-col items-center gap-1"
                             >
-                                <p className="text-emerald-500 font-black uppercase tracking-widest text-xs opacity-80">ENERGÍA ASEGURADA</p>
-                                <p className="text-amber-400 font-black text-2xl flex items-center gap-2">
+                                <p className="text-emerald-500 font-black uppercase tracking-widest text-xs opacity-90">ENERGÍA ASEGURADA</p>
+                                <p className="text-amber-400 font-black text-2xl flex items-center gap-2 drop-shadow-[0_0_10px_rgba(245,158,11,0.4)]">
                                 <Coins className="h-6 w-6" />
                                 +{lastWin}
                                 </p>
@@ -321,7 +337,6 @@ export function TavernCrash() {
             )}
         </div>
 
-        {/* Action Panel */}
         <div className="flex flex-col gap-4">
             <div className="rounded-3xl border border-stone-800 bg-stone-900/60 p-6">
                 <div className="flex items-center gap-2 mb-4">
@@ -345,7 +360,7 @@ export function TavernCrash() {
 
             <div className="rounded-3xl border border-stone-800 bg-stone-900/60 p-6 flex flex-col justify-between flex-1 relative overflow-hidden">
                 {status === "rising" && (
-                    <div className="absolute inset-0 bg-emerald-500/5 transition-opacity" />
+                    <div className="absolute inset-0 bg-emerald-500/5 transition-opacity pointer-events-none" />
                 )}
 
                 <div>
@@ -424,9 +439,9 @@ export function TavernCrash() {
 
 function Placeholder({ title, description }: { title: string, description: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-6 rounded-3xl bg-amber-500/10 p-6 text-amber-400">
-        <AlertOctagon className="h-10 w-10" />
+    <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+      <div className="mb-6 rounded-3xl bg-amber-500/10 p-6 text-amber-400 shadow-xl shadow-black/20">
+        <AlertOctagon className="h-10 w-10 text-amber-500" />
       </div>
       <h3 className="mb-2 text-2xl font-black text-stone-100 uppercase tracking-widest">{title}</h3>
       <p className="max-w-xs text-sm text-stone-500 leading-6">{description}</p>

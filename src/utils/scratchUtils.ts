@@ -4,7 +4,7 @@
  */
 
 // Límite de seguridad para evitar quiebres en la economía (Solo para Rasca y Gana)
-export const MAX_DAILY_WIN_LIMIT = 50000;
+export const MAX_DAILY_WIN_LIMIT = 150000;
 export const VIP_JACKPOT_CHANCE = 0.05;
 export const VIP_JACKPOT_PRIZE = 10000;
 export const NORMAL_MIN_PRIZE = 200;

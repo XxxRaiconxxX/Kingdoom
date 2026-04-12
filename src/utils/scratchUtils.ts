@@ -84,3 +84,18 @@ export function addPlayerDailyScratchGrossWins(playerId: string, dateKey: string
   window.localStorage.setItem(`kingdoom.daily-scratch.${playerId}.${dateKey}`, newValue.toString());
   return newValue;
 }
+// ── TavernCards daily limit ──────────────────────────────────────────────────
+export const MAX_DAILY_CARDS_WIN_LIMIT = 100000;
+
+export function getPlayerDailyCardsGrossWins(playerId: string, dateKey: string): number {
+  const key = `kingdoom.daily-cards.${playerId}.${dateKey}`;
+  const stored = window.localStorage.getItem(key);
+  return stored ? parseInt(stored, 10) : 0;
+}
+
+export function addPlayerDailyCardsGrossWins(playerId: string, dateKey: string, amount: number): number {
+  const current = getPlayerDailyCardsGrossWins(playerId, dateKey);
+  const newValue = current + amount;
+  window.localStorage.setItem(`kingdoom.daily-cards.${playerId}.${dateKey}`, newValue.toString());
+  return newValue;
+}

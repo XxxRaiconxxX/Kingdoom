@@ -85,7 +85,7 @@ export function addPlayerDailyScratchGrossWins(playerId: string, dateKey: string
   return newValue;
 }
 // ── TavernCards daily limit ──────────────────────────────────────────────────
-export const MAX_DAILY_CARDS_WIN_LIMIT = 100000;
+export const MAX_DAILY_CARDS_WIN_LIMIT = 350000;
 
 export function getPlayerDailyCardsGrossWins(playerId: string, dateKey: string): number {
   const key = `kingdoom.daily-cards.${playerId}.${dateKey}`;

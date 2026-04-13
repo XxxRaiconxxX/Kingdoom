@@ -40,6 +40,7 @@ export function TavernCrash() {
   // Refs para evitar stale closures en el animation loop
   const statusRef = useRef<GameStatus>("betting");
   const autoCashOutRef = useRef<number>(0);
+  const autoCashedRef = useRef<boolean>(false); // guardia para no disparar auto cashout dos veces
 
   // Mantener refs sincronizados
   useEffect(() => {
@@ -166,13 +167,16 @@ export function TavernCrash() {
     const currentMult = Math.pow(1.065, elapsedSeconds);
 
     // ✅ Auto cashout: se activa si el multiplicador alcanzó el objetivo
+    // No hacemos return para que el loop siga y muestre hasta dónde hubiera llegado
     if (
       autoCashOutRef.current >= 1.01 &&
       currentMult >= autoCashOutRef.current &&
-      statusRef.current === "rising"
+      statusRef.current === "rising" &&
+      !autoCashedRef.current
     ) {
+      autoCashedRef.current = true;
       handleCashOut();
-      return;
+      // Loop continúa intencionalmente — igual que el cashout manual
     }
     
     // Core game step: Check for crash
@@ -212,6 +216,7 @@ export function TavernCrash() {
     crashPointRef.current = generateCrashPoint();
     setMultiplier(1.0);
     setLastWin(0);
+    autoCashedRef.current = false;
     pointsRef.current = [{ time: 0, multiplier: 1.0 }];
     
     setStatus("starting");

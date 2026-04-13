@@ -4,13 +4,13 @@ import { X, Check, Wand2, AlertCircle } from 'lucide-react';
 import { CharacterSheet } from '../types';
 import { parseWhatsAppSheet } from '../utils/sheetParser';
 
-interface CharacterImportModalProps {
+interface CharImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (sheet: Partial<CharacterSheet>) => void;
 }
 
-export const CharacterImportModal: React.FC<CharacterImportModalProps> = ({ isOpen, onClose, onSave }) => {
+export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClose, onSave }) => {
   const [rawText, setRawText] = useState('');
   const [parsedData, setParsedData] = useState<Partial<CharacterSheet> | null>(null);
   const [isParsing, setIsParsing] = useState(false);

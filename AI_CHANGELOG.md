@@ -44,6 +44,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/sheetParser.ts`, `src/utils/characterSheets.ts`, `src/types.ts`, `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`, `src/components/RealmRegistry.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se termino y estabilizo el sistema de Fichas de Personaje (importar desde WhatsApp, guardar con defaults, y buscador publico) con soporte opcional para mostrar/buscar por usuario (sin depender del UUID).
+*   **Cambios Clave:**
+    *   Parser reescrito (`sheetParser.ts`) para tolerar mejor el formato decorado de WhatsApp y capturar secciones multilínea sin “mezclar” campos.
+    *   Guardado de fichas ahora completa valores por defecto al crear la ficha (evita `undefined` y hace el upsert más estable).
+    *   Se añadió `playerUsername?: string` al tipo `CharacterSheet` y la capa de guardado detecta si la tabla soporta esa columna; si no, omite la propiedad para no romper el upsert.
+    *   Registro del Reino (`RealmRegistry`) mejorado: búsqueda por personaje/raza/profesión y, si existe la columna, por `playerUsername`; si no, cae a `playerId`.
+    *   Importador (`CharImportModal`) con placeholder limpio (plantilla) y grilla de stats más usable en móvil.
+*   **Notas/Advertencias:** Si quieres que el Registro muestre y busque por nombre de jugador, crea la columna opcional `playerUsername` en `character_sheets` (texto) o avísame y te paso el SQL exacto para tu esquema.
+
+### [Fecha: 13/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `.env.example`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se corrigio el formato de `.env.example` para que sea un archivo `.env` valido (sin comillas ni `;`) y se pueda copiar/pegar directo.
 *   **Cambios Clave:**

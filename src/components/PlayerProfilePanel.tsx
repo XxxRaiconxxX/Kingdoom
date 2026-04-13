@@ -73,13 +73,47 @@ export function PlayerProfilePanel() {
 
   const handleSaveSheet = async (partialSheet: Partial<CharacterSheet>) => {
     if (!player) return;
+
+    const stats = partialSheet.stats ?? {
+      strength: 0,
+      agility: 0,
+      intelligence: 0,
+      defense: 0,
+      magicDefense: 0,
+    };
+
     const newSheet: CharacterSheet = {
-      ...partialSheet,
       id: crypto.randomUUID(),
       playerId: player.id,
+      playerUsername: player.username,
+      name: partialSheet.name ?? "",
+      age: partialSheet.age ?? "",
+      gender: partialSheet.gender ?? "",
+      height: partialSheet.height ?? "",
+      race: partialSheet.race ?? "",
+      powers: partialSheet.powers ?? "",
+      stats: {
+        strength: Number(stats.strength ?? 0) || 0,
+        agility: Number(stats.agility ?? 0) || 0,
+        intelligence: Number(stats.intelligence ?? 0) || 0,
+        defense: Number(stats.defense ?? 0) || 0,
+        magicDefense: Number(stats.magicDefense ?? 0) || 0,
+      },
+      weapon: partialSheet.weapon ?? "",
+      combatStyle: partialSheet.combatStyle ?? "",
+      birthRealm: partialSheet.birthRealm ?? "",
+      socialClass: partialSheet.socialClass ?? "",
+      nobleTitle: partialSheet.nobleTitle ?? "",
+      profession: partialSheet.profession ?? "",
+      nonMagicSkills: partialSheet.nonMagicSkills ?? "",
+      personality: partialSheet.personality ?? "",
+      history: partialSheet.history ?? "",
+      extras: partialSheet.extras ?? "",
+      weaknesses: partialSheet.weaknesses ?? "",
+      inventory: partialSheet.inventory ?? "",
       createdAt: new Date().toISOString(),
-    } as CharacterSheet;
-    
+    };
+
     await saveCharacterSheet(newSheet);
     const updatedSheets = await getPlayerSheets(player.id);
     setPlayerSheets(updatedSheets);

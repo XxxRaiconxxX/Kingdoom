@@ -223,6 +223,11 @@ export type CharacterStats = {
 export type CharacterSheet = {
   id: string;
   playerId: string;
+  /**
+   * Optional display helper. If your Supabase table includes this column,
+   * the Registry can show/search by username instead of a UUID.
+   */
+  playerUsername?: string;
   name: string;
   age: string;
   gender: string;

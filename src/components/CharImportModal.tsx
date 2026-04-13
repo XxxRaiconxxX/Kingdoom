@@ -4,6 +4,37 @@ import { X, Check, Wand2, AlertCircle } from 'lucide-react';
 import { CharacterSheet } from '../types';
 import { parseWhatsAppSheet } from '../utils/sheetParser';
 
+const WHATSAPP_SHEET_TEMPLATE = `-Nombre Completo/ Apodo:
+-Edad:
+-Genero:
+-Estatura:
+-Raza:
+-Poderes Oficiales:
+
+Estadisticas:
+Tienes 12 puntos para distribuir
+Fuerza:
+Agilidad:
+Inteligencia:
+Defensa:
+Defensa magica:
+Pv Base 100
+
+-Arma principal:
+-Estilo de combate:
+
+-Reino donde nacio:
+-Clase social: (Noble, plebeyo o burgues)
+-Titulo de Nobleza: (En caso de ser)
+-Profesion:
+
+-Habilidades no magicas:
+-Personalidad:
+-Historia:
+-Extras:
+-Debilidades:
+-Inventario:`;
+
 interface CharImportModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -65,7 +96,7 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
                 <textarea
                   value={rawText}
                   onChange={(e) => setRawText(e.target.value)}
-                  placeholder="*╭═════°•>☾<•°═════╮*&#10;*º𝔗𝔥𝔢 ƙ𝔦𝔫𝔤𝔇𝔬𝔬𝔪t*&#10;*╰═════°•>☾<•°═════╯*&#10;&#10;*-Nombre Completo/ Apodo:*&#10;Arthur Pendragon..."
+                  placeholder={WHATSAPP_SHEET_TEMPLATE}
                   className="w-full h-64 bg-black/50 border border-green-500/30 rounded-lg p-4 text-green-100 placeholder:text-green-900/50 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 resize-none font-mono text-sm"
                 />
                 <button
@@ -111,7 +142,7 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
 
                   <div>
                     <label className="text-xs text-zinc-500 uppercase font-bold">Estadísticas Extraídas</label>
-                    <div className="grid grid-cols-5 gap-2 mt-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-1">
                       {Object.entries(parsedData.stats || {}).map(([key, val]) => (
                         <div key={key} className="bg-zinc-900 border border-zinc-700 rounded p-2 text-center">
                           <div className="text-[10px] text-zinc-400 uppercase truncate">{key}</div>

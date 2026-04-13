@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ScrollText, X, User, Info } from 'lucide-react';
 import { CharacterSheet } from '../types';
@@ -15,20 +15,45 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
 
+  const formatPlayerLabel = (sheet: CharacterSheet) => {
+    if (sheet.playerUsername?.trim()) return sheet.playerUsername;
+    if (sheet.playerId) return `${sheet.playerId.slice(0, 8)}...`;
+    return "Desconocido";
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim() || !supabase) return;
+    if (!searchQuery.trim()) return;
 
     setIsSearching(true);
     try {
-      // Assuming 'playerId' stores the username for now, or we search by character name
-      const { data, error } = await supabase
-        .from('character_sheets')
-        .select('*')
-        .or(`name.ilike.%${searchQuery}%,playerId.ilike.%${searchQuery}%`);
+      const q = searchQuery.trim();
+      // Prefer searching by username if the column exists. If not, fall back to playerId (uuid).
+      const preferred = await supabase.from("character_sheets").select("*").or(
+        `name.ilike.%${q}%,race.ilike.%${q}%,profession.ilike.%${q}%,playerUsername.ilike.%${q}%`
+      );
 
-      if (error) throw error;
-      setSearchResults(data as CharacterSheet[]);
+      if (!preferred.error) {
+        setSearchResults((preferred.data ?? []) as CharacterSheet[]);
+        return;
+      }
+
+      const msg = String((preferred.error as any).message ?? "").toLowerCase();
+      const code = String((preferred.error as any).code ?? "");
+      const missingColumn =
+        code === "42703" ||
+        (msg.includes("playerusername") && msg.includes("does not exist"));
+
+      if (!missingColumn) {
+        throw preferred.error;
+      }
+
+      const fallback = await supabase.from("character_sheets").select("*").or(
+        `name.ilike.%${q}%,race.ilike.%${q}%,profession.ilike.%${q}%,playerId.ilike.%${q}%`
+      );
+
+      if (fallback.error) throw fallback.error;
+      setSearchResults((fallback.data ?? []) as CharacterSheet[]);
     } catch (error) {
       console.error('Error searching sheets:', error);
     } finally {
@@ -76,17 +101,16 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-500" />
             <button
               type="submit"
-              disabled={isSearching || !searchQuery.trim() || !supabase}
+              disabled={isSearching || !searchQuery.trim()}
               className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-stone-950 rounded-lg font-bold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSearching ? 'Buscando...' : 'Buscar'}
             </button>
           </form>
-          {!supabase && (
-            <p className="text-rose-400 text-xs mt-2 flex items-center gap-1">
-              <Info className="w-3 h-3" /> La base de datos (Supabase) no está configurada. La búsqueda no está disponible.
-            </p>
-          )}
+          <p className="text-stone-500 text-xs mt-2 flex items-center gap-1">
+            <Info className="w-3 h-3" /> Busca por personaje, raza, profesion o
+            jugador.
+          </p>
         </div>
 
         {/* Results */}
@@ -106,10 +130,12 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
                   </div>
                   <div className="space-y-2 text-xs text-stone-400">
                     <p className="flex items-center gap-2">
-                      <User className="w-3 h-3" /> Jugador: <span className="text-stone-300">{sheet.playerId}</span>
+                      <User className="w-3 h-3" /> Jugador:{" "}
+                      <span className="text-stone-300">{formatPlayerLabel(sheet)}</span>
                     </p>
                     <p className="line-clamp-1">
-                      {sheet.race || 'Raza desconocida'} • {sheet.profession || 'Sin profesión'}
+                      {sheet.race || "Raza desconocida"} •{" "}
+                      {sheet.profession || "Sin profesion"}
                     </p>
                   </div>
                 </div>

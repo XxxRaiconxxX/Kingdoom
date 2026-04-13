@@ -1,97 +1,166 @@
-import { CharacterSheet } from "../types";
+import type { CharacterSheet } from "../types";
 
+/**
+ * Parse the WhatsApp "ficha" template into structured fields.
+ *
+ * The WhatsApp format is decorative and inconsistent:
+ * - lots of borders/separators
+ * - labels may include "-", "*" and can be inline (e.g. "Edad: 200")
+ * - long sections (Historia, Personalidad, etc.) can be multi-line
+ *
+ * We parse it in a best-effort way and return a partial sheet. The caller
+ * should apply defaults before saving.
+ */
 export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
-  // Clean up decorative lines
-  const lines = rawText.split('\n').map(l => l.trim());
-  const cleanLines = lines.filter(l => {
-    if (/^[*\s╭═°•><☾╰⊷⊶⊰❂⊱]+$/.test(l)) return false;
-    if (l.includes('𝔗𝔥𝔢 ƙ𝔦𝔫𝔤𝔇𝔬𝔬𝔪t')) return false;
-    if (l.includes('Tienes 12 puntos para distribuir')) return false;
-    if (l.includes('Pv Base 100')) return false;
-    if (l.includes('(Noble, plebeyo o burgues)')) return false;
-    if (l.includes('(En caso de ser)')) return false;
-    return true;
-  });
+  const normalizeKey = (value: string) =>
+    value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // strip accents for matching
+      .replace(/[\*\_`]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
 
-  const text = cleanLines.join('\n');
+  const stripWrappers = (value: string) =>
+    value.replace(/^[\*\-\:\s]+|[\*\-\:\s]+$/g, "").trim();
 
-  // Define keywords and their regex variations
-  const fields = [
-    { key: 'name', regex: /\*?-?Nombre Completo\/?\s*Apodo:?\*?/i },
-    { key: 'age', regex: /\*?-?Edad:?\*?/i },
-    { key: 'gender', regex: /\*?-?G[eé]nero:?\*?/i },
-    { key: 'height', regex: /\*?-?Estatura:?\*?/i },
-    { key: 'race', regex: /\*?-?Raza:?\*?/i },
-    { key: 'powers', regex: /\*?-?Poderes Oficiales:?\*?/i },
-    { key: 'weapon', regex: /\*?-?Arma principal:?\*?/i },
-    { key: 'combatStyle', regex: /\*?-?Estilo de combate:?\*?/i },
-    { key: 'birthRealm', regex: /\*?-?Reino donde naci[oó]:?\*?/i },
-    { key: 'socialClass', regex: /\*?-?Clase social:?\*?/i },
-    { key: 'nobleTitle', regex: /\*?-?T[ií]tulo de Nobleza:?\*?/i },
-    { key: 'profession', regex: /\*?-?Profesi[oó]n:?\*?/i },
-    { key: 'nonMagicSkills', regex: /\*?-?Habilidades no m[aá]gicas:?\*?/i },
-    { key: 'personality', regex: /\*?-?Personalidad:?\*?/i },
-    { key: 'history', regex: /\*?-?Historia:?\*?/i },
-    { key: 'extras', regex: /\*?-?Extras:?\*?/i },
-    { key: 'weaknesses', regex: /\*?-?Debilidades:?\*?/i },
-    { key: 'inventory', regex: /\*?-?Inventario:?\*?/i },
-    { key: 'stats_section', regex: /\*?-?Estad[ií]sticas:?\*?/i }
-  ];
+  const isDecorativeLine = (line: string) => {
+    if (!/[a-z0-9]/i.test(line)) return true;
+    const normalized = normalizeKey(line);
+    if (normalized.includes("the kingdoom")) return true;
+    if (normalized.includes("tienes 12 puntos para distribuir")) return true;
+    if (normalized.includes("pv base")) return true;
+    if (normalized.includes("(noble")) return true;
+    if (normalized.includes("(en caso")) return true;
+    return false;
+  };
 
-  // Find all matches
-  const matches: { key: string, index: number, length: number }[] = [];
-  fields.forEach(f => {
-    const match = text.match(f.regex);
-    if (match && match.index !== undefined) {
-      matches.push({ key: f.key, index: match.index, length: match[0].length });
-    }
-  });
+  const lines = rawText
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !isDecorativeLine(line));
 
-  // Sort matches by index
-  matches.sort((a, b) => a.index - b.index);
+  type FieldKey =
+    | "name"
+    | "age"
+    | "gender"
+    | "height"
+    | "race"
+    | "powers"
+    | "weapon"
+    | "combatStyle"
+    | "birthRealm"
+    | "socialClass"
+    | "nobleTitle"
+    | "profession"
+    | "nonMagicSkills"
+    | "personality"
+    | "history"
+    | "extras"
+    | "weaknesses"
+    | "inventory";
+
+  const LABELS: Array<{ key: FieldKey; match: (normalized: string) => boolean }> =
+    [
+      {
+        key: "name",
+        match: (l) =>
+          l.startsWith("nombre completo") ||
+          l.startsWith("nombre completo/apodo") ||
+          l.startsWith("nombre completo/ apodo") ||
+          l === "nombre",
+      },
+      { key: "age", match: (l) => l.startsWith("edad") },
+      { key: "gender", match: (l) => l.startsWith("genero") },
+      { key: "height", match: (l) => l.startsWith("estatura") },
+      { key: "race", match: (l) => l.startsWith("raza") },
+      { key: "powers", match: (l) => l.startsWith("poderes oficiales") },
+      { key: "weapon", match: (l) => l.startsWith("arma principal") },
+      { key: "combatStyle", match: (l) => l.startsWith("estilo de combate") },
+      {
+        key: "birthRealm",
+        match: (l) => l.startsWith("reino donde nacio") || l.startsWith("reino donde naci"),
+      },
+      { key: "socialClass", match: (l) => l.startsWith("clase social") },
+      { key: "nobleTitle", match: (l) => l.startsWith("titulo de nobleza") },
+      { key: "profession", match: (l) => l.startsWith("profesion") },
+      { key: "nonMagicSkills", match: (l) => l.startsWith("habilidades no magicas") },
+      { key: "personality", match: (l) => l.startsWith("personalidad") },
+      { key: "history", match: (l) => l.startsWith("historia") },
+      { key: "extras", match: (l) => l.startsWith("extras") },
+      { key: "weaknesses", match: (l) => l.startsWith("debilidades") },
+      { key: "inventory", match: (l) => l.startsWith("inventario") },
+    ];
 
   const result: Partial<CharacterSheet> = {};
 
-  const cleanValue = (val: string) => {
-    // Remove leading/trailing asterisks, dashes, colons, and whitespace
-    return val.replace(/^[\*\-\:\s]+|[\*\-\:\s]+$/g, '').trim();
+  let currentKey: FieldKey | null = null;
+  let buffer: string[] = [];
+
+  const flush = () => {
+    if (!currentKey) return;
+    const value = stripWrappers(buffer.join("\n").trim());
+    (result as any)[currentKey] = value;
+    buffer = [];
   };
 
-  for (let i = 0; i < matches.length; i++) {
-    const current = matches[i];
-    const next = matches[i + 1];
-    const start = current.index + current.length;
-    const end = next ? next.index : text.length;
-    let value = text.substring(start, end).trim();
-    
-    value = cleanValue(value);
-    
-    if (current.key !== 'stats_section') {
-      (result as any)[current.key] = value;
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/^[\u2022\-\u2219]+\s*/g, "").trim();
+    const normalizedLine = normalizeKey(line);
+
+    // Skip "Estadisticas" heading lines; individual stats are parsed separately.
+    if (normalizedLine.startsWith("estadisticas")) {
+      continue;
+    }
+
+    const label = LABELS.find(({ match }) => match(normalizedLine));
+    if (label) {
+      flush();
+      currentKey = label.key;
+
+      // Inline value after ":" (e.g. "Edad: 200")
+      const colonIndex = line.indexOf(":");
+      if (colonIndex !== -1) {
+        const inline = stripWrappers(line.slice(colonIndex + 1));
+        if (inline) buffer.push(inline);
+      }
+
+      continue;
+    }
+
+    if (currentKey) {
+      buffer.push(stripWrappers(line));
     }
   }
 
-  // Handle case where name doesn't have a label and is at the very beginning
-  if (matches.length > 0 && matches[0].index > 0) {
-    if (!matches.find(m => m.key === 'name')) {
-       let potentialName = text.substring(0, matches[0].index).trim();
-       potentialName = cleanValue(potentialName);
-       if (potentialName) result.name = potentialName;
-    }
-  }
+  flush();
 
-  // Extract stats specifically
-  const extractNumber = (regex: RegExp) => {
-    const match = text.match(regex);
-    return match ? parseInt(match[1].replace(/\D/g, ''), 10) || 0 : 0;
+  const extractStatFromLines = (label: string) => {
+    const normalizedLabel = normalizeKey(label);
+    for (const line of rawText.replace(/\r\n/g, "\n").split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const normalized = normalizeKey(trimmed);
+      if (!normalized.startsWith(normalizedLabel)) continue;
+
+      const colonIndex = trimmed.indexOf(":");
+      const after = colonIndex === -1 ? trimmed : trimmed.slice(colonIndex + 1);
+      const match = after.match(/(\d+)/);
+      if (!match) return 0;
+      const parsed = Number(match[1]);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
   };
 
   result.stats = {
-    strength: extractNumber(/Fuerza:\*?\s*(\d+)/i),
-    agility: extractNumber(/agilidad:\*?\s*(\d+)/i),
-    intelligence: extractNumber(/inteligencia:\*?\s*(\d+)/i),
-    defense: extractNumber(/defensa:\*?\s*(\d+)/i),
-    magicDefense: extractNumber(/defensa m[aá]gica:\*?\s*(\d+)/i),
+    strength: extractStatFromLines("Fuerza"),
+    agility: extractStatFromLines("Agilidad"),
+    intelligence: extractStatFromLines("Inteligencia"),
+    defense: extractStatFromLines("Defensa"),
+    magicDefense: extractStatFromLines("Defensa magica"),
   };
 
   return result;

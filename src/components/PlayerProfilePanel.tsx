@@ -16,8 +16,8 @@ import {
   Search
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import { CharacterImportModal } from "./CharacterImportModal";
-import { CharacterSheetModal } from "./CharacterSheetModal";
+import { CharImportModal } from "./CharImportModal";
+import { CharSheetModal } from "./CharSheetModal";
 import { RealmRegistry } from "./RealmRegistry";
 import { CharacterSheet } from "../types";
 import { getPlayerSheets, saveCharacterSheet, deleteCharacterSheet } from "../utils/characterSheets";
@@ -386,12 +386,12 @@ export function PlayerProfilePanel() {
       </AnimatePresence>
 
       {/* Character Sheet Modals */}
-      <CharacterImportModal 
+      <CharImportModal 
         isOpen={isImportModalOpen} 
         onClose={() => setIsImportModalOpen(false)} 
         onSave={handleSaveSheet} 
       />
-      <CharacterSheetModal 
+      <CharSheetModal 
         isOpen={!!selectedSheet} 
         onClose={() => setSelectedSheet(null)} 
         character={selectedSheet} 

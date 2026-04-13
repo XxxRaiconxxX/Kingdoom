@@ -44,6 +44,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `.gitignore`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se protegieron secretos para que un archivo `.env` local nunca se suba al repo por accidente.
+*   **Cambios Clave:**
+    *   `.gitignore` ahora ignora `.env` y `.env.*` (excepto `.env.example`).
+*   **Notas/Advertencias:** Usa `.env.example` como plantilla y crea tu `.env` solo en tu PC. En Vercel, las variables se cargan desde el dashboard.
+
+---
+### [Fecha: 13/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/sheetParser.ts`, `src/utils/characterSheets.ts`, `src/types.ts`, `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`, `src/components/RealmRegistry.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se termino y estabilizo el sistema de Fichas de Personaje (importar desde WhatsApp, guardar con defaults, y buscador publico) con soporte opcional para mostrar/buscar por usuario (sin depender del UUID).
 *   **Cambios Clave:**

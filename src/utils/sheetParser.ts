@@ -18,11 +18,20 @@ export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "") // strip accents for matching
       .replace(/[\*\_`]/g, "")
+      // remove decoration/punctuation (keeps "/" for "Nombre Completo/ Apodo")
+      .replace(/[^a-z0-9\/\s]/g, " ")
       .replace(/\s+/g, " ")
       .trim();
 
   const stripWrappers = (value: string) =>
     value.replace(/^[\*\-\:\s]+|[\*\-\:\s]+$/g, "").trim();
+
+  const sanitizeValue = (value: string) => {
+    const cleaned = stripWrappers(value).replace(/\*/g, "").trim();
+    // Treat placeholder dashes as empty.
+    if (/^[\-\–\—\_]+$/.test(cleaned)) return "";
+    return cleaned;
+  };
 
   const isDecorativeLine = (line: string) => {
     if (!/[a-z0-9]/i.test(line)) return true;
@@ -30,8 +39,9 @@ export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
     if (normalized.includes("the kingdoom")) return true;
     if (normalized.includes("tienes 12 puntos para distribuir")) return true;
     if (normalized.includes("pv base")) return true;
-    if (normalized.includes("(noble")) return true;
-    if (normalized.includes("(en caso")) return true;
+    // Template helper lines sometimes come wrapped in parentheses/asterisks.
+    if (normalized.includes("noble plebeyo o burgues")) return true;
+    if (normalized.includes("en caso de ser")) return true;
     return false;
   };
 
@@ -107,7 +117,7 @@ export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
   };
 
   for (const rawLine of lines) {
-    const line = rawLine.replace(/^[\u2022\-\u2219]+\s*/g, "").trim();
+    const line = sanitizeValue(rawLine.replace(/^[\u2022\-\u2219]+\s*/g, "").trim());
     const normalizedLine = normalizeKey(line);
 
     // Skip "Estadisticas" heading lines; individual stats are parsed separately.
@@ -123,7 +133,7 @@ export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
       // Inline value after ":" (e.g. "Edad: 200")
       const colonIndex = line.indexOf(":");
       if (colonIndex !== -1) {
-        const inline = stripWrappers(line.slice(colonIndex + 1));
+        const inline = sanitizeValue(line.slice(colonIndex + 1));
         if (inline) buffer.push(inline);
       }
 
@@ -131,7 +141,8 @@ export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
     }
 
     if (currentKey) {
-      buffer.push(stripWrappers(line));
+      const next = sanitizeValue(line);
+      if (next) buffer.push(next);
     }
   }
 

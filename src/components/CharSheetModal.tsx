@@ -21,23 +21,64 @@ const TextSection = ({ title, content, icon: Icon }: { title: string, content?: 
   
   if (!content || content.trim() === '') return null;
 
-  const MAX_LENGTH = 250;
-  const shouldTruncate = content.length > MAX_LENGTH;
-  const displayContent = (!shouldTruncate || isExpanded) ? content : content.slice(0, MAX_LENGTH) + '...';
+  const normalized = content
+    .replace(/\r\n/g, "\n")
+    .replace(/\*/g, "")
+    .trim();
+
+  // If it looks like a list, render it as bullets.
+  const lines = normalized
+    .split("\n")
+    .map((line) =>
+      line
+        .trim()
+        .replace(/^[\-\u2022\•\u2219]+\s*/g, "")
+        .replace(/^—+\s*/g, "")
+        .trim()
+    )
+    .filter(Boolean);
+
+  const looksLikeList = lines.length >= 3;
+  const LIST_PREVIEW = 5;
+  const TEXT_PREVIEW = 320;
+
+  const shouldTruncate = looksLikeList
+    ? lines.length > LIST_PREVIEW
+    : normalized.length > TEXT_PREVIEW;
+
+  const previewLines = looksLikeList
+    ? lines.slice(0, LIST_PREVIEW)
+    : lines;
+
+  const displayText = looksLikeList
+    ? undefined
+    : !shouldTruncate || isExpanded
+      ? normalized
+      : `${normalized.slice(0, TEXT_PREVIEW)}...`;
 
   return (
     <div className="mb-8">
       <h3 className="flex items-center gap-2 text-sm font-bold text-amber-500 uppercase tracking-[0.2em] mb-4 border-b border-stone-800/50 pb-2">
         {Icon && <Icon className="w-4 h-4" />} {title}
       </h3>
-      <div className="text-stone-300 whitespace-pre-wrap text-sm leading-relaxed bg-stone-900/20 p-5 rounded-xl border border-stone-800/30">
-        {displayContent}
+      <div className="text-stone-300 text-sm leading-relaxed bg-stone-900/20 p-5 rounded-xl border border-stone-800/30">
+        {looksLikeList ? (
+          <ul className="list-disc pl-5 space-y-2">
+            {(isExpanded ? lines : previewLines).map((line, idx) => (
+              <li key={`${title}-${idx}`} className="text-stone-300">
+                {line}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="whitespace-pre-wrap">{displayText}</p>
+        )}
         {shouldTruncate && (
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
             className="block mt-4 text-amber-500 hover:text-amber-400 font-bold text-xs uppercase tracking-wider transition-colors"
           >
-            {isExpanded ? 'Leer menos' : 'Leer más'}
+            {isExpanded ? 'Ver menos' : 'Ver mas'}
           </button>
         )}
       </div>
@@ -51,7 +92,7 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
     { key: 'agility', label: 'Agilidad', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-500' },
     { key: 'intelligence', label: 'Inteligencia', icon: Brain, color: 'text-blue-400', bg: 'bg-blue-500' },
     { key: 'defense', label: 'Defensa', icon: Shield, color: 'text-zinc-400', bg: 'bg-zinc-500' },
-    { key: 'magicDefense', label: 'Defensa Mágica', icon: Shield, color: 'text-purple-400', bg: 'bg-purple-500' },
+    { key: 'magicDefense', label: 'Defensa Magica', icon: Shield, color: 'text-purple-400', bg: 'bg-purple-500' },
   ];
 
   return (
@@ -95,11 +136,11 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                   {/* Basic Info Grid */}
                   <section>
                     <h3 className="flex items-center gap-2 text-sm font-bold text-amber-500 uppercase tracking-[0.2em] mb-4">
-                      <Info className="w-4 h-4" /> Datos Básicos
+                      <Info className="w-4 h-4" /> Datos Basicos
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       <InfoItem label="Edad" value={character.age} />
-                      <InfoItem label="Género" value={character.gender} />
+                      <InfoItem label="Genero" value={character.gender} />
                       <InfoItem label="Estatura" value={character.height} />
                       <InfoItem label="Clase Social" value={character.socialClass} />
                       <div className="col-span-2">

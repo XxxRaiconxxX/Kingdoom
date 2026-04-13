@@ -41,15 +41,19 @@ export function TavernCrash() {
   const statusRef = useRef<GameStatus>("betting");
   const autoCashOutRef = useRef<number>(0);
   const autoCashedRef = useRef<boolean>(false); // guardia para no disparar auto cashout dos veces
+  const betRef = useRef(bet);
+  const playerRef = useRef(player);
+  const updatingRef = useRef(updating);
+  const multiplierRef = useRef(multiplier);
+  const setPlayerGoldRef = useRef(setPlayerGold);
 
   // Mantener refs sincronizados
-  useEffect(() => {
-    statusRef.current = status;
-  }, [status]);
-
-  useEffect(() => {
-    autoCashOutRef.current = autoCashOut;
-  }, [autoCashOut]);
+  useEffect(() => { statusRef.current = status; }, [status]);
+  useEffect(() => { autoCashOutRef.current = autoCashOut; }, [autoCashOut]);
+  useEffect(() => { betRef.current = bet; }, [bet]);
+  useEffect(() => { playerRef.current = player; }, [player]);
+  useEffect(() => { updatingRef.current = updating; }, [updating]);
+  useEffect(() => { setPlayerGoldRef.current = setPlayerGold; }, [setPlayerGold]);
 
   const generateCrashPoint = () => {
     if (Math.random() < 0.03) return 1.00;
@@ -61,7 +65,14 @@ export function TavernCrash() {
     ctx.clearRect(0, 0, width, height);
 
     const maxX = Math.max(10, elapsed * 1.25);
-    const maxY = Math.max(2, currentMultiplier * 1.3);
+    let maxY = Math.max(2, currentMultiplier * 1.3);
+    
+    const autoCashOutVal = autoCashOutRef.current;
+    if (autoCashOutVal >= 1.01) {
+      if (autoCashOutVal > maxY && autoCashOutVal <= Math.max(5, currentMultiplier * 3)) {
+        maxY = autoCashOutVal * 1.1;
+      }
+    }
 
     const padding = { left: 45, bottom: 35, right: 25, top: 25 };
     const chartWidth = width - padding.left - padding.right;
@@ -96,7 +107,6 @@ export function TavernCrash() {
     ctx.fillText(`${maxY.toFixed(1)}x`, 10, padding.top + 5);
 
     // Línea de auto cashout
-    const autoCashOutVal = autoCashOutRef.current;
     if (autoCashOutVal >= 1.01 && autoCashOutVal <= maxY) {
       const y = getY(autoCashOutVal);
       ctx.save();
@@ -175,19 +185,21 @@ export function TavernCrash() {
       !autoCashedRef.current
     ) {
       autoCashedRef.current = true;
-      handleCashOut();
+      handleCashOut(autoCashOutRef.current);
       // Loop continúa intencionalmente — igual que el cashout manual
     }
     
     // Core game step: Check for crash
     if (currentMult >= crashPointRef.current) {
       setMultiplier(crashPointRef.current);
+      multiplierRef.current = crashPointRef.current;
       setStatus("crashed");
       setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
       return; // Stop animation loop
     }
 
     setMultiplier(currentMult);
+    multiplierRef.current = currentMult;
     pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMult });
 
     // Handle physical drawing
@@ -215,6 +227,7 @@ export function TavernCrash() {
 
     crashPointRef.current = generateCrashPoint();
     setMultiplier(1.0);
+    multiplierRef.current = 1.0;
     setLastWin(0);
     autoCashedRef.current = false;
     pointsRef.current = [{ time: 0, multiplier: 1.0 }];
@@ -229,12 +242,14 @@ export function TavernCrash() {
     }, 1200);
   };
 
-  const handleCashOut = async () => {
-    if (status !== "rising" || updating || !player) return;
+  const handleCashOut = async (exactMultiplier?: number | React.MouseEvent) => {
+    if (statusRef.current !== "rising" || updatingRef.current || !playerRef.current) return;
 
-    const winAmount = Math.floor(bet * multiplier);
+    const m = typeof exactMultiplier === "number" ? exactMultiplier : multiplierRef.current;
+    const winAmount = Math.floor(betRef.current * m);
+    
     setUpdating(true);
-    const success = await setPlayerGold(player.gold + winAmount);
+    const success = await setPlayerGoldRef.current(playerRef.current.gold + winAmount);
     
     if (success) {
       setLastWin(winAmount);

@@ -28,6 +28,7 @@ export function TavernCrash() {
   const [history, setHistory] = useState<number[]>([]);
   const [updating, setUpdating] = useState(false);
   const [lastWin, setLastWin] = useState(0);
+  const [autoCashOut, setAutoCashOut] = useState<number>(0);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>();
@@ -36,13 +37,18 @@ export function TavernCrash() {
   const pointsRef = useRef<Point[]>([]);
   const logicalSizeRef = useRef({ width: 0, height: 0 });
   
-  // Ref to mirror status and avoid stale closures in the animation loop
+  // Refs para evitar stale closures en el animation loop
   const statusRef = useRef<GameStatus>("betting");
+  const autoCashOutRef = useRef<number>(0);
 
-  // Keep ref in sync
+  // Mantener refs sincronizados
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
+
+  useEffect(() => {
+    autoCashOutRef.current = autoCashOut;
+  }, [autoCashOut]);
 
   const generateCrashPoint = () => {
     if (Math.random() < 0.03) return 1.00;
@@ -87,6 +93,24 @@ export function TavernCrash() {
     ctx.font = "bold 10px Inter, sans-serif";
     ctx.fillText(`${maxX.toFixed(0)}s`, width - padding.right - 10, height - 15);
     ctx.fillText(`${maxY.toFixed(1)}x`, 10, padding.top + 5);
+
+    // Línea de auto cashout
+    const autoCashOutVal = autoCashOutRef.current;
+    if (autoCashOutVal >= 1.01 && autoCashOutVal <= maxY) {
+      const y = getY(autoCashOutVal);
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.5)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, y);
+      ctx.lineTo(width - padding.right, y);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(251, 191, 36, 0.8)";
+      ctx.font = "bold 9px Inter, sans-serif";
+      ctx.fillText(`AUTO ${autoCashOutVal.toFixed(2)}x`, padding.left + 4, y - 4);
+      ctx.restore();
+    }
 
     if (pointsRef.current.length > 1) {
         const isDangerous = statusRef.current === "crashed";
@@ -140,6 +164,16 @@ export function TavernCrash() {
     
     const elapsedSeconds = (time - startTimeRef.current) / 1000;
     const currentMult = Math.pow(1.065, elapsedSeconds);
+
+    // ✅ Auto cashout: se activa si el multiplicador alcanzó el objetivo
+    if (
+      autoCashOutRef.current >= 1.01 &&
+      currentMult >= autoCashOutRef.current &&
+      statusRef.current === "rising"
+    ) {
+      handleCashOut();
+      return;
+    }
     
     // Core game step: Check for crash
     if (currentMult >= crashPointRef.current) {
@@ -367,7 +401,8 @@ export function TavernCrash() {
                         Apuesta de Energía
                     </h3>
                     
-                    <div className="flex items-center gap-3 mb-6">
+                    {/* Input de apuesta */}
+                    <div className="flex items-center gap-3 mb-4">
                         <input 
                             type="number"
                             value={bet}
@@ -377,7 +412,8 @@ export function TavernCrash() {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 mb-6">
+                    {/* Botones rápidos */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
                          <button 
                             onClick={() => setBet(Math.floor(player.gold / 2))}
                             disabled={status === "rising" || status === "starting"}
@@ -393,6 +429,36 @@ export function TavernCrash() {
                             ALL IN
                          </button>
                     </div>
+
+                    {/* ✅ Retiro automático */}
+                    <div className="flex flex-col gap-1 mb-6">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-stone-500 flex items-center gap-1">
+                        <Zap className="h-3 w-3 text-amber-500/60" />
+                        Retiro Automático
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          value={autoCashOut === 0 ? "" : autoCashOut}
+                          onChange={(e) => setAutoCashOut(parseFloat(e.target.value) || 0)}
+                          disabled={status === "rising" || status === "starting"}
+                          placeholder="Ej: 1.50  (0 = desactivado)"
+                          className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 pr-8 text-base font-black text-amber-400 placeholder:text-stone-600 placeholder:font-normal focus:outline-none focus:border-amber-500/50 transition"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-500 font-black text-sm">x</span>
+                      </div>
+                      {autoCashOut >= 1.01 ? (
+                        <p className="text-[9px] text-amber-500/80 font-black uppercase tracking-widest flex items-center gap-1">
+                          ⚡ Activo — retira en {autoCashOut.toFixed(2)}x automáticamente
+                        </p>
+                      ) : (
+                        <p className="text-[9px] text-stone-600 uppercase tracking-widest">
+                          Desactivado — retirá manualmente
+                        </p>
+                      )}
+                    </div>
                 </div>
 
                 <div className="space-y-4">
@@ -403,7 +469,9 @@ export function TavernCrash() {
                             className="w-full group relative overflow-hidden rounded-2xl bg-emerald-600 py-5 font-black text-white hover:bg-emerald-500 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all"
                         >
                             <span className="relative z-10 flex flex-col items-center">
-                                <span className="text-[10px] opacity-70 mb-0.5 uppercase tracking-widest">Asegurar ahora</span>
+                                <span className="text-[10px] opacity-70 mb-0.5 uppercase tracking-widest">
+                                  {autoCashOut >= 1.01 ? `Auto en ${autoCashOut.toFixed(2)}x — o retirá ya` : "Asegurar ahora"}
+                                </span>
                                 <span className="flex items-center gap-2 text-xl font-black">
                                     <Coins className="h-5 w-5" />
                                     {Math.floor(bet * multiplier)}

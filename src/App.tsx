@@ -1,832 +1,327 @@
-import { lazy, Suspense, useEffect, useMemo, useState, startTransition } from "react";
-import type { ReactNode } from "react";
-import {
-  Bell,
-  Castle,
-  ChevronDown,
-  Dices,
-  Home,
-  Library,
-  Sparkles,
-  Store,
-  Trophy,
-} from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
-import { EventCard } from "./components/EventCard";
-import { ExpandableText } from "./components/ExpandableText";
-import { FilterPill } from "./components/FilterPill";
-import { MarketItemCard } from "./components/MarketItemCard";
-import { PlayerProfilePanel } from "./components/PlayerProfilePanel";
-import { RankingCard } from "./components/RankingCard";
-import { SectionHeader } from "./components/SectionHeader";
-import { StatCard } from "./components/StatCard";
-import { ACTIVE_EVENTS } from "./data/events";
-import {
-  HOME_STATS,
-  JOIN_STEPS,
-  KINGDOM_ANNOUNCEMENTS,
-  KINGDOM_STATUS,
-  WHATSAPP_JOIN_URL,
-} from "./data/home";
-import { MARKET_CATEGORIES, MARKET_ITEMS } from "./data/market";
-import {
-  fetchWeeklyRanking,
-  formatCountdown,
-  formatRankingWindow,
-} from "./utils/weeklyRanking";
-import { fetchRealmEvents } from "./utils/events";
-import { fetchMarketItems } from "./utils/market";
-import type {
-  MarketCategory, MarketCategoryId, MarketItem, NavItem, RankingPlayer, RankingWindow, TabId,
-} from "./types";
+import React, { useState } from 'react';
+import { ScrollText, Store, Trophy, Home as HomeIcon, Sword, Shield, Coins, Users, Skull, Crown, MessageCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-type TavernMode = "chests" | "roulette" | "cards" | "scratch" | "crash";
+const avatarsImg = 'https://picsum.photos/512/512';
 
-const NAV_ITEMS: NavItem[] = [
-  { id: "home", label: "Inicio", icon: Home },
-  { id: "grimoire", label: "Grimorio", icon: Sparkles },
-  { id: "library", label: "Biblioteca", icon: Library },
-  { id: "market", label: "Mercado", icon: Store },
-  { id: "ranking", label: "Ranking", icon: Trophy },
+// --- Mock Data ---
+const MARKET_ITEMS = [
+  { id: 1, name: 'Espada de Acero Valyrio', desc: 'Un arma forjada con magia antigua. +50 Ataque.', price: 1500, icon: Sword, rarity: 'legendary' },
+  { id: 2, name: 'Armadura de Escamas de Dragón', desc: 'Inmune al fuego y ataques básicos. +100 Defensa.', price: 2000, icon: Shield, rarity: 'epic' },
+  { id: 3, name: 'Veneno de Basilisco', desc: 'Mata lentamente al objetivo. Uso único.', price: 500, icon: Skull, rarity: 'rare' },
+  { id: 4, name: 'Título de Nobleza Falso', desc: 'Te permite entrar a los distritos altos sin ser cuestionado.', price: 800, icon: ScrollText, rarity: 'rare' },
+  { id: 5, name: 'Poción de Sangre', desc: 'Restaura tus heridas instantáneamente.', price: 100, icon: Coins, rarity: 'common' },
 ];
 
-const TAVERN_MODES: {
-  id: TavernMode;
-  label: string;
-  description: string;
-}[] = [
-  {
-    id: "chests",
-    label: "Cofres",
-    description: "Doble o nada con cofres malditos y recompensas inmediatas.",
-  },
-  {
-    id: "roulette",
-    label: "Ruleta",
-    description: "Gira la rueda y apuesta por multiplicadores impredecibles.",
-  },
-  {
-    id: "cards",
-    label: "Cartas",
-    description: "Adivina si la siguiente carta sube o baja para llevarte el pozo.",
-  },
-  {
-    id: "scratch",
-    label: "Rasca",
-    description: "Compra un rasca y gana y prueba suerte por un premio entre 500 y 1000 de oro.",
-  },
-  {
-    id: "crash",
-    label: "Multiplicador",
-    description: "El Multiplicador del Vacio: Retira tu apuesta antes de que la energia colapse.",
-  },
+const RANKING_PLAYERS = [
+  { id: 1, name: 'Lord Arthur', title: 'El León Dorado', faction: 'Los Leones', level: 45, gold: 12500, status: 'alive', kills: 142, avatar: { x: 2, y: 0 } },
+  { id: 2, name: 'Sir Lancelot', title: 'La Espada Fiel', faction: 'Los Leones', level: 42, gold: 8300, status: 'alive', kills: 98, avatar: { x: 4, y: 2 } },
+  { id: 3, name: 'Silas', title: 'El Mercader', faction: 'Gremio de Sombras', level: 30, gold: 25000, status: 'alive', kills: 12, avatar: { x: 1, y: 1 } },
+  { id: 4, name: 'Grom', title: 'El Sanguinario', faction: 'Bárbaros del Norte', level: 38, gold: 1200, status: 'alive', kills: 215, avatar: { x: 3, y: 2 } },
+  { id: 5, name: 'Eliza', title: 'La Viuda Negra', faction: 'Gremio de Sombras', level: 25, gold: 4500, status: 'dead', kills: 45, avatar: { x: 0, y: 2 } },
+  { id: 6, name: 'Baelor', title: 'El Piadoso', faction: 'Clérigos de la Luz', level: 22, gold: 800, status: 'alive', kills: 0, avatar: { x: 1, y: 0 } },
 ];
 
-const pageTransition = {
-  initial: { opacity: 0, y: 22 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -18 },
-  transition: { duration: 0.28, ease: "easeOut" as const },
-};
+// --- Components ---
 
-const TavernGame = lazy(() =>
-  import("./components/TavernGame").then((module) => ({
-    default: module.TavernGame,
-  }))
-);
-const TavernRoulette = lazy(() =>
-  import("./components/TavernRoulette").then((module) => ({
-    default: module.TavernRoulette,
-  }))
-);
-const TavernCards = lazy(() =>
-  import("./components/TavernCards").then((module) => ({
-    default: module.TavernCards,
-  }))
-);
-const TavernScratch = lazy(() =>
-  import("./components/TavernScratch").then((module) => ({
-    default: module.TavernScratch,
-  }))
-);
-const TavernCrash = lazy(() =>
-  import("./components/TavernCrash").then((module) => ({
-    default: module.TavernCrash,
-  }))
-);
-const PurchaseModal = lazy(() =>
-  import("./components/PurchaseModal").then((module) => ({
-    default: module.PurchaseModal,
-  }))
-);
-const WeeklyRankingPodium = lazy(() =>
-  import("./components/WeeklyRankingPodium").then((module) => ({
-    default: module.WeeklyRankingPodium,
-  }))
-);
-const LibrarySection = lazy(() =>
-  import("./components/LibrarySection").then((module) => ({
-    default: module.LibrarySection,
-  }))
-);
-const GrimoireSection = lazy(() =>
-  import("./components/GrimoireSection").then((module) => ({
-    default: module.GrimoireSection,
-  }))
-);
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState<TabId>("home");
-
+function Home() {
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-300">
-      <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6 md:pt-8">
-        <div className="mb-5">
-          <PlayerProfilePanel />
-        </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={pageTransition.initial}
-            animate={pageTransition.animate}
-            exit={pageTransition.exit}
-            transition={pageTransition.transition}
-          >
-            {activeTab === "home" ? <HomeSection /> : null}
-            {activeTab === "grimoire" ? (
-              <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el grimorio prohibido..." />}>
-                <GrimoireSection />
-              </Suspense>
-            ) : null}
-            {activeTab === "library" ? (
-              <Suspense fallback={<FullscreenLoadingOverlay message="Consultando la biblioteca real..." />}>
-                <LibrarySection />
-              </Suspense>
-            ) : null}
-            {activeTab === "market" ? <MarketSection /> : null}
-            {activeTab === "ranking" ? <RankingSection /> : null}
-          </motion.div>
-        </AnimatePresence>
-      </main>
-
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-800/80 bg-stone-950/90 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-md grid-cols-5 gap-2 px-3 pt-3 pb-safe md:max-w-6xl">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-            const isActive = activeTab === id;
-
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => {
-                  startTransition(() => setActiveTab(id));
-                }}
-                className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-[10px] font-semibold transition md:min-h-14 md:flex-row md:gap-2 md:text-xs ${
-                  isActive
-                    ? "border-amber-400/30 bg-amber-500/12 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.12)]"
-                    : "border-transparent bg-stone-900/70 text-stone-400"
-                }`}
-              >
-                <Icon
-                  className={`h-5 w-5 ${
-                    isActive ? "text-amber-400" : "text-stone-500"
-                  }`}
-                />
-                <span>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
-    </div>
-  );
-}
-
-function HomeSection() {
-  const StatusIcon = KINGDOM_STATUS.icon;
-  const [events, setEvents] = useState(ACTIVE_EVENTS);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadEvents() {
-      const result = await fetchRealmEvents();
-
-      if (cancelled) {
-        return;
-      }
-
-      setEvents(result.events);
-    }
-
-    void loadEvents();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <section className="space-y-5">
-      <div className="overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30 md:p-8">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
-          <Castle className="h-4 w-4" />
-          Reino vivo por WhatsApp
-        </div>
-
-        <h1 className="text-4xl font-black leading-none text-stone-100 md:text-5xl">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="space-y-8 pb-24"
+    >
+      <div className="text-center space-y-4 py-8">
+        <h1 className="font-serif text-4xl md:text-6xl font-bold text-amber-500 tracking-wider">
           Reino de las Sombras
         </h1>
-
-        <p className="mt-4 max-w-3xl text-sm leading-6 text-stone-300/90 md:text-base">
-          Intrigas de corte, guerra entre facciones y reliquias prohibidas en un
-          reino donde cada decision puede convertirte en leyenda o condenarte al
-          olvido.
+        <p className="text-stone-400 text-sm md:text-base max-w-md mx-auto px-4">
+          Un mundo de traición, magia y acero. Forja tu destino en el rol de WhatsApp más inmersivo.
         </p>
+      </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-3 md:max-w-xl">
-          {HOME_STATS.map((stat) => (
-            <StatCard
-              key={stat.label}
-              icon={stat.icon}
-              value={stat.value}
-              label={stat.label}
-            />
-          ))}
-        </div>
-
-        <a
-          href={WHATSAPP_JOIN_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 md:w-fit md:min-w-72"
+      <div className="px-4">
+        <a 
+          href="#" 
+          className="flex items-center justify-center gap-2 w-full bg-amber-700 hover:bg-amber-600 text-white py-4 rounded-xl font-serif text-lg font-bold transition-colors shadow-[0_0_15px_rgba(180,83,9,0.5)]"
         >
+          <MessageCircle size={24} />
           Unirse al Gremio (WhatsApp)
         </a>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-3xl border border-stone-800 bg-stone-900/75 p-5 md:p-6">
-          <h2 className="text-lg font-bold text-stone-100">La noche se mueve</h2>
-          <p className="mt-2 text-sm leading-6 text-stone-400">
-            Participa en asedios, pactos secretos, cacerias y duelos narrativos
-            con estetica medieval oscura y progresion competitiva.
-          </p>
+      <div className="grid grid-cols-2 gap-4 px-4">
+        <div className="bg-stone-900/80 border border-stone-800 p-4 rounded-xl text-center space-y-2">
+          <Users className="mx-auto text-amber-500" size={32} />
+          <h3 className="font-serif font-bold text-stone-200">50+ Jugadores</h3>
+          <p className="text-xs text-stone-500">Activos diariamente</p>
         </div>
-
-        <div className="rounded-3xl border border-stone-800 bg-gradient-to-br from-stone-900 to-stone-950 p-5 md:p-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-amber-400/80">
-                {KINGDOM_STATUS.eyebrow}
-              </p>
-              <p className="mt-2 text-2xl font-black text-stone-100">
-                {KINGDOM_STATUS.title}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3">
-              <StatusIcon className="h-6 w-6 text-amber-400" />
-            </div>
-          </div>
-          <p className="mt-3 text-sm leading-6 text-stone-400">
-            {KINGDOM_STATUS.description}
-          </p>
+        <div className="bg-stone-900/80 border border-stone-800 p-4 rounded-xl text-center space-y-2">
+          <Sword className="mx-auto text-amber-500" size={32} />
+          <h3 className="font-serif font-bold text-stone-200">Sistema de Combate</h3>
+          <p className="text-xs text-stone-500">Dados y estadísticas</p>
         </div>
       </div>
-
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-        <SectionHeader
-          eyebrow="Agenda del reino"
-          title="Eventos activos"
-          description="Cada evento conserva imagen, cronica, fechas y estado para que el calendario del rol siempre se sienta vivo."
-          rightSlot={
-            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
-              {events.length} eventos
-            </span>
-          }
-        />
-        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {events.map((event) => (
-            <EventCard key={event.title} event={event} />
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-[0.95fr_1.05fr]">
-        <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-          <SectionHeader eyebrow="Tablon del reino" title="Anuncios del consejo" />
-          <div className="mt-4 space-y-3">
-            {KINGDOM_ANNOUNCEMENTS.map((announcement) => (
-              <div
-                key={announcement.title}
-                className="rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xl bg-amber-500/10 p-2 text-amber-400">
-                    <Bell className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-stone-100">
-                      {announcement.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-stone-400">
-                      {announcement.content}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-          <SectionHeader eyebrow="Primeros pasos" title="Como unirse y empezar" />
-          <div className="mt-4 space-y-3">
-            {JOIN_STEPS.map((step, index) => (
-              <div
-                key={step.title}
-                className="rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-sm font-black text-amber-300">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-stone-100">
-                      {step.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-stone-400">
-                      {step.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
+    </motion.div>
   );
 }
 
-
-
-function MarketSection() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<
-    MarketCategoryId | "all"
-  >("all");
-  const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
-  const [tavernMode, setTavernMode] = useState<TavernMode>("chests");
-  const [marketItems, setMarketItems] = useState<MarketItem[]>(MARKET_ITEMS);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadMarketItems() {
-      const result = await fetchMarketItems();
-
-      if (cancelled) {
-        return;
-      }
-
-      setMarketItems(result.items);
-    }
-
-    void loadMarketItems();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const categoriesToRender = useMemo(
-    () =>
-      selectedCategoryId === "all"
-        ? MARKET_CATEGORIES
-        : MARKET_CATEGORIES.filter(
-            (category) => category.id === selectedCategoryId
-          ),
-    [selectedCategoryId]
-  );
-
-  const featuredItems = useMemo(
-    () => marketItems.filter((item) => item.featured),
-    [marketItems]
-  );
-
-  const modalCategory = useMemo(
-    () =>
-      selectedItem
-        ? MARKET_CATEGORIES.find(
-            (category) => category.id === selectedItem.category
-          )
-        : undefined,
-    [selectedItem]
-  );
-
-  const tavernContent = useMemo(() => {
-    switch (tavernMode) {
-      case "roulette":
-        return <TavernRoulette />;
-      case "cards":
-        return <TavernCards />;
-      case "scratch":
-        return <TavernScratch />;
-      case "crash":
-        return <TavernCrash />;
-      default:
-        return <TavernGame />;
-    }
-  }, [tavernMode]);
-
+function Lore() {
   return (
-    <section className="space-y-5">
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-        <SectionHeader
-          eyebrow="Mercado negro"
-          title="Catalogos del reino"
-          description="La compra usa tu perfil conectado para verificar y descontar el oro en Supabase, y cada categoria queda organizada como un catalogo desplegable."
-          rightSlot={
-            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
-              {marketItems.length} articulos
-            </span>
-          }
-        />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="space-y-6 px-4 pb-24"
+    >
+      <h2 className="font-serif text-3xl font-bold text-amber-500 text-center pt-6">El Lore</h2>
+      
+      <div className="bg-stone-900/80 border border-stone-800 p-6 rounded-xl space-y-4">
+        <h3 className="font-serif text-xl text-stone-200 border-b border-stone-800 pb-2">La Caída del Rey</h3>
+        <p className="text-stone-400 text-sm leading-relaxed">
+          Hace cien años, el Rey Loco fue derrocado, dejando el reino fracturado. Ahora, tres facciones principales luchan por el control de la capital, mientras en las sombras, el mercado negro prospera y los asesinos dictan quién vive un día más.
+        </p>
       </div>
 
-      <details className="group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6">
-        <summary className="flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-start gap-4">
-            <div className="rounded-2xl bg-rose-500/10 p-3 text-rose-300">
-              <Dices className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-amber-400/80">
-                Taberna clandestina
-              </p>
-              <h3 className="mt-2 text-xl font-bold text-stone-100">
-                Juegos de azar
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-stone-400">
-                La mesa sigue viva dentro del mercado. Cambia entre cofres, ruleta o cartas sin salir de la taberna.
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center justify-end sm:justify-start">
-            <div className="rounded-2xl bg-stone-800 p-3 text-stone-300 transition group-open:rotate-180 group-open:text-rose-300">
-              <ChevronDown className="h-5 w-5" />
-            </div>
-          </div>
-        </summary>
+      <div className="bg-stone-900/80 border border-stone-800 p-6 rounded-xl space-y-4">
+        <h3 className="font-serif text-xl text-stone-200 border-b border-stone-800 pb-2">Reglas Básicas</h3>
+        <ul className="text-stone-400 text-sm space-y-3 list-disc pl-4">
+          <li>Respeta el turno de rol de los demás.</li>
+          <li>Las acciones de combate se deciden mediante tiradas de dados (bot en el grupo).</li>
+          <li>La muerte de un personaje es permanente (Permadeath).</li>
+          <li>El metagaming está estrictamente prohibido.</li>
+        </ul>
+      </div>
+    </motion.div>
+  );
+}
 
-        <div className="border-t border-stone-800 pt-5 mt-5">
-          <div className="flex flex-wrap gap-2">
-            {TAVERN_MODES.map((mode) => (
-              <FilterPill
-                key={mode.id}
-                label={mode.label}
-                active={tavernMode === mode.id}
-                onClick={() => setTavernMode(mode.id)}
-              />
-            ))}
-          </div>
+function Market() {
+  const getRarityColor = (rarity: string) => {
+    switch(rarity) {
+      case 'legendary': return 'text-amber-500 border-amber-500/30 bg-amber-500/5';
+      case 'epic': return 'text-purple-500 border-purple-500/30 bg-purple-500/5';
+      case 'rare': return 'text-blue-400 border-blue-400/30 bg-blue-400/5';
+      default: return 'text-stone-300 border-stone-800 bg-stone-900/50';
+    }
+  };
 
-          <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
-            <p className="text-sm leading-6 text-stone-400">
-              {
-                TAVERN_MODES.find((mode) => mode.id === tavernMode)?.description
-              }
-            </p>
-          </div>
-
-          <div className="mt-5">
-            <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la mesa de juego..." />}>
-              {tavernContent}
-            </Suspense>
-          </div>
-        </div>
-      </details>
-
-      {featuredItems.length > 0 ? (
-        <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
-          <SectionHeader
-            eyebrow="Selecciones del mercader"
-            title="Objetos destacados"
-          />
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {featuredItems.map((item) => (
-              <MarketItemCard
-                key={`featured-${item.name}`}
-                item={item}
-                onBuy={() => setSelectedItem(item)}
-                hideImage
-              />
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-        <SectionHeader
-          eyebrow="Filtrar catalogo"
-          title="Categorias del mercado"
-          description="Puedes ver todo junto o quedarte solo con una familia de objetos."
-        />
-        <div className="mt-4 flex flex-wrap gap-2">
-          <FilterPill
-            label="Todos"
-            active={selectedCategoryId === "all"}
-            onClick={() => setSelectedCategoryId("all")}
-          />
-          {MARKET_CATEGORIES.map((category) => (
-            <FilterPill
-              key={category.id}
-              label={category.title}
-              active={selectedCategoryId === category.id}
-              onClick={() => setSelectedCategoryId(category.id)}
-            />
-          ))}
-        </div>
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="space-y-6 px-4 pb-24"
+    >
+      <div className="text-center pt-6 space-y-2">
+        <h2 className="font-serif text-3xl font-bold text-amber-500">Mercado Negro</h2>
+        <p className="text-stone-500 text-sm">Solo para aquellos con el oro suficiente...</p>
       </div>
 
       <div className="space-y-4">
-        {categoriesToRender.map((category) => (
-          <MarketCategoryPanel
-            key={category.id}
-            category={category}
-            items={marketItems.filter((item) => item.category === category.id)}
-            onBuy={(item) => setSelectedItem(item)}
-          />
-        ))}
-      </div>
-
-      <AnimatePresence>
-        {selectedItem ? (
-          <Suspense fallback={<FullscreenLoadingOverlay message="Preparando el pedido del mercado..." />}>
-            <PurchaseModal
-              item={selectedItem}
-              category={modalCategory}
-              onClose={() => setSelectedItem(null)}
-            />
-          </Suspense>
-        ) : null}
-      </AnimatePresence>
-    </section>
-  );
-}
-
-function RankingSection() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [rankingMessage, setRankingMessage] = useState("");
-  const [rankingWindow, setRankingWindow] = useState<RankingWindow | null>(null);
-  const [players, setPlayers] = useState<RankingPlayer[]>([]);
-  const [timeLeft, setTimeLeft] = useState("");
-  const [factionFilter, setFactionFilter] = useState<string>("all");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadRanking() {
-      setIsLoading(true);
-      const ranking = await fetchWeeklyRanking();
-
-      if (cancelled) {
-        return;
-      }
-
-      setPlayers(ranking.players);
-      setRankingWindow(ranking.window);
-      setRankingMessage(ranking.message);
-      setTimeLeft(formatCountdown(ranking.window.weekEndsAt));
-      setIsLoading(false);
-    }
-
-    void loadRanking();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!rankingWindow) {
-      return;
-    }
-
-    setTimeLeft(formatCountdown(rankingWindow.weekEndsAt));
-
-    const intervalId = window.setInterval(() => {
-      setTimeLeft(formatCountdown(rankingWindow.weekEndsAt));
-    }, 60000);
-
-    return () => window.clearInterval(intervalId);
-  }, [rankingWindow]);
-
-  const factions = useMemo(
-    () => Array.from(new Set(players.map((player) => player.faction))),
-    [players]
-  );
-
-  const filteredPlayers = useMemo(
-    () =>
-      players.filter((player) =>
-        factionFilter === "all" ? true : player.faction === factionFilter
-      ),
-    [factionFilter, players]
-  );
-
-  const podiumPlayers = useMemo(() => filteredPlayers.slice(0, 3), [filteredPlayers]);
-  const rankingLabel = rankingWindow ? formatRankingWindow(rankingWindow) : "";
-
-  return (
-    <section className="space-y-5">
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 md:p-7">
-        <SectionHeader
-          eyebrow="Temporada semanal"
-          title="Ranking de actividad"
-          description="El podio premia a quienes mas participan en misiones y eventos oficiales durante la semana actual."
-          rightSlot={
-            <div className="rounded-[1.4rem] border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-right">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">
-                Cierra en
-              </p>
-              <p className="mt-1 text-lg font-black text-stone-100">
-                {timeLeft || "--"}
-              </p>
+        {MARKET_ITEMS.map((item) => (
+          <div key={item.id} className={`p-4 rounded-xl border ${getRarityColor(item.rarity)} flex gap-4 items-start`}>
+            <div className="p-3 bg-stone-950 rounded-lg shrink-0">
+              <item.icon size={24} />
             </div>
-          }
-        />
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-stone-400">
-          <span className="rounded-full border border-stone-700 bg-stone-950/55 px-3 py-2">
-            {rankingLabel || "Semana actual"}
-          </span>
-          <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-amber-300">
-            Misiones + eventos
-          </span>
-        </div>
-        {rankingMessage ? (
-          <p className="mt-4 text-sm leading-6 text-stone-400">{rankingMessage}</p>
-        ) : null}
-      </div>
-
-      {isLoading ? (
-        <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 text-sm text-stone-400">
-          Cargando la temporada semanal...
-        </div>
-      ) : (
-        <>
-          <Suspense
-            fallback={
-              <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 text-sm text-stone-400">
-                Preparando el podio semanal...
+            <div className="flex-1 space-y-1">
+              <div className="flex justify-between items-start">
+                <h3 className="font-serif font-bold text-stone-200">{item.name}</h3>
+                <span className="flex items-center gap-1 text-amber-500 font-mono text-sm font-bold">
+                  {item.price} <Coins size={14} />
+                </span>
               </div>
-            }
-          >
-            <WeeklyRankingPodium players={podiumPlayers} />
-          </Suspense>
-
-          <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-            <SectionHeader
-              eyebrow="Filtro tactico"
-              title="Enfocar por faccion"
-              description="El ranking se reordena solo para la faccion elegida, sin tocar la tabla general."
-            />
-            <div className="mt-4 flex flex-wrap gap-2">
-              <FilterPill
-                label="Todas las facciones"
-                active={factionFilter === "all"}
-                onClick={() => setFactionFilter("all")}
-              />
-              {factions.map((faction) => (
-                <FilterPill
-                  key={faction}
-                  label={faction}
-                  active={factionFilter === faction}
-                  onClick={() => setFactionFilter(faction)}
-                />
-              ))}
+              <p className="text-stone-400 text-xs leading-relaxed">{item.desc}</p>
             </div>
           </div>
-
-          <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-            <SectionHeader
-              eyebrow="Tabla completa"
-              title="Participacion acumulada"
-              description="Cada punto refleja presencia en misiones, eventos y racha de actividad dentro de la semana."
-            />
-            <div className="mt-5 space-y-4">
-              {filteredPlayers.length > 0 ? (
-                filteredPlayers.map((player, index) => (
-                  <RankingCard key={player.id} player={player} index={index} />
-                ))
-              ) : (
-                <div className="rounded-[1.6rem] border border-dashed border-stone-700 bg-stone-950/45 p-5 text-sm leading-6 text-stone-400">
-                  No hay jugadores cargados para esa faccion en la temporada actual.
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      )}
-    </section>
-  );
-}
-
-function MarketCategoryPanel({
-  category,
-  items,
-  onBuy,
-}: {
-  category: MarketCategory;
-  items: MarketItem[];
-  onBuy: (item: MarketItem) => void;
-}) {
-  const Icon = category.icon;
-
-  return (
-    <details
-      open
-      className="group rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6"
-    >
-      <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
-            <Icon className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-stone-100">{category.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-stone-400">
-              {category.subtitle}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-stone-300">
-            {items.length} items
-          </span>
-          <div className="rounded-2xl bg-stone-800 p-3 text-stone-300 transition group-open:rotate-180 group-open:text-amber-300">
-            <ChevronDown className="h-5 w-5" />
-          </div>
-        </div>
-      </summary>
-
-      <div className="mt-5 grid gap-4 border-t border-stone-800 pt-5 md:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => (
-          <MarketItemCard
-            key={`${category.id}-${item.name}`}
-            item={item}
-            onBuy={() => onBuy(item)}
-          />
         ))}
       </div>
-    </details>
+    </motion.div>
   );
 }
 
-function CollapsiblePanel({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  children: ReactNode;
-}) {
-  return (
-    <details className="group rounded-[1.75rem] border border-stone-800 bg-stone-900/75 p-5">
-      <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-bold text-stone-100">{title}</h3>
-          <p className="mt-2 text-sm leading-6 text-stone-400">{subtitle}</p>
+function Ranking() {
+  const top3 = RANKING_PLAYERS.slice(0, 3);
+  const rest = RANKING_PLAYERS.slice(3);
+
+  const PodiumItem = ({ player, rank, height, color, delay }: any) => (
+    <motion.div 
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, type: "spring", stiffness: 100 }}
+      className="flex flex-col items-center relative w-[30%]"
+    >
+      <div className="relative mb-3 z-10">
+        <div className={`absolute inset-0 rounded-full blur-md bg-gradient-to-br ${color} opacity-40`} />
+        <div 
+          className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-stone-800 bg-stone-900 relative z-10 overflow-hidden"
+          style={{
+            backgroundImage: `url(${avatarsImg})`,
+            backgroundSize: '500% 300%',
+            backgroundPosition: `${player.avatar.x * 25}% ${player.avatar.y * 50}%`,
+          }}
+        />
+        <div className={`absolute -bottom-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-br ${color} text-stone-950 border-2 border-stone-900 z-20 shadow-lg`}>
+          {rank === 1 ? <Crown size={14} /> : rank}
         </div>
-        <div className="rounded-2xl bg-stone-800 p-3 text-stone-300 transition group-open:rotate-180 group-open:text-amber-300">
-          <ChevronDown className="h-5 w-5" />
-        </div>
-      </summary>
-      <div className="mt-4 border-t border-stone-800 pt-4">{children}</div>
-    </details>
-  );
-}
-
-function EmbeddedLoadingCard({ message }: { message: string }) {
-  return (
-    <div className="rounded-[1.6rem] border border-stone-800 bg-stone-950/45 p-5 text-sm leading-6 text-stone-400">
-      {message}
-    </div>
-  );
-}
-
-function FullscreenLoadingOverlay({ message }: { message: string }) {
-  return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-[2rem] border border-stone-800 bg-stone-950 px-5 py-6 text-center shadow-2xl shadow-black/40">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
-          Cargando
-        </p>
-        <p className="mt-3 text-sm leading-6 text-stone-300">{message}</p>
       </div>
+      
+      <div className="text-center mb-2 z-10">
+        <div className="font-serif font-bold text-stone-200 text-sm truncate w-full px-1">{player.name}</div>
+        <div className="text-[10px] text-amber-500 font-mono flex items-center justify-center gap-1">
+          {player.gold} <Coins size={10} />
+        </div>
+      </div>
+      
+      <div className={`w-full ${height} bg-gradient-to-t ${color} rounded-t-lg opacity-20 border-t border-x border-stone-500/30 relative overflow-hidden`}>
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay"></div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="space-y-8 px-4 pb-24"
+    >
+      <div className="text-center pt-6 space-y-2">
+        <h2 className="font-serif text-3xl font-bold text-amber-500 flex items-center justify-center gap-2">
+          <Trophy className="text-amber-500" size={28} />
+          Salón de la Fama
+        </h2>
+        <p className="text-stone-500 text-sm">Las leyendas del Reino de las Sombras</p>
+      </div>
+
+      {/* Podium */}
+      <div className="flex justify-center items-end gap-2 mt-12 mb-8 px-2">
+        <PodiumItem player={top3[1]} rank={2} height="h-24 md:h-32" color="from-stone-300 to-stone-500" delay={0.2} />
+        <PodiumItem player={top3[0]} rank={1} height="h-32 md:h-40" color="from-amber-300 to-amber-600" delay={0.1} />
+        <PodiumItem player={top3[2]} rank={3} height="h-20 md:h-24" color="from-orange-400 to-orange-800" delay={0.3} />
+      </div>
+
+      {/* Rest of the Ranking */}
+      <div className="space-y-3">
+        {rest.map((player, index) => (
+          <motion.div
+            key={player.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 + index * 0.1 }}
+            className={`bg-stone-900/80 border border-stone-800 rounded-xl p-3 flex items-center gap-3 relative overflow-hidden group hover:border-stone-700 transition-colors ${player.status === 'dead' ? 'opacity-60 grayscale' : ''}`}
+          >
+            {/* Background accent */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-stone-800 group-hover:bg-amber-900/50 transition-colors" />
+            
+            <div className="w-6 text-center font-serif font-bold text-stone-500 text-sm">
+              {index + 4}
+            </div>
+            
+            <div 
+              className="w-10 h-10 rounded-full border border-stone-700 bg-stone-950 shrink-0 overflow-hidden"
+              style={{
+                backgroundImage: `url(${avatarsImg})`,
+                backgroundSize: '500% 300%',
+                backgroundPosition: `${player.avatar.x * 25}% ${player.avatar.y * 50}%`,
+              }}
+            />
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-serif font-bold text-stone-200 flex items-center gap-2 truncate text-sm">
+                {player.name}
+                {player.status === 'dead' && <Skull size={12} className="text-red-500 shrink-0" />}
+              </h3>
+              <p className="text-[10px] text-stone-500 truncate">{player.title} • {player.faction}</p>
+            </div>
+            
+            <div className="text-right shrink-0 flex flex-col items-end gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-stone-400 flex items-center gap-0.5" title="Asesinatos">
+                  {player.kills} <Sword size={10} />
+                </span>
+                <span className="text-xs font-bold text-stone-300 bg-stone-800 px-1.5 rounded">
+                  Nvl {player.level}
+                </span>
+              </div>
+              <div className="text-[10px] text-amber-500 flex items-center gap-1 font-mono">
+                {player.gold} <Coins size={10} />
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// --- Main App ---
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('home');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'home': return <Home key="home" />;
+      case 'lore': return <Lore key="lore" />;
+      case 'market': return <Market key="market" />;
+      case 'ranking': return <Ranking key="ranking" />;
+      default: return <Home key="home" />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-stone-950 text-stone-300 font-sans selection:bg-amber-900 selection:text-amber-100">
+      
+      {/* Main Content Area */}
+      <main className="max-w-md mx-auto min-h-screen relative">
+        <AnimatePresence mode="wait">
+          {renderContent()}
+        </AnimatePresence>
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-stone-950/90 backdrop-blur-md border-t border-stone-800 pb-safe z-50">
+        <div className="max-w-md mx-auto flex justify-around items-center p-2">
+          <button 
+            onClick={() => setActiveTab('home')}
+            className={`flex flex-col items-center p-2 rounded-lg transition-colors ${activeTab === 'home' ? 'text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
+          >
+            <HomeIcon size={24} />
+            <span className="text-[10px] font-serif mt-1">Inicio</span>
+          </button>
+          
+          <button 
+            onClick={() => setActiveTab('lore')}
+            className={`flex flex-col items-center p-2 rounded-lg transition-colors ${activeTab === 'lore' ? 'text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
+          >
+            <ScrollText size={24} />
+            <span className="text-[10px] font-serif mt-1">Lore</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('market')}
+            className={`flex flex-col items-center p-2 rounded-lg transition-colors ${activeTab === 'market' ? 'text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
+          >
+            <Store size={24} />
+            <span className="text-[10px] font-serif mt-1">Mercado</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('ranking')}
+            className={`flex flex-col items-center p-2 rounded-lg transition-colors ${activeTab === 'ranking' ? 'text-amber-500' : 'text-stone-500 hover:text-stone-300'}`}
+          >
+            <Trophy size={24} />
+            <span className="text-[10px] font-serif mt-1">Ranking</span>
+          </button>
+        </div>
+      </nav>
+      
+      {/* Global CSS for safe area (iPhone bottom bar) */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+      `}} />
     </div>
   );
 }

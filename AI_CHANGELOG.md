@@ -44,6 +44,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `.env.example`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se corrigio el formato de `.env.example` para que sea un archivo `.env` valido (sin comillas ni `;`) y se pueda copiar/pegar directo.
+*   **Cambios Clave:**
+    *   `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` quedaron como `KEY=value`.
+*   **Notas/Advertencias:** Ninguna.
+
+---
+### [Fecha: 13/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/utils/supabaseClient.ts`, `src/lib/supabase.ts`, `src/utils/scratchUtils.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Integracion y saneamiento del repo tras cambios externos: se unifico el historial con `origin/main` y se corrigieron errores de TypeScript que rompian consistencia del proyecto.
 *   **Cambios Clave:**

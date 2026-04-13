@@ -1,6 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = "https://sibisgiwmgdrpfkzmkkw.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_Y8Dk0GxPacMnHDDWmT3DcQ_fptqtC3h";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Create a single supabase client for interacting with your database
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;

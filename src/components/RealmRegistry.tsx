@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ScrollText, X, User, Info } from 'lucide-react';
 import { CharacterSheet } from '../types';
 import { supabase } from '../lib/supabase';
-import { CharacterSheetModal } from './CharacterSheetModal';
+import { CharSheetModal } from './CharSheetModal';
 
 interface RealmRegistryProps {
   onClose: () => void;
@@ -124,7 +124,7 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
         </div>
       </motion.div>
 
-      <CharacterSheetModal 
+      <CharSheetModal 
         isOpen={!!selectedSheet} 
         onClose={() => setSelectedSheet(null)} 
         character={selectedSheet} 

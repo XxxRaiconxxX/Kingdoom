@@ -43,6 +43,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 13/04/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Corrección del sistema de retiro automático y visualización del tope en el minijuego Crash.
+*   **Cambios Clave:**
+    *   **Solución de Stale Closures:** Implementación de `useRef` para variables críticas (apuesta, jugador, multiplicador) asegurando lecturas en tiempo real dentro del bucle `requestAnimationFrame`.
+    *   **Visualización del Tope:** Ajuste dinámico del eje Y (`maxY`) en el canvas para que la línea de retiro automático sea siempre visible en el gráfico.
+    *   **Precisión de Cobro:** El retiro automático ahora asegura el multiplicador exacto configurado por el usuario, evitando discrepancias por saltos de frames.
+*   **Notas/Advertencias:** Simulación y compilación verificadas exitosamente.
+
+---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/scratchUtils.ts`, `src/components/TavernScratch.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Aleatorización del límite diario de ganancias en el Rasca y Gana.

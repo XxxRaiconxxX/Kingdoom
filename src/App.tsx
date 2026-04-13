@@ -6,8 +6,8 @@ import {
   ChevronDown,
   Dices,
   Home,
-  Library,
-  Sparkles,
+  Map,
+  ScrollText,
   Store,
   Trophy,
 } from "lucide-react";
@@ -28,7 +28,14 @@ import {
   KINGDOM_STATUS,
   WHATSAPP_JOIN_URL,
 } from "./data/home";
+import { LORE_CHAPTERS, LORE_RULES, REALM_FACTIONS } from "./data/lore";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "./data/market";
+import {
+  COMMON_THREATS,
+  DEMOGRAPHIC_BLOCS,
+  DIPLOMATIC_TENSIONS,
+  WORLD_STATUS,
+} from "./data/world";
 import {
   fetchWeeklyRanking,
   formatCountdown,
@@ -40,12 +47,12 @@ import type {
   MarketCategory, MarketCategoryId, MarketItem, NavItem, RankingPlayer, RankingWindow, TabId,
 } from "./types";
 
-type TavernMode = "chests" | "roulette" | "cards" | "scratch" | "crash";
+type TavernMode = "chests" | "roulette" | "cards" | "scratch";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
-  { id: "grimoire", label: "Grimorio", icon: Sparkles },
-  { id: "library", label: "Biblioteca", icon: Library },
+  { id: "lore", label: "Lore", icon: ScrollText },
+  { id: "world", label: "Mundo", icon: Map },
   { id: "market", label: "Mercado", icon: Store },
   { id: "ranking", label: "Ranking", icon: Trophy },
 ];
@@ -74,11 +81,6 @@ const TAVERN_MODES: {
     id: "scratch",
     label: "Rasca",
     description: "Compra un rasca y gana y prueba suerte por un premio entre 500 y 1000 de oro.",
-  },
-  {
-    id: "crash",
-    label: "Multiplicador",
-    description: "El Multiplicador del Vacio: Retira tu apuesta antes de que la energia colapse.",
   },
 ];
 
@@ -109,11 +111,6 @@ const TavernScratch = lazy(() =>
     default: module.TavernScratch,
   }))
 );
-const TavernCrash = lazy(() =>
-  import("./components/TavernCrash").then((module) => ({
-    default: module.TavernCrash,
-  }))
-);
 const PurchaseModal = lazy(() =>
   import("./components/PurchaseModal").then((module) => ({
     default: module.PurchaseModal,
@@ -122,16 +119,6 @@ const PurchaseModal = lazy(() =>
 const WeeklyRankingPodium = lazy(() =>
   import("./components/WeeklyRankingPodium").then((module) => ({
     default: module.WeeklyRankingPodium,
-  }))
-);
-const LibrarySection = lazy(() =>
-  import("./components/LibrarySection").then((module) => ({
-    default: module.LibrarySection,
-  }))
-);
-const GrimoireSection = lazy(() =>
-  import("./components/GrimoireSection").then((module) => ({
-    default: module.GrimoireSection,
   }))
 );
 
@@ -154,16 +141,8 @@ export default function App() {
             transition={pageTransition.transition}
           >
             {activeTab === "home" ? <HomeSection /> : null}
-            {activeTab === "grimoire" ? (
-              <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el grimorio prohibido..." />}>
-                <GrimoireSection />
-              </Suspense>
-            ) : null}
-            {activeTab === "library" ? (
-              <Suspense fallback={<FullscreenLoadingOverlay message="Consultando la biblioteca real..." />}>
-                <LibrarySection />
-              </Suspense>
-            ) : null}
+            {activeTab === "lore" ? <LoreSection /> : null}
+            {activeTab === "world" ? <WorldSection /> : null}
             {activeTab === "market" ? <MarketSection /> : null}
             {activeTab === "ranking" ? <RankingSection /> : null}
           </motion.div>
@@ -370,7 +349,177 @@ function HomeSection() {
   );
 }
 
+function LoreSection() {
+  return (
+    <section className="space-y-5">
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+        <SectionHeader
+          eyebrow="Lore y reglas"
+          title="Leyes de la penumbra"
+          description="Aqui dejamos lo mas importante para jugar: reglas base, cronica principal y las facciones narrativas que empujan la temporada."
+        />
+      </div>
 
+      <div className="grid gap-4 md:grid-cols-3">
+        {LORE_RULES.map((rule) => {
+          const Icon = rule.icon;
+
+          return (
+            <article
+              key={rule.title}
+              className="rounded-[1.75rem] border border-stone-800 bg-stone-900/75 p-5"
+            >
+              <div className="w-fit rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+                <Icon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-stone-100">
+                {rule.title}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-stone-400">
+                {rule.description}
+              </p>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
+        <SectionHeader
+          eyebrow="Historia principal"
+          title="El pulso de la temporada"
+          description="La cronica larga queda resumida al principio y puedes expandir cada bloque solo si te interesa leer mas."
+        />
+        <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-5">
+          <ExpandableText
+            lines={4}
+            text="Hace veinte inviernos, el Sol de Ceniza desaparecio detras de un eclipse eterno. Desde entonces, el Reino de las Sombras vive dividido entre casas nobles en decadencia, ordenes religiosas quebradas y gremios que comercian con reliquias prohibidas. La Corona de Carbon ha vuelto a emitir un fulgor oscuro bajo las ruinas de Valdren, y quien la reclame podria unir el reino o romperlo por completo."
+          />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {LORE_CHAPTERS.map((chapter) => (
+          <CollapsiblePanel
+            key={chapter.title}
+            title={chapter.title}
+            subtitle={chapter.summary}
+          >
+            <ExpandableText text={chapter.content} lines={4} />
+          </CollapsiblePanel>
+        ))}
+      </div>
+
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+        <SectionHeader
+          eyebrow="Facciones"
+          title="Fuerzas del relato"
+          description="Las principales facciones del rol quedan resumidas para que el jugador nuevo no se pierda."
+        />
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {REALM_FACTIONS.map((faction) => (
+            <article
+              key={faction.name}
+              className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-5"
+            >
+              <h3 className="text-lg font-bold text-stone-100">{faction.name}</h3>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-300">
+                {faction.motto}
+              </p>
+              <div className="mt-3">
+                <ExpandableText text={faction.description} lines={3} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WorldSection() {
+  return (
+    <section className="space-y-5">
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+        <SectionHeader
+          eyebrow="Mundo y geopolitica"
+          title="Aethelgardia"
+          description="Aqui vive el worldbuilding pesado para que el lore no se sienta saturado: demografia, tensiones diplomaticas y amenazas del continente."
+        />
+      </div>
+
+      <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
+        <SectionHeader
+          eyebrow="Estado del mundo"
+          title={WORLD_STATUS.title}
+          description={WORLD_STATUS.description}
+        />
+      </div>
+
+      <div className="space-y-3">
+        {DEMOGRAPHIC_BLOCS.map((bloc) => (
+          <CollapsiblePanel
+            key={bloc.realm}
+            title={bloc.realm}
+            subtitle={bloc.epithet}
+          >
+            <div className="grid gap-3 md:grid-cols-2">
+              {bloc.groups.map((group) => (
+                <div
+                  key={group.title}
+                  className="rounded-[1.35rem] border border-stone-800 bg-stone-950/45 p-4"
+                >
+                  <p className="text-sm font-bold text-stone-100">{group.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-stone-400">
+                    {group.races.join(", ")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CollapsiblePanel>
+        ))}
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+          <SectionHeader eyebrow="Diplomacia" title="Tensiones activas" />
+          <div className="mt-4 space-y-3">
+            {DIPLOMATIC_TENSIONS.map((note) => (
+              <article
+                key={note.title}
+                className="rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4"
+              >
+                <h3 className="text-sm font-bold text-stone-100">{note.title}</h3>
+                <div className="mt-3">
+                  <ExpandableText text={note.description} lines={3} />
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+          <SectionHeader
+            eyebrow="Peligros del continente"
+            title="Amenazas comunes"
+          />
+          <div className="mt-4 space-y-3">
+            {COMMON_THREATS.map((note) => (
+              <article
+                key={note.title}
+                className="rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4"
+              >
+                <h3 className="text-sm font-bold text-stone-100">{note.title}</h3>
+                <div className="mt-3">
+                  <ExpandableText text={note.description} lines={3} />
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function MarketSection() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<
@@ -433,8 +582,6 @@ function MarketSection() {
         return <TavernCards />;
       case "scratch":
         return <TavernScratch />;
-      case "crash":
-        return <TavernCrash />;
       default:
         return <TavernGame />;
     }

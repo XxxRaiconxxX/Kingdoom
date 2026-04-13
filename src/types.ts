@@ -209,3 +209,38 @@ export type GrimoireCategory = {
   title: string;
   styles: MagicStyle[];
 };
+
+// --- FICHA (CHARACTER SHEET) TYPES ---
+
+export type CharacterStats = {
+  strength: number;
+  agility: number;
+  intelligence: number;
+  defense: number;
+  magicDefense: number;
+};
+
+export type CharacterSheet = {
+  id: string;
+  playerId: string;
+  name: string;
+  age: string;
+  gender: string;
+  height: string;
+  race: string;
+  powers: string;
+  stats: CharacterStats;
+  weapon: string;
+  combatStyle: string;
+  birthRealm: string;
+  socialClass: string;
+  nobleTitle: string;
+  profession: string;
+  nonMagicSkills: string;
+  personality: string;
+  history: string;
+  extras: string;
+  weaknesses: string;
+  inventory: string;
+  createdAt: string;
+};

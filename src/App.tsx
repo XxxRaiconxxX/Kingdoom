@@ -1,19 +1,8 @@
-import React, { useState, lazy, Suspense } from 'react';
-import { ScrollText, Store, Trophy, Home as HomeIcon, Sword, Shield, Coins, Users, Skull, Crown, MessageCircle, Beer } from 'lucide-react';
+import React, { useState } from 'react';
+import { ScrollText, Store, Trophy, Home as HomeIcon, Sword, Shield, Coins, Users, Skull, Crown, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PlayerProfilePanel } from './components/PlayerProfilePanel';
 
 const avatarsImg = 'https://picsum.photos/512/512';
-
-// Lazy load heavy components
-const TavernGame = lazy(() => import('./components/TavernGame').then(m => ({ default: m.TavernGame })));
-const TavernRoulette = lazy(() => import('./components/TavernRoulette').then(m => ({ default: m.TavernRoulette })));
-const TavernCards = lazy(() => import('./components/TavernCards').then(m => ({ default: m.TavernCards })));
-const TavernScratch = lazy(() => import('./components/TavernScratch').then(m => ({ default: m.TavernScratch })));
-const TavernCrash = lazy(() => import('./components/TavernCrash').then(m => ({ default: m.TavernCrash })));
-const WeeklyRankingPodium = lazy(() => import('./components/WeeklyRankingPodium').then(m => ({ default: m.WeeklyRankingPodium })));
-const MarketItemCard = lazy(() => import('./components/MarketItemCard').then(m => ({ default: m.MarketItemCard })));
-const RankingCard = lazy(() => import('./components/RankingCard').then(m => ({ default: m.RankingCard })));
 
 // --- Mock Data ---
 const MARKET_ITEMS = [

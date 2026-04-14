@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 14/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Ajuste de probabilidades de la ruleta y mejora de animacion de giro.
+*   **Cambios Clave:**
+    *   Reemplazo de probabilidades por pesos normalizados para evitar sesgos y hacer los premios altos realmente alcanzables.
+    *   Giro extendido: mas rotaciones y mayor duracion total para una sensacion mas epica.
+    *   Sincronizacion entre tiempo de animacion y resolucion del resultado.
+*   **Notas/Advertencias:** Balance actual favorece mas premios que la version previa.
+
+---
+### [Fecha: 14/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/RealmRegistry.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Correccion de busqueda por jugador en el Registro del Reino.
 *   **Cambios Clave:**

@@ -5,18 +5,18 @@ import { usePlayerSession } from "../context/PlayerSessionContext";
 import ruletaImg from "../assets/ruleta.png";
 
 const MULTIPLIERS = [0, 0.5, 1.5, 2, 5, 10];
-const PROBABILITIES = [0.45, 0.35, 0.25, 0.15, 0.1, 0.05];
+const MULTIPLIER_WEIGHTS = [28, 22, 20, 16, 10, 4];
+const SPIN_DURATION_MS = 7000;
 
 type GamePhase = "betting" | "spinning" | "result";
 
 function getRandomMultiplier() {
-  const rand = Math.random();
-  let cumulative = 0;
+  const totalWeight = MULTIPLIER_WEIGHTS.reduce((sum, weight) => sum + weight, 0);
+  let ticket = Math.random() * totalWeight;
 
-  for (let index = 0; index < PROBABILITIES.length; index += 1) {
-    cumulative += PROBABILITIES[index];
-
-    if (rand <= cumulative) {
+  for (let index = 0; index < MULTIPLIER_WEIGHTS.length; index += 1) {
+    ticket -= MULTIPLIER_WEIGHTS[index];
+    if (ticket <= 0) {
       return MULTIPLIERS[index];
     }
   }
@@ -56,8 +56,8 @@ export function TavernRoulette() {
     const multiplier = getRandomMultiplier();
     setResultMultiplier(multiplier);
 
-    const extraRotation = Math.floor(Math.random() * 360);
-    setSpinDegrees(1800 + extraRotation);
+    const extraRotation = Math.floor(Math.random() * 1080);
+    setSpinDegrees(3600 + extraRotation);
     setPhase("spinning");
 
     window.setTimeout(async () => {
@@ -69,7 +69,7 @@ export function TavernRoulette() {
 
       setPhase("result");
       setUpdating(false);
-    }, 3000);
+    }, SPIN_DURATION_MS);
   }
 
   function handlePlayAgain() {
@@ -209,7 +209,7 @@ export function TavernRoulette() {
                 src={ruletaImg}
                 alt="Ruleta"
                 animate={{ rotate: spinDegrees }}
-                transition={{ duration: 6, ease: "circOut" }}
+                transition={{ duration: SPIN_DURATION_MS / 1000, ease: "circOut" }}
                 className="h-full w-full rounded-full object-cover shadow-[0_0_40px_rgba(245,158,11,0.3)]"
               />
             </div>

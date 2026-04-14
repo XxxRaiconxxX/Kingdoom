@@ -40,7 +40,7 @@ import type {
   MarketCategory, MarketCategoryId, MarketItem, NavItem, RankingPlayer, RankingWindow, TabId,
 } from "./types";
 
-type TavernMode = "chests" | "roulette" | "cards" | "scratch" | "crash";
+type TavernMode = "expedition" | "chests" | "roulette" | "cards" | "scratch" | "crash";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -55,6 +55,11 @@ const TAVERN_MODES: {
   label: string;
   description: string;
 }[] = [
+  {
+    id: "expedition",
+    label: "Expedicion",
+    description: "Combate PvE narrativo por contratos: eliges accion, sobrevives al relato y cobras botin si vuelves vivo.",
+  },
   {
     id: "chests",
     label: "Cofres",
@@ -89,6 +94,11 @@ const pageTransition = {
   transition: { duration: 0.28, ease: "easeOut" as const },
 };
 
+const TavernExpedition = lazy(() =>
+  import("./components/TavernExpedition").then((module) => ({
+    default: module.TavernExpedition,
+  }))
+);
 const TavernGame = lazy(() =>
   import("./components/TavernGame").then((module) => ({
     default: module.TavernGame,
@@ -389,7 +399,7 @@ function MarketSection() {
     MarketCategoryId | "all"
   >("all");
   const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
-  const [tavernMode, setTavernMode] = useState<TavernMode>("chests");
+  const [tavernMode, setTavernMode] = useState<TavernMode>("expedition");
   const [marketItems, setMarketItems] = useState<MarketItem[]>(MARKET_ITEMS);
 
   useEffect(() => {
@@ -439,6 +449,8 @@ function MarketSection() {
 
   const tavernContent = useMemo(() => {
     switch (tavernMode) {
+      case "expedition":
+        return <TavernExpedition />;
       case "roulette":
         return <TavernRoulette />;
       case "cards":
@@ -481,7 +493,7 @@ function MarketSection() {
                 Juegos de azar
               </h3>
               <p className="mt-2 text-sm leading-6 text-stone-400">
-                La mesa sigue viva dentro del mercado. Cambia entre cofres, ruleta o cartas sin salir de la taberna.
+                La mesa sigue viva dentro del mercado. Ahora tambien puedes tomar contratos PvE narrativos sin salir de la taberna.
               </p>
             </div>
           </div>

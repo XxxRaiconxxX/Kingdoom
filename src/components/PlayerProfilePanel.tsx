@@ -1,8 +1,7 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+﻿import { lazy, Suspense, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Backpack,
-  ChevronDown,
   Coins,
   Loader2,
   RefreshCw,
@@ -54,11 +53,9 @@ export function PlayerProfilePanel({
     profileError,
     connectPlayer,
     clearPlayer,
-    refreshPlayer,
     setProfileError,
   } = usePlayerSession();
   const [usernameInput, setUsernameInput] = useState("");
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isTradeOpen, setIsTradeOpen] = useState(false);
@@ -152,12 +149,6 @@ export function PlayerProfilePanel({
     }
   }
 
-  async function handleRefresh() {
-    setIsRefreshing(true);
-    await refreshPlayer();
-    setIsRefreshing(false);
-  }
-
   return (
     <section className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -174,24 +165,6 @@ export function PlayerProfilePanel({
           </p>
         </div>
 
-        {player ? (
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <div className="rounded-[1.5rem] border border-emerald-500/15 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-              Perfil activo
-            </div>
-            <button
-              type="button"
-              onClick={() => onCollapsedChange?.(!isCollapsed)}
-              className="inline-flex items-center justify-center gap-2 rounded-[1.5rem] border border-stone-700 bg-stone-950/40 px-4 py-3 text-sm font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
-              title={isCollapsed ? "Expandir panel" : "Compactar panel"}
-            >
-              <ChevronDown
-                className={`h-4 w-4 transition ${isCollapsed ? "" : "rotate-180"}`}
-              />
-              {isCollapsed ? "Expandir" : "Compactar"}
-            </button>
-          </div>
-        ) : null}
       </div>
 
       <div className="mt-5">
@@ -218,14 +191,28 @@ export function PlayerProfilePanel({
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => onCollapsedChange?.(false)}
-                    className="rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
-                    title="Ver panel completo"
-                  >
-                    Panel
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clearPlayer();
+                        setUsernameInput(player.username);
+                        onCollapsedChange?.(false);
+                      }}
+                      className="rounded-xl border border-stone-700 p-2 text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                      title="Cambiar usuario"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onCollapsedChange?.(!isCollapsed)}
+                      className="rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                      title="Ver panel completo"
+                    >
+                      Panel
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -259,32 +246,18 @@ export function PlayerProfilePanel({
               </div>
 
               <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
-                      <WalletCards className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                        Oro
-                      </p>
-                      <p className="mt-1 text-2xl font-black text-amber-300">
-                        {player.gold}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+                    <WalletCards className="h-5 w-5" />
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleRefresh}
-                    disabled={isRefreshing}
-                    className="rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
-                    title="Actualizar saldo"
-                  >
-                    <RefreshCw
-                      className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-                    />
-                  </button>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                      Oro
+                    </p>
+                    <p className="mt-1 text-2xl font-black text-amber-300">
+                      {player.gold}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -295,17 +268,6 @@ export function PlayerProfilePanel({
                   >
                     <Search className="h-3.5 w-3.5" />
                     Buscar fichas
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      clearPlayer();
-                      setUsernameInput(player.username);
-                      onCollapsedChange?.(false);
-                    }}
-                    className="inline-flex items-center justify-center rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
-                  >
-                    Cambiar
                   </button>
                 </div>
               </div>
@@ -327,6 +289,18 @@ export function PlayerProfilePanel({
                         {player.username}
                       </p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clearPlayer();
+                        setUsernameInput(player.username);
+                        onCollapsedChange?.(false);
+                      }}
+                      className="rounded-xl border border-stone-700 p-2 text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                      title="Cambiar usuario"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center">
@@ -358,13 +332,11 @@ export function PlayerProfilePanel({
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        clearPlayer();
-                        setUsernameInput(player.username);
-                      }}
-                      className="rounded-xl border border-stone-700 px-3 py-2.5 text-xs font-semibold text-stone-400 transition hover:border-stone-500 hover:text-stone-200 md:py-2"
+                      onClick={() => onCollapsedChange?.(!isCollapsed)}
+                      className="rounded-xl border border-stone-700 px-3 py-2.5 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 md:py-2"
+                      title="Compactar panel"
                     >
-                      Cambiar
+                      Panel
                     </button>
                     <button
                       type="button"
@@ -379,32 +351,18 @@ export function PlayerProfilePanel({
               </div>
 
               <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
-                      <WalletCards className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                        Oro disponible
-                      </p>
-                      <p className="mt-1 text-2xl font-black text-amber-300">
-                        {player.gold}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+                    <WalletCards className="h-5 w-5" />
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleRefresh}
-                    disabled={isRefreshing}
-                    className="rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
-                    title="Actualizar saldo"
-                  >
-                    <RefreshCw
-                      className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-                    />
-                  </button>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                      Oro disponible
+                    </p>
+                    <p className="mt-1 text-2xl font-black text-amber-300">
+                      {player.gold}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -429,7 +387,7 @@ export function PlayerProfilePanel({
 
               {playerSheets.length === 0 ? (
                 <div className="text-center py-8 border-2 border-dashed border-stone-800 rounded-xl">
-                  <p className="text-stone-500 text-sm">Aún no has importado ninguna ficha de personaje.</p>
+                  <p className="text-stone-500 text-sm">Aun no has importado ninguna ficha de personaje.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -438,7 +396,7 @@ export function PlayerProfilePanel({
                       <div>
                         <h4 className="font-bold text-amber-400 truncate uppercase tracking-wider">{sheet.name || 'Personaje Sin Nombre'}</h4>
                         <p className="text-xs text-stone-400 truncate mt-1">
-                          {sheet.race || 'Raza Desconocida'} {sheet.profession ? `• ${sheet.profession}` : ''}
+                          {sheet.race || "Raza Desconocida"} {sheet.profession ? ` - ${sheet.profession}` : ""}
                         </p>
                         {sheet.powers && (
                           <p className="text-xs text-stone-500 truncate mt-1">
@@ -580,9 +538,9 @@ export function PlayerProfilePanel({
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-stone-900 border border-stone-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
             >
-              <h3 className="text-xl font-serif font-bold text-amber-500 mb-2">¿Eliminar Ficha?</h3>
+              <h3 className="text-xl font-serif font-bold text-amber-500 mb-2">Eliminar ficha?</h3>
               <p className="text-stone-300 text-sm mb-6">
-                Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar esta ficha de personaje?
+                Esta accion no se puede deshacer. Seguro que deseas eliminar esta ficha de personaje?
               </p>
               <div className="flex gap-3 justify-end">
                 <button

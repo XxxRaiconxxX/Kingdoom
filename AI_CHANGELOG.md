@@ -1,4 +1,4 @@
-# AI Collaboration Log & Project Context
+﻿# AI Collaboration Log & Project Context
 
 Este archivo sirve como puente de comunicacion y registro de actividad entre los asistentes de IA (**Antigravity** y **Jarvis**) y el desarrollador (**e_grado**).
 Su proposito es mantener un historial claro de los cambios en el proyecto **Kingdoom-sync** para evitar conflictos y asegurar que todos estemos en la misma pagina.
@@ -44,14 +44,26 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 14/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Limpieza visual del bloque de sesion para reducir carga en movil y eliminar controles redundantes.
+*   **Cambios Clave:**
+    *   Se elimino el bloque visual `Perfil activo` y el boton redundante `Expandir/Compactar` del encabezado.
+    *   El boton `Panel` queda como control unico para expandir/compactar.
+    *   El cambio de usuario se movio al lado del nombre (icono), y se quitaron botones repetidos en el bloque de oro.
+    *   Se removio el refresco manual del oro en esa vista para compactar la interfaz.
+    *   Se corrigieron textos con codificacion rota en la seccion de fichas y confirmacion de borrado.
+*   **Notas/Advertencias:** Cambio enfocado en UX mobile; no altera logica de Supabase ni de inventario/fichas.
+
+---
+### [Fecha: 14/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`, `src/components/CharSheetModal.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Optimización mobile-first para que la navegación sea más fluida y los modales no queden tapados por la barra inferior.
+*   **Resumen de Tareas:** OptimizaciÃ³n mobile-first para que la navegaciÃ³n sea mÃ¡s fluida y los modales no queden tapados por la barra inferior.
 *   **Cambios Clave:**
     *   El panel `Tu sesion de jugador` ahora se auto-compacta fuera de `Inicio` y permite expandir/compactar manualmente.
-    *   Al cambiar de pestaña se hace scroll al inicio (evita que el usuario “caiga” a mitad de página en móvil).
-    *   Mercado: los catálogos por categoría ya no aparecen abiertos por defecto (reduce scroll infinito).
-    *   Modales de fichas (`CharImportModal`/`CharSheetModal`) suben su z-index y ajustan alto/padding para no quedar detrás de la barra inferior.
-*   **Notas/Advertencias:** Sin cambios en la lógica de Supabase o guardado; solo UX/layout.
+    *   Al cambiar de pestaÃ±a se hace scroll al inicio (evita que el usuario â€œcaigaâ€ a mitad de pÃ¡gina en mÃ³vil).
+    *   Mercado: los catÃ¡logos por categorÃ­a ya no aparecen abiertos por defecto (reduce scroll infinito).
+    *   Modales de fichas (`CharImportModal`/`CharSheetModal`) suben su z-index y ajustan alto/padding para no quedar detrÃ¡s de la barra inferior.
+*   **Notas/Advertencias:** Sin cambios en la lÃ³gica de Supabase o guardado; solo UX/layout.
 
 ---
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
@@ -66,21 +78,21 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Archivos Modificados:** `src/utils/sheetParser.ts`, `src/components/CharSheetModal.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Limpieza total de caracteres de formato (`*`, `-`) al importar fichas y mejora del render de ficha para que listas (Extras/Debilidades/etc.) se vean elegantes con colapsado "Ver mas".
 *   **Cambios Clave:**
-    *   El parser ahora elimina asteriscos restantes dentro del contenido y omite líneas de plantilla tipo "Noble, plebeyo o burgues" / "En caso de ser".
+    *   El parser ahora elimina asteriscos restantes dentro del contenido y omite lÃ­neas de plantilla tipo "Noble, plebeyo o burgues" / "En caso de ser".
     *   `CharSheetModal` renderiza bloques tipo lista como bullets y mantiene "Ver mas / Ver menos" para textos largos.
-*   **Notas/Advertencias:** Para fichas viejas ya guardadas, el modal también limpia `*` y guiones al mostrar (no es necesario re-importar).
+*   **Notas/Advertencias:** Para fichas viejas ya guardadas, el modal tambiÃ©n limpia `*` y guiones al mostrar (no es necesario re-importar).
 
 ---
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/sheetParser.ts`, `src/utils/characterSheets.ts`, `src/types.ts`, `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`, `src/components/RealmRegistry.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se termino y estabilizo el sistema de Fichas de Personaje (importar desde WhatsApp, guardar con defaults, y buscador publico) con soporte opcional para mostrar/buscar por usuario (sin depender del UUID).
 *   **Cambios Clave:**
-    *   Parser reescrito (`sheetParser.ts`) para tolerar mejor el formato decorado de WhatsApp y capturar secciones multilínea sin “mezclar” campos.
-    *   Guardado de fichas ahora completa valores por defecto al crear la ficha (evita `undefined` y hace el upsert más estable).
-    *   Se añadió `playerUsername?: string` al tipo `CharacterSheet` y la capa de guardado detecta si la tabla soporta esa columna; si no, omite la propiedad para no romper el upsert.
-    *   Registro del Reino (`RealmRegistry`) mejorado: búsqueda por personaje/raza/profesión y, si existe la columna, por `playerUsername`; si no, cae a `playerId`.
-    *   Importador (`CharImportModal`) con placeholder limpio (plantilla) y grilla de stats más usable en móvil.
-*   **Notas/Advertencias:** Si quieres que el Registro muestre y busque por nombre de jugador, crea la columna opcional `playerUsername` en `character_sheets` (texto) o avísame y te paso el SQL exacto para tu esquema.
+    *   Parser reescrito (`sheetParser.ts`) para tolerar mejor el formato decorado de WhatsApp y capturar secciones multilÃ­nea sin â€œmezclarâ€ campos.
+    *   Guardado de fichas ahora completa valores por defecto al crear la ficha (evita `undefined` y hace el upsert mÃ¡s estable).
+    *   Se aÃ±adiÃ³ `playerUsername?: string` al tipo `CharacterSheet` y la capa de guardado detecta si la tabla soporta esa columna; si no, omite la propiedad para no romper el upsert.
+    *   Registro del Reino (`RealmRegistry`) mejorado: bÃºsqueda por personaje/raza/profesiÃ³n y, si existe la columna, por `playerUsername`; si no, cae a `playerId`.
+    *   Importador (`CharImportModal`) con placeholder limpio (plantilla) y grilla de stats mÃ¡s usable en mÃ³vil.
+*   **Notas/Advertencias:** Si quieres que el Registro muestre y busque por nombre de jugador, crea la columna opcional `playerUsername` en `character_sheets` (texto) o avÃ­same y te paso el SQL exacto para tu esquema.
 
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `.env.example`, `AI_CHANGELOG.md`
@@ -95,7 +107,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Resumen de Tareas:** Integracion y saneamiento del repo tras cambios externos: se unifico el historial con `origin/main` y se corrigieron errores de TypeScript que rompian consistencia del proyecto.
 *   **Cambios Clave:**
     *   Se integro `origin/main` (merge) y se resolvio el conflicto en `scratchUtils` manteniendo el limite diario dinamico del Rasca y Gana.
-    *   Se restauro la navegacion principal (Inicio, Grimorio, Biblioteca, Mercado, Ranking) para que coincida con `TabId` y el diseño acordado.
+    *   Se restauro la navegacion principal (Inicio, Grimorio, Biblioteca, Mercado, Ranking) para que coincida con `TabId` y el diseÃ±o acordado.
     *   Se corrigio `PlayerProfilePanel` para incluir `motion` en los modales y evitar errores en runtime.
     *   Se normalizo Supabase para que el cliente no sea `null`: ahora falla rapido con un error claro si faltan `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`, y `src/lib/supabase.ts` reexporta el mismo cliente.
 *   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` verificados sin errores.
@@ -103,56 +115,56 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 13/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Corrección del sistema de retiro automático y visualización del tope en el minijuego Crash.
+*   **Resumen de Tareas:** CorrecciÃ³n del sistema de retiro automÃ¡tico y visualizaciÃ³n del tope en el minijuego Crash.
 *   **Cambios Clave:**
-    *   **Solución de Stale Closures:** Implementación de `useRef` para variables críticas (apuesta, jugador, multiplicador) asegurando lecturas en tiempo real dentro del bucle `requestAnimationFrame`.
-    *   **Visualización del Tope:** Ajuste dinámico del eje Y (`maxY`) en el canvas para que la línea de retiro automático sea siempre visible en el gráfico.
-    *   **Precisión de Cobro:** El retiro automático ahora asegura el multiplicador exacto configurado por el usuario, evitando discrepancias por saltos de frames.
-*   **Notas/Advertencias:** Simulación y compilación verificadas exitosamente.
+    *   **SoluciÃ³n de Stale Closures:** ImplementaciÃ³n de `useRef` para variables crÃ­ticas (apuesta, jugador, multiplicador) asegurando lecturas en tiempo real dentro del bucle `requestAnimationFrame`.
+    *   **VisualizaciÃ³n del Tope:** Ajuste dinÃ¡mico del eje Y (`maxY`) en el canvas para que la lÃ­nea de retiro automÃ¡tico sea siempre visible en el grÃ¡fico.
+    *   **PrecisiÃ³n de Cobro:** El retiro automÃ¡tico ahora asegura el multiplicador exacto configurado por el usuario, evitando discrepancias por saltos de frames.
+*   **Notas/Advertencias:** SimulaciÃ³n y compilaciÃ³n verificadas exitosamente.
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/scratchUtils.ts`, `src/components/TavernScratch.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Aleatorización del límite diario de ganancias en el Rasca y Gana.
+*   **Resumen de Tareas:** AleatorizaciÃ³n del lÃ­mite diario de ganancias en el Rasca y Gana.
 *   **Cambios Clave:**
-    *   **Límite Dinámico**: El límite dejó de ser fijo (50,000) y ahora varía cada día entre **10,000 y 150,000 de oro**.
-    *   **Semilla Diaria**: Se utiliza la misma semilla pseudo-aleatoria del día para calcular el límite, asegurando consistencia durante las 24 horas.
-    *   **Feedback Visual**: Se actualizó el mensaje de "Límite Alcanzado" para mostrar dinámicamente el tope del día actual.
-*   **Notas/Advertencias:** El límite es por jugador y por día local.
+    *   **LÃ­mite DinÃ¡mico**: El lÃ­mite dejÃ³ de ser fijo (50,000) y ahora varÃ­a cada dÃ­a entre **10,000 y 150,000 de oro**.
+    *   **Semilla Diaria**: Se utiliza la misma semilla pseudo-aleatoria del dÃ­a para calcular el lÃ­mite, asegurando consistencia durante las 24 horas.
+    *   **Feedback Visual**: Se actualizÃ³ el mensaje de "LÃ­mite Alcanzado" para mostrar dinÃ¡micamente el tope del dÃ­a actual.
+*   **Notas/Advertencias:** El lÃ­mite es por jugador y por dÃ­a local.
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `src/App.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Implementación del minigame "El Multiplicador del Vacío" (Crash Game).
+*   **Resumen de Tareas:** ImplementaciÃ³n del minigame "El Multiplicador del VacÃ­o" (Crash Game).
 *   **Cambios Clave:**
-    *   **Lógica de Tiempo Real**: Sistema basado en `requestAnimationFrame` para un conteo fluido y preciso.
-    *   **Curva Exponencial**: El multiplicador acelera con el tiempo (`1.06^t`), aumentando la presión psicológica.
-    *   **Punto de Colapso Dinámico**: Algoritmo de azar con un 3% de margen de la casa (instant crash).
-    *   **Interfaz de Neón**: Diseño oscuro con efectos de brillo, anillos de energía y respuesta visual al ganar o perder.
-    *   **Integración de Saldo**: Sincronización completa con `usePlayerSession` para apuestas y retiros.
+    *   **LÃ³gica de Tiempo Real**: Sistema basado en `requestAnimationFrame` para un conteo fluido y preciso.
+    *   **Curva Exponencial**: El multiplicador acelera con el tiempo (`1.06^t`), aumentando la presiÃ³n psicolÃ³gica.
+    *   **Punto de Colapso DinÃ¡mico**: Algoritmo de azar con un 3% de margen de la casa (instant crash).
+    *   **Interfaz de NeÃ³n**: DiseÃ±o oscuro con efectos de brillo, anillos de energÃ­a y respuesta visual al ganar o perder.
+    *   **IntegraciÃ³n de Saldo**: SincronizaciÃ³n completa con `usePlayerSession` para apuestas y retiros.
 *   **Notas/Advertencias:** Limpieza de animaciones al desmontar el componente para evitar fugas de memoria.
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se corrigió y potenció el buscador del Grimorio para permitir búsquedas globales y profundas en todo el catálogo de habilidades.
+*   **Resumen de Tareas:** Se corrigiÃ³ y potenciÃ³ el buscador del Grimorio para permitir bÃºsquedas globales y profundas en todo el catÃ¡logo de habilidades.
 *   **Cambios Clave:**
-    *   **Búsqueda Global**: Al buscar una palabra, el sistema ahora ignora la categoría seleccionada y busca en TODO el grimorio simultáneamente.
-    *   **Expansión de Criterios**: El buscador ahora analiza el título, el Marco Teórico (descripción), los nombres de habilidades, sus efectos y las restricciones de Anti-Mano Negra.
-    *   **Auto-Apertura Inteligente**: Las escuelas de magia y las tarjetas de habilidad que contienen la palabra buscada se abren automáticamente para facilitar la lectura.
-    *   **Contexto de Búsqueda**: Se añadieron etiquetas visuales en los resultados que indican a qué categoría (Invocación, Elemental, etc.) pertenece cada estilo encontrado.
-*   **Notas/Advertencias:** `npx tsc --noEmit` verificado. Al limpiar el buscador, la interfaz regresa automáticamente a la categoría que estaba seleccionada previamente.
+    *   **BÃºsqueda Global**: Al buscar una palabra, el sistema ahora ignora la categorÃ­a seleccionada y busca en TODO el grimorio simultÃ¡neamente.
+    *   **ExpansiÃ³n de Criterios**: El buscador ahora analiza el tÃ­tulo, el Marco TeÃ³rico (descripciÃ³n), los nombres de habilidades, sus efectos y las restricciones de Anti-Mano Negra.
+    *   **Auto-Apertura Inteligente**: Las escuelas de magia y las tarjetas de habilidad que contienen la palabra buscada se abren automÃ¡ticamente para facilitar la lectura.
+    *   **Contexto de BÃºsqueda**: Se aÃ±adieron etiquetas visuales en los resultados que indican a quÃ© categorÃ­a (InvocaciÃ³n, Elemental, etc.) pertenece cada estilo encontrado.
+*   **Notas/Advertencias:** `npx tsc --noEmit` verificado. Al limpiar el buscador, la interfaz regresa automÃ¡ticamente a la categorÃ­a que estaba seleccionada previamente.
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Aumento de dificultad y sistema de rachas para el juego de cartas de la taberna.
 *   **Cambios Clave:**
-    *   **Mazo Ampliado**: El rango de cartas pasó de 1-10 a 1-15, dificultando las predicciones.
-    *   **Sistema de Doble o Nada (Rachas)**: Tras ganar, el premio no se cobra automáticamente. El jugador debe decidir entre "Cobrar" o seguir con "Doble o Nada".
+    *   **Mazo Ampliado**: El rango de cartas pasÃ³ de 1-10 a 1-15, dificultando las predicciones.
+    *   **Sistema de Doble o Nada (Rachas)**: Tras ganar, el premio no se cobra automÃ¡ticamente. El jugador debe decidir entre "Cobrar" o seguir con "Doble o Nada".
     *   **Pozo Acumulado**: Las ganancias se acumulan en un pozo que se multiplica x2 con cada acierto. Si se falla, se pierde TODO el pozo acumulado.
-    *   **Optimización Mobile-First**: Rediseño completo de la interfaz con botones más grandes, indicadores de racha/pozo y animaciones fluidas para una experiencia premium en móvil y escritorio.
-*   **Notas/Advertencias:** Los empates mantienen la racha y el pozo (neutral). Se verificó la lógica de persistencia con Supabase.
+    *   **OptimizaciÃ³n Mobile-First**: RediseÃ±o completo de la interfaz con botones mÃ¡s grandes, indicadores de racha/pozo y animaciones fluidas para una experiencia premium en mÃ³vil y escritorio.
+*   **Notas/Advertencias:** Los empates mantienen la racha y el pozo (neutral). Se verificÃ³ la lÃ³gica de persistencia con Supabase.
 
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
@@ -185,7 +197,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/LibrarySection.tsx`, `src/assets/maps/vyralis-map.jpeg`, `src/assets/maps/geopolitica-map.jpeg`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se agregaron los mapas del continente a la pestaña `Mapa y Mundo` dentro de `Biblioteca`, con selector y visor en grande para movil.
+*   **Resumen de Tareas:** Se agregaron los mapas del continente a la pestaÃ±a `Mapa y Mundo` dentro de `Biblioteca`, con selector y visor en grande para movil.
 *   **Cambios Clave:**
     *   Nuevo bloque de mapa al inicio de `Mapa y Mundo` con botones para alternar entre "Vyralis" y "Geopolitica".
     *   El mapa se puede tocar/abrir en un modal de pantalla completa para leer detalles sin saturar la UI.
@@ -195,12 +207,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Conversion automatica de unidades cientificas (N, kg, J, km/h, m/s, °C) a "puntos" estilo D&D para que las habilidades se entiendan como stats (Fuerza, Velocidad, Danio).
+*   **Resumen de Tareas:** Conversion automatica de unidades cientificas (N, kg, J, km/h, m/s, Â°C) a "puntos" estilo D&D para que las habilidades se entiendan como stats (Fuerza, Velocidad, Danio).
 *   **Cambios Clave:**
     *   Se implemento un formateador que reemplaza tokens tipo `$2000 N$` por equivalentes como `(+10 Fuerza)` y limpia escapes como `\\%`.
     *   El formateo se aplica a `effect`, `cd`, `limit`, `antiManoNegra` y tambien al texto de `Marco Teorico` dentro del Grimorio.
     *   La escala de conversion queda centralizada y facil de ajustar en una sola funcion (`convertUnitToDndPoints`).
-*   **Notas/Advertencias:** Escala inicial: N->Fuerza (N/200), m/s->Velocidad (m/s/5), J->Danio (J/500), °C->Danio de Fuego (°C/20), con tope 25. `npx tsc --noEmit` verificado sin errores.
+*   **Notas/Advertencias:** Escala inicial: N->Fuerza (N/200), m/s->Velocidad (m/s/5), J->Danio (J/500), Â°C->Danio de Fuego (Â°C/20), con tope 25. `npx tsc --noEmit` verificado sin errores.
 
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
@@ -223,14 +235,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 09/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/types.ts`, `src/data/grimorio.ts` (Nuevo), `src/components/GrimoireSection.tsx` (Nuevo), `src/components/LibrarySection.tsx` (Nuevo), `src/App.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Reestructuración de la arquitectura de la SPA para integrar un sistema de habilidades (Grimorio) y optimizar la navegación móvil mediante la fusión de secciones informativas.
+*   **Resumen de Tareas:** ReestructuraciÃ³n de la arquitectura de la SPA para integrar un sistema de habilidades (Grimorio) y optimizar la navegaciÃ³n mÃ³vil mediante la fusiÃ³n de secciones informativas.
 *   **Cambios Clave:**
-    *   **Fusión "Biblioteca"**: Se unificaron las antiguas pestañas `Lore` y `Mundo` en una sola sección de `Biblioteca` con un selector interno (Tabs), liberando espacio en la barra de navegación.
-    *   **Grimorio de Habilidades**: Implementación de una sección dedicada para gestionar poderes y magias, categorizados por escuelas (Invocación, Elemental, etc.).
-    *   **Diseño Técnico-Científico**: Las habilidades incluyen Lore basado en física real, niveles 1-5, tiempos de enfriamiento y limitantes específicas.
-    *   **Capa Anti-Mano Negra**: Se integró una sección visual distintiva en cada habilidad para definir reglas de balanceo y prohibiciones de uso (Anti-Powergaming).
-    *   **Navegación Optimizada**: La barra inferior se mantiene en 5 elementos (Inicio, Grimorio, Biblioteca, Mercado, Ranking), mejorando la UX en dispositivos móviles.
-*   **Notas/Advertencias:** Se dejó `src/data/grimorio.ts` con plantillas y comentarios para facilitar la expansión manual de contenidos sin saturar el contexto de la IA.
+    *   **FusiÃ³n "Biblioteca"**: Se unificaron las antiguas pestaÃ±as `Lore` y `Mundo` en una sola secciÃ³n de `Biblioteca` con un selector interno (Tabs), liberando espacio en la barra de navegaciÃ³n.
+    *   **Grimorio de Habilidades**: ImplementaciÃ³n de una secciÃ³n dedicada para gestionar poderes y magias, categorizados por escuelas (InvocaciÃ³n, Elemental, etc.).
+    *   **DiseÃ±o TÃ©cnico-CientÃ­fico**: Las habilidades incluyen Lore basado en fÃ­sica real, niveles 1-5, tiempos de enfriamiento y limitantes especÃ­ficas.
+    *   **Capa Anti-Mano Negra**: Se integrÃ³ una secciÃ³n visual distintiva en cada habilidad para definir reglas de balanceo y prohibiciones de uso (Anti-Powergaming).
+    *   **NavegaciÃ³n Optimizada**: La barra inferior se mantiene en 5 elementos (Inicio, Grimorio, Biblioteca, Mercado, Ranking), mejorando la UX en dispositivos mÃ³viles.
+*   **Notas/Advertencias:** Se dejÃ³ `src/data/grimorio.ts` con plantillas y comentarios para facilitar la expansiÃ³n manual de contenidos sin saturar el contexto de la IA.
 
 ---
 ### [Fecha: 08/04/2026] - [Autor: Jarvis]
@@ -244,15 +256,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 08/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/scratchUtils.ts` (Nuevo), `src/components/TavernScratch.tsx`, `src/App.tsx`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Implementación de la Lotería Dinámica 24h con límites de fortuna, reembolsos automáticos y optimizaciones de interfaz móvil.
+*   **Resumen de Tareas:** ImplementaciÃ³n de la LoterÃ­a DinÃ¡mica 24h con lÃ­mites de fortuna, reembolsos automÃ¡ticos y optimizaciones de interfaz mÃ³vil.
 *   **Cambios Clave:**
-    *   **Lotería Dinámica (24h)**: Se creó `scratchUtils.ts` para generar precios (200-500) y probabilidades (10-40%) deterministas basados en la fecha actual (semilla diaria).
-    *   **Multi-Scratch & Jackpot**: Se añadió la compra múltiple de tickets con "Auto-Scrape" y un Jackpot VIP fijo del 5% (10,000 oro) independiente de la racha diaria.
-    *   **Control de Inflación (Límite 50k)**: Se implementó un tope de ganancias brutas diarias de 50,000 oro. Al alcanzarlo, el juego se bloquea hasta el día siguiente.
-    *   **Sistema de Reembolsos**: Si una compra masiva choca con el límite de 50k antes de terminar, los tickets sobrantes se cancelan automáticamente y el oro se devuelve íntegro al jugador con una auditoría visual en el recibo.
-    *   **Mobile-First Admin**: Se refactorizaron los grupos de botones y filtros del panel de administración para evitar desbordamientos en pantallas pequeñas mediante scroll horizontal y flex-wrap.
-    *   **UX Pulido**: Se ajustó la lógica de renderizado para permitir ver los resultados finales y reembolsos antes de que aparezca el mensaje bloqueante de "Límite Alcanzado".
-*   **Notas/Advertencias:** El sistema de semillas asegura que todos los jugadores vean la misma "suerte" cada día. El límite de 50k se persiste en `localStorage` vinculado al ID del jugador y la fecha. `npx tsc --noEmit` verificado sin errores.
+    *   **LoterÃ­a DinÃ¡mica (24h)**: Se creÃ³ `scratchUtils.ts` para generar precios (200-500) y probabilidades (10-40%) deterministas basados en la fecha actual (semilla diaria).
+    *   **Multi-Scratch & Jackpot**: Se aÃ±adiÃ³ la compra mÃºltiple de tickets con "Auto-Scrape" y un Jackpot VIP fijo del 5% (10,000 oro) independiente de la racha diaria.
+    *   **Control de InflaciÃ³n (LÃ­mite 50k)**: Se implementÃ³ un tope de ganancias brutas diarias de 50,000 oro. Al alcanzarlo, el juego se bloquea hasta el dÃ­a siguiente.
+    *   **Sistema de Reembolsos**: Si una compra masiva choca con el lÃ­mite de 50k antes de terminar, los tickets sobrantes se cancelan automÃ¡ticamente y el oro se devuelve Ã­ntegro al jugador con una auditorÃ­a visual en el recibo.
+    *   **Mobile-First Admin**: Se refactorizaron los grupos de botones y filtros del panel de administraciÃ³n para evitar desbordamientos en pantallas pequeÃ±as mediante scroll horizontal y flex-wrap.
+    *   **UX Pulido**: Se ajustÃ³ la lÃ³gica de renderizado para permitir ver los resultados finales y reembolsos antes de que aparezca el mensaje bloqueante de "LÃ­mite Alcanzado".
+*   **Notas/Advertencias:** El sistema de semillas asegura que todos los jugadores vean la misma "suerte" cada dÃ­a. El lÃ­mite de 50k se persiste en `localStorage` vinculado al ID del jugador y la fecha. `npx tsc --noEmit` verificado sin errores.
 
 ---
 ### [Fecha: 07/04/2026] - [Autor: Antigravity]
@@ -262,7 +274,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   Se creo `src/utils/market.ts` con `fetchMarketItems`, `upsertMarketItem`, `deleteMarketItem` y `slugifyMarketItem`, siguiendo el patron de `events.ts`.
     *   El mercado publico ahora carga los items desde Supabase (tabla `market_items`) con fallback transparente al archivo local `src/data/market.ts`.
     *   La pestana `Mercado` del admin tiene formulario completo: nombre, descripcion, habilidad, categoria, rareza, stock, precio, imagen (URL, ajuste, posicion) y destacado.
-    *   El ID se auto-genera como slug de categoria+nombre al crear (ej: "Mi Espada" + swords → `sword-mi-espada`); en edicion muestra el ID existente.
+    *   El ID se auto-genera como slug de categoria+nombre al crear (ej: "Mi Espada" + swords â†’ `sword-mi-espada`); en edicion muestra el ID existente.
     *   Lista de items a la derecha con buscador por nombre y filtro por categoria; clic precarga el formulario.
 *   **Notas/Advertencias:** Para activar la gestion dinamica hay que crear la tabla `market_items` en Supabase con el SQL documentado en `src/utils/market.ts`. Sin la tabla, el mercado sigue mostrando los datos locales. `npx tsc --noEmit` paso sin errores.
 
@@ -332,14 +344,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Resumen de Tareas:** Se anadio un gestor de eventos desde el panel admin manteniendo el mismo formato visual de las tarjetas que aparecen en Inicio.
 *   **Cambios Clave:**
     *   La Home ahora intenta leer eventos desde Supabase y, si no hay tabla o datos, cae con seguridad al archivo local `src/data/events.ts`.
-    *   Se agrego una pestaña `Eventos` al panel admin para crear y editar los eventos visibles del inicio sin tocar codigo manualmente.
-    *   El diseño publico de los eventos no cambia: solo cambia el origen del contenido cuando Supabase esta disponible.
+    *   Se agrego una pestaÃ±a `Eventos` al panel admin para crear y editar los eventos visibles del inicio sin tocar codigo manualmente.
+    *   El diseÃ±o publico de los eventos no cambia: solo cambia el origen del contenido cuando Supabase esta disponible.
 *   **Notas/Advertencias:** Para administrarlos desde la web hace falta crear manualmente la tabla `realm_events` usando el SQL sugerido en `src/utils/events.ts`.
 
 ---
 ### [Fecha: 06/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/players.ts`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se anadio la pestaña `Jugadores` al panel admin para crear perfiles nuevos y corregir oro sin entrar manualmente a Supabase.
+*   **Resumen de Tareas:** Se anadio la pestaÃ±a `Jugadores` al panel admin para crear perfiles nuevos y corregir oro sin entrar manualmente a Supabase.
 *   **Cambios Clave:**
     *   El panel ahora incluye un formulario de alta para crear jugadores con oro inicial y opcion de admin.
     *   Se agrego una herramienta para sumar, restar o fijar el oro de cualquier jugador registrado.

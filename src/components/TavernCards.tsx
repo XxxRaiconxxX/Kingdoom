@@ -93,7 +93,8 @@ export function TavernCards() {
     const wasLimitHit = cappedPool < pool;
 
     if (cappedPool > 0) {
-      addPlayerDailyCardsGrossWins(player.id, dateKey, cappedPool);
+      const netWin = Math.max(0, cappedPool - bet);
+      addPlayerDailyCardsGrossWins(player.id, dateKey, netWin);
       await setPlayerGold(player.gold + cappedPool);
     }
 

@@ -44,6 +44,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 14/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Correccion del limite diario en Cartas para contar solo ganancia neta.
+*   **Cambios Clave:**
+    *   El contador diario ya no suma el pozo bruto cobrado.
+    *   Ahora suma solo `ganancia neta = cobro - apuesta inicial`.
+*   **Notas/Advertencias:** El ajuste aplica a nuevas partidas; el contador diario se reinicia por fecha.
+
+---
+### [Fecha: 14/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Ajuste de probabilidades de la ruleta y mejora de animacion de giro.
 *   **Cambios Clave:**

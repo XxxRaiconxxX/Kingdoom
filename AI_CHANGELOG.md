@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 14/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/RealmRegistry.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Correccion de busqueda por jugador en el Registro del Reino.
+*   **Cambios Clave:**
+    *   El buscador ahora cruza `players.username` con `character_sheets` para encontrar por nombre de jugador.
+    *   Soporta esquemas mixtos: `playerId`/`player_id` y `playerUsername`/`player_username`.
+    *   Se evita depender de columnas opcionales en el `or(...)` de Supabase, reduciendo falsos negativos.
+*   **Notas/Advertencias:** Sin cambios de DB requeridos; usa los datos actuales.
+
+---
+### [Fecha: 14/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Limpieza visual del bloque de sesion para reducir carga en movil y eliminar controles redundantes.
 *   **Cambios Clave:**

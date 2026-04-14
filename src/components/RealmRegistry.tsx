@@ -14,10 +14,29 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
   const [searchResults, setSearchResults] = useState<CharacterSheet[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
+  const [playerNamesById, setPlayerNamesById] = useState<Record<string, string>>({});
+
+  const getSheetPlayerId = (sheet: CharacterSheet) => {
+    const raw = (sheet as CharacterSheet & { player_id?: string }).playerId
+      ?? (sheet as CharacterSheet & { player_id?: string }).player_id
+      ?? "";
+    return String(raw).trim();
+  };
+
+  const getSheetPlayerUsername = (sheet: CharacterSheet) => {
+    const raw = (sheet as CharacterSheet & { player_username?: string }).playerUsername
+      ?? (sheet as CharacterSheet & { player_username?: string }).player_username
+      ?? "";
+    return String(raw).trim();
+  };
 
   const formatPlayerLabel = (sheet: CharacterSheet) => {
-    if (sheet.playerUsername?.trim()) return sheet.playerUsername;
-    if (sheet.playerId) return `${sheet.playerId.slice(0, 8)}...`;
+    const explicitUsername = getSheetPlayerUsername(sheet);
+    if (explicitUsername) return explicitUsername;
+
+    const playerId = getSheetPlayerId(sheet);
+    if (playerId && playerNamesById[playerId]) return playerNamesById[playerId];
+    if (playerId) return `${playerId.slice(0, 8)}...`;
     return "Desconocido";
   };
 
@@ -28,32 +47,46 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
     setIsSearching(true);
     try {
       const q = searchQuery.trim();
-      // Prefer searching by username if the column exists. If not, fall back to playerId (uuid).
-      const preferred = await supabase.from("character_sheets").select("*").or(
-        `name.ilike.%${q}%,race.ilike.%${q}%,profession.ilike.%${q}%,playerUsername.ilike.%${q}%`
-      );
+      const qLower = q.toLowerCase();
 
-      if (!preferred.error) {
-        setSearchResults((preferred.data ?? []) as CharacterSheet[]);
-        return;
+      // Robust search: load both sources and match client-side so schema naming
+      // differences (playerId/player_id, playerUsername/player_username) do not break.
+      const [sheetsResponse, playersResponse] = await Promise.all([
+        supabase.from("character_sheets").select("*"),
+        supabase.from("players").select("id, username").ilike("username", `%${q}%`),
+      ]);
+
+      if (sheetsResponse.error) throw sheetsResponse.error;
+      if (playersResponse.error) throw playersResponse.error;
+
+      const allSheets = (sheetsResponse.data ?? []) as CharacterSheet[];
+      const matchedPlayers = (playersResponse.data ?? []) as Array<{ id: string; username: string }>;
+      const matchedPlayerIds = new Set(matchedPlayers.map((player) => player.id));
+
+      const nextPlayerNamesById: Record<string, string> = {};
+      for (const player of matchedPlayers) {
+        nextPlayerNamesById[player.id] = player.username;
       }
 
-      const msg = String((preferred.error as any).message ?? "").toLowerCase();
-      const code = String((preferred.error as any).code ?? "");
-      const missingColumn =
-        code === "42703" ||
-        (msg.includes("playerusername") && msg.includes("does not exist"));
+      const results = allSheets.filter((sheet) => {
+        const name = String(sheet.name ?? "").toLowerCase();
+        const race = String(sheet.race ?? "").toLowerCase();
+        const profession = String(sheet.profession ?? "").toLowerCase();
+        const playerUsername = getSheetPlayerUsername(sheet).toLowerCase();
+        const playerId = getSheetPlayerId(sheet);
 
-      if (!missingColumn) {
-        throw preferred.error;
-      }
+        return (
+          name.includes(qLower) ||
+          race.includes(qLower) ||
+          profession.includes(qLower) ||
+          playerUsername.includes(qLower) ||
+          (playerId ? matchedPlayerIds.has(playerId) : false) ||
+          (playerId ? playerId.toLowerCase().includes(qLower) : false)
+        );
+      });
 
-      const fallback = await supabase.from("character_sheets").select("*").or(
-        `name.ilike.%${q}%,race.ilike.%${q}%,profession.ilike.%${q}%,playerId.ilike.%${q}%`
-      );
-
-      if (fallback.error) throw fallback.error;
-      setSearchResults((fallback.data ?? []) as CharacterSheet[]);
+      setPlayerNamesById((current) => ({ ...current, ...nextPlayerNamesById }));
+      setSearchResults(results);
     } catch (error) {
       console.error('Error searching sheets:', error);
     } finally {

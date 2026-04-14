@@ -137,12 +137,24 @@ const GrimoireSection = lazy(() =>
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
+  const [isProfileCollapsed, setIsProfileCollapsed] = useState(false);
+
+  useEffect(() => {
+    // Mobile UX: when switching tabs, jump to the top so the user lands on content.
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+
+    // Keep the profile panel compact on non-home tabs.
+    setIsProfileCollapsed(activeTab !== "home");
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-300">
       <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6 md:pt-8">
         <div className="mb-5">
-          <PlayerProfilePanel />
+          <PlayerProfilePanel
+            collapsed={isProfileCollapsed}
+            onCollapsedChange={setIsProfileCollapsed}
+          />
         </div>
 
         <AnimatePresence mode="wait">
@@ -746,7 +758,6 @@ function MarketCategoryPanel({
 
   return (
     <details
-      open
       className="group rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6"
     >
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4">

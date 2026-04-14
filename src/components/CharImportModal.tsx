@@ -67,12 +67,12 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4 pb-24 pb-safe backdrop-blur-sm sm:p-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-zinc-900 border border-green-500/30 rounded-xl shadow-2xl shadow-green-900/20 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="bg-zinc-900 border border-green-500/30 rounded-xl shadow-2xl shadow-green-900/20 w-full max-w-2xl overflow-hidden flex flex-col max-h-[calc(100svh-8rem)] sm:max-h-[90vh]"
           >
           <div className="flex items-center justify-between p-4 border-b border-green-500/20 bg-green-950/20">
             <h2 className="text-xl font-bold text-green-400 flex items-center gap-2">
@@ -84,7 +84,7 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
             </button>
           </div>
 
-          <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+          <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
             {!parsedData ? (
               <div className="space-y-4">
                 <div className="bg-green-950/30 border border-green-500/20 rounded-lg p-4 flex items-start gap-3">

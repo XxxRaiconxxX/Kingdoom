@@ -98,7 +98,7 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
   return (
     <AnimatePresence>
       {isOpen && character && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 p-4 pb-24 pb-safe backdrop-blur-sm sm:p-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

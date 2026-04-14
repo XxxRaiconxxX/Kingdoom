@@ -43,6 +43,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 14/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/App.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`, `src/components/CharSheetModal.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Optimización mobile-first para que la navegación sea más fluida y los modales no queden tapados por la barra inferior.
+*   **Cambios Clave:**
+    *   El panel `Tu sesion de jugador` ahora se auto-compacta fuera de `Inicio` y permite expandir/compactar manualmente.
+    *   Al cambiar de pestaña se hace scroll al inicio (evita que el usuario “caiga” a mitad de página en móvil).
+    *   Mercado: los catálogos por categoría ya no aparecen abiertos por defecto (reduce scroll infinito).
+    *   Modales de fichas (`CharImportModal`/`CharSheetModal`) suben su z-index y ajustan alto/padding para no quedar detrás de la barra inferior.
+*   **Notas/Advertencias:** Sin cambios en la lógica de Supabase o guardado; solo UX/layout.
+
+---
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `.gitignore`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se protegieron secretos para que un archivo `.env` local nunca se suba al repo por accidente.

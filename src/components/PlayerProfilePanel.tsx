@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Backpack,
+  ChevronDown,
   Coins,
   Loader2,
   RefreshCw,
@@ -38,7 +39,13 @@ const PlayerTradeSheet = lazy(() =>
   }))
 );
 
-export function PlayerProfilePanel() {
+export function PlayerProfilePanel({
+  collapsed,
+  onCollapsedChange,
+}: {
+  collapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
+}) {
   const {
     player,
     isAdmin,
@@ -62,6 +69,8 @@ export function PlayerProfilePanel() {
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
   const [playerSheets, setPlayerSheets] = useState<CharacterSheet[]>([]);
   const [sheetToDelete, setSheetToDelete] = useState<string | null>(null);
+
+  const isCollapsed = Boolean(collapsed && player);
 
   useEffect(() => {
     if (player) {
@@ -166,8 +175,21 @@ export function PlayerProfilePanel() {
         </div>
 
         {player ? (
-          <div className="rounded-[1.5rem] border border-emerald-500/15 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-            Perfil activo
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="rounded-[1.5rem] border border-emerald-500/15 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+              Perfil activo
+            </div>
+            <button
+              type="button"
+              onClick={() => onCollapsedChange?.(!isCollapsed)}
+              className="inline-flex items-center justify-center gap-2 rounded-[1.5rem] border border-stone-700 bg-stone-950/40 px-4 py-3 text-sm font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+              title={isCollapsed ? "Expandir panel" : "Compactar panel"}
+            >
+              <ChevronDown
+                className={`h-4 w-4 transition ${isCollapsed ? "" : "rotate-180"}`}
+              />
+              {isCollapsed ? "Expandir" : "Compactar"}
+            </button>
           </div>
         ) : null}
       </div>
@@ -179,7 +201,117 @@ export function PlayerProfilePanel() {
             Restaurando tu sesion guardada...
           </div>
         ) : player ? (
-          <div className="space-y-4">
+          isCollapsed ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+                      <UserRound className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                        Conectado
+                      </p>
+                      <p className="mt-1 text-lg font-black text-stone-100">
+                        {player.username}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onCollapsedChange?.(false)}
+                    className="rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                    title="Ver panel completo"
+                  >
+                    Panel
+                  </button>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {isAdmin ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsAdminOpen(true)}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-300 transition hover:border-amber-400/35 hover:bg-amber-500/14"
+                    >
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      Admin
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setIsInventoryOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                  >
+                    <Backpack className="h-3.5 w-3.5" />
+                    Inventario
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsTradeOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/25 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-300 transition hover:border-cyan-400/35 hover:bg-cyan-500/14"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    Enviar
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+                      <WalletCards className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                        Oro
+                      </p>
+                      <p className="mt-1 text-2xl font-black text-amber-300">
+                        {player.gold}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    className="rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+                    title="Actualizar saldo"
+                  >
+                    <RefreshCw
+                      className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                    />
+                  </button>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsRegistryOpen(true)}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2 text-xs font-semibold text-purple-300 transition hover:border-purple-400/35 hover:bg-purple-500/14"
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    Buscar fichas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearPlayer();
+                      setUsernameInput(player.username);
+                      onCollapsedChange?.(false);
+                    }}
+                    className="inline-flex items-center justify-center rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
               <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
                 <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -335,6 +467,7 @@ export function PlayerProfilePanel() {
               )}
             </div>
           </div>
+          )
         ) : (
           <form
             onSubmit={handleSubmit}

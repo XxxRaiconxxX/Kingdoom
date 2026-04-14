@@ -220,6 +220,22 @@ export type CharacterStats = {
   magicDefense: number;
 };
 
+export type PveStatKey = "strength" | "life" | "defense";
+
+export type PveCombatStats = {
+  strength: number;
+  life: number;
+  defense: number;
+};
+
+export type PvePlayerProgress = {
+  playerId: string;
+  availablePoints: number;
+  hardVictories: number;
+  stats: PveCombatStats;
+  usage: Record<string, number[]>;
+};
+
 export type CharacterSheet = {
   id: string;
   playerId: string;

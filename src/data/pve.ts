@@ -77,6 +77,8 @@ export type ArcadeEncounter = {
   title: string;
   enemyName: string;
   difficulty: "controlled" | "medium" | "hard";
+  maxAttemptsPerWindow: number;
+  windowHours: number;
   entryFee: number;
   rewardMin: number;
   rewardMax: number;
@@ -96,6 +98,8 @@ export const ARCADE_ENCOUNTERS: ArcadeEncounter[] = [
     title: "Frontera controlada",
     enemyName: "Acechador del matorral",
     difficulty: "controlled",
+    maxAttemptsPerWindow: 5,
+    windowHours: 6,
     entryFee: 70,
     rewardMin: 320,
     rewardMax: 500,
@@ -113,6 +117,8 @@ export const ARCADE_ENCOUNTERS: ArcadeEncounter[] = [
     title: "Asalto intermedio",
     enemyName: "Veterano del hierro negro",
     difficulty: "medium",
+    maxAttemptsPerWindow: 10,
+    windowHours: 6,
     entryFee: 120,
     rewardMin: 650,
     rewardMax: 1000,
@@ -130,6 +136,8 @@ export const ARCADE_ENCOUNTERS: ArcadeEncounter[] = [
     title: "Caza dificil",
     enemyName: "Revenant del vacio",
     difficulty: "hard",
+    maxAttemptsPerWindow: 10,
+    windowHours: 6,
     entryFee: 200,
     rewardMin: 980,
     rewardMax: 1500,

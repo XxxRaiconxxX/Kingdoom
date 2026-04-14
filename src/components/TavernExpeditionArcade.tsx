@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BadgeAlert,
   Bolt,
   Coins,
+  Heart,
   Shield,
   Sparkles,
   Swords,
@@ -11,6 +12,17 @@ import {
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { ARCADE_ENCOUNTERS } from "../data/pve";
+import {
+  consumeEncounterAttempt,
+  createDefaultPveProgress,
+  getEncounterUsageCount,
+  getNextResetAt,
+  grantHardVictoryPoint,
+  loadPveProgress,
+  savePveProgress,
+  spendPvePoint,
+} from "../utils/pveProgress";
+import type { PvePlayerProgress, PveStatKey } from "../types";
 
 type CombatAction = "attack" | "ability" | "defend";
 type CombatResult = "idle" | "active" | "victory" | "defeat";
@@ -25,6 +37,7 @@ type CombatLog = {
 type ArcadeBattleState = {
   encounterId: string;
   playerHp: number;
+  playerMaxHp: number;
   enemyHp: number;
   enemyMaxHp: number;
   turn: number;
@@ -33,10 +46,15 @@ type ArcadeBattleState = {
   result: CombatResult;
   reward: number;
   entryFee: number;
+  awardedPoint: boolean;
   logs: CombatLog[];
 };
 
-const PLAYER_MAX_HP = 100;
+const PLAYER_BASE_HP = 100;
+const LIFE_BONUS_PER_POINT = 15;
+const STRENGTH_ATTACK_BONUS = 3;
+const STRENGTH_ABILITY_BONUS = 4;
+const DEFENSE_DAMAGE_REDUCTION = 2;
 const ATTACK_CRIT_CHANCE = 0.2;
 const ABILITY_CRIT_CHANCE = 0.32;
 const DEFENSE_DODGE_CHANCE = 0.28;
@@ -93,13 +111,35 @@ function createLog(text: string, tone: CombatLogTone): CombatLog {
   };
 }
 
+function formatResetDistance(target: number | null) {
+  if (!target) {
+    return "Disponible";
+  }
+
+  const diff = Math.max(0, target - Date.now());
+  const hours = Math.floor(diff / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  return `${hours}h ${minutes}m`;
+}
+
 export function TavernExpeditionArcade() {
   const { player, isHydrating, setPlayerGold, refreshPlayer } = usePlayerSession();
   const [selectedEncounterId, setSelectedEncounterId] = useState(
     ARCADE_ENCOUNTERS[0]?.id ?? ""
   );
   const [battle, setBattle] = useState<ArcadeBattleState | null>(null);
+  const [progress, setProgress] = useState<PvePlayerProgress | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    if (!player) {
+      setProgress(null);
+      return;
+    }
+
+    const windowMs = 6 * 60 * 60 * 1000;
+    setProgress(loadPveProgress(player.id, windowMs));
+  }, [player]);
 
   const selectedEncounter = useMemo(
     () =>
@@ -108,26 +148,42 @@ export function TavernExpeditionArcade() {
     [selectedEncounterId]
   );
 
+  const safeProgress = progress ?? createDefaultPveProgress(player?.id ?? "guest");
+  const playerMaxHp = PLAYER_BASE_HP + safeProgress.stats.life * LIFE_BONUS_PER_POINT;
+
   async function startRun() {
-    if (!player || !selectedEncounter || isUpdating) {
+    if (!player || !selectedEncounter || isUpdating || !progress) {
       return;
     }
 
-    if (player.gold < selectedEncounter.entryFee) {
+    const windowMs = selectedEncounter.windowHours * 60 * 60 * 1000;
+    const attemptsUsed = getEncounterUsageCount(progress, selectedEncounter.id, windowMs);
+    const attemptsLeft = selectedEncounter.maxAttemptsPerWindow - attemptsUsed;
+
+    if (attemptsLeft <= 0 || player.gold < selectedEncounter.entryFee) {
       return;
     }
 
     setIsUpdating(true);
-    const updated = await setPlayerGold(player.gold - selectedEncounter.entryFee);
+    const updatedPlayer = await setPlayerGold(player.gold - selectedEncounter.entryFee);
     setIsUpdating(false);
 
-    if (!updated) {
+    if (!updatedPlayer) {
       return;
     }
 
+    const nextProgress = consumeEncounterAttempt(
+      progress,
+      selectedEncounter.id,
+      windowMs
+    );
+    savePveProgress(nextProgress);
+    setProgress(nextProgress);
+
     setBattle({
       encounterId: selectedEncounter.id,
-      playerHp: PLAYER_MAX_HP,
+      playerHp: playerMaxHp,
+      playerMaxHp,
       enemyHp: selectedEncounter.enemyHp,
       enemyMaxHp: selectedEncounter.enemyHp,
       turn: 1,
@@ -136,6 +192,7 @@ export function TavernExpeditionArcade() {
       result: "active",
       reward: 0,
       entryFee: selectedEncounter.entryFee,
+      awardedPoint: false,
       logs: [
         createLog(
           `Contrato abierto contra ${selectedEncounter.enemyName}. Entrada pagada: ${selectedEncounter.entryFee} de oro.`,
@@ -146,7 +203,14 @@ export function TavernExpeditionArcade() {
   }
 
   async function resolveAction(action: CombatAction) {
-    if (!battle || !selectedEncounter || !player || battle.result !== "active" || isUpdating) {
+    if (
+      !battle ||
+      !selectedEncounter ||
+      !player ||
+      !progress ||
+      battle.result !== "active" ||
+      isUpdating
+    ) {
       return;
     }
 
@@ -156,11 +220,14 @@ export function TavernExpeditionArcade() {
     let nextPhaseTwo = battle.phaseTwoTriggered;
     let result: CombatResult = "active";
     let reward = 0;
+    let awardedPoint = false;
     const logs: CombatLog[] = [];
 
     if (action === "attack" || action === "ability") {
       const rawDamage =
-        action === "attack" ? randomBetween(17, 29) : randomBetween(28, 44);
+        action === "attack"
+          ? randomBetween(17, 29) + progress.stats.strength * STRENGTH_ATTACK_BONUS
+          : randomBetween(28, 44) + progress.stats.strength * STRENGTH_ABILITY_BONUS;
       const critChance = action === "attack" ? ATTACK_CRIT_CHANCE : ABILITY_CRIT_CHANCE;
       const wasCrit = rollChance(critChance);
       let inflictedDamage = wasCrit ? Math.floor(rawDamage * 1.75) : rawDamage;
@@ -188,9 +255,7 @@ export function TavernExpeditionArcade() {
       } else {
         logs.push(
           createLog(
-            `${
-              action === "attack" ? "Golpe directo" : "Tecnica cargada"
-            } por ${inflictedDamage}${wasCrit ? " con critico" : ""}.`,
+            `${action === "attack" ? "Golpe directo" : "Tecnica cargada"} por ${inflictedDamage}${wasCrit ? " con critico" : ""}.`,
             wasCrit ? "good" : "neutral"
           )
         );
@@ -219,12 +284,23 @@ export function TavernExpeditionArcade() {
       if (nextEnemyHp <= 0) {
         reward = randomBetween(selectedEncounter.rewardMin, selectedEncounter.rewardMax);
         result = "victory";
-        logs.push(
-          createLog(
-            `Objetivo abatido. El gremio liquida ${reward} de oro por este contrato.`,
-            "good"
-          )
-        );
+
+        if (selectedEncounter.difficulty === "hard") {
+          awardedPoint = true;
+          logs.push(
+            createLog(
+              `Objetivo abatido. El gremio liquida ${reward} de oro y ganas 1 punto de mejora.`,
+              "good"
+            )
+          );
+        } else {
+          logs.push(
+            createLog(
+              `Objetivo abatido. El gremio liquida ${reward} de oro por este contrato.`,
+              "good"
+            )
+          );
+        }
       }
     }
 
@@ -243,28 +319,48 @@ export function TavernExpeditionArcade() {
         selectedEncounter.enemyAttackMax
       );
 
-      if (rollChance(selectedEncounter.difficulty === "hard" ? 0.2 : selectedEncounter.difficulty === "medium" ? 0.15 : 0.1)) {
+      if (
+        rollChance(
+          selectedEncounter.difficulty === "hard"
+            ? 0.2
+            : selectedEncounter.difficulty === "medium"
+              ? 0.15
+              : 0.1
+        )
+      ) {
         enemyDamage = Math.floor(enemyDamage * 1.6);
-        logs.push(
-          createLog(`${selectedEncounter.enemyName} conecta un golpe critico.`, "bad")
-        );
+        logs.push(createLog(`${selectedEncounter.enemyName} conecta un golpe critico.`, "bad"));
       }
 
       if (action === "defend") {
-        if (rollChance(DEFENSE_DODGE_CHANCE)) {
+        const dodgeChance = DEFENSE_DODGE_CHANCE + progress.stats.defense * 0.03;
+        const reduceChance = DEFENSE_REDUCE_CHANCE + progress.stats.defense * 0.05;
+
+        if (rollChance(dodgeChance)) {
           enemyDamage = 0;
           logs.push(createLog("Lees la embestida y esquivas todo el dano.", "good"));
-        } else if (rollChance(DEFENSE_REDUCE_CHANCE)) {
-          enemyDamage = Math.max(4, Math.floor(enemyDamage * 0.4));
+        } else if (rollChance(reduceChance)) {
+          enemyDamage = Math.max(
+            3,
+            Math.floor(enemyDamage * 0.4) - progress.stats.defense * DEFENSE_DAMAGE_REDUCTION
+          );
           logs.push(
-            createLog(`Tu defensa absorbe la mayor parte del impacto. Solo recibes ${enemyDamage}.`, "good")
+            createLog(
+              `Tu defensa absorbe la mayor parte del impacto. Solo recibes ${enemyDamage}.`,
+              "good"
+            )
           );
         } else {
+          enemyDamage = Math.max(
+            1,
+            enemyDamage - progress.stats.defense * DEFENSE_DAMAGE_REDUCTION
+          );
           logs.push(
             createLog(`La defensa no cierra a tiempo y aun asi recibes ${enemyDamage}.`, "warn")
           );
         }
       } else {
+        enemyDamage = Math.max(1, enemyDamage - progress.stats.defense * DEFENSE_DAMAGE_REDUCTION);
         logs.push(
           createLog(`${selectedEncounter.enemyName} responde y te hiere por ${enemyDamage}.`, "bad")
         );
@@ -287,6 +383,7 @@ export function TavernExpeditionArcade() {
       phaseTwoTriggered: nextPhaseTwo,
       result,
       reward,
+      awardedPoint,
       logs: [...logs, ...battle.logs].slice(0, 8),
     };
 
@@ -297,12 +394,30 @@ export function TavernExpeditionArcade() {
       const refreshedPlayer = await refreshPlayer();
       const goldBase = refreshedPlayer?.gold ?? player.gold;
       await setPlayerGold(goldBase + reward);
+
+      let nextProgress = progress;
+      if (awardedPoint) {
+        nextProgress = grantHardVictoryPoint(progress);
+        savePveProgress(nextProgress);
+        setProgress(nextProgress);
+      }
+
       setIsUpdating(false);
     }
   }
 
   function resetBattle() {
     setBattle(null);
+  }
+
+  function upgradeStat(stat: PveStatKey) {
+    if (!player || !progress || progress.availablePoints <= 0 || battle?.result === "active") {
+      return;
+    }
+
+    const nextProgress = spendPvePoint(progress, stat);
+    savePveProgress(nextProgress);
+    setProgress(nextProgress);
   }
 
   if (isHydrating) {
@@ -317,7 +432,7 @@ export function TavernExpeditionArcade() {
     <div className="rounded-[2rem] border border-stone-800 bg-stone-900/80 p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.45)] md:p-6">
       <div className="space-y-4">
         <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
                 <UserRound className="h-5 w-5" />
@@ -329,18 +444,66 @@ export function TavernExpeditionArcade() {
                 <p className="text-lg font-black text-stone-100">{player.username}</p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Oro
-              </p>
-              <p className="text-2xl font-black text-amber-400">{player.gold}</p>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:min-w-[520px]">
+              <MiniStat icon={Coins} label="Oro" value={player.gold} />
+              <MiniStat icon={Sparkles} label="Puntos" value={safeProgress.availablePoints} />
+              <MiniStat icon={BadgeAlert} label="Hard wins" value={safeProgress.hardVictories} />
+              <MiniStat icon={Heart} label="Vida base" value={playerMaxHp} />
             </div>
+          </div>
+        </div>
+
+        <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
+                Mejora del cazador
+              </p>
+              <p className="mt-1 text-sm text-stone-400">
+                Solo `Caza dificil` entrega 1 punto por victoria.
+              </p>
+            </div>
+            <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+              {safeProgress.availablePoints} disponibles
+            </span>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            <UpgradeCard
+              icon={Swords}
+              label="Fuerza"
+              value={safeProgress.stats.strength}
+              hint={`+${safeProgress.stats.strength * STRENGTH_ATTACK_BONUS} ataque`}
+              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+              onUpgrade={() => upgradeStat("strength")}
+            />
+            <UpgradeCard
+              icon={Heart}
+              label="Vida"
+              value={safeProgress.stats.life}
+              hint={`+${safeProgress.stats.life * LIFE_BONUS_PER_POINT} HP`}
+              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+              onUpgrade={() => upgradeStat("life")}
+            />
+            <UpgradeCard
+              icon={Shield}
+              label="Defensa"
+              value={safeProgress.stats.defense}
+              hint={`-${safeProgress.stats.defense * DEFENSE_DAMAGE_REDUCTION} dano`}
+              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+              onUpgrade={() => upgradeStat("defense")}
+            />
           </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
           {ARCADE_ENCOUNTERS.map((encounter) => {
             const active = encounter.id === selectedEncounterId;
+            const windowMs = encounter.windowHours * 60 * 60 * 1000;
+            const used = getEncounterUsageCount(safeProgress, encounter.id, windowMs);
+            const remaining = Math.max(0, encounter.maxAttemptsPerWindow - used);
+            const nextResetAt = getNextResetAt(safeProgress, encounter.id, windowMs);
 
             return (
               <button
@@ -377,6 +540,11 @@ export function TavernExpeditionArcade() {
                     Premio {encounter.rewardMax}
                   </div>
                 </div>
+
+                <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                  <span>{remaining}/{encounter.maxAttemptsPerWindow} usos</span>
+                  <span>reset {formatResetDistance(nextResetAt)}</span>
+                </div>
               </button>
             );
           })}
@@ -409,14 +577,29 @@ export function TavernExpeditionArcade() {
               <button
                 type="button"
                 onClick={() => void startRun()}
-                disabled={isUpdating || player.gold < selectedEncounter.entryFee || battle?.result === "active"}
+                disabled={
+                  isUpdating ||
+                  player.gold < selectedEncounter.entryFee ||
+                  battle?.result === "active" ||
+                  getEncounterUsageCount(
+                    safeProgress,
+                    selectedEncounter.id,
+                    selectedEncounter.windowHours * 60 * 60 * 1000
+                  ) >= selectedEncounter.maxAttemptsPerWindow
+                }
                 className="mt-4 w-full rounded-2xl bg-amber-500 px-4 py-4 text-sm font-black text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {player.gold < selectedEncounter.entryFee
                   ? "Oro insuficiente"
                   : battle?.result === "active"
                     ? "Combate en curso"
-                    : "Iniciar caceria"}
+                    : getEncounterUsageCount(
+                        safeProgress,
+                        selectedEncounter.id,
+                        selectedEncounter.windowHours * 60 * 60 * 1000
+                      ) >= selectedEncounter.maxAttemptsPerWindow
+                      ? "Limite alcanzado"
+                      : "Iniciar caceria"}
               </button>
             </div>
 
@@ -424,7 +607,7 @@ export function TavernExpeditionArcade() {
               {battle && battle.encounterId === selectedEncounter.id ? (
                 <>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <BarCard label="Tu vida" value={battle.playerHp} max={PLAYER_MAX_HP} tone="player" />
+                    <BarCard label="Tu vida" value={battle.playerHp} max={battle.playerMaxHp} tone="player" />
                     <BarCard label="Vida enemiga" value={battle.enemyHp} max={battle.enemyMaxHp} tone="enemy" />
                   </div>
 
@@ -474,7 +657,7 @@ export function TavernExpeditionArcade() {
                     <div className="mt-4 rounded-[1.3rem] border border-stone-800 bg-stone-900/80 p-4">
                       <p className="text-sm font-bold text-stone-100">
                         {battle.result === "victory"
-                          ? `Victoria: +${battle.reward} de oro`
+                          ? `Victoria: +${battle.reward} de oro${battle.awardedPoint ? " y +1 punto" : ""}`
                           : "Derrota: sin recompensa"}
                       </p>
                       <button
@@ -496,6 +679,47 @@ export function TavernExpeditionArcade() {
           </div>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function UpgradeCard({
+  icon: Icon,
+  label,
+  value,
+  hint,
+  disabled,
+  onUpgrade,
+}: {
+  icon: typeof Swords;
+  label: string;
+  value: number;
+  hint: string;
+  disabled: boolean;
+  onUpgrade: () => void;
+}) {
+  return (
+    <div className="rounded-[1.3rem] border border-stone-800 bg-stone-900/80 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="rounded-xl bg-amber-500/10 p-2 text-amber-400">
+            <Icon className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-sm font-black text-stone-100">{label}</p>
+            <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">{hint}</p>
+          </div>
+        </div>
+        <span className="text-xl font-black text-stone-100">{value}</span>
+      </div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onUpgrade}
+        className="mt-3 w-full rounded-xl border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-200 transition hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-35"
+      >
+        + Subir
+      </button>
     </div>
   );
 }

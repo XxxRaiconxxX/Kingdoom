@@ -133,7 +133,7 @@ export const ARCADE_ENCOUNTERS: ArcadeEncounter[] = [
     entryFee: 200,
     rewardMin: 980,
     rewardMax: 1500,
-    enemyHp: 168,
+    enemyHp: 135,
     enemyAttackMin: 19,
     enemyAttackMax: 25,
     enemyEvasionChance: 0.18,

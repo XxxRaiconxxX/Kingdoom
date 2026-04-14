@@ -75,8 +75,17 @@ export const NARRATIVE_ENCOUNTERS: NarrativeEncounter[] = [
 export type ArcadeEncounter = {
   id: string;
   title: string;
-  waves: number;
-  baseReward: number;
+  enemyName: string;
+  difficulty: "controlled" | "medium" | "hard";
+  entryFee: number;
+  rewardMin: number;
+  rewardMax: number;
+  enemyHp: number;
+  enemyAttackMin: number;
+  enemyAttackMax: number;
+  enemyEvasionChance: number;
+  enemyGuardChance: number;
+  phaseTwoChance: number;
   speed: "steady" | "fast" | "chaotic";
   summary: string;
 };
@@ -84,18 +93,53 @@ export type ArcadeEncounter = {
 export const ARCADE_ENCOUNTERS: ArcadeEncounter[] = [
   {
     id: "frontier-rush",
-    title: "Rush de frontera",
-    waves: 3,
-    baseReward: 180,
+    title: "Frontera controlada",
+    enemyName: "Acechador del matorral",
+    difficulty: "controlled",
+    entryFee: 70,
+    rewardMin: 320,
+    rewardMax: 500,
+    enemyHp: 92,
+    enemyAttackMin: 10,
+    enemyAttackMax: 17,
+    enemyEvasionChance: 0.1,
+    enemyGuardChance: 0.18,
+    phaseTwoChance: 0.12,
     speed: "steady",
-    summary: "Oleadas cortas de bestias de frontera con recompensas constantes.",
+    summary: "Duelo compacto para farmear oro sin entrar a un riesgo excesivo.",
   },
   {
-    id: "crystal-storm",
-    title: "Tormenta cristalina",
-    waves: 5,
-    baseReward: 320,
+    id: "iron-duel",
+    title: "Asalto intermedio",
+    enemyName: "Veterano del hierro negro",
+    difficulty: "medium",
+    entryFee: 120,
+    rewardMin: 650,
+    rewardMax: 1000,
+    enemyHp: 126,
+    enemyAttackMin: 14,
+    enemyAttackMax: 24,
+    enemyEvasionChance: 0.14,
+    enemyGuardChance: 0.22,
+    phaseTwoChance: 0.2,
     speed: "fast",
-    summary: "Combate veloz, riesgo alto y ventana corta para reaccionar.",
+    summary: "Ritmo agresivo, defensa inteligente y mejores pagos por victoria.",
+  },
+  {
+    id: "void-revenant",
+    title: "Caza dificil",
+    enemyName: "Revenant del vacio",
+    difficulty: "hard",
+    entryFee: 200,
+    rewardMin: 980,
+    rewardMax: 1500,
+    enemyHp: 168,
+    enemyAttackMin: 19,
+    enemyAttackMax: 31,
+    enemyEvasionChance: 0.18,
+    enemyGuardChance: 0.28,
+    phaseTwoChance: 0.3,
+    speed: "chaotic",
+    summary: "La presa mas peligrosa: mas oro, mas trucos y una segunda fase real.",
   },
 ];

@@ -58,7 +58,7 @@ const TAVERN_MODES: {
   {
     id: "expedition",
     label: "Expedicion",
-    description: "Combate PvE narrativo por contratos: eliges accion, sobrevives al relato y cobras botin si vuelves vivo.",
+    description: "Combate PvE arcade: eliges contrato, atacas, te defiendes y cazas recompensas sin saturar la pantalla.",
   },
   {
     id: "chests",
@@ -95,8 +95,8 @@ const pageTransition = {
 };
 
 const TavernExpedition = lazy(() =>
-  import("./components/TavernExpedition").then((module) => ({
-    default: module.TavernExpedition,
+  import("./components/TavernExpeditionArcade").then((module) => ({
+    default: module.TavernExpeditionArcade,
   }))
 );
 const TavernGame = lazy(() =>
@@ -493,7 +493,7 @@ function MarketSection() {
                 Juegos de azar
               </h3>
               <p className="mt-2 text-sm leading-6 text-stone-400">
-                La mesa sigue viva dentro del mercado. Ahora tambien puedes tomar contratos PvE narrativos sin salir de la taberna.
+                La mesa sigue viva dentro del mercado. Ahora tambien puedes tomar contratos PvE arcade sin salir de la taberna.
               </p>
             </div>
           </div>

@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   BadgeAlert,
   Bolt,
+  ChevronDown,
+  ChevronUp,
   Coins,
   Heart,
   Shield,
@@ -130,6 +132,7 @@ export function TavernExpeditionArcade() {
   const [battle, setBattle] = useState<ArcadeBattleState | null>(null);
   const [progress, setProgress] = useState<PvePlayerProgress | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showUpgrades, setShowUpgrades] = useState(false);
 
   useEffect(() => {
     if (!player) {
@@ -150,6 +153,36 @@ export function TavernExpeditionArcade() {
 
   const safeProgress = progress ?? createDefaultPveProgress(player?.id ?? "guest");
   const playerMaxHp = PLAYER_BASE_HP + safeProgress.stats.life * LIFE_BONUS_PER_POINT;
+  const selectedEncounterWindowMs = selectedEncounter
+    ? selectedEncounter.windowHours * 60 * 60 * 1000
+    : 0;
+  const selectedEncounterUsed = selectedEncounter
+    ? getEncounterUsageCount(safeProgress, selectedEncounter.id, selectedEncounterWindowMs)
+    : 0;
+  const selectedEncounterRemaining = selectedEncounter
+    ? Math.max(0, selectedEncounter.maxAttemptsPerWindow - selectedEncounterUsed)
+    : 0;
+  const selectedEncounterResetAt = selectedEncounter
+    ? getNextResetAt(safeProgress, selectedEncounter.id, selectedEncounterWindowMs)
+    : null;
+  const selectedEncounterLimitReached = selectedEncounter
+    ? selectedEncounterUsed >= selectedEncounter.maxAttemptsPerWindow
+    : true;
+  const focusedBattle =
+    battle && selectedEncounter && battle.encounterId === selectedEncounter.id ? battle : null;
+  const battleInFocus = Boolean(focusedBattle);
+
+  useEffect(() => {
+    if (safeProgress.availablePoints > 0) {
+      setShowUpgrades(true);
+    }
+  }, [safeProgress.availablePoints]);
+
+  useEffect(() => {
+    if (battle?.result === "active") {
+      setShowUpgrades(false);
+    }
+  }, [battle?.result]);
 
   async function startRun() {
     if (!player || !selectedEncounter || isUpdating || !progress) {
@@ -431,251 +464,326 @@ export function TavernExpeditionArcade() {
   return (
     <div className="rounded-[2rem] border border-stone-800 bg-stone-900/80 p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.45)] md:p-6">
       <div className="space-y-4">
-        <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
+        <div className="rounded-[1.45rem] border border-stone-800 bg-stone-950/55 p-3.5 md:p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
                 <UserRound className="h-5 w-5" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
                   Cazador activo
                 </p>
-                <p className="text-lg font-black text-stone-100">{player.username}</p>
+                <p className="truncate text-lg font-black text-stone-100">{player.username}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:min-w-[520px]">
-              <MiniStat icon={Coins} label="Oro" value={player.gold} />
-              <MiniStat icon={Sparkles} label="Puntos" value={safeProgress.availablePoints} />
-              <MiniStat icon={BadgeAlert} label="Hard wins" value={safeProgress.hardVictories} />
-              <MiniStat icon={Heart} label="Vida base" value={playerMaxHp} />
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowUpgrades((current) => !current)}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-200 transition hover:border-amber-400/30 hover:text-amber-200"
+            >
+              <span>Mejoras</span>
+              <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-amber-300">
+                {safeProgress.availablePoints}
+              </span>
+              {showUpgrades ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            <CompactStatPill icon={Coins} label="Oro" value={player.gold} />
+            <CompactStatPill icon={Sparkles} label="Puntos" value={safeProgress.availablePoints} />
+            <CompactStatPill icon={BadgeAlert} label="Hard" value={safeProgress.hardVictories} />
+            <CompactStatPill icon={Heart} label="Vida" value={playerMaxHp} />
           </div>
         </div>
 
-        <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
-                Mejora del cazador
-              </p>
-              <p className="mt-1 text-sm text-stone-400">
-                Solo `Caza dificil` entrega 1 punto por victoria.
-              </p>
+        {!battleInFocus ? (
+          <>
+            <div className="space-y-3">
+              <div className="px-1">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
+                  Contratos
+                </p>
+                <p className="mt-1 text-sm text-stone-400">
+                  Desliza y elige la caceria que quieres abrir.
+                </p>
+              </div>
+
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {ARCADE_ENCOUNTERS.map((encounter) => {
+                  const active = encounter.id === selectedEncounterId;
+                  const windowMs = encounter.windowHours * 60 * 60 * 1000;
+                  const used = getEncounterUsageCount(safeProgress, encounter.id, windowMs);
+                  const remaining = Math.max(0, encounter.maxAttemptsPerWindow - used);
+                  const nextResetAt = getNextResetAt(safeProgress, encounter.id, windowMs);
+
+                  return (
+                    <button
+                      key={encounter.id}
+                      type="button"
+                      onClick={() => setSelectedEncounterId(encounter.id)}
+                      className={`min-w-[248px] snap-start rounded-[1.35rem] border p-4 text-left transition sm:min-w-[280px] ${
+                        active
+                          ? "border-amber-400/30 bg-amber-500/10 shadow-[0_0_16px_rgba(245,158,11,0.08)]"
+                          : "border-stone-800 bg-stone-950/50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">
+                            {difficultyLabel(encounter.difficulty)}
+                          </p>
+                          <h3 className="mt-1 text-base font-black text-stone-100">
+                            {encounter.title}
+                          </h3>
+                        </div>
+                        <span
+                          className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${difficultyTone(encounter.difficulty)}`}
+                        >
+                          {encounter.rewardMax}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-stone-300">
+                        <div className="rounded-xl border border-stone-800 bg-stone-900/80 px-3 py-2">
+                          Entrada {encounter.entryFee}
+                        </div>
+                        <div className="rounded-xl border border-stone-800 bg-stone-900/80 px-3 py-2">
+                          Premio {encounter.rewardMax}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                        <span>{remaining}/{encounter.maxAttemptsPerWindow} usos</span>
+                        <span>reset {formatResetDistance(nextResetAt)}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
-              {safeProgress.availablePoints} disponibles
-            </span>
-          </div>
 
-          <div className="grid gap-3 md:grid-cols-3">
-            <UpgradeCard
-              icon={Swords}
-              label="Fuerza"
-              value={safeProgress.stats.strength}
-              hint={`+${safeProgress.stats.strength * STRENGTH_ATTACK_BONUS} ataque`}
-              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-              onUpgrade={() => upgradeStat("strength")}
-            />
-            <UpgradeCard
-              icon={Heart}
-              label="Vida"
-              value={safeProgress.stats.life}
-              hint={`+${safeProgress.stats.life * LIFE_BONUS_PER_POINT} HP`}
-              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-              onUpgrade={() => upgradeStat("life")}
-            />
-            <UpgradeCard
-              icon={Shield}
-              label="Defensa"
-              value={safeProgress.stats.defense}
-              hint={`-${safeProgress.stats.defense * DEFENSE_DAMAGE_REDUCTION} dano`}
-              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-              onUpgrade={() => upgradeStat("defense")}
-            />
-          </div>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-3">
-          {ARCADE_ENCOUNTERS.map((encounter) => {
-            const active = encounter.id === selectedEncounterId;
-            const windowMs = encounter.windowHours * 60 * 60 * 1000;
-            const used = getEncounterUsageCount(safeProgress, encounter.id, windowMs);
-            const remaining = Math.max(0, encounter.maxAttemptsPerWindow - used);
-            const nextResetAt = getNextResetAt(safeProgress, encounter.id, windowMs);
-
-            return (
-              <button
-                key={encounter.id}
-                type="button"
-                onClick={() => setSelectedEncounterId(encounter.id)}
-                className={`rounded-[1.5rem] border p-4 text-left transition ${
-                  active
-                    ? "border-amber-400/30 bg-amber-500/10 shadow-[0_0_16px_rgba(245,158,11,0.08)]"
-                    : "border-stone-800 bg-stone-950/50"
-                }`}
-              >
+            {selectedEncounter ? (
+              <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">
-                      {difficultyLabel(encounter.difficulty)}
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
+                      Contrato seleccionado
                     </p>
-                    <h3 className="mt-2 text-base font-black text-stone-100">
-                      {encounter.title}
-                    </h3>
+                    <h4 className="mt-2 text-xl font-black text-stone-100">
+                      {selectedEncounter.enemyName}
+                    </h4>
                   </div>
-                  <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${difficultyTone(encounter.difficulty)}`}>
-                    {encounter.rewardMax}
+                  <span
+                    className={`rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] ${difficultyTone(selectedEncounter.difficulty)}`}
+                  >
+                    {difficultyLabel(selectedEncounter.difficulty)}
                   </span>
                 </div>
 
-                <p className="mt-3 text-sm leading-6 text-stone-400">{encounter.summary}</p>
+                <p className="mt-3 text-sm leading-6 text-stone-400">
+                  {selectedEncounter.summary}
+                </p>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-stone-300">
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/80 px-3 py-2">
-                    Entrada {encounter.entryFee}
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <MiniStat icon={Coins} label="Entrada" value={selectedEncounter.entryFee} />
+                  <MiniStat icon={Sparkles} label="Min" value={selectedEncounter.rewardMin} />
+                  <MiniStat icon={BadgeAlert} label="Max" value={selectedEncounter.rewardMax} />
+                  <MiniStat icon={Bolt} label="Ritmo" value={selectedEncounter.speed} />
+                </div>
+
+                <div className="mt-4 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                  <span>{selectedEncounterRemaining}/{selectedEncounter.maxAttemptsPerWindow} usos</span>
+                  <span>reset {formatResetDistance(selectedEncounterResetAt)}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => void startRun()}
+                  disabled={
+                    isUpdating ||
+                    player.gold < selectedEncounter.entryFee ||
+                    battle?.result === "active" ||
+                    selectedEncounterLimitReached
+                  }
+                  className="mt-4 w-full rounded-2xl bg-amber-500 px-4 py-4 text-sm font-black text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {player.gold < selectedEncounter.entryFee
+                    ? "Oro insuficiente"
+                    : battle?.result === "active"
+                      ? "Combate en curso"
+                      : selectedEncounterLimitReached
+                        ? "Limite alcanzado"
+                        : "Iniciar caceria"}
+                </button>
+              </div>
+            ) : null}
+          </>
+        ) : null}
+
+        {!battleInFocus ? (
+          <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55">
+            <button
+              type="button"
+              onClick={() => setShowUpgrades((current) => !current)}
+              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
+            >
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
+                  Mejora del cazador
+                </p>
+                <p className="mt-1 text-sm text-stone-400">
+                  Solo `Caza dificil` entrega 1 punto por victoria.
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+                  {safeProgress.availablePoints} disponibles
+                </span>
+                {showUpgrades ? (
+                  <ChevronUp className="h-4 w-4 text-stone-400" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-stone-400" />
+                )}
+              </div>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {showUpgrades ? (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid gap-3 px-4 pb-4 md:grid-cols-3">
+                    <UpgradeCard
+                      icon={Swords}
+                      label="Fuerza"
+                      value={safeProgress.stats.strength}
+                      hint={`+${safeProgress.stats.strength * STRENGTH_ATTACK_BONUS} ataque`}
+                      disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+                      onUpgrade={() => upgradeStat("strength")}
+                    />
+                    <UpgradeCard
+                      icon={Heart}
+                      label="Vida"
+                      value={safeProgress.stats.life}
+                      hint={`+${safeProgress.stats.life * LIFE_BONUS_PER_POINT} HP`}
+                      disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+                      onUpgrade={() => upgradeStat("life")}
+                    />
+                    <UpgradeCard
+                      icon={Shield}
+                      label="Defensa"
+                      value={safeProgress.stats.defense}
+                      hint={`-${safeProgress.stats.defense * DEFENSE_DAMAGE_REDUCTION} dano`}
+                      disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+                      onUpgrade={() => upgradeStat("defense")}
+                    />
                   </div>
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/80 px-3 py-2">
-                    Premio {encounter.rewardMax}
-                  </div>
-                </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
+        ) : null}
 
-                <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.16em] text-stone-500">
-                  <span>{remaining}/{encounter.maxAttemptsPerWindow} usos</span>
-                  <span>reset {formatResetDistance(nextResetAt)}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {selectedEncounter ? (
-          <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="rounded-[1.6rem] border border-stone-800 bg-stone-950/55 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
-                    Objetivo
-                  </p>
-                  <h4 className="mt-2 text-xl font-black text-stone-100">
-                    {selectedEncounter.enemyName}
-                  </h4>
-                </div>
-                <span className={`rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] ${difficultyTone(selectedEncounter.difficulty)}`}>
+        {focusedBattle ? (
+          <div className="rounded-[1.6rem] border border-amber-500/20 bg-stone-950/60 p-4 shadow-[0_0_18px_rgba(245,158,11,0.08)]">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
+                  Combate en foco
+                </p>
+                <h4 className="mt-2 text-xl font-black text-stone-100">
+                  {selectedEncounter?.enemyName}
+                </h4>
+              </div>
+              {selectedEncounter ? (
+                <span
+                  className={`rounded-full border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] ${difficultyTone(selectedEncounter.difficulty)}`}
+                >
                   {difficultyLabel(selectedEncounter.difficulty)}
                 </span>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <MiniStat icon={Coins} label="Entrada" value={selectedEncounter.entryFee} />
-                <MiniStat icon={Sparkles} label="Min" value={selectedEncounter.rewardMin} />
-                <MiniStat icon={BadgeAlert} label="Max" value={selectedEncounter.rewardMax} />
-                <MiniStat icon={Bolt} label="Ritmo" value={selectedEncounter.speed} />
-              </div>
-
-              <button
-                type="button"
-                onClick={() => void startRun()}
-                disabled={
-                  isUpdating ||
-                  player.gold < selectedEncounter.entryFee ||
-                  battle?.result === "active" ||
-                  getEncounterUsageCount(
-                    safeProgress,
-                    selectedEncounter.id,
-                    selectedEncounter.windowHours * 60 * 60 * 1000
-                  ) >= selectedEncounter.maxAttemptsPerWindow
-                }
-                className="mt-4 w-full rounded-2xl bg-amber-500 px-4 py-4 text-sm font-black text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {player.gold < selectedEncounter.entryFee
-                  ? "Oro insuficiente"
-                  : battle?.result === "active"
-                    ? "Combate en curso"
-                    : getEncounterUsageCount(
-                        safeProgress,
-                        selectedEncounter.id,
-                        selectedEncounter.windowHours * 60 * 60 * 1000
-                      ) >= selectedEncounter.maxAttemptsPerWindow
-                      ? "Limite alcanzado"
-                      : "Iniciar caceria"}
-              </button>
+              ) : null}
             </div>
 
-            <div className="rounded-[1.6rem] border border-stone-800 bg-stone-950/55 p-4">
-              {battle && battle.encounterId === selectedEncounter.id ? (
-                <>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <BarCard label="Tu vida" value={battle.playerHp} max={battle.playerMaxHp} tone="player" />
-                    <BarCard label="Vida enemiga" value={battle.enemyHp} max={battle.enemyMaxHp} tone="enemy" />
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-3 gap-3">
-                    <ActionButton
-                      label="Ataque"
-                      icon={Swords}
-                      disabled={battle.result !== "active" || isUpdating}
-                      onClick={() => void resolveAction("attack")}
-                    />
-                    <ActionButton
-                      label="Habilidad"
-                      icon={Sparkles}
-                      disabled={battle.result !== "active" || isUpdating || battle.abilityCooldown > 0}
-                      onClick={() => void resolveAction("ability")}
-                      badge={battle.abilityCooldown > 0 ? `${battle.abilityCooldown}` : "OK"}
-                    />
-                    <ActionButton
-                      label="Defensa"
-                      icon={Shield}
-                      disabled={battle.result !== "active" || isUpdating}
-                      onClick={() => void resolveAction("defend")}
-                    />
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.16em] text-stone-500">
-                    <span>Turno {battle.turn}</span>
-                    <span>{battle.phaseTwoTriggered ? "Fase 2 activa" : "Fase 1"}</span>
-                  </div>
-
-                  <div className="mt-4 max-h-56 space-y-2 overflow-y-auto pr-1">
-                    <AnimatePresence initial={false}>
-                      {battle.logs.map((log) => (
-                        <motion.div
-                          key={log.id}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className={`rounded-[1.1rem] border px-3 py-3 text-sm leading-5 ${logToneClasses(log.tone)}`}
-                        >
-                          {log.text}
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-
-                  {battle.result !== "active" ? (
-                    <div className="mt-4 rounded-[1.3rem] border border-stone-800 bg-stone-900/80 p-4">
-                      <p className="text-sm font-bold text-stone-100">
-                        {battle.result === "victory"
-                          ? `Victoria: +${battle.reward} de oro${battle.awardedPoint ? " y +1 punto" : ""}`
-                          : "Derrota: sin recompensa"}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={resetBattle}
-                        className="mt-3 w-full rounded-2xl bg-stone-100 px-4 py-3 text-sm font-black text-stone-950"
-                      >
-                        Reiniciar combate
-                      </button>
-                    </div>
-                  ) : null}
-                </>
-              ) : (
-                <div className="flex min-h-64 items-center justify-center rounded-[1.4rem] border border-dashed border-stone-800 bg-stone-900/60 px-5 text-center text-sm leading-6 text-stone-400">
-                  Elige un contrato y entra directo al combate arcade. Esta version prioriza ritmo, claridad y lectura limpia en movil.
-                </div>
-              )}
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+              <CompactStatPill icon={Coins} label="Entrada" value={focusedBattle.entryFee} />
+              <CompactStatPill
+                icon={Sparkles}
+                label="Premio"
+                value={focusedBattle.reward > 0 ? focusedBattle.reward : (selectedEncounter?.rewardMax ?? 0)}
+              />
+              <CompactStatPill icon={BadgeAlert} label="Turno" value={focusedBattle.turn} />
+              <CompactStatPill icon={Bolt} label="Fase" value={focusedBattle.phaseTwoTriggered ? 2 : 1} />
             </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <BarCard label="Tu vida" value={focusedBattle.playerHp} max={focusedBattle.playerMaxHp} tone="player" />
+              <BarCard label="Vida enemiga" value={focusedBattle.enemyHp} max={focusedBattle.enemyMaxHp} tone="enemy" />
+            </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              <ActionButton
+                label="Ataque"
+                icon={Swords}
+                disabled={focusedBattle.result !== "active" || isUpdating}
+                onClick={() => void resolveAction("attack")}
+              />
+              <ActionButton
+                label="Habilidad"
+                icon={Sparkles}
+                disabled={focusedBattle.result !== "active" || isUpdating || focusedBattle.abilityCooldown > 0}
+                onClick={() => void resolveAction("ability")}
+                badge={focusedBattle.abilityCooldown > 0 ? `${focusedBattle.abilityCooldown}` : "OK"}
+              />
+              <ActionButton
+                label="Defensa"
+                icon={Shield}
+                disabled={focusedBattle.result !== "active" || isUpdating}
+                onClick={() => void resolveAction("defend")}
+              />
+            </div>
+
+            <div className="mt-4 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.16em] text-stone-500">
+              <span>Turno {focusedBattle.turn}</span>
+              <span>{focusedBattle.phaseTwoTriggered ? "Fase 2 activa" : "Fase 1"}</span>
+            </div>
+
+            <div className="mt-4 max-h-52 space-y-2 overflow-y-auto pr-1">
+              <AnimatePresence initial={false}>
+                {focusedBattle.logs.map((log) => (
+                  <motion.div
+                    key={log.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`rounded-[1.1rem] border px-3 py-3 text-sm leading-5 ${logToneClasses(log.tone)}`}
+                  >
+                    {log.text}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {focusedBattle.result !== "active" ? (
+              <div className="mt-4 rounded-[1.3rem] border border-stone-800 bg-stone-900/80 p-4">
+                <p className="text-sm font-bold text-stone-100">
+                  {focusedBattle.result === "victory"
+                    ? `Victoria: +${focusedBattle.reward} de oro${focusedBattle.awardedPoint ? " y +1 punto" : ""}`
+                    : "Derrota: sin recompensa"}
+                </p>
+                <button
+                  type="button"
+                  onClick={resetBattle}
+                  className="mt-3 w-full rounded-2xl bg-stone-100 px-4 py-3 text-sm font-black text-stone-950"
+                >
+                  Reiniciar combate
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -699,7 +807,7 @@ function UpgradeCard({
   onUpgrade: () => void;
 }) {
   return (
-    <div className="rounded-[1.3rem] border border-stone-800 bg-stone-900/80 p-4">
+    <div className="rounded-[1.15rem] border border-stone-800 bg-stone-900/80 p-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-amber-500/10 p-2 text-amber-400">
@@ -710,16 +818,40 @@ function UpgradeCard({
             <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">{hint}</p>
           </div>
         </div>
-        <span className="text-xl font-black text-stone-100">{value}</span>
+        <span className="text-lg font-black text-stone-100">{value}</span>
       </div>
       <button
         type="button"
         disabled={disabled}
         onClick={onUpgrade}
-        className="mt-3 w-full rounded-xl border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-200 transition hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-35"
+        className="mt-2 w-full rounded-xl border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-amber-200 transition hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-35"
       >
         + Subir
       </button>
+    </div>
+  );
+}
+
+function CompactStatPill({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Coins;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="flex min-w-[96px] items-center gap-2 rounded-full border border-stone-800 bg-stone-900/80 px-3 py-2">
+      <div className="rounded-full bg-amber-500/10 p-1.5 text-amber-400">
+        <Icon className="h-3.5 w-3.5" />
+      </div>
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+          {label}
+        </p>
+        <p className="text-sm font-black text-stone-100">{value}</p>
+      </div>
     </div>
   );
 }

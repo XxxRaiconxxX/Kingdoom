@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernExpeditionArcade.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se reorganizo la vista movil de Expedicion para hacerla mas compacta, clara y enfocada durante combate.
+*   **Cambios Clave:**
+    *   Se creo un header compacto con stats en pills horizontales y acceso rapido a mejoras.
+    *   Los contratos pasaron a scroll horizontal y el detalle del contrato seleccionado ahora vive en una sola card mas limpia.
+    *   Las mejoras del cazador quedaron colapsables y el combate entra en modo foco ocultando paneles secundarios.
+*   **Notas/Advertencias:** Se mantuvo intacta la logica de contratos, combate y progresion; el cambio es de estructura visual y jerarquia de contenido.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se corrigio el retiro en Cartas para que el limite diario afecte solo la ganancia neta y no devore la apuesta base del jugador.
 *   **Cambios Clave:**

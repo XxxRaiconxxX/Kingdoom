@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se reemplazo la ruleta simple por una mesa de ruleta americana mobile-first, con tablero clasico, rueda visual y apuestas pagadas con el oro real del jugador.
+*   **Cambios Clave:**
+    *   Se creo un motor de ruleta separado con orden americano, tipos de apuesta clasicos, resolucion de payout y apoyo para historial/resultados.
+    *   La nueva interfaz permite apostar por numero, columnas, docenas y apuestas externas usando fichas, repetir apuesta, duplicar y limpiar.
+    *   El giro descuenta el oro desde Supabase, anima la rueda, resuelve la ronda y devuelve el premio al saldo real del jugador.
+*   **Notas/Advertencias:** La logica actual replica una ruleta americana clasica con simulacion local; no incluye bonus tipo Cash Collect ni persistencia historica entre sesiones.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/CharImportModal.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/utils/characterPortraits.ts`, `src/utils/characterSheets.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se migro el guardado de retratos de fichas hacia Supabase Storage para evitar base64 pesado dentro de la tabla.
 *   **Cambios Clave:**

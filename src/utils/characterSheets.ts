@@ -1,8 +1,8 @@
 import type { CharacterSheet } from "../types";
 import { supabase } from "../lib/supabase";
+import { deleteCharacterPortraitByUrl } from "./characterPortraits";
 
 const STORAGE_KEY = "kingdoom_character_sheets";
-const PORTRAITS_STORAGE_KEY = "kingdoom_character_sheet_portraits";
 
 let supportsPlayerUsername: boolean | null = null;
 let supportsPortraitUrl: boolean | null = null;
@@ -83,41 +83,6 @@ function getLocalSheets(): CharacterSheet[] {
   return [];
 }
 
-function getLocalPortraits(): Record<string, string> {
-  const stored = localStorage.getItem(PORTRAITS_STORAGE_KEY);
-  if (!stored) {
-    return {};
-  }
-
-  try {
-    return JSON.parse(stored) as Record<string, string>;
-  } catch (error) {
-    console.error("Failed to parse character sheet portraits", error);
-    return {};
-  }
-}
-
-function saveLocalPortrait(sheetId: string, portraitUrl?: string): void {
-  const portraits = getLocalPortraits();
-
-  if (portraitUrl) {
-    portraits[sheetId] = portraitUrl;
-  } else {
-    delete portraits[sheetId];
-  }
-
-  localStorage.setItem(PORTRAITS_STORAGE_KEY, JSON.stringify(portraits));
-}
-
-function mergePortraits(sheets: CharacterSheet[]): CharacterSheet[] {
-  const portraits = getLocalPortraits();
-
-  return sheets.map((sheet) => ({
-    ...sheet,
-    portraitUrl: sheet.portraitUrl ?? portraits[sheet.id],
-  }));
-}
-
 function saveLocalSheet(sheet: CharacterSheet): void {
   const sheets = getLocalSheets();
   const existingIndex = sheets.findIndex(s => s.id === sheet.id);
@@ -135,20 +100,14 @@ function deleteLocalSheet(id: string): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 }
 
-function deleteLocalPortrait(id: string): void {
-  const portraits = getLocalPortraits();
-  delete portraits[id];
-  localStorage.setItem(PORTRAITS_STORAGE_KEY, JSON.stringify(portraits));
-}
-
 // Main Exports (Async to support Supabase)
 export async function getCharacterSheets(): Promise<CharacterSheet[]> {
   const { data, error } = await supabase.from("character_sheets").select("*");
   if (error) {
     console.error("Supabase error fetching sheets:", error);
-    return mergePortraits(getLocalSheets()); // Fallback
+    return getLocalSheets(); // Fallback
   }
-  return mergePortraits((data ?? []) as CharacterSheet[]);
+  return (data ?? []) as CharacterSheet[];
 }
 
 export async function saveCharacterSheet(sheet: CharacterSheet): Promise<void> {
@@ -160,8 +119,6 @@ export async function saveCharacterSheet(sheet: CharacterSheet): Promise<void> {
     canStorePortraitUrl
   );
 
-  saveLocalPortrait(sheet.id, sheet.portraitUrl);
-
   const { error } = await supabase.from("character_sheets").upsert(payload);
   if (error) {
     console.error("Supabase error saving sheet:", error);
@@ -169,9 +126,9 @@ export async function saveCharacterSheet(sheet: CharacterSheet): Promise<void> {
   }
 }
 
-export async function deleteCharacterSheet(id: string): Promise<void> {
+export async function deleteCharacterSheet(id: string, portraitUrl?: string): Promise<void> {
+  await deleteCharacterPortraitByUrl(portraitUrl);
   const { error } = await supabase.from("character_sheets").delete().eq("id", id);
-  deleteLocalPortrait(id);
   if (error) {
     console.error("Supabase error deleting sheet:", error);
     deleteLocalSheet(id); // Fallback
@@ -185,9 +142,9 @@ export async function getPlayerSheets(playerId: string): Promise<CharacterSheet[
     .eq("playerId", playerId);
   if (error) {
     console.error("Supabase error fetching player sheets:", error);
-    return mergePortraits(getLocalSheets().filter((s) => s.playerId === playerId)); // Fallback
+    return getLocalSheets().filter((s) => s.playerId === playerId); // Fallback
   }
-  return mergePortraits((data ?? []) as CharacterSheet[]);
+  return (data ?? []) as CharacterSheet[];
 }
 
 function sanitizeSheetForSupabase(

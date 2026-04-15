@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Wand2, AlertCircle, ImagePlus } from 'lucide-react';
 import { CharacterSheet } from '../types';
@@ -38,32 +38,58 @@ Pv Base 100
 interface CharImportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (sheet: Partial<CharacterSheet>) => void;
+  onSave: (sheet: Partial<CharacterSheet>, portraitFile?: File | null) => Promise<void> | void;
 }
 
 export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClose, onSave }) => {
   const [rawText, setRawText] = useState('');
   const [parsedData, setParsedData] = useState<Partial<CharacterSheet> | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const [portraitFile, setPortraitFile] = useState<File | null>(null);
+  const [portraitPreviewUrl, setPortraitPreviewUrl] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
+  useEffect(() => {
+    return () => {
+      if (portraitPreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(portraitPreviewUrl);
+      }
+    };
+  }, [portraitPreviewUrl]);
 
   const handlePortraitSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
-    if (!file || !parsedData) {
+    if (!file) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setParsedData({ ...parsedData, portraitUrl: reader.result });
-      }
+    if (portraitPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(portraitPreviewUrl);
+    }
+
+    setPortraitFile(file);
+    setPortraitPreviewUrl(URL.createObjectURL(file));
+    setSaveError("");
+  };
+
+  const resetForm = () => {
+    setRawText('');
+    setParsedData(null);
+    setPortraitFile(null);
+    setSaveError("");
+
+    if (portraitPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(portraitPreviewUrl);
     };
-    reader.readAsDataURL(file);
+
+    setPortraitPreviewUrl("");
   };
 
   const handleParse = () => {
     setIsParsing(true);
+    setSaveError("");
     setTimeout(() => {
       const data = parseWhatsAppSheet(rawText);
       setParsedData(data);
@@ -71,12 +97,23 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
     }, 600); // Fake delay for effect
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (parsedData) {
-      onSave(parsedData);
-      setRawText('');
-      setParsedData(null);
-      onClose();
+      try {
+        setIsSaving(true);
+        setSaveError("");
+        await onSave(parsedData, portraitFile);
+        resetForm();
+        onClose();
+      } catch (error) {
+        setSaveError(
+          error instanceof Error
+            ? error.message
+            : "No se pudo guardar la ficha con su retrato."
+        );
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -174,10 +211,10 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
                       </p>
                     </div>
 
-                    {parsedData.portraitUrl ? (
+                    {portraitPreviewUrl ? (
                       <div className="mt-3 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950/80">
                         <img
-                          src={parsedData.portraitUrl}
+                          src={portraitPreviewUrl}
                           alt={`Retrato de ${parsedData.name || "personaje"}`}
                           className="h-48 w-full object-cover"
                         />
@@ -209,19 +246,33 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
 
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setParsedData(null)}
+                    onClick={() => {
+                      setParsedData(null);
+                      setPortraitFile(null);
+                      setSaveError("");
+                      if (portraitPreviewUrl.startsWith("blob:")) {
+                        URL.revokeObjectURL(portraitPreviewUrl);
+                      }
+                      setPortraitPreviewUrl("");
+                    }}
                     className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-colors"
                   >
                     Volver a Pegar
                   </button>
                   <button
-                    onClick={handleSave}
-                    className="flex-1 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                    onClick={() => void handleSave()}
+                    disabled={isSaving}
+                    className="flex-1 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <Check className="w-5 h-5" />
-                    Guardar Ficha
+                    {isSaving ? "Guardando..." : "Guardar Ficha"}
                   </button>
                 </div>
+                {saveError ? (
+                  <div className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                    {saveError}
+                  </div>
+                ) : null}
               </div>
             )}
           </div>

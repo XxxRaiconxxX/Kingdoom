@@ -21,6 +21,7 @@ import { CharSheetModal } from "./CharSheetModal";
 import { RealmRegistry } from "./RealmRegistry";
 import { CharacterSheet } from "../types";
 import { getPlayerSheets, saveCharacterSheet, deleteCharacterSheet } from "../utils/characterSheets";
+import { uploadCharacterPortrait } from "../utils/characterPortraits";
 
 const AdminControlSheet = lazy(() =>
   import("./AdminControlSheet").then((module) => ({
@@ -65,7 +66,7 @@ export function PlayerProfilePanel({
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
   const [playerSheets, setPlayerSheets] = useState<CharacterSheet[]>([]);
-  const [sheetToDelete, setSheetToDelete] = useState<string | null>(null);
+  const [sheetToDelete, setSheetToDelete] = useState<CharacterSheet | null>(null);
 
   const isCollapsed = Boolean(collapsed && player);
 
@@ -77,8 +78,22 @@ export function PlayerProfilePanel({
     }
   }, [player]);
 
-  const handleSaveSheet = async (partialSheet: Partial<CharacterSheet>) => {
+  const handleSaveSheet = async (
+    partialSheet: Partial<CharacterSheet>,
+    portraitFile?: File | null
+  ) => {
     if (!player) return;
+
+    const sheetId = crypto.randomUUID();
+    let portraitUrl = partialSheet.portraitUrl ?? "";
+
+    if (portraitFile) {
+      portraitUrl = await uploadCharacterPortrait({
+        file: portraitFile,
+        playerId: player.id,
+        sheetId,
+      });
+    }
 
     const stats = partialSheet.stats ?? {
       strength: 0,
@@ -89,10 +104,10 @@ export function PlayerProfilePanel({
     };
 
     const newSheet: CharacterSheet = {
-      id: crypto.randomUUID(),
+      id: sheetId,
       playerId: player.id,
       playerUsername: player.username,
-      portraitUrl: partialSheet.portraitUrl ?? "",
+      portraitUrl,
       name: partialSheet.name ?? "",
       age: partialSheet.age ?? "",
       gender: partialSheet.gender ?? "",
@@ -128,7 +143,7 @@ export function PlayerProfilePanel({
 
   const confirmDeleteSheet = async () => {
     if (sheetToDelete) {
-      await deleteCharacterSheet(sheetToDelete);
+      await deleteCharacterSheet(sheetToDelete.id, sheetToDelete.portraitUrl);
       if (player) {
         const updatedSheets = await getPlayerSheets(player.id);
         setPlayerSheets(updatedSheets);
@@ -137,8 +152,8 @@ export function PlayerProfilePanel({
     }
   };
 
-  const handleDeleteSheet = (id: string) => {
-    setSheetToDelete(id);
+  const handleDeleteSheet = (sheet: CharacterSheet) => {
+    setSheetToDelete(sheet);
   };
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -422,7 +437,7 @@ export function PlayerProfilePanel({
                           <Eye className="w-3.5 h-3.5" /> Ver Ficha
                         </button>
                         <button 
-                          onClick={() => handleDeleteSheet(sheet.id)}
+                          onClick={() => handleDeleteSheet(sheet)}
                           className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors"
                           title="Eliminar ficha"
                         >

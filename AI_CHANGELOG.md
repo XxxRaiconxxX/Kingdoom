@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/CharImportModal.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/utils/characterPortraits.ts`, `src/utils/characterSheets.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se migro el guardado de retratos de fichas hacia Supabase Storage para evitar base64 pesado dentro de la tabla.
+*   **Cambios Clave:**
+    *   El modal de importacion ahora conserva el archivo de galeria y sube el retrato al bucket `character-portraits` al guardar.
+    *   La ficha guarda solo la URL publica del retrato en `portraitUrl`, en vez de guardar la imagen embebida.
+    *   Al borrar una ficha, la app intenta limpiar tambien el archivo del bucket si la URL pertenece a ese storage.
+*   **Notas/Advertencias:** Requiere crear el bucket `character-portraits` y sus politicas en Supabase; si el bucket no existe o la policy bloquea la subida, el modal mostrara error al guardar.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/CharImportModal.tsx`, `src/components/CharSheetModal.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/types.ts`, `src/utils/characterSheets.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se añadio soporte de retrato para las fichas de personaje, seleccionable desde galeria y visible dentro de la ficha.
 *   **Cambios Clave:**

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Coins, RefreshCw, RotateCcw, Trash2, UserRound } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import {
-  AMERICAN_WHEEL_ORDER,
+  ROULETTE_WHEEL_ORDER,
   formatBetLabel,
   getNeighborPreview,
   getPocketColor,
@@ -12,50 +12,40 @@ import {
   resolveRouletteRound,
   ROULETTE_CHIPS,
   ROULETTE_NUMBER_GRID,
-  spinAmericanRoulette,
+  spinRoulette,
   type RouletteBetId,
   type RoulettePocket,
   type RouletteRoundResult,
 } from "../utils/rouletteEngine";
 
 const SPIN_DURATION_MS = 5200;
-const SEGMENT_ANGLE = 360 / AMERICAN_WHEEL_ORDER.length;
+const SEGMENT_ANGLE = 360 / ROULETTE_WHEEL_ORDER.length;
 
 type RoulettePhase = "betting" | "spinning" | "resolved";
 type RouletteBets = Partial<Record<RouletteBetId, number>>;
 
 const OUTSIDE_BET_ROWS: Array<Array<{ id: RouletteBetId; label: string; color?: "red" | "black" }>> = [
   [
-    { id: "dozen:1", label: "1st 12" },
-    { id: "dozen:2", label: "2nd 12" },
-    { id: "dozen:3", label: "3rd 12" },
+    { id: "outside:low", label: "1 a 12" },
+    { id: "outside:high", label: "13 a 25" },
   ],
   [
-    { id: "outside:low", label: "1 a 18" },
     { id: "outside:even", label: "PAR" },
+    { id: "outside:odd", label: "IMPAR" },
     { id: "outside:red", label: "ROJO", color: "red" },
     { id: "outside:black", label: "NEGRO", color: "black" },
-    { id: "outside:odd", label: "IMPAR" },
-    { id: "outside:high", label: "19 a 36" },
   ],
 ];
-
-const COLUMN_BET_IDS = ["column:3", "column:2", "column:1"] as const;
 
 function sumBets(bets: RouletteBets) {
   return Object.values(bets).reduce((sum, value) => sum + (value ?? 0), 0);
 }
 
 function buildWheelGradient() {
-  return `conic-gradient(${AMERICAN_WHEEL_ORDER.map((pocket, index) => {
+  return `conic-gradient(${ROULETTE_WHEEL_ORDER.map((pocket, index) => {
     const start = index * SEGMENT_ANGLE;
     const end = start + SEGMENT_ANGLE;
-    const tone =
-      getPocketColor(pocket) === "green"
-        ? "#33d24f"
-        : getPocketColor(pocket) === "red"
-          ? "#e53935"
-          : "#161616";
+    const tone = getPocketColor(pocket) === "red" ? "#e53935" : "#161616";
 
     return `${tone} ${start}deg ${end}deg`;
   }).join(", ")})`;
@@ -67,7 +57,7 @@ export function TavernRoulette() {
   const [selectedChip, setSelectedChip] = useState<number>(ROULETTE_CHIPS[2]);
   const [bets, setBets] = useState<RouletteBets>({});
   const [lastSubmittedBets, setLastSubmittedBets] = useState<RouletteBets>({});
-  const [lastNumbers, setLastNumbers] = useState<RoulettePocket[]>(["27", "13", "35", "0", "25", "3", "4", "33", "7", "10"]);
+  const [lastNumbers, setLastNumbers] = useState<RoulettePocket[]>(["23", "3", "10", "17", "13", "25", "9", "4", "18", "7"]);
   const [roundResult, setRoundResult] = useState<RouletteRoundResult | null>(null);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [updating, setUpdating] = useState(false);
@@ -85,6 +75,14 @@ export function TavernRoulette() {
 
   function handlePlaceBet(id: RouletteBetId) {
     if (!player || phase === "spinning") {
+      return;
+    }
+
+    if (id === "outside:red" && (bets["outside:black"] ?? 0) > 0) {
+      return;
+    }
+
+    if (id === "outside:black" && (bets["outside:red"] ?? 0) > 0) {
       return;
     }
 
@@ -161,7 +159,7 @@ export function TavernRoulette() {
 
     setLastSubmittedBets(snapshot);
 
-    const winningPocket = spinAmericanRoulette();
+    const winningPocket = spinRoulette();
     const result = resolveRouletteRound(snapshot, winningPocket);
     const winningIndex = getWinningPocketIndex(winningPocket);
     const extraSpins = 6 * 360;
@@ -186,7 +184,7 @@ export function TavernRoulette() {
   if (isHydrating) {
     return (
       <RouletteMessage
-        title="Mesa de ruleta americana"
+        title="Mesa de ruleta compacta"
         description="Recuperando tu sesion del reino para abrir la mesa..."
       />
     );
@@ -195,7 +193,7 @@ export function TavernRoulette() {
   if (!player) {
     return (
       <RouletteMessage
-        title="Mesa de ruleta americana"
+        title="Mesa de ruleta compacta"
         description="Conecta tu perfil del reino en el panel superior para apostar con tu oro real."
       />
     );
@@ -249,14 +247,14 @@ export function TavernRoulette() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/65">
-                    Ruleta americana
+                    Ruleta compacta
                   </p>
                   <p className="mt-1 text-sm text-stone-200/80">
-                    0 y 00. Mesa clasica con estilo arcade y cobro real sobre tu oro del reino.
+                    Solo del 1 al 25. Mesa compacta para movil y cobro real sobre tu oro del reino.
                   </p>
                 </div>
                 <span className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100/70">
-                  Single player
+                  1-25
                 </span>
               </div>
 
@@ -275,18 +273,16 @@ export function TavernRoulette() {
                     <div className="mt-3 flex items-center justify-center gap-3">
                       <span className={`inline-flex min-h-14 min-w-14 items-center justify-center rounded-full border-2 text-xl font-black ${
                         winningPocket
-                          ? winningColor === "green"
-                            ? "border-emerald-300/40 bg-emerald-500/20 text-emerald-100"
-                            : winningColor === "red"
-                              ? "border-rose-300/25 bg-rose-500/90 text-white"
-                              : "border-stone-500 bg-stone-950 text-stone-100"
+                          ? winningColor === "red"
+                            ? "border-rose-300/25 bg-rose-500/90 text-white"
+                            : "border-stone-500 bg-stone-950 text-stone-100"
                           : "border-white/10 bg-black/20 text-stone-300"
                       }`}>
                         {winningPocket ?? "--"}
                       </span>
                       <div className="text-left">
                         <p className="text-sm font-black text-stone-100">
-                          {winningPocket ? `${winningColor === "green" ? "Verde" : winningColor === "red" ? "Rojo" : "Negro"} / ${getPocketParityLabel(winningPocket)}` : "Esperando giro"}
+                          {winningPocket ? `${winningColor === "red" ? "Rojo" : "Negro"} / ${getPocketParityLabel(winningPocket)}` : "Esperando giro"}
                         </p>
                         <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-stone-400">
                           {phase === "spinning"
@@ -310,11 +306,9 @@ export function TavernRoulette() {
                         <span
                           key={`${pocket}-${index}`}
                           className={`inline-flex h-9 min-w-9 items-center justify-center rounded-full border text-sm font-black ${
-                            getPocketColor(pocket) === "green"
-                              ? "border-emerald-300/35 bg-emerald-500/20 text-emerald-100"
-                              : getPocketColor(pocket) === "red"
-                                ? "border-rose-300/25 bg-rose-500/90 text-white"
-                                : "border-stone-500 bg-stone-950 text-stone-100"
+                            getPocketColor(pocket) === "red"
+                              ? "border-rose-300/25 bg-rose-500/90 text-white"
+                              : "border-stone-500 bg-stone-950 text-stone-100"
                           }`}
                         >
                           {pocket}
@@ -369,95 +363,65 @@ export function TavernRoulette() {
                   Mesa de apuestas
                 </p>
                 <p className="mt-1 text-sm text-stone-200/80">
-                  Toca una zona para apilar la ficha seleccionada. La mesa sigue reglas clasicas americanas.
+                  Toca una zona para apilar la ficha seleccionada. Quitamos extremos para que todo quede mas limpio.
                 </p>
               </div>
               <div className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100/70">
-                Gana con pleno x35
+                Gana con pleno x24
               </div>
             </div>
 
             <div className="mt-4 md:mt-5">
-              <div className="mb-3 flex items-center justify-between gap-3 md:hidden">
-                <span className="rounded-full border border-amber-200/15 bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100/80">
-                  Desliza la mesa
-                </span>
-                <span className="text-[11px] font-medium text-stone-300/75">
-                  Mantengo el tablero grande para que siga siendo legible.
-                </span>
-              </div>
+              <div className="rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+                <div className="space-y-2">
+                  {ROULETTE_NUMBER_GRID.map((row, rowIndex) => (
+                    <div key={`row-${rowIndex}`} className="grid grid-cols-5 gap-2">
+                      {row.map((pocket) => (
+                        <BetCell
+                          key={pocket}
+                          label={pocket}
+                          amount={bets[`straight:${pocket}`]}
+                          active={highlightedWinningIds.has(`straight:${pocket}`)}
+                          tone={getPocketColor(pocket)}
+                          onClick={() => handlePlaceBet(`straight:${pocket}`)}
+                        />
+                      ))}
+                    </div>
+                  ))}
 
-              <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:-mx-2 sm:px-2 md:mx-0 md:px-0">
-                <div className="w-max min-w-[860px] rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:min-w-[760px]">
-                <div className="flex gap-2">
-                  <div className="grid w-20 grid-rows-2 gap-2">
-                    {(["00", "0"] as RoulettePocket[]).map((pocket) => (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {OUTSIDE_BET_ROWS[0].map((bet) => (
                       <BetCell
-                        key={pocket}
-                        label={pocket}
-                        amount={bets[`straight:${pocket}`]}
-                        active={highlightedWinningIds.has(`straight:${pocket}`)}
-                        tone="green"
-                        onClick={() => handlePlaceBet(`straight:${pocket}`)}
+                        key={bet.id}
+                        label={bet.label}
+                        amount={bets[bet.id]}
+                        active={highlightedWinningIds.has(bet.id)}
+                        tone="outside"
+                        compact
+                        onClick={() => handlePlaceBet(bet.id)}
                       />
                     ))}
                   </div>
 
-                  <div className="flex-1 space-y-2">
-                    {ROULETTE_NUMBER_GRID.map((row, rowIndex) => (
-                      <div key={`row-${rowIndex}`} className="grid grid-cols-[repeat(12,minmax(0,1fr))_72px] gap-2">
-                        {row.map((pocket) => (
-                          <BetCell
-                            key={pocket}
-                            label={pocket}
-                            amount={bets[`straight:${pocket}`]}
-                            active={highlightedWinningIds.has(`straight:${pocket}`)}
-                            tone={getPocketColor(pocket)}
-                            onClick={() => handlePlaceBet(`straight:${pocket}`)}
-                          />
-                        ))}
-                        <BetCell
-                          label="2 to 1"
-                          amount={bets[COLUMN_BET_IDS[rowIndex]]}
-                          active={highlightedWinningIds.has(COLUMN_BET_IDS[rowIndex])}
-                          tone="outside"
-                          compact
-                          onClick={() => handlePlaceBet(COLUMN_BET_IDS[rowIndex])}
-                        />
-                      </div>
+                  <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                    {OUTSIDE_BET_ROWS[1].map((bet) => (
+                      <BetCell
+                        key={bet.id}
+                        label={bet.label}
+                        amount={bets[bet.id]}
+                        active={highlightedWinningIds.has(bet.id)}
+                        tone={bet.color ?? "outside"}
+                        compact
+                        disabled={
+                          (bet.id === "outside:red" && (bets["outside:black"] ?? 0) > 0) ||
+                          (bet.id === "outside:black" && (bets["outside:red"] ?? 0) > 0)
+                        }
+                        onClick={() => handlePlaceBet(bet.id)}
+                      />
                     ))}
-
-                    <div className="grid grid-cols-3 gap-2">
-                      {OUTSIDE_BET_ROWS[0].map((bet) => (
-                        <BetCell
-                          key={bet.id}
-                          label={bet.label}
-                          amount={bets[bet.id]}
-                          active={highlightedWinningIds.has(bet.id)}
-                          tone="outside"
-                          compact
-                          onClick={() => handlePlaceBet(bet.id)}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-6 gap-2">
-                      {OUTSIDE_BET_ROWS[1].map((bet) => (
-                        <BetCell
-                          key={bet.id}
-                          label={bet.label}
-                          amount={bets[bet.id]}
-                          active={highlightedWinningIds.has(bet.id)}
-                          tone={bet.color ?? "outside"}
-                          compact
-                          onClick={() => handlePlaceBet(bet.id)}
-                        />
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             </div>
 
             <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
@@ -573,7 +537,7 @@ function RouletteWheel({
       >
         <div className="absolute inset-[14px] rounded-full border-[12px] border-amber-300/85 bg-[radial-gradient(circle_at_top,#2f9e44,#116329_58%,#0d421d)] shadow-[inset_0_8px_16px_rgba(255,255,255,0.12)]" />
 
-        {AMERICAN_WHEEL_ORDER.map((pocket, index) => {
+        {ROULETTE_WHEEL_ORDER.map((pocket, index) => {
           const angle = index * SEGMENT_ANGLE;
           const isWinner = pocket === winningPocket;
           return (
@@ -622,6 +586,7 @@ function BetCell({
   active,
   tone,
   compact = false,
+  disabled = false,
   onClick,
 }: {
   label: string;
@@ -629,6 +594,7 @@ function BetCell({
   active: boolean;
   tone: "red" | "black" | "green" | "outside";
   compact?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }) {
   const toneClass =
@@ -643,10 +609,11 @@ function BetCell({
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={onClick}
       className={`relative overflow-hidden rounded-[0.95rem] border ${toneClass} ${
         compact ? "min-h-14 px-2 py-2.5 text-sm" : "min-h-14 px-2 py-3 text-base"
-      } font-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(0,0,0,0.18)]`}
+      } font-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(0,0,0,0.18)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none`}
     >
       {active ? (
         <div className="absolute inset-0 border-2 border-amber-200/90 shadow-[inset_0_0_0_2px_rgba(253,224,71,0.55),0_0_18px_rgba(253,224,71,0.35)]" />

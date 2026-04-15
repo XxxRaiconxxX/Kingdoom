@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se simplifico la ruleta para ganar espacio real en movil, eliminando laterales y reduciendo la mesa a un formato compacto del 1 al 25.
+*   **Cambios Clave:**
+    *   La ruleta y el tablero ahora trabajan solo con numeros del `1` al `25`, usando una grilla `5x5` mas limpia y sin bloques laterales `0/00` ni `2 to 1`.
+    *   Se compactaron las apuestas externas a rangos y colores utiles para esta nueva mesa, con payout de pleno adaptado a `x24`.
+    *   Se bloqueo la convivencia de apuestas opuestas entre `ROJO` y `NEGRO`, tanto en logica como visualmente dentro del tablero.
+*   **Notas/Advertencias:** Este cambio altera la economia y las probabilidades respecto a la ruleta anterior; el comportamiento actual ya no intenta simular una americana clasica sino una variante compacta propia.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se ajusto la ruleta en movil para priorizar legibilidad y tamano tactil real, evitando comprimir el tablero.
 *   **Cambios Clave:**

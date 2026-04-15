@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/App.tsx`, `src/sections/HomeSection.tsx`, `src/sections/MarketSection.tsx`, `src/sections/RankingSection.tsx`, `vite.config.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se optimizo el rendimiento movil separando secciones pesadas, evitando renders ocultos y mejorando el chunking del build.
+*   **Cambios Clave:**
+    *   `Mercado` y `Ranking` salieron del bundle principal y ahora cargan en diferido por seccion.
+    *   La taberna del mercado y las categorias colapsables dejaron de montar contenido pesado mientras estan cerradas.
+    *   Se anadieron `manualChunks` en Vite y `content-visibility` en bloques largos para reducir costo inicial de render en movil.
+*   **Notas/Advertencias:** El bundle principal del cliente paso de un bloque cercano a 563 KB a uno cercano a 59 KB, aunque siguen existiendo chunks pesados esperables en `supabase`, `motion` y `GrimoireSection`.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernExpeditionArcade.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se reorganizo la vista movil de Expedicion para hacerla mas compacta, clara y enfocada durante combate.
 *   **Cambios Clave:**

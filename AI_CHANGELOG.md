@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/CharImportModal.tsx`, `src/components/CharSheetModal.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/types.ts`, `src/utils/characterSheets.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se añadio soporte de retrato para las fichas de personaje, seleccionable desde galeria y visible dentro de la ficha.
+*   **Cambios Clave:**
+    *   El modal de importacion ahora permite elegir una imagen desde galeria y verla en preview antes de guardar.
+    *   La ficha abierta muestra el retrato en una seccion dedicada y las tarjetas de `Mis Personajes` muestran miniatura cuando existe.
+    *   El guardado ahora soporta `portraitUrl` con persistencia local de respaldo incluso si la tabla de Supabase aun no tiene esa columna.
+*   **Notas/Advertencias:** Si `character_sheets` en Supabase no tiene la columna `portraitUrl`, la imagen seguira funcionando en este dispositivo via almacenamiento local, pero no se sincronizara entre dispositivos hasta agregar esa columna.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `src/sections/HomeSection.tsx`, `src/sections/MarketSection.tsx`, `src/sections/RankingSection.tsx`, `vite.config.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se optimizo el rendimiento movil separando secciones pesadas, evitando renders ocultos y mejorando el chunking del build.
 *   **Cambios Clave:**

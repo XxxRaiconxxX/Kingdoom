@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Shield, Sword, Brain, Zap, Heart, Info, BookOpen, User, Backpack, Sparkles } from 'lucide-react';
+import { X, Shield, Sword, Brain, Zap, Heart, Info, BookOpen, User, Backpack, Sparkles, ImageIcon } from 'lucide-react';
 import { CharacterSheet } from '../types';
 
 interface CharSheetModalProps {
@@ -132,6 +132,27 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                 
                 {/* Left Column: Stats & Basic Info (Takes 4 cols on large screens) */}
                 <div className="lg:col-span-4 space-y-8">
+                  <section>
+                    <h3 className="flex items-center gap-2 text-sm font-bold text-amber-500 uppercase tracking-[0.2em] mb-4">
+                      <ImageIcon className="w-4 h-4" /> Retrato
+                    </h3>
+                    <div className="overflow-hidden rounded-xl border border-stone-800/50 bg-stone-900/40">
+                      {character.portraitUrl ? (
+                        <img
+                          src={character.portraitUrl}
+                          alt={`Retrato de ${character.name || 'personaje'}`}
+                          className="h-72 w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-72 flex-col items-center justify-center gap-3 bg-gradient-to-b from-stone-900/80 to-stone-950 text-stone-500">
+                          <ImageIcon className="h-10 w-10" />
+                          <p className="text-sm uppercase tracking-[0.16em]">
+                            Sin retrato
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </section>
                   
                   {/* Basic Info Grid */}
                   <section>

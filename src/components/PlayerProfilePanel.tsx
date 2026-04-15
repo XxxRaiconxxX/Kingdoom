@@ -92,6 +92,7 @@ export function PlayerProfilePanel({
       id: crypto.randomUUID(),
       playerId: player.id,
       playerUsername: player.username,
+      portraitUrl: partialSheet.portraitUrl ?? "",
       name: partialSheet.name ?? "",
       age: partialSheet.age ?? "",
       gender: partialSheet.gender ?? "",
@@ -393,6 +394,15 @@ export function PlayerProfilePanel({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {playerSheets.map(sheet => (
                     <div key={sheet.id} className="bg-stone-900 border border-stone-800 rounded-xl p-4 flex flex-col gap-3 hover:border-amber-500/30 transition-colors">
+                      {sheet.portraitUrl ? (
+                        <div className="overflow-hidden rounded-lg border border-stone-800 bg-stone-950">
+                          <img
+                            src={sheet.portraitUrl}
+                            alt={`Retrato de ${sheet.name || "personaje"}`}
+                            className="h-36 w-full object-cover"
+                          />
+                        </div>
+                      ) : null}
                       <div>
                         <h4 className="font-bold text-amber-400 truncate uppercase tracking-wider">{sheet.name || 'Personaje Sin Nombre'}</h4>
                         <p className="text-xs text-stone-400 truncate mt-1">

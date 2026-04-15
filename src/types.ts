@@ -244,6 +244,7 @@ export type CharacterSheet = {
    * the Registry can show/search by username instead of a UUID.
    */
   playerUsername?: string;
+  portraitUrl?: string;
   name: string;
   age: string;
   gender: string;

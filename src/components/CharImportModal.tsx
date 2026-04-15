@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Wand2, AlertCircle } from 'lucide-react';
+import { X, Check, Wand2, AlertCircle, ImagePlus } from 'lucide-react';
 import { CharacterSheet } from '../types';
 import { parseWhatsAppSheet } from '../utils/sheetParser';
 
@@ -45,6 +45,22 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
   const [rawText, setRawText] = useState('');
   const [parsedData, setParsedData] = useState<Partial<CharacterSheet> | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+
+  const handlePortraitSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file || !parsedData) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setParsedData({ ...parsedData, portraitUrl: reader.result });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleParse = () => {
     setIsParsing(true);
@@ -138,6 +154,35 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
                         className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white mt-1"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-zinc-500 uppercase font-bold">Retrato del personaje</label>
+                    <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-green-500/30 bg-green-600/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:bg-green-600/20">
+                        <ImagePlus className="w-4 h-4" />
+                        Añadir desde galeria
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePortraitSelect}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-xs text-zinc-500">
+                        Se usara como retrato visible dentro de la ficha.
+                      </p>
+                    </div>
+
+                    {parsedData.portraitUrl ? (
+                      <div className="mt-3 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950/80">
+                        <img
+                          src={parsedData.portraitUrl}
+                          alt={`Retrato de ${parsedData.name || "personaje"}`}
+                          className="h-48 w-full object-cover"
+                        />
+                      </div>
+                    ) : null}
                   </div>
 
                   <div>

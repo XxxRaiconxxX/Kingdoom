@@ -45,6 +45,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se ajusto la ruleta en movil para priorizar legibilidad y tamano tactil real, evitando comprimir el tablero.
+*   **Cambios Clave:**
+    *   La mesa ahora usa un ancho real mayor en movil y se muestra en scroll horizontal de borde a borde, en lugar de encogerse hasta volverse pequena.
+    *   Se anadio una pista visual de `Desliza la mesa` para dejar claro que el tablero puede desplazarse lateralmente.
+    *   Se mantuvo el tamano util de las casillas para que apostar desde movil siga siendo comodo y preciso.
+*   **Notas/Advertencias:** La decision favorece usabilidad sobre ver todo de una sola vez; si luego quieres, se puede sumar una vista secundaria simplificada solo para movil.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se pulio el encuadre y el estilo visual de la ruleta para acercarla mas a una mesa de casino y corregir el panel estirado en escritorio.
 *   **Cambios Clave:**
     *   Se rehizo el marco exterior con acabado madera/oro y un fondo interior de tapete mas profundo para que la ruleta no se vea como cajas verdes apiladas.

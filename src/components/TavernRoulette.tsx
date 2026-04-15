@@ -377,8 +377,18 @@ export function TavernRoulette() {
               </div>
             </div>
 
-            <div className="mt-4 overflow-x-auto pb-2">
-              <div className="min-w-[720px] rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+            <div className="mt-4 md:mt-5">
+              <div className="mb-3 flex items-center justify-between gap-3 md:hidden">
+                <span className="rounded-full border border-amber-200/15 bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100/80">
+                  Desliza la mesa
+                </span>
+                <span className="text-[11px] font-medium text-stone-300/75">
+                  Mantengo el tablero grande para que siga siendo legible.
+                </span>
+              </div>
+
+              <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:-mx-2 sm:px-2 md:mx-0 md:px-0">
+                <div className="w-max min-w-[860px] rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:min-w-[760px]">
                 <div className="flex gap-2">
                   <div className="grid w-20 grid-rows-2 gap-2">
                     {(["00", "0"] as RoulettePocket[]).map((pocket) => (
@@ -447,6 +457,7 @@ export function TavernRoulette() {
                   </div>
                 </div>
               </div>
+            </div>
             </div>
 
             <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">

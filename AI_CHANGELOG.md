@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se corrigio el retiro en Cartas para que el limite diario afecte solo la ganancia neta y no devore la apuesta base del jugador.
+*   **Cambios Clave:**
+    *   El maximo retirable ahora se calcula como `apuesta base + ganancia neta restante del dia`.
+    *   Se corrigio el bloqueo de `Doble o nada` para que compare contra el retiro total real permitido.
+    *   El aviso visual de limite diario ahora muestra el total correcto que se puede cobrar del pozo.
+*   **Notas/Advertencias:** Corrige el caso donde un jugador con poco margen diario recuperaba solo su apuesta o menos de lo esperado tras una racha alta.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernScratch.tsx`, `src/utils/scratchUtils.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se agrego un sistema de reembolso para tickets sin premio en Rasca y Gana segun la cantidad comprada.
 *   **Cambios Clave:**

@@ -41,9 +41,10 @@ export function TavernCards() {
 
   const dailyWins = player ? getPlayerDailyCardsGrossWins(player.id, dateKey) : 0;
   const limitReached = dailyWins >= MAX_DAILY_CARDS_WIN_LIMIT;
-  const remaining = Math.max(0, MAX_DAILY_CARDS_WIN_LIMIT - dailyWins);
+  const remainingNetWin = Math.max(0, MAX_DAILY_CARDS_WIN_LIMIT - dailyWins);
+  const maxCashoutTotal = bet + remainingNetWin;
   const canCashOut = streak >= 2;
-  const isContinueBlocked = pool >= remaining && canCashOut;
+  const isContinueBlocked = pool >= maxCashoutTotal && canCashOut;
 
   async function handleRefresh() {
     setUpdating(true);
@@ -95,7 +96,7 @@ export function TavernCards() {
     if (!player || updating || !canCashOut) return;
     setUpdating(true);
 
-    const cappedPool = Math.min(pool, remaining);
+    const cappedPool = Math.min(pool, maxCashoutTotal);
     const wasLimitHit = cappedPool < pool;
 
     if (cappedPool > 0) {
@@ -359,9 +360,9 @@ export function TavernCards() {
                 <span className="flex items-center gap-2 text-3xl font-black text-amber-400">
                   <Coins className="h-6 w-6" /> {pool}
                 </span>
-                {pool > remaining && (
+                {pool > maxCashoutTotal && (
                   <span className="mt-2 text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                    Solo cobraras {remaining.toLocaleString()} por el limite diario
+                    Solo cobraras {maxCashoutTotal.toLocaleString()} por el limite diario
                   </span>
                 )}
                 {!canCashOut && (

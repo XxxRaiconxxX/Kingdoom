@@ -206,12 +206,12 @@ export function TavernRoulette() {
   const winningColor = winningPocket ? getPocketColor(winningPocket) : null;
 
   return (
-    <div className="rounded-[2rem] border border-emerald-500/15 bg-[radial-gradient(circle_at_top,rgba(22,163,74,0.16),transparent_40%),linear-gradient(180deg,#146b31,#0d4f25_45%,#0a3f1d)] p-4 shadow-[inset_0_8px_35px_rgba(0,0,0,0.35)] md:p-5">
-      <div className="space-y-4">
-        <div className="rounded-[1.5rem] border border-emerald-300/15 bg-black/20 px-4 py-3 backdrop-blur-sm">
+    <div className="rounded-[2.25rem] bg-[linear-gradient(180deg,#8f6224,#5d3812_38%,#2d1608)] p-[3px] shadow-[0_24px_65px_rgba(0,0,0,0.45)]">
+      <div className="space-y-4 rounded-[2.05rem] border border-amber-200/15 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.14),transparent_32%),linear-gradient(180deg,#0f6d30,#0a5225_54%,#073816)] p-3 shadow-[inset_0_14px_40px_rgba(255,255,255,0.04),inset_0_-14px_35px_rgba(0,0,0,0.34)] md:p-5">
+        <div className="rounded-[1.65rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(8,44,20,0.88),rgba(3,25,11,0.78))] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-amber-300/10 p-3 text-amber-300">
+              <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-3 text-amber-300 shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
                 <UserRound className="h-5 w-5" />
               </div>
               <div>
@@ -234,7 +234,7 @@ export function TavernRoulette() {
                 type="button"
                 onClick={handleRefresh}
                 disabled={updating}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-stone-200 transition hover:border-amber-300/30 hover:text-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-stone-200 transition hover:border-amber-300/30 hover:text-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RefreshCw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
                 Refrescar
@@ -243,24 +243,24 @@ export function TavernRoulette() {
           </div>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+        <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)] xl:items-start">
           <div className="space-y-4">
-            <div className="rounded-[1.6rem] border border-amber-200/15 bg-black/20 p-4">
+            <div className="rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.82),rgba(3,22,10,0.72))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/65">
                     Ruleta americana
                   </p>
                   <p className="mt-1 text-sm text-stone-200/80">
-                    0 y 00. Mesa clasica de pago real con tu oro del reino.
+                    0 y 00. Mesa clasica con estilo arcade y cobro real sobre tu oro del reino.
                   </p>
                 </div>
-                <span className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100/70">
+                <span className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100/70">
                   Single player
                 </span>
               </div>
 
-              <div className="mt-4 flex flex-col items-center gap-4">
+              <div className="mt-4 flex flex-col items-center gap-4 rounded-[1.5rem] border border-amber-200/12 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.08),transparent_34%),linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.3))] p-3">
                 <RouletteWheel
                   wheelRotation={wheelRotation}
                   wheelGradient={wheelGradient}
@@ -268,7 +268,7 @@ export function TavernRoulette() {
                 />
 
                 <div className="grid w-full gap-3 md:grid-cols-2 xl:grid-cols-1">
-                  <div className="rounded-[1.25rem] border border-white/10 bg-black/20 p-4 text-center">
+                  <div className="rounded-[1.25rem] border border-white/10 bg-black/25 p-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100/55">
                       Ultimo resultado
                     </p>
@@ -288,7 +288,7 @@ export function TavernRoulette() {
                         <p className="text-sm font-black text-stone-100">
                           {winningPocket ? `${winningColor === "green" ? "Verde" : winningColor === "red" ? "Rojo" : "Negro"} / ${getPocketParityLabel(winningPocket)}` : "Esperando giro"}
                         </p>
-                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-stone-400">
+                        <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-stone-400">
                           {phase === "spinning"
                             ? "La bola sigue girando"
                             : phase === "resolved"
@@ -301,7 +301,7 @@ export function TavernRoulette() {
                     </div>
                   </div>
 
-                  <div className="rounded-[1.25rem] border border-white/10 bg-black/20 p-4">
+                  <div className="rounded-[1.25rem] border border-white/10 bg-black/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100/55">
                       Ultimos 10
                     </p>
@@ -326,11 +326,16 @@ export function TavernRoulette() {
               </div>
             </div>
 
-            <div className="rounded-[1.6rem] border border-white/10 bg-black/20 p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
-                Fichas
-              </p>
-              <div className="mt-4 flex flex-wrap justify-center gap-3">
+            <div className="rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.82),rgba(3,22,10,0.72))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
+                  Fichas disponibles
+                </p>
+                <span className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+                  Valor activo x{selectedChip}
+                </span>
+              </div>
+              <div className="mt-4 flex flex-wrap justify-center gap-3 rounded-[1.35rem] border border-white/10 bg-black/20 p-3">
                 {ROULETTE_CHIPS.map((chip) => (
                   <button
                     key={chip}
@@ -357,23 +362,23 @@ export function TavernRoulette() {
             </div>
           </div>
 
-          <div className="rounded-[1.6rem] border border-white/10 bg-black/20 p-4">
+          <div className="self-start rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.84),rgba(3,22,10,0.72))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
                   Mesa de apuestas
                 </p>
                 <p className="mt-1 text-sm text-stone-200/80">
-                  Toca una zona para apilar la ficha seleccionada. El cobro sigue reglas clasicas americanas.
+                  Toca una zona para apilar la ficha seleccionada. La mesa sigue reglas clasicas americanas.
                 </p>
               </div>
-              <div className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100/70">
+              <div className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100/70">
                 Gana con pleno x35
               </div>
             </div>
 
             <div className="mt-4 overflow-x-auto pb-2">
-              <div className="min-w-[720px] rounded-[1.35rem] border border-emerald-200/15 bg-emerald-900/35 p-3">
+              <div className="min-w-[720px] rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
                 <div className="flex gap-2">
                   <div className="grid w-20 grid-rows-2 gap-2">
                     {(["00", "0"] as RoulettePocket[]).map((pocket) => (
@@ -444,8 +449,8 @@ export function TavernRoulette() {
               </div>
             </div>
 
-            <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_auto]">
-              <div className="rounded-[1.25rem] border border-white/10 bg-black/20 p-4">
+            <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
+              <div className="rounded-[1.35rem] border border-white/10 bg-black/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
                   Apuestas colocadas
                 </p>
@@ -468,7 +473,7 @@ export function TavernRoulette() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+              <div className="grid grid-cols-2 gap-2 rounded-[1.35rem] border border-white/10 bg-black/20 p-2 sm:grid-cols-4 xl:min-w-[420px]">
                 <ActionButton
                   label="Repetir"
                   icon={RotateCcw}
@@ -506,7 +511,7 @@ export function TavernRoulette() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="mt-4 rounded-[1.3rem] border border-white/10 bg-black/20 p-4"
+                  className="mt-4 rounded-[1.35rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(17,10,4,0.5),rgba(0,0,0,0.2))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div>
@@ -547,8 +552,8 @@ function RouletteWheel({
   winningPocket: RoulettePocket | null;
 }) {
   return (
-    <div className="relative flex h-[290px] w-[290px] items-center justify-center sm:h-[320px] sm:w-[320px]">
-      <div className="absolute top-0 z-20 h-0 w-0 border-l-[14px] border-r-[14px] border-t-[20px] border-l-transparent border-r-transparent border-t-amber-300 drop-shadow-[0_6px_14px_rgba(0,0,0,0.45)]" />
+    <div className="relative flex h-[292px] w-[292px] items-center justify-center rounded-full bg-[radial-gradient(circle,#6d4118,#3e220d_65%,#1e0d04)] p-3 shadow-[0_20px_40px_rgba(0,0,0,0.42)] sm:h-[328px] sm:w-[328px]">
+      <div className="absolute top-2 z-20 h-0 w-0 border-l-[14px] border-r-[14px] border-t-[20px] border-l-transparent border-r-transparent border-t-amber-300 drop-shadow-[0_6px_14px_rgba(0,0,0,0.45)]" />
       <motion.div
         animate={{ rotate: wheelRotation }}
         transition={{ duration: SPIN_DURATION_MS / 1000, ease: "easeOut" }}
@@ -617,12 +622,12 @@ function BetCell({
 }) {
   const toneClass =
     tone === "red"
-      ? "border-rose-300/30 bg-rose-600 text-white"
+      ? "border-rose-300/30 bg-gradient-to-b from-rose-500 to-rose-700 text-white"
       : tone === "black"
-        ? "border-stone-600 bg-stone-950 text-stone-100"
+        ? "border-stone-600 bg-gradient-to-b from-stone-800 to-black text-stone-100"
         : tone === "green"
-          ? "border-emerald-300/30 bg-emerald-500/25 text-emerald-100"
-          : "border-emerald-300/20 bg-emerald-700/30 text-stone-100";
+          ? "border-emerald-300/30 bg-gradient-to-b from-emerald-500/40 to-emerald-700/50 text-emerald-100"
+          : "border-emerald-300/20 bg-gradient-to-b from-emerald-600/45 to-emerald-900/55 text-stone-100";
 
   return (
     <button
@@ -630,7 +635,7 @@ function BetCell({
       onClick={onClick}
       className={`relative overflow-hidden rounded-[0.95rem] border ${toneClass} ${
         compact ? "min-h-14 px-2 py-2.5 text-sm" : "min-h-14 px-2 py-3 text-base"
-      } font-black transition hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(0,0,0,0.18)]`}
+      } font-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(0,0,0,0.18)]`}
     >
       {active ? (
         <div className="absolute inset-0 border-2 border-amber-200/90 shadow-[inset_0_0_0_2px_rgba(253,224,71,0.55),0_0_18px_rgba(253,224,71,0.35)]" />
@@ -663,10 +668,10 @@ function ActionButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-45 ${
+      className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] px-4 py-3 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-45 ${
         tone === "primary"
-          ? "bg-gradient-to-b from-rose-500 to-rose-700 text-white hover:from-rose-400 hover:to-rose-600"
-          : "border border-white/10 bg-black/20 text-stone-100 hover:border-amber-200/25 hover:text-amber-100"
+          ? "border border-rose-300/20 bg-gradient-to-b from-rose-500 to-rose-700 text-white shadow-[0_10px_20px_rgba(127,29,29,0.32)] hover:from-rose-400 hover:to-rose-600"
+          : "border border-white/10 bg-[linear-gradient(180deg,rgba(15,59,28,0.92),rgba(5,31,14,0.9))] text-stone-100 hover:border-amber-200/25 hover:text-amber-100"
       }`}
     >
       <Icon className="h-4 w-4" />
@@ -692,7 +697,7 @@ function StatusChip({
         : "text-stone-100";
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
+    <div className="rounded-2xl border border-white/10 bg-black/25 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
       <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100/55">
         {label}
       </p>

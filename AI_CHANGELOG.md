@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se pulio el encuadre y el estilo visual de la ruleta para acercarla mas a una mesa de casino y corregir el panel estirado en escritorio.
+*   **Cambios Clave:**
+    *   Se rehizo el marco exterior con acabado madera/oro y un fondo interior de tapete mas profundo para que la ruleta no se vea como cajas verdes apiladas.
+    *   El panel derecho ahora deja de estirarse artificialmente, con mejor proporcion visual entre rueda, tablero, apuestas y botonera.
+    *   Se mejoraron rueda, fichas, celdas y botones con gradientes, sombras y bandejas mas cercanas a la referencia visual.
+*   **Notas/Advertencias:** Es un clon visual aproximado; aun se puede seguir afinando la rueda o el tablero si luego quieres una replica mas agresiva de la referencia.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se reemplazo la ruleta simple por una mesa de ruleta americana mobile-first, con tablero clasico, rueda visual y apuestas pagadas con el oro real del jugador.
 *   **Cambios Clave:**

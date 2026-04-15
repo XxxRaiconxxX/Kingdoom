@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/sections/MarketSection.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se amplio el espacio util de la ruleta en movil y se aplico un ligero efecto de alejamiento visual para que el contenido respire mejor dentro del marco.
+*   **Cambios Clave:**
+    *   La taberna del mercado ahora usa menos padding en movil, liberando ancho real para la ruleta.
+    *   La ruleta gano algo de ancho lateral con margenes negativos controlados y una escala visual suave que simula un pequeno `zoom out` solo en movil.
+    *   Se compactaron paddings internos del marco para evitar que textos y bloques queden pegados al borde derecho.
+*   **Notas/Advertencias:** El ajuste de escala solo afecta movil y se revierte automaticamente en escritorio para no tocar la vista que ya estaba correcta.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se simplifico la ruleta para ganar espacio real en movil, eliminando laterales y reduciendo la mesa a un formato compacto del 1 al 25.
 *   **Cambios Clave:**

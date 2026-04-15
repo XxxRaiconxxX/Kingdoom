@@ -204,9 +204,9 @@ export function TavernRoulette() {
   const winningColor = winningPocket ? getPocketColor(winningPocket) : null;
 
   return (
-    <div className="rounded-[2.25rem] bg-[linear-gradient(180deg,#8f6224,#5d3812_38%,#2d1608)] p-[3px] shadow-[0_24px_65px_rgba(0,0,0,0.45)]">
-      <div className="space-y-4 rounded-[2.05rem] border border-amber-200/15 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.14),transparent_32%),linear-gradient(180deg,#0f6d30,#0a5225_54%,#073816)] p-3 shadow-[inset_0_14px_40px_rgba(255,255,255,0.04),inset_0_-14px_35px_rgba(0,0,0,0.34)] md:p-5">
-        <div className="rounded-[1.65rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(8,44,20,0.88),rgba(3,25,11,0.78))] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm">
+    <div className="-mx-2 w-[calc(100%+1rem)] origin-top scale-[0.985] rounded-[2.25rem] bg-[linear-gradient(180deg,#8f6224,#5d3812_38%,#2d1608)] p-[3px] shadow-[0_24px_65px_rgba(0,0,0,0.45)] sm:-mx-1 sm:w-[calc(100%+0.5rem)] sm:scale-[0.992] md:mx-0 md:w-full md:scale-100">
+      <div className="space-y-3 rounded-[2.05rem] border border-amber-200/15 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.14),transparent_32%),linear-gradient(180deg,#0f6d30,#0a5225_54%,#073816)] p-2.5 shadow-[inset_0_14px_40px_rgba(255,255,255,0.04),inset_0_-14px_35px_rgba(0,0,0,0.34)] sm:p-3 md:space-y-4 md:p-5">
+        <div className="rounded-[1.65rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(8,44,20,0.88),rgba(3,25,11,0.78))] px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm md:px-4 md:py-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-3 text-amber-300 shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
@@ -241,9 +241,9 @@ export function TavernRoulette() {
           </div>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)] xl:items-start">
+        <div className="grid gap-3 md:gap-4 xl:grid-cols-[360px_minmax(0,1fr)] xl:items-start">
           <div className="space-y-4">
-            <div className="rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.82),rgba(3,22,10,0.72))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.82),rgba(3,22,10,0.72))] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/65">
@@ -258,7 +258,7 @@ export function TavernRoulette() {
                 </span>
               </div>
 
-              <div className="mt-4 flex flex-col items-center gap-4 rounded-[1.5rem] border border-amber-200/12 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.08),transparent_34%),linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.3))] p-3">
+              <div className="mt-3.5 flex flex-col items-center gap-3 rounded-[1.5rem] border border-amber-200/12 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.08),transparent_34%),linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.3))] p-2.5 md:mt-4 md:gap-4 md:p-3">
                 <RouletteWheel
                   wheelRotation={wheelRotation}
                   wheelGradient={wheelGradient}
@@ -320,7 +320,7 @@ export function TavernRoulette() {
               </div>
             </div>
 
-            <div className="rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.82),rgba(3,22,10,0.72))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.82),rgba(3,22,10,0.72))] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:p-4">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
                   Fichas disponibles
@@ -329,7 +329,7 @@ export function TavernRoulette() {
                   Valor activo x{selectedChip}
                 </span>
               </div>
-              <div className="mt-4 flex flex-wrap justify-center gap-3 rounded-[1.35rem] border border-white/10 bg-black/20 p-3">
+              <div className="mt-3.5 flex flex-wrap justify-center gap-3 rounded-[1.35rem] border border-white/10 bg-black/20 p-2.5 md:mt-4 md:p-3">
                 {ROULETTE_CHIPS.map((chip) => (
                   <button
                     key={chip}
@@ -356,7 +356,7 @@ export function TavernRoulette() {
             </div>
           </div>
 
-          <div className="self-start rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.84),rgba(3,22,10,0.72))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <div className="self-start rounded-[1.8rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(9,39,18,0.84),rgba(3,22,10,0.72))] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:p-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
@@ -371,8 +371,8 @@ export function TavernRoulette() {
               </div>
             </div>
 
-            <div className="mt-4 md:mt-5">
-              <div className="rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+            <div className="mt-3.5 md:mt-5">
+              <div className="rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-2.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:p-3">
                 <div className="space-y-2">
                   {ROULETTE_NUMBER_GRID.map((row, rowIndex) => (
                     <div key={`row-${rowIndex}`} className="grid grid-cols-5 gap-2">

@@ -166,7 +166,7 @@ export function MarketSection() {
       <details
         open={isTavernOpen}
         onToggle={(event) => setIsTavernOpen(event.currentTarget.open)}
-        className="group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6"
+        className="group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-4 sm:p-5 md:p-6"
       >
         <summary className="flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
@@ -209,7 +209,7 @@ export function MarketSection() {
               ))}
             </div>
 
-            <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
+            <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-3 py-2.5 sm:px-4 sm:py-3">
               <p className="text-sm leading-6 text-stone-400">
                 {TAVERN_MODES.find((mode) => mode.id === tavernMode)?.description}
               </p>

@@ -45,6 +45,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se sumo un segundo nivel de enfoque durante el giro compactando tambien la seccion de fichas para que la rueda gane protagonismo.
+*   **Cambios Clave:**
+    *   `Fichas disponibles` ahora se repliega automaticamente durante la tirada y muestra solo un estado compacto con la ficha activa.
+    *   El jugador conserva contexto del valor seleccionado sin mantener toda la bandeja abierta mientras la rueda gira.
+    *   La transicion entre bandeja expandida y compacta usa la misma animacion suave del resto de la mesa para que el flujo se sienta uniforme.
+*   **Notas/Advertencias:** La seleccion de ficha queda bloqueada solo durante el giro; al terminar la ronda la bandeja vuelve automaticamente.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se mejoro el flujo del giro de ruleta plegando automaticamente la mesa durante la tirada y haciendo mas teatral la frenada final.
 *   **Cambios Clave:**
     *   Al pulsar `Girar`, la `Mesa de apuestas` se contrae con animacion y deja el foco en la rueda y el estado de la ronda.

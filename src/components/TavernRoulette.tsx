@@ -330,30 +330,67 @@ export function TavernRoulette() {
                   Valor activo x{selectedChip}
                 </span>
               </div>
-              <div className="mt-3.5 flex flex-wrap justify-center gap-3 rounded-[1.35rem] border border-white/10 bg-black/20 p-2.5 md:mt-4 md:p-3">
-                {ROULETTE_CHIPS.map((chip) => (
-                  <button
-                    key={chip}
-                    type="button"
-                    onClick={() => setSelectedChip(chip)}
-                    className={`inline-flex h-16 w-16 items-center justify-center rounded-full border-[5px] font-black shadow-[0_10px_22px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 ${
-                      selectedChip === chip
-                        ? "border-amber-200 bg-gradient-to-br from-amber-200 to-amber-400 text-stone-950"
-                        : chip === 1
-                          ? "border-sky-200 bg-gradient-to-br from-sky-300 to-sky-500 text-white"
-                          : chip === 5
-                            ? "border-pink-200 bg-gradient-to-br from-pink-300 to-pink-500 text-white"
-                            : chip === 10
-                              ? "border-lime-200 bg-gradient-to-br from-lime-300 to-lime-600 text-white"
-                              : chip === 25
-                                ? "border-cyan-100 bg-gradient-to-br from-cyan-200 to-cyan-500 text-white"
-                                : "border-rose-100 bg-gradient-to-br from-rose-300 to-rose-600 text-white"
-                    }`}
+
+              <AnimatePresence initial={false} mode="wait">
+                {isSpinning ? (
+                  <motion.div
+                    key="collapsed-chips"
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
                   >
-                    {chip}
-                  </button>
-                ))}
-              </div>
+                    <div className="mt-3.5 flex items-center justify-between gap-3 rounded-[1.35rem] border border-white/10 bg-black/20 px-4 py-3 md:mt-4">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
+                          Ficha fijada
+                        </p>
+                        <p className="mt-1 text-sm text-stone-300/80">
+                          El valor queda bloqueado hasta que termine el giro.
+                        </p>
+                      </div>
+                      <span className="inline-flex h-14 min-w-14 items-center justify-center rounded-full border-[5px] border-amber-200 bg-gradient-to-br from-amber-200 to-amber-400 px-3 text-lg font-black text-stone-950 shadow-[0_10px_22px_rgba(0,0,0,0.28)]">
+                        {selectedChip}
+                      </span>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="expanded-chips"
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-3.5 flex flex-wrap justify-center gap-3 rounded-[1.35rem] border border-white/10 bg-black/20 p-2.5 md:mt-4 md:p-3">
+                      {ROULETTE_CHIPS.map((chip) => (
+                        <button
+                          key={chip}
+                          type="button"
+                          onClick={() => setSelectedChip(chip)}
+                          className={`inline-flex h-16 w-16 items-center justify-center rounded-full border-[5px] font-black shadow-[0_10px_22px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 ${
+                            selectedChip === chip
+                              ? "border-amber-200 bg-gradient-to-br from-amber-200 to-amber-400 text-stone-950"
+                              : chip === 1
+                                ? "border-sky-200 bg-gradient-to-br from-sky-300 to-sky-500 text-white"
+                                : chip === 5
+                                  ? "border-pink-200 bg-gradient-to-br from-pink-300 to-pink-500 text-white"
+                                  : chip === 10
+                                    ? "border-lime-200 bg-gradient-to-br from-lime-300 to-lime-600 text-white"
+                                    : chip === 25
+                                      ? "border-cyan-100 bg-gradient-to-br from-cyan-200 to-cyan-500 text-white"
+                                      : "border-rose-100 bg-gradient-to-br from-rose-300 to-rose-600 text-white"
+                          }`}
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 

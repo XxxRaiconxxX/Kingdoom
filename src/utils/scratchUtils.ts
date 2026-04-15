@@ -11,6 +11,12 @@ export const VIP_JACKPOT_PRIZE = 10000;
 export const NORMAL_MIN_PRIZE = 200;
 export const NORMAL_MAX_PRIZE = 2500; // Un premio jugoso diario de los normales
 
+export interface ScratchRefundOutcome {
+  refundedTickets: number;
+  refundedGold: number;
+  mode: "none" | "half" | "full";
+}
+
 export interface DailyScratchConfig {
   cost: number;
   winChance: number;
@@ -69,6 +75,36 @@ export function getDailyScratchConfig(): DailyScratchConfig {
     winChance,
     dateKey,
     maxDailyLimit,
+  };
+}
+
+export function getScratchRefundOutcome(
+  quantity: number,
+  losingTickets: number,
+  ticketCost: number,
+): ScratchRefundOutcome {
+  if (losingTickets <= 0 || ticketCost <= 0) {
+    return {
+      refundedTickets: 0,
+      refundedGold: 0,
+      mode: "none",
+    };
+  }
+
+  if (quantity > 50) {
+    const shouldRefundFullLosses = Math.random() < 0.5;
+
+    return {
+      refundedTickets: shouldRefundFullLosses ? losingTickets : 0,
+      refundedGold: shouldRefundFullLosses ? losingTickets * ticketCost : 0,
+      mode: shouldRefundFullLosses ? "full" : "none",
+    };
+  }
+
+  return {
+    refundedTickets: losingTickets,
+    refundedGold: Math.floor((losingTickets * ticketCost) / 2),
+    mode: "half",
   };
 }
 

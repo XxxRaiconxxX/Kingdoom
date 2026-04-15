@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernScratch.tsx`, `src/utils/scratchUtils.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se agrego un sistema de reembolso para tickets sin premio en Rasca y Gana segun la cantidad comprada.
+*   **Cambios Clave:**
+    *   Compras de 50 o menos ahora devuelven automaticamente el 50% del valor de los tickets sin premio.
+    *   Compras de mas de 50 activan un 50% de probabilidad de reembolso completo sobre los tickets sin premio.
+    *   La pantalla final ahora separa el reembolso por limite diario del nuevo reembolso por resultado.
+*   **Notas/Advertencias:** Se asumio que el valor exacto de 50 tickets entra en la regla de "50 o menos" para evitar un caso ambiguo sin cobertura.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se bloqueo el cobro temprano en Cartas para que `Plantarse y cobrar` se habilite recien desde la segunda ronda.
 *   **Cambios Clave:**

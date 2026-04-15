@@ -9,11 +9,13 @@ import {
   addPlayerDailyScratchGrossWins,
   getDailyScratchConfig,
   getPlayerDailyScratchGrossWins,
+  getScratchRefundOutcome,
   NORMAL_MAX_PRIZE,
   NORMAL_MIN_PRIZE,
   VIP_JACKPOT_CHANCE,
   VIP_JACKPOT_PRIZE,
 } from "../utils/scratchUtils";
+import type { ScratchRefundOutcome } from "../utils/scratchUtils";
 
 type ScratchPhase = "buy" | "ready" | "scratching" | "revealed";
 
@@ -23,8 +25,11 @@ interface ScratchBatchResult {
   wins: number;
   loses: number;
   totalPrize: number;
-  refundedTickets: number;
-  refundedGold: number;
+  unusedTickets: number;
+  unusedRefundGold: number;
+  consolationRefundTickets: number;
+  consolationRefundGold: number;
+  consolationRefundMode: ScratchRefundOutcome["mode"];
 }
 
 export function TavernScratch() {
@@ -120,20 +125,27 @@ export function TavernScratch() {
         cappedTotalPrize = Math.max(0, dailyConfig.maxDailyLimit - dailyGrossWins);
       }
       
-      const refundedTickets = quantity - usedTickets;
-      const refundedGold = refundedTickets * dailyConfig.cost;
+      const totalWins = normalWins + vipWins;
+      const losingTickets = Math.max(usedTickets - totalWins, 0);
+      const unusedTickets = quantity - usedTickets;
+      const unusedRefundGold = unusedTickets * dailyConfig.cost;
+      const consolationRefund = getScratchRefundOutcome(quantity, losingTickets, dailyConfig.cost);
 
       setBatchResult({
         totalCost,
         quantity,
-        wins: normalWins + vipWins,
-        loses: usedTickets - normalWins, 
+        wins: totalWins,
+        loses: losingTickets,
         totalPrize: cappedTotalPrize,
-        refundedTickets,
-        refundedGold
+        unusedTickets,
+        unusedRefundGold,
+        consolationRefundTickets: consolationRefund.refundedTickets,
+        consolationRefundGold: consolationRefund.refundedGold,
+        consolationRefundMode: consolationRefund.mode,
       });
 
-      const goldToDeposit = cappedTotalPrize + refundedGold;
+      const goldToDeposit =
+        cappedTotalPrize + unusedRefundGold + consolationRefund.refundedGold;
 
       if (goldToDeposit > 0) {
         setUpdating(true);
@@ -242,6 +254,11 @@ export function TavernScratch() {
                   Pagas <span className="font-bold text-amber-300">{dailyConfig.cost} de oro</span> y
                   tienes un <span className="font-bold text-amber-300">{Math.round(dailyConfig.winChance * 100)}%</span> de
                   sacar un premio entre {NORMAL_MIN_PRIZE} y {NORMAL_MAX_PRIZE} monedas. Ademas, TODOS los tickets tienen un <span className="font-bold text-emerald-400">5% extra fijo de ganar 10,000 oro (Jackpot).</span>
+                </p>
+                <p className="mt-3 text-xs leading-6 text-stone-500">
+                  Reembolso de tickets sin premio: compras de <span className="font-bold text-stone-300">50 o menos</span> devuelven
+                  <span className="font-bold text-amber-300"> 50% del valor</span>. Compras de <span className="font-bold text-stone-300">mas de 50</span>
+                  tienen <span className="font-bold text-emerald-400">50% de probabilidad</span> de devolver el <span className="font-bold text-emerald-400">100% del valor</span>.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/40 p-4">
@@ -387,12 +404,12 @@ export function TavernScratch() {
                 <div className="mx-auto mt-4 max-w-sm rounded-[1rem] bg-stone-950/40 p-5 text-sm text-stone-300">
                   <div className="flex items-center justify-between border-b border-stone-800/60 pb-3">
                     <span className="text-stone-400">Tickets Jugados</span>
-                    <span className="font-bold text-stone-100 text-base">{batchResult.quantity - batchResult.refundedTickets}</span>
+                    <span className="font-bold text-stone-100 text-base">{batchResult.quantity - batchResult.unusedTickets}</span>
                   </div>
-                  {batchResult.refundedTickets > 0 ? (
+                  {batchResult.unusedTickets > 0 ? (
                     <div className="flex items-center justify-between border-b border-stone-800/60 py-3">
                       <span className="font-bold text-amber-500">Límite Diario Alcanzado</span>
-                      <span className="font-bold text-stone-100">{batchResult.refundedTickets} no usados</span>
+                      <span className="font-bold text-stone-100">{batchResult.unusedTickets} no usados</span>
                     </div>
                   ) : null}
                   <div className="flex items-center justify-between border-b border-stone-800/60 py-3">
@@ -405,10 +422,28 @@ export function TavernScratch() {
                   </div>
                 </div>
 
-                {batchResult.refundedGold > 0 ? (
+                {batchResult.unusedRefundGold > 0 ? (
                   <div className="mx-auto mt-3 max-w-sm rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm">
                     <p className="text-center text-amber-300">
-                      Se ha reembolsado a tu cuenta <span className="font-bold text-amber-400">+{batchResult.refundedGold} ORO</span> de los tickets devueltos.
+                      Se ha reembolsado a tu cuenta <span className="font-bold text-amber-400">+{batchResult.unusedRefundGold} ORO</span> por los tickets no usados al tocar el limite diario.
+                    </p>
+                  </div>
+                ) : null}
+
+                {batchResult.consolationRefundGold > 0 ? (
+                  <div className="mx-auto mt-3 max-w-sm rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm">
+                    <p className="text-center text-emerald-300">
+                      {batchResult.consolationRefundMode === "full"
+                        ? <>La tirada masiva activo un reembolso completo de tickets sin premio: <span className="font-bold text-emerald-400">+{batchResult.consolationRefundGold} ORO</span>.</>
+                        : <>Los tickets sin premio devolvieron <span className="font-bold text-emerald-400">+{batchResult.consolationRefundGold} ORO</span> (50% del valor).</>}
+                    </p>
+                  </div>
+                ) : null}
+
+                {batchResult.consolationRefundMode === "none" && batchResult.quantity > 50 && batchResult.loses > 0 ? (
+                  <div className="mx-auto mt-3 max-w-sm rounded-xl border border-stone-700 bg-stone-950/40 p-3 text-sm">
+                    <p className="text-center text-stone-400">
+                      Esta tirada masiva no activo el 50% de probabilidad de reembolso completo para tickets sin premio.
                     </p>
                   </div>
                 ) : null}

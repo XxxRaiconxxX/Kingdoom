@@ -18,7 +18,7 @@ import {
   type RouletteRoundResult,
 } from "../utils/rouletteEngine";
 
-const SPIN_DURATION_MS = 5200;
+const SPIN_DURATION_MS = 6600;
 const SEGMENT_ANGLE = 360 / ROULETTE_WHEEL_ORDER.length;
 
 type RoulettePhase = "betting" | "spinning" | "resolved";
@@ -66,6 +66,7 @@ export function TavernRoulette() {
   const totalBet = useMemo(() => sumBets(bets), [bets]);
   const canSpin = Boolean(player && totalBet > 0 && player.gold >= totalBet && phase !== "spinning" && !updating);
   const highlightedWinningIds = useMemo(() => new Set(roundResult?.winningBets.map((bet) => bet.id) ?? []), [roundResult]);
+  const isSpinning = phase === "spinning";
 
   async function handleRefresh() {
     setUpdating(true);
@@ -372,56 +373,94 @@ export function TavernRoulette() {
             </div>
 
             <div className="mt-3.5 md:mt-5">
-              <div className="rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-2.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:p-3">
-                <div className="space-y-2">
-                  {ROULETTE_NUMBER_GRID.map((row, rowIndex) => (
-                    <div key={`row-${rowIndex}`} className="grid grid-cols-5 gap-2">
-                      {row.map((pocket) => (
-                        <BetCell
-                          key={pocket}
-                          label={pocket}
-                          amount={bets[`straight:${pocket}`]}
-                          active={highlightedWinningIds.has(`straight:${pocket}`)}
-                          tone={getPocketColor(pocket)}
-                          onClick={() => handlePlaceBet(`straight:${pocket}`)}
-                        />
-                      ))}
+              <AnimatePresence initial={false} mode="wait">
+                {isSpinning ? (
+                  <motion.div
+                    key="collapsed-board"
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="rounded-[1.5rem] border border-amber-200/15 bg-[linear-gradient(180deg,rgba(15,44,20,0.55),rgba(4,20,10,0.48))] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/70">
+                            Mesa replegada
+                          </p>
+                          <p className="mt-1 text-sm text-stone-300/80">
+                            Las apuestas quedan cerradas mientras la rueda resuelve la ronda.
+                          </p>
+                        </div>
+                        <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-100">
+                          Girando
+                        </span>
+                      </div>
                     </div>
-                  ))}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="expanded-board"
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-2.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:p-3">
+                      <div className="space-y-2">
+                        {ROULETTE_NUMBER_GRID.map((row, rowIndex) => (
+                          <div key={`row-${rowIndex}`} className="grid grid-cols-5 gap-2">
+                            {row.map((pocket) => (
+                              <BetCell
+                                key={pocket}
+                                label={pocket}
+                                amount={bets[`straight:${pocket}`]}
+                                active={highlightedWinningIds.has(`straight:${pocket}`)}
+                                tone={getPocketColor(pocket)}
+                                onClick={() => handlePlaceBet(`straight:${pocket}`)}
+                              />
+                            ))}
+                          </div>
+                        ))}
 
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    {OUTSIDE_BET_ROWS[0].map((bet) => (
-                      <BetCell
-                        key={bet.id}
-                        label={bet.label}
-                        amount={bets[bet.id]}
-                        active={highlightedWinningIds.has(bet.id)}
-                        tone="outside"
-                        compact
-                        onClick={() => handlePlaceBet(bet.id)}
-                      />
-                    ))}
-                  </div>
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          {OUTSIDE_BET_ROWS[0].map((bet) => (
+                            <BetCell
+                              key={bet.id}
+                              label={bet.label}
+                              amount={bets[bet.id]}
+                              active={highlightedWinningIds.has(bet.id)}
+                              tone="outside"
+                              compact
+                              onClick={() => handlePlaceBet(bet.id)}
+                            />
+                          ))}
+                        </div>
 
-                  <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                    {OUTSIDE_BET_ROWS[1].map((bet) => (
-                      <BetCell
-                        key={bet.id}
-                        label={bet.label}
-                        amount={bets[bet.id]}
-                        active={highlightedWinningIds.has(bet.id)}
-                        tone={bet.color ?? "outside"}
-                        compact
-                        disabled={
-                          (bet.id === "outside:red" && (bets["outside:black"] ?? 0) > 0) ||
-                          (bet.id === "outside:black" && (bets["outside:red"] ?? 0) > 0)
-                        }
-                        onClick={() => handlePlaceBet(bet.id)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+                        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                          {OUTSIDE_BET_ROWS[1].map((bet) => (
+                            <BetCell
+                              key={bet.id}
+                              label={bet.label}
+                              amount={bets[bet.id]}
+                              active={highlightedWinningIds.has(bet.id)}
+                              tone={bet.color ?? "outside"}
+                              compact
+                              disabled={
+                                (bet.id === "outside:red" && (bets["outside:black"] ?? 0) > 0) ||
+                                (bet.id === "outside:black" && (bets["outside:red"] ?? 0) > 0)
+                              }
+                              onClick={() => handlePlaceBet(bet.id)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
@@ -452,26 +491,26 @@ export function TavernRoulette() {
                 <ActionButton
                   label="Repetir"
                   icon={RotateCcw}
-                  disabled={phase === "spinning" || sumBets(lastSubmittedBets) <= 0 || sumBets(lastSubmittedBets) > player.gold}
+                  disabled={isSpinning || sumBets(lastSubmittedBets) <= 0 || sumBets(lastSubmittedBets) > player.gold}
                   tone="secondary"
                   onClick={handleRebet}
                 />
                 <ActionButton
                   label="x2 apuesta"
                   icon={Coins}
-                  disabled={phase === "spinning" || totalBet <= 0 || totalBet * 2 > player.gold}
+                  disabled={isSpinning || totalBet <= 0 || totalBet * 2 > player.gold}
                   tone="secondary"
                   onClick={handleDoubleBets}
                 />
                 <ActionButton
                   label="Limpiar"
                   icon={Trash2}
-                  disabled={phase === "spinning" || totalBet <= 0}
+                  disabled={isSpinning || totalBet <= 0}
                   tone="secondary"
                   onClick={handleClearBets}
                 />
                 <ActionButton
-                  label={phase === "spinning" ? "Girando..." : "Girar"}
+                  label={isSpinning ? "Girando..." : "Girar"}
                   icon={RefreshCw}
                   disabled={!canSpin}
                   tone="primary"
@@ -531,7 +570,7 @@ function RouletteWheel({
       <div className="absolute top-2 z-20 h-0 w-0 border-l-[14px] border-r-[14px] border-t-[20px] border-l-transparent border-r-transparent border-t-amber-300 drop-shadow-[0_6px_14px_rgba(0,0,0,0.45)]" />
       <motion.div
         animate={{ rotate: wheelRotation }}
-        transition={{ duration: SPIN_DURATION_MS / 1000, ease: "easeOut" }}
+        transition={{ duration: SPIN_DURATION_MS / 1000, ease: [0.12, 0.78, 0.16, 1] }}
         className="relative h-full w-full rounded-full border-[12px] border-amber-700 bg-stone-950 shadow-[0_18px_35px_rgba(0,0,0,0.35),inset_0_8px_30px_rgba(0,0,0,0.4)]"
         style={{ backgroundImage: wheelGradient }}
       >

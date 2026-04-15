@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se mejoro el flujo del giro de ruleta plegando automaticamente la mesa durante la tirada y haciendo mas teatral la frenada final.
+*   **Cambios Clave:**
+    *   Al pulsar `Girar`, la `Mesa de apuestas` se contrae con animacion y deja el foco en la rueda y el estado de la ronda.
+    *   Mientras la rueda gira, aparece un estado replegado que deja claro que las apuestas ya quedaron cerradas.
+    *   El spin ahora dura un poco mas y desacelera mas al final para que el remate se sienta mas lento y dramatizado.
+*   **Notas/Advertencias:** La mesa vuelve automaticamente al terminar la ronda; si luego quieres, se puede hacer que se repliegue tambien la zona de fichas para un modo aun mas cinematografico.
+
+---
+### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/sections/MarketSection.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se amplio el espacio util de la ruleta en movil y se aplico un ligero efecto de alejamiento visual para que el contenido respire mejor dentro del marco.
 *   **Cambios Clave:**

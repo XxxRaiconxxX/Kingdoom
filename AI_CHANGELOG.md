@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 16/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `android/app/src/main/res/values/ic_launcher_background.xml`, `android/app/src/main/res/mipmap-mdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se rediseño el icono Android de Kingdoom con un estilo medieval propio basado en un escudo verde oscuro con monograma `KG` y remates dorados.
+*   **Cambios Clave:**
+    *   Se regeneraron los iconos launcher y adaptive foreground para todas las densidades Android con una identidad visual medieval consistente.
+    *   El adaptive icon ahora usa un fondo verde reino para que el escudo no aparezca sobre blanco en launchers compatibles.
+    *   El monograma `KG` quedo centrado dentro de un escudo oscuro con borde dorado para mantener legibilidad incluso en tamaños pequenos.
+*   **Notas/Advertencias:** Android Studio puede seguir marcando cambios propios en `android/.idea` y Gradle por haber abierto el proyecto; no afectan al nuevo icono.
+
+---
+### [Fecha: 16/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `package.json`, `capacitor.config.ts`, `.env.example`, `src/utils/supabaseClient.ts`, `src/main.tsx`, `android/app/src/main/AndroidManifest.xml`, `android/*`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se dejo el proyecto realmente preparado para Android con Capacitor, incluyendo la plataforma nativa, scripts, deep links y sincronizacion del build.
 *   **Cambios Clave:**

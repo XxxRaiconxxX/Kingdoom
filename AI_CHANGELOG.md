@@ -43,6 +43,29 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
+### [Fecha: 16/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `package.json`, `capacitor.config.ts`, `.env.example`, `src/utils/supabaseClient.ts`, `src/main.tsx`, `android/app/src/main/AndroidManifest.xml`, `android/*`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se dejo el proyecto realmente preparado para Android con Capacitor, incluyendo la plataforma nativa, scripts, deep links y sincronizacion del build.
+*   **Cambios Clave:**
+    *   Se instalaron `@capacitor/core@8.3.0`, `@capacitor/cli@8.3.0`, `@capacitor/android@8.3.0` y `@capacitor/app@8.1.0`, y se creo la carpeta nativa `android/`.
+    *   Se anadieron scripts para build estatico y sincronizacion con Android Studio, y se tipifico `capacitor.config.ts` apuntando a `dist`.
+    *   El cliente de Supabase ahora soporta helpers de redirect web/mobile y un handler para deep links nativos (`code`, `token_hash`, `access_token`/`refresh_token`).
+    *   `src/main.tsx` escucha `getLaunchUrl` y `appUrlOpen`, y Android manifiesta el deep link `com.reborn.app://auth/callback`.
+    *   Se ejecuto `static-build` y `npx cap sync android` correctamente, y se elimino `package-lock.json` para respetar la politica del repo.
+*   **Notas/Advertencias:** El repo todavia no tiene flujos activos de `supabase.auth.*`; la base nativa ya esta lista, pero para login real aun debes configurar Redirect URLs en Supabase y luego abrir `android/` en Android Studio para compilar el APK o AAB.
+
+---
+### [Fecha: 16/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `package.json`, `.env.example`, `src/utils/supabaseClient.ts`, `capacitor.config.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se dejo preparada la base del proyecto para empaquetarlo con Capacitor en Android sin romper la compilacion web actual.
+*   **Cambios Clave:**
+    *   Se identifico el stack real como `React + Vite` con salida estatica en `dist`, y se creo `capacitor.config.ts` apuntando a ese `webDir`.
+    *   Se añadieron scripts para `static-build`, `cap:sync` y `android:sync` en `package.json`.
+    *   El cliente de Supabase ahora expone utilidades para construir `redirectTo` y `emailRedirectTo` segun si la app corre en web o dentro de Capacitor, usando por defecto `com.reborn.app://auth/callback` para mobile.
+    *   `.env.example` ahora documenta la URL publica de la app y el redirect movil para futuros flujos de autenticacion.
+*   **Notas/Advertencias:** El repo aun no tenia flujos activos de `supabase.auth.*`; la integracion de redirects quedo preparada para cuando agregues login real. Todavia falta instalar `@capacitor/core`, `@capacitor/cli` y `@capacitor/android`, y luego ejecutar `npx cap add android`.
+
+---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se sumo un segundo nivel de enfoque durante el giro compactando tambien la seccion de fichas para que la rueda gane protagonismo.

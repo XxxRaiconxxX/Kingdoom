@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 16/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se corrigio la alineacion entre la flecha de la ruleta compacta y el bolsillo ganador real para que la animacion termine donde indica el resultado.
+*   **Cambios Clave:**
+    *   El giro final ahora se calcula usando el centro del bolsillo ganador en lugar del borde del segmento.
+    *   Las etiquetas numericas de la rueda tambien se reposicionaron al centro de cada bolsillo para que la lectura visual coincida con la logica.
+    *   Con esto, la flecha superior y el resultado mostrado vuelven a apuntar al mismo numero.
+*   **Notas/Advertencias:** Si Android Studio o el navegador tenia cache visual de la rueda, conviene recargar la vista para ver la alineacion corregida.
+
+---
+### [Fecha: 16/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `android/app/src/main/res/values/ic_launcher_background.xml`, `android/app/src/main/res/mipmap-mdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se rediseño el icono Android de Kingdoom con un estilo medieval propio basado en un escudo verde oscuro con monograma `KG` y remates dorados.
 *   **Cambios Clave:**

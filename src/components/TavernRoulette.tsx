@@ -20,6 +20,7 @@ import {
 
 const SPIN_DURATION_MS = 6600;
 const SEGMENT_ANGLE = 360 / ROULETTE_WHEEL_ORDER.length;
+const POCKET_CENTER_OFFSET = SEGMENT_ANGLE / 2;
 
 type RoulettePhase = "betting" | "spinning" | "resolved";
 type RouletteBets = Partial<Record<RouletteBetId, number>>;
@@ -164,7 +165,8 @@ export function TavernRoulette() {
     const result = resolveRouletteRound(snapshot, winningPocket);
     const winningIndex = getWinningPocketIndex(winningPocket);
     const extraSpins = 6 * 360;
-    const targetRotation = wheelRotation + extraSpins - winningIndex * SEGMENT_ANGLE;
+    const targetRotation =
+      wheelRotation + extraSpins - winningIndex * SEGMENT_ANGLE - POCKET_CENTER_OFFSET;
 
     setWheelRotation(targetRotation);
     setPhase("spinning");
@@ -614,7 +616,7 @@ function RouletteWheel({
         <div className="absolute inset-[14px] rounded-full border-[12px] border-amber-300/85 bg-[radial-gradient(circle_at_top,#2f9e44,#116329_58%,#0d421d)] shadow-[inset_0_8px_16px_rgba(255,255,255,0.12)]" />
 
         {ROULETTE_WHEEL_ORDER.map((pocket, index) => {
-          const angle = index * SEGMENT_ANGLE;
+          const angle = index * SEGMENT_ANGLE + POCKET_CENTER_OFFSET;
           const isWinner = pocket === winningPocket;
           return (
             <div

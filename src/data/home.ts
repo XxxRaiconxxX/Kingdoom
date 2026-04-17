@@ -1,7 +1,8 @@
 import { Crown, Dice5, Flame, Users } from "lucide-react";
 import type { HomeStat, JoinStep, KingdomAnnouncement } from "../types";
 
-export const COMMUNITY_APP_DOWNLOAD_FALLBACK_URL = "";
+export const COMMUNITY_APP_DOWNLOAD_FALLBACK_URL =
+  "https://raw.githubusercontent.com/XxxRaiconxxX/Kingdoom/main/app-debug.apk";
 
 export const HOME_STATS: HomeStat[] = [
   { value: "En progreso", label: "Personajes", icon: Users },

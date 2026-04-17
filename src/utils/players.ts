@@ -6,15 +6,35 @@ type PlayerRow = {
   username: string;
   gold: number;
   is_admin?: boolean | null;
+  auth_user_id?: string | null;
 };
+
+let supportsAuthUserId: boolean | null = null;
 
 function mapPlayerRow(row: PlayerRow): PlayerAccount {
   return {
     id: row.id,
     username: row.username,
     gold: row.gold,
-    isAdmin: row.is_admin ?? row.username.trim().toLowerCase() === "nothing",
+    isAdmin: Boolean(row.is_admin),
+    authUserId: row.auth_user_id ?? null,
   };
+}
+
+async function detectAuthUserIdSupport() {
+  if (supportsAuthUserId !== null) {
+    return supportsAuthUserId;
+  }
+
+  const { error } = await supabase.from("players").select("auth_user_id").limit(1);
+
+  if (!error) {
+    supportsAuthUserId = true;
+    return true;
+  }
+
+  supportsAuthUserId = error.code !== "42703";
+  return supportsAuthUserId;
 }
 
 export async function fetchPlayerByUsername(
@@ -26,21 +46,46 @@ export async function fetchPlayerByUsername(
     return null;
   }
 
-  const adminAttempt = await supabase
-    .from("players")
-    .select("id, username, gold, is_admin")
-    .ilike("username", normalizedUsername)
-    .single();
+  const supportsAuthLink = await detectAuthUserIdSupport();
+  const { data, error } = supportsAuthLink
+    ? await supabase
+        .from("players")
+        .select("id, username, gold, is_admin, auth_user_id")
+        .ilike("username", normalizedUsername)
+        .single()
+    : await supabase
+        .from("players")
+        .select("id, username, gold, is_admin")
+        .ilike("username", normalizedUsername)
+        .single();
 
-  if (!adminAttempt.error && adminAttempt.data) {
-    return mapPlayerRow(adminAttempt.data as PlayerRow);
+  if (error || !data) {
+    return null;
+  }
+
+  return mapPlayerRow(data as PlayerRow);
+}
+
+export async function fetchPlayerByAuthUserId(
+  authUserId: string
+): Promise<PlayerAccount | null> {
+  const normalizedAuthUserId = authUserId.trim();
+
+  if (!normalizedAuthUserId) {
+    return null;
+  }
+
+  const supportsAuthLink = await detectAuthUserIdSupport();
+
+  if (!supportsAuthLink) {
+    return null;
   }
 
   const { data, error } = await supabase
     .from("players")
-    .select("id, username, gold")
-    .ilike("username", normalizedUsername)
-    .single();
+    .select("id, username, gold, is_admin, auth_user_id")
+    .eq("auth_user_id", normalizedAuthUserId)
+    .maybeSingle();
 
   if (error || !data) {
     return null;
@@ -62,19 +107,16 @@ export async function updatePlayerGold(
 }
 
 export async function fetchAllPlayers(): Promise<PlayerAccount[]> {
-  const adminAttempt = await supabase
-    .from("players")
-    .select("id, username, gold, is_admin")
-    .order("username", { ascending: true });
-
-  if (!adminAttempt.error && adminAttempt.data) {
-    return (adminAttempt.data as PlayerRow[]).map(mapPlayerRow);
-  }
-
-  const { data, error } = await supabase
-    .from("players")
-    .select("id, username, gold")
-    .order("username", { ascending: true });
+  const supportsAuthLink = await detectAuthUserIdSupport();
+  const { data, error } = supportsAuthLink
+    ? await supabase
+        .from("players")
+        .select("id, username, gold, is_admin, auth_user_id")
+        .order("username", { ascending: true })
+    : await supabase
+        .from("players")
+        .select("id, username, gold, is_admin")
+        .order("username", { ascending: true });
 
   if (error || !data) {
     return [];
@@ -87,6 +129,7 @@ export async function createPlayerAccount(input: {
   username: string;
   gold: number;
   isAdmin?: boolean;
+  authUserId?: string;
 }) {
   const normalizedUsername = input.username.trim();
 
@@ -98,15 +141,27 @@ export async function createPlayerAccount(input: {
     };
   }
 
-  const adminAttempt = await supabase
-    .from("players")
-    .insert({
-      username: normalizedUsername,
-      gold: Math.max(0, input.gold),
-      is_admin: Boolean(input.isAdmin),
-    })
-    .select("id, username, gold, is_admin")
-    .single();
+  const supportsAuthLink = await detectAuthUserIdSupport();
+  const insertPayload = {
+    username: normalizedUsername,
+    gold: Math.max(0, input.gold),
+    is_admin: Boolean(input.isAdmin),
+    ...(supportsAuthLink && input.authUserId
+      ? { auth_user_id: input.authUserId.trim() }
+      : {}),
+  };
+
+  const adminAttempt = supportsAuthLink
+    ? await supabase
+        .from("players")
+        .insert(insertPayload)
+        .select("id, username, gold, is_admin, auth_user_id")
+        .single()
+    : await supabase
+        .from("players")
+        .insert(insertPayload)
+        .select("id, username, gold, is_admin")
+        .single();
 
   if (!adminAttempt.error && adminAttempt.data) {
     return {
@@ -154,5 +209,88 @@ export async function createPlayerAccount(input: {
     status: "error" as const,
     message: "No se pudo crear el jugador en Supabase.",
     player: null as PlayerAccount | null,
+  };
+}
+
+export async function linkPlayerToAuthUser(playerId: string, authUserId: string) {
+  const normalizedPlayerId = playerId.trim();
+  const normalizedAuthUserId = authUserId.trim();
+
+  if (!normalizedPlayerId || !normalizedAuthUserId) {
+    return {
+      status: "error" as const,
+      message: "Faltan datos para vincular la cuenta segura con el jugador.",
+    };
+  }
+
+  const supportsAuthLink = await detectAuthUserIdSupport();
+
+  if (!supportsAuthLink) {
+    return {
+      status: "unavailable" as const,
+      message:
+        "La columna auth_user_id aun no existe en players. Crea esa columna antes de vincular cuentas seguras.",
+    };
+  }
+
+  const { data: claimedByAnother, error: claimError } = await supabase
+    .from("players")
+    .select("id, username")
+    .eq("auth_user_id", normalizedAuthUserId)
+    .neq("id", normalizedPlayerId)
+    .maybeSingle();
+
+  if (claimError) {
+    return {
+      status: "error" as const,
+      message: "No se pudo comprobar si la cuenta segura ya estaba vinculada.",
+    };
+  }
+
+  if (claimedByAnother) {
+    return {
+      status: "claimed" as const,
+      message: `La cuenta segura ya esta vinculada a ${claimedByAnother.username}.`,
+    };
+  }
+
+  const { data: currentPlayer, error: playerError } = await supabase
+    .from("players")
+    .select("id, username, auth_user_id")
+    .eq("id", normalizedPlayerId)
+    .maybeSingle();
+
+  if (playerError || !currentPlayer) {
+    return {
+      status: "error" as const,
+      message: "No se pudo leer el jugador que quieres vincular.",
+    };
+  }
+
+  if (
+    currentPlayer.auth_user_id &&
+    String(currentPlayer.auth_user_id) !== normalizedAuthUserId
+  ) {
+    return {
+      status: "claimed" as const,
+      message: `El jugador ${currentPlayer.username} ya esta ligado a otra cuenta segura.`,
+    };
+  }
+
+  const { error } = await supabase
+    .from("players")
+    .update({ auth_user_id: normalizedAuthUserId })
+    .eq("id", normalizedPlayerId);
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: "No se pudo guardar la vinculacion segura del jugador.",
+    };
+  }
+
+  return {
+    status: "linked" as const,
+    message: "Jugador vinculado correctamente con la cuenta segura.",
   };
 }

@@ -1,5 +1,6 @@
 import { MARKET_ITEMS } from "../data/market";
 import type { MarketCategoryId, MarketItem, Rarity, StockStatus } from "../types";
+import { formatAdminPermissionMessage } from "./supabaseErrors";
 import { supabase } from "./supabaseClient";
 
 // SQL sugerido para Supabase:
@@ -151,7 +152,10 @@ export async function upsertMarketItem(input: AdminMarketItemInput) {
   if (error) {
     return {
       status: "error" as const,
-      message: "No se pudo guardar el item en Supabase: " + error.message,
+      message: formatAdminPermissionMessage(
+        "No se pudo guardar el item en Supabase.",
+        error.message
+      ),
     };
   }
 
@@ -179,7 +183,10 @@ export async function deleteMarketItem(id: string) {
   if (error) {
     return {
       status: "error" as const,
-      message: "No se pudo borrar el item en Supabase.",
+      message: formatAdminPermissionMessage(
+        "No se pudo borrar el item en Supabase.",
+        error.message
+      ),
     };
   }
 

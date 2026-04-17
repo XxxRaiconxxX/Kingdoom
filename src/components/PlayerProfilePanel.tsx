@@ -20,8 +20,16 @@ import { CharImportModal } from "./CharImportModal";
 import { CharSheetModal } from "./CharSheetModal";
 import { RealmRegistry } from "./RealmRegistry";
 import { CharacterSheet } from "../types";
-import { getPlayerSheets, saveCharacterSheet, deleteCharacterSheet } from "../utils/characterSheets";
-import { uploadCharacterPortrait } from "../utils/characterPortraits";
+import {
+  MAX_PLAYER_CHARACTER_SHEETS,
+  getPlayerSheets,
+  saveCharacterSheet,
+  deleteCharacterSheet,
+} from "../utils/characterSheets";
+import {
+  resolveActivePveSheetId,
+  setActivePveSheetId,
+} from "../utils/pveProgress";
 
 const AdminControlSheet = lazy(() =>
   import("./AdminControlSheet").then((module) => ({
@@ -66,33 +74,31 @@ export function PlayerProfilePanel({
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
   const [playerSheets, setPlayerSheets] = useState<CharacterSheet[]>([]);
-  const [sheetToDelete, setSheetToDelete] = useState<CharacterSheet | null>(null);
+  const [sheetToDelete, setSheetToDelete] = useState<string | null>(null);
+  const [sheetFeedback, setSheetFeedback] = useState("");
+  const [activeExpeditionSheetId, setActiveExpeditionSheetId] = useState<string | null>(null);
 
   const isCollapsed = Boolean(collapsed && player);
 
   useEffect(() => {
     if (player) {
-      getPlayerSheets(player.id).then(setPlayerSheets);
+      getPlayerSheets(player.id).then((sheets) => {
+        setPlayerSheets(sheets);
+        setActiveExpeditionSheetId(resolveActivePveSheetId(player.id, sheets.map((sheet) => sheet.id)));
+      });
     } else {
       setPlayerSheets([]);
+      setActiveExpeditionSheetId(null);
     }
   }, [player]);
 
-  const handleSaveSheet = async (
-    partialSheet: Partial<CharacterSheet>,
-    portraitFile?: File | null
-  ) => {
+  const handleSaveSheet = async (partialSheet: Partial<CharacterSheet>) => {
     if (!player) return;
-
-    const sheetId = crypto.randomUUID();
-    let portraitUrl = partialSheet.portraitUrl ?? "";
-
-    if (portraitFile) {
-      portraitUrl = await uploadCharacterPortrait({
-        file: portraitFile,
-        playerId: player.id,
-        sheetId,
-      });
+    if (playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS) {
+      setSheetFeedback(
+        `Cada cuenta puede tener hasta ${MAX_PLAYER_CHARACTER_SHEETS} fichas. Elimina una antes de importar otra.`
+      );
+      return;
     }
 
     const stats = partialSheet.stats ?? {
@@ -104,10 +110,9 @@ export function PlayerProfilePanel({
     };
 
     const newSheet: CharacterSheet = {
-      id: sheetId,
+      id: crypto.randomUUID(),
       playerId: player.id,
       playerUsername: player.username,
-      portraitUrl,
       name: partialSheet.name ?? "",
       age: partialSheet.age ?? "",
       gender: partialSheet.gender ?? "",
@@ -139,21 +144,53 @@ export function PlayerProfilePanel({
     await saveCharacterSheet(newSheet);
     const updatedSheets = await getPlayerSheets(player.id);
     setPlayerSheets(updatedSheets);
+    const nextActiveSheetId =
+      activeExpeditionSheetId && updatedSheets.some((sheet) => sheet.id === activeExpeditionSheetId)
+        ? activeExpeditionSheetId
+        : newSheet.id;
+    setActivePveSheetId(player.id, nextActiveSheetId);
+    setActiveExpeditionSheetId(nextActiveSheetId);
+    setSheetFeedback(`Ficha importada. ${newSheet.name || "Personaje"} ya puede usarse en Expedicion.`);
   };
 
   const confirmDeleteSheet = async () => {
     if (sheetToDelete) {
-      await deleteCharacterSheet(sheetToDelete.id, sheetToDelete.portraitUrl);
+      await deleteCharacterSheet(sheetToDelete);
       if (player) {
         const updatedSheets = await getPlayerSheets(player.id);
         setPlayerSheets(updatedSheets);
+        const nextActiveSheetId = updatedSheets.some((sheet) => sheet.id === activeExpeditionSheetId)
+          ? activeExpeditionSheetId
+          : updatedSheets[0]?.id ?? null;
+        setActivePveSheetId(player.id, nextActiveSheetId);
+        setActiveExpeditionSheetId(nextActiveSheetId);
+        setSheetFeedback(
+          updatedSheets.length > 0
+            ? "Ficha eliminada. Se reajusto la seleccion activa de Expedicion."
+            : "Ficha eliminada. Ya no tienes un cazador activo para Expedicion."
+        );
       }
       setSheetToDelete(null);
     }
   };
 
-  const handleDeleteSheet = (sheet: CharacterSheet) => {
-    setSheetToDelete(sheet);
+  const handleDeleteSheet = (id: string) => {
+    setSheetToDelete(id);
+  };
+
+  const handleSelectExpeditionSheet = (sheetId: string) => {
+    if (!player) {
+      return;
+    }
+
+    setActivePveSheetId(player.id, sheetId);
+    setActiveExpeditionSheetId(sheetId);
+    const selected = playerSheets.find((sheet) => sheet.id === sheetId);
+    setSheetFeedback(
+      selected
+        ? `${selected.name || "La ficha"} ahora es tu cazador activo en Expedicion.`
+        : "Se actualizo la ficha activa de Expedicion."
+    );
   };
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -176,8 +213,8 @@ export function PlayerProfilePanel({
             Tu sesion de jugador
           </h2>
           <p className="max-w-2xl text-sm leading-6 text-stone-400">
-            Conecta una sola vez tu nombre registrado y el mercado junto con la
-            taberna usaran ese mismo perfil para leer y descontar tu oro.
+            Conecta tu jugador por nombre para usar mercado, taberna, fichas e
+            inventario con el mismo perfil del reino.
           </p>
         </div>
 
@@ -390,16 +427,28 @@ export function PlayerProfilePanel({
                   <div className="rounded-xl bg-green-500/10 p-2.5 text-green-400 shrink-0">
                     <ScrollText className="h-5 w-5" />
                   </div>
-                  <h3 className="text-lg font-bold text-stone-100 uppercase tracking-wider">Mis Personajes</h3>
+                  <div>
+                    <h3 className="text-lg font-bold text-stone-100 uppercase tracking-wider">Mis Personajes</h3>
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                      Maximo {MAX_PLAYER_CHARACTER_SHEETS} fichas por cuenta
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setIsImportModalOpen(true)}
+                  disabled={playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600/20 border border-green-500/30 px-4 py-2 text-sm font-semibold text-green-400 hover:bg-green-600/30 hover:text-green-300 transition-colors w-full sm:w-auto"
                 >
                   <Plus className="w-4 h-4" />
-                  Importar Ficha
+                  {playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS ? "Limite alcanzado" : "Importar Ficha"}
                 </button>
               </div>
+
+              {sheetFeedback ? (
+                <div className="mb-4 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-100">
+                  {sheetFeedback}
+                </div>
+              ) : null}
 
               {playerSheets.length === 0 ? (
                 <div className="text-center py-8 border-2 border-dashed border-stone-800 rounded-xl">
@@ -409,17 +458,15 @@ export function PlayerProfilePanel({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {playerSheets.map(sheet => (
                     <div key={sheet.id} className="bg-stone-900 border border-stone-800 rounded-xl p-4 flex flex-col gap-3 hover:border-amber-500/30 transition-colors">
-                      {sheet.portraitUrl ? (
-                        <div className="overflow-hidden rounded-lg border border-stone-800 bg-stone-950">
-                          <img
-                            src={sheet.portraitUrl}
-                            alt={`Retrato de ${sheet.name || "personaje"}`}
-                            className="h-36 w-full object-cover"
-                          />
-                        </div>
-                      ) : null}
                       <div>
-                        <h4 className="font-bold text-amber-400 truncate uppercase tracking-wider">{sheet.name || 'Personaje Sin Nombre'}</h4>
+                        <div className="flex items-start justify-between gap-3">
+                          <h4 className="font-bold text-amber-400 truncate uppercase tracking-wider">{sheet.name || 'Personaje Sin Nombre'}</h4>
+                          {activeExpeditionSheetId === sheet.id ? (
+                            <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200">
+                              Activa PvE
+                            </span>
+                          ) : null}
+                        </div>
                         <p className="text-xs text-stone-400 truncate mt-1">
                           {sheet.race || "Raza Desconocida"} {sheet.profession ? ` - ${sheet.profession}` : ""}
                         </p>
@@ -429,6 +476,16 @@ export function PlayerProfilePanel({
                           </p>
                         )}
                       </div>
+                      <button
+                        onClick={() => handleSelectExpeditionSheet(sheet.id)}
+                        className={`inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] transition-colors ${
+                          activeExpeditionSheetId === sheet.id
+                            ? "border-amber-400/30 bg-amber-500/10 text-amber-200"
+                            : "border-stone-700 bg-stone-950 text-stone-300 hover:border-amber-400/25 hover:text-stone-100"
+                        }`}
+                      >
+                        {activeExpeditionSheetId === sheet.id ? "Cazador activo" : "Usar en Expedicion"}
+                      </button>
                       <div className="flex items-center gap-2 mt-auto">
                         <button 
                           onClick={() => setSelectedSheet(sheet)}
@@ -437,7 +494,7 @@ export function PlayerProfilePanel({
                           <Eye className="w-3.5 h-3.5" /> Ver Ficha
                         </button>
                         <button 
-                          onClick={() => handleDeleteSheet(sheet)}
+                          onClick={() => handleDeleteSheet(sheet.id)}
                           className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors"
                           title="Eliminar ficha"
                         >
@@ -452,53 +509,74 @@ export function PlayerProfilePanel({
           </div>
           )
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="grid gap-4 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4 md:grid-cols-[1fr_auto]"
-          >
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-stone-200">
-                Nombre del jugador registrado
-              </span>
-              <input
-                type="text"
-                required
-                value={usernameInput}
-                onChange={(event) => {
-                  setUsernameInput(event.target.value);
-                  if (profileError) {
-                    setProfileError("");
-                  }
-                }}
-                className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
-                placeholder="Tu nombre exacto en la base de datos"
-              />
-            </label>
-
-            <button
-              type="submit"
-              disabled={isSubmittingProfile}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
+          <div className="space-y-4 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
+            <form
+              onSubmit={handleSubmit}
+              className="grid gap-4 md:grid-cols-[1fr_auto]"
             >
-              {isSubmittingProfile ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Conectando...
-                </>
-              ) : (
-                <>
-                  <Coins className="h-4 w-4" />
-                  Conectar perfil
-                </>
-              )}
-            </button>
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-stone-200">
+                  Nombre del jugador registrado
+                </span>
+                <input
+                  type="text"
+                  required
+                  value={usernameInput}
+                  onChange={(event) => {
+                    setUsernameInput(event.target.value);
+                    if (profileError) {
+                      setProfileError("");
+                    }
+                  }}
+                  className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+                  placeholder="Tu nombre exacto registrado en el reino"
+                />
+              </label>
 
-            {profileError ? (
-              <div className="md:col-span-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {profileError}
+              <button
+                type="submit"
+                disabled={isSubmittingProfile}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
+              >
+                {isSubmittingProfile ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Conectando...
+                  </>
+                ) : (
+                  <>
+                    <Coins className="h-4 w-4" />
+                    Conectar perfil
+                  </>
+                )}
+              </button>
+
+              {profileError ? (
+                <div className="md:col-span-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                  {profileError}
+                </div>
+              ) : null}
+            </form>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-purple-500/15 bg-purple-500/5 px-4 py-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-purple-300/80">
+                  Registro publico
+                </p>
+                <p className="mt-1 text-sm text-stone-400">
+                  Puedes revisar las fichas del reino aunque todavia no hayas conectado tu perfil.
+                </p>
               </div>
-            ) : null}
-          </form>
+              <button
+                type="button"
+                onClick={() => setIsRegistryOpen(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2 text-xs font-semibold text-purple-300 transition hover:border-purple-400/35 hover:bg-purple-500/14"
+              >
+                <Search className="h-3.5 w-3.5" />
+                Explorar fichas
+              </button>
+            </div>
+          </div>
         )}
       </div>
 

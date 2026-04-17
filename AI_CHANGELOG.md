@@ -43,177 +43,189 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
-### [Fecha: 16/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se corrigio la alineacion entre la flecha de la ruleta compacta y el bolsillo ganador real para que la animacion termine donde indica el resultado.
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/App.tsx`, `src/sections/HomeSection.tsx`, `src/data/home.ts`, `src/utils/siteSettings.ts`, `supabase_site_settings.sql`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se resolvieron textos pendientes del inicio y la descarga de la app ahora puede cargarse directamente desde Supabase en vez de quedar fija en codigo.
 *   **Cambios Clave:**
-    *   El giro final ahora se calcula usando el centro del bolsillo ganador en lugar del borde del segmento.
-    *   Las etiquetas numericas de la rueda tambien se reposicionaron al centro de cada bolsillo para que la lectura visual coincida con la logica.
-    *   Con esto, la flecha superior y el resultado mostrado vuelven a apuntar al mismo numero.
-*   **Notas/Advertencias:** Si Android Studio o el navegador tenia cache visual de la rueda, conviene recargar la vista para ver la alineacion corregida.
+    *   El CTA de `Descargar app de la comunidad` ahora consulta `site_settings.community_app_download_url` en Supabase y usa un fallback local vacio si la tabla o el valor aun no existen.
+    *   Se preparo `supabase_site_settings.sql` con la tabla `site_settings`, lectura publica y gestion restringida a admins autenticados.
+    *   Se corrigio el texto de primeros pasos para quitar la referencia vieja a `cuenta segura`.
+    *   Tambien se alineo `src/sections/HomeSection.tsx` con el home actual para no dejar una version duplicada mostrando el boton viejo de WhatsApp.
+*   **Notas/Advertencias:** Para activar la descarga debes ejecutar `supabase_site_settings.sql` y luego guardar la URL final del APK en la fila `community_app_download_url`.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/context/PlayerSessionContext.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/main.tsx`, `src/utils/supabaseClient.ts`, `src/utils/supabaseErrors.ts`, `.env.example`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se retiro la capa de `magic link` y se devolvio el acceso del jugador al flujo simple por nombre, manteniendo el resto del proyecto como estaba.
+*   **Cambios Clave:**
+    *   `PlayerSessionContext` vuelve a hidratar y refrescar la sesion usando solo el nombre del jugador guardado en `localStorage`.
+    *   `PlayerProfilePanel` elimino el bloque de `Cuenta segura beta` y vuelve a mostrar un acceso directo por nombre de jugador.
+    *   `main.tsx` ya no envuelve la app con `SupabaseAuthProvider` y se retiro el helper de redirect auth que habia quedado en `supabaseClient`.
+    *   Se limpiaron mensajes y variables de entorno que mencionaban `magic link` para no dejar rastro del flujo viejo.
+*   **Notas/Advertencias:** Esto devuelve la comodidad del acceso simple, pero tambien elimina la proteccion adicional que habiamos empezado a montar sobre sesiones y ownership.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/RealmRegistry.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/components/AdminControlSheet.tsx`, `src/App.tsx`, `src/data/home.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se abrio el registro de fichas como catalogo publico de solo lectura, se simplifico el panel admin quitando Plantillas y se dejo listo el acceso para descarga de la app de la comunidad.
+*   **Cambios Clave:**
+    *   `RealmRegistry` ahora carga todas las fichas al abrirse, las muestra en grid con filtro en vivo y permite revisar cualquier ficha del reino sin editarla.
+    *   El acceso al registro publico ya puede abrirse incluso antes de conectar un perfil, para que cualquier visitante pueda consultar personajes.
+    *   Se elimino la pestaña `Plantillas` del panel admin para dejar el centro de control mas limpio.
+    *   Se retiro el boton de unirse por WhatsApp del inicio y se anadio un CTA configurable para descargar la app de la comunidad mediante `COMMUNITY_APP_DOWNLOAD_URL`.
+*   **Notas/Advertencias:** Para activar el boton de descarga debes rellenar `COMMUNITY_APP_DOWNLOAD_URL` en `src/data/home.ts` con el enlace real del APK o la pagina de descarga.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/types.ts`, `src/data/pve.ts`, `src/utils/pveProgress.ts`, `src/utils/characterSheets.ts`, `src/components/PlayerProfilePanel.tsx`, `src/components/TavernExpeditionArcade.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se rehizo la progresion de Expedicion para que ahora cuelgue de una ficha activa, tenga niveles, experiencia y contratos bloqueados por rango en vez de escalar solo por puntos sueltos.
+*   **Cambios Clave:**
+    *   El progreso PvE ya no vive por jugador sino por ficha: cada personaje tiene `level`, `exp`, puntos disponibles y stats propios de Expedicion.
+    *   Se anadio seleccion de ficha activa para Expedicion en el perfil y se limito la cuenta a un maximo de 2 fichas importadas.
+    *   Cada 5 niveles se entrega 1 punto extra de stats, manteniendo ademas el sistema de puntos por victoria de los contratos.
+    *   La ficha base ahora aporta bonos de combate a Expedicion, de modo que fuerza, defensa, magia y agilidad del personaje si influyen en el arcade.
+    *   Los contratos se ampliaron y ahora tienen `minLevel`, `recommendedPower` y `expReward`, con una curva pensada para que llegar a nivel 15 tome varias semanas de constancia.
+*   **Notas/Advertencias:** La progresion sigue guardandose en localStorage por ficha. Si mas adelante quieres blindarla, el siguiente paso natural es mover tambien Expedicion a RPC segura en Supabase.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/minigamesSecure.ts`, `src/components/TavernGame.tsx`, `src/components/TavernCrash.tsx`, `supabase_minigame_chests_crash.sql`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se endurecieron `Cofres` y `Crash` para que apuesta, colapso, premio y saldo se resuelvan desde Supabase en vez de depender del cliente.
+*   **Cambios Clave:**
+    *   `Cofres` ahora usa una sola RPC segura para descontar, resolver los tres cofres y devolver premio/saldo final.
+    *   `Crash` ahora usa una sesion segura en Supabase: iniciar ronda, consultar estado, cobrar y registrar historial salen del servidor.
+    *   Se amplio `minigamesSecure.ts` para cubrir lectura/acciones de cofres y crash.
+    *   Se anadio `supabase_minigame_chests_crash.sql` con tablas, RLS de lectura propia y RPCs seguras de ambos minijuegos.
+*   **Notas/Advertencias:** Debes ejecutar `supabase_minigame_chests_crash.sql` en Supabase antes de volver a usar oro real en `Cofres` y `Crash`.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/minigamesSecure.ts`, `src/components/TavernCards.tsx`, `src/components/TavernRoulette.tsx`, `supabase_minigame_cards_roulette.sql`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se endurecieron `Cartas` y `Ruleta` para que el oro, el resultado y el estado de partida pasen a Supabase en vez de resolverse en el navegador.
+*   **Cambios Clave:**
+    *   `Cartas` ahora usa una partida segura persistida en Supabase con RPCs para iniciar, adivinar, continuar y cobrar, incluyendo limite diario de ganancias netas.
+    *   `Ruleta` ahora usa una sola RPC segura para descontar apuesta, resolver multiplicador y devolver el saldo final y el premio real.
+    *   Se anadio `minigamesSecure.ts` como capa cliente para leer estado de cartas y ejecutar RPCs de ambos juegos.
+    *   Se anadio `supabase_minigame_cards_roulette.sql` con tablas de auditoria/estado, RLS de lectura propia y funciones seguras para ambos minijuegos.
+*   **Notas/Advertencias:** Debes ejecutar `supabase_minigame_cards_roulette.sql` en Supabase antes de volver a usar oro real en `Cartas` y `Ruleta`.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/scratchUtils.ts`, `src/utils/scratchSecure.ts`, `src/components/TavernScratch.tsx`, `supabase_minigame_scratch.sql`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se endurecio `Rasca y gana` para que la compra, el sorteo, el jackpot y el limite diario dejen de resolverse en el cliente y pasen a una RPC segura en Supabase.
+*   **Cambios Clave:**
+    *   Se alineo la semilla diaria del rasca entre frontend y Supabase con una formula determinista compatible en ambos lados.
+    *   Se anadio `scratchSecure.ts` para consultar el progreso diario y ejecutar tandas seguras mediante `play_scratch_batch`.
+    *   `TavernScratch` ya no usa `Math.random()` ni `localStorage` para premios o limite diario: ahora prepara la tanda en UI y la resuelve contra Supabase al rascar.
+    *   Se anadio `supabase_minigame_scratch.sql` con tablas de auditoria, limite diario, RLS de lectura propia y la RPC segura del minijuego.
+*   **Notas/Advertencias:** Debes ejecutar `supabase_minigame_scratch.sql` en Supabase antes de volver a usar dinero real en `Rasca y gana`.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/supabaseErrors.ts`, `src/utils/market.ts`, `src/utils/events.ts`, `src/utils/adminRanking.ts`, `supabase_admin_rls.sql`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se preparo el siguiente anillo de seguridad admin para mercado, eventos y ranking semanal, junto con mensajes mas claros cuando RLS o permisos bloquean escrituras.
+*   **Cambios Clave:**
+    *   Se anadio `supabase_admin_rls.sql` con una funcion `is_current_user_admin()` y politicas RLS para que `market_items`, `realm_events` y `weekly_activity_rankings` sigan siendo publicos en lectura pero solo editables por admins autenticados.
+    *   `market_orders` ahora tambien puede ser leido por admins autenticados para futura supervision del mercado.
+    *   `market.ts`, `events.ts` y `adminRanking.ts` detectan mejor errores de permisos y muestran mensajes guiando a usar `Cuenta segura beta` con `is_admin = true`.
+*   **Notas/Advertencias:** Debes ejecutar `supabase_admin_rls.sql` en Supabase para activar este cierre de permisos. El siguiente paso fuerte sera migrar recompensas de minijuegos a RPCs seguras.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/purchases.ts`, `src/components/PurchaseModal.tsx`, `supabase_market_purchase.sql`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se migro el flujo de compras del mercado hacia una compra segura basada en RPC para que el oro y el inventario dejen de depender del cliente.
+*   **Cambios Clave:**
+    *   `PurchaseModal` ya no descuenta oro ni sincroniza inventario desde el frontend; ahora llama a `purchase_market_item` mediante `purchaseMarketItemSecure()`.
+    *   Si la RPC no existe o falla, el mercado muestra un error claro y deja de usar el camino inseguro anterior.
+    *   Formspree queda como aviso secundario: si falla, la compra economica sigue siendo valida y solo se informa que el aviso debe revisarse manualmente.
+    *   Se anadio `supabase_market_purchase.sql` con la tabla `market_orders`, su RLS de lectura propia y la funcion `purchase_market_item(...)` como base segura para economia.
+*   **Notas/Advertencias:** Debes ejecutar `supabase_market_purchase.sql` en Supabase antes de volver a usar compras reales del mercado.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/context/PlayerSessionContext.tsx`, `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se alineo el frontend para la activacion de RLS en `players`: el perfil del reino ahora exige sesion segura autenticada y deja de depender del fallback anonimo por nombre.
+*   **Cambios Clave:**
+    *   `connectPlayer()` ahora exige una cuenta segura autenticada antes de vincular el jugador del reino.
+    *   La hidratacion de perfil ya no intenta restaurar sesiones legacy por `localStorage` sin una cuenta segura valida.
+    *   Si el usuario cierra la cuenta segura, la sesion del jugador tambien se limpia para evitar estados mezclados.
+    *   El panel de perfil ahora explica que primero va la autenticacion por correo y luego la vinculacion del jugador.
+*   **Notas/Advertencias:** Con esto la app queda lista para activar una politica base de `RLS` en `players`, pero el panel admin aun necesitara una capa segura posterior para escrituras globales.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/types.ts`, `src/utils/players.ts`, `src/context/PlayerSessionContext.tsx`, `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se avanzo en la transicion entre `Supabase Auth` y el sistema actual de `players`, permitiendo empezar a vincular una cuenta segura con un jugador real del reino.
+*   **Cambios Clave:**
+    *   `PlayerAccount` ahora soporta `authUserId` y `players.ts` detecta si la columna `auth_user_id` existe en Supabase.
+    *   Se anadieron helpers para leer jugadores por `auth_user_id` y para vincular un jugador a una cuenta autenticada de Supabase.
+    *   `PlayerSessionContext` ahora prioriza el jugador vinculado a la cuenta segura al hidratar sesion y al refrescar perfil.
+    *   Si hay `magic link` activo, al conectar el perfil del reino la app intenta vincularlo automaticamente y evita colisiones entre cuentas seguras y jugadores ya reclamados.
+    *   El panel de perfil ahora muestra si la cuenta segura ya quedo vinculada al jugador actual.
+*   **Notas/Advertencias:** Para que la vinculacion funcione de verdad en Supabase debes crear la columna `players.auth_user_id uuid unique` y protegerla luego con RLS.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/context/SupabaseAuthContext.tsx`, `src/utils/supabaseClient.ts`, `src/main.tsx`, `src/components/PlayerProfilePanel.tsx`, `.env.example`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se preparo la base de `Supabase Auth` en modo transicion para empezar a cerrar seguridad sin romper aun el flujo actual de jugador por nombre.
+*   **Cambios Clave:**
+    *   Se anadio `SupabaseAuthProvider` con restauracion de sesion, escucha de `onAuthStateChange`, envio de magic link por email y cierre de sesion.
+    *   `main.tsx` ahora envuelve la app con el nuevo contexto de autenticacion.
+    *   `PlayerProfilePanel` incluye un bloque `Cuenta segura beta` para iniciar sesion por correo con magic link y visualizar el estado autenticado.
+    *   `supabaseClient.ts` expone `getSupabaseAuthRedirectUrl()` y `.env.example` documenta la variable opcional `VITE_SUPABASE_AUTH_REDIRECT_URL`.
+*   **Notas/Advertencias:** Esta capa aun no liga automaticamente `auth.users` con `players`; por ahora convive con el sistema actual de perfil del reino y sirve como base para la siguiente migracion.
+
+---
+### [Fecha: 17/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/players.ts`, `src/context/PlayerSessionContext.tsx`, `src/utils/adminRanking.ts`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se hizo el primer endurecimiento de seguridad visible: el panel admin ya no se concede por nombre especial y el ranking semanal queda descrito como validacion manual del rol hecho por WhatsApp.
+*   **Cambios Clave:**
+    *   Se elimino el fallback que trataba al usuario `Nothing` como admin si la columna `is_admin` no existia o no venia cargada.
+    *   `PlayerSessionContext` ahora considera admin solo a jugadores con `player.isAdmin` real.
+    *   Los textos del panel admin dejaron de recomendar nombres especiales y ahora apuntan a `players.is_admin`.
+    *   El bloque de actividad semanal deja claro que misiones y eventos se cargan de forma manual tras validar el rol en texto fuera de la web.
+*   **Notas/Advertencias:** Esto endurece la UI, pero no sustituye RLS ni backend seguro para oro, ranking, eventos o mercado.
 
 ---
 ### [Fecha: 16/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `android/app/src/main/res/values/ic_launcher_background.xml`, `android/app/src/main/res/mipmap-mdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png`, `android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png`, `android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png`, `android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se rediseño el icono Android de Kingdoom con un estilo medieval propio basado en un escudo verde oscuro con monograma `KG` y remates dorados.
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/components/TavernScratch.tsx`, `src/components/GrimoireSection.tsx`, `src/assets/ruleta-optimized.jpg`, `src/assets/scratch-win-card-optimized.jpg`, `src/assets/scratch-pristine-card-optimized.jpg`, `src/assets/scratch-lose-card-optimized.jpg`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se reemplazaron los assets pesados de ruleta y rasca por versiones mucho mas livianas y el grimorio ahora carga su dataset grande de forma diferida.
 *   **Cambios Clave:**
-    *   Se regeneraron los iconos launcher y adaptive foreground para todas las densidades Android con una identidad visual medieval consistente.
-    *   El adaptive icon ahora usa un fondo verde reino para que el escudo no aparezca sobre blanco en launchers compatibles.
-    *   El monograma `KG` quedo centrado dentro de un escudo oscuro con borde dorado para mantener legibilidad incluso en tamaños pequenos.
-*   **Notas/Advertencias:** Android Studio puede seguir marcando cambios propios en `android/.idea` y Gradle por haber abierto el proyecto; no afectan al nuevo icono.
+    *   La ruleta paso de usar `ruleta.png` (~415 KB) a `ruleta-optimized.jpg` (~37 KB).
+    *   Las tres cartas del rasca ahora usan versiones optimizadas JPG de ~25-28 KB cada una en vez de PNGs de 156-168 KB.
+    *   `GrimoireSection` ya no importa `GRIMOIRE_DATA` en caliente; primero monta la UI y luego carga el dataset del grimorio aparte.
+*   **Notas/Advertencias:** Los PNG originales siguen en `src/assets` como respaldo local, pero ya no se usan en runtime.
 
 ---
 ### [Fecha: 16/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `package.json`, `capacitor.config.ts`, `.env.example`, `src/utils/supabaseClient.ts`, `src/main.tsx`, `android/app/src/main/AndroidManifest.xml`, `android/*`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se dejo el proyecto realmente preparado para Android con Capacitor, incluyendo la plataforma nativa, scripts, deep links y sincronizacion del build.
+*   **Archivos Modificados:** `src/App.tsx`, `src/sections/MarketSection.tsx`, `src/sections/RankingSection.tsx`, `vite.config.ts`, `src/components/TavernScratch.tsx`, `src/components/TavernRoulette.tsx`, `src/components/PlayerTradeSheet.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se hizo una pasada real de rendimiento para la SPA: mas code splitting, precarga suave de tabs y ajustes de carga en imagenes grandes o repetidas.
 *   **Cambios Clave:**
-    *   Se instalaron `@capacitor/core@8.3.0`, `@capacitor/cli@8.3.0`, `@capacitor/android@8.3.0` y `@capacitor/app@8.1.0`, y se creo la carpeta nativa `android/`.
-    *   Se anadieron scripts para build estatico y sincronizacion con Android Studio, y se tipifico `capacitor.config.ts` apuntando a `dist`.
-    *   El cliente de Supabase ahora soporta helpers de redirect web/mobile y un handler para deep links nativos (`code`, `token_hash`, `access_token`/`refresh_token`).
-    *   `src/main.tsx` escucha `getLaunchUrl` y `appUrlOpen`, y Android manifiesta el deep link `com.reborn.app://auth/callback`.
-    *   Se ejecuto `static-build` y `npx cap sync android` correctamente, y se elimino `package-lock.json` para respetar la politica del repo.
-*   **Notas/Advertencias:** El repo todavia no tiene flujos activos de `supabase.auth.*`; la base nativa ya esta lista, pero para login real aun debes configurar Redirect URLs en Supabase y luego abrir `android/` en Android Studio para compilar el APK o AAB.
+    *   `Market` y `Ranking` salieron del bundle principal y ahora cargan como secciones lazy propias.
+    *   Las tabs publicas ahora disparan precarga en hover, focus o touch para que el cambio de vista se sienta mas inmediato.
+    *   Se anadio `manualChunks` en Vite para separar `react`, `motion`, `supabase`, `icons` y secciones pesadas.
+    *   Varias imagenes de taberna e inventario ahora usan `decoding=\"async\"` y `loading=\"lazy\"`, y bloques largos usan `content-visibility` en secciones separadas.
+*   **Notas/Advertencias:** La ruleta sigue usando `ruleta.png`, que pesa mas de 400 KB; ya no castiga tanto al arranque porque vive fuera del bundle principal, pero si quieres el siguiente paso fuerte es reemplazar ese asset por una version mas liviana o reconstruir la rueda en CSS/SVG.
 
 ---
 ### [Fecha: 16/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `package.json`, `.env.example`, `src/utils/supabaseClient.ts`, `capacitor.config.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se dejo preparada la base del proyecto para empaquetarlo con Capacitor en Android sin romper la compilacion web actual.
-*   **Cambios Clave:**
-    *   Se identifico el stack real como `React + Vite` con salida estatica en `dist`, y se creo `capacitor.config.ts` apuntando a ese `webDir`.
-    *   Se añadieron scripts para `static-build`, `cap:sync` y `android:sync` en `package.json`.
-    *   El cliente de Supabase ahora expone utilidades para construir `redirectTo` y `emailRedirectTo` segun si la app corre en web o dentro de Capacitor, usando por defecto `com.reborn.app://auth/callback` para mobile.
-    *   `.env.example` ahora documenta la URL publica de la app y el redirect movil para futuros flujos de autenticacion.
-*   **Notas/Advertencias:** El repo aun no tenia flujos activos de `supabase.auth.*`; la integracion de redirects quedo preparada para cuando agregues login real. Todavia falta instalar `@capacitor/core`, `@capacitor/cli` y `@capacitor/android`, y luego ejecutar `npx cap add android`.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se sumo un segundo nivel de enfoque durante el giro compactando tambien la seccion de fichas para que la rueda gane protagonismo.
-*   **Cambios Clave:**
-    *   `Fichas disponibles` ahora se repliega automaticamente durante la tirada y muestra solo un estado compacto con la ficha activa.
-    *   El jugador conserva contexto del valor seleccionado sin mantener toda la bandeja abierta mientras la rueda gira.
-    *   La transicion entre bandeja expandida y compacta usa la misma animacion suave del resto de la mesa para que el flujo se sienta uniforme.
-*   **Notas/Advertencias:** La seleccion de ficha queda bloqueada solo durante el giro; al terminar la ronda la bandeja vuelve automaticamente.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se mejoro el flujo del giro de ruleta plegando automaticamente la mesa durante la tirada y haciendo mas teatral la frenada final.
-*   **Cambios Clave:**
-    *   Al pulsar `Girar`, la `Mesa de apuestas` se contrae con animacion y deja el foco en la rueda y el estado de la ronda.
-    *   Mientras la rueda gira, aparece un estado replegado que deja claro que las apuestas ya quedaron cerradas.
-    *   El spin ahora dura un poco mas y desacelera mas al final para que el remate se sienta mas lento y dramatizado.
-*   **Notas/Advertencias:** La mesa vuelve automaticamente al terminar la ronda; si luego quieres, se puede hacer que se repliegue tambien la zona de fichas para un modo aun mas cinematografico.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/sections/MarketSection.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se amplio el espacio util de la ruleta en movil y se aplico un ligero efecto de alejamiento visual para que el contenido respire mejor dentro del marco.
-*   **Cambios Clave:**
-    *   La taberna del mercado ahora usa menos padding en movil, liberando ancho real para la ruleta.
-    *   La ruleta gano algo de ancho lateral con margenes negativos controlados y una escala visual suave que simula un pequeno `zoom out` solo en movil.
-    *   Se compactaron paddings internos del marco para evitar que textos y bloques queden pegados al borde derecho.
-*   **Notas/Advertencias:** El ajuste de escala solo afecta movil y se revierte automaticamente en escritorio para no tocar la vista que ya estaba correcta.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se simplifico la ruleta para ganar espacio real en movil, eliminando laterales y reduciendo la mesa a un formato compacto del 1 al 25.
-*   **Cambios Clave:**
-    *   La ruleta y el tablero ahora trabajan solo con numeros del `1` al `25`, usando una grilla `5x5` mas limpia y sin bloques laterales `0/00` ni `2 to 1`.
-    *   Se compactaron las apuestas externas a rangos y colores utiles para esta nueva mesa, con payout de pleno adaptado a `x24`.
-    *   Se bloqueo la convivencia de apuestas opuestas entre `ROJO` y `NEGRO`, tanto en logica como visualmente dentro del tablero.
-*   **Notas/Advertencias:** Este cambio altera la economia y las probabilidades respecto a la ruleta anterior; el comportamiento actual ya no intenta simular una americana clasica sino una variante compacta propia.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se ajusto la ruleta en movil para priorizar legibilidad y tamano tactil real, evitando comprimir el tablero.
-*   **Cambios Clave:**
-    *   La mesa ahora usa un ancho real mayor en movil y se muestra en scroll horizontal de borde a borde, en lugar de encogerse hasta volverse pequena.
-    *   Se anadio una pista visual de `Desliza la mesa` para dejar claro que el tablero puede desplazarse lateralmente.
-    *   Se mantuvo el tamano util de las casillas para que apostar desde movil siga siendo comodo y preciso.
-*   **Notas/Advertencias:** La decision favorece usabilidad sobre ver todo de una sola vez; si luego quieres, se puede sumar una vista secundaria simplificada solo para movil.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se pulio el encuadre y el estilo visual de la ruleta para acercarla mas a una mesa de casino y corregir el panel estirado en escritorio.
-*   **Cambios Clave:**
-    *   Se rehizo el marco exterior con acabado madera/oro y un fondo interior de tapete mas profundo para que la ruleta no se vea como cajas verdes apiladas.
-    *   El panel derecho ahora deja de estirarse artificialmente, con mejor proporcion visual entre rueda, tablero, apuestas y botonera.
-    *   Se mejoraron rueda, fichas, celdas y botones con gradientes, sombras y bandejas mas cercanas a la referencia visual.
-*   **Notas/Advertencias:** Es un clon visual aproximado; aun se puede seguir afinando la rueda o el tablero si luego quieres una replica mas agresiva de la referencia.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se reemplazo la ruleta simple por una mesa de ruleta americana mobile-first, con tablero clasico, rueda visual y apuestas pagadas con el oro real del jugador.
-*   **Cambios Clave:**
-    *   Se creo un motor de ruleta separado con orden americano, tipos de apuesta clasicos, resolucion de payout y apoyo para historial/resultados.
-    *   La nueva interfaz permite apostar por numero, columnas, docenas y apuestas externas usando fichas, repetir apuesta, duplicar y limpiar.
-    *   El giro descuenta el oro desde Supabase, anima la rueda, resuelve la ronda y devuelve el premio al saldo real del jugador.
-*   **Notas/Advertencias:** La logica actual replica una ruleta americana clasica con simulacion local; no incluye bonus tipo Cash Collect ni persistencia historica entre sesiones.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/CharImportModal.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/utils/characterPortraits.ts`, `src/utils/characterSheets.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se migro el guardado de retratos de fichas hacia Supabase Storage para evitar base64 pesado dentro de la tabla.
-*   **Cambios Clave:**
-    *   El modal de importacion ahora conserva el archivo de galeria y sube el retrato al bucket `character-portraits` al guardar.
-    *   La ficha guarda solo la URL publica del retrato en `portraitUrl`, en vez de guardar la imagen embebida.
-    *   Al borrar una ficha, la app intenta limpiar tambien el archivo del bucket si la URL pertenece a ese storage.
-*   **Notas/Advertencias:** Requiere crear el bucket `character-portraits` y sus politicas en Supabase; si el bucket no existe o la policy bloquea la subida, el modal mostrara error al guardar.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/CharImportModal.tsx`, `src/components/CharSheetModal.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/types.ts`, `src/utils/characterSheets.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se añadio soporte de retrato para las fichas de personaje, seleccionable desde galeria y visible dentro de la ficha.
-*   **Cambios Clave:**
-    *   El modal de importacion ahora permite elegir una imagen desde galeria y verla en preview antes de guardar.
-    *   La ficha abierta muestra el retrato en una seccion dedicada y las tarjetas de `Mis Personajes` muestran miniatura cuando existe.
-    *   El guardado ahora soporta `portraitUrl` con persistencia local de respaldo incluso si la tabla de Supabase aun no tiene esa columna.
-*   **Notas/Advertencias:** Si `character_sheets` en Supabase no tiene la columna `portraitUrl`, la imagen seguira funcionando en este dispositivo via almacenamiento local, pero no se sincronizara entre dispositivos hasta agregar esa columna.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/App.tsx`, `src/sections/HomeSection.tsx`, `src/sections/MarketSection.tsx`, `src/sections/RankingSection.tsx`, `vite.config.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se optimizo el rendimiento movil separando secciones pesadas, evitando renders ocultos y mejorando el chunking del build.
-*   **Cambios Clave:**
-    *   `Mercado` y `Ranking` salieron del bundle principal y ahora cargan en diferido por seccion.
-    *   La taberna del mercado y las categorias colapsables dejaron de montar contenido pesado mientras estan cerradas.
-    *   Se anadieron `manualChunks` en Vite y `content-visibility` en bloques largos para reducir costo inicial de render en movil.
-*   **Notas/Advertencias:** El bundle principal del cliente paso de un bloque cercano a 563 KB a uno cercano a 59 KB, aunque siguen existiendo chunks pesados esperables en `supabase`, `motion` y `GrimoireSection`.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernExpeditionArcade.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se reorganizo la vista movil de Expedicion para hacerla mas compacta, clara y enfocada durante combate.
+*   **Resumen de Tareas:** Se añadieron mutadores aleatorios por caceria y criticos especiales por dificultad para darle mas variedad y personalidad al PvE arcade.
 *   **Cambios Clave:**
-    *   Se creo un header compacto con stats en pills horizontales y acceso rapido a mejoras.
-    *   Los contratos pasaron a scroll horizontal y el detalle del contrato seleccionado ahora vive en una sola card mas limpia.
-    *   Las mejoras del cazador quedaron colapsables y el combate entra en modo foco ocultando paneles secundarios.
-*   **Notas/Advertencias:** Se mantuvo intacta la logica de contratos, combate y progresion; el cambio es de estructura visual y jerarquia de contenido.
+    *   Cada contrato ahora recibe un mutador aleatorio al iniciarse, con efectos reales sobre dano, defensa, fase dos o recompensa final.
+    *   Las tres dificultades tienen identidad propia de critico: `Corte preciso` en controlado, `Ruptura brutal` en medio y `Juicio del verdugo` en dificil.
+    *   La UI ahora avisa que hay mutador aleatorio, explica el critico especial de cada dificultad y muestra el mutador activo durante el combate.
+*   **Notas/Advertencias:** Los mutadores se sortean localmente en cada inicio de caceria y no quedan sincronizados entre dispositivos.
 
 ---
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se corrigio el retiro en Cartas para que el limite diario afecte solo la ganancia neta y no devore la apuesta base del jugador.
+### [Fecha: 16/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernExpeditionArcade.tsx`, `src/utils/pveProgress.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se reajusto la progresion de Expedicion para que los contratos controlado y medio tambien puedan otorgar puntos de mejora, sin romper el contador de victorias hard.
 *   **Cambios Clave:**
-    *   El maximo retirable ahora se calcula como `apuesta base + ganancia neta restante del dia`.
-    *   Se corrigio el bloqueo de `Doble o nada` para que compare contra el retiro total real permitido.
-    *   El aviso visual de limite diario ahora muestra el total correcto que se puede cobrar del pozo.
-*   **Notas/Advertencias:** Corrige el caso donde un jugador con poco margen diario recuperaba solo su apuesta o menos de lo esperado tras una racha alta.
-
----
-### [Fecha: 15/04/2026] - [Autor: Jarvis]
-*   **Archivos Modificados:** `src/components/TavernScratch.tsx`, `src/utils/scratchUtils.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se agrego un sistema de reembolso para tickets sin premio en Rasca y Gana segun la cantidad comprada.
-*   **Cambios Clave:**
-    *   Compras de 50 o menos ahora devuelven automaticamente el 50% del valor de los tickets sin premio.
-    *   Compras de mas de 50 activan un 50% de probabilidad de reembolso completo sobre los tickets sin premio.
-    *   La pantalla final ahora separa el reembolso por limite diario del nuevo reembolso por resultado.
-*   **Notas/Advertencias:** Se asumio que el valor exacto de 50 tickets entra en la regla de "50 o menos" para evitar un caso ambiguo sin cobertura.
+    *   Las victorias en `Controlado` ahora tienen 5% de probabilidad de dar 1 punto, y `Medio` 10%; `Caza dificil` sigue entregando 1 punto garantizado.
+    *   La UI de mejoras y las cards de contratos ahora explican claramente la probabilidad de punto segun la dificultad elegida.
+    *   El progreso PvE ya no infla `Hard wins` con puntos obtenidos en facil o medio; ese contador sigue reservado a victorias realmente hard.
+*   **Notas/Advertencias:** La progresion sigue guardandose en `localStorage`; las probabilidades son locales por cliente y no estan sincronizadas por servidor.
 
 ---
 ### [Fecha: 15/04/2026] - [Autor: Jarvis]

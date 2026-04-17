@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDownCircle,
@@ -12,127 +12,199 @@ import {
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import {
   MAX_DAILY_CARDS_WIN_LIMIT,
-  addPlayerDailyCardsGrossWins,
-  getPlayerDailyCardsGrossWins,
 } from "../utils/scratchUtils";
+import {
+  cashOutCardsSecure,
+  CardsSessionState,
+  continueCardsSecure,
+  fetchCardsSession,
+  guessCardsSecure,
+  startCardsGameSecure,
+} from "../utils/minigamesSecure";
 
 type GamePhase = "betting" | "playing" | "choice" | "gameOver";
 
-function getRandomCard() {
-  return Math.floor(Math.random() * 15) + 1;
-}
-
-function getTodayDateKey(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function getInitialSession(): CardsSessionState {
+  return {
+    bet: 0,
+    pool: 0,
+    streak: 0,
+    currentCard: 0,
+    nextCard: 0,
+    phase: "betting",
+    dailyWins: 0,
+    remainingNet: MAX_DAILY_CARDS_WIN_LIMIT,
+  };
 }
 
 export function TavernCards() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [phase, setPhase] = useState<GamePhase>("betting");
   const [bet, setBet] = useState(0);
   const [currentCard, setCurrentCard] = useState(0);
   const [nextCard, setNextCard] = useState(0);
   const [streak, setStreak] = useState(0);
   const [pool, setPool] = useState(0);
+  const [dailyWins, setDailyWins] = useState(0);
+  const [remainingNet, setRemainingNet] = useState(MAX_DAILY_CARDS_WIN_LIMIT);
   const [updating, setUpdating] = useState(false);
+  const [cardsError, setCardsError] = useState("");
 
-  const dateKey = useMemo(() => getTodayDateKey(), []);
-
-  const dailyWins = player ? getPlayerDailyCardsGrossWins(player.id, dateKey) : 0;
   const limitReached = dailyWins >= MAX_DAILY_CARDS_WIN_LIMIT;
-  const remainingNetWin = Math.max(0, MAX_DAILY_CARDS_WIN_LIMIT - dailyWins);
-  const maxCashoutTotal = bet + remainingNetWin;
-  const canCashOut = streak >= 2;
-  const isContinueBlocked = pool >= maxCashoutTotal && canCashOut;
+  const canCashOut = streak >= 2 && phase === "choice";
+  const maxTotalCashout = useMemo(() => bet + remainingNet, [bet, remainingNet]);
+  const isContinueBlocked = pool >= maxTotalCashout && canCashOut;
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSession() {
+      if (!player) {
+        return;
+      }
+
+      const result = await fetchCardsSession();
+
+      if (!active) {
+        return;
+      }
+
+      if (result.status === "error") {
+        setCardsError(result.message);
+        return;
+      }
+
+      applySession(result.session);
+    }
+
+    void loadSession();
+
+    return () => {
+      active = false;
+    };
+  }, [player]);
+
+  function applySession(session: CardsSessionState) {
+    setBet(session.bet);
+    setPool(session.pool);
+    setStreak(session.streak);
+    setCurrentCard(session.currentCard);
+    setNextCard(session.nextCard);
+    setDailyWins(session.dailyWins);
+    setRemainingNet(session.remainingNet);
+    setPhase(session.phase);
+  }
 
   async function handleRefresh() {
     setUpdating(true);
     await refreshPlayer();
+
+    if (player) {
+      const result = await fetchCardsSession();
+      if (result.status === "success") {
+        applySession(result.session);
+      } else {
+        setCardsError(result.message);
+      }
+    }
+
     setUpdating(false);
   }
 
   async function startGame() {
-    if (!player || bet <= 0 || bet > player.gold || updating) return;
+    if (!player || bet <= 0 || bet > player.gold || updating) {
+      return;
+    }
 
     setUpdating(true);
-    const deducted = await setPlayerGold(player.gold - bet);
-    if (!deducted) {
+    setCardsError("");
+
+    const result = await startCardsGameSecure(bet);
+
+    if (result.status === "error") {
+      setCardsError(result.message);
       setUpdating(false);
       return;
     }
 
-    setCurrentCard(getRandomCard());
-    setPool(bet);
-    setStreak(0);
-    setPhase("playing");
+    applySession(result.session);
+    await refreshPlayer();
     setUpdating(false);
   }
 
   async function handleGuess(guess: "higher" | "lower") {
-    if (updating || !player) return;
-    setUpdating(true);
-
-    const drawnCard = getRandomCard();
-    setNextCard(drawnCard);
-
-    if (drawnCard === currentCard) {
-      setPhase("choice");
-    } else if (
-      (guess === "higher" && drawnCard > currentCard) ||
-      (guess === "lower" && drawnCard < currentCard)
-    ) {
-      setPool((prev) => prev * 2);
-      setStreak((prev) => prev + 1);
-      setPhase("choice");
-    } else {
-      setPhase("gameOver");
+    if (updating || !player) {
+      return;
     }
 
+    setUpdating(true);
+    setCardsError("");
+
+    const result = await guessCardsSecure(guess);
+
+    if (result.status === "error") {
+      setCardsError(result.message);
+      setUpdating(false);
+      return;
+    }
+
+    applySession(result.session);
     setUpdating(false);
   }
 
   async function handleCashout() {
-    if (!player || updating || !canCashOut) return;
+    if (!player || updating || !canCashOut) {
+      return;
+    }
+
     setUpdating(true);
+    setCardsError("");
 
-    const cappedPool = Math.min(pool, maxCashoutTotal);
-    const wasLimitHit = cappedPool < pool;
+    const result = await cashOutCardsSecure();
 
-    if (cappedPool > 0) {
-      const netWin = Math.max(0, cappedPool - bet);
-      addPlayerDailyCardsGrossWins(player.id, dateKey, netWin);
-      await setPlayerGold(player.gold + cappedPool);
+    if (result.status === "error") {
+      setCardsError(result.message);
+      setUpdating(false);
+      return;
     }
 
-    if (wasLimitHit) {
-      setPool(cappedPool);
-    }
-
-    setPhase("betting");
-    setBet(0);
-    setPool(0);
-    setStreak(0);
+    applySession(result.session);
+    await refreshPlayer();
     setUpdating(false);
   }
 
-  function handleContinue() {
-    setCurrentCard(nextCard);
-    setNextCard(0);
-    setPhase("playing");
+  async function handleContinue() {
+    if (updating || phase !== "choice") {
+      return;
+    }
+
+    setUpdating(true);
+    setCardsError("");
+
+    const result = await continueCardsSecure();
+
+    if (result.status === "error") {
+      setCardsError(result.message);
+      setUpdating(false);
+      return;
+    }
+
+    applySession(result.session);
+    setUpdating(false);
   }
 
   function handlePlayAgain() {
-    setPhase("betting");
-    setBet(0);
-    setPool(0);
-    setStreak(0);
-    setCurrentCard(0);
-    setNextCard(0);
+    const session = getInitialSession();
+    session.dailyWins = dailyWins;
+    session.remainingNet = remainingNet;
+    applySession(session);
+    setCardsError("");
   }
 
   if (isHydrating) {
-    return <CardsMessage title="Cartas del Oraculo" description="Recuperando tu sesion del reino..." />;
+    return (
+      <CardsMessage title="Cartas del Oraculo" description="Recuperando tu sesion del reino..." />
+    );
   }
 
   if (!player) {
@@ -148,7 +220,7 @@ export function TavernCards() {
     return (
       <CardsMessage
         title="Limite diario alcanzado"
-        description={`Has alcanzado el limite de ${MAX_DAILY_CARDS_WIN_LIMIT.toLocaleString()} de oro en ganancias hoy. La taberna cierra esta mesa por hoy. Vuelve manana a las 00:00.`}
+        description={`Has alcanzado el limite de ${MAX_DAILY_CARDS_WIN_LIMIT.toLocaleString()} de oro en ganancias netas hoy. La taberna cierra esta mesa por hoy. Vuelve manana.`}
       />
     );
   }
@@ -180,6 +252,12 @@ export function TavernCards() {
           </div>
         </div>
       </div>
+
+      {cardsError ? (
+        <div className="mb-4 w-full rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-left text-sm text-rose-200">
+          {cardsError}
+        </div>
+      ) : null}
 
       {dailyWins > 0 && phase === "betting" && (
         <div className="mb-4 w-full rounded-xl border border-stone-800 bg-stone-950/50 px-4 py-3 text-left">
@@ -259,7 +337,6 @@ export function TavernCards() {
                   <Coins className="h-5 w-5" />
                   REPARTIR CARTA
                 </span>
-                <div className="absolute inset-0 translate-y-full bg-gradient-to-t from-white/10 to-transparent transition-transform group-hover:translate-y-0" />
               </button>
 
               <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-stone-500">
@@ -360,9 +437,9 @@ export function TavernCards() {
                 <span className="flex items-center gap-2 text-3xl font-black text-amber-400">
                   <Coins className="h-6 w-6" /> {pool}
                 </span>
-                {pool > maxCashoutTotal && (
+                {pool > maxTotalCashout && (
                   <span className="mt-2 text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                    Solo cobraras {maxCashoutTotal.toLocaleString()} por el limite diario
+                    Solo cobraras {maxTotalCashout.toLocaleString()} por el limite diario
                   </span>
                 )}
                 {!canCashOut && (
@@ -379,8 +456,8 @@ export function TavernCards() {
             <div className="grid w-full gap-4">
               <button
                 type="button"
-                onClick={handleContinue}
-                disabled={isContinueBlocked}
+                onClick={() => void handleContinue()}
+                disabled={isContinueBlocked || updating}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-5 font-black text-stone-950 shadow-lg shadow-amber-900/20 transition-all hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
               >
                 <RefreshCw className="h-5 w-5" />

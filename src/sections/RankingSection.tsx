@@ -1,13 +1,13 @@
-import { lazy, Suspense, useEffect, useMemo, useState, startTransition } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { FilterPill } from "../components/FilterPill";
 import { RankingCard } from "../components/RankingCard";
 import { SectionHeader } from "../components/SectionHeader";
-import type { RankingPlayer, RankingWindow } from "../types";
 import {
   fetchWeeklyRanking,
   formatCountdown,
   formatRankingWindow,
 } from "../utils/weeklyRanking";
+import type { RankingPlayer, RankingWindow } from "../types";
 
 const WeeklyRankingPodium = lazy(() =>
   import("../components/WeeklyRankingPodium").then((module) => ({
@@ -68,10 +68,7 @@ export function RankingSection() {
   );
 
   const filteredPlayers = useMemo(
-    () =>
-      players.filter((player) =>
-        factionFilter === "all" ? true : player.faction === factionFilter
-      ),
+    () => players.filter((player) => (factionFilter === "all" ? true : player.faction === factionFilter)),
     [factionFilter, players]
   );
 
@@ -90,9 +87,7 @@ export function RankingSection() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">
                 Cierra en
               </p>
-              <p className="mt-1 text-lg font-black text-stone-100">
-                {timeLeft || "--"}
-              </p>
+              <p className="mt-1 text-lg font-black text-stone-100">{timeLeft || "--"}</p>
             </div>
           }
         />
@@ -115,17 +110,15 @@ export function RankingSection() {
         </div>
       ) : (
         <>
-          <div className="[content-visibility:auto] [contain-intrinsic-size:460px]">
-            <Suspense
-              fallback={
-                <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 text-sm text-stone-400">
-                  Preparando el podio semanal...
-                </div>
-              }
-            >
-              <WeeklyRankingPodium players={podiumPlayers} />
-            </Suspense>
-          </div>
+          <Suspense
+            fallback={
+              <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 text-sm text-stone-400">
+                Preparando el podio semanal...
+              </div>
+            }
+          >
+            <WeeklyRankingPodium players={podiumPlayers} />
+          </Suspense>
 
           <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
             <SectionHeader
@@ -137,28 +130,23 @@ export function RankingSection() {
               <FilterPill
                 label="Todas las facciones"
                 active={factionFilter === "all"}
-                onClick={() => {
-                  startTransition(() => {
-                    setFactionFilter("all");
-                  });
-                }}
+                onClick={() => setFactionFilter("all")}
               />
               {factions.map((faction) => (
                 <FilterPill
                   key={faction}
                   label={faction}
                   active={factionFilter === faction}
-                  onClick={() => {
-                    startTransition(() => {
-                      setFactionFilter(faction);
-                    });
-                  }}
+                  onClick={() => setFactionFilter(faction)}
                 />
               ))}
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:1100px]">
+          <div
+            className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6"
+            style={{ contentVisibility: "auto", containIntrinsicSize: "1200px" }}
+          >
             <SectionHeader
               eyebrow="Tabla completa"
               title="Participacion acumulada"

@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ScrollText, X, User, Info } from 'lucide-react';
-import { CharacterSheet } from '../types';
-import { supabase } from '../lib/supabase';
-import { CharSheetModal } from './CharSheetModal';
+import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Info, Loader2, ScrollText, Search, User, Users, X } from "lucide-react";
+import { CharacterSheet } from "../types";
+import { supabase } from "../lib/supabase";
+import { CharSheetModal } from "./CharSheetModal";
 
 interface RealmRegistryProps {
   onClose: () => void;
 }
 
 export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<CharacterSheet[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [allSheets, setAllSheets] = useState<CharacterSheet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
   const [playerNamesById, setPlayerNamesById] = useState<Record<string, string>>({});
 
@@ -32,161 +33,218 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
 
   const formatPlayerLabel = (sheet: CharacterSheet) => {
     const explicitUsername = getSheetPlayerUsername(sheet);
-    if (explicitUsername) return explicitUsername;
+    if (explicitUsername) {
+      return explicitUsername;
+    }
 
     const playerId = getSheetPlayerId(sheet);
-    if (playerId && playerNamesById[playerId]) return playerNamesById[playerId];
-    if (playerId) return `${playerId.slice(0, 8)}...`;
+    if (playerId && playerNamesById[playerId]) {
+      return playerNamesById[playerId];
+    }
+
+    if (playerId) {
+      return `${playerId.slice(0, 8)}...`;
+    }
+
     return "Desconocido";
   };
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  useEffect(() => {
+    let cancelled = false;
 
-    setIsSearching(true);
-    try {
-      const q = searchQuery.trim();
-      const qLower = q.toLowerCase();
+    async function loadRegistry() {
+      setIsLoading(true);
+      setLoadError("");
 
-      // Robust search: load both sources and match client-side so schema naming
-      // differences (playerId/player_id, playerUsername/player_username) do not break.
-      const [sheetsResponse, playersResponse] = await Promise.all([
-        supabase.from("character_sheets").select("*"),
-        supabase.from("players").select("id, username").ilike("username", `%${q}%`),
-      ]);
+      try {
+        const [sheetsResponse, playersResponse] = await Promise.all([
+          supabase.from("character_sheets").select("*"),
+          supabase.from("players").select("id, username"),
+        ]);
 
-      if (sheetsResponse.error) throw sheetsResponse.error;
-      if (playersResponse.error) throw playersResponse.error;
+        if (sheetsResponse.error) {
+          throw sheetsResponse.error;
+        }
 
-      const allSheets = (sheetsResponse.data ?? []) as CharacterSheet[];
-      const matchedPlayers = (playersResponse.data ?? []) as Array<{ id: string; username: string }>;
-      const matchedPlayerIds = new Set(matchedPlayers.map((player) => player.id));
+        if (cancelled) {
+          return;
+        }
 
-      const nextPlayerNamesById: Record<string, string> = {};
-      for (const player of matchedPlayers) {
-        nextPlayerNamesById[player.id] = player.username;
-      }
-
-      const results = allSheets.filter((sheet) => {
-        const name = String(sheet.name ?? "").toLowerCase();
-        const race = String(sheet.race ?? "").toLowerCase();
-        const profession = String(sheet.profession ?? "").toLowerCase();
-        const playerUsername = getSheetPlayerUsername(sheet).toLowerCase();
-        const playerId = getSheetPlayerId(sheet);
-
-        return (
-          name.includes(qLower) ||
-          race.includes(qLower) ||
-          profession.includes(qLower) ||
-          playerUsername.includes(qLower) ||
-          (playerId ? matchedPlayerIds.has(playerId) : false) ||
-          (playerId ? playerId.toLowerCase().includes(qLower) : false)
+        const nextSheets = ((sheetsResponse.data ?? []) as CharacterSheet[]).slice().sort((a, b) =>
+          String(a.name ?? "").localeCompare(String(b.name ?? ""), "es", {
+            sensitivity: "base",
+          })
         );
-      });
+        const nextPlayerNamesById = playersResponse.error
+          ? {}
+          : Object.fromEntries(
+              ((playersResponse.data ?? []) as Array<{ id: string; username: string }>).map((player) => [
+                player.id,
+                player.username,
+              ])
+            );
 
-      setPlayerNamesById((current) => ({ ...current, ...nextPlayerNamesById }));
-      setSearchResults(results);
-    } catch (error) {
-      console.error('Error searching sheets:', error);
-    } finally {
-      setIsSearching(false);
+        setAllSheets(nextSheets);
+        setPlayerNamesById(nextPlayerNamesById);
+      } catch (error) {
+        console.error("Error loading registry sheets:", error);
+        if (!cancelled) {
+          setLoadError("No se pudieron cargar las fichas publicas del reino.");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
     }
-  };
+
+    void loadRegistry();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleSheets = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return allSheets;
+    }
+
+    return allSheets.filter((sheet) => {
+      const playerId = getSheetPlayerId(sheet);
+      const playerUsername = getSheetPlayerUsername(sheet) || playerNamesById[playerId] || "";
+      const searchableValues = [
+        sheet.name,
+        sheet.race,
+        sheet.profession,
+        sheet.birthRealm,
+        playerUsername,
+      ];
+
+      return searchableValues.some((value) =>
+        String(value ?? "").toLowerCase().includes(normalizedQuery)
+      );
+    });
+  }, [allSheets, playerNamesById, searchQuery]);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-[#0a0a0a] border border-stone-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh] relative"
+        className="relative flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-stone-800 bg-[#0a0a0a] shadow-2xl"
       >
-        {/* Header */}
-        <div className="shrink-0 flex items-center justify-between p-6 border-b border-stone-800 bg-stone-900/30">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
-              <ScrollText className="w-6 h-6 text-amber-500" />
+        <div className="shrink-0 border-b border-stone-800 bg-stone-900/30 p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
+                <ScrollText className="h-6 w-6 text-amber-500" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-serif font-bold uppercase tracking-wider text-amber-500">
+                  Registro del Reino
+                </h2>
+                <p className="text-sm text-stone-400">
+                  Todas las fichas publicas del reino, solo para consulta.
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-serif font-bold text-amber-500 tracking-wider uppercase">Registro del Reino</h2>
-              <p className="text-stone-400 text-sm">Busca fichas de otros jugadores</p>
-            </div>
+            <button
+              onClick={onClose}
+              className="rounded-xl border border-stone-800 bg-stone-900 p-2 text-stone-400 transition-colors hover:bg-stone-800 hover:text-white"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-2 bg-stone-900 hover:bg-stone-800 text-stone-400 hover:text-white rounded-xl transition-colors border border-stone-800"
-          >
-            <X className="w-6 h-6" />
-          </button>
         </div>
 
-        {/* Search Bar */}
-        <div className="p-6 border-b border-stone-800 bg-stone-900/10">
-          <form onSubmit={handleSearch} className="relative">
+        <div className="border-b border-stone-800 bg-stone-900/10 p-6">
+          <div className="relative">
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por nombre de personaje o jugador..."
-              className="w-full bg-stone-900 border border-stone-700 rounded-xl py-4 pl-12 pr-4 text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Filtrar por personaje, jugador, raza, profesion o reino..."
+              className="w-full rounded-xl border border-stone-700 bg-stone-900 py-4 pl-12 pr-4 text-stone-200 placeholder:text-stone-500 transition-all focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
             />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-500" />
-            <button
-              type="submit"
-              disabled={isSearching || !searchQuery.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-stone-950 rounded-lg font-bold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSearching ? 'Buscando...' : 'Buscar'}
-            </button>
-          </form>
-          <p className="text-stone-500 text-xs mt-2 flex items-center gap-1">
-            <Info className="w-3 h-3" /> Busca por personaje, raza, profesion o
-            jugador.
-          </p>
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-500" />
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
+            <p className="flex items-center gap-1">
+              <Info className="h-3 w-3" />
+              Puedes abrir cualquier ficha para revisarla, pero no editarla.
+            </p>
+            <span className="inline-flex items-center gap-2 rounded-full border border-stone-800 bg-stone-950/50 px-3 py-1 text-stone-300">
+              <Users className="h-3.5 w-3.5 text-amber-400" />
+              {visibleSheets.length} ficha{visibleSheets.length === 1 ? "" : "s"}
+            </span>
+          </div>
         </div>
 
-        {/* Results */}
-        <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
-          {searchResults.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {searchResults.map(sheet => (
-                <div 
-                  key={sheet.id} 
-                  className="bg-stone-900/40 border border-stone-800 rounded-xl p-4 hover:border-amber-500/30 transition-colors cursor-pointer group"
-                  onClick={() => setSelectedSheet(sheet)}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-bold text-amber-500 uppercase tracking-wider text-sm group-hover:text-amber-400 transition-colors line-clamp-1">
-                      {sheet.name || 'Sin Nombre'}
-                    </h4>
-                  </div>
-                  <div className="space-y-2 text-xs text-stone-400">
-                    <p className="flex items-center gap-2">
-                      <User className="w-3 h-3" /> Jugador:{" "}
-                      <span className="text-stone-300">{formatPlayerLabel(sheet)}</span>
-                    </p>
-                    <p className="line-clamp-1">
-                      {sheet.race || "Raza desconocida"} •{" "}
-                      {sheet.profession || "Sin profesion"}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-stone-500 space-y-4">
-              <Search className="w-12 h-12 opacity-20" />
-              <p>{searchQuery ? 'No se encontraron fichas.' : 'Ingresa un nombre para buscar.'}</p>
-            </div>
-          )}
-        </div>
+        {loadError ? (
+          <div className="border-b border-stone-800 bg-rose-500/10 px-6 py-3 text-sm text-rose-200">
+            {loadError}
+          </div>
+        ) : null}
+
+        {isLoading ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-stone-400">
+            <Loader2 className="h-8 w-8 animate-spin text-amber-400" />
+            <p className="text-sm">Cargando las fichas del reino...</p>
+          </div>
+        ) : (
+          <div className="custom-scrollbar flex-1 overflow-y-auto p-6">
+            {visibleSheets.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {visibleSheets.map((sheet) => (
+                  <button
+                    key={sheet.id}
+                    type="button"
+                    className="group rounded-xl border border-stone-800 bg-stone-900/40 p-4 text-left transition-colors hover:border-amber-500/30"
+                    onClick={() => setSelectedSheet(sheet)}
+                  >
+                    <div className="mb-3 flex items-start justify-between">
+                      <h4 className="line-clamp-1 text-sm font-bold uppercase tracking-wider text-amber-500 transition-colors group-hover:text-amber-400">
+                        {sheet.name || "Sin Nombre"}
+                      </h4>
+                    </div>
+                    <div className="space-y-2 text-xs text-stone-400">
+                      <p className="flex items-center gap-2">
+                        <User className="h-3 w-3" />
+                        Jugador: <span className="text-stone-300">{formatPlayerLabel(sheet)}</span>
+                      </p>
+                      <p className="line-clamp-1">
+                        {sheet.race || "Raza desconocida"} • {sheet.profession || "Sin profesion"}
+                      </p>
+                      {sheet.birthRealm ? (
+                        <p className="line-clamp-1 text-stone-500">Reino: {sheet.birthRealm}</p>
+                      ) : null}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center space-y-4 text-stone-500">
+                <Search className="h-12 w-12 opacity-20" />
+                <p>
+                  {searchQuery
+                    ? "No se encontraron fichas con ese filtro."
+                    : "No hay fichas publicas registradas todavia."}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </motion.div>
 
-      <CharSheetModal 
-        isOpen={!!selectedSheet} 
-        onClose={() => setSelectedSheet(null)} 
-        character={selectedSheet} 
+      <CharSheetModal
+        isOpen={!!selectedSheet}
+        onClose={() => setSelectedSheet(null)}
+        character={selectedSheet}
       />
     </div>
   );

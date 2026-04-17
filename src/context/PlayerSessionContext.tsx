@@ -8,7 +8,10 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import type { PlayerAccount } from "../types";
-import { fetchPlayerByUsername, updatePlayerGold } from "../utils/players";
+import {
+  fetchPlayerByUsername,
+  updatePlayerGold,
+} from "../utils/players";
 
 const PLAYER_STORAGE_KEY = "kingdoom.active-player";
 
@@ -123,7 +126,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     let isCancelled = false;
 
     async function hydrateStoredPlayer() {
-      const storedUsername = window.localStorage.getItem(PLAYER_STORAGE_KEY);
+      const storedUsername = window.localStorage.getItem(PLAYER_STORAGE_KEY)?.trim();
 
       if (!storedUsername) {
         setIsHydrating(false);
@@ -136,10 +139,10 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (!storedPlayer) {
-        window.localStorage.removeItem(PLAYER_STORAGE_KEY);
-      } else {
+      if (storedPlayer) {
         setPlayer(storedPlayer);
+        setIsHydrating(false);
+        return;
       }
 
       setIsHydrating(false);
@@ -176,9 +179,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       player,
-      isAdmin: Boolean(
-        player?.isAdmin ?? player?.username.trim().toLowerCase() === "nothing"
-      ),
+      isAdmin: Boolean(player?.isAdmin),
       isHydrating,
       isSubmittingProfile,
       profileError,

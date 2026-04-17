@@ -13,6 +13,7 @@ export type PlayerAccount = {
   username: string;
   gold: number;
   isAdmin?: boolean;
+  authUserId?: string | null;
 };
 
 export type NavItem = {
@@ -230,6 +231,9 @@ export type PveCombatStats = {
 
 export type PvePlayerProgress = {
   playerId: string;
+  sheetId: string;
+  level: number;
+  exp: number;
   availablePoints: number;
   hardVictories: number;
   stats: PveCombatStats;

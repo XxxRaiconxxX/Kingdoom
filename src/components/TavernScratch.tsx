@@ -1,54 +1,57 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Coins, RefreshCw, Sparkles, Ticket, UserRound } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import scratchLoseCard from "../assets/scratch-lose-card.png";
-import scratchPristineCard from "../assets/scratch-pristine-card.png";
-import scratchWinCard from "../assets/scratch-win-card.png";
+import scratchLoseCard from "../assets/scratch-lose-card-optimized.jpg";
+import scratchPristineCard from "../assets/scratch-pristine-card-optimized.jpg";
+import scratchWinCard from "../assets/scratch-win-card-optimized.jpg";
 import {
-  addPlayerDailyScratchGrossWins,
   getDailyScratchConfig,
-  getPlayerDailyScratchGrossWins,
-  getScratchRefundOutcome,
   NORMAL_MAX_PRIZE,
   NORMAL_MIN_PRIZE,
   VIP_JACKPOT_CHANCE,
   VIP_JACKPOT_PRIZE,
 } from "../utils/scratchUtils";
-import type { ScratchRefundOutcome } from "../utils/scratchUtils";
+import {
+  fetchScratchDailyState,
+  playScratchBatchSecure,
+} from "../utils/scratchSecure";
 
 type ScratchPhase = "buy" | "ready" | "scratching" | "revealed";
 
 interface ScratchBatchResult {
   totalCost: number;
+  costPerTicket: number;
   quantity: number;
-  wins: number;
-  loses: number;
+  usedTickets: number;
+  winningTickets: number;
+  jackpotWins: number;
+  losingTickets: number;
   totalPrize: number;
-  unusedTickets: number;
-  unusedRefundGold: number;
-  consolationRefundTickets: number;
-  consolationRefundGold: number;
-  consolationRefundMode: ScratchRefundOutcome["mode"];
+  refundedTickets: number;
+  refundedGold: number;
+  remainingGold: number;
 }
 
 export function TavernScratch() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [phase, setPhase] = useState<ScratchPhase>("buy");
   const [quantity, setQuantity] = useState<number>(1);
   const [batchResult, setBatchResult] = useState<ScratchBatchResult | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [dailyGrossWins, setDailyGrossWins] = useState(0);
+  const [scratchError, setScratchError] = useState("");
 
   const dailyConfig = useMemo(() => getDailyScratchConfig(), []);
-  
-  const dailyGrossWins = player 
-    ? getPlayerDailyScratchGrossWins(player.id, dailyConfig.dateKey) 
-    : 0;
-  
   const limitReached = dailyGrossWins >= dailyConfig.maxDailyLimit;
-
   const totalCost = dailyConfig.cost * quantity;
-  const canBuy = Boolean(player && player.gold >= totalCost && !updating && quantity > 0 && !limitReached);
+  const canBuy = Boolean(
+    player &&
+      player.gold >= totalCost &&
+      !updating &&
+      quantity > 0 &&
+      !limitReached
+  );
   const maxBuyQuantity = player ? Math.floor(player.gold / dailyConfig.cost) : 0;
 
   const projectedGold = useMemo(() => {
@@ -59,9 +62,50 @@ export function TavernScratch() {
     return Math.max(0, player.gold - totalCost);
   }, [player, totalCost]);
 
+  useEffect(() => {
+    let active = true;
+
+    async function loadDailyScratchState() {
+      if (!player) {
+        if (active) {
+          setDailyGrossWins(0);
+        }
+        return;
+      }
+
+      const result = await fetchScratchDailyState(dailyConfig.dateKey);
+
+      if (!active) {
+        return;
+      }
+
+      setDailyGrossWins(result.grossWins);
+
+      if (result.status === "unavailable") {
+        setScratchError(result.message);
+      }
+    }
+
+    void loadDailyScratchState();
+
+    return () => {
+      active = false;
+    };
+  }, [dailyConfig.dateKey, player]);
+
   async function handleRefresh() {
     setUpdating(true);
-    await refreshPlayer();
+    const refreshed = await refreshPlayer();
+
+    if (refreshed) {
+      const scratchState = await fetchScratchDailyState(dailyConfig.dateKey);
+      setDailyGrossWins(scratchState.grossWins);
+
+      if (scratchState.status === "unavailable") {
+        setScratchError(scratchState.message);
+      }
+    }
+
     setUpdating(false);
   }
 
@@ -70,15 +114,7 @@ export function TavernScratch() {
       return;
     }
 
-    setUpdating(true);
-    const nextGold = player.gold - totalCost;
-    const deducted = await setPlayerGold(nextGold);
-    setUpdating(false);
-
-    if (!deducted) {
-      return;
-    }
-
+    setScratchError("");
     setBatchResult(null);
     setPhase("ready");
   }
@@ -91,71 +127,32 @@ export function TavernScratch() {
     setPhase("scratching");
 
     window.setTimeout(async () => {
-      let normalWins = 0;
-      let vipWins = 0;
-      let totalPrize = 0;
-      
-      let usedTickets = 0;
+      setUpdating(true);
+      const result = await playScratchBatchSecure(quantity);
 
-      for (let i = 0; i < quantity; i++) {
-        // Frenar el bucle inmediatamente si ya se alcanzó el límite.
-        if (dailyGrossWins + totalPrize >= dailyConfig.maxDailyLimit) {
-          totalPrize = dailyConfig.maxDailyLimit - dailyGrossWins; 
-          break; 
-        }
-
-        usedTickets++;
-
-        let wonOnThisTicket = false;
-        if (Math.random() < dailyConfig.winChance) {
-          normalWins++;
-          totalPrize += Math.floor(Math.random() * (NORMAL_MAX_PRIZE - NORMAL_MIN_PRIZE + 1)) + NORMAL_MIN_PRIZE;
-          wonOnThisTicket = true;
-        }
-        
-        if (Math.random() < VIP_JACKPOT_CHANCE) {
-          vipWins++;
-          totalPrize += VIP_JACKPOT_PRIZE;
-          wonOnThisTicket = true;
-        }
+      if (result.status === "error") {
+        setUpdating(false);
+        setScratchError(result.message);
+        setPhase("buy");
+        return;
       }
-
-      let cappedTotalPrize = totalPrize;
-      if (dailyGrossWins + totalPrize > dailyConfig.maxDailyLimit) {
-        cappedTotalPrize = Math.max(0, dailyConfig.maxDailyLimit - dailyGrossWins);
-      }
-      
-      const totalWins = normalWins + vipWins;
-      const losingTickets = Math.max(usedTickets - totalWins, 0);
-      const unusedTickets = quantity - usedTickets;
-      const unusedRefundGold = unusedTickets * dailyConfig.cost;
-      const consolationRefund = getScratchRefundOutcome(quantity, losingTickets, dailyConfig.cost);
 
       setBatchResult({
-        totalCost,
-        quantity,
-        wins: totalWins,
-        loses: losingTickets,
-        totalPrize: cappedTotalPrize,
-        unusedTickets,
-        unusedRefundGold,
-        consolationRefundTickets: consolationRefund.refundedTickets,
-        consolationRefundGold: consolationRefund.refundedGold,
-        consolationRefundMode: consolationRefund.mode,
+        totalCost: result.totalCost,
+        costPerTicket: result.costPerTicket,
+        quantity: result.quantity,
+        usedTickets: result.usedTickets,
+        winningTickets: result.winningTickets,
+        jackpotWins: result.jackpotWins,
+        losingTickets: result.losingTickets,
+        totalPrize: result.totalPrize,
+        refundedTickets: result.refundedTickets,
+        refundedGold: result.refundedGold,
+        remainingGold: result.remainingGold,
       });
-
-      const goldToDeposit =
-        cappedTotalPrize + unusedRefundGold + consolationRefund.refundedGold;
-
-      if (goldToDeposit > 0) {
-        setUpdating(true);
-        if (cappedTotalPrize > 0) {
-           addPlayerDailyScratchGrossWins(player.id, dailyConfig.dateKey, cappedTotalPrize);
-        }
-        await setPlayerGold((player?.gold ?? 0) + goldToDeposit);
-        setUpdating(false);
-      }
-
+      setDailyGrossWins(result.dailyGrossWins);
+      await refreshPlayer();
+      setUpdating(false);
       setPhase("revealed");
     }, quantity > 1 ? 2000 : 950);
   }
@@ -163,12 +160,21 @@ export function TavernScratch() {
   function resetScratch() {
     setPhase("buy");
     setBatchResult(null);
+    setScratchError("");
   }
 
   function handleQuantityChange(value: number) {
-    if (value < 1) setQuantity(1);
-    else if (maxBuyQuantity > 0 && value > maxBuyQuantity) setQuantity(maxBuyQuantity);
-    else setQuantity(value);
+    if (value < 1) {
+      setQuantity(1);
+      return;
+    }
+
+    if (maxBuyQuantity > 0 && value > maxBuyQuantity) {
+      setQuantity(maxBuyQuantity);
+      return;
+    }
+
+    setQuantity(value);
   }
 
   if (isHydrating) {
@@ -192,8 +198,8 @@ export function TavernScratch() {
   if (limitReached && phase === "buy") {
     return (
       <ScratchMessage
-        title="Límite Diario Alcanzado"
-        description={`¡El Reino ha visto suficiente suerte de tu parte! Ya has ganado ${dailyGrossWins} de oro hoy, acercándote o superando el límite de ${dailyConfig.maxDailyLimit}. La taberna cierra esta mesa por hoy. Vuelve mañana a las 00:00.`}
+        title="Limite diario alcanzado"
+        description={`El Reino ya registro ${dailyGrossWins} de oro en premios hoy, muy cerca o por encima del limite de ${dailyConfig.maxDailyLimit}. Esta mesa vuelve a abrir manana.`}
       />
     );
   }
@@ -211,9 +217,7 @@ export function TavernScratch() {
                 {player.username}
               </p>
               <div className="mt-1 flex items-center gap-2">
-                <p className="text-2xl font-black text-amber-300">
-                  {player.gold}
-                </p>
+                <p className="text-2xl font-black text-amber-300">{player.gold}</p>
               </div>
             </div>
           </div>
@@ -230,9 +234,15 @@ export function TavernScratch() {
         </div>
 
         <div className="grid gap-4 rounded-[1.6rem] border border-stone-800 bg-stone-950/45 p-4 text-sm text-stone-300 md:grid-cols-3">
-          <StatBubble label="Costo del Día" value={`${dailyConfig.cost} oro`} />
-          <StatBubble label="Probabilidad" value={`${Math.round(dailyConfig.winChance * 100)}%`} />
-          <StatBubble label="Premio Base" value={`${NORMAL_MIN_PRIZE}-${NORMAL_MAX_PRIZE}`} />
+          <StatBubble label="Costo del dia" value={`${dailyConfig.cost} oro`} />
+          <StatBubble
+            label="Probabilidad"
+            value={`${Math.round(dailyConfig.winChance * 100)}%`}
+          />
+          <StatBubble
+            label="Premio base"
+            value={`${NORMAL_MIN_PRIZE}-${NORMAL_MAX_PRIZE}`}
+          />
         </div>
 
         <AnimatePresence mode="wait">
@@ -251,20 +261,35 @@ export function TavernScratch() {
                   Compra un ticket de fortuna
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-stone-400">
-                  Pagas <span className="font-bold text-amber-300">{dailyConfig.cost} de oro</span> y
-                  tienes un <span className="font-bold text-amber-300">{Math.round(dailyConfig.winChance * 100)}%</span> de
-                  sacar un premio entre {NORMAL_MIN_PRIZE} y {NORMAL_MAX_PRIZE} monedas. Ademas, TODOS los tickets tienen un <span className="font-bold text-emerald-400">5% extra fijo de ganar 10,000 oro (Jackpot).</span>
+                  Pagas{" "}
+                  <span className="font-bold text-amber-300">
+                    {dailyConfig.cost} de oro
+                  </span>{" "}
+                  y tienes un{" "}
+                  <span className="font-bold text-amber-300">
+                    {Math.round(dailyConfig.winChance * 100)}%
+                  </span>{" "}
+                  de sacar un premio entre {NORMAL_MIN_PRIZE} y {NORMAL_MAX_PRIZE}{" "}
+                  monedas. Ademas, todos los tickets tienen un{" "}
+                  <span className="font-bold text-emerald-400">
+                    {Math.round(VIP_JACKPOT_CHANCE * 100)}% extra fijo de ganar{" "}
+                    {VIP_JACKPOT_PRIZE.toLocaleString()} oro
+                  </span>
+                  .
                 </p>
-                <p className="mt-3 text-xs leading-6 text-stone-500">
-                  Reembolso de tickets sin premio: compras de <span className="font-bold text-stone-300">50 o menos</span> devuelven
-                  <span className="font-bold text-amber-300"> 50% del valor</span>. Compras de <span className="font-bold text-stone-300">mas de 50</span>
-                  tienen <span className="font-bold text-emerald-400">50% de probabilidad</span> de devolver el <span className="font-bold text-emerald-400">100% del valor</span>.
-                </p>
+
+                {scratchError ? (
+                  <div className="mt-4 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                    {scratchError}
+                  </div>
+                ) : null}
 
                 <div className="mt-6 flex flex-col gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/40 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm font-semibold text-stone-300">Cantidad de tickets:</p>
-                    <div className="flex items-center gap-1 mx-auto sm:mx-0">
+                    <p className="text-sm font-semibold text-stone-300">
+                      Cantidad de tickets:
+                    </p>
+                    <div className="mx-auto flex items-center gap-1 sm:mx-0">
                       <button
                         type="button"
                         onClick={() => handleQuantityChange(quantity - 1)}
@@ -277,7 +302,9 @@ export function TavernScratch() {
                         min={1}
                         max={maxBuyQuantity || 1}
                         value={quantity}
-                        onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                        onChange={(event) =>
+                          handleQuantityChange(parseInt(event.target.value, 10) || 1)
+                        }
                         className="w-16 rounded-xl border border-stone-700 bg-stone-900 px-2 py-2 text-center font-bold text-amber-300 outline-none"
                       />
                       <button
@@ -290,15 +317,36 @@ export function TavernScratch() {
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <button type="button" onClick={() => handleQuantityChange(1)} className="rounded-lg bg-stone-800/80 py-2 text-xs font-bold text-stone-300 transition hover:bg-stone-700">x1</button>
-                    <button type="button" onClick={() => handleQuantityChange(5)} className="rounded-lg bg-stone-800/80 py-2 text-xs font-bold text-stone-300 transition hover:bg-stone-700">x5</button>
-                    <button type="button" disabled={maxBuyQuantity <= 0} onClick={() => handleQuantityChange(maxBuyQuantity)} className="rounded-lg border border-amber-500/20 bg-amber-500/10 py-2 text-xs font-bold text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-50">MAX</button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuantityChange(1)}
+                      className="rounded-lg bg-stone-800/80 py-2 text-xs font-bold text-stone-300 transition hover:bg-stone-700"
+                    >
+                      x1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuantityChange(5)}
+                      className="rounded-lg bg-stone-800/80 py-2 text-xs font-bold text-stone-300 transition hover:bg-stone-700"
+                    >
+                      x5
+                    </button>
+                    <button
+                      type="button"
+                      disabled={maxBuyQuantity <= 0}
+                      onClick={() => handleQuantityChange(maxBuyQuantity)}
+                      className="rounded-lg border border-amber-500/20 bg-amber-500/10 py-2 text-xs font-bold text-amber-400 transition hover:bg-amber-500/20 disabled:opacity-50"
+                    >
+                      MAX
+                    </button>
                   </div>
                 </div>
 
                 {projectedGold !== null ? (
                   <p className="mt-4 text-xs uppercase tracking-[0.16em] text-stone-500">
-                    Costo: <span className="font-bold text-amber-400">{totalCost} oro</span> &bull; Te quedarian {projectedGold} de oro
+                    Costo:{" "}
+                    <span className="font-bold text-amber-400">{totalCost} oro</span>{" "}
+                    • Te quedarian {projectedGold} de oro
                   </p>
                 ) : null}
 
@@ -313,7 +361,7 @@ export function TavernScratch() {
                   }`}
                 >
                   <Ticket className="h-4 w-4" />
-                  {player.gold < totalCost ? "Oro insuficiente" : `Comprar x${quantity} rasca`}
+                  {player.gold < totalCost ? "Oro insuficiente" : `Preparar x${quantity} rasca`}
                 </button>
               </div>
             </motion.div>
@@ -327,14 +375,20 @@ export function TavernScratch() {
               exit={{ opacity: 0, scale: 0.98 }}
               className="space-y-5"
             >
-              <ScratchArtwork mode="pristine" interactive onScratch={() => void scratchTicket()} />
+              <ScratchArtwork
+                mode="pristine"
+                interactive
+                onScratch={() => void scratchTicket()}
+              />
 
               <div className="rounded-[1.5rem] border border-amber-500/15 bg-amber-500/10 p-4 text-center">
-                <p className="text-sm font-bold text-amber-300">{quantity === 1 ? "Ticket listo" : "Tickets listos"}</p>
+                <p className="text-sm font-bold text-amber-300">
+                  {quantity === 1 ? "Ticket listo" : "Tickets listos"}
+                </p>
                 <p className="mt-2 text-sm leading-6 text-stone-300">
-                  {quantity === 1 
-                    ? "Toca la carta o usa el boton para rascar y descubrir si el reino te sonrie."
-                    : `Tienes un talonario de ${quantity} tickets preparado para ser escaneado internamente.`}
+                  {quantity === 1
+                    ? "Toca la carta o usa el boton para procesar la compra segura y descubrir si el reino te sonrie."
+                    : `Tienes un talonario de ${quantity} tickets preparado para ser procesado de forma segura en Supabase.`}
                 </p>
                 <button
                   type="button"
@@ -343,7 +397,7 @@ export function TavernScratch() {
                   className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-stone-100 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-white"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {quantity === 1 ? "Rascar ahora" : "Rascar todo automaticamente"}
+                  {quantity === 1 ? "Rascar ahora" : "Procesar tanda segura"}
                 </button>
               </div>
             </motion.div>
@@ -359,16 +413,22 @@ export function TavernScratch() {
             >
               <motion.div
                 animate={{ rotate: [0, -1.5, 1.5, 0], scale: [1, 1.01, 0.99, 1] }}
-                transition={{ duration: quantity > 1 ? 0.2 : 0.55, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: quantity > 1 ? 0.2 : 0.55,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
                 <ScratchArtwork mode="pristine" />
               </motion.div>
               <div className="rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-5 text-center">
                 <p className="text-lg font-bold text-stone-100">
-                  {quantity === 1 ? "Rascando la suerte..." : `Scrapeando ${quantity} tickets velozmente...`}
+                  {quantity === 1
+                    ? "Rascando la suerte..."
+                    : `Procesando ${quantity} tickets seguros...`}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-stone-400">
-                  La carta esta revelando su destino. Cruza los dedos.
+                  La taberna esta resolviendo la tanda contra Supabase. Cruza los dedos.
                 </p>
               </div>
             </motion.div>
@@ -382,8 +442,14 @@ export function TavernScratch() {
               exit={{ opacity: 0, scale: 0.98 }}
               className="space-y-5"
             >
-              <ScratchArtwork 
-                mode={quantity === 1 && batchResult.wins === 0 ? "lose" : batchResult.wins > 0 ? "win" : "pristine"} 
+              <ScratchArtwork
+                mode={
+                  batchResult.winningTickets === 0 && batchResult.refundedGold === 0
+                    ? "lose"
+                    : batchResult.winningTickets > 0
+                      ? "win"
+                      : "pristine"
+                }
               />
 
               <div
@@ -398,60 +464,76 @@ export function TavernScratch() {
                     batchResult.totalPrize > 0 ? "text-emerald-400" : "text-rose-400"
                   }`}
                 >
-                  {batchResult.totalPrize > 0 ? "¡Recibo Ganador!" : "Sin suerte esta vez"}
+                  {batchResult.totalPrize > 0 ? "Recibo ganador" : "Sin suerte esta vez"}
                 </p>
 
                 <div className="mx-auto mt-4 max-w-sm rounded-[1rem] bg-stone-950/40 p-5 text-sm text-stone-300">
                   <div className="flex items-center justify-between border-b border-stone-800/60 pb-3">
-                    <span className="text-stone-400">Tickets Jugados</span>
-                    <span className="font-bold text-stone-100 text-base">{batchResult.quantity - batchResult.unusedTickets}</span>
+                    <span className="text-stone-400">Tickets jugados</span>
+                    <span className="text-base font-bold text-stone-100">
+                      {batchResult.usedTickets}
+                    </span>
                   </div>
-                  {batchResult.unusedTickets > 0 ? (
+                  {batchResult.refundedTickets > 0 ? (
                     <div className="flex items-center justify-between border-b border-stone-800/60 py-3">
-                      <span className="font-bold text-amber-500">Límite Diario Alcanzado</span>
-                      <span className="font-bold text-stone-100">{batchResult.unusedTickets} no usados</span>
+                      <span className="font-bold text-amber-500">
+                        Limite diario alcanzado
+                      </span>
+                      <span className="font-bold text-stone-100">
+                        {batchResult.refundedTickets} no usados
+                      </span>
                     </div>
                   ) : null}
                   <div className="flex items-center justify-between border-b border-stone-800/60 py-3">
-                    <span className="text-stone-400">Tickets Premiados</span>
-                    <span className="font-black text-emerald-400">{batchResult.wins} WIN</span>
+                    <span className="text-stone-400">Tickets premiados</span>
+                    <span className="font-black text-emerald-400">
+                      {batchResult.winningTickets} WIN
+                    </span>
                   </div>
+                  {batchResult.jackpotWins > 0 ? (
+                    <div className="flex items-center justify-between border-b border-stone-800/60 py-3">
+                      <span className="text-stone-400">Jackpots VIP</span>
+                      <span className="font-black text-amber-400">
+                        {batchResult.jackpotWins}
+                      </span>
+                    </div>
+                  ) : null}
                   <div className="flex items-center justify-between py-3">
-                    <span className="text-stone-400">Tickets Vacios</span>
-                    <span className="font-black text-rose-500">{batchResult.loses} LOSE</span>
+                    <span className="text-stone-400">Tickets vacios</span>
+                    <span className="font-black text-rose-500">
+                      {batchResult.losingTickets} LOSE
+                    </span>
                   </div>
                 </div>
 
-                {batchResult.unusedRefundGold > 0 ? (
+                {batchResult.refundedGold > 0 ? (
                   <div className="mx-auto mt-3 max-w-sm rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm">
                     <p className="text-center text-amber-300">
-                      Se ha reembolsado a tu cuenta <span className="font-bold text-amber-400">+{batchResult.unusedRefundGold} ORO</span> por los tickets no usados al tocar el limite diario.
-                    </p>
-                  </div>
-                ) : null}
-
-                {batchResult.consolationRefundGold > 0 ? (
-                  <div className="mx-auto mt-3 max-w-sm rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm">
-                    <p className="text-center text-emerald-300">
-                      {batchResult.consolationRefundMode === "full"
-                        ? <>La tirada masiva activo un reembolso completo de tickets sin premio: <span className="font-bold text-emerald-400">+{batchResult.consolationRefundGold} ORO</span>.</>
-                        : <>Los tickets sin premio devolvieron <span className="font-bold text-emerald-400">+{batchResult.consolationRefundGold} ORO</span> (50% del valor).</>}
-                    </p>
-                  </div>
-                ) : null}
-
-                {batchResult.consolationRefundMode === "none" && batchResult.quantity > 50 && batchResult.loses > 0 ? (
-                  <div className="mx-auto mt-3 max-w-sm rounded-xl border border-stone-700 bg-stone-950/40 p-3 text-sm">
-                    <p className="text-center text-stone-400">
-                      Esta tirada masiva no activo el 50% de probabilidad de reembolso completo para tickets sin premio.
+                      Se ha reembolsado a tu cuenta{" "}
+                      <span className="font-bold text-amber-400">
+                        +{batchResult.refundedGold} ORO
+                      </span>{" "}
+                      por los tickets devueltos por el limite diario.
                     </p>
                   </div>
                 ) : null}
 
                 <div className="mt-5 flex flex-col items-center justify-center gap-1">
-                  <p className="text-xs uppercase tracking-[0.2em] text-stone-500">Premio depositado</p>
-                  <p className={`text-3xl font-black ${batchResult.totalPrize > batchResult.totalCost ? "text-emerald-400" : "text-emerald-500"}`}>
-                    {batchResult.totalPrize} <span className="text-lg font-bold opacity-70">ORO</span>
+                  <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
+                    Premio depositado
+                  </p>
+                  <p
+                    className={`text-3xl font-black ${
+                      batchResult.totalPrize > batchResult.totalCost
+                        ? "text-emerald-400"
+                        : "text-emerald-500"
+                    }`}
+                  >
+                    {batchResult.totalPrize}{" "}
+                    <span className="text-lg font-bold opacity-70">ORO</span>
+                  </p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                    Saldo final {batchResult.remainingGold} oro
                   </p>
                 </div>
 
@@ -461,7 +543,7 @@ export function TavernScratch() {
                   className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-100 px-6 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-white md:w-auto"
                 >
                   <Coins className="h-5 w-5" />
-                  Jugar otra transaccion
+                  Jugar otra tanda
                 </button>
               </div>
             </motion.div>
@@ -500,6 +582,8 @@ function ScratchArtwork({
                 ? "Ticket premiado de rasca y gana"
                 : "Ticket perdedor de rasca y gana"
           }
+          loading="lazy"
+          decoding="async"
           className="block h-auto w-full object-contain"
           style={{ imageRendering: "pixelated" }}
         />

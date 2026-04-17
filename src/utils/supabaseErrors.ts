@@ -11,7 +11,7 @@ export function formatAdminPermissionMessage(
     message.includes("not allowed");
 
   if (looksLikePermissionError) {
-    return `${fallback} Inicia sesion con Cuenta segura beta y usa un jugador marcado con is_admin = true.`;
+    return `${fallback} Conecta un jugador marcado con is_admin = true para usar esta accion.`;
   }
 
   return rawMessage ? `${fallback} ${rawMessage}` : fallback;

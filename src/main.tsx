@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import App from "./App";
 import { PlayerSessionProvider } from "./context/PlayerSessionContext";
-import { SupabaseAuthProvider } from "./context/SupabaseAuthContext";
 import "./index.css";
 
 const rootElement = document.getElementById("root");
@@ -15,12 +14,10 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <SupabaseAuthProvider>
-      <PlayerSessionProvider>
-        <App />
-        <Analytics />
-        <SpeedInsights />
-      </PlayerSessionProvider>
-    </SupabaseAuthProvider>
+    <PlayerSessionProvider>
+      <App />
+      <Analytics />
+      <SpeedInsights />
+    </PlayerSessionProvider>
   </StrictMode>
 );

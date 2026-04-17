@@ -10,17 +10,3 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-export function getSupabaseAuthRedirectUrl() {
-  const explicitRedirect = import.meta.env.VITE_SUPABASE_AUTH_REDIRECT_URL?.trim();
-
-  if (explicitRedirect) {
-    return explicitRedirect;
-  }
-
-  if (typeof window === "undefined") {
-    return undefined;
-  }
-
-  return `${window.location.origin}${window.location.pathname}`;
-}

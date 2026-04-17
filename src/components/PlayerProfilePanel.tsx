@@ -4,8 +4,6 @@ import {
   Backpack,
   Coins,
   Loader2,
-  LogOut,
-  Mail,
   RefreshCw,
   ShieldCheck,
   UserRound,
@@ -18,7 +16,6 @@ import {
   Search
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import { useSupabaseAuth } from "../context/SupabaseAuthContext";
 import { CharImportModal } from "./CharImportModal";
 import { CharSheetModal } from "./CharSheetModal";
 import { RealmRegistry } from "./RealmRegistry";
@@ -67,18 +64,7 @@ export function PlayerProfilePanel({
     clearPlayer,
     setProfileError,
   } = usePlayerSession();
-  const {
-    authUser,
-    isAuthHydrating,
-    isAuthSubmitting,
-    authError,
-    requestMagicLink,
-    signOutAuth,
-    clearAuthError,
-  } = useSupabaseAuth();
   const [usernameInput, setUsernameInput] = useState("");
-  const [authEmailInput, setAuthEmailInput] = useState("");
-  const [authFeedback, setAuthFeedback] = useState("");
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isTradeOpen, setIsTradeOpen] = useState(false);
@@ -216,28 +202,6 @@ export function PlayerProfilePanel({
     }
   }
 
-  async function handleAuthSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setAuthFeedback("");
-
-    const sent = await requestMagicLink(authEmailInput);
-
-    if (sent) {
-      setAuthFeedback(
-        "Magic link enviado. Revisa tu correo y vuelve a la app desde ese enlace."
-      );
-      setAuthEmailInput("");
-    }
-  }
-
-  async function handleAuthSignOut() {
-    const signedOut = await signOutAuth();
-
-    if (signedOut) {
-      setAuthFeedback("Cuenta segura cerrada correctamente.");
-    }
-  }
-
   return (
     <section className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -249,118 +213,11 @@ export function PlayerProfilePanel({
             Tu sesion de jugador
           </h2>
           <p className="max-w-2xl text-sm leading-6 text-stone-400">
-            Primero autentica tu cuenta segura por correo y luego vincula tu
-            jugador del reino. El mercado y la taberna usaran ese perfil para
-            leer y descontar tu oro.
+            Conecta tu jugador por nombre para usar mercado, taberna, fichas e
+            inventario con el mismo perfil del reino.
           </p>
         </div>
 
-      </div>
-
-      <div className="mt-5 rounded-[1.5rem] border border-cyan-500/18 bg-stone-950/50 p-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-          <div className="space-y-1.5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300/80">
-              Cuenta segura beta
-            </p>
-            <p className="text-sm leading-6 text-stone-400">
-              Esta capa usa Supabase Auth por email para preparar el cierre de seguridad.
-              De momento convive con tu perfil del reino y no lo reemplaza todavía.
-            </p>
-          </div>
-
-          {authUser ? (
-            <button
-              type="button"
-              onClick={() => void handleAuthSignOut()}
-              disabled={isAuthSubmitting}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isAuthSubmitting ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <LogOut className="h-3.5 w-3.5" />
-              )}
-              Cerrar cuenta segura
-            </button>
-          ) : null}
-        </div>
-
-        {isAuthHydrating ? (
-          <div className="mt-4 flex items-center gap-2 text-sm text-stone-400">
-            <Loader2 className="h-4 w-4 animate-spin text-cyan-300" />
-            Restaurando sesion de autenticacion...
-          </div>
-        ) : authUser ? (
-          <div className="mt-4 rounded-[1.2rem] border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
-            <p className="text-xs uppercase tracking-[0.16em] text-emerald-300/80">
-              Autenticado
-            </p>
-            <p className="mt-1 text-sm font-semibold text-stone-100">
-              {authUser.email ?? "Correo no disponible"}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-stone-300">
-              Esta cuenta sera la base para ligar mas adelante tu jugador, permisos y
-              operaciones sensibles.
-            </p>
-            <p className="mt-2 text-xs leading-5 text-stone-300/80">
-              {player && player.authUserId === authUser.id
-                ? `Vinculada al jugador ${player.username}.`
-                : "Si conectas tu perfil del reino con esta sesion activa, la app intentara vincularlo automaticamente."}
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleAuthSubmit} className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-stone-200">
-                Correo para magic link
-              </span>
-              <input
-                type="email"
-                required
-                value={authEmailInput}
-                onChange={(event) => {
-                  setAuthEmailInput(event.target.value);
-                  if (authError) {
-                    clearAuthError();
-                  }
-                }}
-                className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-400/40"
-                placeholder="tu-correo@ejemplo.com"
-              />
-            </label>
-
-            <button
-              type="submit"
-              disabled={isAuthSubmitting}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
-            >
-              {isAuthSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                <>
-                  <Mail className="h-4 w-4" />
-                  Enviar magic link
-                </>
-              )}
-            </button>
-          </form>
-        )}
-
-        {authError ? (
-          <div className="mt-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {authError}
-          </div>
-        ) : null}
-
-        {authFeedback ? (
-          <div className="mt-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
-            {authFeedback}
-          </div>
-        ) : null}
       </div>
 
       <div className="mt-5">
@@ -672,7 +529,7 @@ export function PlayerProfilePanel({
                     }
                   }}
                   className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
-                  placeholder="Tu nombre exacto, despues de iniciar Cuenta segura beta"
+                  placeholder="Tu nombre exacto registrado en el reino"
                 />
               </label>
 

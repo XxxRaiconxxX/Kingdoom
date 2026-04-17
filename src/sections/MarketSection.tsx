@@ -6,9 +6,17 @@ import { MarketItemCard } from "../components/MarketItemCard";
 import { SectionHeader } from "../components/SectionHeader";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "../data/market";
 import { fetchMarketItems } from "../utils/market";
+import { isNativeApp } from "../utils/platform";
 import type { MarketCategory, MarketCategoryId, MarketItem } from "../types";
 
-type TavernMode = "expedition" | "chests" | "roulette" | "cards" | "scratch" | "crash";
+type TavernMode =
+  | "expedition"
+  | "liveHunt"
+  | "chests"
+  | "roulette"
+  | "cards"
+  | "scratch"
+  | "crash";
 
 const TAVERN_MODES: {
   id: TavernMode;
@@ -19,6 +27,12 @@ const TAVERN_MODES: {
     id: "expedition",
     label: "Expedicion",
     description: "Combate PvE arcade: eliges contrato, atacas, te defiendes y cazas recompensas sin saturar la pantalla.",
+  },
+  {
+    id: "liveHunt",
+    label: "Comunal",
+    description:
+      "Evento exclusivo de la app: host, sala en vivo, fichas reales de Expedicion y rondas cooperativas para tumbar contratos entre varios jugadores.",
   },
   {
     id: "chests",
@@ -50,6 +64,11 @@ const TAVERN_MODES: {
 const TavernExpedition = lazy(() =>
   import("../components/TavernExpeditionArcade").then((module) => ({
     default: module.TavernExpeditionArcade,
+  }))
+);
+const AppLiveHuntSection = lazy(() =>
+  import("../components/AppLiveHuntSection").then((module) => ({
+    default: module.AppLiveHuntSection,
   }))
 );
 const TavernGame = lazy(() =>
@@ -84,6 +103,7 @@ const PurchaseModal = lazy(() =>
 );
 
 export function MarketSection() {
+  const nativeApp = isNativeApp();
   const [selectedCategoryId, setSelectedCategoryId] = useState<
     MarketCategoryId | "all"
   >("all");
@@ -132,10 +152,17 @@ export function MarketSection() {
     [selectedItem]
   );
 
+  const tavernModes = useMemo(
+    () => TAVERN_MODES.filter((mode) => nativeApp || mode.id !== "liveHunt"),
+    [nativeApp]
+  );
+
   const tavernContent = useMemo(() => {
     switch (tavernMode) {
       case "expedition":
         return <TavernExpedition />;
+      case "liveHunt":
+        return nativeApp ? <AppLiveHuntSection /> : <TavernExpedition />;
       case "roulette":
         return <TavernRoulette />;
       case "cards":
@@ -147,7 +174,7 @@ export function MarketSection() {
       default:
         return <TavernGame />;
     }
-  }, [tavernMode]);
+  }, [nativeApp, tavernMode]);
 
   return (
     <section className="space-y-5">
@@ -177,6 +204,9 @@ export function MarketSection() {
               <h3 className="mt-2 text-xl font-bold text-stone-100">Juegos de azar</h3>
               <p className="mt-2 text-sm leading-6 text-stone-400">
                 La mesa sigue viva dentro del mercado. Ahora tambien puedes tomar contratos PvE arcade sin salir de la taberna.
+                {nativeApp
+                  ? " En la app se desbloquea ademas la Caceria comunal con salas en vivo por rondas."
+                  : ""}
               </p>
             </div>
           </div>
@@ -189,7 +219,7 @@ export function MarketSection() {
 
         <div className="mt-5 border-t border-stone-800 pt-5">
           <div className="flex flex-wrap gap-2">
-            {TAVERN_MODES.map((mode) => (
+            {tavernModes.map((mode) => (
               <FilterPill
                 key={mode.id}
                 label={mode.label}
@@ -201,7 +231,7 @@ export function MarketSection() {
 
           <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
             <p className="text-sm leading-6 text-stone-400">
-              {TAVERN_MODES.find((mode) => mode.id === tavernMode)?.description}
+              {tavernModes.find((mode) => mode.id === tavernMode)?.description}
             </p>
           </div>
 

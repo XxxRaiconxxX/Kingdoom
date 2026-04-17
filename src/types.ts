@@ -240,6 +240,81 @@ export type PvePlayerProgress = {
   usage: Record<string, number[]>;
 };
 
+export type AppLiveHuntStatus = "lobby" | "active" | "victory" | "defeat";
+export type AppLiveHuntActionType = "attack" | "guard" | "channel" | "sabotage";
+
+export type AppLiveHuntTemplate = {
+  id: string;
+  title: string;
+  shortLabel: string;
+  description: string;
+  enemyName: string;
+  minLevel: number;
+  recommendedPower: number;
+  maxRounds: number;
+  baseEnemyHp: number;
+  threatCap: number;
+  rewardBase: number;
+  tone: "emerald" | "amber" | "rose";
+};
+
+export type AppLiveHuntRoom = {
+  id: string;
+  templateId: string;
+  title: string;
+  description: string;
+  enemyName: string;
+  hostPlayerId: string;
+  hostUsername: string;
+  hostSheetId: string;
+  hostSheetName: string;
+  status: AppLiveHuntStatus;
+  currentRound: number;
+  maxRounds: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  threat: number;
+  threatCap: number;
+  rewardPool: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AppLiveHuntMember = {
+  id: string;
+  huntId: string;
+  playerId: string;
+  username: string;
+  sheetId: string;
+  sheetName: string;
+  sheetLevel: number;
+  sheetPower: number;
+  joinedAt: string;
+};
+
+export type AppLiveHuntAction = {
+  id: string;
+  huntId: string;
+  roundNumber: number;
+  playerId: string;
+  playerUsername: string;
+  sheetId: string;
+  sheetName: string;
+  actionType: AppLiveHuntActionType;
+  createdAt: string;
+};
+
+export type AppLiveHuntRound = {
+  id: string;
+  huntId: string;
+  roundNumber: number;
+  summary: string;
+  enemyDamage: number;
+  threatDelta: number;
+  rewardDelta: number;
+  createdAt: string;
+};
+
 export type CharacterSheet = {
   id: string;
   playerId: string;

@@ -15,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import { ADMIN_WEEKLY_TEMPLATES } from "../data/adminTemplates";
 import { deleteRealmEvent, fetchRealmEvents, upsertRealmEvent } from "../utils/events";
 import {
   createPlayerAccount,
@@ -36,7 +35,7 @@ import {
 } from "../utils/market";
 import type { EventStatus, MarketCategoryId, MarketItem, PlayerAccount, RankingPlayer, Rarity, RealmEvent, StockStatus } from "../types";
 
-type AdminTab = "overview" | "activity" | "players" | "events" | "market" | "templates";
+type AdminTab = "overview" | "activity" | "players" | "events" | "market";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
 type EventListFilter = "all" | EventStatus;
 
@@ -205,12 +204,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       return matchesSearch && matchesCategory;
     });
   }, [marketSearch, marketCategoryFilter, marketItems]);
-
-  function applyTemplate(points: number, missions: number, events: number) {
-    setFormPoints(points);
-    setFormMissions(missions);
-    setFormEvents(events);
-  }
 
   function resetActivityForm() {
     setFormPlayerId("");
@@ -597,13 +590,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 onClick={() => setActiveTab("market")}
               />
             </div>
-            <div className="flex-shrink-0">
-              <AdminTabButton
-                label="Plantillas"
-                active={activeTab === "templates"}
-                onClick={() => setActiveTab("templates")}
-              />
-            </div>
           </div>
         </div>
 
@@ -633,8 +619,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 </div>
                 <p className="mt-4 text-sm leading-6 text-stone-400">
                   Este panel administra la tabla `weekly_activity_rankings`. Si el
-                  jugador conectado es `Nothing` o tiene `is_admin = true`, vera
-                  este acceso.
+                  jugador conectado tiene `is_admin = true`, vera este acceso.
                 </p>
                 {rankingMessage ? (
                   <p className="mt-4 rounded-[1.2rem] border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
@@ -670,9 +655,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     Recomendacion tecnica
                   </p>
                   <p className="mt-2 text-sm leading-6 text-stone-400">
-                    Cuando puedas, anade `is_admin` a la tabla `players` y marca a
-                    `Nothing` con `true`. Mientras tanto, el nombre `Nothing`
-                    sigue funcionando como llave visual de admin.
+                    Mantén el acceso administrativo ligado solo a `players.is_admin`
+                    y evita usar nombres especiales como llave de privilegios.
                   </p>
                 </div>
               </section>
@@ -799,17 +783,23 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <NumericInput label="Puntos" value={formPoints} onChange={setFormPoints} />
                     <NumericInput
-                      label="Misiones"
+                      label="Misiones validadas"
                       value={formMissions}
                       onChange={setFormMissions}
                     />
                     <NumericInput
-                      label="Eventos"
+                      label="Eventos validados"
                       value={formEvents}
                       onChange={setFormEvents}
                     />
                     <NumericInput label="Racha" value={formStreak} onChange={setFormStreak} />
                   </div>
+
+                  <p className="mt-4 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-400">
+                    Usa estos contadores para cargar manualmente el rol validado
+                    por WhatsApp. La app no intenta verificar por si sola si una
+                    misión o evento de texto realmente se completó.
+                  </p>
 
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
                     <button
@@ -1656,58 +1646,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             </div>
           ) : null}
 
-          {activeTab === "templates" ? (
-            <div className="space-y-4">
-              <AdminInfoCard
-                title="Plantillas de semana"
-                message="Usalas como referencia rapida para decidir cuantos puntos otorgar sin improvisar cada vez."
-              />
-              <div className="grid gap-4 xl:grid-cols-3">
-                {ADMIN_WEEKLY_TEMPLATES.map((template) => (
-                  <article
-                    key={template.id}
-                    className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
-                        <Sparkles className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-black text-stone-100">
-                          {template.title}
-                        </h4>
-                        <p className="mt-2 text-sm leading-6 text-stone-400">
-                          {template.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 space-y-2">
-                      {template.scoring.map((entry) => (
-                        <button
-                          key={`${template.id}-${entry.label}`}
-                          type="button"
-                          onClick={() =>
-                            applyTemplate(
-                              entry.points,
-                              entry.label.toLowerCase().includes("mision") ? 1 : 0,
-                              entry.label.toLowerCase().includes("evento") ? 1 : 0
-                            )
-                          }
-                          className="flex w-full items-center justify-between rounded-[1.1rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
-                        >
-                          <span className="text-sm text-stone-300">{entry.label}</span>
-                          <span className="text-sm font-black text-amber-300">
-                            +{entry.points}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          ) : null}
         </div>
       </motion.div>
     </motion.div>

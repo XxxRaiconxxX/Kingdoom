@@ -1,5 +1,6 @@
 import { ACTIVE_EVENTS } from "../data/events";
 import type { EventStatus, RealmEvent } from "../types";
+import { formatAdminPermissionMessage } from "./supabaseErrors";
 import { supabase } from "./supabaseClient";
 
 // SQL sugerido para Supabase:
@@ -126,7 +127,10 @@ export async function upsertRealmEvent(input: AdminRealmEventInput) {
     if (error) {
       return {
         status: "error" as const,
-        message: "No se pudo actualizar el evento en Supabase.",
+        message: formatAdminPermissionMessage(
+          "No se pudo actualizar el evento en Supabase.",
+          error.message
+        ),
       };
     }
 
@@ -141,7 +145,10 @@ export async function upsertRealmEvent(input: AdminRealmEventInput) {
   if (error) {
     return {
       status: "error" as const,
-      message: "No se pudo crear el evento en Supabase.",
+      message: formatAdminPermissionMessage(
+        "No se pudo crear el evento en Supabase.",
+        error.message
+      ),
     };
   }
 
@@ -166,7 +173,10 @@ export async function deleteRealmEvent(id: string) {
   if (error) {
     return {
       status: "error" as const,
-      message: "No se pudo borrar el evento en Supabase.",
+      message: formatAdminPermissionMessage(
+        "No se pudo borrar el evento en Supabase.",
+        error.message
+      ),
     };
   }
 

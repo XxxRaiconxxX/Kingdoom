@@ -10,25 +10,49 @@ import {
   BookOpen
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GRIMOIRE_DATA } from "../data/grimorio";
 import { SectionHeader } from "./SectionHeader";
-import type { MagicStyle, AbilityLevel } from "../types";
+import type { GrimoireCategory, MagicStyle, AbilityLevel } from "../types";
 
 export function GrimoireSection() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(GRIMOIRE_DATA[0].id);
+  const [grimoireData, setGrimoireData] = useState<GrimoireCategory[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const isSearching = searchQuery.trim().length > 0;
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadGrimoireData() {
+      const module = await import("../data/grimorio");
+      if (cancelled) {
+        return;
+      }
+
+      setGrimoireData(module.GRIMOIRE_DATA);
+      setSelectedCategoryId((current) => current || module.GRIMOIRE_DATA[0]?.id || "");
+    }
+
+    void loadGrimoireData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const displayStyles = useMemo(() => {
+    if (grimoireData.length === 0) {
+      return [];
+    }
+
     if (!isSearching) {
-      return GRIMOIRE_DATA.find(c => c.id === selectedCategoryId)?.styles || [];
+      return grimoireData.find(c => c.id === selectedCategoryId)?.styles || [];
     }
 
     const query = searchQuery.toLowerCase().trim();
     const results: (MagicStyle & { categoryTitle: string })[] = [];
 
-    GRIMOIRE_DATA.forEach(category => {
+    grimoireData.forEach(category => {
       category.styles.forEach(style => {
         let match = style.title.toLowerCase().includes(query) || 
                     style.description.toLowerCase().includes(query);
@@ -56,7 +80,21 @@ export function GrimoireSection() {
     });
 
     return results;
-  }, [isSearching, searchQuery, selectedCategoryId]);
+  }, [grimoireData, isSearching, searchQuery, selectedCategoryId]);
+
+  if (grimoireData.length === 0) {
+    return (
+      <section className="space-y-6">
+        <div className="rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 shadow-2xl shadow-black/40 md:p-8">
+          <SectionHeader
+            eyebrow="Conocimiento Prohibido"
+            title="Grimorio de Poderes"
+            description="Levantando el compendio y cargando los estilos del reino..."
+          />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-6">
@@ -80,7 +118,7 @@ export function GrimoireSection() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-2">
-          {GRIMOIRE_DATA.map((category) => (
+          {grimoireData.map((category) => (
             <button
               key={category.id}
               onClick={() => {

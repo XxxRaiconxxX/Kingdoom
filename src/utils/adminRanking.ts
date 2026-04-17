@@ -1,4 +1,5 @@
 import type { PlayerAccount, RankingPlayer } from "../types";
+import { formatAdminPermissionMessage } from "./supabaseErrors";
 import { supabase } from "./supabaseClient";
 import { getCurrentRankingWindow } from "./weeklyRanking";
 import { fetchAllPlayers } from "./players";
@@ -6,7 +7,7 @@ import { fetchAllPlayers } from "./players";
 // SQL sugerido para reforzar acceso admin en players:
 //
 // alter table players add column if not exists is_admin boolean not null default false;
-// update players set is_admin = true where lower(username) = 'nothing';
+// update players set is_admin = true where username = 'TuAdminReal';
 //
 // SQL sugerido para la tabla de ranking semanal administrable:
 //
@@ -118,8 +119,10 @@ export async function upsertAdminWeeklyRankingEntry(
   if (readError) {
     return {
       status: "unavailable" as const,
-      message:
-        "No se pudo leer la tabla weekly_activity_rankings. Revisa que exista y tenga permisos abiertos.",
+      message: formatAdminPermissionMessage(
+        "No se pudo leer la tabla weekly_activity_rankings.",
+        readError.message
+      ),
     };
   }
 
@@ -145,8 +148,10 @@ export async function upsertAdminWeeklyRankingEntry(
     if (error) {
       return {
         status: "unavailable" as const,
-        message:
+        message: formatAdminPermissionMessage(
           "No se pudo actualizar el registro semanal del jugador en Supabase.",
+          error.message
+        ),
       };
     }
 
@@ -160,8 +165,10 @@ export async function upsertAdminWeeklyRankingEntry(
   if (error) {
     return {
       status: "unavailable" as const,
-      message:
+      message: formatAdminPermissionMessage(
         "No se pudo crear el registro semanal del jugador en Supabase.",
+        error.message
+      ),
     };
   }
 
@@ -183,8 +190,10 @@ export async function seedCurrentWeeklyRanking() {
   if (currentError) {
     return {
       status: "unavailable" as const,
-      message:
+      message: formatAdminPermissionMessage(
         "No se pudo comprobar la semana activa en weekly_activity_rankings.",
+        currentError.message
+      ),
     };
   }
 
@@ -206,8 +215,10 @@ export async function seedCurrentWeeklyRanking() {
   if (previousError) {
     return {
       status: "unavailable" as const,
-      message:
+      message: formatAdminPermissionMessage(
         "No se pudo leer la semana anterior para sembrar la nueva temporada.",
+        previousError.message
+      ),
     };
   }
 
@@ -278,8 +289,10 @@ export async function seedCurrentWeeklyRanking() {
   if (insertError) {
     return {
       status: "unavailable" as const,
-      message:
+      message: formatAdminPermissionMessage(
         "No se pudo crear la nueva semana en weekly_activity_rankings.",
+        insertError.message
+      ),
     };
   }
 

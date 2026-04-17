@@ -4,6 +4,8 @@ import type { HomeStat, JoinStep, KingdomAnnouncement } from "../types";
 export const WHATSAPP_JOIN_URL =
   "https://chat.whatsapp.com/TU-ENLACE-DE-INVITACION";
 
+export const COMMUNITY_APP_DOWNLOAD_URL = "";
+
 export const HOME_STATS: HomeStat[] = [
   { value: "En progreso", label: "Personajes", icon: Users },
   { value: "4", label: "Facciones", icon: Flame },
@@ -33,18 +35,18 @@ export const KINGDOM_ANNOUNCEMENTS: KingdomAnnouncement[] = [
 
 export const JOIN_STEPS: JoinStep[] = [
   {
-    title: "Entra al gremio",
+    title: "Descarga la app o entra por web",
     description:
-      "Usa el acceso directo de WhatsApp para sumarte al grupo y leer los anuncios fijados.",
+      "Usa la app de la comunidad cuando este disponible o entra desde la web para revisar fichas, mercado y novedades.",
   },
   {
-    title: "Crea tu personaje",
+    title: "Conecta tu perfil y crea tu personaje",
     description:
-      "Elige faccion, estilo de combate y motivaciones para encajar dentro del reino.",
+      "Conecta tu cuenta segura, vincula tu jugador y prepara hasta dos fichas para entrar al reino.",
   },
   {
-    title: "Empieza a rolear",
+    title: "Empieza a rolear y progresar",
     description:
-      "Participa en eventos, compra equipo y deja huella en la historia oficial.",
+      "Participa en WhatsApp, usa la web para mercado, fichas, ranking y deja huella en la historia oficial.",
   },
 ];

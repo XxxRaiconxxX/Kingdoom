@@ -6,27 +6,23 @@ import type { PlayerAccount } from "../types";
 import cofreCerrado from "../assets/cofre-cerrado.png";
 import cofreOro from "../assets/cofre-oro.png";
 import cofreVacio from "../assets/cofre-vacio.png";
+import { playChestRoundSecure } from "../utils/minigamesSecure";
 
 type GamePhase = "betting" | "playing" | "revealed";
 type ResultType = "x2" | "x1" | "x0" | null;
 
 export function TavernGame() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [phase, setPhase] = useState<GamePhase>("betting");
   const [bet, setBet] = useState(0);
   const [consecutiveSpins, setConsecutiveSpins] = useState(0);
   const [selectedChest, setSelectedChest] = useState<number | null>(null);
-  const [chestResults, setChestResults] = useState<ResultType[]>([
-    null,
-    null,
-    null,
-  ]);
+  const [chestResults, setChestResults] = useState<ResultType[]>([null, null, null]);
   const [updating, setUpdating] = useState(false);
+  const [gameError, setGameError] = useState("");
 
   const balance = player?.gold ?? 0;
   const difficultyLevel = Math.floor(consecutiveSpins / 2);
-  const x2Chance = Math.max(3.3, 33.3 - difficultyLevel * 10);
-  const x1Chance = 33.3;
 
   async function refreshBalance() {
     if (updating) {
@@ -36,10 +32,6 @@ export function TavernGame() {
     setUpdating(true);
     await refreshPlayer();
     setUpdating(false);
-  }
-
-  async function applyGold(nextGold: number) {
-    return setPlayerGold(nextGold);
   }
 
   async function startRound(event: React.FormEvent<HTMLFormElement>) {
@@ -56,17 +48,8 @@ export function TavernGame() {
       return;
     }
 
-    setUpdating(true);
+    setGameError("");
     setBet(betAmount);
-
-    const updatedPlayer = await applyGold(player.gold - betAmount);
-
-    setUpdating(false);
-
-    if (!updatedPlayer) {
-      return;
-    }
-
     setPhase("playing");
     setChestResults([null, null, null]);
     setSelectedChest(null);
@@ -77,46 +60,26 @@ export function TavernGame() {
       return;
     }
 
-    const rand = Math.random() * 100;
-    let actualResult: ResultType = "x0";
-
-    if (rand <= x2Chance) {
-      actualResult = "x2";
-    } else if (rand <= x2Chance + x1Chance) {
-      actualResult = "x1";
-    }
-
-    const available = (["x2", "x1", "x0"] as ResultType[]).filter(
-      (result) => result !== actualResult
-    );
-    available.sort(() => Math.random() - 0.5);
-
-    const newResults: ResultType[] = [];
-    let availableIndex = 0;
-
-    for (let cardIndex = 0; cardIndex < 3; cardIndex += 1) {
-      newResults.push(
-        cardIndex === index ? actualResult : available[availableIndex++]
-      );
-    }
-
-    setChestResults(newResults);
-    setSelectedChest(index);
-    setPhase("revealed");
-
-    const balanceAfterBet = player.gold;
     setUpdating(true);
+    setGameError("");
 
-    if (actualResult === "x2") {
-      await applyGold(balanceAfterBet + bet * 2);
-      setConsecutiveSpins((current) => current + 1);
-    } else if (actualResult === "x1") {
-      await applyGold(balanceAfterBet + bet);
-      setConsecutiveSpins((current) => current + 1);
-    } else {
-      setConsecutiveSpins(0);
+    const result = await playChestRoundSecure({
+      bet,
+      selectedChest: index,
+    });
+
+    if (result.status === "error") {
+      setGameError(result.message);
+      setUpdating(false);
+      setPhase("betting");
+      return;
     }
 
+    setSelectedChest(result.selectedChest);
+    setChestResults(result.chestResults);
+    setConsecutiveSpins(result.nextStreak);
+    setPhase("revealed");
+    await refreshPlayer();
     setUpdating(false);
   }
 
@@ -125,6 +88,7 @@ export function TavernGame() {
     setBet(0);
     setChestResults([null, null, null]);
     setSelectedChest(null);
+    setGameError("");
   }
 
   function getChestImage(index: number) {
@@ -168,11 +132,13 @@ export function TavernGame() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.03)_0%,transparent_50%)]" />
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-6">
-        <PlayerBalanceHeader
-          player={player}
-          updating={updating}
-          onRefresh={refreshBalance}
-        />
+        <PlayerBalanceHeader player={player} updating={updating} onRefresh={refreshBalance} />
+
+        {gameError ? (
+          <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200">
+            {gameError}
+          </div>
+        ) : null}
 
         {balance <= 0 && phase === "betting" ? (
           <motion.div
@@ -224,7 +190,7 @@ export function TavernGame() {
           </motion.div>
         ) : null}
 
-        {phase === "playing" || phase === "revealed" ? (
+        {(phase === "playing" || phase === "revealed") && (
           <div className="flex flex-col items-center py-4">
             <h3 className="mb-8 text-xl font-black uppercase tracking-[0.2em] text-stone-200">
               {phase === "playing" ? "Elige un cofre" : "Resultado"}
@@ -244,29 +210,17 @@ export function TavernGame() {
                     chestClass =
                       "border-emerald-500 bg-emerald-950/40 shadow-[0_0_20px_rgba(16,185,129,0.2)]";
                     glowColor = "rgba(16,185,129,0.15)";
-                    labelElement = (
-                      <span className="mt-2 text-lg font-black text-emerald-400">
-                        WIN x2
-                      </span>
-                    );
+                    labelElement = <span className="mt-2 text-lg font-black text-emerald-400">WIN x2</span>;
                   } else if (result === "x1") {
                     chestClass =
                       "border-amber-500 bg-amber-950/40 shadow-[0_0_20px_rgba(245,158,11,0.2)]";
                     glowColor = "rgba(245,158,11,0.15)";
-                    labelElement = (
-                      <span className="mt-2 text-base font-bold text-amber-400">
-                        Recuperas
-                      </span>
-                    );
+                    labelElement = <span className="mt-2 text-base font-bold text-amber-400">Recuperas</span>;
                   } else {
                     chestClass =
                       "border-rose-600 bg-rose-950/40 shadow-[0_0_20px_rgba(225,29,72,0.2)]";
                     glowColor = "rgba(225,29,72,0.15)";
-                    labelElement = (
-                      <span className="mt-2 text-lg font-black text-rose-500">
-                        MIMIC
-                      </span>
-                    );
+                    labelElement = <span className="mt-2 text-lg font-black text-rose-500">MIMIC</span>;
                   }
 
                   if (!isSelected) {
@@ -352,7 +306,7 @@ export function TavernGame() {
               </motion.div>
             ) : null}
           </div>
-        ) : null}
+        )}
       </motion.div>
     </div>
   );
@@ -378,9 +332,7 @@ function PlayerBalanceHeader({
             {player.username}
           </p>
           <div className="mt-1 flex items-center gap-2">
-            <p className="text-2xl font-black text-amber-300">
-              {player.gold}
-            </p>
+            <p className="text-2xl font-black text-amber-300">{player.gold}</p>
           </div>
         </div>
       </div>

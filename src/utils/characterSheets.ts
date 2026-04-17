@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import { deleteCharacterPortraitByUrl } from "./characterPortraits";
 
 const STORAGE_KEY = "kingdoom_character_sheets";
+export const MAX_PLAYER_CHARACTER_SHEETS = 2;
 
 let supportsPlayerUsername: boolean | null = null;
 let supportsPortraitUrl: boolean | null = null;

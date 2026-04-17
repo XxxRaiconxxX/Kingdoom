@@ -245,7 +245,7 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
                                    className="relative flex flex-col items-center gap-1 rounded-xl border border-stone-800 bg-stone-950 p-2 transition hover:border-cyan-500/50"
                                  >
                                    {item.itemImageUrl ? (
-                                      <img src={item.itemImageUrl} className="h-10 w-10 object-contain drop-shadow-lg" alt={item.itemName} />
+                                     <img src={item.itemImageUrl} loading="lazy" decoding="async" className="h-10 w-10 object-contain drop-shadow-lg" alt={item.itemName} />
                                    ) : (
                                        <PackageCheck className="h-8 w-8 text-stone-500" />
                                    )}
@@ -260,7 +260,7 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
                              <div className="flex items-center justify-between rounded-xl border border-stone-700 bg-stone-950 p-3">
                                <div className="flex items-center gap-3">
                                   {selectedItem.itemImageUrl ? (
-                                     <img src={selectedItem.itemImageUrl} className="h-12 w-12 object-contain drop-shadow-md" alt={selectedItem.itemName} />
+                                     <img src={selectedItem.itemImageUrl} loading="lazy" decoding="async" className="h-12 w-12 object-contain drop-shadow-md" alt={selectedItem.itemName} />
                                   ) : (
                                       <PackageCheck className="h-10 w-10 text-stone-500" />
                                   )}

@@ -4,11 +4,8 @@ import { PackageCheck, UserRound, WalletCards, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { MarketCategory, MarketItem, PurchaseFormValues } from "../types";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import {
-  addItemToInventory,
-  restoreInventoryItem,
-} from "../utils/inventory";
 import { createOrderId } from "../utils/orders";
+import { purchaseMarketItemSecure } from "../utils/purchases";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xkopndnl";
 const MIN_PURCHASE_DELAY_MS = 3000;
@@ -22,8 +19,7 @@ export function PurchaseModal({
   category: MarketCategory | undefined;
   onClose: () => void;
 }) {
-  const { player, refreshPlayer, setPlayerGold, notifyInventoryChanged } =
-    usePlayerSession();
+  const { player, refreshPlayer, notifyInventoryChanged } = usePlayerSession();
   const [formValues, setFormValues] = useState<PurchaseFormValues>({
     whatsapp: "",
     quantity: 1,
@@ -105,40 +101,33 @@ export function PurchaseModal({
       return;
     }
 
-    const nextGold = latestPlayer.gold - totalPrice;
-    const discountedPlayer = await setPlayerGold(nextGold);
-    let inventorySyncResult:
-      | Awaited<ReturnType<typeof addItemToInventory>>
-      | null = null;
+    const nextOrderId = createOrderId();
+    const purchaseResult = await purchaseMarketItemSecure({
+      itemId: item.id,
+      quantity: formValues.quantity,
+      whatsapp: formValues.whatsapp,
+      orderRef: nextOrderId,
+    });
 
-    if (!discountedPlayer) {
+    if (purchaseResult.status === "error") {
       setSubmitState("error");
-      setFeedbackMessage(
-        "No se pudo descontar el oro en la base de datos. Intenta nuevamente."
-      );
+      setFeedbackMessage(purchaseResult.message);
       return;
     }
 
-    inventorySyncResult = await addItemToInventory(
-      latestPlayer.id,
-      item,
-      formValues.quantity
-    );
-
-    const nextOrderId = createOrderId();
-    const data = new FormData();
-    data.append("nombre", latestPlayer.username);
-    data.append("whatsapp", formValues.whatsapp);
-    data.append("producto", item.name);
-    data.append("categoria", category?.title ?? item.category);
-    data.append("precio", `${item.price}`);
-    data.append("cantidad", `${formValues.quantity}`);
-    data.append("total", `${totalPrice}`);
-    data.append("pedido_id", nextOrderId);
-    data.append("_subject", `Nuevo pedido ${nextOrderId} - ${item.name}`);
-    data.append("_gotcha", formValues.gotcha);
-
     try {
+      const data = new FormData();
+      data.append("nombre", latestPlayer.username);
+      data.append("whatsapp", formValues.whatsapp);
+      data.append("producto", item.name);
+      data.append("categoria", category?.title ?? item.category);
+      data.append("precio", `${item.price}`);
+      data.append("cantidad", `${formValues.quantity}`);
+      data.append("total", `${purchaseResult.totalPrice}`);
+      data.append("pedido_id", purchaseResult.orderRef);
+      data.append("_subject", `Nuevo pedido ${purchaseResult.orderRef} - ${item.name}`);
+      data.append("_gotcha", formValues.gotcha);
+
       const response = await fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
         body: data,
@@ -146,67 +135,33 @@ export function PurchaseModal({
           Accept: "application/json",
         },
       });
+      const formspreeFailed = !response.ok;
+      const formspreeWarning = formspreeFailed
+        ? " El pedido economico quedo guardado, pero Formspree no respondio y debes revisar el panel o reenviar el aviso manualmente."
+        : "";
 
-      if (!response.ok) {
-        await setPlayerGold(latestPlayer.gold);
-
-        if (inventorySyncResult?.status === "synced") {
-          await restoreInventoryItem(
-            latestPlayer.id,
-            item,
-            inventorySyncResult.previousQuantity
-          );
-        }
-
-        const payload = (await response.json().catch(() => null)) as
-          | { errors?: Array<{ message?: string }> }
-          | null;
-        const apiMessage =
-          payload?.errors
-            ?.map((entry) => entry.message)
-            .filter(Boolean)
-            .join(", ") ?? "";
-
-        setSubmitState("error");
-        setFeedbackMessage(
-          apiMessage ||
-            "No se pudo enviar el pedido. El oro fue restaurado en tu cuenta."
-        );
-        return;
-      }
-
-      setOrderId(nextOrderId);
-      setRemainingGold(nextGold);
+      setOrderId(purchaseResult.orderRef);
+      setRemainingGold(purchaseResult.remainingGold);
       setSubmitState("success");
 
-      if (inventorySyncResult?.status === "synced") {
-        notifyInventoryChanged();
-      }
+      void refreshPlayer();
+      notifyInventoryChanged();
 
-      const inventoryMessage =
-        inventorySyncResult?.status === "unavailable"
-          ? ` ${inventorySyncResult.message}`
-          : item.category === "potions"
-            ? " Las pociones no se guardan en el inventario persistente."
-            : " El objeto ya aparece en tu inventario.";
+      const inventoryMessage = purchaseResult.inventorySynced
+        ? " El objeto ya aparece en tu inventario."
+        : " Las pociones no se guardan en el inventario persistente.";
 
       setFeedbackMessage(
-        `Pedido enviado con exito. Se descontaron ${totalPrice} de oro de tu perfil activo.${inventoryMessage}`
+        `Compra segura confirmada. Se descontaron ${purchaseResult.totalPrice} de oro de tu perfil activo.${inventoryMessage}${formspreeWarning}`
       );
     } catch {
-      await setPlayerGold(latestPlayer.gold);
-
-      if (inventorySyncResult?.status === "synced") {
-        await restoreInventoryItem(
-          latestPlayer.id,
-          item,
-          inventorySyncResult.previousQuantity
-        );
-      }
-
-      setSubmitState("error");
+      setOrderId(purchaseResult.orderRef);
+      setRemainingGold(purchaseResult.remainingGold);
+      setSubmitState("success");
+      void refreshPlayer();
+      notifyInventoryChanged();
       setFeedbackMessage(
-        "No se pudo conectar con el sistema. Se intento restaurar tu oro automaticamente."
+        `Compra segura confirmada. Se descontaron ${purchaseResult.totalPrice} de oro y el pedido quedo registrado, pero no se pudo avisar a Formspree. Revisa el panel o reenvia el aviso manualmente.`
       );
     }
   }
@@ -425,10 +380,10 @@ export function PurchaseModal({
               <div className="rounded-[1.35rem] border border-stone-800 bg-stone-900/70 p-4 text-sm leading-6 text-stone-400">
                 <p className="font-semibold text-amber-300">Validacion del pago</p>
                 <p className="mt-2">
-                  Antes de enviar el pedido, el sistema refresca tu perfil activo,
-                  comprueba que tengas suficiente oro y descuenta el total en la
-                  base de datos. Si Formspree falla, se intenta restaurar el saldo
-                  automaticamente.
+                  Antes de enviar el pedido, el sistema refresca tu perfil activo y
+                  ejecuta una compra segura en Supabase. El descuento de oro, el
+                  registro del pedido y el inventario ya no dependen del cliente.
+                  Formspree queda como aviso secundario.
                 </p>
               </div>
 

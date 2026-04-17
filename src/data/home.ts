@@ -1,10 +1,7 @@
 import { Crown, Dice5, Flame, Users } from "lucide-react";
 import type { HomeStat, JoinStep, KingdomAnnouncement } from "../types";
 
-export const WHATSAPP_JOIN_URL =
-  "https://chat.whatsapp.com/TU-ENLACE-DE-INVITACION";
-
-export const COMMUNITY_APP_DOWNLOAD_URL = "";
+export const COMMUNITY_APP_DOWNLOAD_FALLBACK_URL = "";
 
 export const HOME_STATS: HomeStat[] = [
   { value: "En progreso", label: "Personajes", icon: Users },
@@ -42,7 +39,7 @@ export const JOIN_STEPS: JoinStep[] = [
   {
     title: "Conecta tu perfil y crea tu personaje",
     description:
-      "Conecta tu cuenta segura, vincula tu jugador y prepara hasta dos fichas para entrar al reino.",
+      "Conecta tu jugador, vincula tu nombre del reino y prepara hasta dos fichas para entrar al conflicto.",
   },
   {
     title: "Empieza a rolear y progresar",

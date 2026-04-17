@@ -19,13 +19,14 @@ import { SectionHeader } from "./components/SectionHeader";
 import { StatCard } from "./components/StatCard";
 import { ACTIVE_EVENTS } from "./data/events";
 import {
-  COMMUNITY_APP_DOWNLOAD_URL,
+  COMMUNITY_APP_DOWNLOAD_FALLBACK_URL,
   HOME_STATS,
   JOIN_STEPS,
   KINGDOM_ANNOUNCEMENTS,
   KINGDOM_STATUS,
 } from "./data/home";
 import { fetchRealmEvents } from "./utils/events";
+import { fetchCommunityAppDownloadUrl } from "./utils/siteSettings";
 import type { NavItem, TabId } from "./types";
 
 const NAV_ITEMS: NavItem[] = [
@@ -173,6 +174,9 @@ export default function App() {
 function HomeSection() {
   const StatusIcon = KINGDOM_STATUS.icon;
   const [events, setEvents] = useState(ACTIVE_EVENTS);
+  const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
+    COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -188,6 +192,28 @@ function HomeSection() {
     }
 
     void loadEvents();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCommunityAppDownloadUrl() {
+      const nextUrl = await fetchCommunityAppDownloadUrl(
+        COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
+      );
+
+      if (cancelled) {
+        return;
+      }
+
+      setCommunityAppDownloadUrl(nextUrl);
+    }
+
+    void loadCommunityAppDownloadUrl();
 
     return () => {
       cancelled = true;
@@ -224,9 +250,9 @@ function HomeSection() {
         </div>
 
         <div className="mt-6 flex flex-col gap-3 md:flex-row">
-          {COMMUNITY_APP_DOWNLOAD_URL ? (
+          {communityAppDownloadUrl ? (
             <a
-              href={COMMUNITY_APP_DOWNLOAD_URL}
+              href={communityAppDownloadUrl}
               target="_blank"
               rel="noreferrer"
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 md:w-fit md:min-w-72"

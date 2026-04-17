@@ -1,21 +1,25 @@
 import { useEffect, useState } from "react";
-import { Bell, Castle } from "lucide-react";
+import { Bell, Castle, Download } from "lucide-react";
 import { EventCard } from "../components/EventCard";
 import { SectionHeader } from "../components/SectionHeader";
 import { StatCard } from "../components/StatCard";
 import { ACTIVE_EVENTS } from "../data/events";
 import {
+  COMMUNITY_APP_DOWNLOAD_FALLBACK_URL,
   HOME_STATS,
   JOIN_STEPS,
   KINGDOM_ANNOUNCEMENTS,
   KINGDOM_STATUS,
-  WHATSAPP_JOIN_URL,
 } from "../data/home";
 import { fetchRealmEvents } from "../utils/events";
+import { fetchCommunityAppDownloadUrl } from "../utils/siteSettings";
 
 export function HomeSection() {
   const StatusIcon = KINGDOM_STATUS.icon;
   const [events, setEvents] = useState(ACTIVE_EVENTS);
+  const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
+    COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +35,28 @@ export function HomeSection() {
     }
 
     void loadEvents();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCommunityAppDownloadUrl() {
+      const nextUrl = await fetchCommunityAppDownloadUrl(
+        COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
+      );
+
+      if (cancelled) {
+        return;
+      }
+
+      setCommunityAppDownloadUrl(nextUrl);
+    }
+
+    void loadCommunityAppDownloadUrl();
 
     return () => {
       cancelled = true;
@@ -66,14 +92,26 @@ export function HomeSection() {
           ))}
         </div>
 
-        <a
-          href={WHATSAPP_JOIN_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 md:w-fit md:min-w-72"
-        >
-          Unirse al Gremio (WhatsApp)
-        </a>
+        <div className="mt-6 flex flex-col gap-3 md:flex-row">
+          {communityAppDownloadUrl ? (
+            <a
+              href={communityAppDownloadUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 md:w-fit md:min-w-72"
+            >
+              <Download className="h-4 w-4" />
+              Descargar app de la comunidad
+            </a>
+          ) : (
+            <div className="w-full rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100 md:w-fit md:min-w-72">
+              <p className="font-extrabold text-amber-300">App de la comunidad</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.16em] text-amber-200/80">
+                Configura el enlace de descarga cuando el APK este listo
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[1.1fr_0.9fr] [content-visibility:auto] [contain-intrinsic-size:300px]">

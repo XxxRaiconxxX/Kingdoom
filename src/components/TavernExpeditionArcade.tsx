@@ -339,6 +339,7 @@ export function TavernExpeditionArcade() {
   const [playerSheets, setPlayerSheets] = useState<CharacterSheet[]>([]);
   const [activeSheetId, setActiveSheetId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showUpgrades, setShowUpgrades] = useState(false);
   const [showContracts, setShowContracts] = useState(false);
 
   useEffect(() => {
@@ -892,57 +893,70 @@ export function TavernExpeditionArcade() {
                 Mejora del cazador
               </p>
             </div>
-            <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
-              {safeProgress.availablePoints} disponibles
-            </span>
-          </div>
-
-          <div className="mb-4 rounded-[1.2rem] border border-stone-800 bg-stone-900/70 px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-stone-200">{levelProgress.current}/{levelProgress.required} exp</p>
-              <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                Hito Lv {Math.floor(safeProgress.level / 5) * 5 + 5}
-              </p>
-            </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-800">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-600"
-                style={{
-                  width: `${Math.max(4, Math.min(100, (levelProgress.current / levelProgress.required) * 100))}%`,
-                }}
-              />
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+                {safeProgress.availablePoints} disponibles
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowUpgrades((current) => !current)}
+                className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300 transition hover:border-amber-400/25 hover:text-stone-100"
+              >
+                {showUpgrades ? "Plegar" : "Ver mejoras"}
+              </button>
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-3">
-            <UpgradeCard
-              icon={Swords}
-              label="Fuerza"
-              value={effectiveStats.strength}
-              hint={`PvE ${safeProgress.stats.strength} | Ficha +${sheetBonuses.strength}`}
-              detail={`Ataque +${effectiveStats.strength * STRENGTH_ATTACK_BONUS}`}
-              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-              onUpgrade={() => upgradeStat("strength")}
-            />
-            <UpgradeCard
-              icon={Heart}
-              label="Vida"
-              value={effectiveStats.life}
-              hint={`PvE ${safeProgress.stats.life} | Ficha +${sheetBonuses.life}`}
-              detail={`HP +${effectiveStats.life * LIFE_BONUS_PER_POINT}`}
-              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-              onUpgrade={() => upgradeStat("life")}
-            />
-            <UpgradeCard
-              icon={Shield}
-              label="Defensa"
-              value={effectiveStats.defense}
-              hint={`PvE ${safeProgress.stats.defense} | Ficha +${sheetBonuses.defense}`}
-              detail={`Dano -${effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION}`}
-              disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-              onUpgrade={() => upgradeStat("defense")}
-            />
-          </div>
+          {showUpgrades ? (
+            <>
+              <div className="mb-4 rounded-[1.2rem] border border-stone-800 bg-stone-900/70 px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-stone-200">{levelProgress.current}/{levelProgress.required} exp</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                    Hito Lv {Math.floor(safeProgress.level / 5) * 5 + 5}
+                  </p>
+                </div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-800">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-600"
+                    style={{
+                      width: `${Math.max(4, Math.min(100, (levelProgress.current / levelProgress.required) * 100))}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-3">
+                <UpgradeCard
+                  icon={Swords}
+                  label="Fuerza"
+                  value={effectiveStats.strength}
+                  hint={`PvE ${safeProgress.stats.strength} | Ficha +${sheetBonuses.strength}`}
+                  detail={`Ataque +${effectiveStats.strength * STRENGTH_ATTACK_BONUS}`}
+                  disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+                  onUpgrade={() => upgradeStat("strength")}
+                />
+                <UpgradeCard
+                  icon={Heart}
+                  label="Vida"
+                  value={effectiveStats.life}
+                  hint={`PvE ${safeProgress.stats.life} | Ficha +${sheetBonuses.life}`}
+                  detail={`HP +${effectiveStats.life * LIFE_BONUS_PER_POINT}`}
+                  disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+                  onUpgrade={() => upgradeStat("life")}
+                />
+                <UpgradeCard
+                  icon={Shield}
+                  label="Defensa"
+                  value={effectiveStats.defense}
+                  hint={`PvE ${safeProgress.stats.defense} | Ficha +${sheetBonuses.defense}`}
+                  detail={`Dano -${effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION}`}
+                  disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
+                  onUpgrade={() => upgradeStat("defense")}
+                />
+              </div>
+            </>
+          ) : null}
         </div>
 
         <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">

@@ -45,12 +45,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 18/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se restauro la version de Ruleta Americana que habia sido reemplazada por codex con una version vieja y simplificada.
+*   **Resumen de Tareas:** Se restauro la version de Ruleta de 25 casillas (Segura/RPC) tras la peticion del usuario de volver a la penultima version estable antes de las modificaciones de hoy.
 *   **Cambios Clave:**
-    *   Se restauro `TavernRoulette.tsx` desde el commit `fc45297` (15/04/2026): 726 lineas con mesa de apuestas visual, sistema de fichas, rueda CSS y apuestas externas.
-    *   Se restauro `rouletteEngine.ts` desde el mismo commit: 357 lineas con 38 casillas (0, 00, 1-36), docenas, columnas, rojo/negro/verde.
-    *   La version que estaba (281 lineas) era una ruleta simple con imagen que no tenia mesa de apuestas, fichas ni apuestas externas.
-*   **Notas/Advertencias:** `npx tsc --noEmit` verificado sin errores. La ruleta vuelve a funcionar como Ruleta Americana completa con todas sus apuestas.
+    *   Se restauro `TavernRoulette.tsx` desde el commit `ba57193` (17/04/2026): Version de 25 casillas con validacion via RPC Supabase (`spinRouletteSecure`).
+    *   Se restauro `rouletteEngine.ts` desde el mismo commit: Mazo de 25 numeros (1-25) con logica de premios sincronizada.
+    *   Esta version reemplaza tanto a la Ruleta Americana (38 casillas) como a la version rota/simplificada introducida hoy por codex.
+*   **Notas/Advertencias:** Requiere que las funciones RPC en Supabase esten activas. `npm run build` verificado con exito.
 
 ---
 ### [Fecha: 18/04/2026] - [Autor: Jarvis]

@@ -123,7 +123,7 @@ export function TavernRoulette() {
             className="w-full max-w-xs"
           >
             <h3 className="mb-4 text-lg font-bold text-stone-100">
-              Â¿Cuanto oro apuestas a la ruleta?
+              ¿Cuanto oro apuestas a la ruleta?
             </h3>
             {rouletteError ? (
               <div className="mb-4 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
@@ -178,7 +178,7 @@ export function TavernRoulette() {
               disabled={bet <= 0 || bet > player.gold || updating}
               className="w-full rounded-xl bg-amber-600 py-4 font-bold text-stone-900 transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
             >
-              Girar ruleta segura
+              Girar ruleta
             </button>
           </motion.div>
         ) : null}
@@ -278,3 +278,5 @@ function TavernMessage({
     </div>
   );
 }
+
+

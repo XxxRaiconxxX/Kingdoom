@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Sword, Brain, Zap, Heart, Info, BookOpen, User, Backpack, Sparkles, ImageIcon } from 'lucide-react';
 import { CharacterSheet } from '../types';
+import { ARCADE_ENCOUNTERS } from '../data/pve';
+import { getPvePower, getPveProgressToNextLevel, loadPveProgressForSheet } from '../utils/pveProgress';
+
+const PROGRESS_WINDOW_MS =
+  Math.max(...ARCADE_ENCOUNTERS.map((encounter) => encounter.windowHours)) * 60 * 60 * 1000;
 
 interface CharSheetModalProps {
   isOpen: boolean;
@@ -94,6 +99,12 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
     { key: 'defense', label: 'Defensa', icon: Shield, color: 'text-zinc-400', bg: 'bg-zinc-500' },
     { key: 'magicDefense', label: 'Defensa Magica', icon: Shield, color: 'text-purple-400', bg: 'bg-purple-500' },
   ];
+
+  const pveProgress = character
+    ? loadPveProgressForSheet(character.playerId, character.id, PROGRESS_WINDOW_MS)
+    : null;
+  const pvePower = pveProgress ? getPvePower(pveProgress) : 0;
+  const pveLevelProgress = pveProgress ? getPveProgressToNextLevel(pveProgress) : null;
 
   return (
     <AnimatePresence>
@@ -201,6 +212,44 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                       </div>
                     </div>
                   </section>
+
+                  {pveProgress ? (
+                    <section>
+                      <h3 className="flex items-center gap-2 text-sm font-bold text-amber-500 uppercase tracking-[0.2em] mb-4">
+                        <Sparkles className="w-4 h-4" /> Progreso PvE
+                      </h3>
+                      <div className="bg-stone-900/40 border border-stone-800/50 p-5 rounded-xl space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <InfoItem label="Nivel PvE" value={`Lv ${pveProgress.level}`} />
+                          <InfoItem label="Poder PvE" value={`${pvePower}`} />
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                          <InfoItem label="Fuerza" value={`${pveProgress.stats.strength}`} />
+                          <InfoItem label="Vida" value={`${pveProgress.stats.life}`} />
+                          <InfoItem label="Defensa" value={`${pveProgress.stats.defense}`} />
+                        </div>
+                        {pveLevelProgress ? (
+                          <div>
+                            <div className="flex items-center justify-between text-xs uppercase tracking-[0.16em] text-stone-500">
+                              <span>{pveLevelProgress.current}/{pveLevelProgress.required} exp</span>
+                              <span>{pveProgress.availablePoints} pts</span>
+                            </div>
+                            <div className="mt-2 h-1.5 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                              <div
+                                className="h-full bg-gradient-to-r from-amber-400 to-amber-600"
+                                style={{
+                                  width: `${Math.max(
+                                    4,
+                                    Math.min(100, (pveLevelProgress.current / pveLevelProgress.required) * 100)
+                                  )}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    </section>
+                  ) : null}
                 </div>
 
                 {/* Right Column: Lore & Combat (Takes 8 cols on large screens) */}

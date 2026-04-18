@@ -339,6 +339,7 @@ export function TavernExpeditionArcade() {
   const [playerSheets, setPlayerSheets] = useState<CharacterSheet[]>([]);
   const [activeSheetId, setActiveSheetId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showContracts, setShowContracts] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -792,35 +793,29 @@ export function TavernExpeditionArcade() {
     <div className="rounded-[2rem] border border-emerald-500/15 bg-emerald-950/25 p-4 shadow-[0_32px_80px_rgba(0,0,0,0.3)]">
       <div className="space-y-4 rounded-[1.7rem] border border-emerald-400/20 bg-[#072b16] p-4 sm:p-5">
         <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
-                Cazador activo
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-amber-500/10 p-2 text-amber-300">
-                  <UserRound className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-lg font-black text-stone-100">
-                    {activeSheet.name || "Ficha sin nombre"}
-                  </p>
-                  <p className="text-sm text-stone-400">{getSheetSummary(activeSheet)}</p>
-                </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-amber-500/10 p-2 text-amber-300">
+                <UserRound className="h-5 w-5" />
               </div>
-              <p className="max-w-2xl text-sm leading-6 text-stone-400">
-                Cada ficha crece por separado. El nivel se gana por exp del contrato y cada 5 niveles da 1 punto extra de stats.
-              </p>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
+                  Ficha PvE
+                </p>
+                <p className="text-lg font-black text-stone-100">
+                  {activeSheet.name || "Ficha sin nombre"}
+                </p>
+                <p className="text-xs uppercase tracking-[0.14em] text-stone-500">{getSheetSummary(activeSheet)}</p>
+              </div>
             </div>
 
-            <div className="rounded-[1.2rem] border border-stone-800 bg-stone-900/80 px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Progreso actual
-              </p>
-              <p className="mt-2 text-2xl font-black text-stone-100">Lv {safeProgress.level}</p>
-              <p className="mt-1 text-sm text-stone-400">
-                {levelProgress.current}/{levelProgress.required} exp del rango actual
-              </p>
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+                Lv {safeProgress.level}
+              </span>
+              <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+                {levelProgress.current}/{levelProgress.required} exp
+              </span>
             </div>
           </div>
 
@@ -872,12 +867,10 @@ export function TavernExpeditionArcade() {
               </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
-                  Cazador activo
+                  Resumen de combate
                 </p>
                 <p className="text-lg font-black text-stone-100">{activeSheet.name || player.username}</p>
-                <p className="text-sm text-stone-400">
-                  La ficha aporta bonos base al combate: +{sheetBonuses.strength} fuerza, +{sheetBonuses.life} vida y +{sheetBonuses.defense} defensa.
-                </p>
+                <p className="text-sm text-stone-400">{getSheetSummary(activeSheet)}</p>
               </div>
             </div>
 
@@ -898,9 +891,6 @@ export function TavernExpeditionArcade() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
                 Mejora del cazador
               </p>
-              <p className="mt-1 text-sm text-stone-400">
-                Los contratos siguen soltando puntos de mejora, pero ademas cada 5 niveles obtienes 1 punto extra. La ficha base tambien suma al combate para que cada personaje se sienta distinto.
-              </p>
             </div>
             <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
               {safeProgress.availablePoints} disponibles
@@ -909,9 +899,9 @@ export function TavernExpeditionArcade() {
 
           <div className="mb-4 rounded-[1.2rem] border border-stone-800 bg-stone-900/70 px-4 py-3">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-stone-200">Exp actual: {safeProgress.exp}</p>
+              <p className="text-sm font-semibold text-stone-200">{levelProgress.current}/{levelProgress.required} exp</p>
               <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                Siguiente hito en Lv {Math.floor(safeProgress.level / 5) * 5 + 5}
+                Hito Lv {Math.floor(safeProgress.level / 5) * 5 + 5}
               </p>
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-800">
@@ -929,7 +919,8 @@ export function TavernExpeditionArcade() {
               icon={Swords}
               label="Fuerza"
               value={effectiveStats.strength}
-              hint={`${safeProgress.stats.strength} invertidos | +${sheetBonuses.strength} ficha | +${effectiveStats.strength * STRENGTH_ATTACK_BONUS} ataque`}
+              hint={`PvE ${safeProgress.stats.strength} | Ficha +${sheetBonuses.strength}`}
+              detail={`Ataque +${effectiveStats.strength * STRENGTH_ATTACK_BONUS}`}
               disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
               onUpgrade={() => upgradeStat("strength")}
             />
@@ -937,7 +928,8 @@ export function TavernExpeditionArcade() {
               icon={Heart}
               label="Vida"
               value={effectiveStats.life}
-              hint={`${safeProgress.stats.life} invertidos | +${sheetBonuses.life} ficha | +${effectiveStats.life * LIFE_BONUS_PER_POINT} HP`}
+              hint={`PvE ${safeProgress.stats.life} | Ficha +${sheetBonuses.life}`}
+              detail={`HP +${effectiveStats.life * LIFE_BONUS_PER_POINT}`}
               disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
               onUpgrade={() => upgradeStat("life")}
             />
@@ -945,81 +937,88 @@ export function TavernExpeditionArcade() {
               icon={Shield}
               label="Defensa"
               value={effectiveStats.defense}
-              hint={`${safeProgress.stats.defense} invertidos | +${sheetBonuses.defense} ficha | -${effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION} dano`}
+              hint={`PvE ${safeProgress.stats.defense} | Ficha +${sheetBonuses.defense}`}
+              detail={`Dano -${effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION}`}
               disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
               onUpgrade={() => upgradeStat("defense")}
             />
           </div>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
-          {ARCADE_ENCOUNTERS.map((encounter) => {
-            const active = encounter.id === selectedEncounterId;
-            const locked = safeProgress.level < encounter.minLevel;
-            const windowMs = encounter.windowHours * 60 * 60 * 1000;
-            const used = getEncounterUsageCount(safeProgress, encounter.id, windowMs);
-            const remaining = Math.max(0, encounter.maxAttemptsPerWindow - used);
-            const nextResetAt = getNextResetAt(safeProgress, encounter.id, windowMs);
+        <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
+                Contratos
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowContracts((current) => !current)}
+              className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300 transition hover:border-amber-400/25 hover:text-stone-100"
+            >
+              {showContracts ? "Plegar" : "Ver contratos"}
+            </button>
+          </div>
 
-            return (
-              <button
-                key={encounter.id}
-                type="button"
-                onClick={() => {
-                  if (!locked) {
-                    setSelectedEncounterId(encounter.id);
-                  }
-                }}
-                className={`rounded-[1.5rem] border p-4 text-left transition ${
-                  active
-                    ? "border-amber-400/30 bg-amber-500/10 shadow-[0_0_16px_rgba(245,158,11,0.08)]"
-                    : "border-stone-800 bg-stone-950/50"
-                } ${locked ? "opacity-60" : ""}`}
-                disabled={locked}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">
-                      {difficultyLabel(encounter.difficulty)}
-                    </p>
-                    <h3 className="mt-2 text-base font-black text-stone-100">
-                      {encounter.title}
-                    </h3>
-                  </div>
-                  <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${difficultyTone(encounter.difficulty)}`}>
-                    {formatVictoryPointChance(encounter.difficulty)}
-                  </span>
-                </div>
+          {showContracts ? (
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {ARCADE_ENCOUNTERS.map((encounter) => {
+                const active = encounter.id === selectedEncounterId;
+                const locked = safeProgress.level < encounter.minLevel;
+                const windowMs = encounter.windowHours * 60 * 60 * 1000;
+                const used = getEncounterUsageCount(safeProgress, encounter.id, windowMs);
+                const remaining = Math.max(0, encounter.maxAttemptsPerWindow - used);
+                const nextResetAt = getNextResetAt(safeProgress, encounter.id, windowMs);
 
-                <p className="mt-3 text-sm leading-6 text-stone-400">{encounter.summary}</p>
+                return (
+                  <button
+                    key={encounter.id}
+                    type="button"
+                    onClick={() => {
+                      if (!locked) {
+                        setSelectedEncounterId(encounter.id);
+                      }
+                    }}
+                    className={`rounded-[1.5rem] border p-4 text-left transition ${
+                      active
+                        ? "border-amber-400/30 bg-amber-500/10 shadow-[0_0_16px_rgba(245,158,11,0.08)]"
+                        : "border-stone-800 bg-stone-950/50"
+                    } ${locked ? "opacity-60" : ""}`}
+                    disabled={locked}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">
+                          {difficultyLabel(encounter.difficulty)}
+                        </p>
+                        <h3 className="mt-2 text-base font-black text-stone-100">
+                          {encounter.title}
+                        </h3>
+                      </div>
+                      <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${difficultyTone(encounter.difficulty)}`}>
+                        {formatVictoryPointChance(encounter.difficulty)}
+                      </span>
+                    </div>
 
-                <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.16em] text-stone-500">
-                  <span>Lv {encounter.minLevel} minimo</span>
-                  <span>Poder {encounter.recommendedPower}</span>
-                </div>
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-stone-300">
+                      <div className="rounded-xl border border-stone-800 bg-stone-900/80 px-3 py-2">
+                        Entrada {encounter.entryFee}
+                      </div>
+                      <div className="rounded-xl border border-stone-800 bg-stone-900/80 px-3 py-2">
+                        {encounter.expReward} exp
+                      </div>
+                    </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-stone-300">
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/80 px-3 py-2">
-                    Entrada {encounter.entryFee}
-                  </div>
-                  <div className="rounded-xl border border-stone-800 bg-stone-900/80 px-3 py-2">
-                    {encounter.expReward} exp
-                  </div>
-                </div>
-
-                <div className="mt-2 rounded-xl border border-stone-800 bg-stone-950/70 px-3 py-2 text-xs leading-5 text-stone-400">
-                  {locked
-                    ? `Bloqueado hasta nivel ${encounter.minLevel}.`
-                    : "Al iniciar se asigna un mutador aleatorio de contrato."}
-                </div>
-
-                <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.16em] text-stone-500">
-                  <span>{remaining}/{encounter.maxAttemptsPerWindow} usos</span>
-                  <span>reset {formatResetDistance(nextResetAt)}</span>
-                </div>
-              </button>
-            );
-          })}
+                    <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                      <span>{remaining}/{encounter.maxAttemptsPerWindow} usos</span>
+                      <span>reset {formatResetDistance(nextResetAt)}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
 
         {selectedEncounter ? (
@@ -1044,31 +1043,6 @@ export function TavernExpeditionArcade() {
                 <MiniStat icon={Sparkles} label="Exp" value={selectedEncounter.expReward} />
                 <MiniStat icon={Sparkles} label="Min" value={selectedEncounter.rewardMin} />
                 <MiniStat icon={BadgeAlert} label="Max" value={selectedEncounter.rewardMax} />
-              </div>
-
-              <div className="mt-4 rounded-[1.1rem] border border-stone-800 bg-stone-900/70 px-4 py-3 text-sm text-stone-300">
-                <span className="font-semibold text-amber-300">Requisito:</span> nivel {selectedEncounter.minLevel} minimo y poder recomendado de {selectedEncounter.recommendedPower}.
-                {playerPower < selectedEncounter.recommendedPower
-                  ? " Puedes entrar antes, pero el contrato te va a castigar."
-                  : " Tu ficha ya esta en rango para pelearlo con dignidad."}
-              </div>
-
-              <div className="mt-3 rounded-[1.1rem] border border-stone-800 bg-stone-900/70 px-4 py-3 text-sm text-stone-300">
-                <span className="font-semibold text-amber-300">Puntos de mejora:</span>{" "}
-                {selectedEncounter.difficulty === "hard"
-                  ? "esta caceria entrega 1 punto garantizado si ganas, ademas de la exp del contrato."
-                  : `si ganas, tienes ${Math.round(
-                      getVictoryPointChance(selectedEncounter.difficulty) * 100
-                    )}% de recibir 1 punto de mejora, aparte de la exp.`}
-              </div>
-
-              <div className="mt-3 rounded-[1.1rem] border border-stone-800 bg-stone-900/70 px-4 py-3 text-sm text-stone-300">
-                <span className="font-semibold text-amber-300">Critico especial:</span>{" "}
-                {selectedEncounter.difficulty === "hard"
-                  ? "Juicio del verdugo, el remate mas brutal del modo dificil."
-                  : selectedEncounter.difficulty === "medium"
-                    ? "Ruptura brutal, criticos mas pesados y agresivos."
-                    : "Corte preciso, criticos mas estables para farmear."}
               </div>
 
               <button
@@ -1214,6 +1188,7 @@ function UpgradeCard({
   label,
   value,
   hint,
+  detail,
   disabled,
   onUpgrade,
 }: {
@@ -1221,6 +1196,7 @@ function UpgradeCard({
   label: string;
   value: number;
   hint: string;
+  detail: string;
   disabled: boolean;
   onUpgrade: () => void;
 }) {
@@ -1234,6 +1210,7 @@ function UpgradeCard({
           <div>
             <p className="text-sm font-black text-stone-100">{label}</p>
             <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">{hint}</p>
+            <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-stone-600">{detail}</p>
           </div>
         </div>
         <span className="text-xl font-black text-stone-100">{value}</span>

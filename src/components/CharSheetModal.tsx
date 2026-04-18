@@ -105,6 +105,11 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
     : null;
   const pvePower = pveProgress ? getPvePower(pveProgress) : 0;
   const pveLevelProgress = pveProgress ? getPveProgressToNextLevel(pveProgress) : null;
+  const pveBonuses = {
+    strength: pveProgress?.stats.strength ?? 0,
+    defense: pveProgress?.stats.defense ?? 0,
+    life: pveProgress?.stats.life ?? 0,
+  };
 
   return (
     <AnimatePresence>
@@ -188,8 +193,15 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                     </h3>
                     <div className="bg-stone-900/40 border border-stone-800/50 p-5 rounded-xl space-y-5">
                       {statConfig.map(stat => {
-                        const val = character.stats[stat.key as keyof typeof character.stats] || 0;
-                        const max = 20; // Assuming max stat might be higher
+                        const baseValue = character.stats[stat.key as keyof typeof character.stats] || 0;
+                        const bonusValue =
+                          stat.key === 'strength'
+                            ? pveBonuses.strength
+                            : stat.key === 'defense'
+                              ? pveBonuses.defense
+                              : 0;
+                        const val = baseValue + bonusValue;
+                        const max = 20;
                         const percentage = Math.min(100, (val / max) * 100);
                         return (
                           <div key={stat.key}>
@@ -198,7 +210,12 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
                                 {stat.label}
                               </span>
-                              <span className="font-bold text-stone-200">{val}</span>
+                              <span className="font-bold text-stone-200">
+                                {val}
+                                {bonusValue > 0 ? (
+                                  <span className="ml-1 text-xs text-amber-400">(+{bonusValue})</span>
+                                ) : null}
+                              </span>
                             </div>
                             <div className="h-1.5 bg-stone-950 rounded-full overflow-hidden border border-stone-800">
                               <div className={`h-full ${stat.bg} shadow-[0_0_10px_currentColor]`} style={{ width: `${percentage}%` }} />
@@ -208,7 +225,12 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                       })}
                       <div className="mt-6 pt-5 border-t border-stone-800/50 flex justify-between items-center font-bold">
                         <span className="flex items-center gap-2 text-rose-400"><Heart className="w-5 h-5" /> PV Base</span>
-                        <span className="text-rose-400 text-xl">100</span>
+                        <span className="text-rose-400 text-xl">
+                          {100 + pveBonuses.life * 15}
+                          {pveBonuses.life > 0 ? (
+                            <span className="ml-1 text-xs text-amber-400">(+{pveBonuses.life * 15})</span>
+                          ) : null}
+                        </span>
                       </div>
                     </div>
                   </section>

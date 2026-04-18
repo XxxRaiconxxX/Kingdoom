@@ -468,7 +468,21 @@ export function PlayerProfilePanel({
 
                     return (
                     <div key={sheet.id} className="bg-stone-900 border border-stone-800 rounded-xl p-4 flex flex-col gap-3 hover:border-amber-500/30 transition-colors">
-                      <div>
+                      <div className="flex items-start gap-3">
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-stone-800 bg-stone-950">
+                          {sheet.portraitUrl ? (
+                            <img
+                              src={sheet.portraitUrl}
+                              alt={`Retrato de ${sheet.name || "personaje"}`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+                              Sin foto
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-3">
                           <h4 className="font-bold text-amber-400 truncate uppercase tracking-wider">{sheet.name || 'Personaje Sin Nombre'}</h4>
                           {activeExpeditionSheetId === sheet.id ? (
@@ -485,6 +499,7 @@ export function PlayerProfilePanel({
                             Poder: {sheet.powers.replace(/\*/g, '')}
                           </p>
                         )}
+                        </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2 rounded-xl border border-stone-800 bg-stone-950/70 p-3">
                         <div>

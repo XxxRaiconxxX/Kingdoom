@@ -43,7 +43,6 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ```
 
 ---
-<<<<<<< HEAD
 ### [Fecha: 18/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se restauro la version de Ruleta Americana que habia sido reemplazada por codex con una version vieja y simplificada.
@@ -52,7 +51,8 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   Se restauro `rouletteEngine.ts` desde el mismo commit: 357 lineas con 38 casillas (0, 00, 1-36), docenas, columnas, rojo/negro/verde.
     *   La version que estaba (281 lineas) era una ruleta simple con imagen que no tenia mesa de apuestas, fichas ni apuestas externas.
 *   **Notas/Advertencias:** `npx tsc --noEmit` verificado sin errores. La ruleta vuelve a funcionar como Ruleta Americana completa con todas sus apuestas.
-=======
+
+---
 ### [Fecha: 18/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se compacto el panel admin para que las listas no ocupen tanta altura y se elimino la pestana visible de `Resumen`.
@@ -120,7 +120,6 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   La resolucion de ronda ahora usa la funcion `settle_app_live_hunt(...)`, que inserta la bitacora, actualiza la sala y, si la caceria termina, paga el oro a `players` sin duplicar recompensas.
     *   La UI de la app ahora muestra `Tu parte del contrato` y un bloque `Reparto final` para que cada jugador vea el pago resuelto dentro de la propia sala.
 *   **Notas/Advertencias:** Para activar esta fase en vivo hace falta volver a ejecutar `supabase_app_live_hunts.sql`, porque ahora incluye la tabla de resultados y la funcion SQL de settlement.
->>>>>>> c872cc7fe380a7c0604acaf35b4d2273fedb1b69
 
 ---
 ### [Fecha: 17/04/2026] - [Autor: Jarvis]

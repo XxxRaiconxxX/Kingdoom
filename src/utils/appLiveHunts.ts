@@ -3,6 +3,7 @@ import type {
   AppLiveHuntAction,
   AppLiveHuntActionType,
   AppLiveHuntMember,
+  AppLiveHuntResult,
   AppLiveHuntRoom,
   AppLiveHuntRound,
   CharacterSheet,
@@ -67,11 +68,25 @@ type LiveHuntRoundRow = {
   created_at: string;
 };
 
+type LiveHuntResultRow = {
+  id: string;
+  hunt_id: string;
+  player_id: string;
+  username: string;
+  sheet_id: string;
+  sheet_name: string;
+  outcome: AppLiveHuntRoom["status"];
+  gold_reward: number;
+  participation_score: number;
+  created_at: string;
+};
+
 export type AppLiveHuntSnapshot = {
   room: AppLiveHuntRoom;
   members: AppLiveHuntMember[];
   actions: AppLiveHuntAction[];
   rounds: AppLiveHuntRound[];
+  results: AppLiveHuntResult[];
 };
 
 export type AppLiveHuntState = {
@@ -145,6 +160,21 @@ function mapRound(row: LiveHuntRoundRow): AppLiveHuntRound {
   };
 }
 
+function mapResult(row: LiveHuntResultRow): AppLiveHuntResult {
+  return {
+    id: row.id,
+    huntId: row.hunt_id,
+    playerId: row.player_id,
+    username: row.username,
+    sheetId: row.sheet_id,
+    sheetName: row.sheet_name,
+    outcome: row.outcome,
+    goldReward: row.gold_reward,
+    participationScore: row.participation_score,
+    createdAt: row.created_at,
+  };
+}
+
 function isMissingTable(message: string) {
   const normalized = message.toLowerCase();
   return normalized.includes("does not exist") || normalized.includes("42p01");
@@ -186,6 +216,7 @@ export async function fetchAppLiveHuntSnapshot(
     { data: members, error: membersError },
     { data: actions, error: actionsError },
     { data: rounds, error: roundsError },
+    { data: results, error: resultsError },
   ] = await Promise.all([
     supabase.from("app_live_hunts").select("*").eq("id", huntId).maybeSingle(),
     supabase
@@ -203,9 +234,21 @@ export async function fetchAppLiveHuntSnapshot(
       .select("*")
       .eq("hunt_id", huntId)
       .order("round_number", { ascending: false }),
+    supabase
+      .from("app_live_hunt_results")
+      .select("*")
+      .eq("hunt_id", huntId)
+      .order("gold_reward", { ascending: false }),
   ]);
 
-  if (roomError || membersError || actionsError || roundsError || !room) {
+  if (
+    roomError ||
+    membersError ||
+    actionsError ||
+    roundsError ||
+    resultsError ||
+    !room
+  ) {
     return null;
   }
 
@@ -214,6 +257,7 @@ export async function fetchAppLiveHuntSnapshot(
     members: (members as LiveHuntMemberRow[]).map(mapMember),
     actions: (actions as LiveHuntActionRow[]).map(mapAction),
     rounds: (rounds as LiveHuntRoundRow[]).map(mapRound),
+    results: (results as LiveHuntResultRow[]).map(mapResult),
   };
 }
 
@@ -396,6 +440,16 @@ export async function resolveAppLiveHuntRound(snapshot: AppLiveHuntSnapshot) {
   let threatDelta = 0;
   let rewardDelta = 0;
   const summaryParts: string[] = [];
+  const participationMap = new Map<
+    string,
+    {
+      playerId: string;
+      username: string;
+      sheetId: string;
+      sheetName: string;
+      score: number;
+    }
+  >();
 
   const silentHunters = snapshot.members.filter(
     (member) => !currentActions.some((action) => action.playerId === member.playerId)
@@ -411,6 +465,13 @@ export async function resolveAppLiveHuntRound(snapshot: AppLiveHuntSnapshot) {
         const damage = 14 + Math.floor(power / 11) + randomRange(0, 7);
         totalDamage += damage;
         threatDelta += 4;
+        participationMap.set(action.playerId, {
+          playerId: action.playerId,
+          username: action.playerUsername,
+          sheetId: action.sheetId,
+          sheetName: action.sheetName,
+          score: damage + 16,
+        });
         summaryParts.push(`${action.sheetName} presiona la linea y abre ${damage} de dano.`);
         break;
       }
@@ -419,6 +480,13 @@ export async function resolveAppLiveHuntRound(snapshot: AppLiveHuntSnapshot) {
         totalDamage += damage;
         threatDelta -= 10 + Math.floor(power / 24);
         rewardDelta += 40 + level * 4;
+        participationMap.set(action.playerId, {
+          playerId: action.playerId,
+          username: action.playerUsername,
+          sheetId: action.sheetId,
+          sheetName: action.sheetName,
+          score: damage + 26,
+        });
         summaryParts.push(`${action.sheetName} contiene la amenaza y estabiliza el frente.`);
         break;
       }
@@ -427,6 +495,13 @@ export async function resolveAppLiveHuntRound(snapshot: AppLiveHuntSnapshot) {
         totalDamage += damage;
         threatDelta -= 3;
         rewardDelta += 85 + level * 6;
+        participationMap.set(action.playerId, {
+          playerId: action.playerId,
+          username: action.playerUsername,
+          sheetId: action.sheetId,
+          sheetName: action.sheetName,
+          score: damage + 22,
+        });
         summaryParts.push(`${action.sheetName} canaliza reliquias y mejora el botin comunal.`);
         break;
       }
@@ -435,6 +510,13 @@ export async function resolveAppLiveHuntRound(snapshot: AppLiveHuntSnapshot) {
         totalDamage += damage;
         threatDelta += 8;
         rewardDelta += 55 + level * 5;
+        participationMap.set(action.playerId, {
+          playerId: action.playerId,
+          username: action.playerUsername,
+          sheetId: action.sheetId,
+          sheetName: action.sheetName,
+          score: damage + 18,
+        });
         summaryParts.push(`${action.sheetName} sabotea el flanco y deja una grieta enorme.`);
         break;
       }
@@ -457,18 +539,62 @@ export async function resolveAppLiveHuntRound(snapshot: AppLiveHuntSnapshot) {
 
   let nextStatus: AppLiveHuntRoom["status"] = "active";
   let nextRound = room.currentRound + 1;
+  let settlementPayload: Array<{
+    player_id: string;
+    username: string;
+    sheet_id: string;
+    sheet_name: string;
+    gold_reward: number;
+    participation_score: number;
+  }> = [];
 
   if (nextEnemyHp <= 0) {
     nextStatus = "victory";
     nextRound = room.currentRound;
+    const participants = snapshot.members.map((member) => {
+      const participation = participationMap.get(member.playerId);
+      return {
+        player_id: member.playerId,
+        username: member.username,
+        sheet_id: member.sheetId,
+        sheet_name: member.sheetName,
+        participation_score:
+          participation?.score ??
+          Math.max(8, Math.floor(member.sheetPower / 16) + member.sheetLevel * 2),
+      };
+    });
+    const totalScore = participants.reduce(
+      (sum, entry) => sum + entry.participation_score,
+      0
+    );
+    settlementPayload = participants.map((entry) => ({
+      ...entry,
+      gold_reward:
+        totalScore > 0
+          ? Math.max(
+              60,
+              Math.round((nextRewardPool * entry.participation_score) / totalScore)
+            )
+          : Math.max(60, Math.round(nextRewardPool / Math.max(1, participants.length))),
+    }));
     summaryParts.push(
-      `La cuadrilla remata a ${room.enemyName}. El botin potencial queda en ${nextRewardPool} de oro para narrar y repartir luego.`
+      `La cuadrilla remata a ${room.enemyName}. El botin queda repartido en ${nextRewardPool} de oro segun el peso de cada integrante.`
     );
   } else if (nextThreat >= room.threatCap || room.currentRound >= room.maxRounds) {
     nextStatus = "defeat";
     nextRound = room.currentRound;
+    settlementPayload = snapshot.members.map((member) => ({
+      player_id: member.playerId,
+      username: member.username,
+      sheet_id: member.sheetId,
+      sheet_name: member.sheetName,
+      gold_reward: Math.max(12, Math.round(room.rewardPool * 0.08)),
+      participation_score:
+        participationMap.get(member.playerId)?.score ??
+        Math.max(6, Math.floor(member.sheetPower / 18) + member.sheetLevel),
+    }));
     summaryParts.push(
-      `La amenaza supera el margen del contrato y ${room.enemyName} retiene el frente.`
+      `La amenaza supera el margen del contrato y ${room.enemyName} retiene el frente. La cuadrilla rescata una parte menor del botin.`
     );
   } else {
     summaryParts.push(
@@ -477,30 +603,22 @@ export async function resolveAppLiveHuntRound(snapshot: AppLiveHuntSnapshot) {
   }
 
   const summary = summaryParts.join(" ");
+  const { error: settleError } = await supabase.rpc("settle_app_live_hunt", {
+    p_hunt_id: room.id,
+    p_round_number: room.currentRound,
+    p_summary: summary,
+    p_enemy_damage: totalDamage,
+    p_threat_delta: threatDelta,
+    p_reward_delta: rewardDelta,
+    p_next_status: nextStatus,
+    p_next_round: nextRound,
+    p_next_enemy_hp: nextEnemyHp,
+    p_next_threat: nextThreat,
+    p_next_reward_pool: nextRewardPool,
+    p_rewards: settlementPayload,
+  });
 
-  const [{ error: roundError }, { error: roomError }] = await Promise.all([
-    supabase.from("app_live_hunt_rounds").insert({
-      hunt_id: room.id,
-      round_number: room.currentRound,
-      summary,
-      enemy_damage: totalDamage,
-      threat_delta: threatDelta,
-      reward_delta: rewardDelta,
-    }),
-    supabase
-      .from("app_live_hunts")
-      .update({
-        status: nextStatus,
-        current_round: nextRound,
-        enemy_hp: nextEnemyHp,
-        threat: nextThreat,
-        reward_pool: nextRewardPool,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", room.id),
-  ]);
-
-  if (roundError || roomError) {
+  if (settleError) {
     return {
       status: "error" as const,
       message: "No se pudo resolver la ronda en Supabase.",

@@ -315,6 +315,19 @@ export type AppLiveHuntRound = {
   createdAt: string;
 };
 
+export type AppLiveHuntResult = {
+  id: string;
+  huntId: string;
+  playerId: string;
+  username: string;
+  sheetId: string;
+  sheetName: string;
+  outcome: AppLiveHuntStatus;
+  goldReward: number;
+  participationScore: number;
+  createdAt: string;
+};
+
 export type CharacterSheet = {
   id: string;
   playerId: string;

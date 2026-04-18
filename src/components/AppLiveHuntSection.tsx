@@ -15,6 +15,7 @@ import { supabase } from "../lib/supabase";
 import type {
   AppLiveHuntActionType,
   AppLiveHuntMember,
+  AppLiveHuntResult,
   AppLiveHuntRoom,
   CharacterSheet,
   PvePlayerProgress,
@@ -94,7 +95,7 @@ function formatCountdown(msRemaining: number | null) {
 }
 
 export function AppLiveHuntSection() {
-  const { player, isHydrating } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [rooms, setRooms] = useState<AppLiveHuntRoom[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<AppLiveHuntSnapshot | null>(null);
@@ -129,6 +130,10 @@ export function AppLiveHuntSection() {
     [snapshot]
   );
   const roundDeadline = useMemo(() => getRoundDeadline(selectedRoom), [selectedRoom]);
+  const currentPlayerResult = useMemo(
+    () => snapshot?.results.find((result) => result.playerId === player?.id) ?? null,
+    [player?.id, snapshot]
+  );
 
   async function refreshRoomsOnly() {
     const state = await fetchAppLiveHunts();
@@ -276,6 +281,11 @@ export function AppLiveHuntSection() {
         { event: "*", schema: "public", table: "app_live_hunt_rounds", filter: `hunt_id=eq.${roomId}` },
         () => void refreshSnapshotForRoom(roomId)
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "app_live_hunt_results", filter: `hunt_id=eq.${roomId}` },
+        () => void refreshSnapshotForRoom(roomId)
+      )
       .subscribe();
 
     return () => {
@@ -300,6 +310,19 @@ export function AppLiveHuntSection() {
       window.clearInterval(intervalId);
     };
   }, [roundDeadline]);
+
+  useEffect(() => {
+    if (
+      !player ||
+      !snapshot ||
+      (snapshot.room.status !== "victory" && snapshot.room.status !== "defeat") ||
+      !snapshot.results.some((result) => result.playerId === player.id)
+    ) {
+      return;
+    }
+
+    void refreshPlayer();
+  }, [player, refreshPlayer, snapshot]);
 
   async function handleCreateRoom(templateId: string) {
     if (!player || !activeSheet || !activeProgress) {
@@ -401,6 +424,7 @@ export function AppLiveHuntSection() {
     setIsBusy(false);
     setStatusMessage(result.message);
     await refreshRoomsAndSnapshot(snapshot.room.id);
+    await refreshPlayer();
   }
 
   if (isHydrating) {
@@ -595,6 +619,27 @@ export function AppLiveHuntSection() {
                   {formatRoomMeta(selectedRoom)} · {roundActionCount}/{snapshot.members.length || 1} acciones marcadas
                 </div>
 
+                {currentPlayerResult ? (
+                  <div className="mt-4 rounded-[1.2rem] border border-emerald-500/20 bg-emerald-500/10 px-4 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
+                      Tu parte del contrato
+                    </p>
+                    <div className="mt-2 flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-2xl font-black text-emerald-100">
+                          +{currentPlayerResult.goldReward} oro
+                        </p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-emerald-200/80">
+                          Peso {currentPlayerResult.participationScore} · {getStatusCopy(currentPlayerResult.outcome)}
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-emerald-400/20 bg-stone-950/50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100">
+                        Ya asentado
+                      </span>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="mt-4 flex flex-wrap gap-2">
                   {!isJoined && selectedRoom.status !== "victory" && selectedRoom.status !== "defeat" ? (
                     <button
@@ -717,6 +762,29 @@ export function AppLiveHuntSection() {
                 </div>
               </div>
 
+              {(selectedRoom.status === "victory" || selectedRoom.status === "defeat") &&
+              snapshot.results.length > 0 ? (
+                <div className="rounded-[1.35rem] border border-stone-800 bg-stone-950/60 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
+                      Reparto final
+                    </p>
+                    <span className="rounded-full border border-stone-700 bg-stone-950/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+                      {snapshot.results.length} pagos
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {snapshot.results.map((result) => (
+                      <RewardCard
+                        key={result.id}
+                        result={result}
+                        isCurrentPlayer={result.playerId === player.id}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               {selectedRoom.status === "active" && isJoined ? (
                 <div className="fixed inset-x-0 bottom-[5.35rem] z-40 border-t border-stone-800/80 bg-stone-950/95 px-3 py-3 backdrop-blur-xl md:static md:border-0 md:bg-transparent md:px-0 md:py-0">
                   <div className="mx-auto max-w-md md:max-w-none">
@@ -825,6 +893,39 @@ function MemberCard({
           </span>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function RewardCard({
+  result,
+  isCurrentPlayer,
+}: {
+  result: AppLiveHuntResult;
+  isCurrentPlayer: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-[1rem] border px-4 py-4 ${
+        isCurrentPlayer
+          ? "border-emerald-400/25 bg-emerald-500/10"
+          : "border-stone-800 bg-stone-900/75"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-black text-stone-100">{result.sheetName}</p>
+          <p className="mt-1 text-xs uppercase tracking-[0.16em] text-stone-500">
+            {result.username} · Peso {result.participationScore}
+          </p>
+        </div>
+        {isCurrentPlayer ? (
+          <span className="rounded-full border border-emerald-400/20 bg-stone-950/60 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100">
+            Tu parte
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-3 text-lg font-black text-emerald-100">+{result.goldReward} oro</p>
     </div>
   );
 }

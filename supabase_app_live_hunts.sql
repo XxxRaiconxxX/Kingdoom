@@ -8,6 +8,9 @@ create table if not exists public.app_live_hunts (
   host_username text not null,
   host_sheet_id uuid not null,
   host_sheet_name text not null,
+  mutator_id text not null default 'emberstorm',
+  mutator_title text not null default 'Tormenta de brasas',
+  mutator_summary text not null default '',
   status text not null default 'lobby',
   current_round integer not null default 1,
   max_rounds integer not null default 6,
@@ -29,6 +32,8 @@ create table if not exists public.app_live_hunt_members (
   sheet_name text not null,
   sheet_level integer not null default 1,
   sheet_power integer not null default 12,
+  specialization text not null default 'strategist',
+  specialization_title text not null default 'Estratega',
   joined_at timestamptz not null default now(),
   unique (hunt_id, player_id)
 );
@@ -71,6 +76,18 @@ create table if not exists public.app_live_hunt_results (
   created_at timestamptz not null default now(),
   unique (hunt_id, player_id)
 );
+
+alter table public.app_live_hunts
+  add column if not exists mutator_id text not null default 'emberstorm';
+alter table public.app_live_hunts
+  add column if not exists mutator_title text not null default 'Tormenta de brasas';
+alter table public.app_live_hunts
+  add column if not exists mutator_summary text not null default '';
+
+alter table public.app_live_hunt_members
+  add column if not exists specialization text not null default 'strategist';
+alter table public.app_live_hunt_members
+  add column if not exists specialization_title text not null default 'Estratega';
 
 alter table public.app_live_hunts enable row level security;
 alter table public.app_live_hunt_members enable row level security;

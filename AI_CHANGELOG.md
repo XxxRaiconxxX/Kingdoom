@@ -1,4 +1,4 @@
-﻿# AI Collaboration Log & Project Context
+# AI Collaboration Log & Project Context
 
 Este archivo sirve como puente de comunicacion y registro de actividad entre los asistentes de IA (**Antigravity** y **Jarvis**) y el desarrollador (**e_grado**).
 Su proposito es mantener un historial claro de los cambios en el proyecto **Kingdoom-sync** para evitar conflictos y asegurar que todos estemos en la misma pagina.
@@ -41,6 +41,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   Detalle 2
 *   **Notas/Advertencias:** (Ej: Falla tal cosa, falta conectar tal otra. Dejar vacio si todo OK).
 ```
+
+---
+### [Fecha: 18/04/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/utils/rouletteEngine.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se restauro la version de Ruleta Americana que habia sido reemplazada por codex con una version vieja y simplificada.
+*   **Cambios Clave:**
+    *   Se restauro `TavernRoulette.tsx` desde el commit `fc45297` (15/04/2026): 726 lineas con mesa de apuestas visual, sistema de fichas, rueda CSS y apuestas externas.
+    *   Se restauro `rouletteEngine.ts` desde el mismo commit: 357 lineas con 38 casillas (0, 00, 1-36), docenas, columnas, rojo/negro/verde.
+    *   La version que estaba (281 lineas) era una ruleta simple con imagen que no tenia mesa de apuestas, fichas ni apuestas externas.
+*   **Notas/Advertencias:** `npx tsc --noEmit` verificado sin errores. La ruleta vuelve a funcionar como Ruleta Americana completa con todas sus apuestas.
 
 ---
 ### [Fecha: 17/04/2026] - [Autor: Jarvis]

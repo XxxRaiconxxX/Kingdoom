@@ -242,6 +242,11 @@ export type PvePlayerProgress = {
 
 export type AppLiveHuntStatus = "lobby" | "active" | "victory" | "defeat";
 export type AppLiveHuntActionType = "attack" | "guard" | "channel" | "sabotage";
+export type AppLiveHuntSpecialization =
+  | "vanguard"
+  | "bastion"
+  | "warden"
+  | "strategist";
 
 export type AppLiveHuntTemplate = {
   id: string;
@@ -256,6 +261,18 @@ export type AppLiveHuntTemplate = {
   threatCap: number;
   rewardBase: number;
   tone: "emerald" | "amber" | "rose";
+  mutatorPool: string[];
+};
+
+export type AppLiveHuntMutator = {
+  id: string;
+  title: string;
+  summary: string;
+  effectLine: string;
+  tone: "emerald" | "amber" | "rose";
+  damageMod: number;
+  threatMod: number;
+  rewardMod: number;
 };
 
 export type AppLiveHuntRoom = {
@@ -268,6 +285,9 @@ export type AppLiveHuntRoom = {
   hostUsername: string;
   hostSheetId: string;
   hostSheetName: string;
+  mutatorId: string;
+  mutatorTitle: string;
+  mutatorSummary: string;
   status: AppLiveHuntStatus;
   currentRound: number;
   maxRounds: number;
@@ -289,6 +309,8 @@ export type AppLiveHuntMember = {
   sheetName: string;
   sheetLevel: number;
   sheetPower: number;
+  specialization: AppLiveHuntSpecialization;
+  specializationTitle: string;
   joinedAt: string;
 };
 
@@ -312,6 +334,19 @@ export type AppLiveHuntRound = {
   enemyDamage: number;
   threatDelta: number;
   rewardDelta: number;
+  createdAt: string;
+};
+
+export type AppLiveHuntResult = {
+  id: string;
+  huntId: string;
+  playerId: string;
+  username: string;
+  sheetId: string;
+  sheetName: string;
+  outcome: AppLiveHuntStatus;
+  goldReward: number;
+  participationScore: number;
   createdAt: string;
 };
 

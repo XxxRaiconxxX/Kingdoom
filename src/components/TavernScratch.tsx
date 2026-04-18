@@ -346,7 +346,7 @@ export function TavernScratch() {
                   <p className="mt-4 text-xs uppercase tracking-[0.16em] text-stone-500">
                     Costo:{" "}
                     <span className="font-bold text-amber-400">{totalCost} oro</span>{" "}
-                    â€¢ Te quedarian {projectedGold} de oro
+                    • Te quedarian {projectedGold} de oro
                   </p>
                 ) : null}
 
@@ -387,8 +387,8 @@ export function TavernScratch() {
                 </p>
                 <p className="mt-2 text-sm leading-6 text-stone-300">
                   {quantity === 1
-                    ? "Toca la carta o usa el boton para procesar la compra segura y descubrir si el reino te sonrie."
-                    : `Tienes un talonario de ${quantity} tickets preparado para ser procesado de forma segura en Supabase.`}
+                    ? "Toca la carta o usa el boton para rascar y descubrir si el reino te sonrie."
+                    : `Tienes un talonario de ${quantity} tickets listo para revelar de una sola tanda.`}
                 </p>
                 <button
                   type="button"
@@ -397,7 +397,7 @@ export function TavernScratch() {
                   className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-stone-100 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-white"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {quantity === 1 ? "Rascar ahora" : "Procesar tanda segura"}
+                  {quantity === 1 ? "Rascar ahora" : "Procesar tanda"}
                 </button>
               </div>
             </motion.div>
@@ -425,10 +425,10 @@ export function TavernScratch() {
                 <p className="text-lg font-bold text-stone-100">
                   {quantity === 1
                     ? "Rascando la suerte..."
-                    : `Procesando ${quantity} tickets seguros...`}
+                    : `Procesando ${quantity} tickets...`}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-stone-400">
-                  La taberna esta resolviendo la tanda contra Supabase. Cruza los dedos.
+                  La taberna esta resolviendo la tanda. Cruza los dedos.
                 </p>
               </div>
             </motion.div>
@@ -641,3 +641,4 @@ function ScratchMessage({
     </div>
   );
 }
+

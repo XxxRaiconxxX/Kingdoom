@@ -7,7 +7,6 @@ import {
   Loader2,
   ScrollText,
   ShieldCheck,
-  Sparkles,
   Store,
   Swords,
   UserPlus,
@@ -38,10 +37,11 @@ import type { EventStatus, MarketCategoryId, MarketItem, PlayerAccount, RankingP
 type AdminTab = "overview" | "activity" | "players" | "events" | "market";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
 type EventListFilter = "all" | EventStatus;
+const ADMIN_LIST_PREVIEW_COUNT = 4;
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const { player, refreshPlayer } = usePlayerSession();
-  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+  const [activeTab, setActiveTab] = useState<AdminTab>("activity");
   const [players, setPlayers] = useState<PlayerAccount[]>([]);
   const [rankingRows, setRankingRows] = useState<RankingPlayer[]>([]);
   const [rankingMessage, setRankingMessage] = useState("");
@@ -105,6 +105,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [marketItemCategory, setMarketItemCategory] = useState<MarketCategoryId>("swords");
   const [marketItemStockStatus, setMarketItemStockStatus] = useState<StockStatus>("available");
   const [marketItemFeatured, setMarketItemFeatured] = useState(false);
+  const [showAllRankingRows, setShowAllRankingRows] = useState(false);
+  const [showAllPlayersList, setShowAllPlayersList] = useState(false);
+  const [showAllEventsList, setShowAllEventsList] = useState(false);
+  const [showAllMarketItemsList, setShowAllMarketItemsList] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -204,6 +208,50 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       return matchesSearch && matchesCategory;
     });
   }, [marketSearch, marketCategoryFilter, marketItems]);
+  const visibleRankingRows = useMemo(
+    () =>
+      showAllRankingRows
+        ? rankingRows
+        : rankingRows.slice(0, ADMIN_LIST_PREVIEW_COUNT),
+    [rankingRows, showAllRankingRows]
+  );
+  const visiblePlayers = useMemo(
+    () =>
+      showAllPlayersList
+        ? filteredPlayers
+        : filteredPlayers.slice(0, ADMIN_LIST_PREVIEW_COUNT),
+    [filteredPlayers, showAllPlayersList]
+  );
+  const visibleEvents = useMemo(
+    () =>
+      showAllEventsList
+        ? filteredEvents
+        : filteredEvents.slice(0, ADMIN_LIST_PREVIEW_COUNT),
+    [filteredEvents, showAllEventsList]
+  );
+  const visibleMarketItems = useMemo(
+    () =>
+      showAllMarketItemsList
+        ? filteredMarketItems
+        : filteredMarketItems.slice(0, ADMIN_LIST_PREVIEW_COUNT),
+    [filteredMarketItems, showAllMarketItemsList]
+  );
+
+  useEffect(() => {
+    setShowAllPlayersList(false);
+  }, [playerSearch]);
+
+  useEffect(() => {
+    setShowAllRankingRows(false);
+  }, [rankingRows.length]);
+
+  useEffect(() => {
+    setShowAllEventsList(false);
+  }, [eventSearch, eventListFilter]);
+
+  useEffect(() => {
+    setShowAllMarketItemsList(false);
+  }, [marketSearch, marketCategoryFilter]);
 
   function resetActivityForm() {
     setFormPlayerId("");
@@ -557,13 +605,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           <div className="flex w-full max-w-[100vw] items-center gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:max-w-full md:px-0 [&::-webkit-scrollbar]:hidden">
             <div className="flex-shrink-0">
               <AdminTabButton
-                label="Resumen"
-                active={activeTab === "overview"}
-                onClick={() => setActiveTab("overview")}
-              />
-            </div>
-            <div className="flex-shrink-0">
-              <AdminTabButton
                 label="Actividad"
                 active={activeTab === "activity"}
                 onClick={() => setActiveTab("activity")}
@@ -855,7 +896,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
                 <div className="mt-4 space-y-3">
                   {rankingRows.length > 0 ? (
-                    rankingRows.map((row, index) => (
+                    visibleRankingRows.map((row, index) => (
                       <button
                         key={`${row.id}-${row.name}`}
                         type="button"
@@ -886,6 +927,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       message="Aun no hay registros semanales. Puedes crear el primero desde el formulario."
                     />
                   )}
+                  <ExpandableListToggle
+                    shownCount={visibleRankingRows.length}
+                    totalCount={rankingRows.length}
+                    expanded={showAllRankingRows}
+                    onToggle={() => setShowAllRankingRows((current) => !current)}
+                    itemLabel="registros"
+                  />
                 </div>
               </section>
             </div>
@@ -1095,7 +1143,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
                 <div className="mt-4 space-y-3">
                   {filteredPlayers.length > 0 ? (
-                    filteredPlayers.map((entry) => (
+                    visiblePlayers.map((entry) => (
                       <div
                         key={entry.id}
                         className="flex items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3"
@@ -1123,6 +1171,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       No se encontraron jugadores con ese nombre.
                     </div>
                   )}
+                  <ExpandableListToggle
+                    shownCount={visiblePlayers.length}
+                    totalCount={filteredPlayers.length}
+                    expanded={showAllPlayersList}
+                    onToggle={() => setShowAllPlayersList((current) => !current)}
+                    itemLabel="jugadores"
+                  />
                 </div>
               </section>
             </div>
@@ -1340,7 +1395,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
                 <div className="mt-4 space-y-3">
                   {filteredEvents.length > 0 ? (
-                    filteredEvents.map((entry) => (
+                    visibleEvents.map((entry) => (
                       <button
                         key={entry.id ?? entry.title}
                         type="button"
@@ -1368,6 +1423,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       No se encontraron eventos para ese filtro.
                     </button>
                   )}
+                  <ExpandableListToggle
+                    shownCount={visibleEvents.length}
+                    totalCount={filteredEvents.length}
+                    expanded={showAllEventsList}
+                    onToggle={() => setShowAllEventsList((current) => !current)}
+                    itemLabel="eventos"
+                  />
                 </div>
               </section>
             </div>
@@ -1576,7 +1638,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
-                      Catalogo actual
+                      Lista compacta
                     </p>
                     <h4 className="mt-1 text-xl font-black text-stone-100">
                       Items del mercado
@@ -1615,7 +1677,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
                 <div className="mt-4 space-y-3">
                   {filteredMarketItems.length > 0 ? (
-                    filteredMarketItems.map((item) => (
+                    visibleMarketItems.map((item) => (
                       <button
                         key={item.id}
                         type="button"
@@ -1641,6 +1703,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       No se encontraron items para ese filtro.
                     </div>
                   )}
+                  <ExpandableListToggle
+                    shownCount={visibleMarketItems.length}
+                    totalCount={filteredMarketItems.length}
+                    expanded={showAllMarketItemsList}
+                    onToggle={() => setShowAllMarketItemsList((current) => !current)}
+                    itemLabel="items"
+                  />
                 </div>
               </section>
             </div>
@@ -1712,6 +1781,36 @@ function AdminInfoCard({
       <p className="text-sm font-bold text-stone-100">{title}</p>
       <p className="mt-2 text-sm leading-6 text-stone-400">{message}</p>
     </div>
+  );
+}
+
+function ExpandableListToggle({
+  shownCount,
+  totalCount,
+  expanded,
+  onToggle,
+  itemLabel,
+}: {
+  shownCount: number;
+  totalCount: number;
+  expanded: boolean;
+  onToggle: () => void;
+  itemLabel: string;
+}) {
+  if (totalCount <= ADMIN_LIST_PREVIEW_COUNT || shownCount === 0) {
+    return null;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="w-full rounded-[1.1rem] border border-stone-700 bg-stone-950/35 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+    >
+      {expanded
+        ? `Ver menos ${itemLabel}`
+        : `Ver mas ${itemLabel} (${shownCount}/${totalCount})`}
+    </button>
   );
 }
 

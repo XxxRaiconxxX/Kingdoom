@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BadgeAlert,
+  Crown,
+  Flame,
   RadioTower,
   Shield,
   Sparkles,
@@ -9,12 +11,18 @@ import {
   TimerReset,
   Users,
 } from "lucide-react";
-import { APP_LIVE_HUNT_ACTION_COPY, APP_LIVE_HUNT_TEMPLATES } from "../data/appLiveHunts";
+import {
+  APP_LIVE_HUNT_ACTION_COPY,
+  APP_LIVE_HUNT_MUTATORS,
+  APP_LIVE_HUNT_SPECIALIZATIONS,
+  APP_LIVE_HUNT_TEMPLATES,
+} from "../data/appLiveHunts";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { supabase } from "../lib/supabase";
 import type {
   AppLiveHuntActionType,
   AppLiveHuntMember,
+  AppLiveHuntResult,
   AppLiveHuntRoom,
   CharacterSheet,
   PvePlayerProgress,
@@ -26,6 +34,7 @@ import {
   fetchAppLiveHuntSnapshot,
   fetchAppLiveHunts,
   joinAppLiveHunt,
+  resolveAppLiveHuntSpecialization,
   resolveAppLiveHuntRound,
   setAppLiveHuntStatus,
   submitAppLiveHuntAction,
@@ -44,6 +53,17 @@ function getTemplateTone(tone: "emerald" | "amber" | "rose") {
       return "border-emerald-500/20 bg-emerald-500/10 text-emerald-200";
     default:
       return "border-amber-500/20 bg-amber-500/10 text-amber-200";
+  }
+}
+
+function getToneShell(tone: "emerald" | "amber" | "rose") {
+  switch (tone) {
+    case "rose":
+      return "border-rose-500/20 bg-rose-500/10 text-rose-100";
+    case "emerald":
+      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-100";
+    default:
+      return "border-amber-500/20 bg-amber-500/10 text-amber-100";
   }
 }
 
@@ -93,8 +113,31 @@ function formatCountdown(msRemaining: number | null) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
+function getThreatPressure(room: AppLiveHuntRoom) {
+  const ratio = room.threatCap > 0 ? room.threat / room.threatCap : 0;
+  if (ratio >= 0.82) {
+    return {
+      label: "Frontera rota",
+      tone: "rose" as const,
+      summary: "La sala esta a un paso de perder el control del contrato.",
+    };
+  }
+  if (ratio >= 0.52) {
+    return {
+      label: "Presion alta",
+      tone: "amber" as const,
+      summary: "Conviene rotar cobertura y no regalar rondas mudas.",
+    };
+  }
+  return {
+    label: "Ritmo estable",
+    tone: "emerald" as const,
+    summary: "La cuadrilla sostiene bien la linea por ahora.",
+  };
+}
+
 export function AppLiveHuntSection() {
-  const { player, isHydrating } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [rooms, setRooms] = useState<AppLiveHuntRoom[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<AppLiveHuntSnapshot | null>(null);
@@ -129,6 +172,28 @@ export function AppLiveHuntSection() {
     [snapshot]
   );
   const roundDeadline = useMemo(() => getRoundDeadline(selectedRoom), [selectedRoom]);
+  const currentPlayerResult = useMemo(
+    () => snapshot?.results.find((result) => result.playerId === player?.id) ?? null,
+    [player?.id, snapshot]
+  );
+  const selectedMutatorTone = useMemo(() => {
+    const matched = APP_LIVE_HUNT_MUTATORS.find(
+      (entry: { id: string; tone: "emerald" | "amber" | "rose" }) =>
+        entry.id === selectedRoom?.mutatorId
+    );
+    return matched?.tone ?? "amber";
+  }, [selectedRoom?.mutatorId]);
+  const pressureState = useMemo(
+    () => (selectedRoom ? getThreatPressure(selectedRoom) : null),
+    [selectedRoom]
+  );
+  const activeSpecialization = useMemo(
+    () =>
+      activeProgress
+        ? APP_LIVE_HUNT_SPECIALIZATIONS[resolveAppLiveHuntSpecialization(activeProgress)]
+        : null,
+    [activeProgress]
+  );
 
   async function refreshRoomsOnly() {
     const state = await fetchAppLiveHunts();
@@ -276,6 +341,11 @@ export function AppLiveHuntSection() {
         { event: "*", schema: "public", table: "app_live_hunt_rounds", filter: `hunt_id=eq.${roomId}` },
         () => void refreshSnapshotForRoom(roomId)
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "app_live_hunt_results", filter: `hunt_id=eq.${roomId}` },
+        () => void refreshSnapshotForRoom(roomId)
+      )
       .subscribe();
 
     return () => {
@@ -300,6 +370,19 @@ export function AppLiveHuntSection() {
       window.clearInterval(intervalId);
     };
   }, [roundDeadline]);
+
+  useEffect(() => {
+    if (
+      !player ||
+      !snapshot ||
+      (snapshot.room.status !== "victory" && snapshot.room.status !== "defeat") ||
+      !snapshot.results.some((result) => result.playerId === player.id)
+    ) {
+      return;
+    }
+
+    void refreshPlayer();
+  }, [player, refreshPlayer, snapshot]);
 
   async function handleCreateRoom(templateId: string) {
     if (!player || !activeSheet || !activeProgress) {
@@ -401,6 +484,7 @@ export function AppLiveHuntSection() {
     setIsBusy(false);
     setStatusMessage(result.message);
     await refreshRoomsAndSnapshot(snapshot.room.id);
+    await refreshPlayer();
   }
 
   if (isHydrating) {
@@ -446,6 +530,23 @@ export function AppLiveHuntSection() {
             <HeroChip label="Poder" value={`${getProgressPower(activeProgress)}`} />
             <HeroChip label="Salas abiertas" value={`${rooms.length}`} />
           </div>
+
+          {activeSpecialization ? (
+            <div className="rounded-[1.15rem] border border-stone-800 bg-stone-950/65 px-4 py-3">
+              <div className="flex items-center gap-2 text-emerald-200">
+                <Crown className="h-4 w-4" />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">
+                  Rol de tu ficha
+                </p>
+              </div>
+              <p className="mt-2 text-sm font-black text-stone-100">
+                {activeSpecialization.title}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-stone-400">
+                {activeSpecialization.cue}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -595,6 +696,57 @@ export function AppLiveHuntSection() {
                   {formatRoomMeta(selectedRoom)} · {roundActionCount}/{snapshot.members.length || 1} acciones marcadas
                 </div>
 
+                <div className={`mt-4 grid gap-3 lg:grid-cols-[1.15fr_0.85fr]`}>
+                  <div className={`rounded-[1.2rem] border px-4 py-4 ${getToneShell(selectedMutatorTone)}`}>
+                    <div className="flex items-center gap-2">
+                      <Flame className="h-4 w-4" />
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">
+                        Mutador vivo
+                      </p>
+                    </div>
+                    <p className="mt-2 text-sm font-black">{selectedRoom.mutatorTitle}</p>
+                    <p className="mt-2 text-xs leading-5 opacity-90">
+                      {selectedRoom.mutatorSummary}
+                    </p>
+                  </div>
+
+                  {pressureState ? (
+                    <div className={`rounded-[1.2rem] border px-4 py-4 ${getToneShell(pressureState.tone)}`}>
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">
+                          Pulso del frente
+                        </p>
+                      </div>
+                      <p className="mt-2 text-sm font-black">{pressureState.label}</p>
+                      <p className="mt-2 text-xs leading-5 opacity-90">
+                        {pressureState.summary}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+
+                {currentPlayerResult ? (
+                  <div className="mt-4 rounded-[1.2rem] border border-emerald-500/20 bg-emerald-500/10 px-4 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
+                      Tu parte del contrato
+                    </p>
+                    <div className="mt-2 flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-2xl font-black text-emerald-100">
+                          +{currentPlayerResult.goldReward} oro
+                        </p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-emerald-200/80">
+                          Peso {currentPlayerResult.participationScore} · {getStatusCopy(currentPlayerResult.outcome)}
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-emerald-400/20 bg-stone-950/50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100">
+                        Ya asentado
+                      </span>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="mt-4 flex flex-wrap gap-2">
                   {!isJoined && selectedRoom.status !== "victory" && selectedRoom.status !== "defeat" ? (
                     <button
@@ -717,6 +869,29 @@ export function AppLiveHuntSection() {
                 </div>
               </div>
 
+              {(selectedRoom.status === "victory" || selectedRoom.status === "defeat") &&
+              snapshot.results.length > 0 ? (
+                <div className="rounded-[1.35rem] border border-stone-800 bg-stone-950/60 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
+                      Reparto final
+                    </p>
+                    <span className="rounded-full border border-stone-700 bg-stone-950/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+                      {snapshot.results.length} pagos
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {snapshot.results.map((result) => (
+                      <RewardCard
+                        key={result.id}
+                        result={result}
+                        isCurrentPlayer={result.playerId === player.id}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               {selectedRoom.status === "active" && isJoined ? (
                 <div className="fixed inset-x-0 bottom-[5.35rem] z-40 border-t border-stone-800/80 bg-stone-950/95 px-3 py-3 backdrop-blur-xl md:static md:border-0 md:bg-transparent md:px-0 md:py-0">
                   <div className="mx-auto max-w-md md:max-w-none">
@@ -810,6 +985,7 @@ function MemberCard({
   member: AppLiveHuntMember;
   hostPlayerId: string;
 }) {
+  const specializationCopy = APP_LIVE_HUNT_SPECIALIZATIONS[member.specialization];
   return (
     <div className="rounded-[1rem] border border-stone-800 bg-stone-900/75 px-3 py-3">
       <div className="flex items-start justify-between gap-3">
@@ -818,6 +994,9 @@ function MemberCard({
           <p className="mt-1 text-xs uppercase tracking-[0.16em] text-stone-500">
             {member.username} · Lv {member.sheetLevel} · Poder {member.sheetPower}
           </p>
+          <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-emerald-200/80">
+            {specializationCopy.title} · {specializationCopy.cue}
+          </p>
         </div>
         {member.playerId === hostPlayerId ? (
           <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200">
@@ -825,6 +1004,39 @@ function MemberCard({
           </span>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function RewardCard({
+  result,
+  isCurrentPlayer,
+}: {
+  result: AppLiveHuntResult;
+  isCurrentPlayer: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-[1rem] border px-4 py-4 ${
+        isCurrentPlayer
+          ? "border-emerald-400/25 bg-emerald-500/10"
+          : "border-stone-800 bg-stone-900/75"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-black text-stone-100">{result.sheetName}</p>
+          <p className="mt-1 text-xs uppercase tracking-[0.16em] text-stone-500">
+            {result.username} · Peso {result.participationScore}
+          </p>
+        </div>
+        {isCurrentPlayer ? (
+          <span className="rounded-full border border-emerald-400/20 bg-stone-950/60 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100">
+            Tu parte
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-3 text-lg font-black text-emerald-100">+{result.goldReward} oro</p>
     </div>
   );
 }

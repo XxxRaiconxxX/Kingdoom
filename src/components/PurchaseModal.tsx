@@ -102,12 +102,14 @@ export function PurchaseModal({
     }
 
     const nextOrderId = createOrderId();
-    const purchaseResult = await purchaseMarketItemSecure({
-      itemId: item.id,
-      quantity: formValues.quantity,
-      whatsapp: formValues.whatsapp,
-      orderRef: nextOrderId,
-    });
+const purchaseResult = await purchaseMarketItemSecure({
+  playerId: latestPlayer.id,
+  itemId: item.id,
+  quantity: formValues.quantity,
+  whatsapp: formValues.whatsapp,
+  orderRef: nextOrderId,
+});
+
 
     if (purchaseResult.status === "error") {
       setSubmitState("error");

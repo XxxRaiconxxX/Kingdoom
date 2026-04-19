@@ -115,10 +115,28 @@ export function PlayerProfilePanel({
       magicDefense: 0,
     };
 
+let portraitUrl: string | undefined = undefined;
+
+if (portraitFile) {
+  const ext = portraitFile.name.split(".").pop() ?? "jpg";
+  const path = `portraits/${player.id}/${crypto.randomUUID()}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from("character-portraits")
+    .upload(path, portraitFile, { upsert: true });
+
+  if (!uploadError) {
+    const { data: urlData } = supabase.storage
+      .from("character-portraits")
+      .getPublicUrl(path);
+    portraitUrl = urlData.publicUrl;
+  }
+}
+
     const newSheet: CharacterSheet = {
       id: crypto.randomUUID(),
       playerId: player.id,
       playerUsername: player.username,
+portraitUrl,
       name: partialSheet.name ?? "",
       age: partialSheet.age ?? "",
       gender: partialSheet.gender ?? "",

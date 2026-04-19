@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Backpack,
@@ -98,7 +98,7 @@ export function PlayerProfilePanel({
     }
   }, [player]);
 
-  const handleSaveSheet = async (partialSheet: Partial<CharacterSheet>) => {
+  const handleSaveSheet = async (partialSheet: Partial<CharacterSheet>, portraitFile?: File | null) => {
     if (!player) return;
     if (playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS) {
       setSheetFeedback(

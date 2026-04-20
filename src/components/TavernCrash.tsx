@@ -28,23 +28,15 @@ interface Point {
 export function TavernCrash() {
   const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [status, setStatus] = useState<GameStatus>("betting");
-<<<<<<< HEAD
-  const [bet, setBet] = useState<number | "">("");
-=======
   const [bet, setBet] = useState(0);
   const [betInput, setBetInput] = useState("");
->>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
   const [multiplier, setMultiplier] = useState(1);
   const [history, setHistory] = useState<number[]>([]);
   const [updating, setUpdating] = useState(false);
   const [refreshingGold, setRefreshingGold] = useState(false);
   const [lastWin, setLastWin] = useState(0);
-<<<<<<< HEAD
-  const [autoCashOut, setAutoCashOut] = useState<number | "">("");
-=======
   const [autoCashOut, setAutoCashOut] = useState<number>(0);
   const [autoCashOutInput, setAutoCashOutInput] = useState("");
->>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
   const [crashError, setCrashError] = useState("");
   const [startTimestamp, setStartTimestamp] = useState<number | null>(null);
 
@@ -75,7 +67,7 @@ export function TavernCrash() {
     startTimestampRef.current = startTimestamp;
   }, [startTimestamp]);
 
-  const projectedCashOut = useMemo(() => Math.floor(Number(bet) * multiplier), [bet, multiplier]);
+  const projectedCashOut = useMemo(() => Math.floor(bet * multiplier), [bet, multiplier]);
 
   function syncBetInput(nextBet: number) {
     const sanitized = Math.max(0, Math.floor(nextBet));
@@ -153,15 +145,6 @@ export function TavernCrash() {
 
       setHistory(result.history);
       setStatus(result.session.phase);
-<<<<<<< HEAD
-      if (!hydrateRunRef.current) {
-        setBet(result.session.bet > 0 ? result.session.bet : "");
-        setAutoCashOut(result.session.autoCashOut > 0 ? result.session.autoCashOut : "");
-        hydrateRunRef.current = true;
-      }
-      setMultiplier(result.session.multiplier);
-      setLastWin(result.session.lastWin);
-=======
       syncBetInput(result.session.bet);
       setMultiplier(result.session.multiplier);
       setLastWin(result.session.lastWin);
@@ -169,7 +152,6 @@ export function TavernCrash() {
       if (result.session.phase === "rising" && result.session.startedAt) {
         syncRoundStart(result.session.startedAt);
       }
->>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
     }
 
     void hydrateCrash();
@@ -206,10 +188,7 @@ export function TavernCrash() {
         setMultiplier(result.session.multiplier);
       }
       setLastWin(result.session.lastWin);
-<<<<<<< HEAD
-=======
       syncAutoCashOutInput(result.session.autoCashOut);
->>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
 
       if (result.session.phase === "rising" && startTimestampRef.current === null) {
         syncRoundStart(result.session.startedAt);
@@ -412,10 +391,7 @@ export function TavernCrash() {
   }, [status]);
 
   async function handleStart() {
-    const numericBet = Number(bet);
-    const numericAuto = Number(autoCashOut);
-
-    if (!player || numericBet <= 0 || numericBet > player.gold || updating) {
+    if (!player || bet <= 0 || bet > player.gold || updating) {
       return;
     }
 
@@ -423,8 +399,8 @@ export function TavernCrash() {
     setCrashError("");
 
     const result = await startCrashGameSecure({
-      bet: numericBet,
-      autoCashOut: numericAuto,
+      bet,
+      autoCashOut,
     });
 
     if (result.status === "error") {
@@ -651,24 +627,11 @@ export function TavernCrash() {
 
               <div className="mb-4 flex items-center gap-3">
                 <input
-<<<<<<< HEAD
-                  type="number"
-                  value={bet}
-                  onChange={(event) => {
-                    const val = event.target.value;
-                    if (val === "") {
-                      setBet("");
-                    } else {
-                      setBet(Math.min(player.gold, Math.max(0, parseInt(val, 10) || 0)));
-                    }
-                  }}
-=======
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
                   value={betInput}
                   onChange={(event) => handleBetInputChange(event.target.value)}
->>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
                   disabled={status === "rising" || status === "starting"}
                   placeholder="Monto a apostar"
                   className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 text-lg font-black text-stone-100 transition focus:border-amber-500/50 focus:outline-none"
@@ -699,25 +662,10 @@ export function TavernCrash() {
                 </label>
                 <div className="relative">
                   <input
-<<<<<<< HEAD
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    value={autoCashOut}
-                    onChange={(event) => {
-                      const val = event.target.value;
-                      if (val === "") {
-                        setAutoCashOut("");
-                      } else {
-                        setAutoCashOut(parseFloat(val) || 0);
-                      }
-                    }}
-=======
                     type="text"
                     inputMode="decimal"
                     value={autoCashOutInput}
                     onChange={(event) => handleAutoCashOutInputChange(event.target.value)}
->>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
                     disabled={status === "rising" || status === "starting"}
                     placeholder="Ej: 1.50  (0 = desactivado)"
                     className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 pr-8 text-base font-black text-amber-400 placeholder:font-normal placeholder:text-stone-600 transition focus:border-amber-500/50 focus:outline-none"
@@ -739,13 +687,8 @@ export function TavernCrash() {
                 >
                   <span className="relative z-10 flex flex-col items-center">
                     <span className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
-<<<<<<< HEAD
-                      {Number(autoCashOut) >= 1.01
-                        ? `Auto en ${Number(autoCashOut).toFixed(2)}x — o retira ya`
-=======
                       {autoCashOut >= 1.01
                         ? `Auto en ${autoCashOut.toFixed(2)}x - o retira ya`
->>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
                         : "Asegurar ahora"}
                     </span>
                     <span className="flex items-center gap-2 text-xl font-black">
@@ -757,7 +700,7 @@ export function TavernCrash() {
               ) : (
                 <button
                   onClick={() => void handleStart()}
-                  disabled={Number(bet) <= 0 || Number(bet) > player.gold || updating || status === "starting"}
+                  disabled={bet <= 0 || bet > player.gold || updating || status === "starting"}
                   className="group relative w-full overflow-hidden rounded-2xl bg-stone-100 py-5 font-black text-stone-900 transition hover:bg-white active:scale-95 disabled:opacity-30"
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2 uppercase tracking-tighter">

@@ -128,51 +128,55 @@ export function GrimoireSection() {
             title="Grimorio de Poderes"
             description="Explora las escuelas de magia del reino, sus fundamentos fisicos y sus limites eticos. Todo poder tiene un precio y una restriccion."
           />
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-500 group-focus-within:text-amber-400 transition" />
-            <input 
-              type="text"
-              placeholder={mode === "magic" ? "Buscar habilidad o fundamento..." : "Buscar bestia, origen o rareza..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-80 rounded-2xl border border-stone-800 bg-stone-950/50 py-3.5 pl-11 pr-4 text-sm text-stone-100 placeholder:text-stone-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition"
-            />
+          <div className="flex w-full flex-col gap-3 md:w-auto md:items-end">
+            <div className="flex w-full shrink-0 rounded-2xl border border-stone-800 bg-stone-950/50 p-1.5 md:w-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("magic");
+                  setSearchQuery("");
+                }}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
+                  mode === "magic"
+                    ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/10"
+                    : "text-stone-500 hover:text-stone-300"
+                }`}
+              >
+                <BookOpen className="h-4 w-4" />
+                Magias
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("bestiary");
+                  setSearchQuery("");
+                }}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
+                  mode === "bestiary"
+                    ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/10"
+                    : "text-stone-500 hover:text-stone-300"
+                }`}
+              >
+                <PawPrint className="h-4 w-4" />
+                Bestiario
+              </button>
+            </div>
+
+            <div className="group relative w-full md:w-80">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500 transition group-focus-within:text-amber-400" />
+              <input
+                type="text"
+                placeholder={mode === "magic" ? "Buscar habilidad o fundamento..." : "Buscar bestia, origen o rareza..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/50 py-3.5 pl-11 pr-4 text-sm text-stone-100 transition placeholder:text-stone-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/20"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setMode("magic");
-              setSearchQuery("");
-            }}
-            className={`px-5 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
-              mode === "magic"
-                ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20 scale-105"
-                : "bg-stone-800/50 text-stone-400 hover:bg-stone-800 hover:text-stone-100 border border-stone-700/50"
-            }`}
-          >
-            Magias
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode("bestiary");
-              setSearchQuery("");
-            }}
-            className={`px-5 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
-              mode === "bestiary"
-                ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20 scale-105"
-                : "bg-stone-800/50 text-stone-400 hover:bg-stone-800 hover:text-stone-100 border border-stone-700/50"
-            }`}
-          >
-            Bestiario
-          </button>
-        </div>
-
         {mode === "magic" ? (
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap gap-2">
             {grimoireData.map((category) => (
               <button
                 key={category.id}

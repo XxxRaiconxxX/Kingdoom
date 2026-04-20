@@ -87,28 +87,50 @@ function mapMagicRow(row: MagicStyleRow): MagicStyle & {
   };
 }
 
-function groupMagicRows(rows: MagicStyleRow[]): GrimoireCategory[] {
-  const grouped = new Map<string, GrimoireCategory>();
+function cloneStaticCategories(): GrimoireCategory[] {
+  return GRIMOIRE_DATA.map((category) => ({
+    ...category,
+    styles: category.styles.map((style) => ({
+      ...style,
+      levels: { ...style.levels },
+    })),
+  }));
+}
+
+function mergeMagicRowsWithStatic(rows: MagicStyleRow[]): GrimoireCategory[] {
+  const categories = cloneStaticCategories();
+  const categoryMap = new Map(categories.map((category) => [category.id, category]));
 
   rows.map(mapMagicRow).forEach((style) => {
-    const current =
-      grouped.get(style.categoryId) ??
-      ({
+    let category = categoryMap.get(style.categoryId);
+
+    if (!category) {
+      category = {
         id: style.categoryId,
         title: style.categoryTitle,
         styles: [],
-      } satisfies GrimoireCategory);
+      };
+      categoryMap.set(style.categoryId, category);
+      categories.push(category);
+    }
 
-    current.styles.push({
+    const nextStyle: MagicStyle = {
       id: style.id,
       title: style.title,
       description: style.description,
       levels: style.levels,
-    });
-    grouped.set(style.categoryId, current);
+    };
+    const existingIndex = category.styles.findIndex((entry) => entry.id === style.id);
+
+    if (existingIndex >= 0) {
+      category.styles[existingIndex] = nextStyle;
+      return;
+    }
+
+    category.styles.push(nextStyle);
   });
 
-  return Array.from(grouped.values()).map((category) => ({
+  return categories.map((category) => ({
     ...category,
     styles: category.styles.sort((a, b) => a.title.localeCompare(b.title)),
   }));
@@ -189,7 +211,7 @@ export async function fetchGrimoireContent(): Promise<GrimoireContentState> {
       magicResult.error || bestiaryResult.error
         ? "El Grimorio usa contenido local mientras faltan tablas administrables en Supabase."
         : "",
-    categories: magicRows.length > 0 ? groupMagicRows(magicRows) : GRIMOIRE_DATA,
+    categories: magicRows.length > 0 ? mergeMagicRowsWithStatic(magicRows) : GRIMOIRE_DATA,
     bestiary: bestiaryRows.map(mapBestiaryRow),
   };
 }
@@ -213,7 +235,14 @@ export async function fetchAdminMagicStyles() {
   return {
     status: "ready" as const,
     message: "",
-    styles: (data as MagicStyleRow[]).map(mapMagicRow),
+    styles: mergeMagicRowsWithStatic(data as MagicStyleRow[]).flatMap((category) =>
+      category.styles.map((style, index) => ({
+        ...style,
+        categoryId: category.id,
+        categoryTitle: category.title,
+        sortOrder: index,
+      }))
+    ),
   };
 }
 

@@ -21,7 +21,6 @@ import { CharImportModal } from "./CharImportModal";
 import { CharSheetModal } from "./CharSheetModal";
 import { RealmRegistry } from "./RealmRegistry";
 import { CharacterSheet } from "../types";
-import { ARCADE_ENCOUNTERS } from "../data/pve";
 import {
   MAX_PLAYER_CHARACTER_SHEETS,
   getPlayerSheets,
@@ -29,14 +28,9 @@ import {
   deleteCharacterSheet,
 } from "../utils/characterSheets";
 import {
-  getPvePower,
-  loadPveProgressForSheet,
   resolveActivePveSheetId,
   setActivePveSheetId,
 } from "../utils/pveProgress";
-
-const PROGRESS_WINDOW_MS =
-  Math.max(...ARCADE_ENCOUNTERS.map((encounter) => encounter.windowHours)) * 60 * 60 * 1000;
 
 const AdminControlSheet = lazy(() =>
   import("./AdminControlSheet").then((module) => ({
@@ -482,9 +476,6 @@ portraitUrl,
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {playerSheets.map((sheet) => {
-                    const pveProgress = loadPveProgressForSheet(player.id, sheet.id, PROGRESS_WINDOW_MS);
-                    const pvePower = getPvePower(pveProgress);
-
                     return (
                     <div key={sheet.id} className="bg-stone-900 border border-stone-800 rounded-xl p-4 flex flex-col gap-3 hover:border-amber-500/30 transition-colors">
                       <div className="flex items-start gap-3">
@@ -518,22 +509,6 @@ portraitUrl,
                             Poder: {sheet.powers.replace(/\*/g, '')}
                           </p>
                         )}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 rounded-xl border border-stone-800 bg-stone-950/70 p-3">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.16em] text-stone-500">Lv PvE</p>
-                          <p className="mt-1 text-sm font-black text-stone-100">{pveProgress.level}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] uppercase tracking-[0.16em] text-stone-500">Poder</p>
-                          <p className="mt-1 text-sm font-black text-stone-100">{pvePower}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <p className="text-[10px] uppercase tracking-[0.16em] text-stone-500">Stats PvE</p>
-                          <p className="mt-1 text-xs font-semibold text-stone-300">
-                            F {pveProgress.stats.strength} · V {pveProgress.stats.life} · D {pveProgress.stats.defense}
-                          </p>
                         </div>
                       </div>
                       <button

@@ -1,4 +1,5 @@
-﻿import { lazy, Suspense, useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Backpack,
@@ -98,7 +99,7 @@ export function PlayerProfilePanel({
     }
   }, [player]);
 
-  const handleSaveSheet = async (partialSheet: Partial<CharacterSheet>) => {
+  const handleSaveSheet = async (partialSheet: Partial<CharacterSheet>, portraitFile?: File | null) => {
     if (!player) return;
     if (playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS) {
       setSheetFeedback(
@@ -115,10 +116,28 @@ export function PlayerProfilePanel({
       magicDefense: 0,
     };
 
+let portraitUrl: string | undefined = undefined;
+
+if (portraitFile) {
+  const ext = portraitFile.name.split(".").pop() ?? "jpg";
+  const path = `portraits/${player.id}/${crypto.randomUUID()}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from("character-portraits")
+    .upload(path, portraitFile, { upsert: true });
+
+  if (!uploadError) {
+    const { data: urlData } = supabase.storage
+      .from("character-portraits")
+      .getPublicUrl(path);
+    portraitUrl = urlData.publicUrl;
+  }
+}
+
     const newSheet: CharacterSheet = {
       id: crypto.randomUUID(),
       playerId: player.id,
       playerUsername: player.username,
+portraitUrl,
       name: partialSheet.name ?? "",
       age: partialSheet.age ?? "",
       gender: partialSheet.gender ?? "",

@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-export type TabId = "home" | "grimoire" | "library" | "market" | "ranking";
+export type TabId = "home" | "grimoire" | "library" | "market";
 export type Rarity = "legendary" | "epic" | "rare" | "common";
 export type PlayerStatus = "alive" | "dead";
 export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
@@ -209,6 +209,26 @@ export type GrimoireCategory = {
   id: string;
   title: string;
   styles: MagicStyle[];
+};
+
+export type BestiaryRarity =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "legendary"
+  | "calamity";
+
+export type BestiaryEntry = {
+  id: string;
+  name: string;
+  originPlace: string;
+  foundAt: string;
+  description: string;
+  ability: string;
+  rarity: BestiaryRarity;
+  imageUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 // --- FICHA (CHARACTER SHEET) TYPES ---

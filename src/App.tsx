@@ -9,7 +9,6 @@ import {
   Library,
   Sparkles,
   Store,
-  Trophy,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { EventCard } from "./components/EventCard";
@@ -34,7 +33,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: "grimoire", label: "Grimorio", icon: Sparkles },
   { id: "library", label: "Biblioteca", icon: Library },
   { id: "market", label: "Mercado", icon: Store },
-  { id: "ranking", label: "Ranking", icon: Trophy },
 ];
 
 const pageTransition = {
@@ -56,15 +54,9 @@ const loadMarketSection = () =>
   import("./sections/MarketSection").then((module) => ({
     default: module.MarketSection,
   }));
-const loadRankingSection = () =>
-  import("./sections/RankingSection").then((module) => ({
-    default: module.RankingSection,
-  }));
-
 const LibrarySection = lazy(loadLibrarySection);
 const GrimoireSection = lazy(loadGrimoireSection);
 const MarketSection = lazy(loadMarketSection);
-const RankingSection = lazy(loadRankingSection);
 
 function preloadTab(tabId: TabId) {
   switch (tabId) {
@@ -76,9 +68,6 @@ function preloadTab(tabId: TabId) {
       break;
     case "market":
       void loadMarketSection();
-      break;
-    case "ranking":
-      void loadRankingSection();
       break;
     default:
       break;
@@ -128,17 +117,12 @@ export default function App() {
                 <MarketSection />
               </Suspense>
             ) : null}
-            {activeTab === "ranking" ? (
-              <Suspense fallback={<FullscreenLoadingOverlay message="Levantando la tabla del reino..." />}>
-                <RankingSection />
-              </Suspense>
-            ) : null}
           </motion.div>
         </AnimatePresence>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-800/80 bg-stone-950/90 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-md grid-cols-5 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
+        <div className="mx-auto grid max-w-md grid-cols-4 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
 

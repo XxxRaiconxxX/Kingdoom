@@ -14,6 +14,7 @@ import { usePlayerSession } from "../context/PlayerSessionContext";
 import {
   cashOutCrashSecure,
   fetchCrashSessionState,
+  getCrashGrowthMultiplier,
   startCrashGameSecure,
 } from "../utils/minigamesSecure";
 
@@ -24,17 +25,26 @@ interface Point {
   multiplier: number;
 }
 
-const SPINUP_SECONDS = 1.2;
-
 export function TavernCrash() {
   const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [status, setStatus] = useState<GameStatus>("betting");
+<<<<<<< HEAD
   const [bet, setBet] = useState<number | "">("");
+=======
+  const [bet, setBet] = useState(0);
+  const [betInput, setBetInput] = useState("");
+>>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
   const [multiplier, setMultiplier] = useState(1);
   const [history, setHistory] = useState<number[]>([]);
   const [updating, setUpdating] = useState(false);
+  const [refreshingGold, setRefreshingGold] = useState(false);
   const [lastWin, setLastWin] = useState(0);
+<<<<<<< HEAD
   const [autoCashOut, setAutoCashOut] = useState<number | "">("");
+=======
+  const [autoCashOut, setAutoCashOut] = useState<number>(0);
+  const [autoCashOutInput, setAutoCashOutInput] = useState("");
+>>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
   const [crashError, setCrashError] = useState("");
   const [startTimestamp, setStartTimestamp] = useState<number | null>(null);
 
@@ -49,6 +59,8 @@ export function TavernCrash() {
   const autoCashOutRef = useRef<number>(0);
   const multiplierRef = useRef(1);
   const startTimestampRef = useRef<number | null>(null);
+  const lastUiMultiplierUpdateRef = useRef(0);
+  const cashOutInFlightRef = useRef(false);
 
   useEffect(() => {
     statusRef.current = status;
@@ -64,6 +76,61 @@ export function TavernCrash() {
   }, [startTimestamp]);
 
   const projectedCashOut = useMemo(() => Math.floor(Number(bet) * multiplier), [bet, multiplier]);
+
+  function syncBetInput(nextBet: number) {
+    const sanitized = Math.max(0, Math.floor(nextBet));
+    setBet(sanitized);
+    setBetInput(sanitized > 0 ? String(sanitized) : "");
+  }
+
+  function handleBetInputChange(rawValue: string) {
+    const digitsOnly = rawValue.replace(/[^\d]/g, "");
+
+    if (!digitsOnly) {
+      setBet(0);
+      setBetInput("");
+      return;
+    }
+
+    const parsed = Number(digitsOnly);
+    const capped = Math.min(player?.gold ?? parsed, Math.max(0, Math.floor(parsed)));
+    setBet(capped);
+    setBetInput(String(capped));
+  }
+
+  function syncAutoCashOutInput(nextAutoCashOut: number) {
+    const sanitized = nextAutoCashOut >= 1.01 ? Number(nextAutoCashOut.toFixed(2)) : 0;
+    setAutoCashOut(sanitized);
+    setAutoCashOutInput(sanitized > 0 ? String(sanitized) : "");
+  }
+
+  function handleAutoCashOutInputChange(rawValue: string) {
+    const normalized = rawValue.replace(",", ".").replace(/[^\d.]/g, "");
+    const parts = normalized.split(".");
+    const cleanValue =
+      parts.length > 1 ? `${parts[0]}.${parts.slice(1).join("")}` : normalized;
+
+    setAutoCashOutInput(cleanValue);
+
+    const parsed = Number(cleanValue);
+    setAutoCashOut(Number.isFinite(parsed) && parsed >= 1.01 ? parsed : 0);
+  }
+
+  function getPerformanceStartTimestamp(startedAt?: number) {
+    if (!startedAt) {
+      return performance.now();
+    }
+
+    return performance.now() - Math.max(0, Date.now() - startedAt);
+  }
+
+  function syncRoundStart(startedAt?: number) {
+    const timestamp = getPerformanceStartTimestamp(startedAt);
+    setStartTimestamp(timestamp);
+    startTimestampRef.current = timestamp;
+    lastUiMultiplierUpdateRef.current = 0;
+    pointsRef.current = [{ time: 0, multiplier: 1 }];
+  }
 
   useEffect(() => {
     let active = true;
@@ -86,6 +153,7 @@ export function TavernCrash() {
 
       setHistory(result.history);
       setStatus(result.session.phase);
+<<<<<<< HEAD
       if (!hydrateRunRef.current) {
         setBet(result.session.bet > 0 ? result.session.bet : "");
         setAutoCashOut(result.session.autoCashOut > 0 ? result.session.autoCashOut : "");
@@ -93,6 +161,15 @@ export function TavernCrash() {
       }
       setMultiplier(result.session.multiplier);
       setLastWin(result.session.lastWin);
+=======
+      syncBetInput(result.session.bet);
+      setMultiplier(result.session.multiplier);
+      setLastWin(result.session.lastWin);
+      syncAutoCashOutInput(result.session.autoCashOut);
+      if (result.session.phase === "rising" && result.session.startedAt) {
+        syncRoundStart(result.session.startedAt);
+      }
+>>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
     }
 
     void hydrateCrash();
@@ -108,7 +185,15 @@ export function TavernCrash() {
     }
 
     const intervalId = window.setInterval(async () => {
+      if (cashOutInFlightRef.current) {
+        return;
+      }
+
       const result = await fetchCrashSessionState();
+
+      if (cashOutInFlightRef.current) {
+        return;
+      }
 
       if (result.status === "error") {
         setCrashError(result.message);
@@ -117,19 +202,23 @@ export function TavernCrash() {
 
       setHistory(result.history);
       setStatus(result.session.phase);
-      setMultiplier(result.session.multiplier);
+      if (result.session.phase !== "rising") {
+        setMultiplier(result.session.multiplier);
+      }
       setLastWin(result.session.lastWin);
+<<<<<<< HEAD
+=======
+      syncAutoCashOutInput(result.session.autoCashOut);
+>>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
 
       if (result.session.phase === "rising" && startTimestampRef.current === null) {
-        const timestamp = performance.now() - SPINUP_SECONDS * 1000;
-        setStartTimestamp(timestamp);
-        pointsRef.current = [{ time: 0, multiplier: 1 }];
+        syncRoundStart(result.session.startedAt);
       }
 
       if (result.session.phase === "crashed" || result.session.phase === "cashed_out") {
         await refreshPlayer();
       }
-    }, 250);
+    }, 120);
 
     return () => {
       window.clearInterval(intervalId);
@@ -145,7 +234,7 @@ export function TavernCrash() {
   ) => {
     ctx.clearRect(0, 0, width, height);
 
-    const maxX = Math.max(10, elapsed * 1.25);
+    const maxX = Math.max(8, elapsed * 1.25);
     let maxY = Math.max(2, currentMultiplier * 1.3);
 
     if (autoCashOutRef.current >= 1.01) {
@@ -246,10 +335,19 @@ export function TavernCrash() {
 
     const start = startTimestampRef.current ?? time;
     const elapsedSeconds = Math.max((time - start) / 1000, 0);
-    const currentMultiplier = multiplierRef.current;
+    const currentMultiplier =
+      statusRef.current === "rising"
+        ? getCrashGrowthMultiplier(elapsedSeconds)
+        : multiplierRef.current;
+
+    multiplierRef.current = currentMultiplier;
+    if (statusRef.current === "rising" && time - lastUiMultiplierUpdateRef.current > 80) {
+      lastUiMultiplierUpdateRef.current = time;
+      setMultiplier(currentMultiplier);
+    }
 
     pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMultiplier });
-    if (pointsRef.current.length > 200) {
+    if (pointsRef.current.length > 1200) {
       pointsRef.current.shift();
     }
 
@@ -267,7 +365,9 @@ export function TavernCrash() {
       }
     }
 
-    requestRef.current = window.requestAnimationFrame(animateGraph);
+    if (statusRef.current === "rising") {
+      requestRef.current = window.requestAnimationFrame(animateGraph);
+    }
   };
 
   useEffect(() => {
@@ -334,12 +434,10 @@ export function TavernCrash() {
     }
 
     setStatus(result.session.phase);
-    setMultiplier(result.session.multiplier);
+    setMultiplier(1);
     setLastWin(result.session.lastWin);
     setHistory(result.history);
-    setStartTimestamp(performance.now());
-    startTimestampRef.current = performance.now();
-    pointsRef.current = [{ time: 0, multiplier: 1 }];
+    syncRoundStart(result.session.startedAt);
     await refreshPlayer();
     setUpdating(false);
   }
@@ -349,21 +447,54 @@ export function TavernCrash() {
       return;
     }
 
+    const lockedAt = Date.now();
+    const lockedMultiplier = multiplierRef.current;
+    const lockedWin = Math.floor(bet * lockedMultiplier);
+    cashOutInFlightRef.current = true;
     setUpdating(true);
-    const result = await cashOutCrashSecure();
+    statusRef.current = "cashed_out";
+    multiplierRef.current = lockedMultiplier;
+    setStatus("cashed_out");
+    setMultiplier(lockedMultiplier);
+    setLastWin(lockedWin);
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+    }
+
+    const result = await cashOutCrashSecure({
+      multiplier: lockedMultiplier,
+      requestedAt: lockedAt,
+    });
 
     if (result.status === "error") {
       setCrashError(result.message);
+      statusRef.current = "rising";
+      setStatus("rising");
+      cashOutInFlightRef.current = false;
       setUpdating(false);
       return;
     }
 
+    cashOutInFlightRef.current = false;
     setStatus(result.session.phase);
     setMultiplier(result.session.multiplier);
     setLastWin(result.session.lastWin);
     setHistory(result.history);
     await refreshPlayer();
     setUpdating(false);
+  }
+
+  async function handleRefreshGold() {
+    if (refreshingGold) {
+      return;
+    }
+
+    setRefreshingGold(true);
+    try {
+      await refreshPlayer();
+    } finally {
+      setRefreshingGold(false);
+    }
   }
 
   if (isHydrating) {
@@ -392,11 +523,11 @@ export function TavernCrash() {
             <p className="font-mono text-lg font-black text-amber-400">{player.gold}</p>
             <button
               type="button"
-              onClick={() => void refreshPlayer()}
-              disabled={updating}
+              onClick={() => void handleRefreshGold()}
+              disabled={refreshingGold}
               className="rounded-lg p-1 text-stone-500 transition hover:text-amber-400 disabled:opacity-30"
             >
-              <RefreshCw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-4 w-4 ${refreshingGold ? "animate-spin" : ""}`} />
             </button>
           </div>
         </div>
@@ -412,7 +543,13 @@ export function TavernCrash() {
         <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-stone-800 bg-stone-950 shadow-2xl group">
           <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
 
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <div
+            className={`pointer-events-none absolute inset-0 flex ${
+              status === "rising"
+                ? "items-start justify-center p-4 sm:p-6"
+                : "flex-col items-center justify-center"
+            }`}
+          >
             <AnimatePresence mode="wait">
               {status === "betting" ? (
                 <motion.div key="betting-ui" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
@@ -427,12 +564,12 @@ export function TavernCrash() {
                   className="flex flex-col items-center"
                 >
                   <h2
-                    className={`text-6xl font-black tabular-nums drop-shadow-[0_0_40px_rgba(0,0,0,0.8)] md:text-8xl ${
+                    className={`font-black tabular-nums drop-shadow-[0_0_40px_rgba(0,0,0,0.8)] ${
                       status === "crashed"
-                        ? "text-rose-600"
+                        ? "text-6xl text-rose-600 md:text-8xl"
                         : status === "cashed_out"
-                          ? "text-emerald-500/60"
-                          : "text-stone-50"
+                          ? "text-6xl text-emerald-500/60 md:text-8xl"
+                          : "rounded-2xl border border-amber-400/20 bg-stone-950/70 px-5 py-2 text-4xl text-stone-50 shadow-[0_0_30px_rgba(0,0,0,0.65)] backdrop-blur-sm md:text-5xl"
                     }`}
                   >
                     {multiplier.toFixed(2)}x
@@ -514,6 +651,7 @@ export function TavernCrash() {
 
               <div className="mb-4 flex items-center gap-3">
                 <input
+<<<<<<< HEAD
                   type="number"
                   value={bet}
                   onChange={(event) => {
@@ -524,21 +662,29 @@ export function TavernCrash() {
                       setBet(Math.min(player.gold, Math.max(0, parseInt(val, 10) || 0)));
                     }
                   }}
+=======
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={betInput}
+                  onChange={(event) => handleBetInputChange(event.target.value)}
+>>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
                   disabled={status === "rising" || status === "starting"}
+                  placeholder="Monto a apostar"
                   className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 text-lg font-black text-stone-100 transition focus:border-amber-500/50 focus:outline-none"
                 />
               </div>
 
               <div className="mb-4 grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => setBet(Math.floor(player.gold / 2))}
+                  onClick={() => syncBetInput(Math.floor(player.gold / 2))}
                   disabled={status === "rising" || status === "starting"}
                   className="rounded-xl bg-stone-800 py-2 text-[10px] font-black text-stone-400 transition hover:text-stone-100"
                 >
                   50% SALDO
                 </button>
                 <button
-                  onClick={() => setBet(player.gold)}
+                  onClick={() => syncBetInput(player.gold)}
                   disabled={status === "rising" || status === "starting"}
                   className="rounded-xl bg-stone-800 py-2 text-[10px] font-black text-stone-400 transition hover:text-stone-100"
                 >
@@ -553,6 +699,7 @@ export function TavernCrash() {
                 </label>
                 <div className="relative">
                   <input
+<<<<<<< HEAD
                     type="number"
                     step="0.1"
                     min="0"
@@ -565,12 +712,21 @@ export function TavernCrash() {
                         setAutoCashOut(parseFloat(val) || 0);
                       }
                     }}
+=======
+                    type="text"
+                    inputMode="decimal"
+                    value={autoCashOutInput}
+                    onChange={(event) => handleAutoCashOutInputChange(event.target.value)}
+>>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
                     disabled={status === "rising" || status === "starting"}
                     placeholder="Ej: 1.50  (0 = desactivado)"
                     className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 pr-8 text-base font-black text-amber-400 placeholder:font-normal placeholder:text-stone-600 transition focus:border-amber-500/50 focus:outline-none"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black text-stone-500">x</span>
                 </div>
+                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
+                  Dejalo vacio para que suba hasta colapsar. Si marcas un valor, cobra automatico al llegar.
+                </p>
               </div>
             </div>
 
@@ -583,8 +739,13 @@ export function TavernCrash() {
                 >
                   <span className="relative z-10 flex flex-col items-center">
                     <span className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
+<<<<<<< HEAD
                       {Number(autoCashOut) >= 1.01
                         ? `Auto en ${Number(autoCashOut).toFixed(2)}x — o retira ya`
+=======
+                      {autoCashOut >= 1.01
+                        ? `Auto en ${autoCashOut.toFixed(2)}x - o retira ya`
+>>>>>>> 42eba0c7db315c28079d66d8404095c212ce385f
                         : "Asegurar ahora"}
                     </span>
                     <span className="flex items-center gap-2 text-xl font-black">

@@ -45,6 +45,6 @@ export const JOIN_STEPS: JoinStep[] = [
   {
     title: "Empieza a rolear y progresar",
     description:
-      "Participa en WhatsApp, usa la web para mercado, fichas, ranking y deja huella en la historia oficial.",
+    "Participa en WhatsApp, usa la web para mercado, fichas y grimorio, y deja huella en la historia oficial.",
   },
 ];

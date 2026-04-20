@@ -65,6 +65,7 @@ export type CrashSessionStateResult =
         multiplier: number;
         lastWin: number;
         autoCashOut: number;
+        startedAt?: number;
       };
       remainingGold: number;
       history: number[];
@@ -231,16 +232,17 @@ function pushCrashHistory(playerId: string, value: number) {
   return next;
 }
 
-function getCrashGrowthMultiplier(elapsedSeconds: number) {
-  return Number((1 + elapsedSeconds * 0.72 + elapsedSeconds * elapsedSeconds * 0.09).toFixed(2));
+export function getCrashGrowthMultiplier(elapsedSeconds: number) {
+  const safeElapsed = Math.max(0, elapsedSeconds);
+  return Number(Math.exp(safeElapsed * 0.17).toFixed(2));
 }
 
 function randomCrashAt() {
   const roll = Math.random();
-  if (roll < 0.45) return 1.35 + Math.random() * 0.9;
-  if (roll < 0.75) return 2.25 + Math.random() * 1.8;
-  if (roll < 0.93) return 4.2 + Math.random() * 3.6;
-  return 8 + Math.random() * 10;
+  if (roll < 0.34) return 1.45 + Math.random() * 0.85;
+  if (roll < 0.7) return 2.35 + Math.random() * 1.9;
+  if (roll < 0.93) return 4.4 + Math.random() * 3.8;
+  return 8.5 + Math.random() * 9.5;
 }
 
 async function resolveCrashState(playerId: string, playerGold: number) {
@@ -539,6 +541,7 @@ export async function fetchCrashSessionState(): Promise<CrashSessionStateResult>
       multiplier: resolved.state.multiplier,
       lastWin: resolved.state.lastWin,
       autoCashOut: resolved.state.autoCashOut,
+      startedAt: resolved.state.startedAt,
     },
     remainingGold: resolved.remainingGold,
     history: resolved.history,
@@ -584,20 +587,25 @@ export async function startCrashGameSecure(input: {
       multiplier: state.multiplier,
       lastWin: state.lastWin,
       autoCashOut: state.autoCashOut,
+      startedAt: state.startedAt,
     },
     remainingGold,
     history: getCrashHistory(player.id),
   };
 }
 
-export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
+export async function cashOutCrashSecure(input?: {
+  multiplier?: number;
+  requestedAt?: number;
+}): Promise<CrashSessionStateResult> {
   const player = await getActivePlayer();
   if (!player) {
     return { status: "error", message: "Conecta tu perfil del reino antes de usar Crash." };
   }
 
-  const resolved = await resolveCrashState(player.id, player.gold);
-  if (resolved.state.phase !== "rising") {
+  const state = getCrashState(player.id);
+  if (state.phase !== "rising" || !state.startedAt || !state.crashAt) {
+    const resolved = await resolveCrashState(player.id, player.gold);
     return {
       status: "success",
       session: {
@@ -606,13 +614,46 @@ export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
         multiplier: resolved.state.multiplier,
         lastWin: resolved.state.lastWin,
         autoCashOut: resolved.state.autoCashOut,
+        startedAt: resolved.state.startedAt,
       },
       remainingGold: resolved.remainingGold,
       history: resolved.history,
     };
   }
 
-  const payout = Math.floor(resolved.state.bet * resolved.state.multiplier);
+  const requestedAt = input?.requestedAt ?? Date.now();
+  const elapsedAtRequest = Math.max(0, (requestedAt - state.startedAt) / 1000);
+  const requestGrowth = getCrashGrowthMultiplier(elapsedAtRequest);
+  const crashPoint = Number(state.crashAt.toFixed(2));
+
+  if (requestGrowth >= state.crashAt) {
+    const nextState: CrashState = {
+      ...state,
+      phase: "crashed",
+      multiplier: crashPoint,
+      lastWin: 0,
+    };
+    const history = pushCrashHistory(player.id, crashPoint);
+    saveCrashState(player.id, nextState);
+
+    return {
+      status: "success",
+      session: {
+        phase: nextState.phase,
+        bet: nextState.bet,
+        multiplier: nextState.multiplier,
+        lastWin: nextState.lastWin,
+        autoCashOut: nextState.autoCashOut,
+        startedAt: nextState.startedAt,
+      },
+      remainingGold: player.gold,
+      history,
+    };
+  }
+
+  const clickedMultiplier = input?.multiplier && input.multiplier >= 1 ? input.multiplier : requestGrowth;
+  const cashOutMultiplier = Number(Math.min(clickedMultiplier, requestGrowth).toFixed(2));
+  const payout = Math.floor(state.bet * cashOutMultiplier);
   const remainingGold = player.gold + payout;
   const updated = await updatePlayerGold(player.id, remainingGold);
   if (!updated) {
@@ -620,8 +661,9 @@ export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
   }
 
   const nextState: CrashState = {
-    ...resolved.state,
+    ...state,
     phase: "cashed_out",
+    multiplier: cashOutMultiplier,
     lastWin: payout,
   };
   const history = pushCrashHistory(player.id, Number(nextState.multiplier.toFixed(2)));
@@ -635,6 +677,7 @@ export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
       multiplier: nextState.multiplier,
       lastWin: nextState.lastWin,
       autoCashOut: nextState.autoCashOut,
+      startedAt: nextState.startedAt,
     },
     remainingGold,
     history,

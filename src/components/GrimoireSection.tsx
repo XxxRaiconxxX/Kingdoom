@@ -7,16 +7,24 @@ import {
   AlertTriangle, 
   ShieldAlert,
   Search,
-  BookOpen
+  BookOpen,
+  PawPrint,
+  MapPin,
+  Gem
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionHeader } from "./SectionHeader";
-import type { GrimoireCategory, MagicStyle, AbilityLevel } from "../types";
+import type { BestiaryEntry, GrimoireCategory, MagicStyle, AbilityLevel } from "../types";
+import { fetchGrimoireContent } from "../utils/grimoireContent";
+
+type GrimoireMode = "magic" | "bestiary";
 
 export function GrimoireSection() {
   const [grimoireData, setGrimoireData] = useState<GrimoireCategory[]>([]);
+  const [bestiaryData, setBestiaryData] = useState<BestiaryEntry[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [mode, setMode] = useState<GrimoireMode>("magic");
 
   const isSearching = searchQuery.trim().length > 0;
 
@@ -24,13 +32,14 @@ export function GrimoireSection() {
     let cancelled = false;
 
     async function loadGrimoireData() {
-      const module = await import("../data/grimorio");
+      const result = await fetchGrimoireContent();
       if (cancelled) {
         return;
       }
 
-      setGrimoireData(module.GRIMOIRE_DATA);
-      setSelectedCategoryId((current) => current || module.GRIMOIRE_DATA[0]?.id || "");
+      setGrimoireData(result.categories);
+      setBestiaryData(result.bestiary);
+      setSelectedCategoryId((current) => current || result.categories[0]?.id || "");
     }
 
     void loadGrimoireData();
@@ -82,6 +91,20 @@ export function GrimoireSection() {
     return results;
   }, [grimoireData, isSearching, searchQuery, selectedCategoryId]);
 
+  const displayBestiary = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
+      return bestiaryData;
+    }
+
+    return bestiaryData.filter((entry) =>
+      `${entry.name} ${entry.originPlace} ${entry.foundAt} ${entry.description} ${entry.ability} ${entry.rarity}`
+        .toLowerCase()
+        .includes(query)
+    );
+  }, [bestiaryData, searchQuery]);
+
   if (grimoireData.length === 0) {
     return (
       <section className="space-y-6">
@@ -105,72 +128,244 @@ export function GrimoireSection() {
             title="Grimorio de Poderes"
             description="Explora las escuelas de magia del reino, sus fundamentos fisicos y sus limites eticos. Todo poder tiene un precio y una restriccion."
           />
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-500 group-focus-within:text-amber-400 transition" />
-            <input 
-              type="text"
-              placeholder="Buscar habilidad o fundamento..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-80 rounded-2xl border border-stone-800 bg-stone-950/50 py-3.5 pl-11 pr-4 text-sm text-stone-100 placeholder:text-stone-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition"
-            />
+          <div className="flex w-full flex-col gap-3 md:w-auto md:items-end">
+            <div className="flex w-full shrink-0 rounded-2xl border border-stone-800 bg-stone-950/50 p-1.5 md:w-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("magic");
+                  setSearchQuery("");
+                }}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
+                  mode === "magic"
+                    ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/10"
+                    : "text-stone-500 hover:text-stone-300"
+                }`}
+              >
+                <BookOpen className="h-4 w-4" />
+                Magias
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("bestiary");
+                  setSearchQuery("");
+                }}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
+                  mode === "bestiary"
+                    ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/10"
+                    : "text-stone-500 hover:text-stone-300"
+                }`}
+              >
+                <PawPrint className="h-4 w-4" />
+                Bestiario
+              </button>
+            </div>
+
+            <div className="group relative w-full md:w-80">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500 transition group-focus-within:text-amber-400" />
+              <input
+                type="text"
+                placeholder={mode === "magic" ? "Buscar habilidad o fundamento..." : "Buscar bestia, origen o rareza..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl border border-stone-800 bg-stone-950/50 py-3.5 pl-11 pr-4 text-sm text-stone-100 transition placeholder:text-stone-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/20"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-2">
-          {grimoireData.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => {
-                setSelectedCategoryId(category.id);
-                setSearchQuery(""); // Clear search when picking a category
-              }}
-              className={`px-5 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
-                !isSearching && selectedCategoryId === category.id
-                  ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/20 scale-105"
-                  : "bg-stone-800/50 text-stone-400 hover:bg-stone-800 hover:text-stone-100 border border-stone-700/50"
-              }`}
+        {mode === "magic" ? (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {grimoireData.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => {
+                  setSelectedCategoryId(category.id);
+                  setSearchQuery("");
+                }}
+                className={`px-5 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
+                  !isSearching && selectedCategoryId === category.id
+                    ? "bg-stone-100 text-stone-950 shadow-lg shadow-stone-100/10"
+                    : "bg-stone-800/50 text-stone-400 hover:bg-stone-800 hover:text-stone-100 border border-stone-700/50"
+                }`}
+              >
+                {category.title}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      {mode === "bestiary" ? (
+        <BestiaryView
+          entries={displayBestiary}
+          searchQuery={searchQuery}
+          onClearSearch={() => setSearchQuery("")}
+        />
+      ) : (
+        <div className="space-y-4">
+          {isSearching && (
+            <div className="px-4 py-2 flex items-center justify-between">
+              <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">
+                Mostrando {displayStyles.length} resultados globales
+              </p>
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="text-xs font-bold text-amber-500 hover:text-amber-400 uppercase tracking-widest underline underline-offset-4"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          )}
+
+          {displayStyles.map((style) => (
+            <MagicStylePanel 
+              key={style.id} 
+              style={style} 
+              searchQuery={searchQuery}
+              showCategoryTag={isSearching}
+            />
+          ))}
+          
+          {displayStyles.length === 0 && (
+            <div className="rounded-[2rem] border border-dashed border-stone-800 bg-stone-900/20 p-12 text-center">
+              <BookOpen className="h-10 w-10 text-stone-700 mx-auto mb-4" />
+              <p className="text-stone-500 text-sm italic">
+                {isSearching ? "No se encontraron coincidencias en el grimorio..." : "Esta seccion del grimorio aun no ha sido transcrita..."}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function getBestiaryRarityLabel(rarity: BestiaryEntry["rarity"]) {
+  const labels: Record<BestiaryEntry["rarity"], string> = {
+    common: "Comun",
+    uncommon: "Poco comun",
+    rare: "Raro",
+    legendary: "Legendario",
+    calamity: "Calamidad",
+  };
+
+  return labels[rarity] ?? rarity;
+}
+
+function BestiaryView({
+  entries,
+  searchQuery,
+  onClearSearch,
+}: {
+  entries: BestiaryEntry[];
+  searchQuery: string;
+  onClearSearch: () => void;
+}) {
+  const isSearching = searchQuery.trim().length > 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/55 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-amber-400/80">
+              <PawPrint className="h-4 w-4" />
+              Bestiario del reino
+            </div>
+            <p className="mt-2 text-sm leading-6 text-stone-400">
+              Criaturas, horrores y calamidades catalogadas por origen, habitat,
+              rareza y habilidad dominante.
+            </p>
+          </div>
+          <span className="w-fit rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
+            {entries.length} registros
+          </span>
+        </div>
+      </div>
+
+      {isSearching ? (
+        <div className="px-4 py-2 flex items-center justify-between">
+          <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">
+            Mostrando {entries.length} resultados del bestiario
+          </p>
+          <button
+            onClick={onClearSearch}
+            className="text-xs font-bold text-amber-500 hover:text-amber-400 uppercase tracking-widest underline underline-offset-4"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      ) : null}
+
+      {entries.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {entries.map((entry) => (
+            <article
+              key={entry.id}
+              className="overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-900/60 shadow-xl shadow-black/20"
             >
-              {category.title}
-            </button>
+              <div className="relative h-52 border-b border-stone-800 bg-stone-950">
+                {entry.imageUrl ? (
+                  <img
+                    src={entry.imageUrl}
+                    alt={entry.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-stone-700">
+                    <PawPrint className="h-12 w-12" />
+                  </div>
+                )}
+                <div className="absolute left-4 top-4 rounded-full border border-stone-700 bg-stone-950/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-amber-300 backdrop-blur">
+                  {getBestiaryRarityLabel(entry.rarity)}
+                </div>
+              </div>
+
+              <div className="space-y-4 p-5">
+                <div>
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-stone-100">
+                    {entry.name}
+                  </h3>
+                  <div className="mt-3 grid gap-2 text-xs uppercase tracking-[0.14em] text-stone-500">
+                    <div className="flex items-center gap-2">
+                      <Gem className="h-3.5 w-3.5 text-amber-500/80" />
+                      Origen: {entry.originPlace || "Desconocido"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-3.5 w-3.5 text-amber-500/80" />
+                      Se encuentra: {entry.foundAt || "Sin registrar"}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm leading-6 text-stone-300">{entry.description}</p>
+                <div className="rounded-2xl border border-amber-500/15 bg-amber-500/10 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-400">
+                    Habilidad
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-amber-50/90">
+                    {entry.ability}
+                  </p>
+                </div>
+              </div>
+            </article>
           ))}
         </div>
-      </div>
-
-      <div className="space-y-4">
-        {isSearching && (
-          <div className="px-4 py-2 flex items-center justify-between">
-            <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">
-              Mostrando {displayStyles.length} resultados globales
-            </p>
-            <button 
-              onClick={() => setSearchQuery("")}
-              className="text-xs font-bold text-amber-500 hover:text-amber-400 uppercase tracking-widest underline underline-offset-4"
-            >
-              Limpiar filtros
-            </button>
-          </div>
-        )}
-
-        {displayStyles.map((style) => (
-          <MagicStylePanel 
-            key={style.id} 
-            style={style} 
-            searchQuery={searchQuery}
-            showCategoryTag={isSearching}
-          />
-        ))}
-        
-        {displayStyles.length === 0 && (
-          <div className="rounded-[2rem] border border-dashed border-stone-800 bg-stone-900/20 p-12 text-center">
-            <BookOpen className="h-10 w-10 text-stone-700 mx-auto mb-4" />
-            <p className="text-stone-500 text-sm italic">
-              {isSearching ? "No se encontraron coincidencias en el grimorio..." : "Esta seccion del grimorio aun no ha sido transcrita..."}
-            </p>
-          </div>
-        )}
-      </div>
-    </section>
+      ) : (
+        <div className="rounded-[2rem] border border-dashed border-stone-800 bg-stone-900/20 p-12 text-center">
+          <PawPrint className="h-10 w-10 text-stone-700 mx-auto mb-4" />
+          <p className="text-stone-500 text-sm italic">
+            {isSearching
+              ? "No se encontraron criaturas para ese filtro..."
+              : "El Bestiario aun no tiene criaturas cargadas desde el panel admin."}
+          </p>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { AdminBestiaryManager, AdminMagicManager } from "./AdminGrimoireManagers";
 import {
   Coins,
   Crown,
@@ -34,14 +35,21 @@ import {
 } from "../utils/market";
 import type { EventStatus, MarketCategoryId, MarketItem, PlayerAccount, RankingPlayer, Rarity, RealmEvent, StockStatus } from "../types";
 
-type AdminTab = "overview" | "activity" | "players" | "events" | "market";
+type AdminTab =
+  | "overview"
+  | "activity"
+  | "players"
+  | "events"
+  | "market"
+  | "magic"
+  | "bestiary";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
 type EventListFilter = "all" | EventStatus;
 const ADMIN_LIST_PREVIEW_COUNT = 4;
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const { player, refreshPlayer } = usePlayerSession();
-  const [activeTab, setActiveTab] = useState<AdminTab>("activity");
+  const [activeTab, setActiveTab] = useState<AdminTab>("players");
   const [players, setPlayers] = useState<PlayerAccount[]>([]);
   const [rankingRows, setRankingRows] = useState<RankingPlayer[]>([]);
   const [rankingMessage, setRankingMessage] = useState("");
@@ -115,10 +123,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
     async function loadAdminData() {
       setStatus("loading");
-      const [playersList, rankingResult] = await Promise.all([
-        fetchAllPlayers(),
-        fetchAdminWeeklyRankingRows(),
-      ]);
+      const playersList = await fetchAllPlayers();
       const eventsResult = await fetchRealmEvents();
       const marketResult = await fetchMarketItems();
 
@@ -127,12 +132,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       }
 
       setPlayers(playersList);
-      setRankingRows(rankingResult.rows);
-      setRankingMessage(rankingResult.message);
-      setWindowLabel(formatRankingWindow(rankingResult.window));
       setEvents(eventsResult.events);
       setMarketItems(marketResult.items);
-      setStatus(rankingResult.status === "ready" ? "ready" : "unavailable");
+      setStatus("ready");
     }
 
     void loadAdminData();
@@ -144,20 +146,14 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
   async function reloadAdminData() {
     setStatus("loading");
-    const [playersList, rankingResult] = await Promise.all([
-      fetchAllPlayers(),
-      fetchAdminWeeklyRankingRows(),
-    ]);
+    const playersList = await fetchAllPlayers();
     const eventsResult = await fetchRealmEvents();
     const marketResult = await fetchMarketItems();
 
     setPlayers(playersList);
-    setRankingRows(rankingResult.rows);
-    setRankingMessage(rankingResult.message);
-    setWindowLabel(formatRankingWindow(rankingResult.window));
     setEvents(eventsResult.events);
     setMarketItems(marketResult.items);
-    setStatus(rankingResult.status === "ready" ? "ready" : "unavailable");
+    setStatus("ready");
   }
 
   const selectedPlayer = useMemo(
@@ -605,13 +601,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           <div className="flex w-full max-w-[100vw] items-center gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:max-w-full md:px-0 [&::-webkit-scrollbar]:hidden">
             <div className="flex-shrink-0">
               <AdminTabButton
-                label="Actividad"
-                active={activeTab === "activity"}
-                onClick={() => setActiveTab("activity")}
-              />
-            </div>
-            <div className="flex-shrink-0">
-              <AdminTabButton
                 label="Jugadores"
                 active={activeTab === "players"}
                 onClick={() => setActiveTab("players")}
@@ -629,6 +618,20 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 label="Mercado"
                 active={activeTab === "market"}
                 onClick={() => setActiveTab("market")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Magias"
+                active={activeTab === "magic"}
+                onClick={() => setActiveTab("magic")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Bestiario"
+                active={activeTab === "bestiary"}
+                onClick={() => setActiveTab("bestiary")}
               />
             </div>
           </div>
@@ -1714,6 +1717,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
               </section>
             </div>
           ) : null}
+
+          {activeTab === "magic" ? <AdminMagicManager /> : null}
+
+          {activeTab === "bestiary" ? <AdminBestiaryManager /> : null}
 
         </div>
       </motion.div>

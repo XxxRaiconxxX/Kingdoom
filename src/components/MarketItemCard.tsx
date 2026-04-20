@@ -96,7 +96,7 @@ export function MarketItemCard({
 
   return (
     <article
-      className={`relative overflow-hidden rounded-[1.5rem] border ${style.card}`}
+      className={`kd-hover-lift relative overflow-hidden rounded-[1.5rem] border ${style.card}`}
     >
       {style.glow ? (
         <>
@@ -180,7 +180,7 @@ export function MarketItemCard({
             <button
               type="button"
               onClick={() => setIsDescriptionExpanded((current) => !current)}
-              className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-300 transition hover:text-amber-200 md:hidden"
+              className="kd-touch text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-300 transition hover:text-amber-200 md:hidden"
             >
               {isDescriptionExpanded ? "Ver menos" : "Ver mas"}
             </button>
@@ -197,7 +197,7 @@ export function MarketItemCard({
                 <button
                   type="button"
                   onClick={() => setIsAbilityExpanded((current) => !current)}
-                  className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-400 transition hover:text-stone-200"
+                  className="kd-touch text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-400 transition hover:text-stone-200"
                 >
                   {isAbilityExpanded ? "Ocultar" : "Ver"}
                 </button>
@@ -235,7 +235,7 @@ export function MarketItemCard({
           type="button"
           onClick={onBuy}
           disabled={stock.buttonDisabled}
-          className={`flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition md:py-3 ${
+          className={`kd-touch flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition md:py-3 ${
             stock.buttonDisabled
               ? "cursor-not-allowed bg-stone-800 text-stone-500"
               : "bg-amber-500 text-stone-950 hover:bg-amber-400"

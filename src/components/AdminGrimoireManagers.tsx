@@ -378,7 +378,7 @@ export function AdminMagicManager() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-      <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
         <AdminManagerHeader
           icon={<Sparkles className="h-5 w-5" />}
           eyebrow="Editor del grimorio"
@@ -401,7 +401,7 @@ export function AdminMagicManager() {
               <button
                 type="button"
                 onClick={handleParseDraft}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
+                className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
               >
                 <Sparkles className="h-4 w-4" />
                 Interpretar formato
@@ -409,7 +409,7 @@ export function AdminMagicManager() {
               <button
                 type="button"
                 onClick={() => setDraftText("")}
-                className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500"
+                className="kd-touch rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500"
               >
                 Limpiar texto pegado
               </button>
@@ -447,7 +447,7 @@ export function AdminMagicManager() {
             <button
               type="button"
               onClick={() => setShowAdvancedLevels((current) => !current)}
-              className="flex w-full items-center justify-between gap-3 text-left"
+              className="kd-touch flex w-full items-center justify-between gap-3 text-left"
             >
               <span>
                 <span className="block text-sm font-bold text-stone-100">
@@ -478,7 +478,7 @@ export function AdminMagicManager() {
             <button
               type="submit"
               disabled={isSaving}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:opacity-60"
+              className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:opacity-60"
             >
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
               {styleId ? "Actualizar magia" : "Guardar magia"}
@@ -486,7 +486,7 @@ export function AdminMagicManager() {
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-2xl border border-stone-700 px-5 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500"
+              className="kd-touch rounded-2xl border border-stone-700 px-5 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500"
             >
               Limpiar
             </button>
@@ -495,7 +495,7 @@ export function AdminMagicManager() {
                 type="button"
                 onClick={() => void handleDelete()}
                 disabled={isSaving}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-500/35 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-200 transition hover:bg-red-500/15 disabled:opacity-60"
+                className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-red-500/35 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-200 transition hover:bg-red-500/15 disabled:opacity-60"
               >
                 <Trash2 className="h-4 w-4" />
                 Borrar
@@ -511,7 +511,7 @@ export function AdminMagicManager() {
         </form>
       </section>
 
-      <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
         <AdminManagerHeader
           icon={<BookOpen className="h-5 w-5" />}
           eyebrow="Estilos actuales"
@@ -531,7 +531,7 @@ export function AdminMagicManager() {
               key={`${style.categoryId}-${style.id}`}
               type="button"
               onClick={() => preloadStyle(style)}
-              className="flex w-full items-center justify-between gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+              className="kd-touch kd-hover-lift flex w-full items-center justify-between gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
             >
               <div>
                 <p className="text-sm font-bold text-stone-100">{style.title}</p>
@@ -664,7 +664,7 @@ export function AdminBestiaryManager() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-      <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
         <AdminManagerHeader
           icon={<PawPrint className="h-5 w-5" />}
           eyebrow="Editor del bestiario"
@@ -685,7 +685,7 @@ export function AdminBestiaryManager() {
             <select
               value={rarity}
               onChange={(event) => setRarity(event.target.value as BestiaryRarity)}
-              className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+              className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
             >
               {BESTIARY_RARITIES.map((entry) => (
                 <option key={entry.id} value={entry.id}>
@@ -696,7 +696,7 @@ export function AdminBestiaryManager() {
           </label>
 
           <AdminTextField label="URL o imagen cargada" value={imageUrl} onChange={setImageUrl} placeholder="https://... o data URL" />
-          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-stone-700 bg-stone-950/45 px-4 py-4 text-sm font-bold text-stone-300 transition hover:border-amber-500/30 hover:text-amber-300">
+          <label className="kd-touch flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-stone-700 bg-stone-950/45 px-4 py-4 text-sm font-bold text-stone-300 transition hover:border-amber-500/30 hover:text-amber-300">
             <ImagePlus className="h-4 w-4" />
             Cargar imagen desde galeria
             <input
@@ -709,7 +709,7 @@ export function AdminBestiaryManager() {
 
           {imageUrl ? (
             <div className="overflow-hidden rounded-[1.4rem] border border-stone-800 bg-stone-950/45">
-              <img src={imageUrl} alt={name || "Preview de bestia"} className="h-48 w-full object-cover" />
+              <img src={imageUrl} alt={name || "Preview de bestia"} loading="lazy" decoding="async" className="h-48 w-full object-cover" />
             </div>
           ) : null}
 
@@ -717,7 +717,7 @@ export function AdminBestiaryManager() {
             <button
               type="submit"
               disabled={isSaving}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:opacity-60"
+              className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:opacity-60"
             >
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <PawPrint className="h-4 w-4" />}
               {id ? "Actualizar bestia" : "Guardar bestia"}
@@ -725,7 +725,7 @@ export function AdminBestiaryManager() {
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-2xl border border-stone-700 px-5 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500"
+              className="kd-touch rounded-2xl border border-stone-700 px-5 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500"
             >
               Limpiar
             </button>
@@ -734,7 +734,7 @@ export function AdminBestiaryManager() {
                 type="button"
                 onClick={() => void handleDelete()}
                 disabled={isSaving}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-500/35 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-200 transition hover:bg-red-500/15 disabled:opacity-60"
+                className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-red-500/35 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-200 transition hover:bg-red-500/15 disabled:opacity-60"
               >
                 <Trash2 className="h-4 w-4" />
                 Borrar
@@ -750,7 +750,7 @@ export function AdminBestiaryManager() {
         </form>
       </section>
 
-      <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
         <AdminManagerHeader
           icon={<PawPrint className="h-5 w-5" />}
           eyebrow="Catalogo de criaturas"
@@ -766,11 +766,11 @@ export function AdminBestiaryManager() {
                 key={entry.id}
                 type="button"
                 onClick={() => preloadEntry(entry)}
-                className="flex w-full items-center gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 p-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                className="kd-touch kd-hover-lift flex w-full items-center gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 p-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
               >
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-stone-800 bg-stone-900">
                   {entry.imageUrl ? (
-                    <img src={entry.imageUrl} alt={entry.name} className="h-full w-full object-cover" />
+                    <img src={entry.imageUrl} alt={entry.name} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   ) : null}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -831,7 +831,7 @@ function AdminTextField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>
   );
@@ -858,7 +858,7 @@ function AdminTextArea({
         rows={rows}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>
   );

@@ -19,7 +19,8 @@ export function SectionHeader({
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
           {eyebrow}
         </p>
-        <h2 className="mt-2 text-2xl font-black text-stone-100">{title}</h2>
+        <h2 className="mt-2 text-2xl font-black text-stone-100 md:text-3xl">{title}</h2>
+        <div className="kd-divider mt-3 h-px w-full max-w-72" />
         {description ? (
           <p className="mt-3 max-w-xl text-sm leading-6 text-stone-400">
             {description}

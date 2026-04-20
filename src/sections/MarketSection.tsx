@@ -178,7 +178,7 @@ export function MarketSection() {
 
   return (
     <section className="space-y-5">
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+      <div className="kd-glass kd-stagger rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
         <SectionHeader
           eyebrow="Mercado negro"
           title="Catalogos del reino"
@@ -191,8 +191,8 @@ export function MarketSection() {
         />
       </div>
 
-      <details className="group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6">
-        <summary className="flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <details className="kd-glass kd-hover-lift group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6">
+        <summary className="kd-touch flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="rounded-2xl bg-rose-500/10 p-3 text-rose-300">
               <Dices className="h-5 w-5" />
@@ -229,7 +229,7 @@ export function MarketSection() {
             ))}
           </div>
 
-          <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
+          <div className="rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
             <p className="text-sm leading-6 text-stone-400">
               {tavernModes.find((mode) => mode.id === tavernMode)?.description}
             </p>
@@ -244,9 +244,9 @@ export function MarketSection() {
       </details>
 
       {featuredItems.length > 0 ? (
-        <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
+        <div className="kd-glass rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
           <SectionHeader eyebrow="Selecciones del mercader" title="Objetos destacados" />
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2">
             {featuredItems.map((item) => (
               <MarketItemCard
                 key={`featured-${item.name}`}
@@ -259,7 +259,7 @@ export function MarketSection() {
         </div>
       ) : null}
 
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+      <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
         <SectionHeader
           eyebrow="Filtrar catalogo"
           title="Categorias del mercado"
@@ -320,8 +320,8 @@ function MarketCategoryPanel({
   const Icon = category.icon;
 
   return (
-    <details className="group rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
-      <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+    <details className="kd-glass kd-hover-lift group rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+      <summary className="kd-touch flex cursor-pointer list-none items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
             <Icon className="h-5 w-5" />
@@ -342,7 +342,7 @@ function MarketCategoryPanel({
         </div>
       </summary>
 
-      <div className="mt-5 grid gap-4 border-t border-stone-800 pt-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="kd-stagger mt-5 grid gap-4 border-t border-stone-800 pt-5 md:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
           <MarketItemCard key={`${category.id}-${item.name}`} item={item} onBuy={() => onBuy(item)} />
         ))}

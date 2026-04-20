@@ -29,7 +29,7 @@ export function EventCard({ event }: { event: RealmEvent }) {
   const statusStyle = eventStatusStyles[event.status];
 
   return (
-    <article className="overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/80">
+    <article className="kd-glass kd-hover-lift overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/80">
       <div className="relative aspect-[16/10] bg-stone-950 lg:aspect-[16/9]">
         {!imageFailed ? (
           <img
@@ -76,7 +76,7 @@ export function EventCard({ event }: { event: RealmEvent }) {
         <button
           type="button"
           onClick={() => setExpanded((current) => !current)}
-          className="flex w-full items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/45 px-4 py-3 text-left text-sm font-semibold text-stone-200 transition hover:border-stone-700"
+          className="kd-touch flex w-full items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/45 px-4 py-3 text-left text-sm font-semibold text-stone-200 transition hover:border-stone-700"
         >
           <span>Ver detalles del evento</span>
           <span className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}>

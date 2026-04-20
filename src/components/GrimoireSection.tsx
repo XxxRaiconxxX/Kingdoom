@@ -108,7 +108,7 @@ export function GrimoireSection() {
   if (grimoireData.length === 0) {
     return (
       <section className="space-y-6">
-        <div className="rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 shadow-2xl shadow-black/40 md:p-8">
+        <div className="kd-glass rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 shadow-2xl shadow-black/40 md:p-8">
           <SectionHeader
             eyebrow="Conocimiento Prohibido"
             title="Grimorio de Poderes"
@@ -121,7 +121,7 @@ export function GrimoireSection() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 md:p-8 shadow-2xl shadow-black/40">
+      <div className="kd-glass kd-stagger rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 shadow-2xl shadow-black/40 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <SectionHeader
             eyebrow="Conocimiento Prohibido"
@@ -136,7 +136,7 @@ export function GrimoireSection() {
                   setMode("magic");
                   setSearchQuery("");
                 }}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
+                className={`kd-touch flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
                   mode === "magic"
                     ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/10"
                     : "text-stone-500 hover:text-stone-300"
@@ -151,7 +151,7 @@ export function GrimoireSection() {
                   setMode("bestiary");
                   setSearchQuery("");
                 }}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
+                className={`kd-touch flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
                   mode === "bestiary"
                     ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/10"
                     : "text-stone-500 hover:text-stone-300"
@@ -184,7 +184,7 @@ export function GrimoireSection() {
                   setSelectedCategoryId(category.id);
                   setSearchQuery("");
                 }}
-                className={`px-5 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
+                className={`kd-touch rounded-2xl px-5 py-2.5 text-xs font-bold uppercase tracking-widest transition-all ${
                   !isSearching && selectedCategoryId === category.id
                     ? "bg-stone-100 text-stone-950 shadow-lg shadow-stone-100/10"
                     : "bg-stone-800/50 text-stone-400 hover:bg-stone-800 hover:text-stone-100 border border-stone-700/50"
@@ -204,7 +204,7 @@ export function GrimoireSection() {
           onClearSearch={() => setSearchQuery("")}
         />
       ) : (
-        <div className="space-y-4">
+        <div className="kd-stagger space-y-4">
           {isSearching && (
             <div className="px-4 py-2 flex items-center justify-between">
               <p className="text-xs font-bold text-stone-500 uppercase tracking-widest">
@@ -267,7 +267,7 @@ function BestiaryView({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/55 p-5">
+      <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/55 p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-amber-400/80">
@@ -304,7 +304,7 @@ function BestiaryView({
           {entries.map((entry) => (
             <article
               key={entry.id}
-              className="overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-900/60 shadow-xl shadow-black/20"
+              className="kd-glass kd-hover-lift overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-900/60 shadow-xl shadow-black/20"
             >
               <div className="relative h-52 border-b border-stone-800 bg-stone-950">
                 {entry.imageUrl ? (
@@ -592,12 +592,12 @@ function MagicStylePanel({
   }, [hasMatch, normalizedQuery]);
 
   return (
-    <div className={`rounded-[2.5rem] border overflow-hidden transition-all duration-300 ${
+    <div className={`kd-glass kd-hover-lift overflow-hidden rounded-[2.5rem] border transition-all duration-300 ${
       isOpen ? "border-stone-700 bg-stone-900/60 shadow-xl" : "border-stone-800 bg-stone-900/40"
     }`}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-start justify-between p-6 md:p-8 text-left hover:bg-stone-800/20 transition"
+        className="kd-touch flex w-full items-start justify-between p-6 text-left transition hover:bg-stone-800/20 md:p-8"
       >
         <div className="flex items-start gap-5">
           <div className={`rounded-2xl transition-colors p-4 border shadow-[0_0_15px_rgba(245,158,11,0.05)] ${
@@ -664,7 +664,7 @@ function MagicStylePanel({
                         <div className="h-px flex-1 bg-stone-800"></div>
                       </div>
 
-                      <div className="grid gap-4 lg:grid-cols-2">
+                      <div className="kd-stagger grid gap-4 lg:grid-cols-2">
                         {(isFiltering ? filtered : levelAbilities).map((ability, idx) => (
                           <AbilityCard key={`${level}-${idx}`} ability={ability} query={searchQuery} />
                         ))}
@@ -704,14 +704,14 @@ function AbilityCard({ ability, query }: { ability: AbilityLevel, query?: string
   );
 
   return (
-    <div className={`rounded-3xl border transition-all duration-300 group overflow-hidden ${
+    <div className={`kd-hover-lift group overflow-hidden rounded-3xl border transition-all duration-300 ${
       expanded 
         ? "border-amber-500/30 bg-amber-500/5 shadow-2xl shadow-amber-500/5" 
         : "border-stone-800 bg-stone-950/30 hover:border-stone-700 hover:bg-stone-900/20"
     }`}>
       <button 
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4"
+        className="kd-touch flex w-full items-center justify-between gap-4 p-4 text-left sm:p-5"
       >
         <div className="flex min-w-0 items-center gap-4">
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl font-black transition-colors ${

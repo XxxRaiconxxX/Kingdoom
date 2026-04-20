@@ -573,9 +573,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 18 }}
         transition={{ duration: 0.22, ease: "easeOut" }}
-        className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/50"
+        className="kd-glass mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/50"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-stone-800 px-5 py-4 md:px-6">
+        <div className="flex items-start justify-between gap-4 border-b border-amber-500/10 px-5 py-4 md:px-6">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-400/75">
               Modo administrador
@@ -591,13 +591,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-stone-200"
+            className="kd-touch rounded-full border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-stone-200"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="border-b border-stone-800 px-0 py-4 md:px-6">
+        <div className="border-b border-amber-500/10 px-0 py-4 md:px-6">
           <div className="flex w-full max-w-[100vw] items-center gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:max-w-full md:px-0 [&::-webkit-scrollbar]:hidden">
             <div className="flex-shrink-0">
               <AdminTabButton
@@ -637,7 +637,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5 md:px-6">
+        <div className="kd-stagger flex-1 overflow-y-auto px-5 py-5 md:px-6">
           {status === "loading" ? (
             <AdminInfoCard
               title="Cargando modo admin"
@@ -1741,10 +1741,10 @@ function AdminTabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
+      className={`kd-touch rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
         active
-          ? "border-amber-400/30 bg-amber-500/10 text-amber-300"
-          : "border-stone-700 bg-stone-900/70 text-stone-400"
+          ? "border-amber-400/40 bg-amber-500/14 text-amber-200 shadow-[inset_0_0_18px_rgba(245,158,11,0.08)]"
+          : "border-stone-700 bg-stone-900/70 text-stone-400 hover:border-amber-500/25 hover:text-stone-200"
       }`}
     >
       {label}
@@ -1765,10 +1765,10 @@ function AdminModeButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
+      className={`kd-touch rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
         active
-          ? "border-amber-400/30 bg-amber-500/10 text-amber-300"
-          : "border-stone-700 bg-stone-900/70 text-stone-400"
+          ? "border-amber-400/40 bg-amber-500/14 text-amber-200 shadow-[inset_0_0_18px_rgba(245,158,11,0.08)]"
+          : "border-stone-700 bg-stone-900/70 text-stone-400 hover:border-amber-500/25 hover:text-stone-200"
       }`}
     >
       {label}
@@ -1784,7 +1784,7 @@ function AdminInfoCard({
   message: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-5">
+    <div className="kd-glass rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-5">
       <p className="text-sm font-bold text-stone-100">{title}</p>
       <p className="mt-2 text-sm leading-6 text-stone-400">{message}</p>
     </div>
@@ -1812,7 +1812,7 @@ function ExpandableListToggle({
     <button
       type="button"
       onClick={onToggle}
-      className="w-full rounded-[1.1rem] border border-stone-700 bg-stone-950/35 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+      className="kd-touch w-full rounded-[1.1rem] border border-stone-700 bg-stone-950/35 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
     >
       {expanded
         ? `Ver menos ${itemLabel}`
@@ -1840,7 +1840,7 @@ function LabeledInput({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>
   );
@@ -1867,7 +1867,7 @@ function LabeledTextArea({
         rows={rows}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>
   );
@@ -1890,7 +1890,7 @@ function NumericInput({
         min="0"
         value={value}
         onChange={(event) => onChange(Number(event.target.value) || 0)}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>
   );

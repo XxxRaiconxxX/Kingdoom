@@ -233,7 +233,7 @@ portraitUrl,
   }
 
   return (
-    <section className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
+    <section className="kd-glass rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">

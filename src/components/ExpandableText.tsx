@@ -29,7 +29,7 @@ export function ExpandableText({
       <button
         type="button"
         onClick={() => setExpanded((current) => !current)}
-        className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-300 transition hover:text-amber-200"
+        className="kd-touch text-xs font-semibold uppercase tracking-[0.16em] text-amber-300 transition hover:text-amber-200"
       >
         {expanded ? "Ver menos" : "Ver mas"}
       </button>

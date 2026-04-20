@@ -182,7 +182,6 @@ export function MarketSection() {
         <SectionHeader
           eyebrow="Mercado negro"
           title="Catalogos del reino"
-          description="La compra usa tu perfil conectado para verificar y descontar el oro en Supabase, y cada categoria queda organizada como un catalogo desplegable."
           rightSlot={
             <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
               {marketItems.length} articulos
@@ -202,12 +201,6 @@ export function MarketSection() {
                 Taberna clandestina
               </p>
               <h3 className="mt-2 text-xl font-bold text-stone-100">Juegos de azar</h3>
-              <p className="mt-2 text-sm leading-6 text-stone-400">
-                La mesa sigue viva dentro del mercado. Ahora tambien puedes tomar contratos PvE arcade sin salir de la taberna.
-                {nativeApp
-                  ? " En la app se desbloquea ademas la Caceria comunal con salas en vivo por rondas."
-                  : ""}
-              </p>
             </div>
           </div>
           <div className="flex shrink-0 items-center justify-end sm:justify-start">
@@ -227,12 +220,6 @@ export function MarketSection() {
                 onClick={() => setTavernMode(mode.id)}
               />
             ))}
-          </div>
-
-          <div className="rounded-[1.4rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
-            <p className="text-sm leading-6 text-stone-400">
-              {tavernModes.find((mode) => mode.id === tavernMode)?.description}
-            </p>
           </div>
 
           <div className="mt-5">
@@ -263,7 +250,6 @@ export function MarketSection() {
         <SectionHeader
           eyebrow="Filtrar catalogo"
           title="Categorias del mercado"
-          description="Puedes ver todo junto o quedarte solo con una familia de objetos."
         />
         <div className="mt-4 flex flex-wrap gap-2">
           <FilterPill

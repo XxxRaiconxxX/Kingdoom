@@ -614,9 +614,6 @@ portraitUrl,
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-purple-300/80">
                   Registro publico
                 </p>
-                <p className="mt-1 text-sm text-stone-400">
-                  Puedes revisar las fichas del reino aunque todavia no hayas conectado tu perfil.
-                </p>
               </div>
               <button
                 type="button"

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Info, Loader2, ScrollText, Search, User, Users, X } from "lucide-react";
+import { Loader2, ScrollText, Search, User, Users, X } from "lucide-react";
 import { CharacterSheet } from "../types";
 import { supabase } from "../lib/supabase";
 import { CharSheetModal } from "./CharSheetModal";
@@ -173,11 +173,7 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-500" />
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
-            <p className="flex items-center gap-1">
-              <Info className="h-3 w-3" />
-              Puedes abrir cualquier ficha para revisarla, pero no editarla.
-            </p>
+          <div className="mt-3 flex flex-wrap items-center justify-end gap-2 text-xs text-stone-500">
             <span className="inline-flex items-center gap-2 rounded-full border border-stone-800 bg-stone-950/50 px-3 py-1 text-stone-300">
               <Users className="h-3.5 w-3.5 text-amber-400" />
               {visibleSheets.length} ficha{visibleSheets.length === 1 ? "" : "s"}

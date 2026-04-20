@@ -139,7 +139,7 @@ const purchaseResult = await purchaseMarketItemSecure({
       });
       const formspreeFailed = !response.ok;
       const formspreeWarning = formspreeFailed
-        ? " El pedido economico quedo guardado, pero Formspree no respondio y debes revisar el panel o reenviar el aviso manualmente."
+        ? " El pedido quedo guardado, pero el aviso externo debe revisarse manualmente."
         : "";
 
       setOrderId(purchaseResult.orderRef);
@@ -163,7 +163,7 @@ const purchaseResult = await purchaseMarketItemSecure({
       void refreshPlayer();
       notifyInventoryChanged();
       setFeedbackMessage(
-        `Compra segura confirmada. Se descontaron ${purchaseResult.totalPrice} de oro y el pedido quedo registrado, pero no se pudo avisar a Formspree. Revisa el panel o reenvia el aviso manualmente.`
+        `Compra confirmada. Se descontaron ${purchaseResult.totalPrice} de oro y el pedido quedo registrado. Revisa el aviso externo manualmente.`
       );
     }
   }
@@ -298,8 +298,7 @@ const purchaseResult = await purchaseMarketItemSecure({
                 </div>
               ) : (
                 <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                  Conecta tu perfil del reino antes de comprar para que el sistema
-                  pueda verificar y descontar el oro.
+                  Conecta tu perfil del reino antes de comprar.
                 </div>
               )}
 
@@ -377,16 +376,6 @@ const purchaseResult = await purchaseMarketItemSecure({
                     />
                   </label>
                 </div>
-              </div>
-
-              <div className="rounded-[1.35rem] border border-stone-800 bg-stone-900/70 p-4 text-sm leading-6 text-stone-400">
-                <p className="font-semibold text-amber-300">Validacion del pago</p>
-                <p className="mt-2">
-                  Antes de enviar el pedido, el sistema refresca tu perfil activo y
-                  ejecuta una compra segura en Supabase. El descuento de oro, el
-                  registro del pedido y el inventario ya no dependen del cliente.
-                  Formspree queda como aviso secundario.
-                </p>
               </div>
 
               {feedbackMessage && submitState === "error" ? (

@@ -258,7 +258,6 @@ function HomeSection() {
         <SectionHeader
           eyebrow="Agenda del reino"
           title="Eventos activos"
-          description="Cada evento conserva imagen, cronica, fechas y estado para que el calendario del rol siempre se sienta vivo."
           rightSlot={
             <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
               {events.length} eventos

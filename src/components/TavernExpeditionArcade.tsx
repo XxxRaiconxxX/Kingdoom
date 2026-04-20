@@ -5,7 +5,6 @@ import {
 
   Coins,
   Heart,
-  Lock,
   Shield,
   Sparkles,
   Swords,
@@ -1090,12 +1089,11 @@ export function TavernExpeditionArcade() {
                       : "Iniciar caceria"}
               </button>
 
-              <p className="mt-3 flex items-center gap-2 text-xs leading-5 text-stone-400">
-                {selectedEncounterLocked ? <Lock className="h-3.5 w-3.5 text-amber-300" /> : null}
-                {willLevelSoon
-                  ? "Si ganas este contrato, tu ficha sube de nivel."
-                  : "La curva esta pensada para que cada rango nuevo se sienta ganado, no regalado."}
-              </p>
+              {willLevelSoon ? (
+                <p className="mt-3 text-xs leading-5 text-amber-200">
+                  Si ganas este contrato, tu ficha sube de nivel.
+                </p>
+              ) : null}
             </div>
 
             <div className="rounded-[1.6rem] border border-stone-800 bg-stone-950/55 p-4">

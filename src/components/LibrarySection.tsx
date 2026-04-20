@@ -106,7 +106,6 @@ function LoreSubSection() {
         <SectionHeader
           eyebrow="Historia principal"
           title="El pulso de la temporada"
-          description="La cronica larga queda resumida al principio y puedes expandir cada bloque solo si te interesa leer mas."
         />
         <div className="mt-4 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-5">
           <ExpandableText
@@ -128,7 +127,6 @@ function LoreSubSection() {
         <SectionHeader
           eyebrow="Facciones"
           title="Fuerzas del relato"
-          description="Las principales facciones del rol quedan resumidas para que el jugador nuevo no se pierda."
         />
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {REALM_FACTIONS.map((faction) => (
@@ -290,10 +288,7 @@ function WorldSubSection() {
             decoding="async"
             className="h-auto w-full object-cover"
           />
-          <div className="flex items-center justify-between gap-4 border-t border-stone-800 px-4 py-3">
-            <p className="text-xs leading-5 text-stone-400">
-              Toca el mapa para ampliarlo y leer los detalles.
-            </p>
+          <div className="flex items-center justify-end gap-4 border-t border-stone-800 px-4 py-3">
             <span className="shrink-0 rounded-full border border-stone-800 bg-stone-900/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-stone-300">
               Zoom
             </span>
@@ -399,10 +394,7 @@ function WorldSubSection() {
                 />
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-800 px-5 py-4">
-                <p className="text-xs leading-5 text-stone-400">
-                  Consejo: en movil, puedes hacer zoom con los gestos del navegador.
-                </p>
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-stone-800 px-5 py-4">
                 <a
                   href={mapInfo.src}
                   target="_blank"

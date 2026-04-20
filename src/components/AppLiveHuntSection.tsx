@@ -558,7 +558,7 @@ export function AppLiveHuntSection() {
 
       {backendState === "fallback" && rooms.length === 0 ? (
         <div className="rounded-[1.35rem] border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
-          Ejecuta `supabase_app_live_hunts.sql` para activar salas reales. La interfaz ya quedo lista y pensada para movil.
+          Caceria comunal en preparacion.
         </div>
       ) : null}
 

@@ -927,7 +927,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   ) : (
                     <AdminInfoCard
                       title="Semana vacia"
-                      message="Aun no hay registros semanales. Puedes crear el primero desde el formulario."
+                      message="Sin registros semanales."
                     />
                   )}
                   <ExpandableListToggle
@@ -984,9 +984,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         <div>
                           <p className="text-sm font-semibold text-stone-200">
                             Crear como admin
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-stone-500">
-                            Solo si quieres que este jugador vea el panel de administracion.
                           </p>
                         </div>
                         <input
@@ -1220,7 +1217,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     label="Cronica o descripcion larga"
                     value={eventLongDescription}
                     onChange={setEventLongDescription}
-                    placeholder="Detalle desplegable del evento"
+                    placeholder="Detalle del evento"
                     rows={4}
                   />
                   <LabeledInput
@@ -1555,9 +1552,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   <label className="flex items-center justify-between rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3">
                     <div>
                       <p className="text-sm font-semibold text-stone-200">Destacado</p>
-                      <p className="mt-1 text-xs leading-5 text-stone-500">
-                        Aparece en la seccion de objetos destacados del mercado.
-                      </p>
                     </div>
                     <input
                       type="checkbox"
@@ -1572,11 +1566,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       ID actual:{" "}
                       <span className="font-mono text-stone-300">{marketItemId}</span>
                     </div>
-                  ) : (
-                    <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-xs text-stone-400">
-                      El ID se genera como slug del nombre y la categoria al guardar.
-                    </div>
-                  )}
+                  ) : null}
 
                   <div className="mt-4 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
                     <button

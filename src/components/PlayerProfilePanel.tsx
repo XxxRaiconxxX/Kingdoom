@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { lazy, Suspense, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Backpack,
   Coins,
@@ -631,16 +632,19 @@ portraitUrl,
       </div>
 
       <>
-        {isAdminOpen && player && isAdmin ? (
-          <Suspense
-            key="admin-sheet"
-            fallback={
-              <ProfileSheetFallback message="Abriendo el centro de control del reino..." />
-            }
-          >
-            <AdminControlSheet onClose={() => setIsAdminOpen(false)} />
-          </Suspense>
-        ) : null}
+        {isAdminOpen && player && isAdmin
+          ? createPortal(
+              <Suspense
+                key="admin-sheet"
+                fallback={
+                  <ProfileSheetFallback message="Abriendo el centro de control del reino..." />
+                }
+              >
+                <AdminControlSheet onClose={() => setIsAdminOpen(false)} />
+              </Suspense>,
+              document.body,
+            )
+          : null}
         {isInventoryOpen && player ? (
           <Suspense
             key="inventory-sheet"

@@ -186,9 +186,42 @@
   opacity: 0.72;
 }
 
-.kd-glass > :not(.kd-hero-orb) {
+.kd-glass > :not(.kd-hero-orb):not(.fixed):not(.absolute) {
   position: relative;
   z-index: 1;
+}
+
+.kd-admin-shell {
+  width: min(100%, calc(100dvw - 1rem));
+}
+
+.kd-admin-content {
+  scrollbar-gutter: stable;
+}
+
+.kd-admin-content > *,
+.kd-admin-content section,
+.kd-admin-content form,
+.kd-admin-content label,
+.kd-admin-content input,
+.kd-admin-content select,
+.kd-admin-content textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .kd-admin-content section {
+    border-radius: 1.25rem;
+    padding: 1rem;
+  }
+
+  .kd-admin-content button,
+  .kd-admin-content input,
+  .kd-admin-content select,
+  .kd-admin-content textarea {
+    max-width: 100%;
+  }
 }
 
 .kd-hover-lift {

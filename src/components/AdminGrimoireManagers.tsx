@@ -42,6 +42,206 @@ function parseLevels(raw: string): Record<number, AbilityLevel[]> {
   };
 }
 
+function emptyLevels(): Record<number, AbilityLevel[]> {
+  return {
+    1: [],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+  };
+}
+
+function stripMarkdown(value: string) {
+  return value
+    .replace(/\*\*/g, "")
+    .replace(/`/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeForSearch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function cleanHeading(value: string) {
+  return stripMarkdown(
+    value
+      .replace(/^#+\s*/, "")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "")
+  );
+}
+
+function extractDraftCategory(lines: string[]) {
+  for (const line of lines) {
+    if (!normalizeForSearch(line).includes("catalogo de")) continue;
+
+    const boldMatch = line.match(/\*\*([^*]+)\*\*/);
+    if (boldMatch?.[1]) {
+      return stripMarkdown(boldMatch[1]);
+    }
+  }
+
+  return "General";
+}
+
+function parseMagicBullet(line: string) {
+  const match = line.match(/^\s*\*\s+\*\*([^:]+):\*\*\s*(.*)$/);
+  if (!match) return null;
+
+  const label = normalizeForSearch(match[1]);
+  const value = stripMarkdown(match[2] ?? "");
+
+  if (label === "efecto") return { field: "effect" as const, value };
+  if (label === "cd") return { field: "cd" as const, value };
+  if (label === "limitante") return { field: "limit" as const, value };
+  if (label === "anti-mano negra" || label === "anti mano negra") {
+    return { field: "antiManoNegra" as const, value };
+  }
+
+  return null;
+}
+
+function parseMagicDraft(raw: string) {
+  const lines = raw.replace(/\r\n/g, "\n").split("\n");
+  const meaningfulLines = lines.filter((line) => line.trim().length > 0);
+
+  if (meaningfulLines.length === 0) {
+    throw new Error("empty");
+  }
+
+  const categoryTitle = extractDraftCategory(meaningfulLines);
+  const categoryId = slugifyGrimoireId(categoryTitle, "general");
+  const styleHeadingIndex = lines.findIndex((line) => {
+    const normalized = normalizeForSearch(line);
+    return (
+      /^#{2,}/.test(line.trim()) &&
+      !normalized.includes("escala") &&
+      !normalized.includes("habilidades") &&
+      cleanHeading(line).length > 0
+    );
+  });
+  const scaleIndex = lines.findIndex((line) =>
+    normalizeForSearch(line).includes("escala de niveles")
+  );
+  const firstLevelIndex = lines.findIndex((line) =>
+    /^#{2,}/.test(line.trim()) && normalizeForSearch(line).includes("lv")
+  );
+  const title =
+    styleHeadingIndex >= 0
+      ? cleanHeading(lines[styleHeadingIndex])
+      : "Nueva magia";
+  const descriptionEnd =
+    scaleIndex >= 0
+      ? scaleIndex
+      : firstLevelIndex >= 0
+        ? firstLevelIndex
+        : lines.length;
+  const description = lines
+    .slice(0, descriptionEnd)
+    .filter((line, index) => index !== styleHeadingIndex)
+    .filter((line) => line.trim() !== "---")
+    .join("\n")
+    .trim();
+  const levels = emptyLevels();
+  let currentLevel = 0;
+  let currentAbility: AbilityLevel | null = null;
+  let currentField: keyof Pick<AbilityLevel, "effect" | "cd" | "limit" | "antiManoNegra"> | null = null;
+
+  function pushCurrentAbility() {
+    if (!currentAbility || currentLevel < 1 || currentLevel > 5) return;
+
+    levels[currentLevel].push({
+      ...currentAbility,
+      effect: currentAbility.effect.trim(),
+      cd: currentAbility.cd.trim() || "Sin CD especificado.",
+      limit: currentAbility.limit.trim() || "Sin limitante especificada.",
+      antiManoNegra:
+        currentAbility.antiManoNegra.trim() ||
+        "Pendiente de definir por administracion.",
+    });
+  }
+
+  for (const line of lines.slice(firstLevelIndex >= 0 ? firstLevelIndex : 0)) {
+    const trimmed = line.trim();
+    const normalized = normalizeForSearch(trimmed);
+
+    if (!trimmed || trimmed === "---") continue;
+    if (normalized.startsWith("continuamos") || normalized.startsWith("¿continuamos")) {
+      break;
+    }
+
+    const levelMatch = trimmed.match(/^#{2,}.*lv\s*([1-5])/i);
+    if (levelMatch?.[1]) {
+      pushCurrentAbility();
+      currentAbility = null;
+      currentField = null;
+      currentLevel = Number(levelMatch[1]);
+      continue;
+    }
+
+    const abilityMatch =
+      trimmed.match(/^\d+\.\s+\*\*([^*]+?)\*\*:?\s*(.*)$/) ??
+      trimmed.match(/^\d+\.\s+([^:]+):\s*(.*)$/);
+
+    if (abilityMatch?.[1] && currentLevel >= 1 && currentLevel <= 5) {
+      pushCurrentAbility();
+      const initialEffect = stripMarkdown(abilityMatch[2] ?? "");
+      currentAbility = {
+        level: currentLevel,
+        name: stripMarkdown(abilityMatch[1]),
+        effect: initialEffect,
+        cd: "",
+        limit: "",
+        antiManoNegra: "",
+      };
+      currentField = initialEffect ? "effect" : null;
+      continue;
+    }
+
+    if (!currentAbility) continue;
+
+    const bullet = parseMagicBullet(trimmed);
+    if (bullet) {
+      if (bullet.field === "effect" && currentAbility.effect) {
+        currentAbility.effect = `${currentAbility.effect} ${bullet.value}`.trim();
+      } else {
+        currentAbility[bullet.field] = bullet.value;
+      }
+      currentField = bullet.field;
+      continue;
+    }
+
+    if (currentField && !trimmed.startsWith("#")) {
+      currentAbility[currentField] = `${currentAbility[currentField]} ${stripMarkdown(trimmed)}`.trim();
+    }
+  }
+
+  pushCurrentAbility();
+
+  const totalAbilities = Object.values(levels).reduce(
+    (total, entries) => total + entries.length,
+    0
+  );
+
+  if (totalAbilities === 0) {
+    throw new Error("levels");
+  }
+
+  return {
+    categoryId,
+    categoryTitle,
+    title,
+    description,
+    levels,
+    totalAbilities,
+  };
+}
+
 function readImageAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -62,6 +262,8 @@ export function AdminMagicManager() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [levelsText, setLevelsText] = useState(formatLevels(EMPTY_LEVELS));
+  const [draftText, setDraftText] = useState("");
+  const [showAdvancedLevels, setShowAdvancedLevels] = useState(false);
 
   async function loadStyles() {
     const result = await fetchAdminMagicStyles();
@@ -89,6 +291,8 @@ export function AdminMagicManager() {
     setTitle("");
     setDescription("");
     setLevelsText(formatLevels(EMPTY_LEVELS));
+    setDraftText("");
+    setShowAdvancedLevels(false);
     setFeedback("");
   }
 
@@ -99,7 +303,27 @@ export function AdminMagicManager() {
     setTitle(style.title);
     setDescription(style.description);
     setLevelsText(formatLevels(style.levels));
+    setDraftText("");
+    setShowAdvancedLevels(false);
     setFeedback("");
+  }
+
+  function handleParseDraft() {
+    try {
+      const parsed = parseMagicDraft(draftText);
+      setCategoryId(parsed.categoryId);
+      setCategoryTitle(parsed.categoryTitle);
+      setTitle(parsed.title);
+      setDescription(parsed.description);
+      setLevelsText(formatLevels(parsed.levels));
+      setFeedback(
+        `Formato interpretado: ${parsed.totalAbilities} habilidades cargadas. Revisa y guarda.`
+      );
+    } catch {
+      setFeedback(
+        "No pude interpretar la magia. Revisa que tenga titulo, seccion 'Escala de niveles' y bloques 'Habilidades de Lv1-Lv5'."
+      );
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -162,6 +386,36 @@ export function AdminMagicManager() {
         />
 
         <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+          <div className="rounded-[1.4rem] border border-amber-500/20 bg-amber-500/5 p-4">
+            <AdminTextArea
+              label="Pegar magia completa"
+              value={draftText}
+              onChange={setDraftText}
+              placeholder="Pega aqui el texto completo: catalogo, titulo, descripcion y habilidades Lv1-Lv5..."
+              rows={10}
+            />
+            <p className="mt-2 text-xs leading-5 text-amber-100/70">
+              Ideal para staff: pega el formato narrativo y Jarvis lo convierte a los campos del Grimorio.
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={handleParseDraft}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
+              >
+                <Sparkles className="h-4 w-4" />
+                Interpretar formato
+              </button>
+              <button
+                type="button"
+                onClick={() => setDraftText("")}
+                className="rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500"
+              >
+                Limpiar texto pegado
+              </button>
+            </div>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <AdminTextField
               label="Categoria ID"
@@ -189,13 +443,36 @@ export function AdminMagicManager() {
             placeholder="Texto tecnico, cientifico o narrativo del estilo..."
             rows={6}
           />
-          <AdminTextArea
-            label="Niveles Lv1-Lv5 en JSON"
-            value={levelsText}
-            onChange={setLevelsText}
-            placeholder="Mantiene el mismo formato actual del grimorio"
-            rows={12}
-          />
+          <div className="rounded-[1.4rem] border border-stone-800 bg-stone-950/35 p-4">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedLevels((current) => !current)}
+              className="flex w-full items-center justify-between gap-3 text-left"
+            >
+              <span>
+                <span className="block text-sm font-bold text-stone-100">
+                  Niveles generados
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-stone-500">
+                  Uso avanzado. Normalmente no hace falta tocar esto si ya pegaste el formato narrativo.
+                </span>
+              </span>
+              <span className="rounded-full border border-stone-700 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">
+                {showAdvancedLevels ? "Ocultar" : "Ver JSON"}
+              </span>
+            </button>
+            {showAdvancedLevels ? (
+              <div className="mt-4">
+                <AdminTextArea
+                  label="JSON Lv1-Lv5"
+                  value={levelsText}
+                  onChange={setLevelsText}
+                  placeholder="Formato interno del grimorio"
+                  rows={12}
+                />
+              </div>
+            ) : null}
+          </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button

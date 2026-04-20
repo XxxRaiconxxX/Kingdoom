@@ -33,6 +33,7 @@ export function TavernCrash() {
   const [multiplier, setMultiplier] = useState(1);
   const [history, setHistory] = useState<number[]>([]);
   const [updating, setUpdating] = useState(false);
+  const [refreshingGold, setRefreshingGold] = useState(false);
   const [lastWin, setLastWin] = useState(0);
   const [autoCashOut, setAutoCashOut] = useState<number>(0);
   const [autoCashOutInput, setAutoCashOutInput] = useState("");
@@ -49,6 +50,7 @@ export function TavernCrash() {
   const multiplierRef = useRef(1);
   const startTimestampRef = useRef<number | null>(null);
   const lastUiMultiplierUpdateRef = useRef(0);
+  const cashOutInFlightRef = useRef(false);
 
   useEffect(() => {
     statusRef.current = status;
@@ -163,7 +165,15 @@ export function TavernCrash() {
     }
 
     const intervalId = window.setInterval(async () => {
+      if (cashOutInFlightRef.current) {
+        return;
+      }
+
       const result = await fetchCrashSessionState();
+
+      if (cashOutInFlightRef.current) {
+        return;
+      }
 
       if (result.status === "error") {
         setCrashError(result.message);
@@ -314,7 +324,7 @@ export function TavernCrash() {
     }
 
     pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMultiplier });
-    if (pointsRef.current.length > 200) {
+    if (pointsRef.current.length > 1200) {
       pointsRef.current.shift();
     }
 
@@ -411,21 +421,54 @@ export function TavernCrash() {
       return;
     }
 
+    const lockedAt = Date.now();
+    const lockedMultiplier = multiplierRef.current;
+    const lockedWin = Math.floor(bet * lockedMultiplier);
+    cashOutInFlightRef.current = true;
     setUpdating(true);
-    const result = await cashOutCrashSecure();
+    statusRef.current = "cashed_out";
+    multiplierRef.current = lockedMultiplier;
+    setStatus("cashed_out");
+    setMultiplier(lockedMultiplier);
+    setLastWin(lockedWin);
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+    }
+
+    const result = await cashOutCrashSecure({
+      multiplier: lockedMultiplier,
+      requestedAt: lockedAt,
+    });
 
     if (result.status === "error") {
       setCrashError(result.message);
+      statusRef.current = "rising";
+      setStatus("rising");
+      cashOutInFlightRef.current = false;
       setUpdating(false);
       return;
     }
 
+    cashOutInFlightRef.current = false;
     setStatus(result.session.phase);
     setMultiplier(result.session.multiplier);
     setLastWin(result.session.lastWin);
     setHistory(result.history);
     await refreshPlayer();
     setUpdating(false);
+  }
+
+  async function handleRefreshGold() {
+    if (refreshingGold) {
+      return;
+    }
+
+    setRefreshingGold(true);
+    try {
+      await refreshPlayer();
+    } finally {
+      setRefreshingGold(false);
+    }
   }
 
   if (isHydrating) {
@@ -454,11 +497,11 @@ export function TavernCrash() {
             <p className="font-mono text-lg font-black text-amber-400">{player.gold}</p>
             <button
               type="button"
-              onClick={() => void refreshPlayer()}
-              disabled={updating}
+              onClick={() => void handleRefreshGold()}
+              disabled={refreshingGold}
               className="rounded-lg p-1 text-stone-500 transition hover:text-amber-400 disabled:opacity-30"
             >
-              <RefreshCw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-4 w-4 ${refreshingGold ? "animate-spin" : ""}`} />
             </button>
           </div>
         </div>
@@ -474,7 +517,13 @@ export function TavernCrash() {
         <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-stone-800 bg-stone-950 shadow-2xl group">
           <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
 
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <div
+            className={`pointer-events-none absolute inset-0 flex ${
+              status === "rising"
+                ? "items-start justify-center p-4 sm:p-6"
+                : "flex-col items-center justify-center"
+            }`}
+          >
             <AnimatePresence mode="wait">
               {status === "betting" ? (
                 <motion.div key="betting-ui" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
@@ -489,12 +538,12 @@ export function TavernCrash() {
                   className="flex flex-col items-center"
                 >
                   <h2
-                    className={`text-6xl font-black tabular-nums drop-shadow-[0_0_40px_rgba(0,0,0,0.8)] md:text-8xl ${
+                    className={`font-black tabular-nums drop-shadow-[0_0_40px_rgba(0,0,0,0.8)] ${
                       status === "crashed"
-                        ? "text-rose-600"
+                        ? "text-6xl text-rose-600 md:text-8xl"
                         : status === "cashed_out"
-                          ? "text-emerald-500/60"
-                          : "text-stone-50"
+                          ? "text-6xl text-emerald-500/60 md:text-8xl"
+                          : "rounded-2xl border border-amber-400/20 bg-stone-950/70 px-5 py-2 text-4xl text-stone-50 shadow-[0_0_30px_rgba(0,0,0,0.65)] backdrop-blur-sm md:text-5xl"
                     }`}
                   >
                     {multiplier.toFixed(2)}x

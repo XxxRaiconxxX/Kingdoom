@@ -234,7 +234,7 @@ function pushCrashHistory(playerId: string, value: number) {
 
 export function getCrashGrowthMultiplier(elapsedSeconds: number) {
   const safeElapsed = Math.max(0, elapsedSeconds);
-  return Number((1 + safeElapsed * 0.18 + safeElapsed * safeElapsed * 0.015).toFixed(2));
+  return Number(Math.exp(safeElapsed * 0.17).toFixed(2));
 }
 
 function randomCrashAt() {
@@ -594,14 +594,18 @@ export async function startCrashGameSecure(input: {
   };
 }
 
-export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
+export async function cashOutCrashSecure(input?: {
+  multiplier?: number;
+  requestedAt?: number;
+}): Promise<CrashSessionStateResult> {
   const player = await getActivePlayer();
   if (!player) {
     return { status: "error", message: "Conecta tu perfil del reino antes de usar Crash." };
   }
 
-  const resolved = await resolveCrashState(player.id, player.gold);
-  if (resolved.state.phase !== "rising") {
+  const state = getCrashState(player.id);
+  if (state.phase !== "rising" || !state.startedAt || !state.crashAt) {
+    const resolved = await resolveCrashState(player.id, player.gold);
     return {
       status: "success",
       session: {
@@ -617,7 +621,39 @@ export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
     };
   }
 
-  const payout = Math.floor(resolved.state.bet * resolved.state.multiplier);
+  const requestedAt = input?.requestedAt ?? Date.now();
+  const elapsedAtRequest = Math.max(0, (requestedAt - state.startedAt) / 1000);
+  const requestGrowth = getCrashGrowthMultiplier(elapsedAtRequest);
+  const crashPoint = Number(state.crashAt.toFixed(2));
+
+  if (requestGrowth >= state.crashAt) {
+    const nextState: CrashState = {
+      ...state,
+      phase: "crashed",
+      multiplier: crashPoint,
+      lastWin: 0,
+    };
+    const history = pushCrashHistory(player.id, crashPoint);
+    saveCrashState(player.id, nextState);
+
+    return {
+      status: "success",
+      session: {
+        phase: nextState.phase,
+        bet: nextState.bet,
+        multiplier: nextState.multiplier,
+        lastWin: nextState.lastWin,
+        autoCashOut: nextState.autoCashOut,
+        startedAt: nextState.startedAt,
+      },
+      remainingGold: player.gold,
+      history,
+    };
+  }
+
+  const clickedMultiplier = input?.multiplier && input.multiplier >= 1 ? input.multiplier : requestGrowth;
+  const cashOutMultiplier = Number(Math.min(clickedMultiplier, requestGrowth).toFixed(2));
+  const payout = Math.floor(state.bet * cashOutMultiplier);
   const remainingGold = player.gold + payout;
   const updated = await updatePlayerGold(player.id, remainingGold);
   if (!updated) {
@@ -625,8 +661,9 @@ export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
   }
 
   const nextState: CrashState = {
-    ...resolved.state,
+    ...state,
     phase: "cashed_out",
+    multiplier: cashOutMultiplier,
     lastWin: payout,
   };
   const history = pushCrashHistory(player.id, Number(nextState.multiplier.toFixed(2)));

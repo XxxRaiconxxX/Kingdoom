@@ -241,6 +241,19 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                         <Sparkles className="w-4 h-4" /> Progreso PvE
                       </h3>
                       <div className="bg-stone-900/40 border border-stone-800/50 p-5 rounded-xl space-y-4">
+                        <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4">
+                          <p className="text-[10px] uppercase tracking-[0.16em] text-stone-500">
+                            Estadisticas de juego
+                          </p>
+                          <div className="mt-3 space-y-1.5 text-sm font-semibold text-stone-200">
+                            <p>LV PVE: {pveProgress.level}</p>
+                            <p>PODER: {pvePower}</p>
+                            <p>
+                              STATS PVE: F {pveProgress.stats.strength} - V {pveProgress.stats.life} - D{" "}
+                              {pveProgress.stats.defense}
+                            </p>
+                          </div>
+                        </div>
                         <div className="grid grid-cols-2 gap-3">
                           <InfoItem label="Nivel PvE" value={`Lv ${pveProgress.level}`} />
                           <InfoItem label="Poder PvE" value={`${pvePower}`} />

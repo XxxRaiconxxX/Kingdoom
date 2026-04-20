@@ -201,7 +201,7 @@ export function TavernCrash() {
   ) => {
     ctx.clearRect(0, 0, width, height);
 
-    const maxX = Math.max(4, elapsed * 1.35);
+    const maxX = Math.max(8, elapsed * 1.25);
     let maxY = Math.max(2, currentMultiplier * 1.3);
 
     if (autoCashOutRef.current >= 1.01) {
@@ -621,6 +621,9 @@ export function TavernCrash() {
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black text-stone-500">x</span>
                 </div>
+                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-600">
+                  Dejalo vacio para que suba hasta colapsar. Si marcas un valor, cobra automatico al llegar.
+                </p>
               </div>
             </div>
 
@@ -634,7 +637,7 @@ export function TavernCrash() {
                   <span className="relative z-10 flex flex-col items-center">
                     <span className="mb-0.5 text-[10px] uppercase tracking-widest opacity-70">
                       {autoCashOut >= 1.01
-                        ? `Auto en ${autoCashOut.toFixed(2)}x — o retira ya`
+                        ? `Auto en ${autoCashOut.toFixed(2)}x - o retira ya`
                         : "Asegurar ahora"}
                     </span>
                     <span className="flex items-center gap-2 text-xl font-black">

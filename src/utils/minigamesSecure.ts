@@ -233,15 +233,16 @@ function pushCrashHistory(playerId: string, value: number) {
 }
 
 export function getCrashGrowthMultiplier(elapsedSeconds: number) {
-  return Number((1 + elapsedSeconds * 0.72 + elapsedSeconds * elapsedSeconds * 0.09).toFixed(2));
+  const safeElapsed = Math.max(0, elapsedSeconds);
+  return Number((1 + safeElapsed * 0.18 + safeElapsed * safeElapsed * 0.015).toFixed(2));
 }
 
 function randomCrashAt() {
   const roll = Math.random();
-  if (roll < 0.45) return 1.35 + Math.random() * 0.9;
-  if (roll < 0.75) return 2.25 + Math.random() * 1.8;
-  if (roll < 0.93) return 4.2 + Math.random() * 3.6;
-  return 8 + Math.random() * 10;
+  if (roll < 0.34) return 1.45 + Math.random() * 0.85;
+  if (roll < 0.7) return 2.35 + Math.random() * 1.9;
+  if (roll < 0.93) return 4.4 + Math.random() * 3.8;
+  return 8.5 + Math.random() * 9.5;
 }
 
 async function resolveCrashState(playerId: string, playerGold: number) {

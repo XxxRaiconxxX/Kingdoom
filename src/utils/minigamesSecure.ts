@@ -65,6 +65,7 @@ export type CrashSessionStateResult =
         multiplier: number;
         lastWin: number;
         autoCashOut: number;
+        startedAt?: number;
       };
       remainingGold: number;
       history: number[];
@@ -231,7 +232,7 @@ function pushCrashHistory(playerId: string, value: number) {
   return next;
 }
 
-function getCrashGrowthMultiplier(elapsedSeconds: number) {
+export function getCrashGrowthMultiplier(elapsedSeconds: number) {
   return Number((1 + elapsedSeconds * 0.72 + elapsedSeconds * elapsedSeconds * 0.09).toFixed(2));
 }
 
@@ -539,6 +540,7 @@ export async function fetchCrashSessionState(): Promise<CrashSessionStateResult>
       multiplier: resolved.state.multiplier,
       lastWin: resolved.state.lastWin,
       autoCashOut: resolved.state.autoCashOut,
+      startedAt: resolved.state.startedAt,
     },
     remainingGold: resolved.remainingGold,
     history: resolved.history,
@@ -584,6 +586,7 @@ export async function startCrashGameSecure(input: {
       multiplier: state.multiplier,
       lastWin: state.lastWin,
       autoCashOut: state.autoCashOut,
+      startedAt: state.startedAt,
     },
     remainingGold,
     history: getCrashHistory(player.id),
@@ -606,6 +609,7 @@ export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
         multiplier: resolved.state.multiplier,
         lastWin: resolved.state.lastWin,
         autoCashOut: resolved.state.autoCashOut,
+        startedAt: resolved.state.startedAt,
       },
       remainingGold: resolved.remainingGold,
       history: resolved.history,
@@ -635,6 +639,7 @@ export async function cashOutCrashSecure(): Promise<CrashSessionStateResult> {
       multiplier: nextState.multiplier,
       lastWin: nextState.lastWin,
       autoCashOut: nextState.autoCashOut,
+      startedAt: nextState.startedAt,
     },
     remainingGold,
     history,

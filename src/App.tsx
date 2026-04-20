@@ -10,7 +10,6 @@ import {
   Sparkles,
   Store,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 import { EventCard } from "./components/EventCard";
 import { ExpandableText } from "./components/ExpandableText";
 import { PlayerProfilePanel } from "./components/PlayerProfilePanel";
@@ -34,13 +33,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: "library", label: "Biblioteca", icon: Library },
   { id: "market", label: "Mercado", icon: Store },
 ];
-
-const pageTransition = {
-  initial: { opacity: 0, y: 22 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -18 },
-  transition: { duration: 0.28, ease: "easeOut" as const },
-};
 
 const loadLibrarySection = () =>
   import("./components/LibrarySection").then((module) => ({
@@ -79,8 +71,8 @@ export default function App() {
   const [isProfileCollapsed, setIsProfileCollapsed] = useState(false);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    setIsProfileCollapsed(activeTab !== "home");
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    startTransition(() => setIsProfileCollapsed(activeTab !== "home"));
   }, [activeTab]);
 
   return (
@@ -93,32 +85,24 @@ export default function App() {
           />
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={pageTransition.initial}
-            animate={pageTransition.animate}
-            exit={pageTransition.exit}
-            transition={pageTransition.transition}
-          >
-            {activeTab === "home" ? <HomeSection /> : null}
-            {activeTab === "grimoire" ? (
-              <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el grimorio prohibido..." />}>
-                <GrimoireSection />
-              </Suspense>
-            ) : null}
-            {activeTab === "library" ? (
-              <Suspense fallback={<FullscreenLoadingOverlay message="Consultando la biblioteca real..." />}>
-                <LibrarySection />
-              </Suspense>
-            ) : null}
-            {activeTab === "market" ? (
-              <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el mercado clandestino..." />}>
-                <MarketSection />
-              </Suspense>
-            ) : null}
-          </motion.div>
-        </AnimatePresence>
+        <div key={activeTab} className="animate-[content-fade-in_180ms_ease-out]">
+          {activeTab === "home" ? <HomeSection /> : null}
+          {activeTab === "grimoire" ? (
+            <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el grimorio prohibido..." />}>
+              <GrimoireSection />
+            </Suspense>
+          ) : null}
+          {activeTab === "library" ? (
+            <Suspense fallback={<FullscreenLoadingOverlay message="Consultando la biblioteca real..." />}>
+              <LibrarySection />
+            </Suspense>
+          ) : null}
+          {activeTab === "market" ? (
+            <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el mercado clandestino..." />}>
+              <MarketSection />
+            </Suspense>
+          ) : null}
+        </div>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-800/80 bg-stone-950/90 backdrop-blur-xl">
@@ -165,39 +149,23 @@ function HomeSection() {
   useEffect(() => {
     let cancelled = false;
 
-    async function loadEvents() {
-      const result = await fetchRealmEvents();
+    async function loadHomeData() {
+      const [eventsResult, nextUrl] = await Promise.all([
+        fetchRealmEvents(),
+        fetchCommunityAppDownloadUrl(COMMUNITY_APP_DOWNLOAD_FALLBACK_URL),
+      ]);
 
       if (cancelled) {
         return;
       }
 
-      setEvents(result.events);
+      startTransition(() => {
+        setEvents(eventsResult.events);
+        setCommunityAppDownloadUrl(nextUrl);
+      });
     }
 
-    void loadEvents();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadCommunityAppDownloadUrl() {
-      const nextUrl = await fetchCommunityAppDownloadUrl(
-        COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
-      );
-
-      if (cancelled) {
-        return;
-      }
-
-      setCommunityAppDownloadUrl(nextUrl);
-    }
-
-    void loadCommunityAppDownloadUrl();
+    void loadHomeData();
 
     return () => {
       cancelled = true;
@@ -284,7 +252,7 @@ function HomeSection() {
         </div>
       </div>
 
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:760px]">
         <SectionHeader
           eyebrow="Agenda del reino"
           title="Eventos activos"
@@ -302,7 +270,7 @@ function HomeSection() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[0.95fr_1.05fr]">
+      <div className="grid gap-4 md:grid-cols-[0.95fr_1.05fr] [content-visibility:auto] [contain-intrinsic-size:680px]">
         <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
           <SectionHeader eyebrow="Tablon del reino" title="Anuncios del consejo" />
           <div className="mt-4 space-y-3">
@@ -356,7 +324,7 @@ function HomeSection() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr] [content-visibility:auto] [contain-intrinsic-size:420px]">
         <CollapsiblePanel
           title="Estado del reino"
           subtitle="Una lectura rápida de los frentes abiertos antes de sumarte al conflicto."

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Castle, ChevronDown } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 import type { EventStatus, RealmEvent } from "../types";
 
 const eventStatusStyles: Record<
@@ -37,6 +36,9 @@ export function EventCard({ event }: { event: RealmEvent }) {
             src={event.imageUrl}
             alt={event.title}
             loading="lazy"
+            decoding="async"
+            width={640}
+            height={400}
             referrerPolicy="no-referrer"
             onError={() => setImageFailed(true)}
             className="h-full w-full object-cover"
@@ -77,35 +79,19 @@ export function EventCard({ event }: { event: RealmEvent }) {
           className="flex w-full items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/45 px-4 py-3 text-left text-sm font-semibold text-stone-200 transition hover:border-stone-700"
         >
           <span>Ver detalles del evento</span>
-          <motion.span
-            animate={{ rotate: expanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
+          <span className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}>
             <ChevronDown className="h-4 w-4 text-stone-400" />
-          </motion.span>
+          </span>
         </button>
 
-        <AnimatePresence initial={false}>
-          {expanded ? (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              className="overflow-hidden"
-            >
-              <div className="grid gap-3 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4 lg:grid-cols-2">
-                <DetailRow label="Cronica" value={event.longDescription} />
-                <DetailRow
-                  label="Facciones"
-                  value={event.factions.join(" · ")}
-                />
-                <DetailRow label="Requisitos" value={event.requirements} />
-                <DetailRow label="Recompensas" value={event.rewards} />
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+        {expanded ? (
+          <div className="grid gap-3 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4 lg:grid-cols-2">
+            <DetailRow label="Cronica" value={event.longDescription} />
+            <DetailRow label="Facciones" value={event.factions.join(" - ")} />
+            <DetailRow label="Requisitos" value={event.requirements} />
+            <DetailRow label="Recompensas" value={event.rewards} />
+          </div>
+        ) : null}
       </div>
     </article>
   );

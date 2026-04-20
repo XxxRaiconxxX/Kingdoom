@@ -1,6 +1,5 @@
 import { supabase } from "../lib/supabase";
 import { lazy, Suspense, useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   Backpack,
   Coins,
@@ -17,10 +16,7 @@ import {
   Search
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import { CharImportModal } from "./CharImportModal";
-import { CharSheetModal } from "./CharSheetModal";
-import { RealmRegistry } from "./RealmRegistry";
-import { CharacterSheet } from "../types";
+import type { CharacterSheet } from "../types";
 import {
   MAX_PLAYER_CHARACTER_SHEETS,
   getPlayerSheets,
@@ -32,6 +28,21 @@ import {
   setActivePveSheetId,
 } from "../utils/pveProgress";
 
+const CharImportModal = lazy(() =>
+  import("./CharImportModal").then((module) => ({
+    default: module.CharImportModal,
+  }))
+);
+const CharSheetModal = lazy(() =>
+  import("./CharSheetModal").then((module) => ({
+    default: module.CharSheetModal,
+  }))
+);
+const RealmRegistry = lazy(() =>
+  import("./RealmRegistry").then((module) => ({
+    default: module.RealmRegistry,
+  }))
+);
 const AdminControlSheet = lazy(() =>
   import("./AdminControlSheet").then((module) => ({
     default: module.AdminControlSheet,
@@ -484,6 +495,10 @@ portraitUrl,
                             <img
                               src={sheet.portraitUrl}
                               alt={`Retrato de ${sheet.name || "personaje"}`}
+                              loading="lazy"
+                              decoding="async"
+                              width={64}
+                              height={64}
                               className="h-full w-full object-cover"
                             />
                           ) : (
@@ -615,7 +630,7 @@ portraitUrl,
         )}
       </div>
 
-      <AnimatePresence>
+      <>
         {isAdminOpen && player && isAdmin ? (
           <Suspense
             key="admin-sheet"
@@ -646,58 +661,59 @@ portraitUrl,
             <PlayerTradeSheet onClose={() => setIsTradeOpen(false)} />
           </Suspense>
         ) : null}
-      </AnimatePresence>
+      </>
 
       {/* Character Sheet Modals */}
-      <CharImportModal 
-        isOpen={isImportModalOpen} 
-        onClose={() => setIsImportModalOpen(false)} 
-        onSave={handleSaveSheet} 
-      />
-      <CharSheetModal 
-        isOpen={!!selectedSheet} 
-        onClose={() => setSelectedSheet(null)} 
-        character={selectedSheet} 
-      />
+      {isImportModalOpen ? (
+        <Suspense fallback={<ProfileSheetFallback message="Preparando el importador de fichas..." />}>
+          <CharImportModal
+            isOpen={isImportModalOpen}
+            onClose={() => setIsImportModalOpen(false)}
+            onSave={handleSaveSheet}
+          />
+        </Suspense>
+      ) : null}
+      {selectedSheet ? (
+        <Suspense fallback={<ProfileSheetFallback message="Abriendo la hoja del personaje..." />}>
+          <CharSheetModal
+            isOpen={!!selectedSheet}
+            onClose={() => setSelectedSheet(null)}
+            character={selectedSheet}
+          />
+        </Suspense>
+      ) : null}
 
-      <AnimatePresence>
-        {isRegistryOpen && (
+      {isRegistryOpen ? (
+        <Suspense fallback={<ProfileSheetFallback message="Abriendo el registro publico de fichas..." />}>
           <RealmRegistry onClose={() => setIsRegistryOpen(false)} />
-        )}
-      </AnimatePresence>
+        </Suspense>
+      ) : null}
 
       {/* Delete Confirmation Modal */}
-      <AnimatePresence>
-        {sheetToDelete && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-stone-900 border border-stone-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
-            >
-              <h3 className="text-xl font-serif font-bold text-amber-500 mb-2">Eliminar ficha?</h3>
-              <p className="text-stone-300 text-sm mb-6">
-                Esta accion no se puede deshacer. Seguro que deseas eliminar esta ficha de personaje?
-              </p>
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => setSheetToDelete(null)}
-                  className="px-4 py-2 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition-colors text-sm font-medium"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={confirmDeleteSheet}
-                  className="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 transition-colors text-sm font-medium"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </motion.div>
+      {sheetToDelete ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-stone-800 bg-stone-900 p-6 shadow-2xl">
+            <h3 className="mb-2 font-serif text-xl font-bold text-amber-500">Eliminar ficha?</h3>
+            <p className="mb-6 text-sm text-stone-300">
+              Esta accion no se puede deshacer. Seguro que deseas eliminar esta ficha de personaje?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setSheetToDelete(null)}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-stone-400 transition-colors hover:bg-stone-800 hover:text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteSheet}
+                className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500 hover:text-white"
+              >
+                Eliminar
+              </button>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      ) : null}
     </section>
   );
 }

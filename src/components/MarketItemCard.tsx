@@ -121,6 +121,9 @@ export function MarketItemCard({
               src={item.imageUrl}
               alt={item.name}
               loading="lazy"
+              decoding="async"
+              width={500}
+              height={400}
               referrerPolicy="no-referrer"
               onError={() => setImageFailed(true)}
               style={{

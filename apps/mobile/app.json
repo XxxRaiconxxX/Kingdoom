@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "kingdoom",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -42,8 +42,10 @@
     "extra": {
       "project": "kingdoom-native",
       "eas": {
-        "projectId": "replace-with-your-eas-project-id"
-      }
-    }
+        "projectId": "a058785a-c950-4b6a-b5ed-b64a39243847"
+      },
+      "router": {}
+    },
+    "owner": "srnothing"
   }
 }

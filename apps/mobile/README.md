@@ -64,3 +64,9 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - El historial de compras en Perfil ahora permite filtrar por ventana de tiempo (`7 dias`, `30 dias`, `Todo`).
 - Se agrego buscador por nombre de item o referencia de pedido.
 - El usuario puede compartir/exportar el resumen en texto desde el movil con un solo boton.
+
+## Fase 8 - Inventario compacto con detalle expandible
+
+- Inventario en Perfil suma buscador y filtros por categoria para revisar objetos rapido.
+- Cada item incluye accion `Ver detalle` y abre `DetailSheet` nativo con informacion completa.
+- Se muestran imagen, descripcion, habilidad, cantidad e ID del objeto sin saturar la lista principal.

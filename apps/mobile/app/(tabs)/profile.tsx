@@ -1,13 +1,25 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Share, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  Share,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { DetailSheet } from "@/src/components/DetailSheet";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import { fetchPlayerInventoryNative } from "@/src/features/inventory/inventoryService";
 import { usePurchaseHistoryStore } from "@/src/features/market/purchaseHistoryStore";
+import type { InventoryCategoryId, InventoryEntry } from "@/src/features/shared/types";
 import { MOBILE_THEME } from "@/src/theme/colors";
 import { useSessionStore } from "@/src/features/session/sessionStore";
 
 type HistoryWindow = "7d" | "30d" | "all";
+type InventoryFilter = "all" | InventoryCategoryId;
 
 export default function ProfileScreen() {
   const { player, disconnect, refreshGold } = useSessionStore();
@@ -15,6 +27,9 @@ export default function ProfileScreen() {
   const clearPlayerEntries = usePurchaseHistoryStore((state) => state.clearPlayerEntries);
   const [historySearch, setHistorySearch] = useState("");
   const [historyWindow, setHistoryWindow] = useState<HistoryWindow>("30d");
+  const [inventorySearch, setInventorySearch] = useState("");
+  const [inventoryFilter, setInventoryFilter] = useState<InventoryFilter>("all");
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState<InventoryEntry | null>(null);
 
   const playerPurchaseEntries = useMemo(() => {
     if (!player) {
@@ -55,6 +70,18 @@ export default function ProfileScreen() {
     queryFn: () => fetchPlayerInventoryNative(player!.id),
     enabled: Boolean(player?.id),
   });
+
+  const filteredInventoryItems = useMemo(() => {
+    const normalized = inventorySearch.trim().toLowerCase();
+    return (inventoryQuery.data?.items ?? []).filter((item) => {
+      const categoryOk = inventoryFilter === "all" || item.itemCategory === inventoryFilter;
+      const searchOk =
+        !normalized ||
+        item.itemName.toLowerCase().includes(normalized) ||
+        item.itemId.toLowerCase().includes(normalized);
+      return categoryOk && searchOk;
+    });
+  }, [inventoryFilter, inventoryQuery.data?.items, inventorySearch]);
 
   const isRefreshing = inventoryQuery.isRefetching;
 
@@ -284,11 +311,66 @@ export default function ProfileScreen() {
           <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 16 }}>
             Inventario
           </Text>
+          <TextInput
+            value={inventorySearch}
+            onChangeText={setInventorySearch}
+            autoCapitalize="none"
+            placeholder="Buscar objeto o ID"
+            placeholderTextColor={MOBILE_THEME.mutedText}
+            style={{
+              borderWidth: 1,
+              borderColor: MOBILE_THEME.border,
+              borderRadius: 10,
+              paddingHorizontal: 11,
+              paddingVertical: 9,
+              color: MOBILE_THEME.text,
+              backgroundColor: MOBILE_THEME.bg,
+              fontSize: 13,
+            }}
+          />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {(
+                [
+                  { id: "all", label: "Todo" },
+                  { id: "armors", label: "Armaduras" },
+                  { id: "swords", label: "Espadas" },
+                  { id: "others", label: "Otros" },
+                ] as Array<{ id: InventoryFilter; label: string }>
+              ).map((chip) => {
+                const active = inventoryFilter === chip.id;
+                return (
+                  <Pressable
+                    key={chip.id}
+                    onPress={() => setInventoryFilter(chip.id)}
+                    style={{
+                      borderRadius: 999,
+                      borderWidth: 1,
+                      borderColor: active ? MOBILE_THEME.gold : MOBILE_THEME.border,
+                      paddingHorizontal: 10,
+                      paddingVertical: 6,
+                      backgroundColor: active ? "rgba(212,166,74,0.12)" : MOBILE_THEME.bg,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: active ? MOBILE_THEME.gold : MOBILE_THEME.mutedText,
+                        fontSize: 12,
+                        fontWeight: "700",
+                      }}
+                    >
+                      {chip.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
           {inventoryQuery.isLoading ? <ActivityIndicator color={MOBILE_THEME.gold} /> : null}
           {inventoryQuery.data?.errorMessage ? (
             <Text style={{ color: MOBILE_THEME.danger }}>{inventoryQuery.data.errorMessage}</Text>
           ) : null}
-          {(inventoryQuery.data?.items ?? []).map((item) => (
+          {filteredInventoryItems.map((item) => (
             <View
               key={item.id}
               style={{
@@ -297,6 +379,7 @@ export default function ProfileScreen() {
                 borderColor: MOBILE_THEME.border,
                 padding: 10,
                 backgroundColor: MOBILE_THEME.bg,
+                gap: 4,
               }}
             >
               <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>
@@ -305,13 +388,79 @@ export default function ProfileScreen() {
               <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
                 {item.itemCategory} | {item.itemRarity}
               </Text>
+              <Pressable
+                onPress={() => setSelectedInventoryItem(item)}
+                style={{
+                  marginTop: 4,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: MOBILE_THEME.border,
+                  paddingVertical: 7,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: MOBILE_THEME.text, fontSize: 12, fontWeight: "700" }}>
+                  Ver detalle
+                </Text>
+              </Pressable>
             </View>
           ))}
-          {!inventoryQuery.isLoading && (inventoryQuery.data?.items?.length ?? 0) === 0 ? (
+          {!inventoryQuery.isLoading && filteredInventoryItems.length === 0 ? (
             <Text style={{ color: MOBILE_THEME.mutedText }}>Sin objetos registrados.</Text>
           ) : null}
         </View>
       ) : null}
+
+      <DetailSheet
+        visible={Boolean(selectedInventoryItem)}
+        title={selectedInventoryItem?.itemName ?? "Objeto"}
+        subtitle={
+          selectedInventoryItem
+            ? `${selectedInventoryItem.itemCategory} - ${selectedInventoryItem.itemRarity}`
+            : ""
+        }
+        onClose={() => setSelectedInventoryItem(null)}
+      >
+        {selectedInventoryItem?.itemImageUrl ? (
+          <Image
+            source={{ uri: selectedInventoryItem.itemImageUrl }}
+            resizeMode={selectedInventoryItem.itemImageFit === "contain" ? "contain" : "cover"}
+            style={{
+              width: "100%",
+              height: 170,
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: MOBILE_THEME.border,
+              backgroundColor: MOBILE_THEME.bg,
+            }}
+          />
+        ) : null}
+        <View
+          style={{
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: MOBILE_THEME.border,
+            backgroundColor: MOBILE_THEME.surfaceSoft,
+            padding: 12,
+            gap: 8,
+          }}
+        >
+          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "800" }}>
+            Cantidad: x{selectedInventoryItem?.quantity ?? 0}
+          </Text>
+          <Text style={{ color: MOBILE_THEME.text, lineHeight: 22 }}>
+            {selectedInventoryItem?.itemDescription || "Sin descripcion."}
+          </Text>
+          {selectedInventoryItem?.itemAbility ? (
+            <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>
+              Habilidad: {selectedInventoryItem.itemAbility}
+            </Text>
+          ) : null}
+          <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
+            ID: {selectedInventoryItem?.itemId ?? "-"}
+          </Text>
+        </View>
+      </DetailSheet>
     </ScreenShell>
   );
 }

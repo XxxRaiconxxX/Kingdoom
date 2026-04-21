@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 21/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/sections/MarketSection.tsx`
+*   **Resumen de Tareas:** Se aplico el formato de filtros `1+4` pedido para categorias del mercado, priorizando vista compacta en movil.
+*   **Cambios Clave:**
+    *   Categorias pasan a una sola fila horizontal con scroll, sin ocupar altura extra.
+    *   Rareza y orden quedan dentro de un bloque colapsable con boton `Ver filtros`.
+    *   El bloque avanzado puede abrir/cerrar con indicador visual, reduciendo ruido cuando no se usa.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasan.
+
+---
+### [Fecha: 21/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `src/data/home.ts`, `src/sections/MarketSection.tsx`, `src/components/AdminControlSheet.tsx`, `src/components/RealmRegistry.tsx`, `src/components/TavernExpeditionArcade.tsx`, `src/utils/market.ts`, `src/features/market/market.types.ts`, `src/features/market/market.adapter.ts`, `src/features/market/market.service.ts`, `src/features/market/index.ts`
 *   **Resumen de Tareas:** Se aplico una ronda incremental de mejoras moviles, orden administrativo y primer piloto de arquitectura por feature sin reescribir el proyecto.
 *   **Cambios Clave:**

@@ -156,6 +156,7 @@ export function MarketSection() {
   const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
   const [tavernMode, setTavernMode] = useState<TavernMode>("expedition");
   const [isTavernInfoOpen, setIsTavernInfoOpen] = useState(false);
+  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
   const [rarityFilter, setRarityFilter] = useState<Rarity | "all">("all");
   const [priceSort, setPriceSort] = useState<PriceSort>("featured");
   const [marketItems, setMarketItems] = useState<MarketItem[]>(MARKET_ITEMS);
@@ -384,22 +385,35 @@ export function MarketSection() {
           eyebrow="Filtrar catalogo"
           title="Categorias del mercado"
         />
-        <div className="mt-4 flex flex-wrap gap-2">
-          <FilterPill
-            label="Todos"
-            active={selectedCategoryId === "all"}
-            onClick={() => setSelectedCategoryId("all")}
-          />
-          {MARKET_CATEGORIES.map((category) => (
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex-shrink-0">
             <FilterPill
-              key={category.id}
-              label={category.title}
-              active={selectedCategoryId === category.id}
-              onClick={() => setSelectedCategoryId(category.id)}
+              label="Todos"
+              active={selectedCategoryId === "all"}
+              onClick={() => setSelectedCategoryId("all")}
             />
+          </div>
+          {MARKET_CATEGORIES.map((category) => (
+            <div key={category.id} className="flex-shrink-0">
+              <FilterPill
+                label={category.title}
+                active={selectedCategoryId === category.id}
+                onClick={() => setSelectedCategoryId(category.id)}
+              />
+            </div>
           ))}
         </div>
-        <div className="mt-5 space-y-4">
+        <button
+          type="button"
+          onClick={() => setIsAdvancedFiltersOpen((current) => !current)}
+          className="kd-touch mt-4 inline-flex items-center gap-2 rounded-full border border-stone-700 bg-stone-900/70 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-stone-300 transition hover:border-amber-500/25 hover:text-stone-100"
+        >
+          <ChevronDown
+            className={`h-4 w-4 transition ${isAdvancedFiltersOpen ? "rotate-180 text-amber-300" : "text-stone-500"}`}
+          />
+          {isAdvancedFiltersOpen ? "Ocultar filtros" : "Ver filtros"}
+        </button>
+        <div className={`mt-4 space-y-4 ${isAdvancedFiltersOpen ? "block" : "hidden"}`}>
           <div>
             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
               Rareza

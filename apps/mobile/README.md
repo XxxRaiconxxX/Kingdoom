@@ -33,3 +33,9 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - El cliente movil usa RPC `purchase_market_item` para evitar descontar oro en cliente.
 - SQL listo en `apps/mobile/supabase_purchase_market_rpc.sql`.
 - Tras compra exitosa se refresca oro y se invalida inventario local.
+
+## Fase 3 - Historial nativo de compras
+
+- Cada compra segura exitosa se registra localmente en la app (con `orderRef`, item, cantidad, total y saldo restante).
+- El perfil muestra una lista compacta de movimientos recientes por jugador.
+- Incluye accion para limpiar historial local del jugador sin tocar datos de Supabase.

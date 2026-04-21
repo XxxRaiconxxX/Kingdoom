@@ -3,12 +3,14 @@ import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import { fetchMarketItemsNative } from "@/src/features/market/marketService";
+import { usePurchaseHistoryStore } from "@/src/features/market/purchaseHistoryStore";
 import { purchaseMarketItemNative } from "@/src/features/market/purchaseService";
 import { useSessionStore } from "@/src/features/session/sessionStore";
 import { MOBILE_THEME } from "@/src/theme/colors";
 
 export default function MarketScreen() {
   const queryClient = useQueryClient();
+  const addHistoryEntry = usePurchaseHistoryStore((state) => state.addEntry);
   const [quantityByItemId, setQuantityByItemId] = useState<Record<string, number>>({});
   const [feedback, setFeedback] = useState("");
   const { player, refreshGold } = useSessionStore();
@@ -19,8 +21,11 @@ export default function MarketScreen() {
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: purchaseMarketItemNative,
-    onSuccess: async (result) => {
+    mutationFn: async (variables: { playerId: string; itemId: string; quantity: number }) => {
+      const result = await purchaseMarketItemNative(variables);
+      return { result, variables };
+    },
+    onSuccess: async ({ result, variables }) => {
       if (result.status === "error") {
         setFeedback(result.message);
         return;
@@ -29,6 +34,22 @@ export default function MarketScreen() {
       setFeedback(
         `${result.message} Pedido ${result.orderRef}. Descuento: ${result.totalPrice} oro.`
       );
+      const boughtItem = sortedItems.find((item) => item.id === variables.itemId);
+      if (player && boughtItem) {
+        addHistoryEntry({
+          id: `${result.orderRef}-${Date.now()}`,
+          playerId: player.id,
+          playerUsername: player.username,
+          itemId: boughtItem.id,
+          itemName: boughtItem.name,
+          quantity: variables.quantity,
+          totalPrice: result.totalPrice,
+          remainingGold: result.remainingGold,
+          orderRef: result.orderRef,
+          purchasedAt: new Date().toISOString(),
+        });
+      }
+
       await refreshGold();
       if (player?.id) {
         await queryClient.invalidateQueries({ queryKey: ["inventory", player.id] });
@@ -43,7 +64,7 @@ export default function MarketScreen() {
   );
 
   return (
-    <ScreenShell title="Mercado" subtitle="Catalogo, compra e inventario">
+    <ScreenShell title="Mercado" subtitle="Compra segura nativa">
       {marketQuery.isLoading ? (
         <View
           style={{

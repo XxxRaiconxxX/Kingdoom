@@ -207,6 +207,24 @@ export default function MarketScreen() {
           <Text style={{ color: MOBILE_THEME.danger, lineHeight: 20 }}>
             {marketQuery.data.errorMessage}
           </Text>
+          <Pressable
+            onPress={() => {
+              void marketQuery.refetch();
+              void refreshGold();
+            }}
+            style={{
+              marginTop: 10,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: MOBILE_THEME.border,
+              paddingVertical: 8,
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
+              Reintentar
+            </Text>
+          </Pressable>
         </View>
       ) : null}
 

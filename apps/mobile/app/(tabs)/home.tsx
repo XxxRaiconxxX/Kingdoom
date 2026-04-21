@@ -37,10 +37,12 @@ export default function HomeScreen() {
         />
         <Pressable
           onPress={() => void handleConnect()}
+          disabled={isLoading || usernameInput.trim().length === 0}
           style={{
             borderRadius: 12,
             paddingVertical: 12,
-            backgroundColor: MOBILE_THEME.gold,
+            backgroundColor:
+              isLoading || usernameInput.trim().length === 0 ? MOBILE_THEME.border : MOBILE_THEME.gold,
             alignItems: "center",
           }}
         >

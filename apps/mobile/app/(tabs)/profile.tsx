@@ -495,7 +495,34 @@ export default function ProfileScreen() {
           </ScrollView>
           {inventoryQuery.isLoading ? <ActivityIndicator color={MOBILE_THEME.gold} /> : null}
           {inventoryQuery.data?.errorMessage ? (
-            <Text style={{ color: MOBILE_THEME.danger }}>{inventoryQuery.data.errorMessage}</Text>
+            <View
+              style={{
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                padding: 10,
+                backgroundColor: MOBILE_THEME.bg,
+                gap: 8,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.danger }}>{inventoryQuery.data.errorMessage}</Text>
+              <Pressable
+                onPress={() => {
+                  void inventoryQuery.refetch();
+                }}
+                style={{
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: MOBILE_THEME.border,
+                  paddingVertical: 8,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
+                  Reintentar inventario
+                </Text>
+              </Pressable>
+            </View>
           ) : null}
           {filteredInventoryItems.map((item) => (
             <View

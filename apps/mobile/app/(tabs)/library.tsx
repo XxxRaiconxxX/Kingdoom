@@ -131,6 +131,23 @@ export default function LibraryScreen() {
           <Text style={{ color: MOBILE_THEME.danger, lineHeight: 20 }}>
             {eventsQuery.data.errorMessage}
           </Text>
+          <Pressable
+            onPress={() => {
+              void eventsQuery.refetch();
+            }}
+            style={{
+              marginTop: 10,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: MOBILE_THEME.border,
+              paddingVertical: 8,
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
+              Reintentar
+            </Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -192,7 +209,7 @@ export default function LibraryScreen() {
       <DetailSheet
         visible={Boolean(selectedEvent)}
         title={selectedEvent?.title ?? "Detalle"}
-        subtitle={selectedEvent ? `${selectedEvent.status} · ${selectedEvent.startDate}` : ""}
+        subtitle={selectedEvent ? `${selectedEvent.status} - ${selectedEvent.startDate}` : ""}
         onClose={() => setSelectedEvent(null)}
       >
         {selectedEvent?.imageUrl ? (
@@ -223,7 +240,7 @@ export default function LibraryScreen() {
             {selectedEvent?.longDescription || selectedEvent?.description}
           </Text>
           <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-            Inicio: {selectedEvent?.startDate ?? "-"} · Cierre: {selectedEvent?.endDate ?? "-"}
+            Inicio: {selectedEvent?.startDate ?? "-"} - Cierre: {selectedEvent?.endDate ?? "-"}
           </Text>
           {selectedEvent?.factions?.length ? (
             <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>

@@ -76,3 +76,9 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - Perfil agrega bloque de metricas rapidas para seguimiento del jugador.
 - Se muestran compras y oro gastado en 7 y 30 dias.
 - Se incluyen indicadores de inventario (`objetos unicos` y `unidades totales`).
+
+## Fase 10 - Hardening beta de UX y errores
+
+- Acciones de reintento rapido en estados de error de Mercado, Biblioteca e Inventario.
+- Ajuste de entrada en Home para evitar accion vacia al conectar perfil.
+- Limpieza de textos con mojibake en detalle de Biblioteca.

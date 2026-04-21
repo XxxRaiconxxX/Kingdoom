@@ -30,6 +30,10 @@ export default function ProfileScreen() {
   const [inventorySearch, setInventorySearch] = useState("");
   const [inventoryFilter, setInventoryFilter] = useState<InventoryFilter>("all");
   const [selectedInventoryItem, setSelectedInventoryItem] = useState<InventoryEntry | null>(null);
+  const playerAllEntries = useMemo(
+    () => (player ? purchaseEntries.filter((entry) => entry.playerId === player.id) : []),
+    [player, purchaseEntries]
+  );
 
   const playerPurchaseEntries = useMemo(() => {
     if (!player) {
@@ -82,6 +86,38 @@ export default function ProfileScreen() {
       return categoryOk && searchOk;
     });
   }, [inventoryFilter, inventoryQuery.data?.items, inventorySearch]);
+
+  const profileMetrics = useMemo(() => {
+    const now = Date.now();
+    const start7d = now - 7 * 24 * 60 * 60 * 1000;
+    const start30d = now - 30 * 24 * 60 * 60 * 1000;
+
+    let spent7d = 0;
+    let spent30d = 0;
+    let buys7d = 0;
+    let buys30d = 0;
+
+    for (const entry of playerAllEntries) {
+      const when = new Date(entry.purchasedAt).getTime();
+      if (!Number.isFinite(when)) {
+        continue;
+      }
+      if (when >= start30d) {
+        spent30d += entry.totalPrice;
+        buys30d += 1;
+      }
+      if (when >= start7d) {
+        spent7d += entry.totalPrice;
+        buys7d += 1;
+      }
+    }
+
+    const inventoryItems = inventoryQuery.data?.items ?? [];
+    const totalUnits = inventoryItems.reduce((acc, item) => acc + item.quantity, 0);
+    const uniqueItems = inventoryItems.length;
+
+    return { spent7d, spent30d, buys7d, buys30d, totalUnits, uniqueItems };
+  }, [inventoryQuery.data?.items, playerAllEntries]);
 
   const isRefreshing = inventoryQuery.isRefetching;
 
@@ -169,6 +205,97 @@ export default function ProfileScreen() {
           <Text style={{ color: MOBILE_THEME.gold, fontWeight: "700" }}>Refrescar oro</Text>
         </Pressable>
       </View>
+
+      {player ? (
+        <View
+          style={{
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: MOBILE_THEME.border,
+            backgroundColor: MOBILE_THEME.surfaceSoft,
+            padding: 14,
+            gap: 8,
+          }}
+        >
+          <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 16 }}>
+            Resumen de actividad
+          </Text>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                backgroundColor: MOBILE_THEME.bg,
+                padding: 10,
+                gap: 3,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>COMPRAS 7 DIAS</Text>
+              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
+                {profileMetrics.buys7d}
+              </Text>
+              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>
+                -{profileMetrics.spent7d} oro
+              </Text>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                backgroundColor: MOBILE_THEME.bg,
+                padding: 10,
+                gap: 3,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>COMPRAS 30 DIAS</Text>
+              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
+                {profileMetrics.buys30d}
+              </Text>
+              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>
+                -{profileMetrics.spent30d} oro
+              </Text>
+            </View>
+          </View>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                backgroundColor: MOBILE_THEME.bg,
+                padding: 10,
+                gap: 3,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>OBJETOS UNICOS</Text>
+              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
+                {profileMetrics.uniqueItems}
+              </Text>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                backgroundColor: MOBILE_THEME.bg,
+                padding: 10,
+                gap: 3,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>UNIDADES TOTALES</Text>
+              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
+                {profileMetrics.totalUnits}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : null}
 
       {player ? (
         <View

@@ -70,3 +70,9 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - Inventario en Perfil suma buscador y filtros por categoria para revisar objetos rapido.
 - Cada item incluye accion `Ver detalle` y abre `DetailSheet` nativo con informacion completa.
 - Se muestran imagen, descripcion, habilidad, cantidad e ID del objeto sin saturar la lista principal.
+
+## Fase 9 - Resumen compacto de actividad
+
+- Perfil agrega bloque de metricas rapidas para seguimiento del jugador.
+- Se muestran compras y oro gastado en 7 y 30 dias.
+- Se incluyen indicadores de inventario (`objetos unicos` y `unidades totales`).

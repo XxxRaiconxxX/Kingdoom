@@ -45,6 +45,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 21/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/profile.tsx`, `apps/mobile/README.md`
+*   **Resumen de Tareas:** Se implemento Fase 9 con resumen de actividad para lectura rapida del estado del jugador en perfil.
+*   **Cambios Clave:**
+    *   Se agregaron metricas de compras en 7 y 30 dias con gasto total en oro.
+    *   Se sumaron indicadores de inventario (`objetos unicos` y `unidades totales`).
+    *   El bloque mantiene formato compacto mobile-first para consulta operativa rapida.
+*   **Notas/Advertencias:** `npm run mobile:typecheck`, `npx tsc --noEmit` y `npm run build` pasan.
+
+---
+### [Fecha: 21/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/profile.tsx`, `apps/mobile/README.md`
 *   **Resumen de Tareas:** Se implemento Fase 8 con inventario compacto, filtrable y detalle expandible en perfil movil.
 *   **Cambios Clave:**
     *   Inventario ahora admite buscador por nombre/ID y filtros por categoria.

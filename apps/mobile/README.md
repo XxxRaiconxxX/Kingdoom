@@ -46,3 +46,9 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - Mercado ahora incluye buscador + filtros de categoria en chips horizontales.
 - Biblioteca ahora incluye buscador + filtros por estado de evento en chips horizontales.
 - Se mantiene compatibilidad total con Fase 1-3 sin cambios de economia ni SQL.
+
+## Fase 5 - Detalle expandible con tarjetas compactas
+
+- Se agrego `DetailSheet` nativo reutilizable para abrir informacion completa sin saturar la vista principal.
+- Mercado y Biblioteca pasan a tarjetas compactas con boton `Ver detalle`.
+- El detalle muestra informacion extendida (descripcion completa, metadatos, imagen si existe) en panel inferior.

@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { DetailSheet } from "@/src/components/DetailSheet";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import { fetchRealmEventsNative } from "@/src/features/events/eventsService";
-import type { EventStatus } from "@/src/features/shared/types";
+import type { EventStatus, RealmEvent } from "@/src/features/shared/types";
 import { MOBILE_THEME } from "@/src/theme/colors";
 
 const EVENT_STATUS_FILTERS: Array<{ id: "all" | EventStatus; label: string }> = [
@@ -16,6 +17,7 @@ const EVENT_STATUS_FILTERS: Array<{ id: "all" | EventStatus; label: string }> = 
 export default function LibraryScreen() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | EventStatus>("all");
+  const [selectedEvent, setSelectedEvent] = useState<RealmEvent | null>(null);
   const eventsQuery = useQuery({
     queryKey: ["realm-events"],
     queryFn: fetchRealmEventsNative,
@@ -147,10 +149,27 @@ export default function LibraryScreen() {
           <Text style={{ color: MOBILE_THEME.text, fontSize: 16, fontWeight: "800" }}>
             {entry.title}
           </Text>
-          <Text style={{ color: MOBILE_THEME.mutedText }}>{entry.description}</Text>
+          <Text style={{ color: MOBILE_THEME.mutedText }} numberOfLines={2}>
+            {entry.description}
+          </Text>
           <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
             {entry.startDate} - {entry.endDate} | {entry.status}
           </Text>
+          <Pressable
+            onPress={() => setSelectedEvent(entry)}
+            style={{
+              marginTop: 2,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: MOBILE_THEME.border,
+              paddingVertical: 8,
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
+              Ver detalle
+            </Text>
+          </Pressable>
         </View>
       ))}
 
@@ -169,6 +188,60 @@ export default function LibraryScreen() {
           </Text>
         </View>
       ) : null}
+
+      <DetailSheet
+        visible={Boolean(selectedEvent)}
+        title={selectedEvent?.title ?? "Detalle"}
+        subtitle={selectedEvent ? `${selectedEvent.status} · ${selectedEvent.startDate}` : ""}
+        onClose={() => setSelectedEvent(null)}
+      >
+        {selectedEvent?.imageUrl ? (
+          <Image
+            source={{ uri: selectedEvent.imageUrl }}
+            resizeMode="cover"
+            style={{
+              width: "100%",
+              height: 180,
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: MOBILE_THEME.border,
+              backgroundColor: MOBILE_THEME.bg,
+            }}
+          />
+        ) : null}
+        <View
+          style={{
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: MOBILE_THEME.border,
+            backgroundColor: MOBILE_THEME.surfaceSoft,
+            padding: 12,
+            gap: 8,
+          }}
+        >
+          <Text style={{ color: MOBILE_THEME.text, lineHeight: 22 }}>
+            {selectedEvent?.longDescription || selectedEvent?.description}
+          </Text>
+          <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
+            Inicio: {selectedEvent?.startDate ?? "-"} · Cierre: {selectedEvent?.endDate ?? "-"}
+          </Text>
+          {selectedEvent?.factions?.length ? (
+            <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
+              Facciones: {selectedEvent.factions.join(", ")}
+            </Text>
+          ) : null}
+          {selectedEvent?.requirements ? (
+            <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
+              Requisitos: {selectedEvent.requirements}
+            </Text>
+          ) : null}
+          {selectedEvent?.rewards ? (
+            <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>
+              Recompensas: {selectedEvent.rewards}
+            </Text>
+          ) : null}
+        </View>
+      </DetailSheet>
     </ScreenShell>
   );
 }

@@ -58,3 +58,9 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - El mercado ya no bloquea toda la pantalla al comprar; el estado pendiente se aplica solo al item en curso.
 - Se agrega feedback visual contextual por compra (`success`/`error`) con color semantico.
 - Se evita doble accion sobre el mismo item mientras la operacion segura esta en progreso.
+
+## Fase 7 - Historial filtrable y export rapido
+
+- El historial de compras en Perfil ahora permite filtrar por ventana de tiempo (`7 dias`, `30 dias`, `Todo`).
+- Se agrego buscador por nombre de item o referencia de pedido.
+- El usuario puede compartir/exportar el resumen en texto desde el movil con un solo boton.

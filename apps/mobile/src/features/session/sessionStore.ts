@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { supabase } from "@/src/services/supabase";
+import { supabase, supabaseConfigError } from "@/src/services/supabase";
 
 type SessionPlayer = {
   id: string;
@@ -34,6 +34,11 @@ export const useSessionStore = create<SessionState>()(
           return;
         }
 
+        if (!supabase) {
+          set({ errorMessage: supabaseConfigError });
+          return;
+        }
+
         set({ isLoading: true, errorMessage: "" });
 
         const { data, error } = await supabase
@@ -63,6 +68,10 @@ export const useSessionStore = create<SessionState>()(
       refreshGold: async () => {
         const currentPlayer = get().player;
         if (!currentPlayer) {
+          return;
+        }
+        if (!supabase) {
+          set({ errorMessage: supabaseConfigError });
           return;
         }
 

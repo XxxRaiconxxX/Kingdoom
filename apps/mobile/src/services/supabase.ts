@@ -1,18 +1,22 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    "Faltan EXPO_PUBLIC_SUPABASE_URL o EXPO_PUBLIC_SUPABASE_ANON_KEY en entorno de apps/mobile."
-  );
-}
+export const supabaseConfigError =
+  !supabaseUrl || !supabaseAnonKey
+    ? "Faltan EXPO_PUBLIC_SUPABASE_URL o EXPO_PUBLIC_SUPABASE_ANON_KEY en apps/mobile/.env."
+    : "";
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: false,
-  },
-});
+const resolvedSupabaseUrl = supabaseUrl ?? "";
+const resolvedSupabaseAnonKey = supabaseAnonKey ?? "";
+
+export const supabase: SupabaseClient | null = supabaseConfigError
+  ? null
+  : createClient(resolvedSupabaseUrl, resolvedSupabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+      },
+    });

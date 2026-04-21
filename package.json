@@ -8,6 +8,10 @@
     "static-build": "vite build",
     "build": "vite build",
     "preview": "vite preview",
+    "mobile:start": "npm run start --prefix apps/mobile",
+    "mobile:android": "npm run android --prefix apps/mobile",
+    "mobile:web": "npm run web --prefix apps/mobile",
+    "mobile:typecheck": "npm run typecheck --prefix apps/mobile",
     "cap:sync": "npx cap sync",
     "android:sync": "npm run static-build && npx cap sync android && npx cap open android"
   },

@@ -27,3 +27,9 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - Sesion basica por username contra tabla `players` de Supabase.
 - Estado persistido localmente con Zustand + AsyncStorage.
 - Estructura inicial para evolucionar a features nativas reales sin WebView.
+
+## Fase 2 - Compra segura de mercado
+
+- El cliente movil usa RPC `purchase_market_item` para evitar descontar oro en cliente.
+- SQL listo en `apps/mobile/supabase_purchase_market_rpc.sql`.
+- Tras compra exitosa se refresca oro y se invalida inventario local.

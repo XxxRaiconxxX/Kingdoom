@@ -1,13 +1,25 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { ChevronDown, Dices } from "lucide-react";
+import {
+  Box,
+  ChevronDown,
+  Dices,
+  Info,
+  RotateCcw,
+  ScrollText,
+  Sparkles,
+  Swords,
+  Ticket,
+  TrendingUp,
+} from "lucide-react";
 import { FilterPill } from "../components/FilterPill";
 import { MarketItemCard } from "../components/MarketItemCard";
 import { SectionHeader } from "../components/SectionHeader";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "../data/market";
 import { fetchMarketItems } from "../utils/market";
 import { isNativeApp } from "../utils/platform";
-import type { MarketCategory, MarketCategoryId, MarketItem } from "../types";
+import type { LucideIcon } from "lucide-react";
+import type { MarketCategory, MarketCategoryId, MarketItem, Rarity } from "../types";
 
 type TavernMode =
   | "expedition"
@@ -22,44 +34,78 @@ const TAVERN_MODES: {
   id: TavernMode;
   label: string;
   description: string;
+  status: string;
+  icon: LucideIcon;
 }[] = [
   {
     id: "expedition",
     label: "Expedicion",
     description: "Combate PvE arcade: eliges contrato, atacas, te defiendes y cazas recompensas sin saturar la pantalla.",
+    status: "PvE",
+    icon: Swords,
   },
   {
     id: "liveHunt",
     label: "Comunal",
     description:
       "Evento exclusivo de la app: host, sala en vivo, fichas reales de Expedicion y rondas cooperativas para tumbar contratos entre varios jugadores.",
+    status: "App",
+    icon: Sparkles,
   },
   {
     id: "chests",
     label: "Cofres",
     description: "Doble o nada con cofres malditos y recompensas inmediatas.",
+    status: "Azar",
+    icon: Box,
   },
   {
     id: "roulette",
     label: "Ruleta",
     description: "Gira la rueda y apuesta por multiplicadores impredecibles.",
+    status: "Riesgo",
+    icon: RotateCcw,
   },
   {
     id: "cards",
     label: "Cartas",
     description: "Adivina si la siguiente carta sube o baja para llevarte el pozo.",
+    status: "Azar",
+    icon: ScrollText,
   },
   {
     id: "scratch",
     label: "Rasca",
     description: "Compra un rasca y gana y prueba suerte por un premio entre 500 y 1000 de oro.",
+    status: "Rapido",
+    icon: Ticket,
   },
   {
     id: "crash",
     label: "Multiplicador",
     description: "El Multiplicador del Vacio: Retira tu apuesta antes de que la energia colapse.",
+    status: "Riesgo",
+    icon: TrendingUp,
   },
 ];
+
+const MARKET_RARITY_FILTERS: Array<{ id: Rarity | "all"; label: string }> = [
+  { id: "all", label: "Todas" },
+  { id: "common", label: "Comun" },
+  { id: "rare", label: "Raro" },
+  { id: "epic", label: "Epico" },
+  { id: "legendary", label: "Legendario" },
+];
+
+type PriceSort = "featured" | "low" | "high";
+
+const PRICE_SORTS: Array<{ id: PriceSort; label: string }> = [
+  { id: "featured", label: "Destacado" },
+  { id: "low", label: "Menor precio" },
+  { id: "high", label: "Mayor precio" },
+];
+
+const TAVERN_MODE_STORAGE_KEY = "kingdoom:last-tavern-mode";
 
 const TavernExpedition = lazy(() =>
   import("../components/TavernExpeditionArcade").then((module) => ({
@@ -109,7 +155,26 @@ export function MarketSection() {
   >("all");
   const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
   const [tavernMode, setTavernMode] = useState<TavernMode>("expedition");
+  const [isTavernInfoOpen, setIsTavernInfoOpen] = useState(false);
+  const [rarityFilter, setRarityFilter] = useState<Rarity | "all">("all");
+  const [priceSort, setPriceSort] = useState<PriceSort>("featured");
   const [marketItems, setMarketItems] = useState<MarketItem[]>(MARKET_ITEMS);
+
+  useEffect(() => {
+    const storedMode = window.localStorage.getItem(TAVERN_MODE_STORAGE_KEY) as TavernMode | null;
+
+    if (!storedMode) {
+      return;
+    }
+
+    if (storedMode === "liveHunt" && !nativeApp) {
+      return;
+    }
+
+    if (TAVERN_MODES.some((mode) => mode.id === storedMode)) {
+      setTavernMode(storedMode);
+    }
+  }, [nativeApp]);
 
   useEffect(() => {
     let cancelled = false;
@@ -139,9 +204,27 @@ export function MarketSection() {
     [selectedCategoryId]
   );
 
+  const filteredMarketItems = useMemo(() => {
+    const filteredItems = rarityFilter === "all"
+      ? marketItems
+      : marketItems.filter((item) => item.rarity === rarityFilter);
+
+    return filteredItems.slice().sort((a, b) => {
+      if (priceSort === "low") {
+        return a.price - b.price;
+      }
+
+      if (priceSort === "high") {
+        return b.price - a.price;
+      }
+
+      return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
+    });
+  }, [marketItems, priceSort, rarityFilter]);
+
   const featuredItems = useMemo(
-    () => marketItems.filter((item) => item.featured),
-    [marketItems]
+    () => filteredMarketItems.filter((item) => item.featured),
+    [filteredMarketItems]
   );
 
   const modalCategory = useMemo(
@@ -155,6 +238,11 @@ export function MarketSection() {
   const tavernModes = useMemo(
     () => TAVERN_MODES.filter((mode) => nativeApp || mode.id !== "liveHunt"),
     [nativeApp]
+  );
+
+  const currentTavernMode = useMemo(
+    () => tavernModes.find((mode) => mode.id === tavernMode) ?? tavernModes[0],
+    [tavernMode, tavernModes]
   );
 
   const tavernContent = useMemo(() => {
@@ -175,6 +263,11 @@ export function MarketSection() {
         return <TavernGame />;
     }
   }, [nativeApp, tavernMode]);
+
+  const selectTavernMode = (mode: TavernMode) => {
+    setTavernMode(mode);
+    window.localStorage.setItem(TAVERN_MODE_STORAGE_KEY, mode);
+  };
 
   return (
     <section className="space-y-5">
@@ -211,16 +304,56 @@ export function MarketSection() {
         </summary>
 
         <div className="mt-5 border-t border-stone-800 pt-5">
-          <div className="flex flex-wrap gap-2">
-            {tavernModes.map((mode) => (
-              <FilterPill
-                key={mode.id}
-                label={mode.label}
-                active={tavernMode === mode.id}
-                onClick={() => setTavernMode(mode.id)}
-              />
-            ))}
+          <div className="flex w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {tavernModes.map((mode) => {
+              const Icon = mode.icon;
+              const active = tavernMode === mode.id;
+
+              return (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => selectTavernMode(mode.id)}
+                  className={`kd-touch flex min-w-[8.2rem] flex-col gap-2 rounded-2xl border px-3 py-3 text-left transition ${
+                    active
+                      ? "border-amber-400/35 bg-amber-500/12 text-amber-100"
+                      : "border-stone-800 bg-stone-950/55 text-stone-400 hover:border-amber-500/20"
+                  }`}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <Icon className={`h-4 w-4 ${active ? "text-amber-300" : "text-stone-500"}`} />
+                    <span className="rounded-full border border-stone-700/70 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em]">
+                      {mode.status}
+                    </span>
+                  </span>
+                  <span className="text-xs font-black uppercase tracking-[0.14em]">
+                    {mode.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
+
+          {currentTavernMode ? (
+            <div className="mt-3 rounded-[1.3rem] border border-stone-800 bg-stone-950/45 p-3">
+              <button
+                type="button"
+                onClick={() => setIsTavernInfoOpen((current) => !current)}
+                className="kd-touch flex w-full items-center justify-between gap-3 text-left text-xs font-bold uppercase tracking-[0.16em] text-stone-300"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Info className="h-4 w-4 text-amber-300" />
+                  Info del modo
+                </span>
+                <ChevronDown className={`h-4 w-4 transition ${isTavernInfoOpen ? "rotate-180 text-amber-300" : "text-stone-500"}`} />
+              </button>
+              {isTavernInfoOpen ? (
+                <p className="mt-3 text-sm leading-6 text-stone-400">
+                  {currentTavernMode.description}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="mt-5">
             <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la mesa de juego..." />}>
@@ -266,6 +399,40 @@ export function MarketSection() {
             />
           ))}
         </div>
+        <div className="mt-5 space-y-4">
+          <div>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
+              Rareza
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {MARKET_RARITY_FILTERS.map((filter) => (
+                <div key={filter.id} className="flex-shrink-0">
+                  <FilterPill
+                    label={filter.label}
+                    active={rarityFilter === filter.id}
+                    onClick={() => setRarityFilter(filter.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
+              Orden
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {PRICE_SORTS.map((sort) => (
+                <div key={sort.id} className="flex-shrink-0">
+                  <FilterPill
+                    label={sort.label}
+                    active={priceSort === sort.id}
+                    onClick={() => setPriceSort(sort.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-4" style={{ contentVisibility: "auto", containIntrinsicSize: "1200px" }}>
@@ -273,7 +440,7 @@ export function MarketSection() {
           <MarketCategoryPanel
             key={category.id}
             category={category}
-            items={marketItems.filter((item) => item.category === category.id)}
+            items={filteredMarketItems.filter((item) => item.category === category.id)}
             onBuy={(item) => setSelectedItem(item)}
           />
         ))}

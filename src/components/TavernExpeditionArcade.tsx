@@ -412,6 +412,15 @@ export function TavernExpeditionArcade() {
     stats: effectiveStats,
   });
   const levelProgress = getPveProgressToNextLevel(safeProgress);
+  const nextMilestoneLevel = Math.floor(safeProgress.level / 5) * 5 + 5;
+  const hunterRank =
+    safeProgress.level >= 15
+      ? "Cazador veterano"
+      : safeProgress.level >= 10
+        ? "Cazador experto"
+        : safeProgress.level >= 5
+          ? "Cazador curtido"
+          : "Cazador inicial";
   const selectedEncounterLocked =
     !selectedEncounter || safeProgress.level < selectedEncounter.minLevel;
   const willLevelSoon = selectedEncounter
@@ -795,9 +804,18 @@ export function TavernExpeditionArcade() {
         <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-amber-500/10 p-2 text-amber-300">
-                <UserRound className="h-5 w-5" />
-              </div>
+              {activeSheet.portraitUrl ? (
+                <img
+                  src={activeSheet.portraitUrl}
+                  alt={activeSheet.name || "Ficha PvE"}
+                  className="h-12 w-12 rounded-2xl border border-amber-400/25 object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="rounded-xl bg-amber-500/10 p-3 text-amber-300">
+                  <UserRound className="h-5 w-5" />
+                </div>
+              )}
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-400/80">
                   Ficha PvE
@@ -805,7 +823,9 @@ export function TavernExpeditionArcade() {
                 <p className="text-lg font-black text-stone-100">
                   {activeSheet.name || "Ficha sin nombre"}
                 </p>
-                <p className="text-xs uppercase tracking-[0.14em] text-stone-500">{getSheetSummary(activeSheet)}</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-stone-500">
+                  {hunterRank} · {getSheetSummary(activeSheet)}
+                </p>
               </div>
             </div>
 
@@ -815,6 +835,9 @@ export function TavernExpeditionArcade() {
               </span>
               <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
                 {levelProgress.current}/{levelProgress.required} exp
+              </span>
+              <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200">
+                F {effectiveStats.strength} · V {effectiveStats.life} · D {effectiveStats.defense}
               </span>
             </div>
           </div>
@@ -828,14 +851,14 @@ export function TavernExpeditionArcade() {
                   type="button"
                   disabled={battle?.result === "active"}
                   onClick={() => handleSelectActiveSheet(sheet.id)}
-                  className={`rounded-[1.2rem] border px-4 py-3 text-left transition ${
+                  className={`rounded-[1.2rem] border px-3 py-3 text-left transition ${
                     active
                       ? "border-amber-400/30 bg-amber-500/10"
                       : "border-stone-800 bg-stone-950/65 hover:border-amber-400/20"
                   } disabled:cursor-not-allowed disabled:opacity-45`}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-black text-stone-100">
                         {sheet.name || "Ficha sin nombre"}
                       </p>
@@ -850,7 +873,7 @@ export function TavernExpeditionArcade() {
                           : "border border-stone-700 bg-stone-900 text-stone-400"
                       }`}
                     >
-                      {active ? "Activa" : "Cambiar"}
+                      {active ? "Activa" : "Usar"}
                     </span>
                   </div>
                 </button>
@@ -866,21 +889,20 @@ export function TavernExpeditionArcade() {
                 <UserRound className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
-                  Resumen de combate
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
+                  Cazador activo
                 </p>
                 <p className="text-lg font-black text-stone-100">{activeSheet.name || player.username}</p>
-                <p className="text-sm text-stone-400">{getSheetSummary(activeSheet)}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 lg:min-w-[620px]">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 lg:min-w-[620px]">
               <MiniStat icon={Coins} label="Oro" value={player.gold} />
-              <MiniStat icon={Sparkles} label="Nivel" value={safeProgress.level} />
+              <MiniStat icon={Sparkles} label="Lv" value={safeProgress.level} />
               <MiniStat icon={BadgeAlert} label="Poder" value={playerPower} />
-              <MiniStat icon={Sparkles} label="Puntos" value={safeProgress.availablePoints} />
-              <MiniStat icon={Heart} label="Vida base" value={playerMaxHp} />
-              <MiniStat icon={BadgeAlert} label="Hard wins" value={safeProgress.hardVictories} />
+              <MiniStat icon={Sparkles} label="Pts" value={safeProgress.availablePoints} />
+              <MiniStat icon={Heart} label="HP" value={playerMaxHp} />
+              <MiniStat icon={BadgeAlert} label="Hard" value={safeProgress.hardVictories} />
             </div>
           </div>
         </div>
@@ -906,25 +928,25 @@ export function TavernExpeditionArcade() {
             </div>
           </div>
 
+          <div className="mb-4 rounded-[1.2rem] border border-stone-800 bg-stone-900/70 px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-stone-200">{levelProgress.current}/{levelProgress.required} exp</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                Hito Lv {nextMilestoneLevel}
+              </p>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-800">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-600"
+                style={{
+                  width: `${Math.max(4, Math.min(100, (levelProgress.current / levelProgress.required) * 100))}%`,
+                }}
+              />
+            </div>
+          </div>
+
           {showUpgrades ? (
             <>
-              <div className="mb-4 rounded-[1.2rem] border border-stone-800 bg-stone-900/70 px-4 py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-stone-200">{levelProgress.current}/{levelProgress.required} exp</p>
-                  <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                    Hito Lv {Math.floor(safeProgress.level / 5) * 5 + 5}
-                  </p>
-                </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-800">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-600"
-                    style={{
-                      width: `${Math.max(4, Math.min(100, (levelProgress.current / levelProgress.required) * 100))}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
               <div className="grid gap-3 md:grid-cols-3">
                 <UpgradeCard
                   icon={Swords}
@@ -1184,7 +1206,7 @@ export function TavernExpeditionArcade() {
                 </>
               ) : (
                 <div className="flex min-h-64 items-center justify-center rounded-[1.4rem] border border-dashed border-stone-800 bg-stone-900/60 px-5 text-center text-sm leading-6 text-stone-400">
-                  Elige un contrato y entra directo al combate arcade. Esta version prioriza ritmo, claridad y lectura limpia en movil.
+                  Elige un contrato y entra al combate.
                 </div>
               )}
             </div>

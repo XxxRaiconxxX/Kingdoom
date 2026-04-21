@@ -7,8 +7,10 @@ import {
   Download,
   Home,
   Library,
+  ScrollText,
   Sparkles,
   Store,
+  UserRound,
 } from "lucide-react";
 import { EventCard } from "./components/EventCard";
 import { ExpandableText } from "./components/ExpandableText";
@@ -18,6 +20,8 @@ import { StatCard } from "./components/StatCard";
 import { ACTIVE_EVENTS } from "./data/events";
 import {
   COMMUNITY_APP_DOWNLOAD_FALLBACK_URL,
+  COMMUNITY_APP_UPDATED_AT,
+  COMMUNITY_APP_VERSION,
   HOME_STATS,
   JOIN_STEPS,
   KINGDOM_ANNOUNCEMENTS,
@@ -86,7 +90,15 @@ export default function App() {
         </div>
 
         <div key={activeTab} className="animate-[content-fade-in_180ms_ease-out]">
-          {activeTab === "home" ? <HomeSection /> : null}
+          {activeTab === "home" ? (
+            <HomeSection
+              onFocusProfile={() => {
+                startTransition(() => setIsProfileCollapsed(false));
+                window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+              }}
+              onOpenMarket={() => startTransition(() => setActiveTab("market"))}
+            />
+          ) : null}
           {activeTab === "grimoire" ? (
             <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el grimorio prohibido..." />}>
               <GrimoireSection />
@@ -140,7 +152,13 @@ export default function App() {
   );
 }
 
-function HomeSection() {
+function HomeSection({
+  onFocusProfile,
+  onOpenMarket,
+}: {
+  onFocusProfile: () => void;
+  onOpenMarket: () => void;
+}) {
   const StatusIcon = KINGDOM_STATUS.icon;
   const [events, setEvents] = useState(ACTIVE_EVENTS);
   const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
@@ -203,17 +221,51 @@ function HomeSection() {
           ))}
         </div>
 
+        <div className="mt-5 grid gap-2 sm:grid-cols-3 md:max-w-3xl">
+          <HomeActionButton
+            icon={UserRound}
+            label="Conectar jugador"
+            onClick={onFocusProfile}
+          />
+          <HomeActionButton
+            icon={ScrollText}
+            label="Ver fichas"
+            onClick={onFocusProfile}
+          />
+          <HomeActionButton
+            icon={Store}
+            label="Mercado y taberna"
+            onClick={onOpenMarket}
+          />
+        </div>
+
         <div className="mt-6 flex flex-col gap-3 md:flex-row">
           {communityAppDownloadUrl ? (
-            <a
-              href={communityAppDownloadUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="kd-touch flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 md:w-fit md:min-w-72"
-            >
-              <Download className="h-4 w-4" />
-              Descargar app de la comunidad
-            </a>
+            <div className="w-full rounded-[1.6rem] border border-amber-500/20 bg-stone-950/45 p-3 md:max-w-xl">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300">
+                    App de la comunidad
+                  </p>
+                  <p className="mt-1 text-xs text-stone-400">
+                    {COMMUNITY_APP_VERSION} · Actualizada {COMMUNITY_APP_UPDATED_AT}
+                  </p>
+                </div>
+                <a
+                  href={communityAppDownloadUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  download
+                  className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
+                >
+                  <Download className="h-4 w-4" />
+                  Descargar APK
+                </a>
+              </div>
+              <p className="mt-3 rounded-2xl border border-stone-800 bg-black/25 px-3 py-2 text-xs leading-5 text-stone-400">
+                Android puede pedir permitir instalacion externa.
+              </p>
+            </div>
           ) : (
             <div className="w-full rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100 md:w-fit md:min-w-72">
               <p className="font-extrabold text-amber-300">App de la comunidad</p>
@@ -362,6 +414,27 @@ function HomeSection() {
         </CollapsiblePanel>
       </div>
     </section>
+  );
+}
+
+function HomeActionButton({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof UserRound;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="kd-touch flex items-center justify-center gap-2 rounded-2xl border border-stone-800 bg-stone-950/55 px-3 py-3 text-xs font-extrabold uppercase tracking-[0.12em] text-stone-200 transition hover:border-amber-500/30 hover:text-amber-200"
+    >
+      <Icon className="h-4 w-4 text-amber-300" />
+      {label}
+    </button>
   );
 }
 

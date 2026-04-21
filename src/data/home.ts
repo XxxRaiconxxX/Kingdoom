@@ -3,6 +3,8 @@ import type { HomeStat, JoinStep, KingdomAnnouncement } from "../types";
 
 export const COMMUNITY_APP_DOWNLOAD_FALLBACK_URL =
   "https://raw.githubusercontent.com/XxxRaiconxxX/Kingdoom/main/app-debug.apk";
+export const COMMUNITY_APP_VERSION = "v1.0.0";
+export const COMMUNITY_APP_UPDATED_AT = "21/04/2026";
 
 export const HOME_STATS: HomeStat[] = [
   { value: "En progreso", label: "Personajes", icon: Users },

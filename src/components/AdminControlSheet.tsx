@@ -204,6 +204,36 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       return matchesSearch && matchesCategory;
     });
   }, [marketSearch, marketCategoryFilter, marketItems]);
+  const marketPreviewItem = useMemo<MarketItem>(
+    () => ({
+      id: marketItemId || slugifyMarketItem(marketItemName || "item-preview", marketItemCategory),
+      name: marketItemName.trim() || "Item del mercado",
+      description: marketItemDescription.trim() || "La descripcion aparecera aqui.",
+      ability: marketItemAbility.trim() || undefined,
+      price: marketItemPrice,
+      rarity: marketItemRarity,
+      imageUrl: marketItemImageUrl.trim(),
+      imageFit: marketItemImageFit || undefined,
+      imagePosition: marketItemImagePosition.trim() || "center",
+      category: marketItemCategory,
+      stockStatus: marketItemStockStatus,
+      featured: marketItemFeatured,
+    }),
+    [
+      marketItemAbility,
+      marketItemCategory,
+      marketItemDescription,
+      marketItemFeatured,
+      marketItemId,
+      marketItemImageFit,
+      marketItemImagePosition,
+      marketItemImageUrl,
+      marketItemName,
+      marketItemPrice,
+      marketItemRarity,
+      marketItemStockStatus,
+    ]
+  );
   const visibleRankingRows = useMemo(
     () =>
       showAllRankingRows
@@ -1568,7 +1598,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     </div>
                   ) : null}
 
-                  <div className="mt-4 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+                  <MarketAdminPreview item={marketPreviewItem} />
+
+                  <div className="sticky bottom-0 z-10 -mx-1 mt-4 grid gap-3 rounded-[1.3rem] border border-stone-800 bg-stone-950/90 p-2 shadow-2xl shadow-black/40 backdrop-blur sm:flex sm:flex-wrap sm:items-center">
                     <button
                       type="submit"
                       disabled={isSavingMarketItem || isDeletingMarketItem}
@@ -1680,13 +1712,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         <div>
                           <p className="text-sm font-bold text-stone-100">{item.name}</p>
                           <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
-                            {item.category} &middot; {item.rarity}
+                            {adminCategoryLabel(item.category)} &middot; {adminRarityLabel(item.rarity)}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-black text-amber-300">{item.price}</p>
                           <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
-                            oro &middot; {item.stockStatus}
+                            oro &middot; {adminStockLabel(item.stockStatus)}
                           </p>
                         </div>
                       </button>
@@ -1740,6 +1772,85 @@ function AdminTabButton({
       {label}
     </button>
   );
+}
+
+function MarketAdminPreview({ item }: { item: MarketItem }) {
+  return (
+    <div className="rounded-[1.4rem] border border-amber-500/15 bg-stone-950/55 p-3">
+      <div className="flex items-center gap-3">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-stone-800 bg-stone-900 text-stone-600">
+          {item.imageUrl ? (
+            <img
+              src={item.imageUrl}
+              alt={item.name}
+              className="h-full w-full"
+              style={{
+                objectFit: item.imageFit ?? "contain",
+                objectPosition: item.imagePosition ?? "center",
+              }}
+              loading="lazy"
+            />
+          ) : (
+            <Store className="h-5 w-5" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="truncate text-sm font-black text-stone-100">{item.name}</p>
+            {item.featured ? (
+              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-amber-200">
+                Destacado
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-stone-400">{item.description}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
+            <span>{adminCategoryLabel(item.category)}</span>
+            <span>{adminRarityLabel(item.rarity)}</span>
+            <span>{adminStockLabel(item.stockStatus)}</span>
+            <span className="text-amber-300">{item.price} oro</span>
+          </div>
+        </div>
+      </div>
+      {item.ability ? (
+        <p className="mt-3 line-clamp-2 rounded-xl border border-stone-800 bg-stone-900/70 px-3 py-2 text-xs leading-5 text-stone-300">
+          {item.ability}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function adminCategoryLabel(category: MarketCategoryId) {
+  const labels: Record<MarketCategoryId, string> = {
+    potions: "Pociones",
+    armors: "Armaduras",
+    swords: "Espadas",
+    others: "Otros",
+  };
+
+  return labels[category];
+}
+
+function adminRarityLabel(rarity: Rarity) {
+  const labels: Record<Rarity, string> = {
+    common: "Comun",
+    rare: "Raro",
+    epic: "Epico",
+    legendary: "Legendario",
+  };
+
+  return labels[rarity];
+}
+
+function adminStockLabel(stock: StockStatus) {
+  const labels: Record<StockStatus, string> = {
+    available: "Disponible",
+    limited: "Limitado",
+    "sold-out": "Agotado",
+  };
+
+  return labels[stock];
 }
 
 function AdminModeButton({

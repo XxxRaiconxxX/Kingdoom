@@ -82,3 +82,22 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - Acciones de reintento rapido en estados de error de Mercado, Biblioteca e Inventario.
 - Ajuste de entrada en Home para evitar accion vacia al conectar perfil.
 - Limpieza de textos con mojibake en detalle de Biblioteca.
+
+## Fase 11 - Release prep APK beta
+
+- Se agrego `eas.json` con perfiles de build:
+  - `preview` => APK beta (`distribution: internal`).
+  - `production` => AAB.
+- Se actualizo versionado beta en `app.json` (`version`, `android.versionCode`, `ios.buildNumber`).
+
+### Comandos recomendados para APK beta
+
+1. `cd apps/mobile`
+2. `npx eas login`
+3. `npx eas build:configure`
+4. `npx eas build --platform android --profile preview`
+
+### Verificacion rapida de textos (anti-mojibake)
+
+- Revisar solo archivos de texto/codigo:
+  - `Get-ChildItem -Recurse -File apps/mobile -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notlike '*node_modules*' -and $_.Extension -in '.ts','.tsx','.md','.json','.js','.jsx','.yml','.yaml','.env','.txt' } | Select-String -Pattern 'Â|Ã|�|\\uFFFD'`

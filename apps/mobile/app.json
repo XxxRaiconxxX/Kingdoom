@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kingdoom",
     "slug": "kingdoom-native",
-    "version": "1.0.0",
+    "version": "1.0.1-beta.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "kingdoom",
@@ -15,10 +15,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.reborn.app"
+      "bundleIdentifier": "com.reborn.app",
+      "buildNumber": "10101"
     },
     "android": {
       "package": "com.reborn.app",
+      "versionCode": 10101,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#060606"

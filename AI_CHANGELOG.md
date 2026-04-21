@@ -44,6 +44,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 21/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/README.md`
+*   **Resumen de Tareas:** Se implemento Fase 6 con UX transaccional por item en el flujo de compra segura del mercado movil.
+*   **Cambios Clave:**
+    *   La compra pendiente ahora se controla por `itemId`, evitando bloqueo global de toda la lista.
+    *   Se incorporo feedback semantico (`success`/`error`) para resultados de compra.
+    *   Mientras un item se compra, se deshabilitan solo sus controles locales para prevenir doble accion.
+    *   Se corrigio texto mojibake residual en el detalle del item.
+*   **Notas/Advertencias:** `npm run mobile:typecheck`, `npx tsc --noEmit` y `npm run build` pasan.
+
+---
+### [Fecha: 21/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/src/components/DetailSheet.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/README.md`
 *   **Resumen de Tareas:** Se implemento Fase 5 con vista de detalle expandible para reducir carga visual en listas moviles.
 *   **Cambios Clave:**

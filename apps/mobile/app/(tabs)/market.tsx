@@ -18,6 +18,11 @@ const CATEGORY_FILTERS: Array<{ id: "all" | MarketCategoryId; label: string }> =
   { id: "others", label: "Otros" },
 ];
 
+type MarketFeedback = {
+  type: "success" | "error";
+  message: string;
+};
+
 export default function MarketScreen() {
   const queryClient = useQueryClient();
   const addHistoryEntry = usePurchaseHistoryStore((state) => state.addEntry);
@@ -25,7 +30,8 @@ export default function MarketScreen() {
   const [categoryFilter, setCategoryFilter] = useState<"all" | MarketCategoryId>("all");
   const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
   const [quantityByItemId, setQuantityByItemId] = useState<Record<string, number>>({});
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState<MarketFeedback | null>(null);
+  const [pendingItemId, setPendingItemId] = useState<string | null>(null);
   const { player, refreshGold } = useSessionStore();
 
   const marketQuery = useQuery({
@@ -33,20 +39,32 @@ export default function MarketScreen() {
     queryFn: fetchMarketItemsNative,
   });
 
+  const sortedItems = useMemo(
+    () =>
+      (marketQuery.data?.items ?? [])
+        .slice()
+        .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))),
+    [marketQuery.data?.items]
+  );
+
   const purchaseMutation = useMutation({
     mutationFn: async (variables: { playerId: string; itemId: string; quantity: number }) => {
       const result = await purchaseMarketItemNative(variables);
       return { result, variables };
     },
+    onMutate: async ({ itemId }) => {
+      setPendingItemId(itemId);
+    },
     onSuccess: async ({ result, variables }) => {
       if (result.status === "error") {
-        setFeedback(result.message);
+        setFeedback({ type: "error", message: result.message });
         return;
       }
 
-      setFeedback(
-        `${result.message} Pedido ${result.orderRef}. Descuento: ${result.totalPrice} oro.`
-      );
+      setFeedback({
+        type: "success",
+        message: `${result.message} Pedido ${result.orderRef}. Descuento: ${result.totalPrice} oro.`,
+      });
       const boughtItem = sortedItems.find((item) => item.id === variables.itemId);
       if (player && boughtItem) {
         addHistoryEntry({
@@ -69,12 +87,16 @@ export default function MarketScreen() {
       }
       await queryClient.invalidateQueries({ queryKey: ["market-items"] });
     },
+    onError: () => {
+      setFeedback({
+        type: "error",
+        message: "No se pudo completar la compra. Intenta otra vez.",
+      });
+    },
+    onSettled: () => {
+      setPendingItemId(null);
+    },
   });
-
-  const sortedItems = useMemo(
-    () => (marketQuery.data?.items ?? []).slice().sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))),
-    [marketQuery.data?.items]
-  );
 
   const filteredItems = useMemo(() => {
     const normalized = search.trim().toLowerCase();
@@ -193,12 +215,15 @@ export default function MarketScreen() {
           style={{
             borderRadius: 14,
             borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
+            borderColor: feedback.type === "error" ? MOBILE_THEME.danger : MOBILE_THEME.gold,
+            backgroundColor:
+              feedback.type === "error" ? "rgba(225,100,100,0.12)" : "rgba(212,166,74,0.12)",
             padding: 12,
           }}
         >
-          <Text style={{ color: MOBILE_THEME.text }}>{feedback}</Text>
+          <Text style={{ color: feedback.type === "error" ? MOBILE_THEME.danger : MOBILE_THEME.text }}>
+            {feedback.message}
+          </Text>
         </View>
       ) : null}
 
@@ -226,8 +251,26 @@ export default function MarketScreen() {
             {item.featured ? " | destacado" : ""}
           </Text>
 
+          {pendingItemId === item.id ? (
+            <View
+              style={{
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.gold,
+                paddingHorizontal: 10,
+                paddingVertical: 7,
+                backgroundColor: "rgba(212,166,74,0.12)",
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
+                Procesando compra...
+              </Text>
+            </View>
+          ) : null}
+
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 }}>
             <Pressable
+              disabled={pendingItemId === item.id}
               onPress={() =>
                 setQuantityByItemId((current) => ({
                   ...current,
@@ -240,6 +283,7 @@ export default function MarketScreen() {
                 borderColor: MOBILE_THEME.border,
                 paddingHorizontal: 10,
                 paddingVertical: 6,
+                opacity: pendingItemId === item.id ? 0.45 : 1,
               }}
             >
               <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>-</Text>
@@ -248,6 +292,7 @@ export default function MarketScreen() {
               {quantityByItemId[item.id] ?? 1}
             </Text>
             <Pressable
+              disabled={pendingItemId === item.id}
               onPress={() =>
                 setQuantityByItemId((current) => ({
                   ...current,
@@ -260,6 +305,7 @@ export default function MarketScreen() {
                 borderColor: MOBILE_THEME.border,
                 paddingHorizontal: 10,
                 paddingVertical: 6,
+                opacity: pendingItemId === item.id ? 0.45 : 1,
               }}
             >
               <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>+</Text>
@@ -268,6 +314,7 @@ export default function MarketScreen() {
 
           <Pressable
             onPress={() => setSelectedItem(item)}
+            disabled={pendingItemId === item.id}
             style={{
               marginTop: 2,
               borderRadius: 10,
@@ -275,6 +322,7 @@ export default function MarketScreen() {
               borderColor: MOBILE_THEME.border,
               paddingVertical: 8,
               alignItems: "center",
+              opacity: pendingItemId === item.id ? 0.45 : 1,
             }}
           >
             <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
@@ -283,15 +331,11 @@ export default function MarketScreen() {
           </Pressable>
 
           <Pressable
-            disabled={
-              !player ||
-              item.stockStatus === "sold-out" ||
-              purchaseMutation.isPending
-            }
+            disabled={!player || item.stockStatus === "sold-out" || pendingItemId === item.id}
             onPress={() => {
-              setFeedback("");
+              setFeedback(null);
               if (!player) {
-                setFeedback("Conecta tu perfil primero para comprar.");
+                setFeedback({ type: "error", message: "Conecta tu perfil primero para comprar." });
                 return;
               }
 
@@ -307,12 +351,12 @@ export default function MarketScreen() {
               paddingVertical: 10,
               alignItems: "center",
               backgroundColor:
-                !player || item.stockStatus === "sold-out" || purchaseMutation.isPending
+                !player || item.stockStatus === "sold-out" || pendingItemId === item.id
                   ? MOBILE_THEME.border
                   : MOBILE_THEME.gold,
             }}
           >
-            {purchaseMutation.isPending ? (
+            {pendingItemId === item.id ? (
               <ActivityIndicator color={MOBILE_THEME.bg} />
             ) : (
               <Text
@@ -345,16 +389,14 @@ export default function MarketScreen() {
             padding: 14,
           }}
         >
-          <Text style={{ color: MOBILE_THEME.mutedText }}>
-            No hay items para ese filtro.
-          </Text>
+          <Text style={{ color: MOBILE_THEME.mutedText }}>No hay items para ese filtro.</Text>
         </View>
       ) : null}
 
       <DetailSheet
         visible={Boolean(selectedItem)}
         title={selectedItem?.name ?? "Detalle"}
-        subtitle={selectedItem ? `${selectedItem.category} · ${selectedItem.rarity}` : ""}
+        subtitle={selectedItem ? `${selectedItem.category} - ${selectedItem.rarity}` : ""}
         onClose={() => setSelectedItem(null)}
       >
         {selectedItem?.imageUrl ? (
@@ -381,9 +423,7 @@ export default function MarketScreen() {
             gap: 8,
           }}
         >
-          <Text style={{ color: MOBILE_THEME.text, lineHeight: 22 }}>
-            {selectedItem?.description}
-          </Text>
+          <Text style={{ color: MOBILE_THEME.text, lineHeight: 22 }}>{selectedItem?.description}</Text>
           {selectedItem?.ability ? (
             <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>
               Habilidad: {selectedItem.ability}
@@ -394,7 +434,7 @@ export default function MarketScreen() {
           </Text>
           <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
             Estado: {selectedItem?.stockStatus ?? "N/A"}
-            {selectedItem?.featured ? " · destacado" : ""}
+            {selectedItem?.featured ? " - destacado" : ""}
           </Text>
         </View>
       </DetailSheet>

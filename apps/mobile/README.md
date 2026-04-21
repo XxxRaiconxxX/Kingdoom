@@ -52,3 +52,9 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - Se agrego `DetailSheet` nativo reutilizable para abrir informacion completa sin saturar la vista principal.
 - Mercado y Biblioteca pasan a tarjetas compactas con boton `Ver detalle`.
 - El detalle muestra informacion extendida (descripcion completa, metadatos, imagen si existe) en panel inferior.
+
+## Fase 6 - Estado de compra por item (UX transaccional)
+
+- El mercado ya no bloquea toda la pantalla al comprar; el estado pendiente se aplica solo al item en curso.
+- Se agrega feedback visual contextual por compra (`success`/`error`) con color semantico.
+- Se evita doble accion sobre el mismo item mientras la operacion segura esta en progreso.

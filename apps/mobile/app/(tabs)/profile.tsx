@@ -21,8 +21,21 @@ export default function ProfileScreen() {
     enabled: Boolean(player?.id),
   });
 
+  const isRefreshing = inventoryQuery.isRefetching;
+
   return (
-    <ScreenShell title="Perfil" subtitle="Sesion, oro y estado base">
+    <ScreenShell
+      title="Perfil"
+      subtitle="Sesion, oro y estado base"
+      onRefresh={() => {
+        if (!player) {
+          return;
+        }
+        void refreshGold();
+        void inventoryQuery.refetch();
+      }}
+      refreshing={isRefreshing}
+    >
       <View
         style={{
           borderRadius: 14,

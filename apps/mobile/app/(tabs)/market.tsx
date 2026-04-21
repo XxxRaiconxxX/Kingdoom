@@ -1,16 +1,27 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import { fetchMarketItemsNative } from "@/src/features/market/marketService";
 import { usePurchaseHistoryStore } from "@/src/features/market/purchaseHistoryStore";
 import { purchaseMarketItemNative } from "@/src/features/market/purchaseService";
 import { useSessionStore } from "@/src/features/session/sessionStore";
+import type { MarketCategoryId } from "@/src/features/shared/types";
 import { MOBILE_THEME } from "@/src/theme/colors";
+
+const CATEGORY_FILTERS: Array<{ id: "all" | MarketCategoryId; label: string }> = [
+  { id: "all", label: "Todos" },
+  { id: "potions", label: "Pociones" },
+  { id: "armors", label: "Armaduras" },
+  { id: "swords", label: "Espadas" },
+  { id: "others", label: "Otros" },
+];
 
 export default function MarketScreen() {
   const queryClient = useQueryClient();
   const addHistoryEntry = usePurchaseHistoryStore((state) => state.addEntry);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | MarketCategoryId>("all");
   const [quantityByItemId, setQuantityByItemId] = useState<Record<string, number>>({});
   const [feedback, setFeedback] = useState("");
   const { player, refreshGold } = useSessionStore();
@@ -63,8 +74,87 @@ export default function MarketScreen() {
     [marketQuery.data?.items]
   );
 
+  const filteredItems = useMemo(() => {
+    const normalized = search.trim().toLowerCase();
+    return sortedItems.filter((item) => {
+      const categoryOk = categoryFilter === "all" || item.category === categoryFilter;
+      const searchOk =
+        normalized.length === 0 ||
+        item.name.toLowerCase().includes(normalized) ||
+        item.description.toLowerCase().includes(normalized);
+      return categoryOk && searchOk;
+    });
+  }, [categoryFilter, search, sortedItems]);
+
   return (
-    <ScreenShell title="Mercado" subtitle="Compra segura nativa">
+    <ScreenShell
+      title="Mercado"
+      subtitle="Compra segura nativa"
+      onRefresh={() => {
+        void marketQuery.refetch();
+        void refreshGold();
+      }}
+      refreshing={marketQuery.isRefetching}
+    >
+      <View
+        style={{
+          borderRadius: 14,
+          borderWidth: 1,
+          borderColor: MOBILE_THEME.border,
+          backgroundColor: MOBILE_THEME.surfaceSoft,
+          padding: 12,
+          gap: 10,
+        }}
+      >
+        <TextInput
+          value={search}
+          onChangeText={setSearch}
+          autoCapitalize="none"
+          placeholder="Buscar item"
+          placeholderTextColor={MOBILE_THEME.mutedText}
+          style={{
+            borderWidth: 1,
+            borderColor: MOBILE_THEME.border,
+            borderRadius: 12,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            color: MOBILE_THEME.text,
+            backgroundColor: MOBILE_THEME.bg,
+          }}
+        />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {CATEGORY_FILTERS.map((chip) => {
+              const active = chip.id === categoryFilter;
+              return (
+                <Pressable
+                  key={chip.id}
+                  onPress={() => setCategoryFilter(chip.id)}
+                  style={{
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: active ? MOBILE_THEME.gold : MOBILE_THEME.border,
+                    paddingHorizontal: 12,
+                    paddingVertical: 7,
+                    backgroundColor: active ? "rgba(212,166,74,0.14)" : MOBILE_THEME.bg,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: active ? MOBILE_THEME.gold : MOBILE_THEME.mutedText,
+                      fontWeight: "700",
+                      fontSize: 12,
+                    }}
+                  >
+                    {chip.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </View>
+
       {marketQuery.isLoading ? (
         <View
           style={{
@@ -110,7 +200,7 @@ export default function MarketScreen() {
         </View>
       ) : null}
 
-      {sortedItems.map((item) => (
+      {filteredItems.map((item) => (
         <View
           key={item.id}
           style={{
@@ -226,6 +316,22 @@ export default function MarketScreen() {
           </Pressable>
         </View>
       ))}
+
+      {!marketQuery.isLoading && filteredItems.length === 0 ? (
+        <View
+          style={{
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: MOBILE_THEME.border,
+            backgroundColor: MOBILE_THEME.surfaceSoft,
+            padding: 14,
+          }}
+        >
+          <Text style={{ color: MOBILE_THEME.mutedText }}>
+            No hay items para ese filtro.
+          </Text>
+        </View>
+      ) : null}
     </ScreenShell>
   );
 }

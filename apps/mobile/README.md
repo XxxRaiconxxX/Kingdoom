@@ -39,3 +39,10 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 - Cada compra segura exitosa se registra localmente en la app (con `orderRef`, item, cantidad, total y saldo restante).
 - El perfil muestra una lista compacta de movimientos recientes por jugador.
 - Incluye accion para limpiar historial local del jugador sin tocar datos de Supabase.
+
+## Fase 4 - UX nativa compacta y refresco rapido
+
+- Pull-to-refresh habilitado en Mercado, Biblioteca y Perfil.
+- Mercado ahora incluye buscador + filtros de categoria en chips horizontales.
+- Biblioteca ahora incluye buscador + filtros por estado de evento en chips horizontales.
+- Se mantiene compatibilidad total con Fase 1-3 sin cambios de economia ni SQL.

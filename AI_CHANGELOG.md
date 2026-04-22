@@ -44,6 +44,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 22/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app.json`
+*   **Resumen de Tareas:** Se activo New Architecture para destrabar build Android en EAS con Reanimated/Worklets.
+*   **Cambios Clave:**
+    *   `expo.newArchEnabled` paso de `false` a `true`.
+    *   El prebuild remoto de EAS ya no debe fallar por `assertNewArchitectureEnabledTask`.
+*   **Notas/Advertencias:** Si existe carpeta `apps/mobile/android` local generada con valor antiguo, regenerar con `npx expo prebuild -p android --clean`.
+
+---
+### [Fecha: 22/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/package.json`
 *   **Resumen de Tareas:** Se aplico fix de dependencias para estabilizar build Android de la app nativa ante error de resolucion de AsyncStorage.
 *   **Cambios Clave:**

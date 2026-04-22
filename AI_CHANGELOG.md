@@ -44,6 +44,19 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 22/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `.gitignore`, `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/app/(tabs)/grimoire.tsx`, `apps/mobile/app/(tabs)/home.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/package.json`, `apps/mobile/src/components/DetailSheet.tsx`, `apps/mobile/src/components/ScreenShell.tsx`, `apps/mobile/src/services/supabase.ts`
+*   **Resumen de Tareas:** Se realizo chequeo previo a recompilacion APK y se pulio la experiencia visual de la app nativa.
+*   **Cambios Clave:**
+    *   Se oculto la ruta `index` para eliminar la pestana fantasma del tab bar.
+    *   Se ajusto altura/padding de tabs para mejorar lectura en Android.
+    *   Se agregaron transiciones nativas suaves en pantallas y hoja de detalle con Reanimated.
+    *   Se reemplazo el cierre mojibake del sheet por icono real y se limpiaron textos redundantes.
+    *   Se cambio el error tecnico de Supabase por mensaje apto para beta y se fijo `expo-system-ui` a la version compatible con SDK 54.
+    *   Se ignoran carpetas `.idea/` para evitar ruido de Android Studio.
+*   **Notas/Advertencias:** `npm run typecheck` en `apps/mobile`, `npx expo-doctor`, `npx expo install --check`, `npx tsc --noEmit` y `npm run build` pasan.
+
+---
+### [Fecha: 22/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app.json`
 *   **Resumen de Tareas:** Se activo New Architecture para destrabar build Android en EAS con Reanimated/Worklets.
 *   **Cambios Clave:**

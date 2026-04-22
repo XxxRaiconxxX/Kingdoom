@@ -111,9 +111,9 @@ export default function MarketScreen() {
   }, [categoryFilter, search, sortedItems]);
 
   return (
-    <ScreenShell
-      title="Mercado"
-      subtitle="Compra segura nativa"
+      <ScreenShell
+        title="Mercado"
+        subtitle="Compra segura"
       onRefresh={() => {
         void marketQuery.refetch();
         void refreshGold();

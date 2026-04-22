@@ -4,7 +4,7 @@ import { MOBILE_THEME } from "@/src/theme/colors";
 
 export default function GrimoireScreen() {
   return (
-    <ScreenShell title="Grimorio" subtitle="Catalogos de magia nativos">
+    <ScreenShell title="Grimorio" subtitle="Magias y bestiario">
       <View
         style={{
           borderRadius: 14,
@@ -15,10 +15,7 @@ export default function GrimoireScreen() {
         }}
       >
         <Text style={{ color: MOBILE_THEME.text, fontSize: 15, fontWeight: "700" }}>
-          Modulo en preparacion
-        </Text>
-        <Text style={{ color: MOBILE_THEME.mutedText, marginTop: 8, lineHeight: 20 }}>
-          Aqui ira el listado por categorias y niveles, con carga admin desde Supabase.
+          Sin registros por ahora.
         </Text>
       </View>
     </ScreenShell>

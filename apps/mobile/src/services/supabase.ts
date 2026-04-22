@@ -5,7 +5,7 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 export const supabaseConfigError =
   !supabaseUrl || !supabaseAnonKey
-    ? "Faltan EXPO_PUBLIC_SUPABASE_URL o EXPO_PUBLIC_SUPABASE_ANON_KEY en apps/mobile/.env."
+    ? "La conexion del reino no esta configurada para esta beta. Revisa las variables de Supabase en Expo."
     : "";
 
 const resolvedSupabaseUrl = supabaseUrl ?? "";

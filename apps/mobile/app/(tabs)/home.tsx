@@ -14,7 +14,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScreenShell title="Kingdoom Native" subtitle="Sesion nativa y economia segura">
+    <ScreenShell title="Kingdoom" subtitle="Perfil y oro del reino">
       <View style={{ gap: 12 }}>
         <Text style={{ color: MOBILE_THEME.text, fontSize: 16, fontWeight: "700" }}>
           Conecta tu perfil
@@ -80,7 +80,6 @@ export default function HomeScreen() {
         <Text style={{ color: MOBILE_THEME.gold, fontSize: 16, fontWeight: "700" }}>
           Oro: {player?.gold ?? 0}
         </Text>
-        <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>App nativa sin WebView.</Text>
       </View>
     </ScreenShell>
   );

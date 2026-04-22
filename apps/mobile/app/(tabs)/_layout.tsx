@@ -7,20 +7,31 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: MOBILE_THEME.gold,
         tabBarInactiveTintColor: MOBILE_THEME.mutedText,
         tabBarStyle: {
           backgroundColor: MOBILE_THEME.surface,
           borderTopColor: MOBILE_THEME.border,
-          height: 72,
+          height: 82,
           paddingTop: 8,
+          paddingBottom: 10,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 2,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: "700",
-          marginBottom: 6,
+          marginBottom: 2,
         },
       }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+      />
       <Tabs.Screen
         name="home"
         options={{

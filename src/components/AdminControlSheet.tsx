@@ -1,18 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { AdminBestiaryManager, AdminMagicManager } from "./AdminGrimoireManagers";
 import {
   Coins,
-  Crown,
   Flag,
-  Loader2,
   ScrollText,
-  ShieldCheck,
   Store,
-  Swords,
   UserPlus,
   Users,
   X,
+  Loader2,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { deleteRealmEvent, fetchRealmEvents, upsertRealmEvent } from "../utils/events";
@@ -22,22 +18,28 @@ import {
   updatePlayerGold,
 } from "../utils/players";
 import {
-  fetchAdminWeeklyRankingRows,
-  seedCurrentWeeklyRanking,
-  upsertAdminWeeklyRankingEntry,
-} from "../utils/adminRanking";
-import { formatRankingWindow } from "../utils/weeklyRanking";
-import {
   deleteMarketItem,
   fetchMarketItems,
   slugifyMarketItem,
   upsertMarketItem,
 } from "../utils/market";
-import type { EventStatus, MarketCategoryId, MarketItem, PlayerAccount, RankingPlayer, Rarity, RealmEvent, StockStatus } from "../types";
+import type { EventStatus, MarketCategoryId, MarketItem, PlayerAccount, Rarity, RealmEvent, StockStatus } from "../types";
+import {
+  ADMIN_LIST_PREVIEW_COUNT,
+  AdminInfoCard,
+  AdminModeButton,
+  AdminTabButton,
+  ExpandableListToggle,
+  LabeledInput,
+  LabeledTextArea,
+  MarketAdminPreview,
+  NumericInput,
+  adminCategoryLabel,
+  adminRarityLabel,
+  adminStockLabel,
+} from "./admin/AdminControlPrimitives";
 
 type AdminTab =
-  | "overview"
-  | "activity"
   | "players"
   | "events"
   | "market"
@@ -45,29 +47,25 @@ type AdminTab =
   | "bestiary";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
 type EventListFilter = "all" | EventStatus;
-const ADMIN_LIST_PREVIEW_COUNT = 4;
+
+const AdminMagicManager = lazy(() =>
+  import("./AdminGrimoireManagers").then((module) => ({
+    default: module.AdminMagicManager,
+  }))
+);
+const AdminBestiaryManager = lazy(() =>
+  import("./AdminGrimoireManagers").then((module) => ({
+    default: module.AdminBestiaryManager,
+  }))
+);
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const { player, refreshPlayer } = usePlayerSession();
   const [activeTab, setActiveTab] = useState<AdminTab>("players");
   const [players, setPlayers] = useState<PlayerAccount[]>([]);
-  const [rankingRows, setRankingRows] = useState<RankingPlayer[]>([]);
-  const [rankingMessage, setRankingMessage] = useState("");
-  const [windowLabel, setWindowLabel] = useState("");
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(
     "loading"
   );
-  const [formPlayerId, setFormPlayerId] = useState("");
-  const [formFaction, setFormFaction] = useState("");
-  const [formStatus, setFormStatus] = useState<RankingPlayer["status"]>("alive");
-  const [formPoints, setFormPoints] = useState(0);
-  const [formMissions, setFormMissions] = useState(0);
-  const [formEvents, setFormEvents] = useState(0);
-  const [formStreak, setFormStreak] = useState(0);
-  const [isActivityEditMode, setIsActivityEditMode] = useState(false);
-  const [feedback, setFeedback] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [isSeedingWeek, setIsSeedingWeek] = useState(false);
   const [playerFeedback, setPlayerFeedback] = useState("");
   const [isCreatingPlayer, setIsCreatingPlayer] = useState(false);
   const [isUpdatingGold, setIsUpdatingGold] = useState(false);
@@ -113,7 +111,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [marketItemCategory, setMarketItemCategory] = useState<MarketCategoryId>("swords");
   const [marketItemStockStatus, setMarketItemStockStatus] = useState<StockStatus>("available");
   const [marketItemFeatured, setMarketItemFeatured] = useState(false);
-  const [showAllRankingRows, setShowAllRankingRows] = useState(false);
   const [showAllPlayersList, setShowAllPlayersList] = useState(false);
   const [showAllEventsList, setShowAllEventsList] = useState(false);
   const [showAllMarketItemsList, setShowAllMarketItemsList] = useState(false);
@@ -156,10 +153,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setStatus("ready");
   }
 
-  const selectedPlayer = useMemo(
-    () => players.find((entry) => entry.id === formPlayerId) ?? null,
-    [formPlayerId, players]
-  );
   const selectedGoldPlayer = useMemo(
     () => players.find((entry) => entry.id === goldPlayerId) ?? null,
     [goldPlayerId, players]
@@ -234,13 +227,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       marketItemStockStatus,
     ]
   );
-  const visibleRankingRows = useMemo(
-    () =>
-      showAllRankingRows
-        ? rankingRows
-        : rankingRows.slice(0, ADMIN_LIST_PREVIEW_COUNT),
-    [rankingRows, showAllRankingRows]
-  );
   const visiblePlayers = useMemo(
     () =>
       showAllPlayersList
@@ -268,86 +254,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   }, [playerSearch]);
 
   useEffect(() => {
-    setShowAllRankingRows(false);
-  }, [rankingRows.length]);
-
-  useEffect(() => {
     setShowAllEventsList(false);
   }, [eventSearch, eventListFilter]);
 
   useEffect(() => {
     setShowAllMarketItemsList(false);
   }, [marketSearch, marketCategoryFilter]);
-
-  function resetActivityForm() {
-    setFormPlayerId("");
-    setFormFaction("");
-    setFormStatus("alive");
-    setFormPoints(0);
-    setFormMissions(0);
-    setFormEvents(0);
-    setFormStreak(0);
-    setIsActivityEditMode(false);
-    setFeedback("");
-  }
-
-  function preloadFromExisting(row: RankingPlayer) {
-    const matchingPlayer =
-      players.find((entry) => entry.username === row.name) ?? null;
-
-    if (matchingPlayer) {
-      setFormPlayerId(matchingPlayer.id);
-    }
-
-    setFormFaction(row.faction);
-    setFormStatus(row.status);
-    setFormPoints(row.activityPoints);
-    setFormMissions(row.missionsCompleted);
-    setFormEvents(row.eventsJoined);
-    setFormStreak(row.streakDays ?? 0);
-    setIsActivityEditMode(true);
-    setFeedback("");
-    setActiveTab("activity");
-  }
-
-  async function handleSave(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!selectedPlayer) {
-      setFeedback("Selecciona un jugador para cargar o actualizar su semana.");
-      return;
-    }
-
-    setIsSaving(true);
-    setFeedback("");
-
-    const result = await upsertAdminWeeklyRankingEntry({
-      player: selectedPlayer,
-      faction: formFaction.trim() || "Sin faccion",
-      status: formStatus,
-      activityPoints: formPoints,
-      missionsCompleted: formMissions,
-      eventsJoined: formEvents,
-      streakDays: formStreak,
-    });
-
-    setIsSaving(false);
-    setFeedback(result.message);
-
-    if (result.status === "saved") {
-      setIsActivityEditMode(false);
-      await reloadAdminData();
-    }
-  }
-
-  async function handleSeedWeek() {
-    setIsSeedingWeek(true);
-    setFeedback("");
-    const result = await seedCurrentWeeklyRanking();
-    setIsSeedingWeek(false);
-    setFeedback(result.message);
-    await reloadAdminData();
-  }
 
   async function handleCreatePlayer(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -673,303 +585,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
               title="Cargando modo admin"
               message="Leyendo jugadores y temporada semanal actual..."
             />
-          ) : null}
-
-          {activeTab === "overview" ? (
-            <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
-                      Semana activa
-                    </p>
-                    <h4 className="mt-1 text-xl font-black text-stone-100">
-                      {windowLabel || "Semana actual"}
-                    </h4>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-6 text-stone-400">
-                  Este panel administra la tabla `weekly_activity_rankings`. Si el
-                  jugador conectado tiene `is_admin = true`, vera este acceso.
-                </p>
-                {rankingMessage ? (
-                  <p className="mt-4 rounded-[1.2rem] border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
-                    {rankingMessage}
-                  </p>
-                ) : null}
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <button
-                    type="button"
-                    onClick={() => void handleSeedWeek()}
-                    disabled={isSeedingWeek}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                  >
-                    {isSeedingWeek ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Creando semana...
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="h-4 w-4" />
-                        Nueva semana
-                      </>
-                    )}
-                  </button>
-                  <p className="max-w-md text-sm leading-6 text-stone-400">
-                    Clona la ultima temporada con puntos reiniciados. Si no hay
-                    historial previo, usa la tabla `players` como base inicial.
-                  </p>
-                </div>
-                <div className="mt-4 rounded-[1.3rem] border border-stone-800 bg-stone-950/50 p-4">
-                  <p className="text-sm font-bold text-stone-100">
-                    Recomendacion tecnica
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-stone-400">
-                    Mantén el acceso administrativo ligado solo a `players.is_admin`
-                    y evita usar nombres especiales como llave de privilegios.
-                  </p>
-                </div>
-              </section>
-
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
-                    <Crown className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
-                      Podio administrable
-                    </p>
-                    <h4 className="mt-1 text-xl font-black text-stone-100">
-                      Temporada en curso
-                    </h4>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  {rankingRows.slice(0, 5).map((row, index) => (
-                    <button
-                      key={`${row.id}-${index}`}
-                      type="button"
-                      onClick={() => preloadFromExisting(row)}
-                      className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
-                    >
-                      <div>
-                        <p className="text-sm font-bold text-stone-100">
-                          #{index + 1} {row.name}
-                        </p>
-                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
-                          {row.faction}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-black text-amber-300">
-                          {row.activityPoints}
-                        </p>
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
-                          puntos
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-
-                  {rankingRows.length === 0 ? (
-                    <AdminInfoCard
-                      title="Sin filas semanales"
-                      message="Todavia no cargaste jugadores en la tabla semanal actual. Usa la pestana Actividad para crear los primeros registros."
-                    />
-                  ) : null}
-                </div>
-              </section>
-            </div>
-          ) : null}
-
-          {activeTab === "activity" ? (
-            <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
-                    <Swords className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
-                      Carga manual
-                    </p>
-                    <h4 className="mt-1 text-xl font-black text-stone-100">
-                      Subir o ajustar ranking
-                    </h4>
-                  </div>
-                </div>
-
-                <form className="mt-5 space-y-4" onSubmit={handleSave}>
-                  <label className="space-y-2">
-                    <span className="text-sm font-semibold text-stone-200">
-                      Jugador
-                    </span>
-                    <select
-                      value={formPlayerId}
-                      onChange={(event) => {
-                        const nextId = event.target.value;
-                        setFormPlayerId(nextId);
-                        if (nextId && !formFaction) {
-                          setFormFaction("Sin faccion");
-                        }
-                      }}
-                      className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
-                    >
-                      <option value="">Selecciona un jugador</option>
-                      {players.map((entry) => (
-                        <option key={entry.id} value={entry.id}>
-                          {entry.username}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <LabeledInput
-                      label="Faccion"
-                      value={formFaction}
-                      onChange={setFormFaction}
-                      placeholder="Cuervos del Norte"
-                    />
-                    <label className="space-y-2">
-                      <span className="text-sm font-semibold text-stone-200">
-                        Estado
-                      </span>
-                      <select
-                        value={formStatus}
-                        onChange={(event) =>
-                          setFormStatus(event.target.value as RankingPlayer["status"])
-                        }
-                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
-                      >
-                        <option value="alive">Vivo</option>
-                        <option value="dead">Muerto</option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <NumericInput label="Puntos" value={formPoints} onChange={setFormPoints} />
-                    <NumericInput
-                      label="Misiones validadas"
-                      value={formMissions}
-                      onChange={setFormMissions}
-                    />
-                    <NumericInput
-                      label="Eventos validados"
-                      value={formEvents}
-                      onChange={setFormEvents}
-                    />
-                    <NumericInput label="Racha" value={formStreak} onChange={setFormStreak} />
-                  </div>
-
-                  <p className="mt-4 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-400">
-                    Usa estos contadores para cargar manualmente el rol validado
-                    por WhatsApp. La app no intenta verificar por si sola si una
-                    misión o evento de texto realmente se completó.
-                  </p>
-
-                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <button
-                      type="submit"
-                      disabled={isSaving}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                    >
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <Crown className="h-4 w-4" />
-                          Guardar semana
-                        </>
-                      )}
-                    </button>
-                    {isActivityEditMode ? (
-                      <button
-                        type="button"
-                        onClick={resetActivityForm}
-                        className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
-                      >
-                        Cancelar edicion
-                      </button>
-                    ) : null}
-                  </div>
-
-                  {feedback ? (
-                    <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
-                      {feedback}
-                    </p>
-                  ) : null}
-                </form>
-              </section>
-
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
-                    <ScrollText className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
-                      Temporada actual
-                    </p>
-                    <h4 className="mt-1 text-xl font-black text-stone-100">
-                      {windowLabel || "Semana actual"}
-                    </h4>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  {rankingRows.length > 0 ? (
-                    visibleRankingRows.map((row, index) => (
-                      <button
-                        key={`${row.id}-${row.name}`}
-                        type="button"
-                        onClick={() => preloadFromExisting(row)}
-                        className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
-                      >
-                        <div>
-                          <p className="text-sm font-bold text-stone-100">
-                            #{index + 1} {row.name}
-                          </p>
-                          <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
-                            {row.missionsCompleted} misiones / {row.eventsJoined} eventos
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-black text-amber-300">
-                            {row.activityPoints}
-                          </p>
-                          <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
-                            puntos
-                          </p>
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <AdminInfoCard
-                      title="Semana vacia"
-                      message="Sin registros semanales."
-                    />
-                  )}
-                  <ExpandableListToggle
-                    shownCount={visibleRankingRows.length}
-                    totalCount={rankingRows.length}
-                    expanded={showAllRankingRows}
-                    onToggle={() => setShowAllRankingRows((current) => !current)}
-                    itemLabel="registros"
-                  />
-                </div>
-              </section>
-            </div>
           ) : null}
 
           {activeTab === "players" ? (
@@ -1740,259 +1355,34 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             </div>
           ) : null}
 
-          {activeTab === "magic" ? <AdminMagicManager /> : null}
+          {activeTab === "magic" ? (
+            <Suspense
+              fallback={
+                <AdminInfoCard
+                  title="Cargando magias"
+                  message="Preparando editor del grimorio."
+                />
+              }
+            >
+              <AdminMagicManager />
+            </Suspense>
+          ) : null}
 
-          {activeTab === "bestiary" ? <AdminBestiaryManager /> : null}
+          {activeTab === "bestiary" ? (
+            <Suspense
+              fallback={
+                <AdminInfoCard
+                  title="Cargando bestiario"
+                  message="Preparando editor de criaturas."
+                />
+              }
+            >
+              <AdminBestiaryManager />
+            </Suspense>
+          ) : null}
 
         </div>
       </motion.div>
     </motion.div>
-  );
-}
-
-function AdminTabButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`kd-touch rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
-        active
-          ? "border-amber-400/40 bg-amber-500/14 text-amber-200 shadow-[inset_0_0_18px_rgba(245,158,11,0.08)]"
-          : "border-stone-700 bg-stone-900/70 text-stone-400 hover:border-amber-500/25 hover:text-stone-200"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function MarketAdminPreview({ item }: { item: MarketItem }) {
-  return (
-    <div className="rounded-[1.4rem] border border-amber-500/15 bg-stone-950/55 p-3">
-      <div className="flex items-center gap-3">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-stone-800 bg-stone-900 text-stone-600">
-          {item.imageUrl ? (
-            <img
-              src={item.imageUrl}
-              alt={item.name}
-              className="h-full w-full"
-              style={{
-                objectFit: item.imageFit ?? "contain",
-                objectPosition: item.imagePosition ?? "center",
-              }}
-              loading="lazy"
-            />
-          ) : (
-            <Store className="h-5 w-5" />
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="truncate text-sm font-black text-stone-100">{item.name}</p>
-            {item.featured ? (
-              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-amber-200">
-                Destacado
-              </span>
-            ) : null}
-          </div>
-          <p className="mt-1 line-clamp-2 text-xs leading-5 text-stone-400">{item.description}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
-            <span>{adminCategoryLabel(item.category)}</span>
-            <span>{adminRarityLabel(item.rarity)}</span>
-            <span>{adminStockLabel(item.stockStatus)}</span>
-            <span className="text-amber-300">{item.price} oro</span>
-          </div>
-        </div>
-      </div>
-      {item.ability ? (
-        <p className="mt-3 line-clamp-2 rounded-xl border border-stone-800 bg-stone-900/70 px-3 py-2 text-xs leading-5 text-stone-300">
-          {item.ability}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function adminCategoryLabel(category: MarketCategoryId) {
-  const labels: Record<MarketCategoryId, string> = {
-    potions: "Pociones",
-    armors: "Armaduras",
-    swords: "Espadas",
-    others: "Otros",
-  };
-
-  return labels[category];
-}
-
-function adminRarityLabel(rarity: Rarity) {
-  const labels: Record<Rarity, string> = {
-    common: "Comun",
-    rare: "Raro",
-    epic: "Epico",
-    legendary: "Legendario",
-  };
-
-  return labels[rarity];
-}
-
-function adminStockLabel(stock: StockStatus) {
-  const labels: Record<StockStatus, string> = {
-    available: "Disponible",
-    limited: "Limitado",
-    "sold-out": "Agotado",
-  };
-
-  return labels[stock];
-}
-
-function AdminModeButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`kd-touch rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
-        active
-          ? "border-amber-400/40 bg-amber-500/14 text-amber-200 shadow-[inset_0_0_18px_rgba(245,158,11,0.08)]"
-          : "border-stone-700 bg-stone-900/70 text-stone-400 hover:border-amber-500/25 hover:text-stone-200"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function AdminInfoCard({
-  title,
-  message,
-}: {
-  title: string;
-  message: string;
-}) {
-  return (
-    <div className="kd-glass rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-5">
-      <p className="text-sm font-bold text-stone-100">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-stone-400">{message}</p>
-    </div>
-  );
-}
-
-function ExpandableListToggle({
-  shownCount,
-  totalCount,
-  expanded,
-  onToggle,
-  itemLabel,
-}: {
-  shownCount: number;
-  totalCount: number;
-  expanded: boolean;
-  onToggle: () => void;
-  itemLabel: string;
-}) {
-  if (totalCount <= ADMIN_LIST_PREVIEW_COUNT || shownCount === 0) {
-    return null;
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className="kd-touch w-full rounded-[1.1rem] border border-stone-700 bg-stone-950/35 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
-    >
-      {expanded
-        ? `Ver menos ${itemLabel}`
-        : `Ver mas ${itemLabel} (${shownCount}/${totalCount})`}
-    </button>
-  );
-}
-
-function LabeledInput({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-}) {
-  return (
-    <label className="space-y-2">
-      <span className="text-sm font-semibold text-stone-200">{label}</span>
-      <input
-        type="text"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
-      />
-    </label>
-  );
-}
-
-function LabeledTextArea({
-  label,
-  value,
-  onChange,
-  placeholder,
-  rows = 3,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  rows?: number;
-}) {
-  return (
-    <label className="space-y-2">
-      <span className="text-sm font-semibold text-stone-200">{label}</span>
-      <textarea
-        value={value}
-        rows={rows}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
-      />
-    </label>
-  );
-}
-
-function NumericInput({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <label className="space-y-2">
-      <span className="text-sm font-semibold text-stone-200">{label}</span>
-      <input
-        type="number"
-        min="0"
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value) || 0)}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
-      />
-    </label>
   );
 }

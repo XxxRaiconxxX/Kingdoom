@@ -346,7 +346,7 @@ export function TavernScratch() {
                   <p className="mt-4 text-xs uppercase tracking-[0.16em] text-stone-500">
                     Costo:{" "}
                     <span className="font-bold text-amber-400">{totalCost} oro</span>{" "}
-                    • Te quedarian {projectedGold} de oro
+                    - Te quedarian {projectedGold} de oro
                   </p>
                 ) : null}
 

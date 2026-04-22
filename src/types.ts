@@ -6,6 +6,9 @@ export type PlayerStatus = "alive" | "dead";
 export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
 export type InventoryCategoryId = Exclude<MarketCategoryId, "potions">;
 export type EventStatus = "active" | "in-production" | "finished";
+export type MissionStatus = "available" | "in-progress" | "closed";
+export type MissionDifficulty = "easy" | "medium" | "hard" | "elite";
+export type MissionType = "story" | "hunt" | "escort" | "investigation" | "event";
 export type StockStatus = "available" | "limited" | "sold-out";
 
 export type PlayerAccount = {
@@ -108,6 +111,20 @@ export type RealmEvent = {
   factions: string[];
   rewards: string;
   requirements: string;
+};
+
+export type RealmMission = {
+  id?: string;
+  title: string;
+  description: string;
+  instructions: string;
+  rewardGold: number;
+  difficulty: MissionDifficulty;
+  type: MissionType;
+  status: MissionStatus;
+  visible: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type HomeStat = {

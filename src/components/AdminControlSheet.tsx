@@ -41,6 +41,7 @@ import {
 
 type AdminTab =
   | "players"
+  | "missions"
   | "events"
   | "market"
   | "magic"
@@ -56,6 +57,11 @@ const AdminMagicManager = lazy(() =>
 const AdminBestiaryManager = lazy(() =>
   import("./AdminGrimoireManagers").then((module) => ({
     default: module.AdminBestiaryManager,
+  }))
+);
+const AdminMissionManager = lazy(() =>
+  import("./admin/AdminMissionManager").then((module) => ({
+    default: module.AdminMissionManager,
   }))
 );
 
@@ -550,6 +556,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             </div>
             <div className="flex-shrink-0">
               <AdminTabButton
+                label="Misiones"
+                active={activeTab === "missions"}
+                onClick={() => setActiveTab("missions")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
                 label="Eventos"
                 active={activeTab === "events"}
                 onClick={() => setActiveTab("events")}
@@ -826,6 +839,19 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 </div>
               </section>
             </div>
+          ) : null}
+
+          {activeTab === "missions" ? (
+            <Suspense
+              fallback={
+                <AdminInfoCard
+                  title="Cargando misiones"
+                  message="Preparando tablero del reino."
+                />
+              }
+            >
+              <AdminMissionManager />
+            </Suspense>
           ) : null}
 
           {activeTab === "events" ? (

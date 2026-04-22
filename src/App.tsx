@@ -18,6 +18,7 @@ import { PlayerProfilePanel } from "./components/PlayerProfilePanel";
 import { SectionHeader } from "./components/SectionHeader";
 import { StatCard } from "./components/StatCard";
 import { ACTIVE_EVENTS } from "./data/events";
+import { FALLBACK_MISSIONS } from "./data/missions";
 import {
   COMMUNITY_APP_DOWNLOAD_FALLBACK_URL,
   COMMUNITY_APP_UPDATED_AT,
@@ -28,8 +29,14 @@ import {
   KINGDOM_STATUS,
 } from "./data/home";
 import { fetchRealmEvents } from "./utils/events";
+import {
+  fetchPublicRealmMissions,
+  getMissionDifficultyLabel,
+  getMissionStatusLabel,
+  getMissionTypeLabel,
+} from "./utils/missions";
 import { fetchCommunityAppDownloadUrl } from "./utils/siteSettings";
-import type { NavItem, TabId } from "./types";
+import type { NavItem, RealmMission, TabId } from "./types";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -161,6 +168,7 @@ function HomeSection({
 }) {
   const StatusIcon = KINGDOM_STATUS.icon;
   const [events, setEvents] = useState(ACTIVE_EVENTS);
+  const [missions, setMissions] = useState(FALLBACK_MISSIONS);
   const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
     COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
   );
@@ -169,8 +177,9 @@ function HomeSection({
     let cancelled = false;
 
     async function loadHomeData() {
-      const [eventsResult, nextUrl] = await Promise.all([
+      const [eventsResult, missionsResult, nextUrl] = await Promise.all([
         fetchRealmEvents(),
+        fetchPublicRealmMissions(),
         fetchCommunityAppDownloadUrl(COMMUNITY_APP_DOWNLOAD_FALLBACK_URL),
       ]);
 
@@ -180,6 +189,7 @@ function HomeSection({
 
       startTransition(() => {
         setEvents(eventsResult.events);
+        setMissions(missionsResult.missions);
         setCommunityAppDownloadUrl(nextUrl);
       });
     }
@@ -306,6 +316,23 @@ function HomeSection({
         </div>
       </div>
 
+      <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:560px]">
+        <SectionHeader
+          eyebrow="Tablero operativo"
+          title="Misiones del reino"
+          rightSlot={
+            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
+              {missions.length} abiertas
+            </span>
+          }
+        />
+        <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {missions.map((mission) => (
+            <MissionCard key={mission.id ?? mission.title} mission={mission} />
+          ))}
+        </div>
+      </div>
+
       <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:760px]">
         <SectionHeader
           eyebrow="Agenda del reino"
@@ -414,6 +441,48 @@ function HomeSection({
         </CollapsiblePanel>
       </div>
     </section>
+  );
+}
+
+function MissionCard({ mission }: { mission: RealmMission }) {
+  return (
+    <article className="kd-hover-lift rounded-[1.6rem] border border-emerald-500/15 bg-stone-950/45 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300/80">
+            {getMissionTypeLabel(mission.type)}
+          </p>
+          <h3 className="mt-2 text-lg font-black leading-tight text-stone-100">
+            {mission.title}
+          </h3>
+        </div>
+        <div className="shrink-0 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-right">
+          <p className="text-lg font-black leading-none text-amber-300">
+            {mission.rewardGold}
+          </p>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200/70">
+            oro
+          </p>
+        </div>
+      </div>
+
+      <p className="mt-3 line-clamp-3 text-sm leading-6 text-stone-400">
+        {mission.description}
+      </p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="rounded-full border border-stone-700 bg-stone-950/70 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-300">
+          {getMissionDifficultyLabel(mission.difficulty)}
+        </span>
+        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-200">
+          {getMissionStatusLabel(mission.status)}
+        </span>
+      </div>
+
+      <p className="mt-4 rounded-2xl border border-stone-800 bg-black/20 px-3 py-2 text-xs leading-5 text-stone-400">
+        {mission.instructions}
+      </p>
+    </article>
   );
 }
 

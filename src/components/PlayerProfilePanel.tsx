@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import {
   Backpack,
   Coins,
+  Crown,
   Loader2,
   RefreshCw,
   ShieldCheck,
@@ -14,7 +15,8 @@ import {
   Plus,
   Eye,
   Trash2,
-  Search
+  Search,
+  type LucideIcon,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import type { CharacterSheet } from "../types";
@@ -82,8 +84,6 @@ export function PlayerProfilePanel({
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isTradeOpen, setIsTradeOpen] = useState(false);
   const [isRegistryOpen, setIsRegistryOpen] = useState(false);
-  
-  // Character Sheets State
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
   const [playerSheets, setPlayerSheets] = useState<CharacterSheet[]>([]);
@@ -97,7 +97,12 @@ export function PlayerProfilePanel({
     if (player) {
       getPlayerSheets(player.id).then((sheets) => {
         setPlayerSheets(sheets);
-        setActiveExpeditionSheetId(resolveActivePveSheetId(player.id, sheets.map((sheet) => sheet.id)));
+        setActiveExpeditionSheetId(
+          resolveActivePveSheetId(
+            player.id,
+            sheets.map((sheet) => sheet.id)
+          )
+        );
       });
     } else {
       setPlayerSheets([]);
@@ -105,7 +110,10 @@ export function PlayerProfilePanel({
     }
   }, [player]);
 
-  const handleSaveSheet = async (partialSheet: Partial<CharacterSheet>, portraitFile?: File | null) => {
+  const handleSaveSheet = async (
+    partialSheet: Partial<CharacterSheet>,
+    portraitFile?: File | null
+  ) => {
     if (!player) return;
     if (playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS) {
       setSheetFeedback(
@@ -122,28 +130,28 @@ export function PlayerProfilePanel({
       magicDefense: 0,
     };
 
-let portraitUrl: string | undefined = undefined;
+    let portraitUrl: string | undefined = undefined;
 
-if (portraitFile) {
-  const ext = portraitFile.name.split(".").pop() ?? "jpg";
-  const path = `portraits/${player.id}/${crypto.randomUUID()}.${ext}`;
-  const { error: uploadError } = await supabase.storage
-    .from("character-portraits")
-    .upload(path, portraitFile, { upsert: true });
+    if (portraitFile) {
+      const ext = portraitFile.name.split(".").pop() ?? "jpg";
+      const path = `portraits/${player.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("character-portraits")
+        .upload(path, portraitFile, { upsert: true });
 
-  if (!uploadError) {
-    const { data: urlData } = supabase.storage
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
       .from("character-portraits")
       .getPublicUrl(path);
-    portraitUrl = urlData.publicUrl;
-  }
-}
+        portraitUrl = urlData.publicUrl;
+      }
+    }
 
     const newSheet: CharacterSheet = {
       id: crypto.randomUUID(),
       playerId: player.id,
       playerUsername: player.username,
-portraitUrl,
+      portraitUrl,
       name: partialSheet.name ?? "",
       age: partialSheet.age ?? "",
       gender: partialSheet.gender ?? "",
@@ -176,12 +184,15 @@ portraitUrl,
     const updatedSheets = await getPlayerSheets(player.id);
     setPlayerSheets(updatedSheets);
     const nextActiveSheetId =
-      activeExpeditionSheetId && updatedSheets.some((sheet) => sheet.id === activeExpeditionSheetId)
+      activeExpeditionSheetId &&
+      updatedSheets.some((sheet) => sheet.id === activeExpeditionSheetId)
         ? activeExpeditionSheetId
         : newSheet.id;
     setActivePveSheetId(player.id, nextActiveSheetId);
     setActiveExpeditionSheetId(nextActiveSheetId);
-    setSheetFeedback(`Ficha importada. ${newSheet.name || "Personaje"} ya puede usarse en Expedicion.`);
+    setSheetFeedback(
+      `Ficha importada. ${newSheet.name || "Personaje"} ya puede usarse en Expedicion.`
+    );
   };
 
   const confirmDeleteSheet = async () => {
@@ -190,7 +201,9 @@ portraitUrl,
       if (player) {
         const updatedSheets = await getPlayerSheets(player.id);
         setPlayerSheets(updatedSheets);
-        const nextActiveSheetId = updatedSheets.some((sheet) => sheet.id === activeExpeditionSheetId)
+        const nextActiveSheetId = updatedSheets.some(
+          (sheet) => sheet.id === activeExpeditionSheetId
+        )
           ? activeExpeditionSheetId
           : updatedSheets[0]?.id ?? null;
         setActivePveSheetId(player.id, nextActiveSheetId);
@@ -233,22 +246,40 @@ portraitUrl,
     }
   }
 
+  const activeSheet = playerSheets.find(
+    (sheet) => sheet.id === activeExpeditionSheetId
+  );
+
   return (
-    <section className="kd-glass rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section className="kd-glass relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
+      <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.18),transparent_62%)] blur-2xl" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
+            <span className="h-2 w-2 rounded-full bg-amber-400/80 shadow-[0_0_14px_rgba(251,191,36,0.45)]" />
             Perfil del reino
           </p>
           <h2 className="text-2xl font-black text-stone-100 md:text-3xl">
             Tu sesion de jugador
           </h2>
           <p className="max-w-2xl text-sm leading-6 text-stone-400">
-            Conecta tu jugador por nombre para usar mercado, taberna, fichas e
-            inventario con el mismo perfil del reino.
+            Un mismo perfil para mercado, taberna, fichas y control del oro.
           </p>
         </div>
 
+        <div className="flex flex-wrap gap-2">
+          <ProfilePill label="Jugador" value={player?.username ?? "Sin sesion"} />
+          <ProfilePill
+            label="Fichas"
+            value={`${playerSheets.length}/${MAX_PLAYER_CHARACTER_SHEETS}`}
+          />
+          <ProfilePill
+            label="Activo"
+            value={activeSheet?.name ?? "Ninguno"}
+          />
+        </div>
       </div>
 
       <div className="mt-5">
@@ -259,368 +290,415 @@ portraitUrl,
           </div>
         ) : player ? (
           isCollapsed ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+            <div className="space-y-3">
+              <div className="rounded-[1.6rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.94),rgba(12,10,9,0.8))] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.2)]">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3 text-amber-400">
                       <UserRound className="h-5 w-5" />
                     </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                        Conectado
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                        Jugador conectado
                       </p>
-                      <p className="mt-1 text-lg font-black text-stone-100">
+                      <p className="truncate text-lg font-black text-stone-100">
                         {player.username}
+                      </p>
+                      <p className="mt-1 text-xs text-stone-400">
+                        {activeSheet?.name
+                          ? `Activo: ${activeSheet.name}`
+                          : "Sin cazador activo"}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearPlayer();
-                        setUsernameInput(player.username);
-                        onCollapsedChange?.(false);
-                      }}
-                      className="rounded-xl border border-stone-700 p-2 text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
-                      title="Cambiar usuario"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onCollapsedChange?.(!isCollapsed)}
-                      className="rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
-                      title="Ver panel completo"
-                    >
-                      Panel
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onCollapsedChange?.(!isCollapsed)}
+                    className="rounded-xl border border-stone-700 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                    title="Ver panel completo"
+                  >
+                    Panel
+                  </button>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <ProfileQuickAction
+                    icon={WalletCards}
+                    label="Oro"
+                    value={String(player.gold)}
+                    tone="gold"
+                    onClick={() => setIsInventoryOpen(true)}
+                  />
+                  <ProfileQuickAction
+                    icon={Search}
+                    label="Registro"
+                    value="Ver fichas"
+                    tone="violet"
+                    onClick={() => setIsRegistryOpen(true)}
+                  />
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   {isAdmin ? (
-                    <button
-                      type="button"
+                    <ProfileMiniButton
+                      icon={ShieldCheck}
+                      label="Admin"
+                      tone="gold"
                       onClick={() => setIsAdminOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-300 transition hover:border-amber-400/35 hover:bg-amber-500/14"
-                    >
-                      <ShieldCheck className="h-3.5 w-3.5" />
-                      Admin
-                    </button>
+                    />
                   ) : null}
-                  <button
-                    type="button"
+                  <ProfileMiniButton
+                    icon={Backpack}
+                    label="Inventario"
                     onClick={() => setIsInventoryOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-700 px-3 py-2 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
-                  >
-                    <Backpack className="h-3.5 w-3.5" />
-                    Inventario
-                  </button>
-                  <button
-                    type="button"
+                  />
+                  <ProfileMiniButton
+                    icon={Send}
+                    label="Enviar"
+                    tone="cyan"
                     onClick={() => setIsTradeOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/25 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-300 transition hover:border-cyan-400/35 hover:bg-cyan-500/14"
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                    Enviar
-                  </button>
-                </div>
-              </div>
-
-              <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
-                    <WalletCards className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                      Oro
-                    </p>
-                    <p className="mt-1 text-2xl font-black text-amber-300">
-                      {player.gold}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsRegistryOpen(true)}
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2 text-xs font-semibold text-purple-300 transition hover:border-purple-400/35 hover:bg-purple-500/14"
-                  >
-                    <Search className="h-3.5 w-3.5" />
-                    Buscar fichas
-                  </button>
+                  />
+                  <ProfileMiniButton
+                    icon={RefreshCw}
+                    label="Cambiar"
+                    onClick={() => {
+                      clearPlayer();
+                      setUsernameInput(player.username);
+                      onCollapsedChange?.(false);
+                    }}
+                  />
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
-              <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
-                <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+              <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
+                <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.96),rgba(12,10,9,0.82))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)]">
+                  <div className="flex flex-col gap-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="rounded-[1.15rem] border border-amber-500/20 bg-amber-500/10 p-3 text-amber-400">
+                          <UserRound className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                            Jugador conectado
+                          </p>
+                          <p className="truncate text-xl font-black text-stone-100">
+                            {player.username}
+                          </p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {isAdmin ? (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300">
+                                <Crown className="h-3 w-3" />
+                                Admin
+                              </span>
+                            ) : null}
+                            <span className="rounded-full border border-stone-700 bg-stone-950/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
+                              {playerSheets.length} fichas
+                            </span>
+                            {activeSheet?.name ? (
+                              <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">
+                                {activeSheet.name}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearPlayer();
+                          setUsernameInput(player.username);
+                          onCollapsedChange?.(false);
+                        }}
+                        className="rounded-xl border border-stone-700 p-2 text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
+                        title="Cambiar usuario"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {isAdmin ? (
+                        <ProfileMiniButton
+                          icon={ShieldCheck}
+                          label="Admin"
+                          tone="gold"
+                          onClick={() => setIsAdminOpen(true)}
+                        />
+                      ) : null}
+                      <ProfileMiniButton
+                        icon={Backpack}
+                        label="Inventario"
+                        onClick={() => setIsInventoryOpen(true)}
+                      />
+                      <ProfileMiniButton
+                        icon={Send}
+                        label="Enviar"
+                        tone="cyan"
+                        onClick={() => setIsTradeOpen(true)}
+                      />
+                      <ProfileMiniButton
+                        icon={Search}
+                        label="Buscar fichas"
+                        tone="violet"
+                        onClick={() => setIsRegistryOpen(true)}
+                      />
+                      <ProfileMiniButton
+                        icon={ScrollText}
+                        label="Compactar"
+                        onClick={() => onCollapsedChange?.(!isCollapsed)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(180deg,rgba(31,24,18,0.94),rgba(12,10,9,0.82))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
-                      <UserRound className="h-5 w-5" />
+                    <div className="rounded-[1.15rem] border border-amber-500/20 bg-amber-500/10 p-3 text-amber-400">
+                      <WalletCards className="h-5 w-5" />
                     </div>
                     <div>
                       <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                        Jugador conectado
+                        Oro disponible
                       </p>
-                      <p className="mt-1 text-xl font-black text-stone-100">
-                        {player.username}
+                      <p className="mt-1 text-3xl font-black text-amber-300">
+                        {player.gold}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearPlayer();
-                        setUsernameInput(player.username);
-                        onCollapsedChange?.(false);
-                      }}
-                      className="rounded-xl border border-stone-700 p-2 text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
-                      title="Cambiar usuario"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center">
-                    {isAdmin ? (
-                      <button
-                        type="button"
-                        onClick={() => setIsAdminOpen(true)}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5 text-xs font-semibold text-amber-300 transition hover:border-amber-400/35 hover:bg-amber-500/14 md:py-2"
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <ProfileInfoStat
+                      label="Fichas"
+                      value={`${playerSheets.length}/${MAX_PLAYER_CHARACTER_SHEETS}`}
+                    />
+                    <ProfileInfoStat
+                      label="PvE"
+                      value={activeSheet?.name ? "Lista" : "Pendiente"}
+                    />
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-stone-800 bg-black/20 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">
+                      Cazador activo
+                    </p>
+                    <p className="mt-1 text-sm font-bold text-stone-100">
+                      {activeSheet?.name ?? "Selecciona una ficha"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-5">
+                <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-emerald-400">
+                      <ScrollText className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold uppercase tracking-wider text-stone-100">
+                        Mis personajes
+                      </h3>
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                        Maximo {MAX_PLAYER_CHARACTER_SHEETS} fichas por cuenta
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsImportModalOpen(true)}
+                    disabled={playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/14 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/22 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                  >
+                    <Plus className="h-4 w-4" />
+                    {playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS
+                      ? "Limite alcanzado"
+                      : "Importar ficha"}
+                  </button>
+                </div>
+
+                {sheetFeedback ? (
+                  <div className="mb-4 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-100">
+                    {sheetFeedback}
+                  </div>
+                ) : null}
+
+                {playerSheets.length === 0 ? (
+                  <div className="rounded-xl border-2 border-dashed border-stone-800 py-8 text-center">
+                    <p className="text-sm text-stone-500">
+                      Aun no has importado ninguna ficha de personaje.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {playerSheets.map((sheet) => {
+                      return (
+                      <div
+                        key={sheet.id}
+                        className="kd-hover-lift flex flex-col gap-3 rounded-[1.35rem] border border-stone-800 bg-[linear-gradient(180deg,rgba(26,23,20,0.94),rgba(12,10,9,0.88))] p-4"
                       >
-                        <ShieldCheck className="h-3.5 w-3.5" />
-                        Admin
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={() => setIsInventoryOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-700 px-3 py-2.5 text-xs font-semibold text-stone-400 transition hover:border-stone-500 hover:text-stone-200 md:py-2"
-                    >
-                      <Backpack className="h-3.5 w-3.5" />
-                      Inventario
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsTradeOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/25 bg-cyan-500/10 px-3 py-2.5 text-xs font-semibold text-cyan-300 transition hover:border-cyan-400/35 hover:bg-cyan-500/14 md:py-2"
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                      Enviar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onCollapsedChange?.(!isCollapsed)}
-                      className="rounded-xl border border-stone-700 px-3 py-2.5 text-xs font-semibold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 md:py-2"
-                      title="Compactar panel"
-                    >
-                      Panel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsRegistryOpen(true)}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2.5 text-xs font-semibold text-purple-300 transition hover:border-purple-400/35 hover:bg-purple-500/14 md:py-2 col-span-2 md:col-span-1"
-                    >
-                      <Search className="h-3.5 w-3.5" />
-                      Buscar Fichas
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
-                    <WalletCards className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-                      Oro disponible
-                    </p>
-                    <p className="mt-1 text-2xl font-black text-amber-300">
-                      {player.gold}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Fichas de Personaje Section */}
-            <div className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-xl bg-green-500/10 p-2.5 text-green-400 shrink-0">
-                    <ScrollText className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-stone-100 uppercase tracking-wider">Mis Personajes</h3>
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-stone-500">
-                      Maximo {MAX_PLAYER_CHARACTER_SHEETS} fichas por cuenta
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsImportModalOpen(true)}
-                  disabled={playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600/20 border border-green-500/30 px-4 py-2 text-sm font-semibold text-green-400 hover:bg-green-600/30 hover:text-green-300 transition-colors w-full sm:w-auto"
-                >
-                  <Plus className="w-4 h-4" />
-                  {playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS ? "Limite alcanzado" : "Importar Ficha"}
-                </button>
-              </div>
-
-              {sheetFeedback ? (
-                <div className="mb-4 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-100">
-                  {sheetFeedback}
-                </div>
-              ) : null}
-
-              {playerSheets.length === 0 ? (
-                <div className="text-center py-8 border-2 border-dashed border-stone-800 rounded-xl">
-                  <p className="text-stone-500 text-sm">Aun no has importado ninguna ficha de personaje.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {playerSheets.map((sheet) => {
-                    return (
-                    <div key={sheet.id} className="bg-stone-900 border border-stone-800 rounded-xl p-4 flex flex-col gap-3 hover:border-amber-500/30 transition-colors">
-                      <div className="flex items-start gap-3">
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-stone-800 bg-stone-950">
-                          {sheet.portraitUrl ? (
-                            <img
-                              src={sheet.portraitUrl}
-                              alt={`Retrato de ${sheet.name || "personaje"}`}
-                              loading="lazy"
-                              decoding="async"
-                              width={64}
-                              height={64}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
-                              Sin foto
+                        <div className="flex items-start gap-3">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-stone-800 bg-stone-950">
+                            {sheet.portraitUrl ? (
+                              <img
+                                src={sheet.portraitUrl}
+                                alt={`Retrato de ${sheet.name || "personaje"}`}
+                                loading="lazy"
+                                decoding="async"
+                                width={64}
+                                height={64}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+                                Sin foto
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <h4 className="truncate font-bold uppercase tracking-wider text-amber-300">
+                                {sheet.name || "Personaje sin nombre"}
+                              </h4>
+                              {activeExpeditionSheetId === sheet.id ? (
+                                <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200">
+                                  Activa PvE
+                                </span>
+                              ) : null}
                             </div>
-                          )}
+                            <p className="mt-1 truncate text-xs text-stone-400">
+                              {sheet.race || "Raza desconocida"}
+                              {sheet.profession ? ` - ${sheet.profession}` : ""}
+                            </p>
+                            {sheet.powers ? (
+                              <p className="mt-1 truncate text-xs text-stone-500">
+                                Poder: {sheet.powers.replace(/\*/g, "")}
+                              </p>
+                            ) : null}
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <h4 className="font-bold text-amber-400 truncate uppercase tracking-wider">{sheet.name || 'Personaje Sin Nombre'}</h4>
-                          {activeExpeditionSheetId === sheet.id ? (
-                            <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200">
-                              Activa PvE
-                            </span>
-                          ) : null}
-                        </div>
-                        <p className="text-xs text-stone-400 truncate mt-1">
-                          {sheet.race || "Raza Desconocida"} {sheet.profession ? ` - ${sheet.profession}` : ""}
-                        </p>
-                        {sheet.powers && (
-                          <p className="text-xs text-stone-500 truncate mt-1">
-                            Poder: {sheet.powers.replace(/\*/g, '')}
-                          </p>
-                        )}
+
+                        <button
+                          onClick={() => handleSelectExpeditionSheet(sheet.id)}
+                          className={`inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] transition-colors ${
+                            activeExpeditionSheetId === sheet.id
+                              ? "border-amber-400/30 bg-amber-500/10 text-amber-200"
+                              : "border-stone-700 bg-stone-950 text-stone-300 hover:border-amber-400/25 hover:text-stone-100"
+                          }`}
+                        >
+                          {activeExpeditionSheetId === sheet.id
+                            ? "Cazador activo"
+                            : "Usar en Expedicion"}
+                        </button>
+
+                        <div className="mt-auto flex items-center gap-2">
+                          <button
+                            onClick={() => setSelectedSheet(sheet)}
+                            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-stone-800 py-2 text-xs font-semibold text-stone-200 transition-colors hover:bg-stone-700"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            Ver ficha
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSheet(sheet.id)}
+                            className="rounded-lg bg-rose-500/10 p-2 text-rose-400 transition-colors hover:bg-rose-500/20"
+                            title="Eliminar ficha"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleSelectExpeditionSheet(sheet.id)}
-                        className={`inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] transition-colors ${
-                          activeExpeditionSheetId === sheet.id
-                            ? "border-amber-400/30 bg-amber-500/10 text-amber-200"
-                            : "border-stone-700 bg-stone-950 text-stone-300 hover:border-amber-400/25 hover:text-stone-100"
-                        }`}
-                      >
-                        {activeExpeditionSheetId === sheet.id ? "Cazador activo" : "Usar en Expedicion"}
-                      </button>
-                      <div className="flex items-center gap-2 mt-auto">
-                        <button 
-                          onClick={() => setSelectedSheet(sheet)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 bg-stone-800 hover:bg-stone-700 text-stone-200 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                        >
-                          <Eye className="w-3.5 h-3.5" /> Ver Ficha
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteSheet(sheet.id)}
-                          className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors"
-                          title="Eliminar ficha"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  )})}
-                </div>
-              )}
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
           )
         ) : (
-          <div className="space-y-4 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
-            <form
-              onSubmit={handleSubmit}
-              className="grid gap-4 md:grid-cols-[1fr_auto]"
-            >
-              <label className="space-y-2">
-                <span className="text-sm font-semibold text-stone-200">
-                  Nombre del jugador registrado
-                </span>
-                <input
-                  type="text"
-                  required
-                  value={usernameInput}
-                  onChange={(event) => {
-                    setUsernameInput(event.target.value);
-                    if (profileError) {
-                      setProfileError("");
-                    }
-                  }}
-                  className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
-                  placeholder="Tu nombre exacto registrado en el reino"
-                />
-              </label>
-
-              <button
-                type="submit"
-                disabled={isSubmittingProfile}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
-              >
-                {isSubmittingProfile ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Conectando...
-                  </>
-                ) : (
-                  <>
-                    <Coins className="h-4 w-4" />
-                    Conectar perfil
-                  </>
-                )}
-              </button>
-
-              {profileError ? (
-                <div className="md:col-span-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                  {profileError}
+          <div className="grid gap-4 md:grid-cols-[1.15fr_0.85fr]">
+            <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.96),rgba(12,10,9,0.82))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)]">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="rounded-[1.15rem] border border-amber-500/20 bg-amber-500/10 p-3 text-amber-400">
+                  <Coins className="h-5 w-5" />
                 </div>
-              ) : null}
-            </form>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-purple-500/15 bg-purple-500/5 px-4 py-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-purple-300/80">
-                  Registro publico
-                </p>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                    Acceso al reino
+                  </p>
+                  <p className="text-lg font-black text-stone-100">
+                    Conecta tu perfil
+                  </p>
+                </div>
               </div>
+
+              <form
+                onSubmit={handleSubmit}
+                className="grid gap-4 md:grid-cols-[1fr_auto]"
+              >
+                <label className="space-y-2">
+                  <span className="text-sm font-semibold text-stone-200">
+                    Nombre del jugador registrado
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    value={usernameInput}
+                    onChange={(event) => {
+                      setUsernameInput(event.target.value);
+                      if (profileError) {
+                        setProfileError("");
+                      }
+                    }}
+                    className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
+                    placeholder="Tu nombre exacto registrado en el reino"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingProfile}
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
+                >
+                  {isSubmittingProfile ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Conectando...
+                    </>
+                  ) : (
+                    <>
+                      <Coins className="h-4 w-4" />
+                      Conectar perfil
+                    </>
+                  )}
+                </button>
+
+                {profileError ? (
+                  <div className="md:col-span-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                    {profileError}
+                  </div>
+                ) : null}
+              </form>
+            </div>
+
+            <div className="rounded-[1.75rem] border border-purple-500/15 bg-[linear-gradient(180deg,rgba(30,22,35,0.92),rgba(12,10,9,0.82))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-purple-300/80">
+                Registro publico
+              </p>
+              <h3 className="mt-2 text-xl font-black text-stone-100">
+                Explora fichas del reino
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-stone-400">
+                Consulta personajes cargados, revisa referencias y ubica
+                cazadores sin conectarte primero.
+              </p>
               <button
                 type="button"
                 onClick={() => setIsRegistryOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2 text-xs font-semibold text-purple-300 transition hover:border-purple-400/35 hover:bg-purple-500/14"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-3 text-sm font-semibold text-purple-300 transition hover:border-purple-400/35 hover:bg-purple-500/14"
               >
-                <Search className="h-3.5 w-3.5" />
+                <Search className="h-4 w-4" />
                 Explorar fichas
               </button>
             </div>
@@ -716,6 +794,103 @@ portraitUrl,
         </div>
       ) : null}
     </section>
+  );
+}
+
+function ProfilePill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-full border border-stone-800 bg-stone-950/60 px-3 py-2">
+      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+        {label}
+      </p>
+      <p className="mt-1 max-w-28 truncate text-xs font-semibold text-stone-200">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function ProfileInfoStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-stone-800 bg-stone-950/60 px-4 py-3">
+      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-bold text-stone-100">{value}</p>
+    </div>
+  );
+}
+
+function ProfileQuickAction({
+  icon: Icon,
+  label,
+  value,
+  tone = "default",
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  tone?: "default" | "gold" | "cyan" | "violet";
+  onClick: () => void;
+}) {
+  const toneStyles: Record<string, string> = {
+    default: "border-stone-800 bg-stone-950/50 text-stone-200",
+    gold: "border-amber-500/20 bg-amber-500/10 text-amber-200",
+    cyan: "border-cyan-500/20 bg-cyan-500/10 text-cyan-200",
+    violet: "border-purple-500/20 bg-purple-500/10 text-purple-200",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`kd-touch flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition hover:brightness-110 ${toneStyles[tone]}`}
+    >
+      <div className="rounded-xl bg-black/20 p-2.5">
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] opacity-75">
+          {label}
+        </p>
+        <p className="truncate text-sm font-bold">{value}</p>
+      </div>
+    </button>
+  );
+}
+
+function ProfileMiniButton({
+  icon: Icon,
+  label,
+  tone = "default",
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  tone?: "default" | "gold" | "cyan" | "violet";
+  onClick: () => void;
+}) {
+  const toneStyles: Record<string, string> = {
+    default:
+      "border-stone-700 bg-stone-950/55 text-stone-300 hover:border-stone-500 hover:text-stone-100",
+    gold:
+      "border-amber-500/25 bg-amber-500/10 text-amber-300 hover:border-amber-400/35 hover:bg-amber-500/14",
+    cyan:
+      "border-cyan-500/25 bg-cyan-500/10 text-cyan-300 hover:border-cyan-400/35 hover:bg-cyan-500/14",
+    violet:
+      "border-purple-500/25 bg-purple-500/10 text-purple-300 hover:border-purple-400/35 hover:bg-purple-500/14",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-semibold transition md:py-2 ${toneStyles[tone]}`}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </button>
   );
 }
 

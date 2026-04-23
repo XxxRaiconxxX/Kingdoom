@@ -1,20 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { Flag, Loader2, ScrollText } from "lucide-react";
+import { Coins, Flag, Loader2, ScrollText, UserPlus } from "lucide-react";
 import type {
   MissionDifficulty,
   MissionStatus,
   MissionType,
+  PlayerAccount,
   RealmMission,
+  RealmMissionClaim,
+  RealmMissionClaimStatus,
 } from "../../types";
 import {
+  claimRealmMission,
   deleteRealmMission,
   fetchAdminRealmMissions,
+  fetchMissionClaims,
+  getMissionClaimStatusLabel,
   getMissionDifficultyLabel,
   getMissionStatusLabel,
   getMissionTypeLabel,
+  markMissionRewardDelivered,
+  updateMissionClaimStatus,
   upsertRealmMission,
 } from "../../utils/missions";
+import { fetchAllPlayers, updatePlayerGold } from "../../utils/players";
 import {
   ADMIN_LIST_PREVIEW_COUNT,
   AdminInfoCard,
@@ -29,13 +38,19 @@ type MissionListFilter = "all" | MissionStatus;
 
 export function AdminMissionManager() {
   const [missions, setMissions] = useState<RealmMission[]>([]);
+  const [players, setPlayers] = useState<PlayerAccount[]>([]);
+  const [claims, setClaims] = useState<RealmMissionClaim[]>([]);
   const [feedback, setFeedback] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoadingClaims, setIsLoadingClaims] = useState(false);
+  const [isClaimingPlayer, setIsClaimingPlayer] = useState(false);
+  const [isRewardingClaimId, setIsRewardingClaimId] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<MissionListFilter>("all");
   const [showAll, setShowAll] = useState(false);
+  const [claimPlayerId, setClaimPlayerId] = useState("");
   const [missionId, setMissionId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -49,15 +64,43 @@ export function AdminMissionManager() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    void loadMissions();
+    void loadBaseData();
   }, []);
 
-  async function loadMissions() {
+  const selectedMission = useMemo(
+    () => missions.find((mission) => mission.id === missionId) ?? null,
+    [missionId, missions]
+  );
+  const selectedClaimPlayer = useMemo(
+    () => players.find((player) => player.id === claimPlayerId) ?? null,
+    [claimPlayerId, players]
+  );
+
+  async function loadBaseData() {
     setIsLoading(true);
-    const result = await fetchAdminRealmMissions();
-    setMissions(result.missions);
-    setFeedback(result.message);
+    const [missionsResult, playersResult] = await Promise.all([
+      fetchAdminRealmMissions(),
+      fetchAllPlayers(),
+    ]);
+    setMissions(missionsResult.missions);
+    setPlayers(playersResult);
+    setFeedback(missionsResult.message);
     setIsLoading(false);
+  }
+
+  async function loadClaimsForMission(nextMissionId: string) {
+    if (!nextMissionId.trim()) {
+      setClaims([]);
+      return;
+    }
+
+    setIsLoadingClaims(true);
+    const result = await fetchMissionClaims(nextMissionId);
+    setClaims(result.claims);
+    if (result.status === "error") {
+      setFeedback(result.message);
+    }
+    setIsLoadingClaims(false);
   }
 
   const filteredMissions = useMemo(() => {
@@ -96,6 +139,8 @@ export function AdminMissionManager() {
     setType("story");
     setStatus("available");
     setVisible(true);
+    setClaimPlayerId("");
+    setClaims([]);
     setFeedback("");
   }
 
@@ -109,7 +154,14 @@ export function AdminMissionManager() {
     setType(mission.type);
     setStatus(mission.status);
     setVisible(mission.visible);
+    setClaimPlayerId("");
     setFeedback("");
+
+    if (mission.id) {
+      void loadClaimsForMission(mission.id);
+    } else {
+      setClaims([]);
+    }
   }
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
@@ -133,8 +185,19 @@ export function AdminMissionManager() {
     setFeedback(result.message);
 
     if (result.status === "saved") {
+      const previouslySelectedMissionId = missionId;
       resetForm();
-      await loadMissions();
+      await loadBaseData();
+
+      if (previouslySelectedMissionId) {
+        const reselected = (await fetchAdminRealmMissions()).missions.find(
+          (mission) => mission.id === previouslySelectedMissionId
+        );
+
+        if (reselected) {
+          preloadMission(reselected);
+        }
+      }
     }
   }
 
@@ -162,8 +225,102 @@ export function AdminMissionManager() {
 
     if (result.status === "deleted") {
       resetForm();
-      await loadMissions();
+      await loadBaseData();
     }
+  }
+
+  async function handleAddParticipant() {
+    if (!missionId) {
+      setFeedback("Guarda primero la mision antes de agregar participantes.");
+      return;
+    }
+
+    if (!claimPlayerId) {
+      setFeedback("Selecciona un jugador para asignarlo a la mision.");
+      return;
+    }
+
+    setIsClaimingPlayer(true);
+    setFeedback("");
+
+    const result = await claimRealmMission(missionId, claimPlayerId);
+
+    setIsClaimingPlayer(false);
+    setFeedback(result.message);
+
+    if (result.status === "claimed" || result.status === "exists") {
+      setClaimPlayerId("");
+      await loadClaimsForMission(missionId);
+    }
+  }
+
+  async function handleSetClaimStatus(
+    claim: RealmMissionClaim,
+    nextStatus: RealmMissionClaimStatus
+  ) {
+    if (claim.status === nextStatus) {
+      return;
+    }
+
+    const result = await updateMissionClaimStatus(claim.id, nextStatus);
+    setFeedback(result.message);
+
+    if (result.status === "saved") {
+      await loadClaimsForMission(claim.missionId);
+    }
+  }
+
+  async function handleDeliverReward(claim: RealmMissionClaim) {
+    if (!selectedMission) {
+      setFeedback("Selecciona la mision antes de entregar recompensa.");
+      return;
+    }
+
+    if (claim.rewardDelivered) {
+      setFeedback("La recompensa de este participante ya fue entregada.");
+      return;
+    }
+
+    const shouldDeliver = window.confirm(
+      `Entregar ${selectedMission.rewardGold} de oro a ${claim.playerName}?`
+    );
+
+    if (!shouldDeliver) {
+      return;
+    }
+
+    setIsRewardingClaimId(claim.id);
+    setFeedback("");
+
+    const refreshedPlayers = await fetchAllPlayers();
+    setPlayers(refreshedPlayers);
+    const currentPlayer = refreshedPlayers.find(
+      (player) => player.id === claim.playerId
+    );
+
+    if (!currentPlayer) {
+      setIsRewardingClaimId("");
+      setFeedback("No se encontro al jugador para entregar la recompensa.");
+      return;
+    }
+
+    const updated = await updatePlayerGold(
+      currentPlayer.id,
+      currentPlayer.gold + selectedMission.rewardGold
+    );
+
+    if (!updated) {
+      setIsRewardingClaimId("");
+      setFeedback("No se pudo actualizar el oro del jugador.");
+      return;
+    }
+
+    const markResult = await markMissionRewardDelivered(claim.id);
+    setIsRewardingClaimId("");
+    setFeedback(markResult.message);
+
+    await loadClaimsForMission(claim.missionId);
+    setPlayers(await fetchAllPlayers());
   }
 
   if (isLoading) {
@@ -400,7 +557,11 @@ export function AdminMissionManager() {
                 key={mission.id ?? mission.title}
                 type="button"
                 onClick={() => preloadMission(mission)}
-                className="w-full rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                className={`w-full rounded-[1.2rem] border px-4 py-3 text-left transition ${
+                  mission.id === missionId
+                    ? "border-amber-500/35 bg-stone-900"
+                    : "border-stone-800 bg-stone-950/50 hover:border-amber-500/20 hover:bg-stone-900"
+                }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -446,6 +607,140 @@ export function AdminMissionManager() {
             itemLabel="misiones"
           />
         </div>
+
+        {selectedMission ? (
+          <div className="mt-5 rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                  Participantes
+                </p>
+                <p className="mt-1 text-sm font-bold text-stone-100">
+                  {selectedMission.title}
+                </p>
+              </div>
+              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-amber-200">
+                Premio {selectedMission.rewardGold}
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-stone-200">
+                  Agregar jugador
+                </span>
+                <select
+                  value={claimPlayerId}
+                  onChange={(event) => setClaimPlayerId(event.target.value)}
+                  className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                >
+                  <option value="">Selecciona jugador</option>
+                  {players.map((entry) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.username}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => void handleAddParticipant()}
+                disabled={isClaimingPlayer || !claimPlayerId}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
+              >
+                {isClaimingPlayer ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Agregando...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="h-4 w-4" />
+                    Anadir
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {isLoadingClaims ? (
+                <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/45 px-4 py-3 text-sm text-stone-400">
+                  Cargando participantes...
+                </div>
+              ) : claims.length === 0 ? (
+                <div className="rounded-[1.2rem] border border-dashed border-stone-700 bg-stone-950/40 px-4 py-4 text-sm leading-6 text-stone-400">
+                  Aun no hay jugadores asignados a esta mision.
+                </div>
+              ) : (
+                claims.map((claim) => (
+                  <div
+                    key={claim.id}
+                    className="rounded-[1.2rem] border border-stone-800 bg-stone-900/55 p-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-stone-100">
+                          {claim.playerName}
+                        </p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                          Oro actual: {claim.playerGold}
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300">
+                        {getMissionClaimStatusLabel(claim.status)}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void handleSetClaimStatus(claim, "claimed")}
+                        className={`rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition ${
+                          claim.status === "claimed"
+                            ? "border border-stone-600 bg-stone-800 text-stone-100"
+                            : "border border-stone-700 bg-stone-900 text-stone-300 hover:border-stone-500"
+                        }`}
+                      >
+                        Tomada
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleSetClaimStatus(claim, "completed")}
+                        className={`rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition ${
+                          claim.status === "completed"
+                            ? "border border-emerald-500/40 bg-emerald-500/15 text-emerald-200"
+                            : "border border-stone-700 bg-stone-900 text-stone-300 hover:border-emerald-500/30"
+                        }`}
+                      >
+                        Completada
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDeliverReward(claim)}
+                        disabled={
+                          claim.rewardDelivered || isRewardingClaimId === claim.id
+                        }
+                        className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/12 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-200 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-55"
+                      >
+                        {isRewardingClaimId === claim.id ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Pagando...
+                          </>
+                        ) : (
+                          <>
+                            <Coins className="h-3.5 w-3.5" />
+                            {claim.rewardDelivered ? "Pagada" : "Entregar"}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        ) : null}
       </section>
     </div>
   );

@@ -17,6 +17,7 @@ import { ExpandableText } from "./components/ExpandableText";
 import { PlayerProfilePanel } from "./components/PlayerProfilePanel";
 import { SectionHeader } from "./components/SectionHeader";
 import { StatCard } from "./components/StatCard";
+import { usePlayerSession } from "./context/PlayerSessionContext";
 import { ACTIVE_EVENTS } from "./data/events";
 import { FALLBACK_MISSIONS } from "./data/missions";
 import {
@@ -30,6 +31,7 @@ import {
 } from "./data/home";
 import { fetchRealmEvents } from "./utils/events";
 import {
+  claimRealmMission,
   fetchPublicRealmMissions,
   getMissionDifficultyLabel,
   getMissionStatusLabel,
@@ -166,9 +168,12 @@ function HomeSection({
   onFocusProfile: () => void;
   onOpenMarket: () => void;
 }) {
+  const { player, isHydrating } = usePlayerSession();
   const StatusIcon = KINGDOM_STATUS.icon;
   const [events, setEvents] = useState(ACTIVE_EVENTS);
   const [missions, setMissions] = useState(FALLBACK_MISSIONS);
+  const [claimingMissionId, setClaimingMissionId] = useState("");
+  const [claimFeedback, setClaimFeedback] = useState<Record<string, string>>({});
   const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
     COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
   );
@@ -200,6 +205,28 @@ function HomeSection({
       cancelled = true;
     };
   }, []);
+
+  async function handleClaimMission(mission: RealmMission) {
+    if (!mission.id) {
+      return;
+    }
+
+    if (!player) {
+      setClaimFeedback((current) => ({
+        ...current,
+        [mission.id as string]: "Conecta tu perfil para tomar esta mision.",
+      }));
+      return;
+    }
+
+    setClaimingMissionId(mission.id);
+    const result = await claimRealmMission(mission.id, player.id);
+    setClaimingMissionId("");
+    setClaimFeedback((current) => ({
+      ...current,
+      [mission.id as string]: result.message,
+    }));
+  }
 
   return (
     <section className="space-y-5">
@@ -328,7 +355,14 @@ function HomeSection({
         />
         <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {missions.map((mission) => (
-            <MissionCard key={mission.id ?? mission.title} mission={mission} />
+            <MissionCard
+              key={mission.id ?? mission.title}
+              mission={mission}
+              onClaim={handleClaimMission}
+              isClaiming={claimingMissionId === mission.id}
+              canClaim={Boolean(player) && !isHydrating && Boolean(mission.id)}
+              feedback={mission.id ? claimFeedback[mission.id] : ""}
+            />
           ))}
         </div>
       </div>
@@ -444,7 +478,19 @@ function HomeSection({
   );
 }
 
-function MissionCard({ mission }: { mission: RealmMission }) {
+function MissionCard({
+  mission,
+  onClaim,
+  isClaiming,
+  canClaim,
+  feedback,
+}: {
+  mission: RealmMission;
+  onClaim: (mission: RealmMission) => Promise<void>;
+  isClaiming: boolean;
+  canClaim: boolean;
+  feedback?: string;
+}) {
   return (
     <article className="kd-hover-lift rounded-[1.6rem] border border-emerald-500/15 bg-stone-950/45 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -482,6 +528,32 @@ function MissionCard({ mission }: { mission: RealmMission }) {
       <p className="mt-4 rounded-2xl border border-stone-800 bg-black/20 px-3 py-2 text-xs leading-5 text-stone-400">
         {mission.instructions}
       </p>
+
+      {mission.id ? (
+        <button
+          type="button"
+          onClick={() => void onClaim(mission)}
+          disabled={isClaiming || !canClaim}
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/12 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.14em] text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isClaiming ? (
+            <>
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-200/70 border-t-transparent" />
+              Tomando...
+            </>
+          ) : canClaim ? (
+            "Tomar mision"
+          ) : (
+            "Conecta tu perfil"
+          )}
+        </button>
+      ) : null}
+
+      {feedback ? (
+        <p className="mt-3 rounded-xl border border-stone-800 bg-stone-900/60 px-3 py-2 text-xs leading-5 text-stone-300">
+          {feedback}
+        </p>
+      ) : null}
     </article>
   );
 }

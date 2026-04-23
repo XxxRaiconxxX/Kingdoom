@@ -14,7 +14,20 @@ create table if not exists public.realm_missions (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.realm_mission_claims (
+  id uuid primary key default gen_random_uuid(),
+  mission_id uuid not null references public.realm_missions(id) on delete cascade,
+  player_id uuid not null references public.players(id) on delete cascade,
+  status text not null default 'claimed' check (status in ('claimed', 'completed', 'rewarded')),
+  reward_delivered boolean not null default false,
+  reward_delivered_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (mission_id, player_id)
+);
+
 alter table public.realm_missions enable row level security;
+alter table public.realm_mission_claims enable row level security;
 
 drop policy if exists "Allow public realm missions read" on public.realm_missions;
 create policy "Allow public realm missions read"
@@ -25,6 +38,19 @@ using (true);
 drop policy if exists "Allow realm missions write" on public.realm_missions;
 create policy "Allow realm missions write"
 on public.realm_missions
+for all
+using (true)
+with check (true);
+
+drop policy if exists "Allow public mission claims read" on public.realm_mission_claims;
+create policy "Allow public mission claims read"
+on public.realm_mission_claims
+for select
+using (true);
+
+drop policy if exists "Allow mission claims write" on public.realm_mission_claims;
+create policy "Allow mission claims write"
+on public.realm_mission_claims
 for all
 using (true)
 with check (true);
@@ -44,3 +70,19 @@ create trigger set_realm_missions_updated_at
 before update on public.realm_missions
 for each row
 execute function public.set_realm_missions_updated_at();
+
+create or replace function public.set_realm_mission_claims_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists set_realm_mission_claims_updated_at on public.realm_mission_claims;
+create trigger set_realm_mission_claims_updated_at
+before update on public.realm_mission_claims
+for each row
+execute function public.set_realm_mission_claims_updated_at();

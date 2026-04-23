@@ -1,9 +1,11 @@
 import { FALLBACK_MISSIONS } from "../data/missions";
 import type {
   MissionDifficulty,
+  RealmMissionClaimStatus,
   MissionStatus,
   MissionType,
   RealmMission,
+  RealmMissionClaim,
 } from "../types";
 import { formatAdminPermissionMessage } from "./supabaseErrors";
 import { supabase } from "./supabaseClient";
@@ -20,6 +22,23 @@ type RealmMissionRow = {
   visible: boolean;
   created_at?: string;
   updated_at?: string;
+};
+
+type MissionClaimPlayerRow = {
+  username?: string | null;
+  gold?: number | null;
+};
+
+type RealmMissionClaimRow = {
+  id: string;
+  mission_id: string;
+  player_id: string;
+  status: RealmMissionClaimStatus;
+  reward_delivered: boolean;
+  reward_delivered_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  players?: MissionClaimPlayerRow | MissionClaimPlayerRow[] | null;
 };
 
 export type RealmMissionsState = {
@@ -66,6 +85,31 @@ function buildRealmMissionPayload(input: AdminRealmMissionInput) {
     type: input.type,
     status: input.status,
     visible: input.visible,
+  };
+}
+
+function getClaimPlayer(row: RealmMissionClaimRow): MissionClaimPlayerRow | null {
+  if (Array.isArray(row.players)) {
+    return row.players[0] ?? null;
+  }
+
+  return row.players ?? null;
+}
+
+function mapRealmMissionClaimRow(row: RealmMissionClaimRow): RealmMissionClaim {
+  const player = getClaimPlayer(row);
+
+  return {
+    id: row.id,
+    missionId: row.mission_id,
+    playerId: row.player_id,
+    playerName: player?.username ?? "Jugador desconocido",
+    playerGold: player?.gold ?? 0,
+    status: row.status,
+    rewardDelivered: row.reward_delivered,
+    rewardDeliveredAt: row.reward_delivered_at ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -199,6 +243,150 @@ export async function deleteRealmMission(id: string) {
   };
 }
 
+export async function fetchMissionClaims(missionId: string) {
+  const normalizedMissionId = missionId.trim();
+
+  if (!normalizedMissionId) {
+    return {
+      status: "ready" as const,
+      message: "",
+      claims: [] as RealmMissionClaim[],
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("realm_mission_claims")
+    .select(
+      "id, mission_id, player_id, status, reward_delivered, reward_delivered_at, created_at, updated_at, players(username, gold)"
+    )
+    .eq("mission_id", normalizedMissionId)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) {
+    return {
+      status: "error" as const,
+      message:
+        "No se pudieron cargar los jugadores que tomaron esta mision. Verifica el SQL de participantes.",
+      claims: [] as RealmMissionClaim[],
+    };
+  }
+
+  return {
+    status: "ready" as const,
+    message: "",
+    claims: (data as RealmMissionClaimRow[]).map(mapRealmMissionClaimRow),
+  };
+}
+
+export async function claimRealmMission(missionId: string, playerId: string) {
+  const normalizedMissionId = missionId.trim();
+  const normalizedPlayerId = playerId.trim();
+
+  if (!normalizedMissionId || !normalizedPlayerId) {
+    return {
+      status: "error" as const,
+      message: "Faltan datos para tomar la mision.",
+    };
+  }
+
+  const { error } = await supabase.from("realm_mission_claims").insert({
+    mission_id: normalizedMissionId,
+    player_id: normalizedPlayerId,
+    status: "claimed",
+  });
+
+  if (!error) {
+    return {
+      status: "claimed" as const,
+      message: "Mision tomada. Coordina el rol por WhatsApp.",
+    };
+  }
+
+  if (error.code === "23505") {
+    return {
+      status: "exists" as const,
+      message: "Ese jugador ya tomo esta mision.",
+    };
+  }
+
+  return {
+    status: "error" as const,
+    message: formatAdminPermissionMessage(
+      "No se pudo tomar la mision en Supabase.",
+      error.message
+    ),
+  };
+}
+
+export async function updateMissionClaimStatus(
+  claimId: string,
+  status: RealmMissionClaimStatus
+) {
+  const normalizedClaimId = claimId.trim();
+
+  if (!normalizedClaimId) {
+    return {
+      status: "error" as const,
+      message: "Selecciona una toma de mision valida.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("realm_mission_claims")
+    .update({ status })
+    .eq("id", normalizedClaimId);
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo actualizar el estado del participante.",
+        error.message
+      ),
+    };
+  }
+
+  return {
+    status: "saved" as const,
+    message: "Participante actualizado.",
+  };
+}
+
+export async function markMissionRewardDelivered(claimId: string) {
+  const normalizedClaimId = claimId.trim();
+
+  if (!normalizedClaimId) {
+    return {
+      status: "error" as const,
+      message: "Selecciona una toma de mision valida.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("realm_mission_claims")
+    .update({
+      status: "rewarded",
+      reward_delivered: true,
+      reward_delivered_at: new Date().toISOString(),
+    })
+    .eq("id", normalizedClaimId);
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "El oro se actualizo, pero no se pudo marcar la recompensa como entregada.",
+        error.message
+      ),
+    };
+  }
+
+  return {
+    status: "saved" as const,
+    message: "Recompensa marcada como entregada.",
+  };
+}
+
 export function getMissionDifficultyLabel(difficulty: MissionDifficulty) {
   const labels: Record<MissionDifficulty, string> = {
     easy: "Facil",
@@ -230,4 +418,14 @@ export function getMissionTypeLabel(type: MissionType) {
   };
 
   return labels[type];
+}
+
+export function getMissionClaimStatusLabel(status: RealmMissionClaimStatus) {
+  const labels: Record<RealmMissionClaimStatus, string> = {
+    claimed: "Tomada",
+    completed: "Completada",
+    rewarded: "Pagada",
+  };
+
+  return labels[status];
 }

@@ -127,6 +127,21 @@ export type RealmMission = {
   updatedAt?: string;
 };
 
+export type RealmMissionClaimStatus = "claimed" | "completed" | "rewarded";
+
+export type RealmMissionClaim = {
+  id: string;
+  missionId: string;
+  playerId: string;
+  playerName: string;
+  playerGold: number;
+  status: RealmMissionClaimStatus;
+  rewardDelivered: boolean;
+  rewardDeliveredAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type HomeStat = {
   value: string;
   label: string;

@@ -4,6 +4,7 @@ import type {
   RealmMissionClaimStatus,
   MissionStatus,
   MissionType,
+  MissionReviewNotification,
   RealmMission,
   RealmMissionClaim,
 } from "../types";
@@ -16,6 +17,7 @@ type RealmMissionRow = {
   description: string;
   instructions: string;
   reward_gold: number;
+  max_participants: number;
   difficulty: MissionDifficulty;
   type: MissionType;
   status: MissionStatus;
@@ -35,10 +37,41 @@ type RealmMissionClaimRow = {
   player_id: string;
   status: RealmMissionClaimStatus;
   reward_delivered: boolean;
+  proof_text?: string | null;
+  proof_link?: string | null;
+  proof_image_url?: string | null;
+  submitted_at?: string | null;
   reward_delivered_at?: string | null;
   created_at?: string;
   updated_at?: string;
   players?: MissionClaimPlayerRow | MissionClaimPlayerRow[] | null;
+};
+
+type MissionMetaRow = {
+  id: string;
+  status: MissionStatus;
+  max_participants: number | null;
+};
+
+type MissionNotificationRow = {
+  id: string;
+  mission_id: string;
+  player_id: string;
+  status: RealmMissionClaimStatus;
+  reward_delivered: boolean;
+  proof_text?: string | null;
+  proof_link?: string | null;
+  proof_image_url?: string | null;
+  submitted_at?: string | null;
+  players?: MissionClaimPlayerRow | MissionClaimPlayerRow[] | null;
+  realm_missions?:
+    | {
+        title?: string | null;
+      }
+    | Array<{
+        title?: string | null;
+      }>
+    | null;
 };
 
 export type RealmMissionsState = {
@@ -53,6 +86,7 @@ export type AdminRealmMissionInput = {
   description: string;
   instructions: string;
   rewardGold: number;
+  maxParticipants: number;
   difficulty: MissionDifficulty;
   type: MissionType;
   status: MissionStatus;
@@ -73,6 +107,7 @@ function mapRealmMissionRow(row: RealmMissionRow): RealmMission {
     description: row.description,
     instructions: row.instructions,
     rewardGold: row.reward_gold,
+    maxParticipants: Math.max(1, row.max_participants ?? 1),
     difficulty: row.difficulty,
     type: row.type,
     status: row.status,
@@ -88,6 +123,7 @@ function buildRealmMissionPayload(input: AdminRealmMissionInput) {
     description: input.description.trim(),
     instructions: input.instructions.trim(),
     reward_gold: Math.max(0, Math.floor(input.rewardGold)),
+    max_participants: Math.max(1, Math.floor(input.maxParticipants)),
     difficulty: input.difficulty,
     type: input.type,
     status: input.status,
@@ -103,6 +139,22 @@ function getClaimPlayer(row: RealmMissionClaimRow): MissionClaimPlayerRow | null
   return row.players ?? null;
 }
 
+function getMissionTitleFromRelation(
+  row: MissionNotificationRow
+): string | null {
+  const relation = row.realm_missions;
+
+  if (Array.isArray(relation)) {
+    return relation[0]?.title?.trim() || null;
+  }
+
+  if (relation && typeof relation === "object") {
+    return relation.title?.trim() || null;
+  }
+
+  return null;
+}
+
 function mapRealmMissionClaimRow(row: RealmMissionClaimRow): RealmMissionClaim {
   const player = getClaimPlayer(row);
 
@@ -114,6 +166,10 @@ function mapRealmMissionClaimRow(row: RealmMissionClaimRow): RealmMissionClaim {
     playerGold: player?.gold ?? 0,
     status: row.status,
     rewardDelivered: row.reward_delivered,
+    proofText: row.proof_text?.trim() ?? "",
+    proofLink: row.proof_link?.trim() ?? "",
+    proofImageUrl: row.proof_image_url?.trim() ?? "",
+    submittedAt: row.submitted_at ?? null,
     rewardDeliveredAt: row.reward_delivered_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -124,7 +180,7 @@ export async function fetchPublicRealmMissions(): Promise<RealmMissionsState> {
   const { data, error } = await supabase
     .from("realm_missions")
     .select(
-      "id, title, description, instructions, reward_gold, difficulty, type, status, visible, created_at, updated_at"
+      "id, title, description, instructions, reward_gold, max_participants, difficulty, type, status, visible, created_at, updated_at"
     )
     .eq("visible", true)
     .neq("status", "closed")
@@ -149,7 +205,7 @@ export async function fetchAdminRealmMissions(): Promise<RealmMissionsState> {
   const { data, error } = await supabase
     .from("realm_missions")
     .select(
-      "id, title, description, instructions, reward_gold, difficulty, type, status, visible, created_at, updated_at"
+      "id, title, description, instructions, reward_gold, max_participants, difficulty, type, status, visible, created_at, updated_at"
     )
     .order("created_at", { ascending: false });
 
@@ -272,7 +328,7 @@ export async function fetchMissionClaims(missionId: string) {
   const { data, error } = await supabase
     .from("realm_mission_claims")
     .select(
-      "id, mission_id, player_id, status, reward_delivered, reward_delivered_at, created_at, updated_at, players(username, gold)"
+      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, submitted_at, reward_delivered_at, created_at, updated_at, players(username, gold)"
     )
     .eq("mission_id", normalizedMissionId)
     .order("created_at", { ascending: false });
@@ -290,6 +346,178 @@ export async function fetchMissionClaims(missionId: string) {
     status: "ready" as const,
     message: "",
     claims: (data as RealmMissionClaimRow[]).map(mapRealmMissionClaimRow),
+  };
+}
+
+export async function fetchPlayerMissionClaims(
+  playerId: string,
+  missionIds: string[]
+) {
+  const normalizedPlayerId = playerId.trim();
+  const normalizedMissionIds = missionIds
+    .map((id) => id.trim())
+    .filter((id) => isSupabaseMissionId(id));
+
+  if (!normalizedPlayerId || normalizedMissionIds.length === 0) {
+    return {
+      status: "ready" as const,
+      message: "",
+      claimsByMissionId: {} as Record<string, RealmMissionClaim>,
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("realm_mission_claims")
+    .select(
+      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, submitted_at, reward_delivered_at, created_at, updated_at"
+    )
+    .eq("player_id", normalizedPlayerId)
+    .in("mission_id", normalizedMissionIds);
+
+  if (error || !data) {
+    return {
+      status: "error" as const,
+      message:
+        "No se pudo leer tu estado de misiones. Reintenta en unos segundos.",
+      claimsByMissionId: {} as Record<string, RealmMissionClaim>,
+    };
+  }
+
+  const claimsByMissionId = (data as RealmMissionClaimRow[]).reduce<
+    Record<string, RealmMissionClaim>
+  >((acc, row) => {
+    const mapped = mapRealmMissionClaimRow(row);
+    acc[mapped.missionId] = mapped;
+    return acc;
+  }, {});
+
+  return {
+    status: "ready" as const,
+    message: "",
+    claimsByMissionId,
+  };
+}
+
+export async function submitMissionClaimEvidence(
+  claimId: string,
+  playerId: string,
+  input: {
+    proofText?: string;
+    proofLink?: string;
+    proofImageUrl?: string;
+  }
+) {
+  const normalizedClaimId = claimId.trim();
+  const normalizedPlayerId = playerId.trim();
+  const proofText = input.proofText?.trim() ?? "";
+  const proofLink = input.proofLink?.trim() ?? "";
+  const proofImageUrl = input.proofImageUrl?.trim() ?? "";
+
+  if (!normalizedClaimId || !normalizedPlayerId) {
+    return {
+      status: "error" as const,
+      message: "Faltan datos para entregar la evidencia.",
+    };
+  }
+
+  if (!proofText && !proofLink && !proofImageUrl) {
+    return {
+      status: "error" as const,
+      message: "Agrega al menos un detalle de evidencia antes de enviar.",
+    };
+  }
+
+  const { data: currentClaim, error: currentClaimError } = await supabase
+    .from("realm_mission_claims")
+    .select("id, reward_delivered")
+    .eq("id", normalizedClaimId)
+    .eq("player_id", normalizedPlayerId)
+    .maybeSingle();
+
+  if (currentClaimError || !currentClaim) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se encontro tu postulacion para adjuntar evidencia.",
+        currentClaimError?.message ?? "Postulacion no encontrada."
+      ),
+    };
+  }
+
+  if (currentClaim.reward_delivered) {
+    return {
+      status: "error" as const,
+      message: "Esa mision ya fue pagada y no admite nuevos cambios.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("realm_mission_claims")
+    .update({
+      status: "completed",
+      proof_text: proofText,
+      proof_link: proofLink,
+      proof_image_url: proofImageUrl,
+      submitted_at: new Date().toISOString(),
+    })
+    .eq("id", normalizedClaimId)
+    .eq("player_id", normalizedPlayerId);
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo guardar la evidencia de la mision.",
+        error.message
+      ),
+    };
+  }
+
+  return {
+    status: "saved" as const,
+    message: "Evidencia enviada. Queda pendiente de validacion del staff.",
+  };
+}
+
+export async function fetchPendingMissionReviews() {
+  const { data, error } = await supabase
+    .from("realm_mission_claims")
+    .select(
+      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, submitted_at, players(username), realm_missions(title)"
+    )
+    .eq("status", "completed")
+    .eq("reward_delivered", false)
+    .order("submitted_at", { ascending: false });
+
+  if (error || !data) {
+    return {
+      status: "error" as const,
+      message:
+        "No se pudieron cargar las notificaciones de misiones pendientes.",
+      notifications: [] as MissionReviewNotification[],
+    };
+  }
+
+  const notifications = (data as MissionNotificationRow[]).map((row) => {
+    const player = getClaimPlayer(row);
+
+    return {
+      claimId: row.id,
+      missionId: row.mission_id,
+      missionTitle: getMissionTitleFromRelation(row) ?? "Mision",
+      playerId: row.player_id,
+      playerName: player?.username ?? "Jugador",
+      submittedAt: row.submitted_at ?? null,
+      proofText: row.proof_text?.trim() ?? "",
+      proofLink: row.proof_link?.trim() ?? "",
+      proofImageUrl: row.proof_image_url?.trim() ?? "",
+    };
+  });
+
+  return {
+    status: "ready" as const,
+    message: "",
+    notifications,
   };
 }
 
@@ -312,6 +540,56 @@ export async function claimRealmMission(missionId: string, playerId: string) {
     };
   }
 
+  const { data: missionMeta, error: missionMetaError } = await supabase
+    .from("realm_missions")
+    .select("id, status, max_participants")
+    .eq("id", normalizedMissionId)
+    .maybeSingle();
+
+  if (missionMetaError || !missionMeta) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo validar la mision antes de tomarla.",
+        missionMetaError?.message ?? "Mision no encontrada."
+      ),
+    };
+  }
+
+  const missionState = missionMeta as MissionMetaRow;
+
+  if (missionState.status === "closed") {
+    return {
+      status: "error" as const,
+      message: "La mision ya esta cerrada y no acepta nuevas postulaciones.",
+    };
+  }
+
+  const { count, error: countError } = await supabase
+    .from("realm_mission_claims")
+    .select("id", { count: "exact", head: true })
+    .eq("mission_id", normalizedMissionId);
+
+  if (countError) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo validar el cupo de la mision.",
+        countError.message
+      ),
+    };
+  }
+
+  const maxParticipants = Math.max(1, missionState.max_participants ?? 1);
+  const currentParticipants = count ?? 0;
+
+  if (currentParticipants >= maxParticipants) {
+    return {
+      status: "full" as const,
+      message: "La mision ya alcanzo el cupo maximo de participantes.",
+    };
+  }
+
   const { error } = await supabase.from("realm_mission_claims").insert({
     mission_id: normalizedMissionId,
     player_id: normalizedPlayerId,
@@ -321,7 +599,7 @@ export async function claimRealmMission(missionId: string, playerId: string) {
   if (!error) {
     return {
       status: "claimed" as const,
-      message: "Mision tomada. Coordina el rol por WhatsApp.",
+      message: "Postulacion enviada. Cuando termines, entrega la evidencia.",
     };
   }
 
@@ -445,9 +723,9 @@ export function getMissionTypeLabel(type: MissionType) {
 
 export function getMissionClaimStatusLabel(status: RealmMissionClaimStatus) {
   const labels: Record<RealmMissionClaimStatus, string> = {
-    claimed: "Tomada",
-    completed: "Completada",
-    rewarded: "Pagada",
+    claimed: "Postulado",
+    completed: "Pendiente validar",
+    rewarded: "Aprobada",
   };
 
   return labels[status];

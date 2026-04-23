@@ -44,6 +44,18 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 23/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/types.ts`, `src/data/missions.ts`, `src/utils/missions.ts`, `src/App.tsx`, `src/components/admin/AdminMissionManager.tsx`, `supabase_realm_missions.sql`
+*   **Resumen de Tareas:** Se implemento el flujo completo de postulacion/entrega/validacion de misiones con cupos por encargo y evidencias visibles para staff.
+*   **Cambios Clave:**
+    *   Misiones ahora manejan `maxParticipants` (cupo maximo) y se valida en servidor antes de permitir nuevas postulaciones.
+    *   El jugador ve su estado real por mision (Postulado / Pendiente validar / Aprobada) y puede enviar evidencia (texto, enlace o imagen URL) desde su tarjeta.
+    *   Se agrego panel de avisos en admin (campana) con pendientes de validacion y acceso rapido a cada entrega.
+    *   En participantes de admin ahora se muestra mini bloque de evidencia con preview de imagen y enlaces.
+    *   Se actualizo SQL de Supabase para agregar columnas de cupo y evidencia de forma idempotente.
+*   **Notas/Advertencias:** Ejecutar `supabase_realm_missions.sql` actualizado antes de usar evidencias/cupos en produccion. `npx tsc --noEmit` y `npm run build` pasan.
+
+---
+### [Fecha: 23/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `index.html`, `src/App.tsx`
 *   **Resumen de Tareas:** Se aplicaron optimizaciones enfocadas en mejorar FCP/LCP segun el reporte de PageSpeed.
 *   **Cambios Clave:**

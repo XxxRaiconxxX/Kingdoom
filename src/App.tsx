@@ -31,14 +31,17 @@ import {
 import { fetchRealmEvents } from "./utils/events";
 import {
   claimRealmMission,
+  fetchPlayerMissionClaims,
+  getMissionClaimStatusLabel,
   fetchPublicRealmMissions,
   getMissionDifficultyLabel,
   getMissionStatusLabel,
   getMissionTypeLabel,
   isSupabaseMissionId,
+  submitMissionClaimEvidence,
 } from "./utils/missions";
 import { fetchCommunityAppDownloadUrl } from "./utils/siteSettings";
-import type { NavItem, RealmMission, TabId } from "./types";
+import type { NavItem, RealmMission, RealmMissionClaim, TabId } from "./types";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -203,7 +206,12 @@ function HomeSection({
   const [events, setEvents] = useState(ACTIVE_EVENTS);
   const [missions, setMissions] = useState(FALLBACK_MISSIONS);
   const [claimingMissionId, setClaimingMissionId] = useState("");
+  const [submittingEvidenceMissionId, setSubmittingEvidenceMissionId] =
+    useState("");
   const [claimFeedback, setClaimFeedback] = useState<Record<string, string>>({});
+  const [playerMissionClaims, setPlayerMissionClaims] = useState<
+    Record<string, RealmMissionClaim>
+  >({});
   const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
     COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
   );
@@ -236,6 +244,57 @@ function HomeSection({
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPlayerMissionClaims() {
+      if (!player) {
+        if (!cancelled) {
+          setPlayerMissionClaims({});
+        }
+        return;
+      }
+
+      const missionIds = missions
+        .map((mission) => mission.id ?? "")
+        .filter((id) => isSupabaseMissionId(id));
+
+      const claimsResult = await fetchPlayerMissionClaims(player.id, missionIds);
+
+      if (cancelled) {
+        return;
+      }
+
+      setPlayerMissionClaims(claimsResult.claimsByMissionId);
+
+      if (claimsResult.status === "error") {
+        setClaimFeedback((current) => ({
+          ...current,
+          global: claimsResult.message,
+        }));
+      }
+    }
+
+    void loadPlayerMissionClaims();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [missions, player]);
+
+  async function refreshCurrentPlayerMissionClaims() {
+    if (!player) {
+      setPlayerMissionClaims({});
+      return;
+    }
+
+    const missionIds = missions
+      .map((mission) => mission.id ?? "")
+      .filter((id) => isSupabaseMissionId(id));
+    const claimsResult = await fetchPlayerMissionClaims(player.id, missionIds);
+    setPlayerMissionClaims(claimsResult.claimsByMissionId);
+  }
+
   async function handleClaimMission(mission: RealmMission) {
     if (!mission.id) {
       return;
@@ -256,6 +315,51 @@ function HomeSection({
       ...current,
       [mission.id as string]: result.message,
     }));
+
+    if (result.status === "claimed" || result.status === "exists") {
+      await refreshCurrentPlayerMissionClaims();
+    }
+  }
+
+  async function handleSubmitMissionEvidence(
+    mission: RealmMission,
+    evidence: {
+      proofText: string;
+      proofLink: string;
+      proofImageUrl: string;
+    }
+  ) {
+    if (!mission.id || !player) {
+      return;
+    }
+
+    const currentClaim = playerMissionClaims[mission.id];
+
+    if (!currentClaim) {
+      setClaimFeedback((current) => ({
+        ...current,
+        [mission.id as string]:
+          "Primero debes postularte a la mision para enviar evidencia.",
+      }));
+      return;
+    }
+
+    setSubmittingEvidenceMissionId(mission.id);
+    const result = await submitMissionClaimEvidence(currentClaim.id, player.id, {
+      proofText: evidence.proofText,
+      proofLink: evidence.proofLink,
+      proofImageUrl: evidence.proofImageUrl,
+    });
+    setSubmittingEvidenceMissionId("");
+
+    setClaimFeedback((current) => ({
+      ...current,
+      [mission.id as string]: result.message,
+    }));
+
+    if (result.status === "saved") {
+      await refreshCurrentPlayerMissionClaims();
+    }
   }
 
   return (
@@ -386,15 +490,26 @@ function HomeSection({
         <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {missions.map((mission) => {
             const hasPersistedMission = isSupabaseMissionId(mission.id);
+            const missionClaim = mission.id
+              ? playerMissionClaims[mission.id]
+              : undefined;
             const canClaim =
-              Boolean(player) && !isHydrating && hasPersistedMission;
+              Boolean(player) &&
+              !isHydrating &&
+              hasPersistedMission &&
+              !missionClaim;
 
             return (
               <MissionCard
                 key={mission.id ?? mission.title}
                 mission={mission}
+                claim={missionClaim}
                 onClaim={handleClaimMission}
+                onSubmitEvidence={handleSubmitMissionEvidence}
                 isClaiming={claimingMissionId === mission.id}
+                isSubmittingEvidence={
+                  submittingEvidenceMissionId === mission.id
+                }
                 canClaim={canClaim}
                 disabledLabel={
                   hasPersistedMission ? "Conecta tu perfil" : "Solo lectura"
@@ -519,19 +634,55 @@ function HomeSection({
 
 function MissionCard({
   mission,
+  claim,
   onClaim,
+  onSubmitEvidence,
   isClaiming,
+  isSubmittingEvidence,
   canClaim,
   disabledLabel,
   feedback,
 }: {
   mission: RealmMission;
+  claim?: RealmMissionClaim;
   onClaim: (mission: RealmMission) => Promise<void>;
+  onSubmitEvidence: (
+    mission: RealmMission,
+    evidence: {
+      proofText: string;
+      proofLink: string;
+      proofImageUrl: string;
+    }
+  ) => Promise<void>;
   isClaiming: boolean;
+  isSubmittingEvidence: boolean;
   canClaim: boolean;
   disabledLabel: string;
   feedback?: string;
 }) {
+  const [showEvidenceForm, setShowEvidenceForm] = useState(false);
+  const [proofText, setProofText] = useState(claim?.proofText ?? "");
+  const [proofLink, setProofLink] = useState(claim?.proofLink ?? "");
+  const [proofImageUrl, setProofImageUrl] = useState(claim?.proofImageUrl ?? "");
+
+  useEffect(() => {
+    setProofText(claim?.proofText ?? "");
+    setProofLink(claim?.proofLink ?? "");
+    setProofImageUrl(claim?.proofImageUrl ?? "");
+  }, [claim?.proofImageUrl, claim?.proofLink, claim?.proofText, claim?.id]);
+
+  const canSendEvidence =
+    Boolean(claim) && claim?.status !== "rewarded" && !claim?.rewardDelivered;
+
+  async function handleEvidenceSubmit() {
+    await onSubmitEvidence(mission, {
+      proofText,
+      proofLink,
+      proofImageUrl,
+    });
+    setShowEvidenceForm(false);
+  }
+
   return (
     <article className="kd-hover-lift rounded-[1.6rem] border border-emerald-500/15 bg-stone-950/45 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -564,6 +715,14 @@ function MissionCard({
         <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-200">
           {getMissionStatusLabel(mission.status)}
         </span>
+        <span className="rounded-full border border-stone-700 bg-stone-950/70 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-300">
+          Cupos {mission.maxParticipants}
+        </span>
+        {claim ? (
+          <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-200">
+            {getMissionClaimStatusLabel(claim.status)}
+          </span>
+        ) : null}
       </div>
 
       <p className="mt-4 rounded-2xl border border-stone-800 bg-black/20 px-3 py-2 text-xs leading-5 text-stone-400">
@@ -571,23 +730,92 @@ function MissionCard({
       </p>
 
       {mission.id ? (
-        <button
-          type="button"
-          onClick={() => void onClaim(mission)}
-          disabled={isClaiming || !canClaim}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/12 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.14em] text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isClaiming ? (
-            <>
-              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-200/70 border-t-transparent" />
-              Tomando...
-            </>
-          ) : canClaim ? (
-            "Tomar mision"
-          ) : (
-            disabledLabel
-          )}
-        </button>
+        <>
+          {!claim ? (
+            <button
+              type="button"
+              onClick={() => void onClaim(mission)}
+              disabled={isClaiming || !canClaim}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/12 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.14em] text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isClaiming ? (
+                <>
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-200/70 border-t-transparent" />
+                  Postulando...
+                </>
+              ) : canClaim ? (
+                "Postularme"
+              ) : (
+                disabledLabel
+              )}
+            </button>
+          ) : null}
+
+          {claim ? (
+            <div className="mt-4 rounded-2xl border border-stone-800 bg-stone-900/65 px-3 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-stone-400">
+                Estado actual
+              </p>
+              <p className="mt-1 text-sm font-bold text-stone-100">
+                {getMissionClaimStatusLabel(claim.status)}
+              </p>
+              {claim.status === "completed" ? (
+                <p className="mt-1 text-xs text-amber-200">
+                  Esperando validacion del staff.
+                </p>
+              ) : null}
+              {claim.status === "rewarded" ? (
+                <p className="mt-1 text-xs text-emerald-200">
+                  Recompensa confirmada.
+                </p>
+              ) : null}
+
+              {canSendEvidence ? (
+                <button
+                  type="button"
+                  onClick={() => setShowEvidenceForm((current) => !current)}
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/12 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-cyan-200 transition hover:bg-cyan-500/20"
+                >
+                  {showEvidenceForm ? "Ocultar evidencia" : "Entregar evidencia"}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </>
+      ) : null}
+
+      {showEvidenceForm && canSendEvidence ? (
+        <div className="mt-3 space-y-2 rounded-2xl border border-cyan-500/25 bg-cyan-500/10 p-3">
+          <input
+            type="text"
+            value={proofText}
+            onChange={(event) => setProofText(event.target.value)}
+            placeholder="Resumen de la evidencia"
+            className="w-full rounded-xl border border-stone-700 bg-stone-950/85 px-3 py-2 text-xs text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-400/45"
+          />
+          <input
+            type="url"
+            value={proofLink}
+            onChange={(event) => setProofLink(event.target.value)}
+            placeholder="Link opcional (WhatsApp, Drive, etc.)"
+            className="w-full rounded-xl border border-stone-700 bg-stone-950/85 px-3 py-2 text-xs text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-400/45"
+          />
+          <input
+            type="url"
+            value={proofImageUrl}
+            onChange={(event) => setProofImageUrl(event.target.value)}
+            placeholder="URL de imagen opcional"
+            className="w-full rounded-xl border border-stone-700 bg-stone-950/85 px-3 py-2 text-xs text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-400/45"
+          />
+          <button
+            type="button"
+            onClick={() => void handleEvidenceSubmit()}
+            disabled={isSubmittingEvidence}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/15 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-cyan-100 transition hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmittingEvidence ? "Enviando..." : "Enviar evidencia"}
+          </button>
+        </div>
       ) : null}
 
       {feedback ? (
@@ -595,6 +823,7 @@ function MissionCard({
           {feedback}
         </p>
       ) : null}
+
     </article>
   );
 }

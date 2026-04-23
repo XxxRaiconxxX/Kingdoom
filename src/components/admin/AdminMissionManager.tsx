@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { Coins, Flag, Loader2, ScrollText, UserPlus } from "lucide-react";
+import {
+  BellRing,
+  Coins,
+  ExternalLink,
+  Flag,
+  ImageIcon,
+  Loader2,
+  ScrollText,
+  UserPlus,
+} from "lucide-react";
 import type {
   MissionDifficulty,
+  MissionReviewNotification,
   MissionStatus,
   MissionType,
   PlayerAccount,
@@ -15,6 +25,7 @@ import {
   deleteRealmMission,
   fetchAdminRealmMissions,
   fetchMissionClaims,
+  fetchPendingMissionReviews,
   getMissionClaimStatusLabel,
   getMissionDifficultyLabel,
   getMissionStatusLabel,
@@ -47,6 +58,11 @@ export function AdminMissionManager() {
   const [isLoadingClaims, setIsLoadingClaims] = useState(false);
   const [isClaimingPlayer, setIsClaimingPlayer] = useState(false);
   const [isRewardingClaimId, setIsRewardingClaimId] = useState("");
+  const [highlightedClaimId, setHighlightedClaimId] = useState("");
+  const [pendingReviews, setPendingReviews] = useState<
+    MissionReviewNotification[]
+  >([]);
+  const [showPendingPanel, setShowPendingPanel] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<MissionListFilter>("all");
   const [showAll, setShowAll] = useState(false);
@@ -58,6 +74,7 @@ export function AdminMissionManager() {
     "Resolver por rol en WhatsApp. Un admin valida el cierre."
   );
   const [rewardGold, setRewardGold] = useState(0);
+  const [maxParticipants, setMaxParticipants] = useState(1);
   const [difficulty, setDifficulty] = useState<MissionDifficulty>("easy");
   const [type, setType] = useState<MissionType>("story");
   const [status, setStatus] = useState<MissionStatus>("available");
@@ -71,21 +88,30 @@ export function AdminMissionManager() {
     () => missions.find((mission) => mission.id === missionId) ?? null,
     [missionId, missions]
   );
-  const selectedClaimPlayer = useMemo(
-    () => players.find((player) => player.id === claimPlayerId) ?? null,
-    [claimPlayerId, players]
+  const selectedMissionIsFull = useMemo(
+    () =>
+      selectedMission
+        ? claims.length >= Math.max(1, selectedMission.maxParticipants)
+        : false,
+    [claims.length, selectedMission]
   );
-
   async function loadBaseData() {
     setIsLoading(true);
-    const [missionsResult, playersResult] = await Promise.all([
+    const [missionsResult, playersResult, pendingResult] = await Promise.all([
       fetchAdminRealmMissions(),
       fetchAllPlayers(),
+      fetchPendingMissionReviews(),
     ]);
     setMissions(missionsResult.missions);
     setPlayers(playersResult);
+    setPendingReviews(pendingResult.notifications);
     setFeedback(missionsResult.message);
     setIsLoading(false);
+  }
+
+  async function refreshPendingReviews() {
+    const pendingResult = await fetchPendingMissionReviews();
+    setPendingReviews(pendingResult.notifications);
   }
 
   async function loadClaimsForMission(nextMissionId: string) {
@@ -97,6 +123,14 @@ export function AdminMissionManager() {
     setIsLoadingClaims(true);
     const result = await fetchMissionClaims(nextMissionId);
     setClaims(result.claims);
+    if (highlightedClaimId) {
+      const stillExists = result.claims.some(
+        (entry) => entry.id === highlightedClaimId
+      );
+      if (!stillExists) {
+        setHighlightedClaimId("");
+      }
+    }
     if (result.status === "error") {
       setFeedback(result.message);
     }
@@ -135,6 +169,7 @@ export function AdminMissionManager() {
     setDescription("");
     setInstructions("Resolver por rol en WhatsApp. Un admin valida el cierre.");
     setRewardGold(0);
+    setMaxParticipants(1);
     setDifficulty("easy");
     setType("story");
     setStatus("available");
@@ -142,6 +177,7 @@ export function AdminMissionManager() {
     setClaimPlayerId("");
     setClaims([]);
     setFeedback("");
+    setHighlightedClaimId("");
   }
 
   function preloadMission(mission: RealmMission) {
@@ -150,12 +186,14 @@ export function AdminMissionManager() {
     setDescription(mission.description);
     setInstructions(mission.instructions);
     setRewardGold(mission.rewardGold);
+    setMaxParticipants(mission.maxParticipants);
     setDifficulty(mission.difficulty);
     setType(mission.type);
     setStatus(mission.status);
     setVisible(mission.visible);
     setClaimPlayerId("");
     setFeedback("");
+    setHighlightedClaimId("");
 
     if (mission.id) {
       void loadClaimsForMission(mission.id);
@@ -175,6 +213,7 @@ export function AdminMissionManager() {
       description,
       instructions,
       rewardGold,
+      maxParticipants,
       difficulty,
       type,
       status,
@@ -251,6 +290,7 @@ export function AdminMissionManager() {
     if (result.status === "claimed" || result.status === "exists") {
       setClaimPlayerId("");
       await loadClaimsForMission(missionId);
+      await refreshPendingReviews();
     }
   }
 
@@ -267,6 +307,7 @@ export function AdminMissionManager() {
 
     if (result.status === "saved") {
       await loadClaimsForMission(claim.missionId);
+      await refreshPendingReviews();
     }
   }
 
@@ -278,6 +319,13 @@ export function AdminMissionManager() {
 
     if (claim.rewardDelivered) {
       setFeedback("La recompensa de este participante ya fue entregada.");
+      return;
+    }
+
+    if (claim.status !== "completed") {
+      setFeedback(
+        "Primero valida la entrega (estado pendiente) antes de pagar recompensa."
+      );
       return;
     }
 
@@ -320,7 +368,24 @@ export function AdminMissionManager() {
     setFeedback(markResult.message);
 
     await loadClaimsForMission(claim.missionId);
+    await refreshPendingReviews();
     setPlayers(await fetchAllPlayers());
+  }
+
+  async function focusPendingReview(notification: MissionReviewNotification) {
+    const targetMission = missions.find(
+      (entry) => entry.id === notification.missionId
+    );
+
+    if (!targetMission) {
+      setFeedback("No se encontro la mision relacionada con esa notificacion.");
+      return;
+    }
+
+    preloadMission(targetMission);
+    setShowPendingPanel(false);
+    await loadClaimsForMission(notification.missionId);
+    setHighlightedClaimId(notification.claimId);
   }
 
   if (isLoading) {
@@ -403,7 +468,7 @@ export function AdminMissionManager() {
             </label>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <label className="space-y-2">
               <span className="text-sm font-semibold text-stone-200">Estado</span>
               <select
@@ -422,6 +487,11 @@ export function AdminMissionManager() {
               label="Recompensa (oro)"
               value={rewardGold}
               onChange={setRewardGold}
+            />
+            <NumericInput
+              label="Cupos maximos"
+              value={maxParticipants}
+              onChange={(value) => setMaxParticipants(Math.max(1, value))}
             />
           </div>
 
@@ -494,19 +564,66 @@ export function AdminMissionManager() {
       </section>
 
       <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
-        <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
-            <ScrollText className="h-5 w-5" />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+              <ScrollText className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                Tablero publico
+              </p>
+              <h4 className="mt-1 text-xl font-black text-stone-100">
+                Misiones del reino
+              </h4>
+            </div>
           </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
-              Tablero publico
-            </p>
-            <h4 className="mt-1 text-xl font-black text-stone-100">
-              Misiones del reino
-            </h4>
-          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowPendingPanel((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/12 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-cyan-200 transition hover:bg-cyan-500/20"
+          >
+            <BellRing className="h-4 w-4" />
+            Pendientes
+            <span className="rounded-full border border-cyan-400/35 bg-cyan-500/20 px-2 py-0.5 text-[10px]">
+              {pendingReviews.length}
+            </span>
+          </button>
         </div>
+
+        {showPendingPanel ? (
+          <div className="mt-4 rounded-[1.2rem] border border-cyan-500/25 bg-cyan-500/10 p-3">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
+              Avisos de validacion
+            </p>
+            <div className="mt-3 space-y-2">
+              {pendingReviews.length > 0 ? (
+                pendingReviews.slice(0, 6).map((notification) => (
+                  <button
+                    key={notification.claimId}
+                    type="button"
+                    onClick={() => void focusPendingReview(notification)}
+                    className="w-full rounded-xl border border-cyan-500/25 bg-stone-950/65 px-3 py-2 text-left text-xs text-stone-200 transition hover:border-cyan-400/45"
+                  >
+                    <span className="font-semibold text-cyan-200">
+                      {notification.playerName}
+                    </span>{" "}
+                    entrego evidencia en{" "}
+                    <span className="font-semibold text-stone-100">
+                      {notification.missionTitle}
+                    </span>
+                    . Clica para verificar.
+                  </button>
+                ))
+              ) : (
+                <div className="rounded-xl border border-stone-800 bg-stone-950/60 px-3 py-2 text-xs text-stone-400">
+                  No hay entregas pendientes.
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
           <LabeledInput
@@ -572,6 +689,9 @@ export function AdminMissionManager() {
                       {getMissionTypeLabel(mission.type)} -{" "}
                       {getMissionDifficultyLabel(mission.difficulty)}
                     </p>
+                    <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-stone-500">
+                      Cupos maximos: {mission.maxParticipants}
+                    </p>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-lg font-black text-amber-300">
@@ -620,7 +740,8 @@ export function AdminMissionManager() {
                 </p>
               </div>
               <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-amber-200">
-                Premio {selectedMission.rewardGold}
+                Premio {selectedMission.rewardGold} · Cupos {claims.length}/
+                {selectedMission.maxParticipants}
               </span>
             </div>
 
@@ -645,7 +766,7 @@ export function AdminMissionManager() {
               <button
                 type="button"
                 onClick={() => void handleAddParticipant()}
-                disabled={isClaimingPlayer || !claimPlayerId}
+                disabled={isClaimingPlayer || !claimPlayerId || selectedMissionIsFull}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
               >
                 {isClaimingPlayer ? (
@@ -662,6 +783,12 @@ export function AdminMissionManager() {
               </button>
             </div>
 
+            {selectedMissionIsFull ? (
+              <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                Esta mision ya alcanzo el cupo maximo de participantes.
+              </div>
+            ) : null}
+
             <div className="mt-4 space-y-3">
               {isLoadingClaims ? (
                 <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/45 px-4 py-3 text-sm text-stone-400">
@@ -675,7 +802,11 @@ export function AdminMissionManager() {
                 claims.map((claim) => (
                   <div
                     key={claim.id}
-                    className="rounded-[1.2rem] border border-stone-800 bg-stone-900/55 p-3"
+                    className={`rounded-[1.2rem] border bg-stone-900/55 p-3 transition ${
+                      highlightedClaimId === claim.id
+                        ? "border-cyan-400/60 shadow-[0_0_0_1px_rgba(34,211,238,0.25)]"
+                        : "border-stone-800"
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -691,6 +822,65 @@ export function AdminMissionManager() {
                       </span>
                     </div>
 
+                    {claim.proofText || claim.proofLink || claim.proofImageUrl ? (
+                      <div className="mt-3 space-y-2 rounded-xl border border-cyan-500/25 bg-cyan-500/10 p-3">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-200">
+                          Evidencia enviada
+                        </p>
+                        {claim.proofText ? (
+                          <p className="text-xs leading-5 text-stone-200">
+                            {claim.proofText}
+                          </p>
+                        ) : null}
+                        {claim.submittedAt ? (
+                          <p className="text-[11px] text-stone-400">
+                            Entregado:{" "}
+                            {new Date(claim.submittedAt).toLocaleString("es-ES", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        ) : null}
+                        {claim.proofLink ? (
+                          <a
+                            href={claim.proofLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-cyan-200 underline underline-offset-2"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            Abrir enlace
+                          </a>
+                        ) : null}
+                        {claim.proofImageUrl ? (
+                          <a
+                            href={claim.proofImageUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-cyan-200"
+                          >
+                            <ImageIcon className="h-3.5 w-3.5" />
+                            Ver imagen
+                          </a>
+                        ) : null}
+                        {claim.proofImageUrl ? (
+                          <img
+                            src={claim.proofImageUrl}
+                            alt={`Evidencia de ${claim.playerName}`}
+                            loading="lazy"
+                            decoding="async"
+                            className="mt-1 h-20 w-20 rounded-lg border border-cyan-500/25 object-cover"
+                          />
+                        ) : null}
+                      </div>
+                    ) : (
+                      <div className="mt-3 rounded-xl border border-stone-800 bg-stone-950/45 px-3 py-2 text-xs text-stone-400">
+                        Sin evidencia todavia.
+                      </div>
+                    )}
+
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         type="button"
@@ -701,7 +891,7 @@ export function AdminMissionManager() {
                             : "border border-stone-700 bg-stone-900 text-stone-300 hover:border-stone-500"
                         }`}
                       >
-                        Tomada
+                        Postulado
                       </button>
                       <button
                         type="button"
@@ -712,7 +902,7 @@ export function AdminMissionManager() {
                             : "border border-stone-700 bg-stone-900 text-stone-300 hover:border-emerald-500/30"
                         }`}
                       >
-                        Completada
+                        Pendiente
                       </button>
                       <button
                         type="button"

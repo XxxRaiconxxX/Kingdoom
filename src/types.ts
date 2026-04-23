@@ -119,6 +119,7 @@ export type RealmMission = {
   description: string;
   instructions: string;
   rewardGold: number;
+  maxParticipants: number;
   difficulty: MissionDifficulty;
   type: MissionType;
   status: MissionStatus;
@@ -137,9 +138,25 @@ export type RealmMissionClaim = {
   playerGold: number;
   status: RealmMissionClaimStatus;
   rewardDelivered: boolean;
+  proofText: string;
+  proofLink: string;
+  proofImageUrl: string;
+  submittedAt?: string | null;
   rewardDeliveredAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type MissionReviewNotification = {
+  claimId: string;
+  missionId: string;
+  missionTitle: string;
+  playerId: string;
+  playerName: string;
+  submittedAt?: string | null;
+  proofText: string;
+  proofLink: string;
+  proofImageUrl: string;
 };
 
 export type HomeStat = {

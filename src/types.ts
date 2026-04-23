@@ -253,6 +253,12 @@ export type BestiaryRarity =
 export type BestiaryEntry = {
   id: string;
   name: string;
+  category: string;
+  type: string;
+  generalData: string;
+  threatLevel: string;
+  domestication: string;
+  usage: string;
   originPlace: string;
   foundAt: string;
   description: string;

@@ -13,6 +13,12 @@ create table if not exists public.grimoire_magic_styles (
 create table if not exists public.grimoire_bestiary_entries (
   id text primary key,
   name text not null,
+  category text not null default '',
+  type text not null default '',
+  general_data text not null default '',
+  threat_level text not null default '',
+  domestication text not null default '',
+  usage text not null default '',
   origin_place text not null default '',
   found_at text not null default '',
   description text not null default '',
@@ -23,6 +29,14 @@ create table if not exists public.grimoire_bestiary_entries (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.grimoire_bestiary_entries
+  add column if not exists category text not null default '',
+  add column if not exists type text not null default '',
+  add column if not exists general_data text not null default '',
+  add column if not exists threat_level text not null default '',
+  add column if not exists domestication text not null default '',
+  add column if not exists usage text not null default '';
 
 alter table public.grimoire_magic_styles enable row level security;
 alter table public.grimoire_bestiary_entries enable row level security;

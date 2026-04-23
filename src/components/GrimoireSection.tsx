@@ -99,7 +99,7 @@ export function GrimoireSection() {
     }
 
     return bestiaryData.filter((entry) =>
-      `${entry.name} ${entry.originPlace} ${entry.foundAt} ${entry.description} ${entry.ability} ${entry.rarity}`
+      `${entry.name} ${entry.category} ${entry.type} ${entry.generalData} ${entry.threatLevel} ${entry.domestication} ${entry.usage} ${entry.originPlace} ${entry.foundAt} ${entry.description} ${entry.ability} ${entry.rarity}`
         .toLowerCase()
         .includes(query)
     );
@@ -275,8 +275,7 @@ function BestiaryView({
               Bestiario del reino
             </div>
             <p className="mt-2 text-sm leading-6 text-stone-400">
-              Criaturas, horrores y calamidades catalogadas por origen, habitat,
-              rareza y habilidad dominante.
+              Criaturas catalogadas por categoria, tipo, amenaza, domesticacion y uso.
             </p>
           </div>
           <span className="w-fit rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
@@ -333,6 +332,18 @@ function BestiaryView({
                   <div className="mt-3 grid gap-2 text-xs uppercase tracking-[0.14em] text-stone-500">
                     <div className="flex items-center gap-2">
                       <Gem className="h-3.5 w-3.5 text-amber-500/80" />
+                      Categoria: {entry.category || "Sin registrar"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <PawPrint className="h-3.5 w-3.5 text-amber-500/80" />
+                      Tipo: {entry.type || "Sin registrar"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500/80" />
+                      Amenaza: {entry.threatLevel || "Sin registrar"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Gem className="h-3.5 w-3.5 text-amber-500/80" />
                       Origen: {entry.originPlace || "Desconocido"}
                     </div>
                     <div className="flex items-center gap-2">
@@ -343,6 +354,16 @@ function BestiaryView({
                 </div>
 
                 <p className="text-sm leading-6 text-stone-300">{entry.description}</p>
+                {entry.generalData ? (
+                  <div className="rounded-2xl border border-stone-700/50 bg-stone-950/45 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">
+                      Datos generales
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-stone-200/90">
+                      {entry.generalData}
+                    </p>
+                  </div>
+                ) : null}
                 <div className="rounded-2xl border border-amber-500/15 bg-amber-500/10 p-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-400">
                     Habilidad
@@ -351,6 +372,26 @@ function BestiaryView({
                     {entry.ability}
                   </p>
                 </div>
+                {(entry.domestication || entry.usage) ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-stone-700/50 bg-stone-950/45 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">
+                        Domesticacion
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-stone-200/90">
+                        {entry.domestication || "Sin registrar"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-stone-700/50 bg-stone-950/45 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">
+                        Uso
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-stone-200/90">
+                        {entry.usage || "Sin registrar"}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </article>
           ))}

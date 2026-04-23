@@ -557,6 +557,12 @@ export function AdminBestiaryManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [id, setId] = useState("");
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
+  const [type, setType] = useState("");
+  const [generalData, setGeneralData] = useState("");
+  const [threatLevel, setThreatLevel] = useState("");
+  const [domestication, setDomestication] = useState("");
+  const [usage, setUsage] = useState("");
   const [originPlace, setOriginPlace] = useState("");
   const [foundAt, setFoundAt] = useState("");
   const [description, setDescription] = useState("");
@@ -579,7 +585,7 @@ export function AdminBestiaryManager() {
     if (!query) return entries;
 
     return entries.filter((entry) =>
-      `${entry.name} ${entry.originPlace} ${entry.foundAt} ${entry.rarity}`
+      `${entry.name} ${entry.category} ${entry.type} ${entry.threatLevel} ${entry.originPlace} ${entry.foundAt} ${entry.rarity}`
         .toLowerCase()
         .includes(query)
     );
@@ -588,6 +594,12 @@ export function AdminBestiaryManager() {
   function resetForm() {
     setId("");
     setName("");
+    setCategory("");
+    setType("");
+    setGeneralData("");
+    setThreatLevel("");
+    setDomestication("");
+    setUsage("");
     setOriginPlace("");
     setFoundAt("");
     setDescription("");
@@ -600,6 +612,12 @@ export function AdminBestiaryManager() {
   function preloadEntry(entry: BestiaryEntry) {
     setId(entry.id);
     setName(entry.name);
+    setCategory(entry.category);
+    setType(entry.type);
+    setGeneralData(entry.generalData);
+    setThreatLevel(entry.threatLevel);
+    setDomestication(entry.domestication);
+    setUsage(entry.usage);
     setOriginPlace(entry.originPlace);
     setFoundAt(entry.foundAt);
     setDescription(entry.description);
@@ -626,6 +644,12 @@ export function AdminBestiaryManager() {
     const result = await upsertBestiaryEntry({
       id: id || slugifyGrimoireId(name, "bestia"),
       name,
+      category,
+      type,
+      generalData,
+      threatLevel,
+      domestication,
+      usage,
       originPlace,
       foundAt,
       description,
@@ -673,6 +697,39 @@ export function AdminBestiaryManager() {
 
         <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
           <AdminTextField label="Nombre de la bestia" value={name} onChange={setName} placeholder="Lobo de Ceniza" />
+          <div className="grid gap-4 md:grid-cols-2">
+            <AdminTextField label="Categoria" value={category} onChange={setCategory} placeholder="Bestia elemental" />
+            <AdminTextField label="Tipo" value={type} onChange={setType} placeholder="Reptil colosal" />
+          </div>
+          <AdminTextField
+            label="Nivel de amenaza"
+            value={threatLevel}
+            onChange={setThreatLevel}
+            placeholder="S+, Extrema, Alto..."
+          />
+          <AdminTextArea
+            label="Datos generales"
+            value={generalData}
+            onChange={setGeneralData}
+            placeholder="Tamano, peso, habitat, alimentacion, comportamiento..."
+            rows={5}
+          />
+          <div className="grid gap-4 md:grid-cols-2">
+            <AdminTextArea
+              label="Domesticacion"
+              value={domestication}
+              onChange={setDomestication}
+              placeholder="Domesticable o condiciones para controlarla..."
+              rows={4}
+            />
+            <AdminTextArea
+              label="Uso"
+              value={usage}
+              onChange={setUsage}
+              placeholder="Uso en el mundo, combate, forja, recursos, etc."
+              rows={4}
+            />
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             <AdminTextField label="Lugar de origen" value={originPlace} onChange={setOriginPlace} placeholder="Bosques de Vyralis" />
             <AdminTextField label="Donde se encuentra" value={foundAt} onChange={setFoundAt} placeholder="Ruinas, pantanos, frontera..." />
@@ -776,7 +833,7 @@ export function AdminBestiaryManager() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-stone-100">{entry.name}</p>
                   <p className="mt-1 truncate text-xs uppercase tracking-[0.14em] text-stone-500">
-                    {entry.originPlace} / {entry.rarity}
+                    {entry.category || "Sin categoria"} / {entry.rarity}
                   </p>
                 </div>
               </button>

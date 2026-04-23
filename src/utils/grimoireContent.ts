@@ -22,6 +22,12 @@ type MagicStyleRow = {
 type BestiaryRow = {
   id: string;
   name: string;
+  category: string;
+  type: string;
+  general_data: string;
+  threat_level: string;
+  domestication: string;
+  usage: string;
   origin_place: string;
   found_at: string;
   description: string;
@@ -151,6 +157,12 @@ function mapBestiaryRow(row: BestiaryRow): BestiaryEntry {
   return {
     id: row.id,
     name: row.name,
+    category: row.category ?? "",
+    type: row.type ?? "",
+    generalData: row.general_data ?? "",
+    threatLevel: row.threat_level ?? "",
+    domestication: row.domestication ?? "",
+    usage: row.usage ?? "",
     originPlace: row.origin_place,
     foundAt: row.found_at,
     description: row.description,
@@ -178,6 +190,12 @@ function buildBestiaryPayload(input: AdminBestiaryInput) {
   return {
     id: input.id.trim(),
     name: input.name.trim(),
+    category: input.category.trim(),
+    type: input.type.trim(),
+    general_data: input.generalData.trim(),
+    threat_level: input.threatLevel.trim(),
+    domestication: input.domestication.trim(),
+    usage: input.usage.trim(),
     origin_place: input.originPlace.trim(),
     found_at: input.foundAt.trim(),
     description: input.description.trim(),
@@ -197,7 +215,7 @@ export async function fetchGrimoireContent(): Promise<GrimoireContentState> {
     supabase
       .from("grimoire_bestiary_entries")
       .select(
-        "id, name, origin_place, found_at, description, ability, rarity, image_url, created_at, updated_at"
+        "id, name, category, type, general_data, threat_level, domestication, usage, origin_place, found_at, description, ability, rarity, image_url, created_at, updated_at"
       )
       .order("name", { ascending: true }),
   ]);
@@ -278,7 +296,7 @@ export async function fetchBestiaryEntries() {
   const { data, error } = await supabase
     .from("grimoire_bestiary_entries")
     .select(
-      "id, name, origin_place, found_at, description, ability, rarity, image_url, created_at, updated_at"
+      "id, name, category, type, general_data, threat_level, domestication, usage, origin_place, found_at, description, ability, rarity, image_url, created_at, updated_at"
     )
     .order("name", { ascending: true });
 

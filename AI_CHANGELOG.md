@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 23/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/App.tsx`, `src/utils/missions.ts`
+*   **Resumen de Tareas:** Se corrigio el intento de tomar misiones locales como si fueran registros UUID de Supabase.
+*   **Cambios Clave:**
+    *   Se agrego validacion de UUID para misiones persistidas antes de consultar o insertar participantes.
+    *   Las misiones de fallback/local ahora quedan como solo lectura en el tablero publico.
+    *   Se evita el error `invalid input syntax for type uuid` al tomar plantillas locales.
+*   **Notas/Advertencias:** Las misiones deben crearse desde el panel admin para que los jugadores puedan tomarlas.
+
+---
+### [Fecha: 23/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/types.ts`, `src/utils/grimoireContent.ts`, `src/components/AdminGrimoireManagers.tsx`, `src/components/GrimoireSection.tsx`, `supabase_grimoire_admin.sql`
 *   **Resumen de Tareas:** Se ampliaron los campos del Bestiario con enfoque de ficha tecnica (inspirado en carta de criatura) y se conecto todo el flujo admin/publico/Supabase.
 *   **Cambios Clave:**

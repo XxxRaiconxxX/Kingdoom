@@ -59,6 +59,13 @@ export type AdminRealmMissionInput = {
   visible: boolean;
 };
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function isSupabaseMissionId(value?: string) {
+  return Boolean(value && UUID_PATTERN.test(value.trim()));
+}
+
 function mapRealmMissionRow(row: RealmMissionRow): RealmMission {
   return {
     id: row.id,
@@ -254,6 +261,14 @@ export async function fetchMissionClaims(missionId: string) {
     };
   }
 
+  if (!isSupabaseMissionId(normalizedMissionId)) {
+    return {
+      status: "ready" as const,
+      message: "",
+      claims: [] as RealmMissionClaim[],
+    };
+  }
+
   const { data, error } = await supabase
     .from("realm_mission_claims")
     .select(
@@ -286,6 +301,14 @@ export async function claimRealmMission(missionId: string, playerId: string) {
     return {
       status: "error" as const,
       message: "Faltan datos para tomar la mision.",
+    };
+  }
+
+  if (!isSupabaseMissionId(normalizedMissionId)) {
+    return {
+      status: "error" as const,
+      message:
+        "Esta mision es una plantilla local. Publicala desde el panel admin para poder tomarla.",
     };
   }
 

@@ -36,6 +36,7 @@ import {
   getMissionDifficultyLabel,
   getMissionStatusLabel,
   getMissionTypeLabel,
+  isSupabaseMissionId,
 } from "./utils/missions";
 import { fetchCommunityAppDownloadUrl } from "./utils/siteSettings";
 import type { NavItem, RealmMission, TabId } from "./types";
@@ -354,16 +355,25 @@ function HomeSection({
           }
         />
         <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {missions.map((mission) => (
-            <MissionCard
-              key={mission.id ?? mission.title}
-              mission={mission}
-              onClaim={handleClaimMission}
-              isClaiming={claimingMissionId === mission.id}
-              canClaim={Boolean(player) && !isHydrating && Boolean(mission.id)}
-              feedback={mission.id ? claimFeedback[mission.id] : ""}
-            />
-          ))}
+          {missions.map((mission) => {
+            const hasPersistedMission = isSupabaseMissionId(mission.id);
+            const canClaim =
+              Boolean(player) && !isHydrating && hasPersistedMission;
+
+            return (
+              <MissionCard
+                key={mission.id ?? mission.title}
+                mission={mission}
+                onClaim={handleClaimMission}
+                isClaiming={claimingMissionId === mission.id}
+                canClaim={canClaim}
+                disabledLabel={
+                  hasPersistedMission ? "Conecta tu perfil" : "Solo lectura"
+                }
+                feedback={mission.id ? claimFeedback[mission.id] : ""}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -483,12 +493,14 @@ function MissionCard({
   onClaim,
   isClaiming,
   canClaim,
+  disabledLabel,
   feedback,
 }: {
   mission: RealmMission;
   onClaim: (mission: RealmMission) => Promise<void>;
   isClaiming: boolean;
   canClaim: boolean;
+  disabledLabel: string;
   feedback?: string;
 }) {
   return (
@@ -544,7 +556,7 @@ function MissionCard({
           ) : canClaim ? (
             "Tomar mision"
           ) : (
-            "Conecta tu perfil"
+            disabledLabel
           )}
         </button>
       ) : null}

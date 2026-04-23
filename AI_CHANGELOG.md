@@ -44,6 +44,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 ### [Fecha: 23/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/App.tsx`
+*   **Resumen de Tareas:** Se simplifico el formulario de evidencia en misiones para dejar solo resumen + galeria.
+*   **Cambios Clave:**
+    *   Se removieron los campos "Link opcional" y "URL de imagen opcional" de la tarjeta de evidencia.
+    *   El flujo queda con `Resumen de evidencia` + `Adjuntar desde galeria`.
+    *   El boton de envio ahora exige resumen o archivo adjunto para evitar envios vacios.
+*   **Notas/Advertencias:** La carga por galeria y limpieza automatica de imagen al pagar recompensa se mantiene activa.
+
+---
+### [Fecha: 23/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `src/types.ts`, `src/utils/missions.ts`, `supabase_realm_missions.sql`
 *   **Resumen de Tareas:** Se habilito carga de evidencia por galeria y limpieza automatica de imagen tras validacion/admin payout.
 *   **Cambios Clave:**

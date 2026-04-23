@@ -325,8 +325,6 @@ function HomeSection({
     mission: RealmMission,
     evidence: {
       proofText: string;
-      proofLink: string;
-      proofImageUrl: string;
       proofImageFile?: File | null;
     }
   ) {
@@ -348,8 +346,8 @@ function HomeSection({
     setSubmittingEvidenceMissionId(mission.id);
     const result = await submitMissionClaimEvidence(currentClaim.id, player.id, {
       proofText: evidence.proofText,
-      proofLink: evidence.proofLink,
-      proofImageUrl: evidence.proofImageUrl,
+      proofLink: "",
+      proofImageUrl: "",
       proofImageFile: evidence.proofImageFile,
     });
     setSubmittingEvidenceMissionId("");
@@ -652,8 +650,6 @@ function MissionCard({
     mission: RealmMission,
     evidence: {
       proofText: string;
-      proofLink: string;
-      proofImageUrl: string;
       proofImageFile?: File | null;
     }
   ) => Promise<void>;
@@ -665,18 +661,14 @@ function MissionCard({
 }) {
   const [showEvidenceForm, setShowEvidenceForm] = useState(false);
   const [proofText, setProofText] = useState(claim?.proofText ?? "");
-  const [proofLink, setProofLink] = useState(claim?.proofLink ?? "");
-  const [proofImageUrl, setProofImageUrl] = useState(claim?.proofImageUrl ?? "");
   const [proofImageFile, setProofImageFile] = useState<File | null>(null);
   const [proofImagePreview, setProofImagePreview] = useState("");
 
   useEffect(() => {
     setProofText(claim?.proofText ?? "");
-    setProofLink(claim?.proofLink ?? "");
-    setProofImageUrl(claim?.proofImageUrl ?? "");
     setProofImageFile(null);
     setProofImagePreview("");
-  }, [claim?.proofImageUrl, claim?.proofLink, claim?.proofText, claim?.id]);
+  }, [claim?.proofText, claim?.id]);
 
   const canSendEvidence =
     Boolean(claim) && claim?.status !== "rewarded" && !claim?.rewardDelivered;
@@ -684,8 +676,6 @@ function MissionCard({
   async function handleEvidenceSubmit() {
     await onSubmitEvidence(mission, {
       proofText,
-      proofLink,
-      proofImageUrl,
       proofImageFile,
     });
     setShowEvidenceForm(false);
@@ -809,20 +799,6 @@ function MissionCard({
             placeholder="Resumen de la evidencia"
             className="w-full rounded-xl border border-stone-700 bg-stone-950/85 px-3 py-2 text-xs text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-400/45"
           />
-          <input
-            type="url"
-            value={proofLink}
-            onChange={(event) => setProofLink(event.target.value)}
-            placeholder="Link opcional (WhatsApp, Drive, etc.)"
-            className="w-full rounded-xl border border-stone-700 bg-stone-950/85 px-3 py-2 text-xs text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-400/45"
-          />
-          <input
-            type="url"
-            value={proofImageUrl}
-            onChange={(event) => setProofImageUrl(event.target.value)}
-            placeholder="URL de imagen opcional"
-            className="w-full rounded-xl border border-stone-700 bg-stone-950/85 px-3 py-2 text-xs text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-400/45"
-          />
           <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/12 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-cyan-100 transition hover:bg-cyan-500/22">
             <input
               type="file"
@@ -858,7 +834,7 @@ function MissionCard({
           <button
             type="button"
             onClick={() => void handleEvidenceSubmit()}
-            disabled={isSubmittingEvidence}
+            disabled={isSubmittingEvidence || (!proofText.trim() && !proofImageFile)}
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/15 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-cyan-100 transition hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmittingEvidence ? "Enviando..." : "Enviar evidencia"}

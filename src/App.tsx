@@ -28,7 +28,14 @@ import {
   KINGDOM_ANNOUNCEMENTS,
   KINGDOM_STATUS,
 } from "./data/home";
-import { fetchRealmEvents } from "./utils/events";
+import {
+  fetchPublicEventParticipants,
+  fetchPlayerEventParticipations,
+  fetchRealmEvents,
+  isSupabaseEventId,
+  joinRealmEvent,
+  leaveRealmEvent,
+} from "./utils/events";
 import {
   claimRealmMission,
   fetchPlayerMissionClaims,
@@ -41,7 +48,14 @@ import {
   submitMissionClaimEvidence,
 } from "./utils/missions";
 import { fetchCommunityAppDownloadUrl } from "./utils/siteSettings";
-import type { NavItem, RealmMission, RealmMissionClaim, TabId } from "./types";
+import type {
+  NavItem,
+  RealmEvent,
+  RealmEventParticipant,
+  RealmMission,
+  RealmMissionClaim,
+  TabId,
+} from "./types";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -212,6 +226,14 @@ function HomeSection({
   const [playerMissionClaims, setPlayerMissionClaims] = useState<
     Record<string, RealmMissionClaim>
   >({});
+  const [eventFeedback, setEventFeedback] = useState<Record<string, string>>({});
+  const [eventLoadingId, setEventLoadingId] = useState("");
+  const [eventParticipantsByEventId, setEventParticipantsByEventId] = useState<
+    Record<string, RealmEventParticipant[]>
+  >({});
+  const [playerEventParticipations, setPlayerEventParticipations] = useState<
+    Record<string, RealmEventParticipant>
+  >({});
   const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
     COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
   );
@@ -293,6 +315,125 @@ function HomeSection({
       .filter((id) => isSupabaseMissionId(id));
     const claimsResult = await fetchPlayerMissionClaims(player.id, missionIds);
     setPlayerMissionClaims(claimsResult.claimsByMissionId);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEventParticipationData() {
+      const eventIds = events
+        .map((event) => event.id ?? "")
+        .filter((id) => isSupabaseEventId(id));
+
+      if (eventIds.length === 0) {
+        if (!cancelled) {
+          setEventParticipantsByEventId({});
+          setPlayerEventParticipations({});
+        }
+        return;
+      }
+
+      const participantsResult = await fetchPublicEventParticipants(eventIds);
+
+      if (!cancelled) {
+        setEventParticipantsByEventId(participantsResult.participantsByEventId);
+      }
+
+      if (!player) {
+        if (!cancelled) {
+          setPlayerEventParticipations({});
+        }
+        return;
+      }
+
+      const myResult = await fetchPlayerEventParticipations(player.id, eventIds);
+
+      if (!cancelled) {
+        setPlayerEventParticipations(myResult.participationsByEventId);
+      }
+    }
+
+    void loadEventParticipationData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [events, player]);
+
+  async function refreshEventParticipationData() {
+    const eventIds = events
+      .map((event) => event.id ?? "")
+      .filter((id) => isSupabaseEventId(id));
+
+    if (eventIds.length === 0) {
+      setEventParticipantsByEventId({});
+      setPlayerEventParticipations({});
+      return;
+    }
+
+    const participantsResult = await fetchPublicEventParticipants(eventIds);
+    setEventParticipantsByEventId(participantsResult.participantsByEventId);
+
+    if (!player) {
+      setPlayerEventParticipations({});
+      return;
+    }
+
+    const myResult = await fetchPlayerEventParticipations(player.id, eventIds);
+    setPlayerEventParticipations(myResult.participationsByEventId);
+  }
+
+  async function handleJoinEvent(event: RealmEvent) {
+    if (!player) {
+      if (event?.id) {
+        const eventId = event.id;
+        setEventFeedback((current) => ({
+          ...current,
+          [eventId]: "Conecta tu perfil para unirte al evento.",
+        }));
+      }
+      return;
+    }
+
+    if (!event?.id || !isSupabaseEventId(event.id)) {
+      return;
+    }
+
+    const eventId = event.id;
+    setEventLoadingId(eventId);
+    const result = await joinRealmEvent(eventId, player.id);
+    setEventLoadingId("");
+    setEventFeedback((current) => ({
+      ...current,
+      [eventId]: result.message,
+    }));
+
+    if (result.status === "joined" || result.status === "exists") {
+      await refreshEventParticipationData();
+    }
+  }
+
+  async function handleLeaveEvent(event: RealmEvent) {
+    if (!player) {
+      return;
+    }
+
+    if (!event?.id || !isSupabaseEventId(event.id)) {
+      return;
+    }
+
+    const eventId = event.id;
+    setEventLoadingId(eventId);
+    const result = await leaveRealmEvent(eventId, player.id);
+    setEventLoadingId("");
+    setEventFeedback((current) => ({
+      ...current,
+      [eventId]: result.message,
+    }));
+
+    if (result.status === "left") {
+      await refreshEventParticipationData();
+    }
   }
 
   async function handleClaimMission(mission: RealmMission) {
@@ -532,9 +673,40 @@ function HomeSection({
           }
         />
         <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {events.map((event) => (
-            <EventCard key={event.title} event={event} />
-          ))}
+          {events.map((event) => {
+            const eventId = event.id ?? "";
+            const hasPersistedEvent = isSupabaseEventId(eventId);
+            const participants = hasPersistedEvent
+              ? eventParticipantsByEventId[eventId] ?? []
+              : [];
+            const myParticipation = hasPersistedEvent
+              ? playerEventParticipations[eventId]
+              : undefined;
+            const canJoin =
+              Boolean(player) &&
+              !myParticipation &&
+              hasPersistedEvent &&
+              event.status === "in-production";
+            const canLeave =
+              Boolean(myParticipation) &&
+              hasPersistedEvent &&
+              event.status === "in-production";
+
+            return (
+              <EventCard
+                key={event.id ?? event.title}
+                event={event}
+                participants={participants}
+                myParticipation={myParticipation}
+                canJoin={canJoin}
+                canLeave={canLeave}
+                isSubmitting={eventLoadingId === eventId}
+                feedback={eventFeedback[eventId]}
+                onJoin={handleJoinEvent}
+                onLeave={handleLeaveEvent}
+              />
+            );
+          })}
         </div>
       </div>
 

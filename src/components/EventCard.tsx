@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Castle, ChevronDown } from "lucide-react";
-import type { EventStatus, RealmEvent } from "../types";
+import { Castle, ChevronDown, Users } from "lucide-react";
+import type { EventStatus, RealmEvent, RealmEventParticipant } from "../types";
+import { getEventParticipationStatusLabel } from "../utils/events";
 
 const eventStatusStyles: Record<
   EventStatus,
@@ -23,7 +24,29 @@ const eventStatusStyles: Record<
   },
 };
 
-export function EventCard({ event }: { event: RealmEvent }) {
+type EventCardProps = {
+  event: RealmEvent;
+  participants?: RealmEventParticipant[];
+  myParticipation?: RealmEventParticipant;
+  canJoin?: boolean;
+  canLeave?: boolean;
+  isSubmitting?: boolean;
+  feedback?: string;
+  onJoin?: (event: RealmEvent) => Promise<void>;
+  onLeave?: (event: RealmEvent) => Promise<void>;
+};
+
+export function EventCard({
+  event,
+  participants = [],
+  myParticipation,
+  canJoin = false,
+  canLeave = false,
+  isSubmitting = false,
+  feedback,
+  onJoin,
+  onLeave,
+}: EventCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const statusStyle = eventStatusStyles[event.status];
@@ -73,6 +96,44 @@ export function EventCard({ event }: { event: RealmEvent }) {
           <EventMetaBox label="Cierre" value={event.endDate} />
         </div>
 
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-200">
+            <Users className="h-3.5 w-3.5" />
+            {participants.length} participantes
+          </span>
+          {myParticipation ? (
+            <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-200">
+              {getEventParticipationStatusLabel(myParticipation.status)}
+            </span>
+          ) : null}
+        </div>
+
+        {myParticipation ? (
+          <button
+            type="button"
+            onClick={() => void onLeave?.(event)}
+            disabled={isSubmitting || !canLeave}
+            className="kd-touch inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/12 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.14em] text-cyan-100 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? "Procesando..." : canLeave ? "Salir del evento" : "Participacion bloqueada"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void onJoin?.(event)}
+            disabled={isSubmitting || !canJoin}
+            className="kd-touch inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/12 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.14em] text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? "Procesando..." : canJoin ? "Unirme al evento" : "No disponible"}
+          </button>
+        )}
+
+        {feedback ? (
+          <p className="rounded-xl border border-stone-800 bg-stone-950/55 px-3 py-2 text-xs leading-5 text-stone-300">
+            {feedback}
+          </p>
+        ) : null}
+
         <button
           type="button"
           onClick={() => setExpanded((current) => !current)}
@@ -89,7 +150,22 @@ export function EventCard({ event }: { event: RealmEvent }) {
             <DetailRow label="Cronica" value={event.longDescription} />
             <DetailRow label="Facciones" value={event.factions.join(" - ")} />
             <DetailRow label="Requisitos" value={event.requirements} />
-            <DetailRow label="Recompensas" value={event.rewards} />
+            <DetailRow
+              label="Recompensas"
+              value={
+                event.participationRewardGold && event.participationRewardGold > 0
+                  ? `${event.rewards} • +${event.participationRewardGold} oro por participacion`
+                  : event.rewards
+              }
+            />
+            <DetailRow
+              label="Participantes"
+              value={
+                participants.length > 0
+                  ? participants.map((entry) => entry.playerName).join(" • ")
+                  : "Sin participantes todavia."
+              }
+            />
           </div>
         ) : null}
       </div>

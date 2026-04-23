@@ -111,6 +111,30 @@ export type RealmEvent = {
   factions: string[];
   rewards: string;
   requirements: string;
+  participationRewardGold?: number;
+};
+
+export type RealmEventParticipationStatus = "joined" | "rewarded";
+
+export type RealmEventParticipant = {
+  id: string;
+  eventId: string;
+  playerId: string;
+  playerName: string;
+  status: RealmEventParticipationStatus;
+  rewardDelivered: boolean;
+  rewardDeliveredAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type EventRewardNotification = {
+  participationId: string;
+  eventId: string;
+  eventTitle: string;
+  playerId: string;
+  playerName: string;
+  joinedAt?: string;
 };
 
 export type RealmMission = {

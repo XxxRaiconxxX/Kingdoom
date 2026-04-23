@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
+  BellRing,
   Coins,
   Flag,
   ScrollText,
@@ -11,7 +12,17 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import { deleteRealmEvent, fetchRealmEvents, upsertRealmEvent } from "../utils/events";
+import {
+  deleteRealmEvent,
+  fetchPendingEventRewards,
+  fetchRealmEventParticipants,
+  fetchRealmEvents,
+  getEventParticipationStatusLabel,
+  isSupabaseEventId,
+  joinRealmEvent,
+  markEventRewardDelivered,
+  upsertRealmEvent,
+} from "../utils/events";
 import {
   createPlayerAccount,
   fetchAllPlayers,
@@ -23,7 +34,17 @@ import {
   slugifyMarketItem,
   upsertMarketItem,
 } from "../utils/market";
-import type { EventStatus, MarketCategoryId, MarketItem, PlayerAccount, Rarity, RealmEvent, StockStatus } from "../types";
+import type {
+  EventRewardNotification,
+  EventStatus,
+  MarketCategoryId,
+  MarketItem,
+  PlayerAccount,
+  Rarity,
+  RealmEvent,
+  RealmEventParticipant,
+  StockStatus,
+} from "../types";
 import {
   ADMIN_LIST_PREVIEW_COUNT,
   AdminInfoCard,
@@ -86,6 +107,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [eventFeedback, setEventFeedback] = useState("");
   const [isSavingEvent, setIsSavingEvent] = useState(false);
   const [isDeletingEvent, setIsDeletingEvent] = useState(false);
+  const [isClaimingEventPlayer, setIsClaimingEventPlayer] = useState(false);
+  const [isLoadingEventParticipants, setIsLoadingEventParticipants] = useState(false);
+  const [isRewardingEventParticipantId, setIsRewardingEventParticipantId] = useState("");
+  const [eventParticipants, setEventParticipants] = useState<RealmEventParticipant[]>([]);
+  const [eventPendingRewards, setEventPendingRewards] = useState<EventRewardNotification[]>([]);
+  const [showEventPendingPanel, setShowEventPendingPanel] = useState(false);
+  const [eventParticipantPlayerId, setEventParticipantPlayerId] = useState("");
   const [eventSearch, setEventSearch] = useState("");
   const [eventListFilter, setEventListFilter] = useState<EventListFilter>("all");
   const [eventId, setEventId] = useState("");
@@ -99,6 +127,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [eventFactions, setEventFactions] = useState("");
   const [eventRewards, setEventRewards] = useState("");
   const [eventRequirements, setEventRequirements] = useState("");
+  const [eventParticipationRewardGold, setEventParticipationRewardGold] = useState(0);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [marketFeedback, setMarketFeedback] = useState("");
   const [isSavingMarketItem, setIsSavingMarketItem] = useState(false);
@@ -126,9 +155,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
     async function loadAdminData() {
       setStatus("loading");
-      const playersList = await fetchAllPlayers();
-      const eventsResult = await fetchRealmEvents();
-      const marketResult = await fetchMarketItems();
+      const [playersList, eventsResult, marketResult, pendingRewardsResult] =
+        await Promise.all([
+          fetchAllPlayers(),
+          fetchRealmEvents(),
+          fetchMarketItems(),
+          fetchPendingEventRewards(),
+        ]);
 
       if (cancelled) {
         return;
@@ -137,6 +170,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       setPlayers(playersList);
       setEvents(eventsResult.events);
       setMarketItems(marketResult.items);
+      setEventPendingRewards(pendingRewardsResult.notifications);
       setStatus("ready");
     }
 
@@ -149,19 +183,32 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
   async function reloadAdminData() {
     setStatus("loading");
-    const playersList = await fetchAllPlayers();
-    const eventsResult = await fetchRealmEvents();
-    const marketResult = await fetchMarketItems();
+    const [playersList, eventsResult, marketResult, pendingRewardsResult] =
+      await Promise.all([
+        fetchAllPlayers(),
+        fetchRealmEvents(),
+        fetchMarketItems(),
+        fetchPendingEventRewards(),
+      ]);
 
     setPlayers(playersList);
     setEvents(eventsResult.events);
     setMarketItems(marketResult.items);
+    setEventPendingRewards(pendingRewardsResult.notifications);
     setStatus("ready");
   }
 
   const selectedGoldPlayer = useMemo(
     () => players.find((entry) => entry.id === goldPlayerId) ?? null,
     [goldPlayerId, players]
+  );
+  const selectedEvent = useMemo(
+    () => events.find((entry) => entry.id === eventId) ?? null,
+    [eventId, events]
+  );
+  const selectedEventIsFinished = useMemo(
+    () => Boolean(selectedEvent && selectedEvent.status === "finished"),
+    [selectedEvent]
   );
   const filteredPlayers = useMemo(() => {
     const normalizedSearch = playerSearch.trim().toLowerCase();
@@ -337,8 +384,17 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventFactions(event.factions.join(", "));
     setEventRewards(event.rewards);
     setEventRequirements(event.requirements);
+    setEventParticipationRewardGold(event.participationRewardGold ?? 0);
+    setEventParticipantPlayerId("");
+    setShowEventPendingPanel(false);
     setEventFeedback("");
     setActiveTab("events");
+
+    if (event.id && isSupabaseEventId(event.id)) {
+      void loadEventParticipants(event.id);
+    } else {
+      setEventParticipants([]);
+    }
   }
 
   function resetEventForm() {
@@ -353,7 +409,130 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventFactions("");
     setEventRewards("");
     setEventRequirements("");
+    setEventParticipationRewardGold(0);
+    setEventParticipantPlayerId("");
+    setEventParticipants([]);
+    setShowEventPendingPanel(false);
     setEventFeedback("");
+  }
+
+  async function loadEventParticipants(nextEventId: string) {
+    if (!nextEventId.trim() || !isSupabaseEventId(nextEventId)) {
+      setEventParticipants([]);
+      return;
+    }
+
+    setIsLoadingEventParticipants(true);
+    const result = await fetchRealmEventParticipants(nextEventId);
+    setEventParticipants(result.participants);
+    if (result.status === "error") {
+      setEventFeedback(result.message);
+    }
+    setIsLoadingEventParticipants(false);
+  }
+
+  async function handleAddEventParticipant() {
+    if (!eventId || !selectedEvent) {
+      setEventFeedback("Guarda o selecciona un evento antes de anadir participantes.");
+      return;
+    }
+
+    if (!eventParticipantPlayerId) {
+      setEventFeedback("Selecciona un jugador para unirlo al evento.");
+      return;
+    }
+
+    setIsClaimingEventPlayer(true);
+    setEventFeedback("");
+
+    const result = await joinRealmEvent(eventId, eventParticipantPlayerId);
+
+    setIsClaimingEventPlayer(false);
+    setEventFeedback(result.message);
+
+    if (result.status === "joined" || result.status === "exists") {
+      setEventParticipantPlayerId("");
+      await loadEventParticipants(eventId);
+      await reloadAdminData();
+    }
+  }
+
+  async function handleDeliverEventReward(participant: RealmEventParticipant) {
+    if (!selectedEvent) {
+      setEventFeedback("Selecciona un evento antes de entregar recompensa.");
+      return;
+    }
+
+    if (!selectedEventIsFinished) {
+      setEventFeedback("Primero finaliza el evento para habilitar la recompensa grupal.");
+      return;
+    }
+
+    const rewardGold = Math.max(0, selectedEvent.participationRewardGold ?? 0);
+
+    if (rewardGold <= 0) {
+      setEventFeedback("Configura una recompensa grupal mayor a 0 para este evento.");
+      return;
+    }
+
+    if (participant.rewardDelivered) {
+      setEventFeedback("La recompensa de este participante ya fue entregada.");
+      return;
+    }
+
+    const shouldDeliver = window.confirm(
+      `Entregar ${rewardGold} de oro a ${participant.playerName} por participar en ${selectedEvent.title}?`
+    );
+
+    if (!shouldDeliver) {
+      return;
+    }
+
+    setIsRewardingEventParticipantId(participant.id);
+    setEventFeedback("");
+
+    const refreshedPlayers = await fetchAllPlayers();
+    setPlayers(refreshedPlayers);
+    const currentPlayer = refreshedPlayers.find(
+      (entry) => entry.id === participant.playerId
+    );
+
+    if (!currentPlayer) {
+      setIsRewardingEventParticipantId("");
+      setEventFeedback("No se encontro el jugador para entregar la recompensa.");
+      return;
+    }
+
+    const updated = await updatePlayerGold(
+      currentPlayer.id,
+      currentPlayer.gold + rewardGold
+    );
+
+    if (!updated) {
+      setIsRewardingEventParticipantId("");
+      setEventFeedback("No se pudo actualizar el oro del jugador.");
+      return;
+    }
+
+    const markResult = await markEventRewardDelivered(participant.id);
+    setIsRewardingEventParticipantId("");
+    setEventFeedback(markResult.message);
+
+    await loadEventParticipants(selectedEvent.id ?? "");
+    await reloadAdminData();
+  }
+
+  async function focusPendingEventReward(notification: EventRewardNotification) {
+    const targetEvent = events.find((entry) => entry.id === notification.eventId);
+
+    if (!targetEvent) {
+      setEventFeedback("No se encontro el evento relacionado con ese aviso.");
+      return;
+    }
+
+    preloadEvent(targetEvent);
+    setShowEventPendingPanel(false);
+    await loadEventParticipants(notification.eventId);
   }
 
   function resetMarketForm() {
@@ -470,6 +649,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       factions: eventFactions.split(","),
       rewards: eventRewards,
       requirements: eventRequirements,
+      participationRewardGold: eventParticipationRewardGold,
     });
 
     setIsSavingEvent(false);
@@ -913,6 +1093,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     />
                   </div>
 
+                  <NumericInput
+                    label="Recompensa grupal (oro)"
+                    value={eventParticipationRewardGold}
+                    onChange={setEventParticipationRewardGold}
+                  />
+
                   <label className="space-y-2">
                     <span className="text-sm font-semibold text-stone-200">
                       Estado
@@ -1006,19 +1192,66 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
               </section>
 
               <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
-                    <ScrollText className="h-5 w-5" />
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                      <ScrollText className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                        Agenda visible
+                      </p>
+                      <h4 className="mt-1 text-xl font-black text-stone-100">
+                        Eventos del inicio
+                      </h4>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
-                      Agenda visible
-                    </p>
-                    <h4 className="mt-1 text-xl font-black text-stone-100">
-                      Eventos del inicio
-                    </h4>
-                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowEventPendingPanel((current) => !current)}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/12 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-cyan-200 transition hover:bg-cyan-500/20"
+                  >
+                    <BellRing className="h-4 w-4" />
+                    Pagos pendientes
+                    <span className="rounded-full border border-cyan-400/35 bg-cyan-500/20 px-2 py-0.5 text-[10px]">
+                      {eventPendingRewards.length}
+                    </span>
+                  </button>
                 </div>
+
+                {showEventPendingPanel ? (
+                  <div className="mt-4 rounded-[1.2rem] border border-cyan-500/25 bg-cyan-500/10 p-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
+                      Avisos de cierre
+                    </p>
+                    <div className="mt-3 space-y-2">
+                      {eventPendingRewards.length > 0 ? (
+                        eventPendingRewards.slice(0, 6).map((notification) => (
+                          <button
+                            key={notification.participationId}
+                            type="button"
+                            onClick={() => void focusPendingEventReward(notification)}
+                            className="w-full rounded-xl border border-cyan-500/25 bg-stone-950/65 px-3 py-2 text-left text-xs text-stone-200 transition hover:border-cyan-400/45"
+                          >
+                            <span className="font-semibold text-cyan-200">
+                              {notification.playerName}
+                            </span>{" "}
+                            espera recompensa en{" "}
+                            <span className="font-semibold text-stone-100">
+                              {notification.eventTitle}
+                            </span>
+                            .
+                          </button>
+                        ))
+                      ) : (
+                        <div className="rounded-xl border border-stone-800 bg-stone-950/60 px-3 py-2 text-xs text-stone-400">
+                          No hay pagos pendientes en eventos finalizados.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
                   <LabeledInput
@@ -1080,6 +1313,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                           <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
                             {entry.startDate} / {entry.endDate}
                           </p>
+                          <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-stone-500">
+                            Recompensa grupal: {entry.participationRewardGold ?? 0} oro
+                          </p>
                         </div>
                         <div className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300">
                           {entry.status}
@@ -1102,6 +1338,132 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     itemLabel="eventos"
                   />
                 </div>
+
+                {selectedEvent ? (
+                  <div className="mt-5 rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                          Participantes
+                        </p>
+                        <p className="mt-1 text-sm font-bold text-stone-100">
+                          {selectedEvent.title}
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-amber-200">
+                        Premio {selectedEvent.participationRewardGold ?? 0}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-200">
+                          Agregar jugador
+                        </span>
+                        <select
+                          value={eventParticipantPlayerId}
+                          onChange={(event) => setEventParticipantPlayerId(event.target.value)}
+                          className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                        >
+                          <option value="">Selecciona jugador</option>
+                          {players.map((entry) => (
+                            <option key={entry.id} value={entry.id}>
+                              {entry.username}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => void handleAddEventParticipant()}
+                        disabled={
+                          isClaimingEventPlayer ||
+                          !eventParticipantPlayerId ||
+                          !eventId ||
+                          !isSupabaseEventId(eventId) ||
+                          selectedEventIsFinished
+                        }
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
+                      >
+                        {isClaimingEventPlayer ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Agregando...
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus className="h-4 w-4" />
+                            Anadir
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {selectedEventIsFinished ? (
+                      <div className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+                        El evento ya termino. Ya no se aceptan altas y solo queda pagar recompensas.
+                      </div>
+                    ) : null}
+
+                    <div className="mt-4 space-y-3">
+                      {isLoadingEventParticipants ? (
+                        <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/45 px-4 py-3 text-sm text-stone-400">
+                          Cargando participantes...
+                        </div>
+                      ) : eventParticipants.length === 0 ? (
+                        <div className="rounded-[1.2rem] border border-dashed border-stone-700 bg-stone-950/40 px-4 py-4 text-sm leading-6 text-stone-400">
+                          Aun no hay jugadores apuntados a este evento.
+                        </div>
+                      ) : (
+                        eventParticipants.map((participant) => (
+                          <div
+                            key={participant.id}
+                            className="rounded-[1.2rem] border border-stone-800 bg-stone-900/55 p-3"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-bold text-stone-100">
+                                  {participant.playerName}
+                                </p>
+                                <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                                  Participacion registrada
+                                </p>
+                              </div>
+                              <span className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300">
+                                {getEventParticipationStatusLabel(participant.status)}
+                              </span>
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => void handleDeliverEventReward(participant)}
+                                disabled={
+                                  participant.rewardDelivered ||
+                                  isRewardingEventParticipantId === participant.id ||
+                                  !selectedEventIsFinished
+                                }
+                                className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/12 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-200 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-55"
+                              >
+                                {isRewardingEventParticipantId === participant.id ? (
+                                  <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    Pagando...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Coins className="h-3.5 w-3.5" />
+                                    {participant.rewardDelivered ? "Pagada" : "Entregar"}
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ) : null}
               </section>
             </div>
           ) : null}

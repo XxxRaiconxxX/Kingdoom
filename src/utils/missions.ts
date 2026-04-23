@@ -40,6 +40,7 @@ type RealmMissionClaimRow = {
   proof_text?: string | null;
   proof_link?: string | null;
   proof_image_url?: string | null;
+  proof_image_path?: string | null;
   submitted_at?: string | null;
   reward_delivered_at?: string | null;
   created_at?: string;
@@ -62,6 +63,7 @@ type MissionNotificationRow = {
   proof_text?: string | null;
   proof_link?: string | null;
   proof_image_url?: string | null;
+  proof_image_path?: string | null;
   submitted_at?: string | null;
   players?: MissionClaimPlayerRow | MissionClaimPlayerRow[] | null;
   realm_missions?:
@@ -95,6 +97,7 @@ export type AdminRealmMissionInput = {
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const MISSION_EVIDENCE_BUCKET = "mission-evidence";
 
 export function isSupabaseMissionId(value?: string) {
   return Boolean(value && UUID_PATTERN.test(value.trim()));
@@ -155,6 +158,51 @@ function getMissionTitleFromRelation(
   return null;
 }
 
+function getFileExtension(fileName: string) {
+  const parts = fileName.split(".");
+  const extension = parts.length > 1 ? parts.pop() : "jpg";
+  return (extension || "jpg").toLowerCase();
+}
+
+async function uploadMissionEvidenceImage(input: {
+  playerId: string;
+  missionId: string;
+  file: File;
+}) {
+  const fileExtension = getFileExtension(input.file.name);
+  const path = `${input.playerId}/${input.missionId}/${crypto.randomUUID()}.${fileExtension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(MISSION_EVIDENCE_BUCKET)
+    .upload(path, input.file, {
+      upsert: true,
+      contentType: input.file.type || undefined,
+    });
+
+  if (uploadError) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo subir la imagen de evidencia. Verifica el bucket mission-evidence en Supabase Storage.",
+        uploadError.message
+      ),
+      imageUrl: "",
+      imagePath: "",
+    };
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from(MISSION_EVIDENCE_BUCKET)
+    .getPublicUrl(path);
+
+  return {
+    status: "saved" as const,
+    message: "",
+    imageUrl: publicUrlData.publicUrl,
+    imagePath: path,
+  };
+}
+
 function mapRealmMissionClaimRow(row: RealmMissionClaimRow): RealmMissionClaim {
   const player = getClaimPlayer(row);
 
@@ -169,6 +217,7 @@ function mapRealmMissionClaimRow(row: RealmMissionClaimRow): RealmMissionClaim {
     proofText: row.proof_text?.trim() ?? "",
     proofLink: row.proof_link?.trim() ?? "",
     proofImageUrl: row.proof_image_url?.trim() ?? "",
+    proofImagePath: row.proof_image_path?.trim() ?? "",
     submittedAt: row.submitted_at ?? null,
     rewardDeliveredAt: row.reward_delivered_at ?? null,
     createdAt: row.created_at,
@@ -328,7 +377,7 @@ export async function fetchMissionClaims(missionId: string) {
   const { data, error } = await supabase
     .from("realm_mission_claims")
     .select(
-      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, submitted_at, reward_delivered_at, created_at, updated_at, players(username, gold)"
+      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, proof_image_path, submitted_at, reward_delivered_at, created_at, updated_at, players(username, gold)"
     )
     .eq("mission_id", normalizedMissionId)
     .order("created_at", { ascending: false });
@@ -369,7 +418,7 @@ export async function fetchPlayerMissionClaims(
   const { data, error } = await supabase
     .from("realm_mission_claims")
     .select(
-      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, submitted_at, reward_delivered_at, created_at, updated_at"
+      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, proof_image_path, submitted_at, reward_delivered_at, created_at, updated_at"
     )
     .eq("player_id", normalizedPlayerId)
     .in("mission_id", normalizedMissionIds);
@@ -405,13 +454,15 @@ export async function submitMissionClaimEvidence(
     proofText?: string;
     proofLink?: string;
     proofImageUrl?: string;
+    proofImageFile?: File | null;
   }
 ) {
   const normalizedClaimId = claimId.trim();
   const normalizedPlayerId = playerId.trim();
   const proofText = input.proofText?.trim() ?? "";
   const proofLink = input.proofLink?.trim() ?? "";
-  const proofImageUrl = input.proofImageUrl?.trim() ?? "";
+  let proofImageUrl = input.proofImageUrl?.trim() ?? "";
+  let proofImagePath = "";
 
   if (!normalizedClaimId || !normalizedPlayerId) {
     return {
@@ -420,7 +471,7 @@ export async function submitMissionClaimEvidence(
     };
   }
 
-  if (!proofText && !proofLink && !proofImageUrl) {
+  if (!proofText && !proofLink && !proofImageUrl && !input.proofImageFile) {
     return {
       status: "error" as const,
       message: "Agrega al menos un detalle de evidencia antes de enviar.",
@@ -429,7 +480,7 @@ export async function submitMissionClaimEvidence(
 
   const { data: currentClaim, error: currentClaimError } = await supabase
     .from("realm_mission_claims")
-    .select("id, reward_delivered")
+    .select("id, mission_id, reward_delivered")
     .eq("id", normalizedClaimId)
     .eq("player_id", normalizedPlayerId)
     .maybeSingle();
@@ -451,6 +502,24 @@ export async function submitMissionClaimEvidence(
     };
   }
 
+  if (input.proofImageFile) {
+    const uploadResult = await uploadMissionEvidenceImage({
+      playerId: normalizedPlayerId,
+      missionId: currentClaim.mission_id,
+      file: input.proofImageFile,
+    });
+
+    if (uploadResult.status === "error") {
+      return {
+        status: "error" as const,
+        message: uploadResult.message,
+      };
+    }
+
+    proofImageUrl = uploadResult.imageUrl;
+    proofImagePath = uploadResult.imagePath;
+  }
+
   const { error } = await supabase
     .from("realm_mission_claims")
     .update({
@@ -458,6 +527,7 @@ export async function submitMissionClaimEvidence(
       proof_text: proofText,
       proof_link: proofLink,
       proof_image_url: proofImageUrl,
+      proof_image_path: proofImagePath,
       submitted_at: new Date().toISOString(),
     })
     .eq("id", normalizedClaimId)
@@ -483,7 +553,7 @@ export async function fetchPendingMissionReviews() {
   const { data, error } = await supabase
     .from("realm_mission_claims")
     .select(
-      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, submitted_at, players(username), realm_missions(title)"
+      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, proof_image_path, submitted_at, players(username), realm_missions(title)"
     )
     .eq("status", "completed")
     .eq("reward_delivered", false)
@@ -511,6 +581,7 @@ export async function fetchPendingMissionReviews() {
       proofText: row.proof_text?.trim() ?? "",
       proofLink: row.proof_link?.trim() ?? "",
       proofImageUrl: row.proof_image_url?.trim() ?? "",
+      proofImagePath: row.proof_image_path?.trim() ?? "",
     };
   });
 
@@ -663,12 +734,48 @@ export async function markMissionRewardDelivered(claimId: string) {
     };
   }
 
+  const { data: claimData, error: claimDataError } = await supabase
+    .from("realm_mission_claims")
+    .select("proof_image_path")
+    .eq("id", normalizedClaimId)
+    .maybeSingle();
+
+  if (claimDataError) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo leer la evidencia de la mision antes de cerrar.",
+        claimDataError.message
+      ),
+    };
+  }
+
+  const proofImagePath = claimData?.proof_image_path?.trim() ?? "";
+
+  if (proofImagePath) {
+    const { error: removeError } = await supabase.storage
+      .from(MISSION_EVIDENCE_BUCKET)
+      .remove([proofImagePath]);
+
+    if (removeError) {
+      return {
+        status: "error" as const,
+        message: formatAdminPermissionMessage(
+          "Se pago el oro, pero no se pudo borrar la imagen de evidencia.",
+          removeError.message
+        ),
+      };
+    }
+  }
+
   const { error } = await supabase
     .from("realm_mission_claims")
     .update({
       status: "rewarded",
       reward_delivered: true,
       reward_delivered_at: new Date().toISOString(),
+      proof_image_url: "",
+      proof_image_path: "",
     })
     .eq("id", normalizedClaimId);
 

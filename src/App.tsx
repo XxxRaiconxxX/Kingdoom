@@ -327,6 +327,7 @@ function HomeSection({
       proofText: string;
       proofLink: string;
       proofImageUrl: string;
+      proofImageFile?: File | null;
     }
   ) {
     if (!mission.id || !player) {
@@ -349,6 +350,7 @@ function HomeSection({
       proofText: evidence.proofText,
       proofLink: evidence.proofLink,
       proofImageUrl: evidence.proofImageUrl,
+      proofImageFile: evidence.proofImageFile,
     });
     setSubmittingEvidenceMissionId("");
 
@@ -652,6 +654,7 @@ function MissionCard({
       proofText: string;
       proofLink: string;
       proofImageUrl: string;
+      proofImageFile?: File | null;
     }
   ) => Promise<void>;
   isClaiming: boolean;
@@ -664,11 +667,15 @@ function MissionCard({
   const [proofText, setProofText] = useState(claim?.proofText ?? "");
   const [proofLink, setProofLink] = useState(claim?.proofLink ?? "");
   const [proofImageUrl, setProofImageUrl] = useState(claim?.proofImageUrl ?? "");
+  const [proofImageFile, setProofImageFile] = useState<File | null>(null);
+  const [proofImagePreview, setProofImagePreview] = useState("");
 
   useEffect(() => {
     setProofText(claim?.proofText ?? "");
     setProofLink(claim?.proofLink ?? "");
     setProofImageUrl(claim?.proofImageUrl ?? "");
+    setProofImageFile(null);
+    setProofImagePreview("");
   }, [claim?.proofImageUrl, claim?.proofLink, claim?.proofText, claim?.id]);
 
   const canSendEvidence =
@@ -679,9 +686,18 @@ function MissionCard({
       proofText,
       proofLink,
       proofImageUrl,
+      proofImageFile,
     });
     setShowEvidenceForm(false);
   }
+
+  useEffect(() => {
+    return () => {
+      if (proofImagePreview) {
+        URL.revokeObjectURL(proofImagePreview);
+      }
+    };
+  }, [proofImagePreview]);
 
   return (
     <article className="kd-hover-lift rounded-[1.6rem] border border-emerald-500/15 bg-stone-950/45 p-4">
@@ -807,6 +823,38 @@ function MissionCard({
             placeholder="URL de imagen opcional"
             className="w-full rounded-xl border border-stone-700 bg-stone-950/85 px-3 py-2 text-xs text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-400/45"
           />
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/12 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-cyan-100 transition hover:bg-cyan-500/22">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null;
+                setProofImageFile(file);
+                if (proofImagePreview) {
+                  URL.revokeObjectURL(proofImagePreview);
+                }
+                if (file) {
+                  setProofImagePreview(URL.createObjectURL(file));
+                } else {
+                  setProofImagePreview("");
+                }
+              }}
+            />
+            Adjuntar desde galeria
+          </label>
+          {proofImageFile ? (
+            <p className="text-[11px] text-cyan-100">
+              Archivo: {proofImageFile.name}
+            </p>
+          ) : null}
+          {proofImagePreview ? (
+            <img
+              src={proofImagePreview}
+              alt="Vista previa de evidencia"
+              className="h-20 w-20 rounded-lg border border-cyan-500/30 object-cover"
+            />
+          ) : null}
           <button
             type="button"
             onClick={() => void handleEvidenceSubmit()}

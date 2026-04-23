@@ -23,6 +23,7 @@ create table if not exists public.realm_mission_claims (
   proof_text text not null default '',
   proof_link text not null default '',
   proof_image_url text not null default '',
+  proof_image_path text not null default '',
   submitted_at timestamptz,
   reward_delivered boolean not null default false,
   reward_delivered_at timestamptz,
@@ -38,7 +39,25 @@ alter table public.realm_mission_claims
   add column if not exists proof_text text not null default '',
   add column if not exists proof_link text not null default '',
   add column if not exists proof_image_url text not null default '',
+  add column if not exists proof_image_path text not null default '',
   add column if not exists submitted_at timestamptz;
+
+insert into storage.buckets (id, name, public)
+values ('mission-evidence', 'mission-evidence', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Mission evidence public read" on storage.objects;
+create policy "Mission evidence public read"
+on storage.objects
+for select
+using (bucket_id = 'mission-evidence');
+
+drop policy if exists "Mission evidence write" on storage.objects;
+create policy "Mission evidence write"
+on storage.objects
+for all
+using (bucket_id = 'mission-evidence')
+with check (bucket_id = 'mission-evidence');
 
 do $$
 begin

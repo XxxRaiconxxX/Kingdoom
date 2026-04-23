@@ -141,6 +141,7 @@ export type RealmMissionClaim = {
   proofText: string;
   proofLink: string;
   proofImageUrl: string;
+  proofImagePath: string;
   submittedAt?: string | null;
   rewardDeliveredAt?: string | null;
   createdAt?: string;
@@ -157,6 +158,7 @@ export type MissionReviewNotification = {
   proofText: string;
   proofLink: string;
   proofImageUrl: string;
+  proofImagePath: string;
 };
 
 export type HomeStat = {

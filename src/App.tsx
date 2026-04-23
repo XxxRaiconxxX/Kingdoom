@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { EventCard } from "./components/EventCard";
 import { ExpandableText } from "./components/ExpandableText";
-import { PlayerProfilePanel } from "./components/PlayerProfilePanel";
 import { SectionHeader } from "./components/SectionHeader";
 import { StatCard } from "./components/StatCard";
 import { usePlayerSession } from "./context/PlayerSessionContext";
@@ -60,9 +59,14 @@ const loadMarketSection = () =>
   import("./sections/MarketSection").then((module) => ({
     default: module.MarketSection,
   }));
+const loadPlayerProfilePanel = () =>
+  import("./components/PlayerProfilePanel").then((module) => ({
+    default: module.PlayerProfilePanel,
+  }));
 const LibrarySection = lazy(loadLibrarySection);
 const GrimoireSection = lazy(loadGrimoireSection);
 const MarketSection = lazy(loadMarketSection);
+const PlayerProfilePanel = lazy(loadPlayerProfilePanel);
 
 function preloadTab(tabId: TabId) {
   switch (tabId) {
@@ -96,10 +100,23 @@ export default function App() {
     >
       <main className="kd-shell mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6 md:pt-8">
         <div className="mb-5">
-          <PlayerProfilePanel
-            collapsed={isProfileCollapsed}
-            onCollapsedChange={setIsProfileCollapsed}
-          />
+          <Suspense
+            fallback={
+              <div className="kd-glass rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 md:p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 w-28 rounded bg-stone-700/50" />
+                  <div className="h-8 w-56 rounded bg-stone-700/50" />
+                  <div className="h-4 w-full rounded bg-stone-800/60" />
+                  <div className="h-20 rounded-2xl bg-stone-800/60" />
+                </div>
+              </div>
+            }
+          >
+            <PlayerProfilePanel
+              collapsed={isProfileCollapsed}
+              onCollapsedChange={setIsProfileCollapsed}
+            />
+          </Suspense>
         </div>
 
         <div

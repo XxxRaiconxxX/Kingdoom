@@ -272,10 +272,6 @@ export function PlayerProfilePanel({
         <div className="flex flex-wrap gap-2">
           <ProfilePill label="Jugador" value={player?.username ?? "Sin sesion"} />
           <ProfilePill
-            label="Fichas"
-            value={`${playerSheets.length}/${MAX_PLAYER_CHARACTER_SHEETS}`}
-          />
-          <ProfilePill
             label="Activo"
             value={activeSheet?.name ?? "Ninguno"}
           />
@@ -394,9 +390,6 @@ export function PlayerProfilePanel({
                                 Admin
                               </span>
                             ) : null}
-                            <span className="rounded-full border border-stone-700 bg-stone-950/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-300">
-                              {playerSheets.length} fichas
-                            </span>
                             {activeSheet?.name ? (
                               <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-300">
                                 {activeSheet.name}

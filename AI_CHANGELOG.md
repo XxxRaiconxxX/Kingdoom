@@ -45,6 +45,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 ### [Fecha: 23/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`
+*   **Resumen de Tareas:** Se elimino la repeticion del dato de fichas en el bloque premium del perfil.
+*   **Cambios Clave:**
+    *   Se retiro el pill superior de "Fichas".
+    *   Se retiro el badge de "{n} fichas" junto al nombre del jugador.
+    *   El contador de fichas queda en un unico punto visible dentro del bloque de economia.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasan.
+
+---
+### [Fecha: 23/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`
 *   **Resumen de Tareas:** Se aplico una fase premium al panel de perfil del jugador para mejorar jerarquia, legibilidad y sensacion de app nativa en movil.
 *   **Cambios Clave:**
     *   Se reorganizo el panel en bloques mas claros: identidad del jugador, acciones rapidas, economia y fichas.

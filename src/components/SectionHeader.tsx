@@ -16,7 +16,8 @@ export function SectionHeader({
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
+        <p className="kd-section-eyebrow text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
+          <span className="kd-section-sigil" aria-hidden="true" />
           {eyebrow}
         </p>
         <h2 className="mt-2 text-2xl font-black text-stone-100 md:text-3xl">{title}</h2>
@@ -27,7 +28,7 @@ export function SectionHeader({
           </p>
         ) : null}
       </div>
-      {rightSlot}
+      {rightSlot ? <div className="kd-section-slot">{rightSlot}</div> : null}
     </div>
   );
 }

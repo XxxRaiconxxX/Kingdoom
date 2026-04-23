@@ -90,8 +90,11 @@ export default function App() {
   }, [activeTab]);
 
   return (
-    <div className="kd-ambient min-h-screen bg-stone-950 text-stone-300">
-      <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6 md:pt-8">
+    <div
+      className="kd-ambient min-h-screen bg-stone-950 text-stone-300"
+      data-kd-theme={activeTab}
+    >
+      <main className="kd-shell mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6 md:pt-8">
         <div className="mb-5">
           <PlayerProfilePanel
             collapsed={isProfileCollapsed}
@@ -99,7 +102,10 @@ export default function App() {
           />
         </div>
 
-        <div key={activeTab} className="animate-[content-fade-in_180ms_ease-out]">
+        <div
+          key={activeTab}
+          className="kd-stage animate-[content-fade-in_180ms_ease-out]"
+        >
           {activeTab === "home" ? (
             <HomeSection
               onFocusProfile={() => {
@@ -127,8 +133,8 @@ export default function App() {
         </div>
       </main>
 
-      <nav className="kd-bottom-nav fixed inset-x-0 bottom-0 z-50 border-t border-amber-500/10 bg-stone-950/90 backdrop-blur-xl">
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
+      <nav className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4">
+        <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-4 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
 
@@ -145,13 +151,19 @@ export default function App() {
                 aria-current={isActive ? "page" : undefined}
                 className={`kd-nav-item kd-touch flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-[10px] font-semibold transition md:min-h-14 md:flex-row md:gap-2 md:text-xs ${
                   isActive
-                    ? "border-amber-400/30 bg-amber-500/12 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.12)]"
-                    : "border-transparent bg-stone-900/70 text-stone-400"
+                    ? "border-[color:var(--kd-accent-soft)] bg-[color:var(--kd-accent-bg)] text-[color:var(--kd-accent-strong)] shadow-[0_0_24px_var(--kd-accent-shadow)]"
+                    : "border-transparent bg-stone-900/65 text-stone-400"
                 }`}
               >
-                <Icon
-                  className={`h-5 w-5 ${isActive ? "text-amber-400" : "text-stone-500"}`}
-                />
+                <span
+                  className={`kd-nav-icon-shell flex h-9 w-9 items-center justify-center rounded-2xl transition ${
+                    isActive
+                      ? "bg-[color:var(--kd-accent-bg)] text-[color:var(--kd-accent-strong)]"
+                      : "bg-stone-950/45 text-stone-500"
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
                 <span>{label}</span>
               </button>
             );
@@ -231,7 +243,7 @@ function HomeSection({
 
   return (
     <section className="space-y-5">
-      <div className="kd-glass kd-stagger overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30 md:p-8">
+      <div className="kd-glass kd-hero-panel kd-stagger overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30 md:p-8">
         <div className="kd-hero-orb pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.22),transparent_62%)] blur-sm" />
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
           <Castle className="h-4 w-4" />

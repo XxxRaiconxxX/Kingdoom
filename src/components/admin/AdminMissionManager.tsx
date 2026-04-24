@@ -34,6 +34,7 @@ import {
   updateMissionClaimStatus,
   upsertRealmMission,
 } from "../../utils/missions";
+import { generateMissionWithAi } from "../../utils/missionAi";
 import { fetchAllPlayers, updatePlayerGold } from "../../utils/players";
 import {
   ADMIN_LIST_PREVIEW_COUNT,
@@ -79,6 +80,17 @@ export function AdminMissionManager() {
   const [type, setType] = useState<MissionType>("story");
   const [status, setStatus] = useState<MissionStatus>("available");
   const [visible, setVisible] = useState(true);
+  const [isGeneratingAiMission, setIsGeneratingAiMission] = useState(false);
+  const [aiZone, setAiZone] = useState("");
+  const [aiFaction, setAiFaction] = useState("");
+  const [aiTone, setAiTone] = useState("fantasia oscura politica");
+  const [aiRestriction, setAiRestriction] = useState(
+    "Debe poder resolverse por rol en WhatsApp y ser verificable por staff."
+  );
+  const [aiTheme, setAiTheme] = useState("");
+  const [aiCombatStyle, setAiCombatStyle] = useState<"yes" | "no" | "optional">(
+    "optional"
+  );
 
   useEffect(() => {
     void loadBaseData();
@@ -268,6 +280,57 @@ export function AdminMissionManager() {
     }
   }
 
+  async function handleGenerateMissionWithAi() {
+    setIsGeneratingAiMission(true);
+    setFeedback("");
+
+    const result = await generateMissionWithAi({
+      type,
+      difficulty,
+      recommendedPlayers: Math.max(1, Math.min(4, maxParticipants)),
+      maxParticipants,
+      rewardGold,
+      zone: aiZone,
+      faction: aiFaction,
+      tone: aiTone,
+      restriction: aiRestriction,
+      combatStyle: aiCombatStyle,
+      theme: aiTheme,
+    });
+
+    setIsGeneratingAiMission(false);
+
+    if (result.status === "error" || !result.mission) {
+      setFeedback(result.message);
+      return;
+    }
+
+    setMissionId("");
+    setTitle(result.mission.title);
+    setDescription(result.mission.description);
+    setInstructions(result.mission.instructions);
+    setRewardGold(result.mission.rewardGold);
+    setMaxParticipants(Math.max(1, result.mission.maxParticipants));
+    setDifficulty(result.mission.difficulty);
+    setType(result.mission.type);
+    setStatus("available");
+    setVisible(true);
+    setClaims([]);
+    setHighlightedClaimId("");
+
+    const nextFeedbackParts = [result.message];
+
+    if (result.publicBrief?.subtitle) {
+      nextFeedbackParts.push(`Subtitulo sugerido: ${result.publicBrief.subtitle}`);
+    }
+
+    if (result.promptSummary) {
+      nextFeedbackParts.push(`Resumen IA: ${result.promptSummary}`);
+    }
+
+    setFeedback(nextFeedbackParts.join(" "));
+  }
+
   async function handleAddParticipant() {
     if (!missionId) {
       setFeedback("Guarda primero la mision antes de agregar participantes.");
@@ -415,6 +478,95 @@ export function AdminMissionManager() {
         </div>
 
         <form className="mt-5 space-y-4" onSubmit={handleSave}>
+          <div className="rounded-[1.4rem] border border-cyan-500/20 bg-cyan-500/8 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-cyan-300/80">
+                  Asistente IA
+                </p>
+                <h5 className="mt-1 text-sm font-black text-stone-100">
+                  Generador de misiones
+                </h5>
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleGenerateMissionWithAi()}
+                disabled={isGeneratingAiMission || isSaving || isDeleting}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-cyan-500/12 px-4 py-3 text-sm font-extrabold text-cyan-100 transition hover:bg-cyan-500/18 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isGeneratingAiMission ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <ScrollText className="h-4 w-4" />
+                    Generar con IA
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <LabeledInput
+                label="Zona o escenario"
+                value={aiZone}
+                onChange={setAiZone}
+                placeholder="Frontera helada, barrio noble, ruinas bajo niebla..."
+              />
+              <LabeledInput
+                label="Faccion implicada"
+                value={aiFaction}
+                onChange={setAiFaction}
+                placeholder="Casa Vhalor, Guardia del Umbral..."
+              />
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <LabeledInput
+                label="Tono narrativo"
+                value={aiTone}
+                onChange={setAiTone}
+                placeholder="Intriga politica, horror ritual, caceria sucia..."
+              />
+              <LabeledInput
+                label="Tema central"
+                value={aiTheme}
+                onChange={setAiTheme}
+                placeholder="Traicion, contrabando, reliquia, bestia..."
+              />
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-[1fr_0.8fr]">
+              <LabeledTextArea
+                label="Restriccion especial"
+                value={aiRestriction}
+                onChange={setAiRestriction}
+                placeholder="Debe evitar combate directo, debe permitir varios jugadores..."
+                rows={3}
+              />
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-stone-200">
+                  Combate
+                </span>
+                <select
+                  value={aiCombatStyle}
+                  onChange={(event) =>
+                    setAiCombatStyle(
+                      event.target.value as "yes" | "no" | "optional"
+                    )
+                  }
+                  className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-cyan-400/40"
+                >
+                  <option value="optional">Opcional</option>
+                  <option value="yes">Si</option>
+                  <option value="no">No</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
           <LabeledInput
             label="Titulo"
             value={title}

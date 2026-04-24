@@ -1,10 +1,16 @@
-import {
-  readGeminiConfig,
-  requestGeminiText,
-  setCorsHeaders,
-  type ApiRequest,
-  type ApiResponse,
-} from "./_gemini";
+type ApiRequest = {
+  method?: string;
+  body?: unknown;
+  headers: Record<string, string | string[] | undefined>;
+};
+
+type ApiResponse = {
+  setHeader: (name: string, value: string) => void;
+  status: (code: number) => {
+    json: (payload: unknown) => void;
+    end: () => void;
+  };
+};
 
 type MagicAiRequest = {
   categoryTitle?: string;
@@ -20,6 +26,50 @@ type MagicAiResponse = {
   draftText: string;
   promptSummary: string;
 };
+
+const DEFAULT_ALLOWED_ORIGINS = [
+  "https://xxxraiconxxx.github.io",
+  "https://kingdoom.vercel.app",
+];
+
+function getAllowedOrigin(requestOrigin?: string) {
+  const configuredOrigins = process.env.MISSION_AI_ALLOWED_ORIGINS
+    ?.split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const origins = configuredOrigins?.length
+    ? configuredOrigins
+    : DEFAULT_ALLOWED_ORIGINS;
+
+  if (!requestOrigin) {
+    return origins[0] ?? "*";
+  }
+
+  if (origins.includes(requestOrigin)) {
+    return requestOrigin;
+  }
+
+  return origins[0] ?? "*";
+}
+
+function setCorsHeaders(req: ApiRequest, res: ApiResponse) {
+  const allowedOrigin = getAllowedOrigin(req.headers.origin);
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
+
+function extractTextFromGeminiResponse(payload: any) {
+  const parts = payload?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) {
+    return "";
+  }
+
+  return parts
+    .map((part) => (typeof part?.text === "string" ? part.text : ""))
+    .join("")
+    .trim();
+}
 
 function getPrompt(input: Required<MagicAiRequest>) {
   return `
@@ -84,7 +134,7 @@ Entramos en el catalogo de **[Categoria]**. [Descripcion general del estilo].
 [2 o 3 habilidades]
 
 REGLAS DE FORMATO
-- Usa exactamente los encabezados `### --Titulo--`, `### -Escala de niveles-` y `#### Habilidades de LvX`.
+- Usa exactamente los encabezados \`### --Titulo--\`, \`### -Escala de niveles-\` y \`#### Habilidades de LvX\`.
 - Cada habilidad debe ir numerada.
 - Cada bullet debe usar exactamente: Efecto, CD, Limitante, Anti-Mano Negra.
 - No cierres con preguntas como "Continuamos con..." ni agregues texto despues del Lv5.
@@ -113,7 +163,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const { geminiApiKey, geminiModel } = readGeminiConfig();
+  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
+  const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
 
   if (!geminiApiKey) {
     return res.status(500).json({
@@ -138,14 +189,53 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
-    const draftText = await requestGeminiText({
-      prompt: getPrompt(input),
-      apiKey: geminiApiKey,
-      model: geminiModel,
-    });
+    const geminiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: getPrompt(input) }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.92,
+            topP: 0.9,
+          },
+        }),
+      }
+    );
+
+    const geminiPayload = await geminiResponse.json();
+
+    if (!geminiResponse.ok) {
+      return res.status(502).json({
+        message:
+          geminiPayload?.error?.message ||
+          "Gemini no respondio correctamente al generar la magia.",
+      });
+    }
+
+    const rawText = extractTextFromGeminiResponse(geminiPayload);
+
+    if (!rawText) {
+      return res.status(502).json({
+        message: "Gemini respondio sin contenido util para la magia.",
+      });
+    }
 
     const response: MagicAiResponse = {
-      draftText: sanitizeDraft(draftText),
+      draftText: sanitizeDraft(
+        rawText
+          .replace(/^```text\s*/i, "")
+          .replace(/^```\s*/i, "")
+          .replace(/\s*```$/i, "")
+      ),
       promptSummary: `${input.categoryTitle} / ${input.theme} / combate ${input.combatStyle}`,
     };
 

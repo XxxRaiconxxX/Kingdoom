@@ -1,11 +1,23 @@
-import type { BestiaryEntry, BestiaryRarity } from "../../src/types";
-import {
-  readGeminiConfig,
-  requestGeminiJson,
-  setCorsHeaders,
-  type ApiRequest,
-  type ApiResponse,
-} from "./_gemini";
+type BestiaryRarity =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "legendary"
+  | "calamity";
+
+type ApiRequest = {
+  method?: string;
+  body?: unknown;
+  headers: Record<string, string | string[] | undefined>;
+};
+
+type ApiResponse = {
+  setHeader: (name: string, value: string) => void;
+  status: (code: number) => {
+    json: (payload: unknown) => void;
+    end: () => void;
+  };
+};
 
 type BestiaryAiRequest = {
   name?: string;
@@ -20,22 +32,53 @@ type BestiaryAiRequest = {
   tone?: string;
 };
 
-type BestiaryAiResponse = Pick<
-  BestiaryEntry,
-  | "name"
-  | "category"
-  | "type"
-  | "generalData"
-  | "threatLevel"
-  | "domestication"
-  | "usage"
-  | "originPlace"
-  | "foundAt"
-  | "description"
-  | "ability"
-  | "rarity"
-  | "imageUrl"
->;
+type BestiaryAiResponse = {
+  name: string;
+  category: string;
+  type: string;
+  generalData: string;
+  threatLevel: string;
+  domestication: string;
+  usage: string;
+  originPlace: string;
+  foundAt: string;
+  description: string;
+  ability: string;
+  rarity: BestiaryRarity;
+  imageUrl: string;
+};
+
+const DEFAULT_ALLOWED_ORIGINS = [
+  "https://xxxraiconxxx.github.io",
+  "https://kingdoom.vercel.app",
+];
+
+function getAllowedOrigin(requestOrigin?: string) {
+  const configuredOrigins = process.env.MISSION_AI_ALLOWED_ORIGINS
+    ?.split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const origins = configuredOrigins?.length
+    ? configuredOrigins
+    : DEFAULT_ALLOWED_ORIGINS;
+
+  if (!requestOrigin) {
+    return origins[0] ?? "*";
+  }
+
+  if (origins.includes(requestOrigin)) {
+    return requestOrigin;
+  }
+
+  return origins[0] ?? "*";
+}
+
+function setCorsHeaders(req: ApiRequest, res: ApiResponse) {
+  const allowedOrigin = getAllowedOrigin(req.headers.origin);
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
 
 function normalizeRarity(value?: string): BestiaryRarity {
   if (
@@ -49,6 +92,18 @@ function normalizeRarity(value?: string): BestiaryRarity {
   }
 
   return "common";
+}
+
+function extractTextFromGeminiResponse(payload: any) {
+  const parts = payload?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) {
+    return "";
+  }
+
+  return parts
+    .map((part) => (typeof part?.text === "string" ? part.text : ""))
+    .join("")
+    .trim();
 }
 
 function getPrompt(input: Required<BestiaryAiRequest>) {
@@ -144,7 +199,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const { geminiApiKey, geminiModel } = readGeminiConfig();
+  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
+  const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
 
   if (!geminiApiKey) {
     return res.status(500).json({
@@ -168,13 +224,55 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
-    const payload = await requestGeminiJson<BestiaryAiResponse>({
-      prompt: getPrompt(defaults),
-      apiKey: geminiApiKey,
-      model: geminiModel,
-    });
+    const geminiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: getPrompt(defaults) }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.95,
+            topP: 0.9,
+            responseMimeType: "application/json",
+          },
+        }),
+      }
+    );
 
-    return res.status(200).json(normalizeEntry(payload, defaults));
+    const geminiPayload = await geminiResponse.json();
+
+    if (!geminiResponse.ok) {
+      return res.status(502).json({
+        message:
+          geminiPayload?.error?.message ||
+          "Gemini no respondio correctamente al generar la bestia.",
+      });
+    }
+
+    const rawText = extractTextFromGeminiResponse(geminiPayload);
+
+    if (!rawText) {
+      return res.status(502).json({
+        message: "Gemini respondio sin contenido util para la bestia.",
+      });
+    }
+
+    const sanitized = rawText
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    const parsedPayload = JSON.parse(sanitized) as BestiaryAiResponse;
+    return res.status(200).json(normalizeEntry(parsedPayload, defaults));
   } catch (error) {
     return res.status(500).json({
       message:

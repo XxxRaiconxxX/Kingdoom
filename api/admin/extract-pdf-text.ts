@@ -1,3 +1,5 @@
+import { readGeminiConfig, requestGeminiTextWithParts } from "./_gemini";
+
 type ApiRequest = {
   method?: string;
   body?: unknown;
@@ -44,18 +46,6 @@ function setCorsHeaders(req: ApiRequest, res: ApiResponse) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-function extractTextFromGeminiResponse(payload: any) {
-  const parts = payload?.candidates?.[0]?.content?.parts;
-  if (!Array.isArray(parts)) {
-    return "";
-  }
-
-  return parts
-    .map((part) => (typeof part?.text === "string" ? part.text : ""))
-    .join("")
-    .trim();
-}
-
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   setCorsHeaders(req, res);
 
@@ -67,12 +57,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
-  const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+  const { geminiApiKeys, geminiModel } = readGeminiConfig();
 
-  if (!geminiApiKey) {
+  if (!geminiApiKeys.length) {
     return res.status(500).json({
-      message: "Falta GEMINI_API_KEY en el backend.",
+      message: "Falta GEMINI_API_KEY o GEMINI_API_KEYS en el backend.",
     });
   }
 
@@ -89,48 +78,24 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   try {
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text:
-                    "Extrae el texto legible de este PDF para usarlo como base documental de lore. Devuelve solo texto plano, sin comentarios.",
-                },
-                {
-                  inlineData: {
-                    mimeType,
-                    data: base64,
-                  },
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            topP: 0.7,
+    const text = await requestGeminiTextWithParts({
+      model: geminiModel,
+      apiKeys: geminiApiKeys,
+      parts: [
+        {
+          text:
+            "Extrae el texto legible de este PDF para usarlo como base documental de lore. Devuelve solo texto plano, sin comentarios.",
+        },
+        {
+          inlineData: {
+            mimeType,
+            data: base64,
           },
-        }),
-      }
-    );
-
-    const geminiPayload = await geminiResponse.json();
-
-    if (!geminiResponse.ok) {
-      return res.status(502).json({
-        message:
-          geminiPayload?.error?.message ||
-          "Gemini no pudo leer el PDF correctamente.",
-      });
-    }
-
-    const text = extractTextFromGeminiResponse(geminiPayload);
+        },
+      ],
+      temperature: 0.1,
+      topP: 0.7,
+    });
 
     return res.status(200).json({
       text,

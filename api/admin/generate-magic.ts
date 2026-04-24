@@ -1,3 +1,5 @@
+import { readGeminiConfig, requestGeminiText } from "./_gemini";
+
 type ApiRequest = {
   method?: string;
   body?: unknown;
@@ -57,18 +59,6 @@ function setCorsHeaders(req: ApiRequest, res: ApiResponse) {
   res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-}
-
-function extractTextFromGeminiResponse(payload: any) {
-  const parts = payload?.candidates?.[0]?.content?.parts;
-  if (!Array.isArray(parts)) {
-    return "";
-  }
-
-  return parts
-    .map((part) => (typeof part?.text === "string" ? part.text : ""))
-    .join("")
-    .trim();
 }
 
 function getPrompt(input: Required<MagicAiRequest>) {
@@ -163,13 +153,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
-  const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+  const { geminiApiKeys, geminiModel } = readGeminiConfig();
 
-  if (!geminiApiKey) {
+  if (!geminiApiKeys.length) {
     return res.status(500).json({
       message:
-        "Falta GEMINI_API_KEY en el backend. Configurala en Vercel antes de usar el generador.",
+        "Falta GEMINI_API_KEY o GEMINI_API_KEYS en el backend. Configuralas en Vercel antes de usar el generador.",
     });
   }
 
@@ -189,52 +178,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: getPrompt(input) }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.92,
-            topP: 0.9,
-          },
-        }),
-      }
-    );
-
-    const geminiPayload = await geminiResponse.json();
-
-    if (!geminiResponse.ok) {
-      return res.status(502).json({
-        message:
-          geminiPayload?.error?.message ||
-          "Gemini no respondio correctamente al generar la magia.",
-      });
-    }
-
-    const rawText = extractTextFromGeminiResponse(geminiPayload);
-
-    if (!rawText) {
-      return res.status(502).json({
-        message: "Gemini respondio sin contenido util para la magia.",
-      });
-    }
-
     const response: MagicAiResponse = {
       draftText: sanitizeDraft(
-        rawText
-          .replace(/^```text\s*/i, "")
-          .replace(/^```\s*/i, "")
-          .replace(/\s*```$/i, "")
+        await requestGeminiText({
+          prompt: getPrompt(input),
+          apiKeys: geminiApiKeys,
+          model: geminiModel,
+        })
       ),
       promptSummary: `${input.categoryTitle} / ${input.theme} / combate ${input.combatStyle}`,
     };

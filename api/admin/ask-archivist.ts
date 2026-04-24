@@ -1,3 +1,5 @@
+import { readGeminiConfig, requestGeminiText } from "./_gemini";
+
 type ApiRequest = {
   method?: string;
   body?: unknown;
@@ -54,18 +56,6 @@ function setCorsHeaders(req: ApiRequest, res: ApiResponse) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-function extractTextFromGeminiResponse(payload: any) {
-  const parts = payload?.candidates?.[0]?.content?.parts;
-  if (!Array.isArray(parts)) {
-    return "";
-  }
-
-  return parts
-    .map((part) => (typeof part?.text === "string" ? part.text : ""))
-    .join("")
-    .trim();
-}
-
 function buildPrompt(question: string, documents: ArchivistDocument[]) {
   const context = documents
     .map((document, index) => {
@@ -115,12 +105,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
-  const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+  const { geminiApiKeys, geminiModel } = readGeminiConfig();
 
-  if (!geminiApiKey) {
+  if (!geminiApiKeys.length) {
     return res.status(500).json({
-      message: "Falta GEMINI_API_KEY en el backend.",
+      message: "Falta GEMINI_API_KEY o GEMINI_API_KEYS en el backend.",
     });
   }
 
@@ -142,43 +131,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   try {
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: buildPrompt(question, documents) }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.35,
-            topP: 0.85,
-          },
-        }),
-      }
-    );
-
-    const geminiPayload = await geminiResponse.json();
-
-    if (!geminiResponse.ok) {
-      return res.status(502).json({
-        message:
-          geminiPayload?.error?.message ||
-          "Gemini no respondio correctamente al Archivista.",
-      });
-    }
-
-    const answer = extractTextFromGeminiResponse(geminiPayload);
-
-    if (!answer) {
-      return res.status(502).json({
-        message: "Gemini respondio sin contenido util.",
-      });
-    }
+    const answer = await requestGeminiText({
+      prompt: buildPrompt(question, documents),
+      apiKeys: geminiApiKeys,
+      model: geminiModel,
+    });
 
     return res.status(200).json({
       answer,

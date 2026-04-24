@@ -1,3 +1,5 @@
+import { readGeminiConfig, requestGeminiJson } from "./_gemini";
+
 type BestiaryRarity =
   | "common"
   | "uncommon"
@@ -94,18 +96,6 @@ function normalizeRarity(value?: string): BestiaryRarity {
   return "common";
 }
 
-function extractTextFromGeminiResponse(payload: any) {
-  const parts = payload?.candidates?.[0]?.content?.parts;
-  if (!Array.isArray(parts)) {
-    return "";
-  }
-
-  return parts
-    .map((part) => (typeof part?.text === "string" ? part.text : ""))
-    .join("")
-    .trim();
-}
-
 function getPrompt(input: Required<BestiaryAiRequest>) {
   return `
 Actua como worldbuilder senior y bestiary designer de Kingdoom.
@@ -199,13 +189,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
-  const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+  const { geminiApiKeys, geminiModel } = readGeminiConfig();
 
-  if (!geminiApiKey) {
+  if (!geminiApiKeys.length) {
     return res.status(500).json({
       message:
-        "Falta GEMINI_API_KEY en el backend. Configurala en Vercel antes de usar el generador.",
+        "Falta GEMINI_API_KEY o GEMINI_API_KEYS en el backend. Configuralas en Vercel antes de usar el generador.",
     });
   }
 
@@ -224,54 +213,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: getPrompt(defaults) }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.95,
-            topP: 0.9,
-            responseMimeType: "application/json",
-          },
-        }),
-      }
-    );
-
-    const geminiPayload = await geminiResponse.json();
-
-    if (!geminiResponse.ok) {
-      return res.status(502).json({
-        message:
-          geminiPayload?.error?.message ||
-          "Gemini no respondio correctamente al generar la bestia.",
-      });
-    }
-
-    const rawText = extractTextFromGeminiResponse(geminiPayload);
-
-    if (!rawText) {
-      return res.status(502).json({
-        message: "Gemini respondio sin contenido util para la bestia.",
-      });
-    }
-
-    const sanitized = rawText
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/\s*```$/i, "")
-      .trim();
-
-    const parsedPayload = JSON.parse(sanitized) as BestiaryAiResponse;
+    const parsedPayload = await requestGeminiJson<BestiaryAiResponse>({
+      prompt: getPrompt(defaults),
+      apiKeys: geminiApiKeys,
+      model: geminiModel,
+    });
     return res.status(200).json(normalizeEntry(parsedPayload, defaults));
   } catch (error) {
     return res.status(500).json({

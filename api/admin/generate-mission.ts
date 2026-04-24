@@ -1,3 +1,5 @@
+import { readGeminiConfig, requestGeminiJson } from "./_gemini";
+
 type CombatStyle = "yes" | "no" | "optional";
 type MissionType = "story" | "hunt" | "escort" | "investigation" | "event";
 type MissionDifficulty = "easy" | "medium" | "hard" | "elite";
@@ -269,13 +271,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
-  const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+  const { geminiApiKeys, geminiModel } = readGeminiConfig();
 
-  if (!geminiApiKey) {
+  if (!geminiApiKeys.length) {
     return res.status(500).json({
       message:
-        "Falta GEMINI_API_KEY en el backend. Configurala en Vercel antes de usar el generador.",
+        "Falta GEMINI_API_KEY o GEMINI_API_KEYS en el backend. Configuralas en Vercel antes de usar el generador.",
     });
   }
 
@@ -300,48 +301,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${encodeURIComponent(geminiApiKey)}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: getPrompt(normalizedInput) }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.95,
-            topP: 0.9,
-            responseMimeType: "application/json",
-          },
-        }),
-      }
-    );
-
-    const geminiPayload = await geminiResponse.json();
-
-    if (!geminiResponse.ok) {
-      return res.status(502).json({
-        message:
-          geminiPayload?.error?.message ||
-          "Gemini no respondio correctamente al generar la mision.",
-      });
-    }
-
-    const rawText = extractTextFromGeminiResponse(geminiPayload);
-
-    if (!rawText) {
-      return res.status(502).json({
-        message: "Gemini respondio sin contenido util para la mision.",
-      });
-    }
-
-    const parsedPayload = parseJsonPayload(rawText);
+    const parsedPayload = await requestGeminiJson<MissionAiPayload>({
+      prompt: getPrompt(normalizedInput),
+      apiKeys: geminiApiKeys,
+      model: geminiModel,
+    });
     const normalizedPayload = normalizeMissionPayload(
       parsedPayload,
       normalizedInput

@@ -2,10 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { BookMarked, FileSearch, Loader2, Send, Sparkles } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { askArchivistAi } from "../utils/archivistAi";
-import {
-  fetchKnowledgeDocuments,
-  pickKnowledgeContext,
-} from "../utils/knowledge";
+import { fetchArchivistKnowledgeDocuments } from "../utils/archivistSources";
+import { pickKnowledgeContext } from "../utils/knowledge";
 import type { KnowledgeDocument } from "../types";
 
 type ChatMessage = {
@@ -23,7 +21,7 @@ export function ArchivistSection() {
       id: "welcome",
       role: "assistant",
       text:
-        "Soy el Archivista de Argentis. Puedo responder usando los documentos cargados por el staff.",
+        "Soy el Archivista de Argentis. Puedo responder usando el canon publicado y los documentos cargados por el staff.",
     },
   ]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -34,7 +32,7 @@ export function ArchivistSection() {
     let cancelled = false;
 
     async function loadDocuments() {
-      const result = await fetchKnowledgeDocuments();
+      const result = await fetchArchivistKnowledgeDocuments();
 
       if (cancelled) return;
 
@@ -107,7 +105,7 @@ export function ArchivistSection() {
           <SectionHeader
             eyebrow="Archivo vivo"
             title="Archivista de Argentis"
-            description="Consulta el lore cargado por el staff. Si el documento no existe en la biblioteca, el Archivista lo dira."
+            description="Consulta lore, magias, bestiario, flora, eventos, misiones y documentos cargados."
           />
           <div className="flex w-fit items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
             <BookMarked className="h-4 w-4" />
@@ -206,7 +204,7 @@ export function ArchivistSection() {
               ))
             ) : (
               <div className="rounded-[1.2rem] border border-dashed border-stone-700 bg-stone-950/35 p-4 text-sm leading-6 text-stone-400">
-                Carga documentos desde el panel admin para activar el archivo.
+                Aun no hay fuentes cercanas para esta busqueda.
               </div>
             )}
           </div>
@@ -216,7 +214,7 @@ export function ArchivistSection() {
               Modo canon
             </div>
             <p className="mt-2 text-xs leading-5 text-amber-100/75">
-              Las respuestas se apoyan en la base documental visible.
+              Las respuestas se apoyan en la base documental y secciones publicadas.
             </p>
           </div>
         </aside>

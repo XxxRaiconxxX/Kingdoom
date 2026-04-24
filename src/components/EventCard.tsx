@@ -50,6 +50,15 @@ export function EventCard({
   const [imageFailed, setImageFailed] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const statusStyle = eventStatusStyles[event.status];
+  const maxParticipants = Math.max(0, event.maxParticipants ?? 0);
+  const isFull =
+    maxParticipants > 0 &&
+    participants.length >= maxParticipants &&
+    !myParticipation;
+  const capacityLabel =
+    maxParticipants > 0
+      ? `${participants.length}/${maxParticipants}`
+      : `${participants.length}/∞`;
 
   return (
     <article className="kd-glass kd-hover-lift overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/80">
@@ -99,8 +108,13 @@ export function EventCard({
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-200">
             <Users className="h-3.5 w-3.5" />
-            {participants.length} participantes
+            {capacityLabel} participantes
           </span>
+          {isFull ? (
+            <span className="rounded-full border border-rose-500/35 bg-rose-500/12 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-rose-200">
+              Cupo completo
+            </span>
+          ) : null}
           {myParticipation ? (
             <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-200">
               {getEventParticipationStatusLabel(myParticipation.status)}
@@ -115,7 +129,11 @@ export function EventCard({
             disabled={isSubmitting || !canLeave}
             className="kd-touch inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/12 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.14em] text-cyan-100 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Procesando..." : canLeave ? "Salir del evento" : "Participacion bloqueada"}
+            {isSubmitting
+              ? "Procesando..."
+              : canLeave
+                ? "Salir del evento"
+                : "Participacion bloqueada"}
           </button>
         ) : (
           <button
@@ -124,7 +142,13 @@ export function EventCard({
             disabled={isSubmitting || !canJoin}
             className="kd-touch inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/12 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.14em] text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Procesando..." : canJoin ? "Unirme al evento" : "No disponible"}
+            {isSubmitting
+              ? "Procesando..."
+              : canJoin
+                ? "Unirme al evento"
+                : isFull
+                  ? "Cupo completo"
+                  : "No disponible"}
           </button>
         )}
 
@@ -140,7 +164,11 @@ export function EventCard({
           className="kd-touch flex w-full items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/45 px-4 py-3 text-left text-sm font-semibold text-stone-200 transition hover:border-stone-700"
         >
           <span>Ver detalles del evento</span>
-          <span className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}>
+          <span
+            className={`transition-transform duration-200 ${
+              expanded ? "rotate-180" : ""
+            }`}
+          >
             <ChevronDown className="h-4 w-4 text-stone-400" />
           </span>
         </button>
@@ -154,15 +182,23 @@ export function EventCard({
               label="Recompensas"
               value={
                 event.participationRewardGold && event.participationRewardGold > 0
-                  ? `${event.rewards} • +${event.participationRewardGold} oro por participacion`
+                  ? `${event.rewards} | +${event.participationRewardGold} oro por participacion`
                   : event.rewards
+              }
+            />
+            <DetailRow
+              label="Cupo"
+              value={
+                maxParticipants > 0
+                  ? `${participants.length}/${maxParticipants} participantes`
+                  : `${participants.length} participantes (sin limite)`
               }
             />
             <DetailRow
               label="Participantes"
               value={
                 participants.length > 0
-                  ? participants.map((entry) => entry.playerName).join(" • ")
+                  ? participants.map((entry) => entry.playerName).join(" | ")
                   : "Sin participantes todavia."
               }
             />

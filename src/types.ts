@@ -112,6 +112,7 @@ export type RealmEvent = {
   rewards: string;
   requirements: string;
   participationRewardGold?: number;
+  maxParticipants?: number;
 };
 
 export type RealmEventParticipationStatus = "joined" | "rewarded";

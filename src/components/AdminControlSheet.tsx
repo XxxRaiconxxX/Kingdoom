@@ -128,6 +128,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [eventRewards, setEventRewards] = useState("");
   const [eventRequirements, setEventRequirements] = useState("");
   const [eventParticipationRewardGold, setEventParticipationRewardGold] = useState(0);
+  const [eventMaxParticipants, setEventMaxParticipants] = useState(0);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [marketFeedback, setMarketFeedback] = useState("");
   const [isSavingMarketItem, setIsSavingMarketItem] = useState(false);
@@ -385,6 +386,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventRewards(event.rewards);
     setEventRequirements(event.requirements);
     setEventParticipationRewardGold(event.participationRewardGold ?? 0);
+    setEventMaxParticipants(event.maxParticipants ?? 0);
     setEventParticipantPlayerId("");
     setShowEventPendingPanel(false);
     setEventFeedback("");
@@ -410,6 +412,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventRewards("");
     setEventRequirements("");
     setEventParticipationRewardGold(0);
+    setEventMaxParticipants(0);
     setEventParticipantPlayerId("");
     setEventParticipants([]);
     setShowEventPendingPanel(false);
@@ -439,6 +442,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
     if (!eventParticipantPlayerId) {
       setEventFeedback("Selecciona un jugador para unirlo al evento.");
+      return;
+    }
+
+    const maxParticipants = Math.max(0, selectedEvent.maxParticipants ?? 0);
+    if (maxParticipants > 0 && eventParticipants.length >= maxParticipants) {
+      setEventFeedback("Ese evento ya completo su cupo.");
       return;
     }
 
@@ -650,6 +659,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       rewards: eventRewards,
       requirements: eventRequirements,
       participationRewardGold: eventParticipationRewardGold,
+      maxParticipants: eventMaxParticipants,
     });
 
     setIsSavingEvent(false);
@@ -1098,6 +1108,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     value={eventParticipationRewardGold}
                     onChange={setEventParticipationRewardGold}
                   />
+                  <NumericInput
+                    label="Cupo maximo (0 = sin limite)"
+                    value={eventMaxParticipants}
+                    onChange={setEventMaxParticipants}
+                  />
 
                   <label className="space-y-2">
                     <span className="text-sm font-semibold text-stone-200">
@@ -1316,6 +1331,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                           <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-stone-500">
                             Recompensa grupal: {entry.participationRewardGold ?? 0} oro
                           </p>
+                          <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-stone-500">
+                            Cupo: {(entry.maxParticipants ?? 0) > 0 ? entry.maxParticipants : "sin limite"}
+                          </p>
                         </div>
                         <div className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-300">
                           {entry.status}
@@ -1354,6 +1372,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         Premio {selectedEvent.participationRewardGold ?? 0}
                       </span>
                     </div>
+                    <p className="mt-2 text-xs uppercase tracking-[0.14em] text-stone-500">
+                      Cupo actual:{" "}
+                      {(selectedEvent.maxParticipants ?? 0) > 0
+                        ? `${eventParticipants.length}/${selectedEvent.maxParticipants}`
+                        : `${eventParticipants.length}/∞`}
+                    </p>
 
                     <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
                       <label className="space-y-2">
@@ -1381,7 +1405,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                           !eventParticipantPlayerId ||
                           !eventId ||
                           !isSupabaseEventId(eventId) ||
-                          selectedEventIsFinished
+                          selectedEventIsFinished ||
+                          ((selectedEvent.maxParticipants ?? 0) > 0 &&
+                            eventParticipants.length >= (selectedEvent.maxParticipants ?? 0))
                         }
                         className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
                       >
@@ -1402,6 +1428,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     {selectedEventIsFinished ? (
                       <div className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
                         El evento ya termino. Ya no se aceptan altas y solo queda pagar recompensas.
+                      </div>
+                    ) : null}
+                    {!selectedEventIsFinished &&
+                    (selectedEvent.maxParticipants ?? 0) > 0 &&
+                    eventParticipants.length >= (selectedEvent.maxParticipants ?? 0) ? (
+                      <div className="mt-3 rounded-xl border border-rose-500/25 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                        El evento alcanzo su cupo maximo. No se pueden anadir mas participantes.
                       </div>
                     ) : null}
 

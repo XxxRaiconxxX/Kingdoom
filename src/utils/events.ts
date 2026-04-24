@@ -22,6 +22,7 @@ type RealmEventRow = {
   rewards: string;
   requirements: string;
   participation_reward_gold?: number | null;
+  max_participants?: number | null;
 };
 
 type RealmEventParticipantRow = {
@@ -55,6 +56,7 @@ type RealmEventMetaRow = {
   start_date: string;
   end_date: string;
   status: EventStatus;
+  max_participants?: number | null;
 };
 
 export type RealmEventsState = {
@@ -76,6 +78,7 @@ export type AdminRealmEventInput = {
   rewards: string;
   requirements: string;
   participationRewardGold?: number;
+  maxParticipants?: number;
 };
 
 const UUID_PATTERN =
@@ -99,6 +102,7 @@ function mapRealmEventRow(row: RealmEventRow): RealmEvent {
     rewards: row.rewards,
     requirements: row.requirements,
     participationRewardGold: Math.max(0, row.participation_reward_gold ?? 0),
+    maxParticipants: Math.max(0, row.max_participants ?? 0),
   };
 }
 
@@ -115,6 +119,7 @@ function buildRealmEventPayload(input: AdminRealmEventInput) {
     rewards: input.rewards.trim(),
     requirements: input.requirements.trim(),
     participation_reward_gold: Math.max(0, Math.floor(input.participationRewardGold ?? 0)),
+    max_participants: Math.max(0, Math.floor(input.maxParticipants ?? 0)),
   };
 }
 
@@ -207,7 +212,7 @@ export async function fetchRealmEvents(): Promise<RealmEventsState> {
   const { data, error } = await supabase
     .from("realm_events")
     .select(
-      "id, title, description, long_description, image_url, start_date, end_date, status, factions, rewards, requirements, participation_reward_gold"
+      "id, title, description, long_description, image_url, start_date, end_date, status, factions, rewards, requirements, participation_reward_gold, max_participants"
     )
     .order("created_at", { ascending: false });
 
@@ -440,7 +445,7 @@ export async function joinRealmEvent(eventId: string, playerId: string) {
 
   const { data: eventMeta, error: eventMetaError } = await supabase
     .from("realm_events")
-    .select("id, title, start_date, end_date, status")
+    .select("id, title, start_date, end_date, status, max_participants")
     .eq("id", normalizedEventId)
     .maybeSingle();
 
@@ -470,6 +475,32 @@ export async function joinRealmEvent(eventId: string, playerId: string) {
     };
   }
 
+  const maxParticipants = Math.max(0, currentEvent.max_participants ?? 0);
+
+  if (maxParticipants > 0) {
+    const { count, error: countError } = await supabase
+      .from("realm_event_participants")
+      .select("id", { head: true, count: "exact" })
+      .eq("event_id", normalizedEventId);
+
+    if (countError) {
+      return {
+        status: "error" as const,
+        message: formatAdminPermissionMessage(
+          "No se pudo validar el cupo del evento.",
+          countError.message
+        ),
+      };
+    }
+
+    if ((count ?? 0) >= maxParticipants) {
+      return {
+        status: "full" as const,
+        message: "Ese evento ya completo su cupo de participantes.",
+      };
+    }
+  }
+
   const { error } = await supabase.from("realm_event_participants").insert({
     event_id: normalizedEventId,
     player_id: normalizedPlayerId,
@@ -487,6 +518,16 @@ export async function joinRealmEvent(eventId: string, playerId: string) {
     return {
       status: "exists" as const,
       message: "Ya estabas apuntado en ese evento.",
+    };
+  }
+
+  if (
+    error.code === "P0001" &&
+    error.message.toLowerCase().includes("cupo")
+  ) {
+    return {
+      status: "full" as const,
+      message: "Ese evento ya completo su cupo de participantes.",
     };
   }
 

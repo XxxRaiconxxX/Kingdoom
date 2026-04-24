@@ -682,11 +682,16 @@ function HomeSection({
             const myParticipation = hasPersistedEvent
               ? playerEventParticipations[eventId]
               : undefined;
+            const eventMaxParticipants = Math.max(0, event.maxParticipants ?? 0);
+            const isEventFull =
+              eventMaxParticipants > 0 &&
+              participants.length >= eventMaxParticipants;
             const canJoin =
               Boolean(player) &&
               !myParticipation &&
               hasPersistedEvent &&
-              event.status === "in-production";
+              event.status === "in-production" &&
+              !isEventFull;
             const canLeave =
               Boolean(myParticipation) &&
               hasPersistedEvent &&

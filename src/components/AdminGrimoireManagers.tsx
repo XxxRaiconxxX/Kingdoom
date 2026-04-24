@@ -12,6 +12,10 @@ import {
   upsertBestiaryEntry,
   upsertMagicStyle,
 } from "../utils/grimoireContent";
+import {
+  generateBestiaryWithAi,
+  generateMagicDraftWithAi,
+} from "../utils/grimoireAi";
 
 type AdminMagicStyle = MagicStyle & {
   categoryId: string;
@@ -264,6 +268,14 @@ export function AdminMagicManager() {
   const [levelsText, setLevelsText] = useState(formatLevels(EMPTY_LEVELS));
   const [draftText, setDraftText] = useState("");
   const [showAdvancedLevels, setShowAdvancedLevels] = useState(false);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiTone, setAiTone] = useState("");
+  const [aiTheme, setAiTheme] = useState("");
+  const [aiRestriction, setAiRestriction] = useState("");
+  const [aiCombatStyle, setAiCombatStyle] = useState<"yes" | "no" | "optional">(
+    "optional"
+  );
+  const [aiScientificAngle, setAiScientificAngle] = useState("");
 
   async function loadStyles() {
     const result = await fetchAdminMagicStyles();
@@ -308,9 +320,9 @@ export function AdminMagicManager() {
     setFeedback("");
   }
 
-  function handleParseDraft() {
+  function applyDraftText(raw: string) {
     try {
-      const parsed = parseMagicDraft(draftText);
+      const parsed = parseMagicDraft(raw);
       setCategoryId(parsed.categoryId);
       setCategoryTitle(parsed.categoryTitle);
       setTitle(parsed.title);
@@ -324,6 +336,35 @@ export function AdminMagicManager() {
         "No pude interpretar la magia. Revisa que tenga titulo, seccion 'Escala de niveles' y bloques 'Habilidades de Lv1-Lv5'."
       );
     }
+  }
+
+  function handleParseDraft() {
+    applyDraftText(draftText);
+  }
+
+  async function handleGenerateWithAi() {
+    setIsGeneratingAi(true);
+    setFeedback("");
+
+    const result = await generateMagicDraftWithAi({
+      categoryTitle,
+      titleSeed: title,
+      tone: aiTone,
+      theme: aiTheme,
+      restriction: aiRestriction,
+      combatStyle: aiCombatStyle,
+      scientificAngle: aiScientificAngle,
+    });
+
+    setIsGeneratingAi(false);
+
+    if (result.status !== "ready") {
+      setFeedback(result.message);
+      return;
+    }
+
+    setDraftText(result.draftText);
+    applyDraftText(result.draftText);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -386,6 +427,71 @@ export function AdminMagicManager() {
         />
 
         <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+          <div className="rounded-[1.4rem] border border-cyan-500/20 bg-cyan-500/5 p-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-cyan-300" />
+              <p className="text-sm font-bold text-stone-100">Asistente IA</p>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-stone-400">
+              Genera una magia completa en el formato exacto del grimorio actual y la interpreta sola.
+            </p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <AdminTextField
+                label="Tono"
+                value={aiTone}
+                onChange={setAiTone}
+                placeholder="arcano, ritual, belico, prohibido..."
+              />
+              <AdminTextField
+                label="Tema central"
+                value={aiTheme}
+                onChange={setAiTheme}
+                placeholder="proteccion, sangre, resonancia, invocacion..."
+              />
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <AdminTextField
+                label="Restriccion"
+                value={aiRestriction}
+                onChange={setAiRestriction}
+                placeholder="Debe ser defensiva y util en escenas narrativas."
+              />
+              <AdminTextField
+                label="Enfoque tecnico"
+                value={aiScientificAngle}
+                onChange={setAiScientificAngle}
+                placeholder="metamateriales, biologia, resonancia, runas..."
+              />
+            </div>
+            <label className="mt-4 block space-y-2">
+              <span className="text-sm font-semibold text-stone-200">Combate</span>
+              <select
+                value={aiCombatStyle}
+                onChange={(event) =>
+                  setAiCombatStyle(event.target.value as "yes" | "no" | "optional")
+                }
+                className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_3px_rgba(34,211,238,0.08)]"
+              >
+                <option value="optional">Mixta</option>
+                <option value="yes">Orientada a combate</option>
+                <option value="no">Mayormente narrativa</option>
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={() => void handleGenerateWithAi()}
+              disabled={isGeneratingAi}
+              className="kd-touch mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-extrabold text-cyan-100 transition hover:bg-cyan-500/15 disabled:opacity-60"
+            >
+              {isGeneratingAi ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              Generar magia con IA
+            </button>
+          </div>
+
           <div className="rounded-[1.4rem] border border-amber-500/20 bg-amber-500/5 p-4">
             <AdminTextArea
               label="Pegar magia completa"
@@ -569,6 +675,8 @@ export function AdminBestiaryManager() {
   const [ability, setAbility] = useState("");
   const [rarity, setRarity] = useState<BestiaryRarity>("common");
   const [imageUrl, setImageUrl] = useState("");
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiTone, setAiTone] = useState("");
 
   async function loadEntries() {
     const result = await fetchBestiaryEntries();
@@ -636,6 +744,46 @@ export function AdminBestiaryManager() {
     }
   }
 
+  async function handleGenerateWithAi() {
+    setIsGeneratingAi(true);
+    setFeedback("");
+
+    const result = await generateBestiaryWithAi({
+      name,
+      category,
+      type,
+      threatLevel,
+      domestication,
+      usage,
+      originPlace,
+      foundAt,
+      rarity,
+      tone: aiTone,
+    });
+
+    setIsGeneratingAi(false);
+
+    if (result.status !== "ready" || !result.entry) {
+      setFeedback(result.message);
+      return;
+    }
+
+    setName(result.entry.name);
+    setCategory(result.entry.category);
+    setType(result.entry.type);
+    setGeneralData(result.entry.generalData);
+    setThreatLevel(result.entry.threatLevel);
+    setDomestication(result.entry.domestication);
+    setUsage(result.entry.usage);
+    setOriginPlace(result.entry.originPlace);
+    setFoundAt(result.entry.foundAt);
+    setDescription(result.entry.description);
+    setAbility(result.entry.ability);
+    setRarity(result.entry.rarity);
+    setImageUrl(result.entry.imageUrl);
+    setFeedback(result.message);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSaving(true);
@@ -696,6 +844,35 @@ export function AdminBestiaryManager() {
         />
 
         <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+          <div className="rounded-[1.4rem] border border-cyan-500/20 bg-cyan-500/5 p-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-cyan-300" />
+              <p className="text-sm font-bold text-stone-100">Asistente IA</p>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-stone-400">
+              Completa la bestia con una ficha rica, ordenada y lista para el bestiario del reino.
+            </p>
+            <AdminTextField
+              label="Tono"
+              value={aiTone}
+              onChange={setAiTone}
+              placeholder="sombrio, volcanico, sagrado, depredador..."
+            />
+            <button
+              type="button"
+              onClick={() => void handleGenerateWithAi()}
+              disabled={isGeneratingAi}
+              className="kd-touch mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-extrabold text-cyan-100 transition hover:bg-cyan-500/15 disabled:opacity-60"
+            >
+              {isGeneratingAi ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              Generar bestia con IA
+            </button>
+          </div>
+
           <AdminTextField label="Nombre de la bestia" value={name} onChange={setName} placeholder="Lobo de Ceniza" />
           <div className="grid gap-4 md:grid-cols-2">
             <AdminTextField label="Categoria" value={category} onChange={setCategory} placeholder="Bestia elemental" />

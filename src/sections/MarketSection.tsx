@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import {
   Box,
@@ -16,6 +16,7 @@ import { FilterPill } from "../components/FilterPill";
 import { MarketItemCard } from "../components/MarketItemCard";
 import { SectionHeader } from "../components/SectionHeader";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "../data/market";
+import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
 import { fetchMarketItems } from "../utils/market";
 import { isNativeApp } from "../utils/platform";
 import type { LucideIcon } from "lucide-react";
@@ -149,6 +150,7 @@ const PurchaseModal = lazy(() =>
 );
 
 export function MarketSection() {
+  const marketRevealRef = useRef<HTMLElement | null>(null);
   const nativeApp = isNativeApp();
   const [selectedCategoryId, setSelectedCategoryId] = useState<
     MarketCategoryId | "all"
@@ -270,9 +272,28 @@ export function MarketSection() {
     window.localStorage.setItem(TAVERN_MODE_STORAGE_KEY, mode);
   };
 
+  useGsapStaggerReveal(marketRevealRef, {
+    selector: "[data-gsap-market]",
+    duration: 0.54,
+    stagger: 0.07,
+    y: 18,
+    delay: 0.03,
+    dependencies: [
+      selectedCategoryId,
+      rarityFilter,
+      priceSort,
+      tavernMode,
+      categoriesToRender.length,
+      featuredItems.length,
+    ],
+  });
+
   return (
-    <section className="space-y-5">
-      <div className="kd-glass kd-stagger rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+    <section ref={marketRevealRef} className="space-y-5">
+      <div
+        data-gsap-market
+        className="kd-glass kd-stagger rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6"
+      >
         <SectionHeader
           eyebrow="Mercado negro"
           title="Catalogos del reino"
@@ -284,7 +305,10 @@ export function MarketSection() {
         />
       </div>
 
-      <details className="kd-glass kd-hover-lift group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6">
+      <details
+        data-gsap-market
+        className="kd-glass kd-hover-lift group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6"
+      >
         <summary className="kd-touch flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
             <div className="rounded-2xl bg-rose-500/10 p-3 text-rose-300">
@@ -365,7 +389,10 @@ export function MarketSection() {
       </details>
 
       {featuredItems.length > 0 ? (
-        <div className="kd-glass rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
+        <div
+          data-gsap-market
+          className="kd-glass rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6"
+        >
           <SectionHeader eyebrow="Selecciones del mercader" title="Objetos destacados" />
           <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2">
             {featuredItems.map((item) => (
@@ -380,7 +407,10 @@ export function MarketSection() {
         </div>
       ) : null}
 
-      <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+      <div
+        data-gsap-market
+        className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6"
+      >
         <SectionHeader
           eyebrow="Filtrar catalogo"
           title="Categorias del mercado"
@@ -449,7 +479,11 @@ export function MarketSection() {
         </div>
       </div>
 
-      <div className="space-y-4" style={{ contentVisibility: "auto", containIntrinsicSize: "1200px" }}>
+      <div
+        data-gsap-market
+        className="space-y-4"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "1200px" }}
+      >
         {categoriesToRender.map((category) => (
           <MarketCategoryPanel
             key={category.id}

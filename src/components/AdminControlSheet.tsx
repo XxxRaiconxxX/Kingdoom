@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BellRing,
@@ -12,6 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
+import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
 import {
   deleteRealmEvent,
   fetchPendingEventRewards,
@@ -87,6 +88,7 @@ const AdminMissionManager = lazy(() =>
 );
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
+  const adminRevealRef = useRef<HTMLDivElement | null>(null);
   const { player, refreshPlayer } = usePlayerSession();
   const [activeTab, setActiveTab] = useState<AdminTab>("players");
   const [players, setPlayers] = useState<PlayerAccount[]>([]);
@@ -314,6 +316,23 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     setShowAllMarketItemsList(false);
   }, [marketSearch, marketCategoryFilter]);
+
+  useGsapStaggerReveal(adminRevealRef, {
+    selector: "[data-gsap-admin]",
+    duration: 0.52,
+    stagger: 0.06,
+    y: 14,
+    delay: 0.02,
+    dependencies: [
+      activeTab,
+      status,
+      visiblePlayers.length,
+      visibleEvents.length,
+      visibleMarketItems.length,
+      eventParticipants.length,
+      eventPendingRewards.length,
+    ],
+  });
 
   async function handleCreatePlayer(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -735,7 +754,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <div className="border-b border-amber-500/10 px-0 py-3 sm:py-4 md:px-6">
+        <div
+          data-gsap-admin
+          className="border-b border-amber-500/10 px-0 py-3 sm:py-4 md:px-6"
+        >
           <div className="flex w-full max-w-full min-w-0 items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:px-5 md:px-0 [&::-webkit-scrollbar]:hidden">
             <div className="flex-shrink-0">
               <AdminTabButton
@@ -782,17 +804,25 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="kd-admin-content flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 md:px-6">
+        <div
+          ref={adminRevealRef}
+          className="kd-admin-content flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 md:px-6"
+        >
           {status === "loading" ? (
-            <AdminInfoCard
-              title="Cargando modo admin"
-              message="Leyendo jugadores y temporada semanal actual..."
-            />
+            <div data-gsap-admin>
+              <AdminInfoCard
+                title="Cargando modo admin"
+                message="Leyendo jugadores y temporada semanal actual..."
+              />
+            </div>
           ) : null}
 
           {activeTab === "players" ? (
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+              <section
+                data-gsap-admin
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+              >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
                     <UserPlus className="h-5 w-5" />
@@ -974,7 +1004,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 ) : null}
               </section>
 
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+              <section
+                data-gsap-admin
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+              >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
                     <Users className="h-5 w-5" />
@@ -1032,21 +1065,26 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           ) : null}
 
           {activeTab === "missions" ? (
-            <Suspense
-              fallback={
-                <AdminInfoCard
-                  title="Cargando misiones"
-                  message="Preparando tablero del reino."
-                />
-              }
-            >
-              <AdminMissionManager />
-            </Suspense>
+            <div data-gsap-admin>
+              <Suspense
+                fallback={
+                  <AdminInfoCard
+                    title="Cargando misiones"
+                    message="Preparando tablero del reino."
+                  />
+                }
+              >
+                <AdminMissionManager />
+              </Suspense>
+            </div>
           ) : null}
 
           {activeTab === "events" ? (
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+              <section
+                data-gsap-admin
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+              >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
                     <Flag className="h-5 w-5" />
@@ -1206,7 +1244,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 </form>
               </section>
 
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+              <section
+                data-gsap-admin
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -1503,7 +1544,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
           {activeTab === "market" ? (
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+              <section
+                data-gsap-admin
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+              >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
                     <Store className="h-5 w-5" />
@@ -1692,7 +1736,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 </form>
               </section>
 
-              <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+              <section
+                data-gsap-admin
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+              >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
                     <ScrollText className="h-5 w-5" />
@@ -1777,29 +1824,33 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           ) : null}
 
           {activeTab === "magic" ? (
-            <Suspense
-              fallback={
-                <AdminInfoCard
-                  title="Cargando magias"
-                  message="Preparando editor del grimorio."
-                />
-              }
-            >
-              <AdminMagicManager />
-            </Suspense>
+            <div data-gsap-admin>
+              <Suspense
+                fallback={
+                  <AdminInfoCard
+                    title="Cargando magias"
+                    message="Preparando editor del grimorio."
+                  />
+                }
+              >
+                <AdminMagicManager />
+              </Suspense>
+            </div>
           ) : null}
 
           {activeTab === "bestiary" ? (
-            <Suspense
-              fallback={
-                <AdminInfoCard
-                  title="Cargando bestiario"
-                  message="Preparando editor de criaturas."
-                />
-              }
-            >
-              <AdminBestiaryManager />
-            </Suspense>
+            <div data-gsap-admin>
+              <Suspense
+                fallback={
+                  <AdminInfoCard
+                    title="Cargando bestiario"
+                    message="Preparando editor de criaturas."
+                  />
+                }
+              >
+                <AdminBestiaryManager />
+              </Suspense>
+            </div>
           ) : null}
 
         </div>

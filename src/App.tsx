@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, startTransition } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, startTransition } from "react";
 import type { ReactNode } from "react";
 import {
   Bell,
@@ -48,6 +48,7 @@ import {
   submitMissionClaimEvidence,
 } from "./utils/missions";
 import { fetchCommunityAppDownloadUrl } from "./utils/siteSettings";
+import { useGsapStaggerReveal } from "./hooks/useGsapStaggerReveal";
 import type {
   NavItem,
   RealmEvent,
@@ -215,6 +216,7 @@ function HomeSection({
   onFocusProfile: () => void;
   onOpenMarket: () => void;
 }) {
+  const homeRevealRef = useRef<HTMLElement | null>(null);
   const { player, isHydrating } = usePlayerSession();
   const StatusIcon = KINGDOM_STATUS.icon;
   const [events, setEvents] = useState(ACTIVE_EVENTS);
@@ -237,6 +239,15 @@ function HomeSection({
   const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
     COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
   );
+
+  useGsapStaggerReveal(homeRevealRef, {
+    selector: "[data-gsap-home]",
+    duration: 0.6,
+    stagger: 0.09,
+    y: 20,
+    delay: 0.04,
+    dependencies: [events.length, missions.length],
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -504,8 +515,11 @@ function HomeSection({
   }
 
   return (
-    <section className="space-y-5">
-      <div className="kd-glass kd-hero-panel kd-stagger overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30 md:p-8">
+    <section ref={homeRevealRef} className="space-y-5">
+      <div
+        data-gsap-home
+        className="kd-glass kd-hero-panel kd-stagger overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30 md:p-8"
+      >
         <div className="kd-hero-orb pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.22),transparent_62%)] blur-sm" />
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
           <Castle className="h-4 w-4" />
@@ -589,7 +603,7 @@ function HomeSection({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
+      <div data-gsap-home className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
         <div className="kd-glass kd-hover-lift rounded-3xl border border-stone-800 bg-stone-900/75 p-5 md:p-6">
           <h2 className="text-lg font-bold text-stone-100">La noche se mueve</h2>
           <p className="mt-2 text-sm leading-6 text-stone-400">
@@ -618,7 +632,10 @@ function HomeSection({
         </div>
       </div>
 
-      <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:560px]">
+      <div
+        data-gsap-home
+        className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:560px]"
+      >
         <SectionHeader
           eyebrow="Tablero operativo"
           title="Misiones del reino"
@@ -662,7 +679,10 @@ function HomeSection({
         </div>
       </div>
 
-      <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:760px]">
+      <div
+        data-gsap-home
+        className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:760px]"
+      >
         <SectionHeader
           eyebrow="Agenda del reino"
           title="Eventos activos"
@@ -715,7 +735,10 @@ function HomeSection({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[0.95fr_1.05fr] [content-visibility:auto] [contain-intrinsic-size:680px]">
+      <div
+        data-gsap-home
+        className="grid gap-4 md:grid-cols-[0.95fr_1.05fr] [content-visibility:auto] [contain-intrinsic-size:680px]"
+      >
         <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
           <SectionHeader eyebrow="Tablon del reino" title="Anuncios del consejo" />
           <div className="mt-4 space-y-3">
@@ -769,7 +792,10 @@ function HomeSection({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr] [content-visibility:auto] [contain-intrinsic-size:420px]">
+      <div
+        data-gsap-home
+        className="grid gap-4 md:grid-cols-[0.9fr_1.1fr] [content-visibility:auto] [contain-intrinsic-size:420px]"
+      >
         <CollapsiblePanel
           title="Estado del reino"
           subtitle="Una lectura rápida de los frentes abiertos antes de sumarte al conflicto."

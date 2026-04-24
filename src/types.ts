@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-export type TabId = "home" | "grimoire" | "library" | "market";
+export type TabId = "home" | "grimoire" | "library" | "market" | "archivist";
 export type Rarity = "legendary" | "epic" | "rare" | "common";
 export type PlayerStatus = "alive" | "dead";
 export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
@@ -326,6 +326,31 @@ export type FloraEntry = {
   description: string;
   rarity: BestiaryRarity;
   imageUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type KnowledgeDocumentType =
+  | "lore"
+  | "rules"
+  | "magic"
+  | "bestiary"
+  | "flora"
+  | "event"
+  | "mission"
+  | "faction"
+  | "other";
+
+export type KnowledgeDocument = {
+  id: string;
+  title: string;
+  type: KnowledgeDocumentType;
+  category: string;
+  tags: string[];
+  source: string;
+  content: string;
+  summary: string;
+  visible: boolean;
   createdAt?: string;
   updatedAt?: string;
 };

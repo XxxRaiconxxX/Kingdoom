@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   BellRing,
   Coins,
+  FileText,
   Flag,
   ScrollText,
   Store,
@@ -68,7 +69,8 @@ type AdminTab =
   | "market"
   | "magic"
   | "bestiary"
-  | "flora";
+  | "flora"
+  | "knowledge";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
 type EventListFilter = "all" | EventStatus;
 
@@ -90,6 +92,11 @@ const AdminFloraManager = lazy(() =>
 const AdminMissionManager = lazy(() =>
   import("./admin/AdminMissionManager").then((module) => ({
     default: module.AdminMissionManager,
+  }))
+);
+const AdminKnowledgeManager = lazy(() =>
+  import("./admin/AdminKnowledgeManager").then((module) => ({
+    default: module.AdminKnowledgeManager,
   }))
 );
 
@@ -812,6 +819,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 label="Flora"
                 active={activeTab === "flora"}
                 onClick={() => setActiveTab("flora")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Archivo IA"
+                active={activeTab === "knowledge"}
+                onClick={() => setActiveTab("knowledge")}
               />
             </div>
           </div>
@@ -1877,6 +1891,21 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 }
               >
                 <AdminFloraManager />
+              </Suspense>
+            </div>
+          ) : null}
+
+          {activeTab === "knowledge" ? (
+            <div data-gsap-admin>
+              <Suspense
+                fallback={
+                  <AdminInfoCard
+                    title="Cargando Archivo IA"
+                    message="Preparando base documental del Archivista."
+                  />
+                }
+              >
+                <AdminKnowledgeManager />
               </Suspense>
             </div>
           ) : null}

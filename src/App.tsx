@@ -5,6 +5,7 @@ import {
   Castle,
   ChevronDown,
   Download,
+  FileSearch,
   Home,
   Library,
   ScrollText,
@@ -63,6 +64,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "grimoire", label: "Grimorio", icon: Sparkles },
   { id: "library", label: "Biblioteca", icon: Library },
   { id: "market", label: "Mercado", icon: Store },
+  { id: "archivist", label: "Archivista", icon: FileSearch },
 ];
 
 const loadLibrarySection = () =>
@@ -77,6 +79,10 @@ const loadMarketSection = () =>
   import("./sections/MarketSection").then((module) => ({
     default: module.MarketSection,
   }));
+const loadArchivistSection = () =>
+  import("./components/ArchivistSection").then((module) => ({
+    default: module.ArchivistSection,
+  }));
 const loadPlayerProfilePanel = () =>
   import("./components/PlayerProfilePanel").then((module) => ({
     default: module.PlayerProfilePanel,
@@ -84,6 +90,7 @@ const loadPlayerProfilePanel = () =>
 const LibrarySection = lazy(loadLibrarySection);
 const GrimoireSection = lazy(loadGrimoireSection);
 const MarketSection = lazy(loadMarketSection);
+const ArchivistSection = lazy(loadArchivistSection);
 const PlayerProfilePanel = lazy(loadPlayerProfilePanel);
 
 function preloadTab(tabId: TabId) {
@@ -96,6 +103,9 @@ function preloadTab(tabId: TabId) {
       break;
     case "market":
       void loadMarketSection();
+      break;
+    case "archivist":
+      void loadArchivistSection();
       break;
     default:
       break;
@@ -165,11 +175,16 @@ export default function App() {
               <MarketSection />
             </Suspense>
           ) : null}
+          {activeTab === "archivist" ? (
+            <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el archivo de Argentis..." />}>
+              <ArchivistSection />
+            </Suspense>
+          ) : null}
         </div>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4">
-        <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-4 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
+        <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-5 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
 

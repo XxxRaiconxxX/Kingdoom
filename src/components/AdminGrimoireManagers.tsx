@@ -1,17 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import { BookOpen, ImagePlus, Loader2, PawPrint, Sparkles, Trash2 } from "lucide-react";
-import type { AbilityLevel, BestiaryEntry, BestiaryRarity, MagicStyle } from "../types";
+import { BookOpen, Flower2, ImagePlus, Loader2, PawPrint, Sparkles, Trash2 } from "lucide-react";
+import type { AbilityLevel, BestiaryEntry, BestiaryRarity, FloraEntry, MagicStyle } from "../types";
 import {
   BESTIARY_RARITIES,
   deleteBestiaryEntry,
+  deleteFloraEntry,
   deleteMagicStyle,
   fetchAdminMagicStyles,
   fetchBestiaryEntries,
+  fetchFloraEntries,
   slugifyGrimoireId,
   upsertBestiaryEntry,
+  upsertFloraEntry,
   upsertMagicStyle,
 } from "../utils/grimoireContent";
+import {
+  ADMIN_LIST_PREVIEW_COUNT,
+  ExpandableListToggle,
+} from "./admin/AdminControlPrimitives";
 import {
   generateBestiaryWithAi,
   generateMagicDraftWithAi,
@@ -268,6 +275,7 @@ export function AdminMagicManager() {
   const [levelsText, setLevelsText] = useState(formatLevels(EMPTY_LEVELS));
   const [draftText, setDraftText] = useState("");
   const [showAdvancedLevels, setShowAdvancedLevels] = useState(false);
+  const [showAllStylesList, setShowAllStylesList] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [aiTone, setAiTone] = useState("");
   const [aiTheme, setAiTheme] = useState("");
@@ -295,6 +303,17 @@ export function AdminMagicManager() {
       `${style.title} ${style.categoryTitle}`.toLowerCase().includes(query)
     );
   }, [search, styles]);
+  const visibleStyles = useMemo(
+    () =>
+      showAllStylesList
+        ? filteredStyles
+        : filteredStyles.slice(0, ADMIN_LIST_PREVIEW_COUNT),
+    [filteredStyles, showAllStylesList]
+  );
+
+  useEffect(() => {
+    setShowAllStylesList(false);
+  }, [search]);
 
   function resetForm() {
     setStyleId("");
@@ -632,7 +651,7 @@ export function AdminMagicManager() {
           />
         </div>
         <div className="mt-4 space-y-3">
-          {filteredStyles.map((style) => (
+          {visibleStyles.map((style) => (
             <button
               key={`${style.categoryId}-${style.id}`}
               type="button"
@@ -650,6 +669,13 @@ export function AdminMagicManager() {
               </span>
             </button>
           ))}
+          <ExpandableListToggle
+            shownCount={visibleStyles.length}
+            totalCount={filteredStyles.length}
+            expanded={showAllStylesList}
+            onToggle={() => setShowAllStylesList((current) => !current)}
+            itemLabel="magias"
+          />
         </div>
       </section>
     </div>
@@ -677,6 +703,7 @@ export function AdminBestiaryManager() {
   const [imageUrl, setImageUrl] = useState("");
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [aiTone, setAiTone] = useState("");
+  const [showAllEntriesList, setShowAllEntriesList] = useState(false);
 
   async function loadEntries() {
     const result = await fetchBestiaryEntries();
@@ -698,6 +725,17 @@ export function AdminBestiaryManager() {
         .includes(query)
     );
   }, [entries, search]);
+  const visibleEntries = useMemo(
+    () =>
+      showAllEntriesList
+        ? filteredEntries
+        : filteredEntries.slice(0, ADMIN_LIST_PREVIEW_COUNT),
+    [filteredEntries, showAllEntriesList]
+  );
+
+  useEffect(() => {
+    setShowAllEntriesList(false);
+  }, [search]);
 
   function resetForm() {
     setId("");
@@ -995,7 +1033,7 @@ export function AdminBestiaryManager() {
         </div>
         <div className="mt-4 space-y-3">
           {filteredEntries.length > 0 ? (
-            filteredEntries.map((entry) => (
+            visibleEntries.map((entry) => (
               <button
                 key={entry.id}
                 type="button"
@@ -1020,6 +1058,321 @@ export function AdminBestiaryManager() {
               No hay bestias cargadas todavia.
             </div>
           )}
+          <ExpandableListToggle
+            shownCount={visibleEntries.length}
+            totalCount={filteredEntries.length}
+            expanded={showAllEntriesList}
+            onToggle={() => setShowAllEntriesList((current) => !current)}
+            itemLabel="bestias"
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export function AdminFloraManager() {
+  const [entries, setEntries] = useState<FloraEntry[]>([]);
+  const [feedback, setFeedback] = useState("");
+  const [search, setSearch] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [showAllEntriesList, setShowAllEntriesList] = useState(false);
+  const [id, setId] = useState("");
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
+  const [type, setType] = useState("");
+  const [generalData, setGeneralData] = useState("");
+  const [properties, setProperties] = useState("");
+  const [usage, setUsage] = useState("");
+  const [originPlace, setOriginPlace] = useState("");
+  const [foundAt, setFoundAt] = useState("");
+  const [description, setDescription] = useState("");
+  const [rarity, setRarity] = useState<BestiaryRarity>("common");
+  const [imageUrl, setImageUrl] = useState("");
+
+  async function loadEntries() {
+    const result = await fetchFloraEntries();
+    setEntries(result.entries);
+    setFeedback(result.message);
+  }
+
+  useEffect(() => {
+    void loadEntries();
+  }, []);
+
+  const filteredEntries = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return entries;
+
+    return entries.filter((entry) =>
+      `${entry.name} ${entry.category} ${entry.type} ${entry.generalData} ${entry.properties} ${entry.usage} ${entry.originPlace} ${entry.foundAt} ${entry.description} ${entry.rarity}`
+        .toLowerCase()
+        .includes(query)
+    );
+  }, [entries, search]);
+
+  const visibleEntries = useMemo(
+    () =>
+      showAllEntriesList
+        ? filteredEntries
+        : filteredEntries.slice(0, ADMIN_LIST_PREVIEW_COUNT),
+    [filteredEntries, showAllEntriesList]
+  );
+
+  useEffect(() => {
+    setShowAllEntriesList(false);
+  }, [search]);
+
+  function resetForm() {
+    setId("");
+    setName("");
+    setCategory("");
+    setType("");
+    setGeneralData("");
+    setProperties("");
+    setUsage("");
+    setOriginPlace("");
+    setFoundAt("");
+    setDescription("");
+    setRarity("common");
+    setImageUrl("");
+    setFeedback("");
+  }
+
+  function preloadEntry(entry: FloraEntry) {
+    setId(entry.id);
+    setName(entry.name);
+    setCategory(entry.category);
+    setType(entry.type);
+    setGeneralData(entry.generalData);
+    setProperties(entry.properties);
+    setUsage(entry.usage);
+    setOriginPlace(entry.originPlace);
+    setFoundAt(entry.foundAt);
+    setDescription(entry.description);
+    setRarity(entry.rarity);
+    setImageUrl(entry.imageUrl);
+    setFeedback("");
+  }
+
+  async function handleImageUpload(file?: File) {
+    if (!file) return;
+    try {
+      setImageUrl(await readImageAsDataUrl(file));
+    } catch {
+      setFeedback("No se pudo cargar la imagen seleccionada.");
+    }
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSaving(true);
+    setFeedback("");
+
+    const result = await upsertFloraEntry({
+      id: id || slugifyGrimoireId(name, "flora"),
+      name,
+      category,
+      type,
+      generalData,
+      properties,
+      usage,
+      originPlace,
+      foundAt,
+      description,
+      rarity,
+      imageUrl,
+    });
+
+    setFeedback(result.message);
+    if (result.status === "saved") {
+      resetForm();
+      await loadEntries();
+    }
+    setIsSaving(false);
+  }
+
+  async function handleDelete() {
+    if (!id) {
+      setFeedback("Selecciona una entrada de flora antes de borrar.");
+      return;
+    }
+
+    if (!window.confirm(`Seguro que quieres borrar "${name}" de Flora?`)) {
+      return;
+    }
+
+    setIsSaving(true);
+    const result = await deleteFloraEntry(id);
+    setFeedback(result.message);
+    if (result.status === "deleted") {
+      resetForm();
+      await loadEntries();
+    }
+    setIsSaving(false);
+  }
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+        <AdminManagerHeader
+          icon={<Flower2 className="h-5 w-5" />}
+          eyebrow="Editor de flora"
+          title={id ? "Editar flora" : "Crear flora"}
+        />
+
+        <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+          <AdminTextField label="Nombre" value={name} onChange={setName} placeholder="Flor de ceniza" />
+          <div className="grid gap-4 md:grid-cols-2">
+            <AdminTextField label="Categoria" value={category} onChange={setCategory} placeholder="Hierba medicinal" />
+            <AdminTextField label="Tipo" value={type} onChange={setType} placeholder="Flora mistica, hongo, arbol..." />
+          </div>
+          <AdminTextArea
+            label="Datos generales"
+            value={generalData}
+            onChange={setGeneralData}
+            placeholder="Tamano, ciclo, habitat, recoleccion, estacionalidad..."
+            rows={5}
+          />
+          <AdminTextArea
+            label="Propiedades"
+            value={properties}
+            onChange={setProperties}
+            placeholder="Efectos, toxicidad, aroma, reaccion alquimica..."
+            rows={4}
+          />
+          <AdminTextArea
+            label="Uso"
+            value={usage}
+            onChange={setUsage}
+            placeholder="Uso medicinal, culinario, alquimico, ritual o industrial..."
+            rows={4}
+          />
+          <div className="grid gap-4 md:grid-cols-2">
+            <AdminTextField label="Lugar de origen" value={originPlace} onChange={setOriginPlace} placeholder="Valles de Vyralis" />
+            <AdminTextField label="Donde se encuentra" value={foundAt} onChange={setFoundAt} placeholder="Pantanos, ruinas, cavernas..." />
+          </div>
+          <AdminTextArea
+            label="Descripcion"
+            value={description}
+            onChange={setDescription}
+            placeholder="Descripcion visual, natural y narrativa..."
+            rows={5}
+          />
+
+          <label className="space-y-2">
+            <span className="text-sm font-semibold text-stone-200">Rareza</span>
+            <select
+              value={rarity}
+              onChange={(event) => setRarity(event.target.value as BestiaryRarity)}
+              className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
+            >
+              {BESTIARY_RARITIES.map((entry) => (
+                <option key={entry.id} value={entry.id}>
+                  {entry.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <AdminTextField label="URL o imagen cargada" value={imageUrl} onChange={setImageUrl} placeholder="https://... o data URL" />
+          <label className="kd-touch flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-stone-700 bg-stone-950/45 px-4 py-4 text-sm font-bold text-stone-300 transition hover:border-amber-500/30 hover:text-amber-300">
+            <ImagePlus className="h-4 w-4" />
+            Cargar imagen desde galeria
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => void handleImageUpload(event.target.files?.[0])}
+            />
+          </label>
+
+          {imageUrl ? (
+            <div className="overflow-hidden rounded-[1.4rem] border border-stone-800 bg-stone-950/45">
+              <img src={imageUrl} alt={name || "Preview de flora"} loading="lazy" decoding="async" className="h-48 w-full object-cover" />
+            </div>
+          ) : null}
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:opacity-60"
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Flower2 className="h-4 w-4" />}
+              {id ? "Actualizar flora" : "Guardar flora"}
+            </button>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="kd-touch rounded-2xl border border-stone-700 px-5 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500"
+            >
+              Limpiar
+            </button>
+            {id ? (
+              <button
+                type="button"
+                onClick={() => void handleDelete()}
+                disabled={isSaving}
+                className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-red-500/35 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-200 transition hover:bg-red-500/15 disabled:opacity-60"
+              >
+                <Trash2 className="h-4 w-4" />
+                Borrar
+              </button>
+            ) : null}
+          </div>
+
+          {feedback ? (
+            <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+              {feedback}
+            </p>
+          ) : null}
+        </form>
+      </section>
+
+      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+        <AdminManagerHeader
+          icon={<Flower2 className="h-5 w-5" />}
+          eyebrow="Catalogo de naturaleza"
+          title="Flora"
+        />
+        <div className="mt-4">
+          <AdminTextField label="Buscar flora" value={search} onChange={setSearch} placeholder="Nombre, origen o rareza" />
+        </div>
+        <div className="mt-4 space-y-3">
+          {filteredEntries.length > 0 ? (
+            visibleEntries.map((entry) => (
+              <button
+                key={entry.id}
+                type="button"
+                onClick={() => preloadEntry(entry)}
+                className="kd-touch kd-hover-lift flex w-full items-center gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 p-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+              >
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-stone-800 bg-stone-900">
+                  {entry.imageUrl ? (
+                    <img src={entry.imageUrl} alt={entry.name} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                  ) : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-stone-100">{entry.name}</p>
+                  <p className="mt-1 truncate text-xs uppercase tracking-[0.14em] text-stone-500">
+                    {entry.category || "Sin categoria"} / {entry.rarity}
+                  </p>
+                </div>
+              </button>
+            ))
+          ) : (
+            <div className="rounded-[1.2rem] border border-dashed border-stone-700 bg-stone-950/40 px-4 py-4 text-sm leading-6 text-stone-400">
+              No hay flora cargada todavia.
+            </div>
+          )}
+          <ExpandableListToggle
+            shownCount={visibleEntries.length}
+            totalCount={filteredEntries.length}
+            expanded={showAllEntriesList}
+            onToggle={() => setShowAllEntriesList((current) => !current)}
+            itemLabel="entradas"
+          />
         </div>
       </section>
     </div>

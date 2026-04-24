@@ -9,19 +9,21 @@ import {
   Search,
   BookOpen,
   PawPrint,
+  Flower2,
   MapPin,
   Gem
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionHeader } from "./SectionHeader";
-import type { BestiaryEntry, GrimoireCategory, MagicStyle, AbilityLevel } from "../types";
+import type { BestiaryEntry, FloraEntry, GrimoireCategory, MagicStyle, AbilityLevel } from "../types";
 import { fetchGrimoireContent } from "../utils/grimoireContent";
 
-type GrimoireMode = "magic" | "bestiary";
+type GrimoireMode = "magic" | "bestiary" | "flora";
 
 export function GrimoireSection() {
   const [grimoireData, setGrimoireData] = useState<GrimoireCategory[]>([]);
   const [bestiaryData, setBestiaryData] = useState<BestiaryEntry[]>([]);
+  const [floraData, setFloraData] = useState<FloraEntry[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [mode, setMode] = useState<GrimoireMode>("magic");
@@ -39,6 +41,7 @@ export function GrimoireSection() {
 
       setGrimoireData(result.categories);
       setBestiaryData(result.bestiary);
+      setFloraData(result.flora);
       setSelectedCategoryId((current) => current || result.categories[0]?.id || "");
     }
 
@@ -105,6 +108,20 @@ export function GrimoireSection() {
     );
   }, [bestiaryData, searchQuery]);
 
+  const displayFlora = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
+      return floraData;
+    }
+
+    return floraData.filter((entry) =>
+      `${entry.name} ${entry.category} ${entry.type} ${entry.generalData} ${entry.properties} ${entry.usage} ${entry.originPlace} ${entry.foundAt} ${entry.description} ${entry.rarity}`
+        .toLowerCase()
+        .includes(query)
+    );
+  }, [floraData, searchQuery]);
+
   if (grimoireData.length === 0) {
     return (
       <section className="space-y-6">
@@ -160,13 +177,34 @@ export function GrimoireSection() {
                 <PawPrint className="h-4 w-4" />
                 Bestiario
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("flora");
+                  setSearchQuery("");
+                }}
+                className={`kd-touch flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition md:flex-none ${
+                  mode === "flora"
+                    ? "bg-amber-500 text-stone-950 shadow-lg shadow-amber-500/10"
+                    : "text-stone-500 hover:text-stone-300"
+                }`}
+              >
+                <Flower2 className="h-4 w-4" />
+                Flora
+              </button>
             </div>
 
             <div className="group relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500 transition group-focus-within:text-amber-400" />
               <input
                 type="text"
-                placeholder={mode === "magic" ? "Buscar habilidad o fundamento..." : "Buscar bestia, origen o rareza..."}
+                placeholder={
+                  mode === "magic"
+                    ? "Buscar habilidad o fundamento..."
+                    : mode === "bestiary"
+                      ? "Buscar bestia, origen o rareza..."
+                      : "Buscar flora, uso, origen o rareza..."
+                }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-2xl border border-stone-800 bg-stone-950/50 py-3.5 pl-11 pr-4 text-sm text-stone-100 transition placeholder:text-stone-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/20"
@@ -200,6 +238,12 @@ export function GrimoireSection() {
       {mode === "bestiary" ? (
         <BestiaryView
           entries={displayBestiary}
+          searchQuery={searchQuery}
+          onClearSearch={() => setSearchQuery("")}
+        />
+      ) : mode === "flora" ? (
+        <FloraView
+          entries={displayFlora}
           searchQuery={searchQuery}
           onClearSearch={() => setSearchQuery("")}
         />
@@ -252,6 +296,153 @@ function getBestiaryRarityLabel(rarity: BestiaryEntry["rarity"]) {
   };
 
   return labels[rarity] ?? rarity;
+}
+
+function FloraView({
+  entries,
+  searchQuery,
+  onClearSearch,
+}: {
+  entries: FloraEntry[];
+  searchQuery: string;
+  onClearSearch: () => void;
+}) {
+  const isSearching = searchQuery.trim().length > 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/55 p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-amber-400/80">
+              <Flower2 className="h-4 w-4" />
+              Flora del reino
+            </div>
+            <p className="mt-2 text-sm leading-6 text-stone-400">
+              Herbolaria, hongos, arboles, raices y naturaleza util del mundo, catalogada por uso, origen y rareza.
+            </p>
+          </div>
+          <span className="w-fit rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
+            {entries.length} registros
+          </span>
+        </div>
+      </div>
+
+      {isSearching ? (
+        <div className="flex items-center justify-between px-4 py-2">
+          <p className="text-xs font-bold uppercase tracking-widest text-stone-500">
+            Mostrando {entries.length} resultados de flora
+          </p>
+          <button
+            onClick={onClearSearch}
+            className="text-xs font-bold uppercase tracking-widest text-amber-500 underline underline-offset-4 hover:text-amber-400"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      ) : null}
+
+      {entries.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {entries.map((entry) => (
+            <article
+              key={entry.id}
+              className="kd-glass kd-hover-lift overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-900/60 shadow-xl shadow-black/20"
+            >
+              <div className="relative h-52 border-b border-stone-800 bg-stone-950">
+                {entry.imageUrl ? (
+                  <img
+                    src={entry.imageUrl}
+                    alt={entry.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-stone-700">
+                    <Flower2 className="h-12 w-12" />
+                  </div>
+                )}
+                <div className="absolute left-4 top-4 rounded-full border border-stone-700 bg-stone-950/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-amber-300 backdrop-blur">
+                  {getBestiaryRarityLabel(entry.rarity)}
+                </div>
+              </div>
+
+              <div className="space-y-4 p-5">
+                <div>
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-stone-100">
+                    {entry.name}
+                  </h3>
+                  <div className="mt-3 grid gap-2 text-xs uppercase tracking-[0.14em] text-stone-500">
+                    <div className="flex items-center gap-2">
+                      <Gem className="h-3.5 w-3.5 text-amber-500/80" />
+                      Categoria: {entry.category || "Sin registrar"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Flower2 className="h-3.5 w-3.5 text-amber-500/80" />
+                      Tipo: {entry.type || "Sin registrar"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Gem className="h-3.5 w-3.5 text-amber-500/80" />
+                      Origen: {entry.originPlace || "Desconocido"}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-3.5 w-3.5 text-amber-500/80" />
+                      Se encuentra: {entry.foundAt || "Sin registrar"}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm leading-6 text-stone-300">{entry.description}</p>
+
+                {entry.generalData ? (
+                  <div className="rounded-2xl border border-stone-700/50 bg-stone-950/45 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">
+                      Datos generales
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-stone-200/90">
+                      {entry.generalData}
+                    </p>
+                  </div>
+                ) : null}
+
+                {entry.properties ? (
+                  <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/8 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-300">
+                      Propiedades
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-emerald-50/90">
+                      {entry.properties}
+                    </p>
+                  </div>
+                ) : null}
+
+                {entry.usage ? (
+                  <div className="rounded-2xl border border-stone-700/50 bg-stone-950/45 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-stone-400">
+                      Uso
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-stone-200/90">
+                      {entry.usage}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[2rem] border border-dashed border-stone-800 bg-stone-900/20 p-12 text-center">
+          <Flower2 className="mx-auto mb-4 h-10 w-10 text-stone-700" />
+          <p className="text-sm italic text-stone-500">
+            {isSearching
+              ? "No se encontraron entradas de flora para ese filtro..."
+              : "La seccion de Flora aun no tiene registros cargados desde el panel admin."}
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function BestiaryView({

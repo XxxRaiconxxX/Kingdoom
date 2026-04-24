@@ -313,6 +313,23 @@ export type BestiaryEntry = {
   updatedAt?: string;
 };
 
+export type FloraEntry = {
+  id: string;
+  name: string;
+  category: string;
+  type: string;
+  generalData: string;
+  properties: string;
+  usage: string;
+  originPlace: string;
+  foundAt: string;
+  description: string;
+  rarity: BestiaryRarity;
+  imageUrl: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 // --- FICHA (CHARACTER SHEET) TYPES ---
 
 export type CharacterStats = {

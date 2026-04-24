@@ -67,7 +67,8 @@ type AdminTab =
   | "events"
   | "market"
   | "magic"
-  | "bestiary";
+  | "bestiary"
+  | "flora";
 type GoldAdjustmentMode = "add" | "subtract" | "set";
 type EventListFilter = "all" | EventStatus;
 
@@ -79,6 +80,11 @@ const AdminMagicManager = lazy(() =>
 const AdminBestiaryManager = lazy(() =>
   import("./AdminGrimoireManagers").then((module) => ({
     default: module.AdminBestiaryManager,
+  }))
+);
+const AdminFloraManager = lazy(() =>
+  import("./AdminGrimoireManagers").then((module) => ({
+    default: module.AdminFloraManager,
   }))
 );
 const AdminMissionManager = lazy(() =>
@@ -799,6 +805,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 label="Bestiario"
                 active={activeTab === "bestiary"}
                 onClick={() => setActiveTab("bestiary")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Flora"
+                active={activeTab === "flora"}
+                onClick={() => setActiveTab("flora")}
               />
             </div>
           </div>
@@ -1849,6 +1862,21 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 }
               >
                 <AdminBestiaryManager />
+              </Suspense>
+            </div>
+          ) : null}
+
+          {activeTab === "flora" ? (
+            <div data-gsap-admin>
+              <Suspense
+                fallback={
+                  <AdminInfoCard
+                    title="Cargando flora"
+                    message="Preparando editor de naturaleza del mundo."
+                  />
+                }
+              >
+                <AdminFloraManager />
               </Suspense>
             </div>
           ) : null}

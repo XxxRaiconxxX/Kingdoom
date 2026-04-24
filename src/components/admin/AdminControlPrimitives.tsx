@@ -90,8 +90,8 @@ export function ExpandableListToggle({
       className="kd-touch w-full rounded-[1.1rem] border border-stone-700 bg-stone-950/35 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100"
     >
       {expanded
-        ? `Ver menos ${itemLabel}`
-        : `Ver mas ${itemLabel} (${shownCount}/${totalCount})`}
+        ? `Leer menos ${itemLabel}`
+        : `Leer mas ${itemLabel} (${shownCount}/${totalCount})`}
     </button>
   );
 }

@@ -3,6 +3,7 @@ import type {
   AbilityLevel,
   BestiaryEntry,
   BestiaryRarity,
+  FloraEntry,
   GrimoireCategory,
   MagicStyle,
 } from "../types";
@@ -38,6 +39,23 @@ type BestiaryRow = {
   updated_at?: string;
 };
 
+type FloraRow = {
+  id: string;
+  name: string;
+  category: string;
+  type: string;
+  general_data: string;
+  properties: string;
+  usage: string;
+  origin_place: string;
+  found_at: string;
+  description: string;
+  rarity: BestiaryRarity;
+  image_url: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type AdminMagicStyleInput = {
   id: string;
   categoryId: string;
@@ -49,12 +67,14 @@ export type AdminMagicStyleInput = {
 };
 
 export type AdminBestiaryInput = Omit<BestiaryEntry, "createdAt" | "updatedAt">;
+export type AdminFloraInput = Omit<FloraEntry, "createdAt" | "updatedAt">;
 
 export type GrimoireContentState = {
   status: "ready" | "fallback";
   message: string;
   categories: GrimoireCategory[];
   bestiary: BestiaryEntry[];
+  flora: FloraEntry[];
 };
 
 export const BESTIARY_RARITIES: Array<{ id: BestiaryRarity; label: string }> = [
@@ -174,6 +194,25 @@ function mapBestiaryRow(row: BestiaryRow): BestiaryEntry {
   };
 }
 
+function mapFloraRow(row: FloraRow): FloraEntry {
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category ?? "",
+    type: row.type ?? "",
+    generalData: row.general_data ?? "",
+    properties: row.properties ?? "",
+    usage: row.usage ?? "",
+    originPlace: row.origin_place ?? "",
+    foundAt: row.found_at ?? "",
+    description: row.description ?? "",
+    rarity: row.rarity,
+    imageUrl: row.image_url ?? "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 function buildMagicPayload(input: AdminMagicStyleInput) {
   return {
     id: input.id.trim(),
@@ -205,8 +244,25 @@ function buildBestiaryPayload(input: AdminBestiaryInput) {
   };
 }
 
+function buildFloraPayload(input: AdminFloraInput) {
+  return {
+    id: input.id.trim(),
+    name: input.name.trim(),
+    category: input.category.trim(),
+    type: input.type.trim(),
+    general_data: input.generalData.trim(),
+    properties: input.properties.trim(),
+    usage: input.usage.trim(),
+    origin_place: input.originPlace.trim(),
+    found_at: input.foundAt.trim(),
+    description: input.description.trim(),
+    rarity: input.rarity,
+    image_url: input.imageUrl.trim(),
+  };
+}
+
 export async function fetchGrimoireContent(): Promise<GrimoireContentState> {
-  const [magicResult, bestiaryResult] = await Promise.all([
+  const [magicResult, bestiaryResult, floraResult] = await Promise.all([
     supabase
       .from("grimoire_magic_styles")
       .select("id, category_id, category_title, title, description, levels, sort_order")
@@ -218,19 +274,30 @@ export async function fetchGrimoireContent(): Promise<GrimoireContentState> {
         "id, name, category, type, general_data, threat_level, domestication, usage, origin_place, found_at, description, ability, rarity, image_url, created_at, updated_at"
       )
       .order("name", { ascending: true }),
+    supabase
+      .from("grimoire_flora_entries")
+      .select(
+        "id, name, category, type, general_data, properties, usage, origin_place, found_at, description, rarity, image_url, created_at, updated_at"
+      )
+      .order("name", { ascending: true }),
   ]);
 
   const magicRows = (magicResult.data ?? []) as MagicStyleRow[];
   const bestiaryRows = (bestiaryResult.data ?? []) as BestiaryRow[];
+  const floraRows = (floraResult.data ?? []) as FloraRow[];
 
   return {
-    status: magicRows.length > 0 || bestiaryRows.length > 0 ? "ready" : "fallback",
+    status:
+      magicRows.length > 0 || bestiaryRows.length > 0 || floraRows.length > 0
+        ? "ready"
+        : "fallback",
     message:
-      magicResult.error || bestiaryResult.error
+      magicResult.error || bestiaryResult.error || floraResult.error
         ? "El Grimorio usa contenido local mientras faltan tablas administrables en Supabase."
         : "",
     categories: magicRows.length > 0 ? mergeMagicRowsWithStatic(magicRows) : GRIMOIRE_DATA,
     bestiary: bestiaryRows.map(mapBestiaryRow),
+    flora: floraRows.map(mapFloraRow),
   };
 }
 
@@ -345,4 +412,59 @@ export async function deleteBestiaryEntry(id: string) {
   }
 
   return { status: "deleted" as const, message: "Bestia borrada correctamente." };
+}
+
+export async function fetchFloraEntries() {
+  const { data, error } = await supabase
+    .from("grimoire_flora_entries")
+    .select(
+      "id, name, category, type, general_data, properties, usage, origin_place, found_at, description, rarity, image_url, created_at, updated_at"
+    )
+    .order("name", { ascending: true });
+
+  if (error) {
+    return {
+      status: "fallback" as const,
+      message:
+        "Aun no hay Flora administrable en Supabase. Crea la tabla para empezar a cargar naturaleza del mundo.",
+      entries: [] as FloraEntry[],
+    };
+  }
+
+  return {
+    status: "ready" as const,
+    message: "",
+    entries: ((data ?? []) as FloraRow[]).map(mapFloraRow),
+  };
+}
+
+export async function upsertFloraEntry(input: AdminFloraInput) {
+  const { error } = await supabase
+    .from("grimoire_flora_entries")
+    .upsert(buildFloraPayload(input), { onConflict: "id" });
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage("No se pudo guardar la flora.", error.message),
+    };
+  }
+
+  return { status: "saved" as const, message: "Flora guardada correctamente." };
+}
+
+export async function deleteFloraEntry(id: string) {
+  const { error } = await supabase
+    .from("grimoire_flora_entries")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage("No se pudo borrar la flora.", error.message),
+    };
+  }
+
+  return { status: "deleted" as const, message: "Flora borrada correctamente." };
 }

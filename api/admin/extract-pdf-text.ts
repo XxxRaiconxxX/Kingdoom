@@ -66,7 +66,11 @@ function isQuotaLikeError(message: string) {
     normalized.includes("rate limit") ||
     normalized.includes("resource exhausted") ||
     normalized.includes("too many requests") ||
-    normalized.includes("retry in")
+    normalized.includes("retry in") ||
+    normalized.includes("api key expired") ||
+    normalized.includes("key expired") ||
+    normalized.includes("api key not valid") ||
+    normalized.includes("invalid api key")
   );
 }
 

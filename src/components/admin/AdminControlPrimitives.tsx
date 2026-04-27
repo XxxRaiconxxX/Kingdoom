@@ -90,36 +90,25 @@ export function AdminAiDebugCard({
     .join(" · ");
 
   return (
-    <div className="rounded-[1.2rem] border border-cyan-500/25 bg-cyan-500/8 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
+    <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/6 px-3 py-2.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="mr-1 text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-200">
           Debug IA admin
         </p>
-        <span className="rounded-full border border-cyan-400/20 bg-stone-950/55 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-100">
-          {debug.model}
-        </span>
+        <CompactDebugPill label={debug.model} tone="info" />
+        <CompactDebugPill
+          label={`key ${debug.keyIndexUsed ? `#${debug.keyIndexUsed}` : "ninguna"}`}
+        />
+        <CompactDebugPill label={`fallback ${debug.fallbackUsed ? "si" : "no"}`} />
+        <CompactDebugPill label={`margen ${debug.remainingKeysAfterSuccess}`} />
+        <CompactDebugPill label={`cuotas ${debug.quotaFailures}`} />
+        {debug.exhaustedByQuota ? (
+          <CompactDebugPill label="pool agotado" tone="danger" />
+        ) : null}
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-        <DebugMetric label="Keys detectadas" value={String(debug.totalKeysConfigured)} />
-        <DebugMetric
-          label="Key usada"
-          value={debug.keyIndexUsed ? `#${debug.keyIndexUsed}` : "Ninguna"}
-        />
-        <DebugMetric label="Fallback" value={debug.fallbackUsed ? "Si" : "No"} />
-        <DebugMetric label="Cuotas previas" value={String(debug.quotaFailures)} />
-        <DebugMetric
-          label="Margen restante"
-          value={String(debug.remainingKeysAfterSuccess)}
-        />
-        <DebugMetric
-          label="Agotadas por cuota"
-          value={debug.exhaustedByQuota ? "Si" : "No"}
-        />
-      </div>
-
-      <p className="mt-3 text-xs leading-5 text-cyan-100/80">
-        Intentos: {attemptSummary || "Sin intentos registrados."}
+      <p className="mt-2 text-[11px] leading-5 text-cyan-100/75">
+        {attemptSummary || "Sin intentos registrados."}
       </p>
     </div>
   );
@@ -230,20 +219,26 @@ export function NumericInput({
   );
 }
 
-function DebugMetric({
+function CompactDebugPill({
   label,
-  value,
+  tone,
 }: {
   label: string;
-  value: string;
+  tone?: "default" | "info" | "danger";
 }) {
+  const toneClass =
+    tone === "info"
+      ? "border-cyan-400/25 text-cyan-100"
+      : tone === "danger"
+        ? "border-red-400/25 text-red-200"
+        : "border-stone-700 text-stone-200";
+
   return (
-    <div className="rounded-xl border border-cyan-500/15 bg-stone-950/55 px-3 py-2">
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-300/80">
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-black text-stone-100">{value}</p>
-    </div>
+    <span
+      className={`rounded-full border bg-stone-950/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${toneClass}`}
+    >
+      {label}
+    </span>
   );
 }
 

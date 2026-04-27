@@ -29,6 +29,10 @@ function getArchivistEndpoint() {
       .replace(/\/generate-mission$/, "/ask-archivist");
   }
 
+  if (typeof window !== "undefined" && window.location.hostname.includes("github.io")) {
+    return "https://kingdoom.vercel.app/api/admin/ask-archivist";
+  }
+
   return "/api/admin/ask-archivist";
 }
 

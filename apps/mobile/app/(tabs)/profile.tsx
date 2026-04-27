@@ -169,7 +169,7 @@ export default function ProfileScreen() {
           gap: 8,
         }}
       >
-        <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12, letterSpacing: 0.7 }}>
+        <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12, fontWeight: "800" }}>
           JUGADOR
         </Text>
         <Text style={{ color: MOBILE_THEME.text, fontSize: 18, fontWeight: "800" }}>

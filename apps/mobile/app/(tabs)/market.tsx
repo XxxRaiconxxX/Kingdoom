@@ -1,13 +1,24 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DetailSheet } from "@/src/components/DetailSheet";
+import {
+  EmptyState,
+  ErrorPanel,
+  Pill,
+  PrimaryAction,
+  RealmCard,
+  SearchInput,
+  SectionHeader,
+  StaggerItem,
+} from "@/src/components/KingdoomUI";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import { fetchMarketItemsNative } from "@/src/features/market/marketService";
 import { usePurchaseHistoryStore } from "@/src/features/market/purchaseHistoryStore";
 import { purchaseMarketItemNative } from "@/src/features/market/purchaseService";
-import { useSessionStore } from "@/src/features/session/sessionStore";
 import type { MarketCategoryId, MarketItem } from "@/src/features/shared/types";
+import { useSessionStore } from "@/src/features/session/sessionStore";
 import { MOBILE_THEME } from "@/src/theme/colors";
 
 const CATEGORY_FILTERS: Array<{ id: "all" | MarketCategoryId; label: string }> = [
@@ -22,6 +33,42 @@ type MarketFeedback = {
   type: "success" | "error";
   message: string;
 };
+
+function ItemThumb({ item }: { item: MarketItem }) {
+  if (!item.imageUrl) {
+    return (
+      <View
+        style={{
+          width: 58,
+          height: 58,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: MOBILE_THEME.border,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "rgba(240,179,47,0.08)",
+        }}
+      >
+        <MaterialIcons name="inventory-2" size={22} color={MOBILE_THEME.gold} />
+      </View>
+    );
+  }
+
+  return (
+    <Image
+      source={{ uri: item.imageUrl }}
+      resizeMode={item.imageFit === "contain" ? "contain" : "cover"}
+      style={{
+        width: 58,
+        height: 58,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: MOBILE_THEME.borderStrong,
+        backgroundColor: MOBILE_THEME.bg,
+      }}
+    />
+  );
+}
 
 export default function MarketScreen() {
   const queryClient = useQueryClient();
@@ -63,7 +110,7 @@ export default function MarketScreen() {
 
       setFeedback({
         type: "success",
-        message: `${result.message} Pedido ${result.orderRef}. Descuento: ${result.totalPrice} oro.`,
+        message: `${result.message} Pedido ${result.orderRef}.`,
       });
       const boughtItem = sortedItems.find((item) => item.id === variables.itemId);
       if (player && boughtItem) {
@@ -88,10 +135,7 @@ export default function MarketScreen() {
       await queryClient.invalidateQueries({ queryKey: ["market-items"] });
     },
     onError: () => {
-      setFeedback({
-        type: "error",
-        message: "No se pudo completar la compra. Intenta otra vez.",
-      });
+      setFeedback({ type: "error", message: "No se pudo completar la compra." });
     },
     onSettled: () => {
       setPendingItemId(null);
@@ -111,310 +155,165 @@ export default function MarketScreen() {
   }, [categoryFilter, search, sortedItems]);
 
   return (
-      <ScreenShell
-        title="Mercado"
-        subtitle="Compra segura"
+    <ScreenShell
+      title="Mercado"
+      subtitle="Compra segura nativa"
       onRefresh={() => {
         void marketQuery.refetch();
         void refreshGold();
       }}
       refreshing={marketQuery.isRefetching}
     >
-      <View
-        style={{
-          borderRadius: 14,
-          borderWidth: 1,
-          borderColor: MOBILE_THEME.border,
-          backgroundColor: MOBILE_THEME.surfaceSoft,
-          padding: 12,
-          gap: 10,
-        }}
-      >
-        <TextInput
-          value={search}
-          onChangeText={setSearch}
-          autoCapitalize="none"
-          placeholder="Buscar item"
-          placeholderTextColor={MOBILE_THEME.mutedText}
-          style={{
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            borderRadius: 12,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            color: MOBILE_THEME.text,
-            backgroundColor: MOBILE_THEME.bg,
-          }}
-        />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            {CATEGORY_FILTERS.map((chip) => {
-              const active = chip.id === categoryFilter;
-              return (
-                <Pressable
+      <StaggerItem index={0}>
+        <RealmCard tone="gold">
+          <SectionHeader eyebrow="Catalogo" title="Objetos del reino" />
+          <SearchInput value={search} onChangeText={setSearch} placeholder="Buscar item" />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {CATEGORY_FILTERS.map((chip) => (
+                <Pill
                   key={chip.id}
+                  label={chip.label}
+                  active={chip.id === categoryFilter}
                   onPress={() => setCategoryFilter(chip.id)}
-                  style={{
-                    borderRadius: 999,
-                    borderWidth: 1,
-                    borderColor: active ? MOBILE_THEME.gold : MOBILE_THEME.border,
-                    paddingHorizontal: 12,
-                    paddingVertical: 7,
-                    backgroundColor: active ? "rgba(212,166,74,0.14)" : MOBILE_THEME.bg,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: active ? MOBILE_THEME.gold : MOBILE_THEME.mutedText,
-                      fontWeight: "700",
-                      fontSize: 12,
-                    }}
-                  >
-                    {chip.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </ScrollView>
-      </View>
+                />
+              ))}
+            </View>
+          </ScrollView>
+        </RealmCard>
+      </StaggerItem>
 
       {marketQuery.isLoading ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 16,
-            alignItems: "center",
-          }}
-        >
-          <ActivityIndicator color={MOBILE_THEME.gold} />
-        </View>
+        <StaggerItem index={1}>
+          <RealmCard>
+            <ActivityIndicator color={MOBILE_THEME.gold} />
+          </RealmCard>
+        </StaggerItem>
       ) : null}
 
       {marketQuery.data?.errorMessage ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.danger, lineHeight: 20 }}>
-            {marketQuery.data.errorMessage}
-          </Text>
-          <Pressable
-            onPress={() => {
+        <StaggerItem index={1}>
+          <ErrorPanel
+            message={marketQuery.data.errorMessage}
+            onRetry={() => {
               void marketQuery.refetch();
               void refreshGold();
             }}
-            style={{
-              marginTop: 10,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              paddingVertical: 8,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
-              Reintentar
-            </Text>
-          </Pressable>
-        </View>
+          />
+        </StaggerItem>
       ) : null}
 
       {feedback ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: feedback.type === "error" ? MOBILE_THEME.danger : MOBILE_THEME.gold,
-            backgroundColor:
-              feedback.type === "error" ? "rgba(225,100,100,0.12)" : "rgba(212,166,74,0.12)",
-            padding: 12,
-          }}
-        >
-          <Text style={{ color: feedback.type === "error" ? MOBILE_THEME.danger : MOBILE_THEME.text }}>
-            {feedback.message}
-          </Text>
-        </View>
+        <StaggerItem index={2}>
+          <RealmCard tone={feedback.type === "error" ? "danger" : "teal"}>
+            <Text style={{ color: feedback.type === "error" ? MOBILE_THEME.danger : MOBILE_THEME.text, lineHeight: 20 }}>
+              {feedback.message}
+            </Text>
+          </RealmCard>
+        </StaggerItem>
       ) : null}
 
-      {filteredItems.map((item) => (
-        <View
-          key={item.id}
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-            gap: 6,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.text, fontSize: 16, fontWeight: "800" }}>
-            {item.name}
-          </Text>
-          <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }} numberOfLines={2}>
-            {item.description}
-          </Text>
-          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "700" }}>{item.price} oro</Text>
-          <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-            {item.category} | {item.rarity} | {item.stockStatus}
-            {item.featured ? " | destacado" : ""}
-          </Text>
+      {filteredItems.map((item, index) => {
+        const quantity = quantityByItemId[item.id] ?? 1;
+        const pending = pendingItemId === item.id;
+        const disabled = !player || item.stockStatus === "sold-out" || pending;
 
-          {pendingItemId === item.id ? (
-            <View
-              style={{
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.gold,
-                paddingHorizontal: 10,
-                paddingVertical: 7,
-                backgroundColor: "rgba(212,166,74,0.12)",
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
-                Procesando compra...
-              </Text>
-            </View>
-          ) : null}
+        return (
+          <StaggerItem key={item.id} index={index + 3}>
+            <RealmCard tone={item.featured ? "gold" : "default"}>
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <ItemThumb item={item} />
+                <View style={{ flex: 1, gap: 5 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8 }}>
+                    <Text style={{ color: MOBILE_THEME.text, fontSize: 16, fontWeight: "900", flex: 1 }} numberOfLines={2}>
+                      {item.name}
+                    </Text>
+                    <Text style={{ color: MOBILE_THEME.gold, fontWeight: "900" }}>{item.price}</Text>
+                  </View>
+                  <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 18 }} numberOfLines={2}>
+                    {item.description}
+                  </Text>
+                  <Text style={{ color: MOBILE_THEME.dimText, fontSize: 11 }}>
+                    {item.category} / {item.rarity} / {item.stockStatus}
+                  </Text>
+                </View>
+              </View>
 
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 }}>
-            <Pressable
-              disabled={pendingItemId === item.id}
-              onPress={() =>
-                setQuantityByItemId((current) => ({
-                  ...current,
-                  [item.id]: Math.max(1, (current[item.id] ?? 1) - 1),
-                }))
-              }
-              style={{
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                opacity: pendingItemId === item.id ? 0.45 : 1,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>-</Text>
-            </Pressable>
-            <Text style={{ color: MOBILE_THEME.text, minWidth: 24, textAlign: "center" }}>
-              {quantityByItemId[item.id] ?? 1}
-            </Text>
-            <Pressable
-              disabled={pendingItemId === item.id}
-              onPress={() =>
-                setQuantityByItemId((current) => ({
-                  ...current,
-                  [item.id]: Math.min(99, (current[item.id] ?? 1) + 1),
-                }))
-              }
-              style={{
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                opacity: pendingItemId === item.id ? 0.45 : 1,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>+</Text>
-            </Pressable>
-          </View>
+              <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                <PrimaryAction
+                  label="-"
+                  icon="remove"
+                  variant="ghost"
+                  disabled={pending}
+                  onPress={() =>
+                    setQuantityByItemId((current) => ({
+                      ...current,
+                      [item.id]: Math.max(1, quantity - 1),
+                    }))
+                  }
+                />
+                <View
+                  style={{
+                    minWidth: 48,
+                    minHeight: 46,
+                    borderRadius: 14,
+                    borderWidth: 1,
+                    borderColor: MOBILE_THEME.border,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: MOBILE_THEME.bg,
+                  }}
+                >
+                  <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>{quantity}</Text>
+                </View>
+                <PrimaryAction
+                  label="+"
+                  icon="add"
+                  variant="ghost"
+                  disabled={pending}
+                  onPress={() =>
+                    setQuantityByItemId((current) => ({
+                      ...current,
+                      [item.id]: Math.min(99, quantity + 1),
+                    }))
+                  }
+                />
+              </View>
 
-          <Pressable
-            onPress={() => setSelectedItem(item)}
-            disabled={pendingItemId === item.id}
-            style={{
-              marginTop: 2,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              paddingVertical: 8,
-              alignItems: "center",
-              opacity: pendingItemId === item.id ? 0.45 : 1,
-            }}
-          >
-            <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
-              Ver detalle
-            </Text>
-          </Pressable>
-
-          <Pressable
-            disabled={!player || item.stockStatus === "sold-out" || pendingItemId === item.id}
-            onPress={() => {
-              setFeedback(null);
-              if (!player) {
-                setFeedback({ type: "error", message: "Conecta tu perfil primero para comprar." });
-                return;
-              }
-
-              void purchaseMutation.mutateAsync({
-                playerId: player.id,
-                itemId: item.id,
-                quantity: quantityByItemId[item.id] ?? 1,
-              });
-            }}
-            style={{
-              marginTop: 8,
-              borderRadius: 12,
-              paddingVertical: 10,
-              alignItems: "center",
-              backgroundColor:
-                !player || item.stockStatus === "sold-out" || pendingItemId === item.id
-                  ? MOBILE_THEME.border
-                  : MOBILE_THEME.gold,
-            }}
-          >
-            {pendingItemId === item.id ? (
-              <ActivityIndicator color={MOBILE_THEME.bg} />
-            ) : (
-              <Text
-                style={{
-                  color:
-                    !player || item.stockStatus === "sold-out"
-                      ? MOBILE_THEME.mutedText
-                      : MOBILE_THEME.bg,
-                  fontWeight: "800",
-                }}
-              >
-                {item.stockStatus === "sold-out"
-                  ? "Agotado"
-                  : !player
-                    ? "Conecta perfil"
-                    : "Comprar seguro"}
-              </Text>
-            )}
-          </Pressable>
-        </View>
-      ))}
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <View style={{ flex: 1 }}>
+                  <PrimaryAction label="Detalle" icon="visibility" variant="ghost" disabled={pending} onPress={() => setSelectedItem(item)} />
+                </View>
+                <View style={{ flex: 1.25 }}>
+                  <PrimaryAction
+                    label={item.stockStatus === "sold-out" ? "Agotado" : !player ? "Conecta perfil" : "Comprar"}
+                    icon="shopping-bag"
+                    loading={pending}
+                    disabled={disabled}
+                    onPress={() => {
+                      setFeedback(null);
+                      if (!player) {
+                        setFeedback({ type: "error", message: "Conecta tu perfil primero." });
+                        return;
+                      }
+                      void purchaseMutation.mutateAsync({ playerId: player.id, itemId: item.id, quantity });
+                    }}
+                  />
+                </View>
+              </View>
+            </RealmCard>
+          </StaggerItem>
+        );
+      })}
 
       {!marketQuery.isLoading && filteredItems.length === 0 ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.mutedText }}>No hay items para ese filtro.</Text>
-        </View>
+        <EmptyState title="Sin items" message="No hay objetos para ese filtro." icon="inventory-2" />
       ) : null}
 
       <DetailSheet
         visible={Boolean(selectedItem)}
         title={selectedItem?.name ?? "Detalle"}
-        subtitle={selectedItem ? `${selectedItem.category} - ${selectedItem.rarity}` : ""}
+        subtitle={selectedItem ? `${selectedItem.category} / ${selectedItem.rarity}` : ""}
         onClose={() => setSelectedItem(null)}
       >
         {selectedItem?.imageUrl ? (
@@ -423,38 +322,21 @@ export default function MarketScreen() {
             resizeMode={selectedItem.imageFit === "contain" ? "contain" : "cover"}
             style={{
               width: "100%",
-              height: 180,
-              borderRadius: 14,
+              height: 190,
+              borderRadius: 16,
               borderWidth: 1,
               borderColor: MOBILE_THEME.border,
               backgroundColor: MOBILE_THEME.bg,
             }}
           />
         ) : null}
-        <View
-          style={{
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 12,
-            gap: 8,
-          }}
-        >
+        <RealmCard>
           <Text style={{ color: MOBILE_THEME.text, lineHeight: 22 }}>{selectedItem?.description}</Text>
           {selectedItem?.ability ? (
-            <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>
-              Habilidad: {selectedItem.ability}
-            </Text>
+            <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Habilidad: {selectedItem.ability}</Text>
           ) : null}
-          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "800", fontSize: 16 }}>
-            Precio: {selectedItem?.price ?? 0} oro
-          </Text>
-          <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-            Estado: {selectedItem?.stockStatus ?? "N/A"}
-            {selectedItem?.featured ? " - destacado" : ""}
-          </Text>
-        </View>
+          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "900" }}>Precio: {selectedItem?.price ?? 0} oro</Text>
+        </RealmCard>
       </DetailSheet>
     </ScreenShell>
   );

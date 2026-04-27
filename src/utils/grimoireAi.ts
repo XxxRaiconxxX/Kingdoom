@@ -55,6 +55,10 @@ function deriveEndpoint(pathname: string) {
     return missionUrl.replace("/generate-mission", pathname);
   }
 
+  if (typeof window !== "undefined" && window.location.hostname.includes("github.io")) {
+    return `https://kingdoom.vercel.app/api/admin${pathname}`;
+  }
+
   return "";
 }
 

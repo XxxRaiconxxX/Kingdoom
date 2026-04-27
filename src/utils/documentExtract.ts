@@ -17,6 +17,10 @@ function getPdfExtractEndpoint() {
       .replace(/\/generate-mission$/, "/extract-pdf-text");
   }
 
+  if (typeof window !== "undefined" && window.location.hostname.includes("github.io")) {
+    return "https://kingdoom.vercel.app/api/admin/extract-pdf-text";
+  }
+
   return "/api/admin/extract-pdf-text";
 }
 

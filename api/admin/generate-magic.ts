@@ -1,12 +1,13 @@
 import {
   readGeminiConfig,
   readGroqConfig,
+  readNvidiaConfig,
   requestAiTextWithFallback,
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
   hasTextGenerationProvider,
-} from "../../src/utils/serverAiProviders";
+} from "./_serverAiProviders.js";
 
 type MagicAiRequest = {
   categoryTitle?: string;
@@ -119,11 +120,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   const gemini = readGeminiConfig();
   const groq = readGroqConfig();
+  const nvidia = readNvidiaConfig();
 
-  if (!hasTextGenerationProvider(gemini, groq)) {
+  if (!hasTextGenerationProvider(gemini, groq, nvidia)) {
     return res.status(500).json({
       message:
-        "Falta GEMINI_API_KEYS/GEMINI_API_KEY o GROQ_API_KEYS/GROQ_API_KEY en el backend. Configuralas en Vercel antes de usar el generador.",
+        "Falta GEMINI_API_KEYS/GEMINI_API_KEY, GROQ_API_KEYS/GROQ_API_KEY o NVIDIA_API_KEYS/NVIDIA_API_KEY en el backend. Configuralas en Vercel antes de usar el generador.",
     });
   }
 
@@ -148,6 +150,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       prompt: getPrompt(input),
       gemini,
       groq,
+      nvidia,
       temperature: 0.92,
       topP: 0.9,
     });

@@ -1,27 +1,41 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { DetailSheet } from "@/src/components/DetailSheet";
+import {
+  EmptyState,
+  ErrorPanel,
+  MetricTile,
+  Pill,
+  RealmCard,
+  SearchInput,
+  SectionHeader,
+  StaggerItem,
+} from "@/src/components/KingdoomUI";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import { fetchRealmEventsNative } from "@/src/features/events/eventsService";
-import type { EventStatus, RealmEvent } from "@/src/features/shared/types";
+import { fetchMissionsNative } from "@/src/features/missions/missionsService";
+import type { EventStatus, RealmEvent, RealmMission } from "@/src/features/shared/types";
 import { MOBILE_THEME } from "@/src/theme/colors";
 
 const EVENT_STATUS_FILTERS: Array<{ id: "all" | EventStatus; label: string }> = [
   { id: "all", label: "Todos" },
   { id: "active", label: "Activos" },
   { id: "in-production", label: "Produccion" },
-  { id: "finished", label: "Finalizados" },
+  { id: "finished", label: "Cerrados" },
 ];
 
+type LibraryMode = "events" | "missions";
+
 export default function LibraryScreen() {
+  const [mode, setMode] = useState<LibraryMode>("events");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | EventStatus>("all");
   const [selectedEvent, setSelectedEvent] = useState<RealmEvent | null>(null);
-  const eventsQuery = useQuery({
-    queryKey: ["realm-events"],
-    queryFn: fetchRealmEventsNative,
-  });
+  const [selectedMission, setSelectedMission] = useState<RealmMission | null>(null);
+  const eventsQuery = useQuery({ queryKey: ["realm-events"], queryFn: fetchRealmEventsNative });
+  const missionsQuery = useQuery({ queryKey: ["realm-missions"], queryFn: fetchMissionsNative });
 
   const filteredEvents = useMemo(() => {
     const normalized = search.trim().toLowerCase();
@@ -35,229 +49,190 @@ export default function LibraryScreen() {
     });
   }, [eventsQuery.data?.events, search, statusFilter]);
 
+  const filteredMissions = useMemo(() => {
+    const normalized = search.trim().toLowerCase();
+    return (missionsQuery.data?.missions ?? []).filter((mission) => {
+      if (!normalized) {
+        return true;
+      }
+      return (
+        mission.title.toLowerCase().includes(normalized) ||
+        mission.description.toLowerCase().includes(normalized) ||
+        mission.type.toLowerCase().includes(normalized)
+      );
+    });
+  }, [missionsQuery.data?.missions, search]);
+
+  const isRefreshing = eventsQuery.isRefetching || missionsQuery.isRefetching;
+  const isLoading = mode === "events" ? eventsQuery.isLoading : missionsQuery.isLoading;
+  const activeError = mode === "events" ? eventsQuery.data?.errorMessage : missionsQuery.data?.errorMessage;
+
   return (
     <ScreenShell
       title="Biblioteca"
-      subtitle="Cronicas, mapa y bestiario"
+      subtitle="Eventos y misiones"
       onRefresh={() => {
         void eventsQuery.refetch();
+        void missionsQuery.refetch();
       }}
-      refreshing={eventsQuery.isRefetching}
+      refreshing={isRefreshing}
     >
-      <View
-        style={{
-          borderRadius: 14,
-          borderWidth: 1,
-          borderColor: MOBILE_THEME.border,
-          backgroundColor: MOBILE_THEME.surfaceSoft,
-          padding: 12,
-          gap: 10,
-        }}
-      >
-        <TextInput
-          value={search}
-          onChangeText={setSearch}
-          autoCapitalize="none"
-          placeholder="Buscar evento"
-          placeholderTextColor={MOBILE_THEME.mutedText}
-          style={{
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            borderRadius: 12,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            color: MOBILE_THEME.text,
-            backgroundColor: MOBILE_THEME.bg,
+      <StaggerItem index={0}>
+        <RealmCard tone="gold">
+          <SectionHeader
+            eyebrow="Archivo"
+            title={mode === "events" ? "Agenda del reino" : "Tablon de misiones"}
+            trailing={
+              <View style={{ flexDirection: "row", gap: 6 }}>
+                <Pill label="Eventos" active={mode === "events"} onPress={() => setMode("events")} />
+                <Pill label="Misiones" active={mode === "missions"} onPress={() => setMode("missions")} />
+              </View>
+            }
+          />
+          <SearchInput value={search} onChangeText={setSearch} placeholder={mode === "events" ? "Buscar evento" : "Buscar mision"} />
+          {mode === "events" ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                {EVENT_STATUS_FILTERS.map((chip) => (
+                  <Pill key={chip.id} label={chip.label} active={chip.id === statusFilter} onPress={() => setStatusFilter(chip.id)} />
+                ))}
+              </View>
+            </ScrollView>
+          ) : null}
+        </RealmCard>
+      </StaggerItem>
+
+      {isLoading ? (
+        <RealmCard>
+          <ActivityIndicator color={MOBILE_THEME.gold} />
+        </RealmCard>
+      ) : null}
+
+      {activeError ? (
+        <ErrorPanel
+          message={activeError}
+          onRetry={() => {
+            void eventsQuery.refetch();
+            void missionsQuery.refetch();
           }}
         />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            {EVENT_STATUS_FILTERS.map((chip) => {
-              const active = chip.id === statusFilter;
-              return (
+      ) : null}
+
+      {mode === "events"
+        ? filteredEvents.map((entry, index) => (
+            <StaggerItem key={entry.id} index={index + 1}>
+              <RealmCard>
+                {entry.imageUrl ? (
+                  <Image
+                    source={{ uri: entry.imageUrl }}
+                    resizeMode="cover"
+                    style={{ height: 132, borderRadius: 16, borderWidth: 1, borderColor: MOBILE_THEME.border, backgroundColor: MOBILE_THEME.bg }}
+                  />
+                ) : null}
+                <SectionHeader
+                  eyebrow={entry.status}
+                  title={entry.title}
+                  trailing={<MaterialIcons name="event" size={22} color={MOBILE_THEME.gold} />}
+                />
+                <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }} numberOfLines={2}>
+                  {entry.description}
+                </Text>
+                <Text style={{ color: MOBILE_THEME.dimText, fontSize: 12 }}>
+                  {entry.startDate} / {entry.endDate}
+                </Text>
                 <Pressable
-                  key={chip.id}
-                  onPress={() => setStatusFilter(chip.id)}
+                  onPress={() => setSelectedEvent(entry)}
                   style={{
-                    borderRadius: 999,
+                    minHeight: 42,
+                    borderRadius: 13,
                     borderWidth: 1,
-                    borderColor: active ? MOBILE_THEME.gold : MOBILE_THEME.border,
-                    paddingHorizontal: 12,
-                    paddingVertical: 7,
-                    backgroundColor: active ? "rgba(212,166,74,0.14)" : MOBILE_THEME.bg,
+                    borderColor: MOBILE_THEME.border,
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <Text
-                    style={{
-                      color: active ? MOBILE_THEME.gold : MOBILE_THEME.mutedText,
-                      fontWeight: "700",
-                      fontSize: 12,
-                    }}
-                  >
-                    {chip.label}
-                  </Text>
+                  <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>Ver evento</Text>
                 </Pressable>
-              );
-            })}
-          </View>
-        </ScrollView>
-      </View>
+              </RealmCard>
+            </StaggerItem>
+          ))
+        : filteredMissions.map((mission, index) => (
+            <StaggerItem key={mission.id} index={index + 1}>
+              <RealmCard tone={mission.status === "closed" ? "default" : "teal"}>
+                <SectionHeader
+                  eyebrow={mission.difficulty}
+                  title={mission.title}
+                  trailing={<Pill label={`${mission.rewardGold} oro`} active />}
+                />
+                <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }} numberOfLines={2}>
+                  {mission.description}
+                </Text>
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <MetricTile label="CUPO" value={mission.maxParticipants} icon="groups" />
+                  <MetricTile label="ESTADO" value={mission.status} icon="flag" />
+                </View>
+                <Pressable
+                  onPress={() => setSelectedMission(mission)}
+                  style={{
+                    minHeight: 42,
+                    borderRadius: 13,
+                    borderWidth: 1,
+                    borderColor: MOBILE_THEME.border,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>Ver mision</Text>
+                </Pressable>
+              </RealmCard>
+            </StaggerItem>
+          ))}
 
-      {eventsQuery.isLoading ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 16,
-            alignItems: "center",
-          }}
-        >
-          <ActivityIndicator color={MOBILE_THEME.gold} />
-        </View>
+      {!isLoading && mode === "events" && filteredEvents.length === 0 ? (
+        <EmptyState title="Sin eventos" message="No hay eventos para ese filtro." icon="event-busy" />
       ) : null}
 
-      {eventsQuery.data?.errorMessage ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.danger, lineHeight: 20 }}>
-            {eventsQuery.data.errorMessage}
-          </Text>
-          <Pressable
-            onPress={() => {
-              void eventsQuery.refetch();
-            }}
-            style={{
-              marginTop: 10,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              paddingVertical: 8,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
-              Reintentar
-            </Text>
-          </Pressable>
-        </View>
-      ) : null}
-
-      {filteredEvents.map((entry) => (
-        <View
-          key={entry.id}
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-            gap: 6,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.text, fontSize: 16, fontWeight: "800" }}>
-            {entry.title}
-          </Text>
-          <Text style={{ color: MOBILE_THEME.mutedText }} numberOfLines={2}>
-            {entry.description}
-          </Text>
-          <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-            {entry.startDate} - {entry.endDate} | {entry.status}
-          </Text>
-          <Pressable
-            onPress={() => setSelectedEvent(entry)}
-            style={{
-              marginTop: 2,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              paddingVertical: 8,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
-              Ver detalle
-            </Text>
-          </Pressable>
-        </View>
-      ))}
-
-      {!eventsQuery.isLoading && filteredEvents.length === 0 ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.mutedText }}>
-            No hay eventos para ese filtro.
-          </Text>
-        </View>
+      {!isLoading && mode === "missions" && filteredMissions.length === 0 ? (
+        <EmptyState title="Sin misiones" message="No hay misiones publicadas." icon="flag" />
       ) : null}
 
       <DetailSheet
         visible={Boolean(selectedEvent)}
-        title={selectedEvent?.title ?? "Detalle"}
-        subtitle={selectedEvent ? `${selectedEvent.status} - ${selectedEvent.startDate}` : ""}
+        title={selectedEvent?.title ?? "Evento"}
+        subtitle={selectedEvent ? `${selectedEvent.status} / ${selectedEvent.startDate}` : ""}
         onClose={() => setSelectedEvent(null)}
       >
         {selectedEvent?.imageUrl ? (
           <Image
             source={{ uri: selectedEvent.imageUrl }}
             resizeMode="cover"
-            style={{
-              width: "100%",
-              height: 180,
-              borderRadius: 14,
-              borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              backgroundColor: MOBILE_THEME.bg,
-            }}
+            style={{ width: "100%", height: 190, borderRadius: 16, borderWidth: 1, borderColor: MOBILE_THEME.border, backgroundColor: MOBILE_THEME.bg }}
           />
         ) : null}
-        <View
-          style={{
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 12,
-            gap: 8,
-          }}
-        >
+        <RealmCard>
           <Text style={{ color: MOBILE_THEME.text, lineHeight: 22 }}>
             {selectedEvent?.longDescription || selectedEvent?.description}
           </Text>
           <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-            Inicio: {selectedEvent?.startDate ?? "-"} - Cierre: {selectedEvent?.endDate ?? "-"}
+            Inicio: {selectedEvent?.startDate ?? "-"} / Cierre: {selectedEvent?.endDate ?? "-"}
           </Text>
-          {selectedEvent?.factions?.length ? (
-            <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-              Facciones: {selectedEvent.factions.join(", ")}
-            </Text>
-          ) : null}
-          {selectedEvent?.requirements ? (
-            <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-              Requisitos: {selectedEvent.requirements}
-            </Text>
-          ) : null}
-          {selectedEvent?.rewards ? (
-            <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>
-              Recompensas: {selectedEvent.rewards}
-            </Text>
-          ) : null}
-        </View>
+          {selectedEvent?.rewards ? <Text style={{ color: MOBILE_THEME.gold }}>Recompensas: {selectedEvent.rewards}</Text> : null}
+        </RealmCard>
+      </DetailSheet>
+
+      <DetailSheet
+        visible={Boolean(selectedMission)}
+        title={selectedMission?.title ?? "Mision"}
+        subtitle={selectedMission ? `${selectedMission.difficulty} / ${selectedMission.type}` : ""}
+        onClose={() => setSelectedMission(null)}
+      >
+        <RealmCard tone="teal">
+          <Text style={{ color: MOBILE_THEME.text, lineHeight: 22 }}>{selectedMission?.description}</Text>
+          <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>{selectedMission?.instructions}</Text>
+          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "900" }}>
+            Recompensa: {selectedMission?.rewardGold ?? 0} oro
+          </Text>
+        </RealmCard>
       </DetailSheet>
     </ScreenShell>
   );

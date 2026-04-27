@@ -42,7 +42,15 @@ export type MissionAiResponse = {
 
 function resolveMissionAiEndpoint() {
   const configuredUrl = import.meta.env.VITE_MISSION_AI_API_URL?.trim();
-  return configuredUrl || "/api/admin/generate-mission";
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
+  if (typeof window !== "undefined" && window.location.hostname.includes("github.io")) {
+    return "https://kingdoom.vercel.app/api/admin/generate-mission";
+  }
+
+  return "/api/admin/generate-mission";
 }
 
 export async function generateMissionWithAi(input: MissionAiRequest) {

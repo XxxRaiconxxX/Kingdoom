@@ -78,14 +78,18 @@ export function AdminAiDebugCard({
 
   const attemptSummary = debug.attempts
     .map((attempt) => {
+      const providerLabel =
+        attempt.provider === "gemini"
+          ? `g${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`
+          : `groq${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`;
       const label =
         attempt.status === "success"
           ? "ok"
-          : attempt.status === "quota-fallback"
-            ? "cuota"
+          : attempt.status === "fallback"
+            ? "fallback"
             : "error";
 
-      return `#${attempt.keyIndex} ${label}`;
+      return `${providerLabel} ${label}`;
     })
     .join(" · ");
 
@@ -95,6 +99,7 @@ export function AdminAiDebugCard({
         <p className="mr-1 text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-200">
           Debug IA admin
         </p>
+        <CompactDebugPill label={debug.provider} tone="info" />
         <CompactDebugPill label={debug.model} tone="info" />
         <CompactDebugPill
           label={`key ${debug.keyIndexUsed ? `#${debug.keyIndexUsed}` : "ninguna"}`}

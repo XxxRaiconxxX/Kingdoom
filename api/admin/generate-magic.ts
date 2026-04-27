@@ -1,16 +1,12 @@
-type ApiRequest = {
-  method?: string;
-  body?: unknown;
-  headers: Record<string, string | string[] | undefined>;
-};
-
-type ApiResponse = {
-  setHeader: (name: string, value: string) => void;
-  status: (code: number) => {
-    json: (payload: unknown) => void;
-    end: () => void;
-  };
-};
+import {
+  readGeminiConfig,
+  readGroqConfig,
+  requestAiTextWithFallback,
+  setCorsHeaders,
+  type ApiRequest,
+  type ApiResponse,
+  hasTextGenerationProvider,
+} from "../../src/utils/serverAiProviders";
 
 type MagicAiRequest = {
   categoryTitle?: string;
@@ -28,237 +24,6 @@ type MagicAiResponse = {
   promptSummary: string;
 };
 
-type GeminiAttemptDebug = {
-  keyIndex: number;
-  status: "success" | "quota-fallback" | "error";
-  reason: string;
-};
-
-type GeminiDebugInfo = {
-  model: string;
-  totalKeysConfigured: number;
-  keyIndexUsed: number | null;
-  fallbackUsed: boolean;
-  quotaFailures: number;
-  remainingKeysAfterSuccess: number;
-  exhaustedByQuota: boolean;
-  attempts: GeminiAttemptDebug[];
-};
-
-const DEFAULT_ALLOWED_ORIGINS = [
-  "https://xxxraiconxxx.github.io",
-  "https://kingdoom.vercel.app",
-];
-
-function getAllowedOrigin(requestOrigin?: string) {
-  const configuredOrigins = process.env.MISSION_AI_ALLOWED_ORIGINS
-    ?.split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
-  const origins = configuredOrigins?.length
-    ? configuredOrigins
-    : DEFAULT_ALLOWED_ORIGINS;
-
-  if (!requestOrigin) {
-    return origins[0] ?? "*";
-  }
-
-  if (origins.includes(requestOrigin)) {
-    return requestOrigin;
-  }
-
-  return origins[0] ?? "*";
-}
-
-function setCorsHeaders(req: ApiRequest, res: ApiResponse) {
-  const allowedOrigin = getAllowedOrigin(req.headers.origin);
-  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-}
-
-function readGeminiConfig() {
-  const geminiApiKeys = [
-    ...(process.env.GEMINI_API_KEYS ?? "")
-      .split(/[\n,]/g)
-      .map((value) => value.trim())
-      .filter(Boolean),
-    ...(process.env.GEMINI_API_KEY?.trim()
-      ? [process.env.GEMINI_API_KEY.trim()]
-      : []),
-  ];
-  const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
-
-  return { geminiApiKeys, geminiModel };
-}
-
-function isQuotaLikeError(message: string) {
-  const normalized = message.toLowerCase();
-  return (
-    normalized.includes("quota") ||
-    normalized.includes("rate limit") ||
-    normalized.includes("resource exhausted") ||
-    normalized.includes("too many requests") ||
-    normalized.includes("retry in") ||
-    normalized.includes("api key expired") ||
-    normalized.includes("key expired") ||
-    normalized.includes("api key not valid") ||
-    normalized.includes("invalid api key")
-  );
-}
-
-async function parseGeminiError(response: any) {
-  let payload: any = null;
-
-  try {
-    payload = await response.json();
-  } catch {
-    payload = null;
-  }
-
-  return (
-    payload?.error?.message ||
-    payload?.message ||
-    `Gemini respondio con estado ${response.status}.`
-  );
-}
-
-function extractTextFromGeminiResponse(payload: any) {
-  const parts = payload?.candidates?.[0]?.content?.parts;
-  if (!Array.isArray(parts)) {
-    return "";
-  }
-
-  return parts
-    .map((part) => (typeof part?.text === "string" ? part.text : ""))
-    .join("")
-    .trim();
-}
-
-async function requestGeminiText(input: {
-  prompt: string;
-  apiKeys: string[];
-  model: string;
-}) {
-  if (!input.apiKeys.length) {
-    throw new Error(
-      "Falta GEMINI_API_KEY o GEMINI_API_KEYS en el backend."
-    );
-  }
-
-  let lastError = "Gemini no respondio correctamente al generar texto.";
-  const attempts: GeminiAttemptDebug[] = [];
-
-  const buildDebug = (
-    keyIndexUsed: number | null,
-    exhaustedByQuota: boolean
-  ): GeminiDebugInfo => {
-    const quotaFailures = attempts.filter(
-      (attempt) => attempt.status === "quota-fallback"
-    ).length;
-
-    return {
-      model: input.model,
-      totalKeysConfigured: input.apiKeys.length,
-      keyIndexUsed,
-      fallbackUsed:
-        quotaFailures > 0 || (keyIndexUsed !== null && keyIndexUsed > 1),
-      quotaFailures,
-      remainingKeysAfterSuccess:
-        keyIndexUsed === null
-          ? 0
-          : Math.max(0, input.apiKeys.length - keyIndexUsed),
-      exhaustedByQuota,
-      attempts,
-    };
-  };
-
-  for (let index = 0; index < input.apiKeys.length; index += 1) {
-    const apiKey = input.apiKeys[index];
-    const keyIndex = index + 1;
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${input.model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: input.prompt }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.92,
-            topP: 0.9,
-          },
-        }),
-      }
-    );
-
-    if (response.ok) {
-      const payload = await response.json();
-      const rawText = extractTextFromGeminiResponse(payload);
-
-      if (!rawText) {
-        attempts.push({
-          keyIndex,
-          status: "error",
-          reason: "Gemini respondio sin texto util.",
-        });
-        throw {
-          message: "Gemini respondio sin texto util.",
-          debug: buildDebug(null, false),
-        };
-      }
-
-      attempts.push({
-        keyIndex,
-        status: "success",
-        reason: "Respuesta valida.",
-      });
-
-      return {
-        text: rawText
-          .replace(/^```text\s*/i, "")
-          .replace(/^```\s*/i, "")
-          .replace(/\s*```$/i, "")
-          .trim(),
-        debug: buildDebug(keyIndex, false),
-      };
-    }
-
-    const errorMessage = await parseGeminiError(response);
-    lastError = errorMessage;
-
-    if (index < input.apiKeys.length - 1 && isQuotaLikeError(errorMessage)) {
-      attempts.push({
-        keyIndex,
-        status: "quota-fallback",
-        reason: errorMessage,
-      });
-      continue;
-    }
-
-    attempts.push({
-      keyIndex,
-      status: "error",
-      reason: errorMessage,
-    });
-
-    throw {
-      message: errorMessage,
-      debug: buildDebug(null, isQuotaLikeError(errorMessage)),
-    };
-  }
-
-  throw {
-    message: lastError,
-    debug: buildDebug(null, true),
-  };
-}
 
 function getPrompt(input: Required<MagicAiRequest>) {
   return `
@@ -352,12 +117,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const { geminiApiKeys, geminiModel } = readGeminiConfig();
+  const gemini = readGeminiConfig();
+  const groq = readGroqConfig();
 
-  if (!geminiApiKeys.length) {
+  if (!hasTextGenerationProvider(gemini, groq)) {
     return res.status(500).json({
       message:
-        "Falta GEMINI_API_KEY o GEMINI_API_KEYS en el backend. Configuralas en Vercel antes de usar el generador.",
+        "Falta GEMINI_API_KEYS/GEMINI_API_KEY o GROQ_API_KEYS/GROQ_API_KEY en el backend. Configuralas en Vercel antes de usar el generador.",
     });
   }
 
@@ -378,20 +144,22 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
-    const geminiResult = await requestGeminiText({
+    const providerResult = await requestAiTextWithFallback({
       prompt: getPrompt(input),
-      apiKeys: geminiApiKeys,
-      model: geminiModel,
+      gemini,
+      groq,
+      temperature: 0.92,
+      topP: 0.9,
     });
 
     const response: MagicAiResponse = {
-      draftText: sanitizeDraft(geminiResult.text),
+      draftText: sanitizeDraft(providerResult.text),
       promptSummary: `${input.categoryTitle} / ${input.theme} / combate ${input.combatStyle}`,
     };
 
     return res.status(200).json({
       ...response,
-      ...(includeDebug ? { debug: geminiResult.debug } : {}),
+      ...(includeDebug ? { debug: providerResult.debug } : {}),
     });
   } catch (error) {
     return res.status(500).json({

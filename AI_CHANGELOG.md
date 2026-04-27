@@ -31,6 +31,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
+### [Fecha: 27/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/serverAiProviders.ts`, `src/utils/aiDebug.ts`, `src/components/admin/AdminControlPrimitives.tsx`, `api/admin/generate-mission.ts`, `api/admin/generate-magic.ts`, `api/admin/generate-bestiary.ts`, `api/admin/ask-archivist.ts`, `.env.example`
+*   **Resumen de Tareas:** Se integró soporte de Groq como proveedor IA de respaldo para misiones, magias, bestiario y Archivista, con posibilidad de varias keys y debug admin ampliado por proveedor.
+*   **Cambios Clave:**
+    *   Se creó un motor compartido en `src/utils/serverAiProviders.ts` para manejar Gemini y Groq fuera de `api/admin`, evitando repetir lógica y manteniendo compatibilidad con Vercel.
+    *   Los endpoints de misiones, magias, bestiario y Archivista ahora pueden responder con `Gemini -> Groq` como cadena de fallback.
+    *   Se añadió soporte para `GROQ_API_KEYS` además de `GROQ_API_KEY`, junto con `GROQ_MODEL_PRIMARY` y `GROQ_MODEL_FALLBACK`.
+    *   El debug admin ahora contempla proveedor y modelo, para que staff pueda ver si la llamada salió por Gemini o por Groq.
+*   **Notas/Advertencias:**
+    *   La extracción de PDF sigue dependiendo de Gemini, porque ese flujo actual usa inline PDF y no se migró a Groq.
+
 ### Plantilla de Nueva Entrada (Copiar y usar)
 ```markdown
 ### [Fecha: DD/MM/AAAA] - [Autor: Antigravity / Jarvis / Usuario]

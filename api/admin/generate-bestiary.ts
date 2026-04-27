@@ -30,6 +30,7 @@ type BestiaryAiRequest = {
   foundAt?: string;
   rarity?: BestiaryRarity;
   tone?: string;
+  includeDebug?: boolean;
 };
 
 type BestiaryAiResponse = {
@@ -46,6 +47,23 @@ type BestiaryAiResponse = {
   ability: string;
   rarity: BestiaryRarity;
   imageUrl: string;
+};
+
+type GeminiAttemptDebug = {
+  keyIndex: number;
+  status: "success" | "quota-fallback" | "error";
+  reason: string;
+};
+
+type GeminiDebugInfo = {
+  model: string;
+  totalKeysConfigured: number;
+  keyIndexUsed: number | null;
+  fallbackUsed: boolean;
+  quotaFailures: number;
+  remainingKeysAfterSuccess: number;
+  exhaustedByQuota: boolean;
+  attempts: GeminiAttemptDebug[];
 };
 
 const DEFAULT_ALLOWED_ORIGINS = [
@@ -146,9 +164,35 @@ async function requestGeminiJson<T>(input: {
   }
 
   let lastError = "Gemini no respondio correctamente a la peticion JSON.";
+  const attempts: GeminiAttemptDebug[] = [];
+
+  const buildDebug = (
+    keyIndexUsed: number | null,
+    exhaustedByQuota: boolean
+  ): GeminiDebugInfo => {
+    const quotaFailures = attempts.filter(
+      (attempt) => attempt.status === "quota-fallback"
+    ).length;
+
+    return {
+      model: input.model,
+      totalKeysConfigured: input.apiKeys.length,
+      keyIndexUsed,
+      fallbackUsed:
+        quotaFailures > 0 || (keyIndexUsed !== null && keyIndexUsed > 1),
+      quotaFailures,
+      remainingKeysAfterSuccess:
+        keyIndexUsed === null
+          ? 0
+          : Math.max(0, input.apiKeys.length - keyIndexUsed),
+      exhaustedByQuota,
+      attempts,
+    };
+  };
 
   for (let index = 0; index < input.apiKeys.length; index += 1) {
     const apiKey = input.apiKeys[index];
+    const keyIndex = index + 1;
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${input.model}:generateContent?key=${encodeURIComponent(apiKey)}`,
       {
@@ -177,7 +221,15 @@ async function requestGeminiJson<T>(input: {
       const rawText = extractTextFromGeminiResponse(payload);
 
       if (!rawText) {
-        throw new Error("Gemini respondio sin texto util.");
+        attempts.push({
+          keyIndex,
+          status: "error",
+          reason: "Gemini respondio sin texto util.",
+        });
+        throw {
+          message: "Gemini respondio sin texto util.",
+          debug: buildDebug(null, false),
+        };
       }
 
       const sanitized = rawText
@@ -186,20 +238,60 @@ async function requestGeminiJson<T>(input: {
         .replace(/\s*```$/i, "")
         .trim();
 
-      return JSON.parse(sanitized) as T;
+      try {
+        const data = JSON.parse(sanitized) as T;
+
+        attempts.push({
+          keyIndex,
+          status: "success",
+          reason: "Respuesta valida.",
+        });
+
+        return {
+          data,
+          debug: buildDebug(keyIndex, false),
+        };
+      } catch {
+        attempts.push({
+          keyIndex,
+          status: "error",
+          reason: "Gemini devolvio JSON invalido.",
+        });
+        throw {
+          message: "Gemini devolvio JSON invalido.",
+          debug: buildDebug(null, false),
+        };
+      }
     }
 
     const errorMessage = await parseGeminiError(response);
     lastError = errorMessage;
 
     if (index < input.apiKeys.length - 1 && isQuotaLikeError(errorMessage)) {
+      attempts.push({
+        keyIndex,
+        status: "quota-fallback",
+        reason: errorMessage,
+      });
       continue;
     }
 
-    throw new Error(errorMessage);
+    attempts.push({
+      keyIndex,
+      status: "error",
+      reason: errorMessage,
+    });
+
+    throw {
+      message: errorMessage,
+      debug: buildDebug(null, isQuotaLikeError(errorMessage)),
+    };
   }
 
-  throw new Error(lastError);
+  throw {
+    message: lastError,
+    debug: buildDebug(null, true),
+  };
 }
 
 function normalizeRarity(value?: string): BestiaryRarity {
@@ -319,6 +411,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   const body = (req.body ?? {}) as BestiaryAiRequest;
+  const includeDebug = body.includeDebug === true;
   const defaults: Required<BestiaryAiRequest> = {
     name: body.name?.trim() || "Criatura sin nombre",
     category: body.category?.trim() || "Bestia salvaje",
@@ -333,18 +426,31 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
-    const parsedPayload = await requestGeminiJson<BestiaryAiResponse>({
+    const result = await requestGeminiJson<BestiaryAiResponse>({
       prompt: getPrompt(defaults),
       apiKeys: geminiApiKeys,
       model: geminiModel,
     });
-    return res.status(200).json(normalizeEntry(parsedPayload, defaults));
+    return res.status(200).json({
+      ...normalizeEntry(result.data, defaults),
+      ...(includeDebug ? { debug: result.debug } : {}),
+    });
   } catch (error) {
     return res.status(500).json({
-      message:
-        error instanceof Error
-          ? `No se pudo generar la bestia con IA. ${error.message}`
-          : "No se pudo generar la bestia con IA.",
+      message: `No se pudo generar la bestia con IA. ${
+        error &&
+        typeof error === "object" &&
+        "message" in error &&
+        typeof error.message === "string"
+          ? error.message
+          : "Error desconocido."
+      }`,
+      ...(includeDebug &&
+      error &&
+      typeof error === "object" &&
+      "debug" in error
+        ? { debug: error.debug }
+        : {}),
     });
   }
 }

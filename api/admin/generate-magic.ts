@@ -20,11 +20,29 @@ type MagicAiRequest = {
   restriction?: string;
   combatStyle?: "yes" | "no" | "optional";
   scientificAngle?: string;
+  includeDebug?: boolean;
 };
 
 type MagicAiResponse = {
   draftText: string;
   promptSummary: string;
+};
+
+type GeminiAttemptDebug = {
+  keyIndex: number;
+  status: "success" | "quota-fallback" | "error";
+  reason: string;
+};
+
+type GeminiDebugInfo = {
+  model: string;
+  totalKeysConfigured: number;
+  keyIndexUsed: number | null;
+  fallbackUsed: boolean;
+  quotaFailures: number;
+  remainingKeysAfterSuccess: number;
+  exhaustedByQuota: boolean;
+  attempts: GeminiAttemptDebug[];
 };
 
 const DEFAULT_ALLOWED_ORIGINS = [
@@ -125,9 +143,35 @@ async function requestGeminiText(input: {
   }
 
   let lastError = "Gemini no respondio correctamente al generar texto.";
+  const attempts: GeminiAttemptDebug[] = [];
+
+  const buildDebug = (
+    keyIndexUsed: number | null,
+    exhaustedByQuota: boolean
+  ): GeminiDebugInfo => {
+    const quotaFailures = attempts.filter(
+      (attempt) => attempt.status === "quota-fallback"
+    ).length;
+
+    return {
+      model: input.model,
+      totalKeysConfigured: input.apiKeys.length,
+      keyIndexUsed,
+      fallbackUsed:
+        quotaFailures > 0 || (keyIndexUsed !== null && keyIndexUsed > 1),
+      quotaFailures,
+      remainingKeysAfterSuccess:
+        keyIndexUsed === null
+          ? 0
+          : Math.max(0, input.apiKeys.length - keyIndexUsed),
+      exhaustedByQuota,
+      attempts,
+    };
+  };
 
   for (let index = 0; index < input.apiKeys.length; index += 1) {
     const apiKey = input.apiKeys[index];
+    const keyIndex = index + 1;
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${input.model}:generateContent?key=${encodeURIComponent(apiKey)}`,
       {
@@ -155,27 +199,61 @@ async function requestGeminiText(input: {
       const rawText = extractTextFromGeminiResponse(payload);
 
       if (!rawText) {
-        throw new Error("Gemini respondio sin texto util.");
+        attempts.push({
+          keyIndex,
+          status: "error",
+          reason: "Gemini respondio sin texto util.",
+        });
+        throw {
+          message: "Gemini respondio sin texto util.",
+          debug: buildDebug(null, false),
+        };
       }
 
-      return rawText
-        .replace(/^```text\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "")
-        .trim();
+      attempts.push({
+        keyIndex,
+        status: "success",
+        reason: "Respuesta valida.",
+      });
+
+      return {
+        text: rawText
+          .replace(/^```text\s*/i, "")
+          .replace(/^```\s*/i, "")
+          .replace(/\s*```$/i, "")
+          .trim(),
+        debug: buildDebug(keyIndex, false),
+      };
     }
 
     const errorMessage = await parseGeminiError(response);
     lastError = errorMessage;
 
     if (index < input.apiKeys.length - 1 && isQuotaLikeError(errorMessage)) {
+      attempts.push({
+        keyIndex,
+        status: "quota-fallback",
+        reason: errorMessage,
+      });
       continue;
     }
 
-    throw new Error(errorMessage);
+    attempts.push({
+      keyIndex,
+      status: "error",
+      reason: errorMessage,
+    });
+
+    throw {
+      message: errorMessage,
+      debug: buildDebug(null, isQuotaLikeError(errorMessage)),
+    };
   }
 
-  throw new Error(lastError);
+  throw {
+    message: lastError,
+    debug: buildDebug(null, true),
+  };
 }
 
 function getPrompt(input: Required<MagicAiRequest>) {
@@ -280,6 +358,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   const body = (req.body ?? {}) as MagicAiRequest;
+  const includeDebug = body.includeDebug === true;
   const input: Required<MagicAiRequest> = {
     categoryTitle: body.categoryTitle?.trim() || "Magia Arcana",
     titleSeed: body.titleSeed?.trim() || "Tejido de Resonancia",
@@ -295,24 +374,37 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
+    const geminiResult = await requestGeminiText({
+      prompt: getPrompt(input),
+      apiKeys: geminiApiKeys,
+      model: geminiModel,
+    });
+
     const response: MagicAiResponse = {
-      draftText: sanitizeDraft(
-        await requestGeminiText({
-          prompt: getPrompt(input),
-          apiKeys: geminiApiKeys,
-          model: geminiModel,
-        })
-      ),
+      draftText: sanitizeDraft(geminiResult.text),
       promptSummary: `${input.categoryTitle} / ${input.theme} / combate ${input.combatStyle}`,
     };
 
-    return res.status(200).json(response);
+    return res.status(200).json({
+      ...response,
+      ...(includeDebug ? { debug: geminiResult.debug } : {}),
+    });
   } catch (error) {
     return res.status(500).json({
-      message:
-        error instanceof Error
-          ? `No se pudo generar la magia con IA. ${error.message}`
-          : "No se pudo generar la magia con IA.",
+      message: `No se pudo generar la magia con IA. ${
+        error &&
+        typeof error === "object" &&
+        "message" in error &&
+        typeof error.message === "string"
+          ? error.message
+          : "Error desconocido."
+      }`,
+      ...(includeDebug &&
+      error &&
+      typeof error === "object" &&
+      "debug" in error
+        ? { debug: error.debug }
+        : {}),
     });
   }
 }

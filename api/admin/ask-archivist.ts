@@ -22,6 +22,23 @@ type ArchivistDocument = {
   content: string;
 };
 
+type GeminiAttemptDebug = {
+  keyIndex: number;
+  status: "success" | "quota-fallback" | "error";
+  reason: string;
+};
+
+type GeminiDebugInfo = {
+  model: string;
+  totalKeysConfigured: number;
+  keyIndexUsed: number | null;
+  fallbackUsed: boolean;
+  quotaFailures: number;
+  remainingKeysAfterSuccess: number;
+  exhaustedByQuota: boolean;
+  attempts: GeminiAttemptDebug[];
+};
+
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://xxxraiconxxx.github.io",
   "https://kingdoom.vercel.app",
@@ -120,9 +137,35 @@ async function requestGeminiText(input: {
   }
 
   let lastError = "Gemini no respondio correctamente al generar texto.";
+  const attempts: GeminiAttemptDebug[] = [];
+
+  const buildDebug = (
+    keyIndexUsed: number | null,
+    exhaustedByQuota: boolean
+  ): GeminiDebugInfo => {
+    const quotaFailures = attempts.filter(
+      (attempt) => attempt.status === "quota-fallback"
+    ).length;
+
+    return {
+      model: input.model,
+      totalKeysConfigured: input.apiKeys.length,
+      keyIndexUsed,
+      fallbackUsed:
+        quotaFailures > 0 || (keyIndexUsed !== null && keyIndexUsed > 1),
+      quotaFailures,
+      remainingKeysAfterSuccess:
+        keyIndexUsed === null
+          ? 0
+          : Math.max(0, input.apiKeys.length - keyIndexUsed),
+      exhaustedByQuota,
+      attempts,
+    };
+  };
 
   for (let index = 0; index < input.apiKeys.length; index += 1) {
     const apiKey = input.apiKeys[index];
+    const keyIndex = index + 1;
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${input.model}:generateContent?key=${encodeURIComponent(apiKey)}`,
       {
@@ -150,27 +193,61 @@ async function requestGeminiText(input: {
       const rawText = extractTextFromGeminiResponse(payload);
 
       if (!rawText) {
-        throw new Error("Gemini respondio sin texto util.");
+        attempts.push({
+          keyIndex,
+          status: "error",
+          reason: "Gemini respondio sin texto util.",
+        });
+        throw {
+          message: "Gemini respondio sin texto util.",
+          debug: buildDebug(null, false),
+        };
       }
 
-      return rawText
-        .replace(/^```text\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "")
-        .trim();
+      attempts.push({
+        keyIndex,
+        status: "success",
+        reason: "Respuesta valida.",
+      });
+
+      return {
+        text: rawText
+          .replace(/^```text\s*/i, "")
+          .replace(/^```\s*/i, "")
+          .replace(/\s*```$/i, "")
+          .trim(),
+        debug: buildDebug(keyIndex, false),
+      };
     }
 
     const errorMessage = await parseGeminiError(response);
     lastError = errorMessage;
 
     if (index < input.apiKeys.length - 1 && isQuotaLikeError(errorMessage)) {
+      attempts.push({
+        keyIndex,
+        status: "quota-fallback",
+        reason: errorMessage,
+      });
       continue;
     }
 
-    throw new Error(errorMessage);
+    attempts.push({
+      keyIndex,
+      status: "error",
+      reason: errorMessage,
+    });
+
+    throw {
+      message: errorMessage,
+      debug: buildDebug(null, isQuotaLikeError(errorMessage)),
+    };
   }
 
-  throw new Error(lastError);
+  throw {
+    message: lastError,
+    debug: buildDebug(null, true),
+  };
 }
 
 function buildPrompt(question: string, documents: ArchivistDocument[]) {
@@ -233,9 +310,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const body = (req.body ?? {}) as {
     question?: string;
     documents?: ArchivistDocument[];
+    includeDebug?: boolean;
   };
   const question = body.question?.trim() ?? "";
   const documents = Array.isArray(body.documents) ? body.documents : [];
+  const includeDebug = body.includeDebug === true;
 
   if (!question) {
     return res.status(400).json({ message: "La pregunta esta vacia." });
@@ -248,26 +327,37 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   try {
-    const answer = await requestGeminiText({
+    const result = await requestGeminiText({
       prompt: buildPrompt(question, documents),
       apiKeys: geminiApiKeys,
       model: geminiModel,
     });
 
     return res.status(200).json({
-      answer,
+      answer: result.text,
       sources: documents.map((document) => ({
         title: document.title,
         type: document.type,
         category: document.category,
       })),
+      ...(includeDebug ? { debug: result.debug } : {}),
     });
   } catch (error) {
     return res.status(500).json({
-      message:
-        error instanceof Error
-          ? `No se pudo consultar al Archivista. ${error.message}`
-          : "No se pudo consultar al Archivista.",
+      message: `No se pudo consultar al Archivista. ${
+        error &&
+        typeof error === "object" &&
+        "message" in error &&
+        typeof error.message === "string"
+          ? error.message
+          : "Error desconocido."
+      }`,
+      ...(includeDebug &&
+      error &&
+      typeof error === "object" &&
+      "debug" in error
+        ? { debug: error.debug }
+        : {}),
     });
   }
 }

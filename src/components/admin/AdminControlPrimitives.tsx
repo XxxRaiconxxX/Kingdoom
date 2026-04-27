@@ -1,5 +1,6 @@
 import { Store } from "lucide-react";
 import type { MarketCategoryId, MarketItem, Rarity, StockStatus } from "../../types";
+import type { AiDebugInfo } from "../../utils/aiDebug";
 
 export const ADMIN_LIST_PREVIEW_COUNT = 4;
 
@@ -62,6 +63,64 @@ export function AdminInfoCard({
     <div className="kd-glass rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-5">
       <p className="text-sm font-bold text-stone-100">{title}</p>
       <p className="mt-2 text-sm leading-6 text-stone-400">{message}</p>
+    </div>
+  );
+}
+
+export function AdminAiDebugCard({
+  debug,
+}: {
+  debug: AiDebugInfo | null;
+}) {
+  if (!debug) {
+    return null;
+  }
+
+  const attemptSummary = debug.attempts
+    .map((attempt) => {
+      const label =
+        attempt.status === "success"
+          ? "ok"
+          : attempt.status === "quota-fallback"
+            ? "cuota"
+            : "error";
+
+      return `#${attempt.keyIndex} ${label}`;
+    })
+    .join(" · ");
+
+  return (
+    <div className="rounded-[1.2rem] border border-cyan-500/25 bg-cyan-500/8 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
+          Debug IA admin
+        </p>
+        <span className="rounded-full border border-cyan-400/20 bg-stone-950/55 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-100">
+          {debug.model}
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        <DebugMetric label="Keys detectadas" value={String(debug.totalKeysConfigured)} />
+        <DebugMetric
+          label="Key usada"
+          value={debug.keyIndexUsed ? `#${debug.keyIndexUsed}` : "Ninguna"}
+        />
+        <DebugMetric label="Fallback" value={debug.fallbackUsed ? "Si" : "No"} />
+        <DebugMetric label="Cuotas previas" value={String(debug.quotaFailures)} />
+        <DebugMetric
+          label="Margen restante"
+          value={String(debug.remainingKeysAfterSuccess)}
+        />
+        <DebugMetric
+          label="Agotadas por cuota"
+          value={debug.exhaustedByQuota ? "Si" : "No"}
+        />
+      </div>
+
+      <p className="mt-3 text-xs leading-5 text-cyan-100/80">
+        Intentos: {attemptSummary || "Sin intentos registrados."}
+      </p>
     </div>
   );
 }
@@ -168,6 +227,23 @@ export function NumericInput({
         className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>
+  );
+}
+
+function DebugMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-xl border border-cyan-500/15 bg-stone-950/55 px-3 py-2">
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-300/80">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-black text-stone-100">{value}</p>
+    </div>
   );
 }
 

@@ -38,6 +38,7 @@ import { generateMissionWithAi } from "../../utils/missionAi";
 import { fetchAllPlayers, updatePlayerGold } from "../../utils/players";
 import {
   ADMIN_LIST_PREVIEW_COUNT,
+  AdminAiDebugCard,
   AdminInfoCard,
   AdminModeButton,
   ExpandableListToggle,
@@ -45,6 +46,7 @@ import {
   LabeledTextArea,
   NumericInput,
 } from "./AdminControlPrimitives";
+import type { AiDebugInfo } from "../../utils/aiDebug";
 
 type MissionListFilter = "all" | MissionStatus;
 
@@ -81,6 +83,7 @@ export function AdminMissionManager() {
   const [status, setStatus] = useState<MissionStatus>("available");
   const [visible, setVisible] = useState(true);
   const [isGeneratingAiMission, setIsGeneratingAiMission] = useState(false);
+  const [aiDebug, setAiDebug] = useState<AiDebugInfo | null>(null);
   const [aiZone, setAiZone] = useState("");
   const [aiFaction, setAiFaction] = useState("");
   const [aiTone, setAiTone] = useState("fantasia oscura politica");
@@ -190,6 +193,7 @@ export function AdminMissionManager() {
     setClaims([]);
     setFeedback("");
     setHighlightedClaimId("");
+    setAiDebug(null);
   }
 
   function preloadMission(mission: RealmMission) {
@@ -206,6 +210,7 @@ export function AdminMissionManager() {
     setClaimPlayerId("");
     setFeedback("");
     setHighlightedClaimId("");
+    setAiDebug(null);
 
     if (mission.id) {
       void loadClaimsForMission(mission.id);
@@ -283,6 +288,7 @@ export function AdminMissionManager() {
   async function handleGenerateMissionWithAi() {
     setIsGeneratingAiMission(true);
     setFeedback("");
+    setAiDebug(null);
 
     const result = await generateMissionWithAi({
       type,
@@ -296,9 +302,11 @@ export function AdminMissionManager() {
       restriction: aiRestriction,
       combatStyle: aiCombatStyle,
       theme: aiTheme,
+      includeDebug: true,
     });
 
     setIsGeneratingAiMission(false);
+    setAiDebug(result.debug ?? null);
 
     if (result.status === "error" || !result.mission) {
       setFeedback(result.message);
@@ -564,6 +572,9 @@ export function AdminMissionManager() {
                   <option value="no">No</option>
                 </select>
               </label>
+            </div>
+            <div className="mt-4">
+              <AdminAiDebugCard debug={aiDebug} />
             </div>
           </div>
 

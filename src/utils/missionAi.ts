@@ -1,4 +1,5 @@
 import type { MissionDifficulty, MissionType, RealmMission } from "../types";
+import type { AiDebugInfo } from "./aiDebug";
 
 export type MissionAiRequest = {
   type?: MissionType;
@@ -12,6 +13,7 @@ export type MissionAiRequest = {
   restriction?: string;
   combatStyle?: "yes" | "no" | "optional";
   theme?: string;
+  includeDebug?: boolean;
 };
 
 export type MissionAiResponse = {
@@ -35,6 +37,7 @@ export type MissionAiResponse = {
     closingLine?: string;
   };
   promptSummary?: string;
+  debug?: AiDebugInfo;
 };
 
 function resolveMissionAiEndpoint() {
@@ -53,7 +56,13 @@ export async function generateMissionWithAi(input: MissionAiRequest) {
   });
 
   const payload = (await response.json().catch(() => null)) as
-    | { mission?: MissionAiResponse["mission"]; publicBrief?: MissionAiResponse["publicBrief"]; promptSummary?: string; message?: string }
+    | {
+        mission?: MissionAiResponse["mission"];
+        publicBrief?: MissionAiResponse["publicBrief"];
+        promptSummary?: string;
+        debug?: AiDebugInfo;
+        message?: string;
+      }
     | null;
 
   if (!response.ok || !payload?.mission) {
@@ -65,6 +74,7 @@ export async function generateMissionWithAi(input: MissionAiRequest) {
       mission: null,
       publicBrief: null,
       promptSummary: "",
+      debug: payload?.debug ?? null,
     };
   }
 
@@ -74,5 +84,6 @@ export async function generateMissionWithAi(input: MissionAiRequest) {
     mission: payload.mission,
     publicBrief: payload.publicBrief ?? null,
     promptSummary: payload.promptSummary ?? "",
+    debug: payload.debug ?? null,
   };
 }

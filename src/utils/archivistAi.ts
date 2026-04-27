@@ -1,12 +1,14 @@
 import type { KnowledgeDocument } from "../types";
+import type { AiDebugInfo } from "./aiDebug";
 
 type ArchivistAskResult =
   | {
       status: "ready";
       answer: string;
       sources: Array<{ title: string; type: string; category: string }>;
+      debug?: AiDebugInfo | null;
     }
-  | { status: "error"; message: string };
+  | { status: "error"; message: string; debug?: AiDebugInfo | null };
 
 function getArchivistEndpoint() {
   const configured = import.meta.env.VITE_ARCHIVIST_AI_API_URL as
@@ -33,6 +35,7 @@ function getArchivistEndpoint() {
 export async function askArchivistAi(input: {
   question: string;
   contextDocuments: KnowledgeDocument[];
+  includeDebug?: boolean;
 }): Promise<ArchivistAskResult> {
   const response = await fetch(getArchivistEndpoint(), {
     method: "POST",
@@ -48,6 +51,7 @@ export async function askArchivistAi(input: {
         summary: document.summary,
         content: document.content,
       })),
+      includeDebug: input.includeDebug ?? false,
     }),
   });
 
@@ -59,6 +63,7 @@ export async function askArchivistAi(input: {
       message:
         payload?.message ??
         "No se pudo consultar al Archivista. Revisa la configuracion del endpoint.",
+      debug: payload?.debug ?? null,
     };
   }
 
@@ -66,5 +71,6 @@ export async function askArchivistAi(input: {
     status: "ready",
     answer: payload?.answer ?? "",
     sources: Array.isArray(payload?.sources) ? payload.sources : [],
+    debug: payload?.debug ?? null,
   };
 }

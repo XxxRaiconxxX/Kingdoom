@@ -17,12 +17,14 @@ import {
 } from "../utils/grimoireContent";
 import {
   ADMIN_LIST_PREVIEW_COUNT,
+  AdminAiDebugCard,
   ExpandableListToggle,
 } from "./admin/AdminControlPrimitives";
 import {
   generateBestiaryWithAi,
   generateMagicDraftWithAi,
 } from "../utils/grimoireAi";
+import type { AiDebugInfo } from "../utils/aiDebug";
 
 type AdminMagicStyle = MagicStyle & {
   categoryId: string;
@@ -277,6 +279,7 @@ export function AdminMagicManager() {
   const [showAdvancedLevels, setShowAdvancedLevels] = useState(false);
   const [showAllStylesList, setShowAllStylesList] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiDebug, setAiDebug] = useState<AiDebugInfo | null>(null);
   const [aiTone, setAiTone] = useState("");
   const [aiTheme, setAiTheme] = useState("");
   const [aiRestriction, setAiRestriction] = useState("");
@@ -325,6 +328,7 @@ export function AdminMagicManager() {
     setDraftText("");
     setShowAdvancedLevels(false);
     setFeedback("");
+    setAiDebug(null);
   }
 
   function preloadStyle(style: AdminMagicStyle) {
@@ -337,6 +341,7 @@ export function AdminMagicManager() {
     setDraftText("");
     setShowAdvancedLevels(false);
     setFeedback("");
+    setAiDebug(null);
   }
 
   function applyDraftText(raw: string) {
@@ -364,6 +369,7 @@ export function AdminMagicManager() {
   async function handleGenerateWithAi() {
     setIsGeneratingAi(true);
     setFeedback("");
+    setAiDebug(null);
 
     const result = await generateMagicDraftWithAi({
       categoryTitle,
@@ -373,9 +379,11 @@ export function AdminMagicManager() {
       restriction: aiRestriction,
       combatStyle: aiCombatStyle,
       scientificAngle: aiScientificAngle,
+      includeDebug: true,
     });
 
     setIsGeneratingAi(false);
+    setAiDebug(result.debug ?? null);
 
     if (result.status !== "ready") {
       setFeedback(result.message);
@@ -509,6 +517,9 @@ export function AdminMagicManager() {
               )}
               Generar magia con IA
             </button>
+            <div className="mt-4">
+              <AdminAiDebugCard debug={aiDebug} />
+            </div>
           </div>
 
           <div className="rounded-[1.4rem] border border-amber-500/20 bg-amber-500/5 p-4">
@@ -702,6 +713,7 @@ export function AdminBestiaryManager() {
   const [rarity, setRarity] = useState<BestiaryRarity>("common");
   const [imageUrl, setImageUrl] = useState("");
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiDebug, setAiDebug] = useState<AiDebugInfo | null>(null);
   const [aiTone, setAiTone] = useState("");
   const [showAllEntriesList, setShowAllEntriesList] = useState(false);
 
@@ -753,6 +765,7 @@ export function AdminBestiaryManager() {
     setRarity("common");
     setImageUrl("");
     setFeedback("");
+    setAiDebug(null);
   }
 
   function preloadEntry(entry: BestiaryEntry) {
@@ -771,6 +784,7 @@ export function AdminBestiaryManager() {
     setRarity(entry.rarity);
     setImageUrl(entry.imageUrl);
     setFeedback("");
+    setAiDebug(null);
   }
 
   async function handleImageUpload(file?: File) {
@@ -785,6 +799,7 @@ export function AdminBestiaryManager() {
   async function handleGenerateWithAi() {
     setIsGeneratingAi(true);
     setFeedback("");
+    setAiDebug(null);
 
     const result = await generateBestiaryWithAi({
       name,
@@ -797,9 +812,11 @@ export function AdminBestiaryManager() {
       foundAt,
       rarity,
       tone: aiTone,
+      includeDebug: true,
     });
 
     setIsGeneratingAi(false);
+    setAiDebug(result.debug ?? null);
 
     if (result.status !== "ready" || !result.entry) {
       setFeedback(result.message);
@@ -909,6 +926,9 @@ export function AdminBestiaryManager() {
               )}
               Generar bestia con IA
             </button>
+            <div className="mt-4">
+              <AdminAiDebugCard debug={aiDebug} />
+            </div>
           </div>
 
           <AdminTextField label="Nombre de la bestia" value={name} onChange={setName} placeholder="Lobo de Ceniza" />

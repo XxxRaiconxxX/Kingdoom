@@ -1,4 +1,5 @@
 import type { BestiaryEntry, BestiaryRarity } from "../types";
+import type { AiDebugInfo } from "./aiDebug";
 
 export type BestiaryAiRequest = {
   name?: string;
@@ -11,6 +12,7 @@ export type BestiaryAiRequest = {
   foundAt?: string;
   rarity?: BestiaryRarity;
   tone?: string;
+  includeDebug?: boolean;
 };
 
 export type BestiaryAiResponse = Pick<
@@ -38,11 +40,13 @@ export type MagicAiRequest = {
   restriction?: string;
   combatStyle?: "yes" | "no" | "optional";
   scientificAngle?: string;
+  includeDebug?: boolean;
 };
 
 export type MagicAiResponse = {
   draftText: string;
   promptSummary?: string;
+  debug?: AiDebugInfo;
 };
 
 function deriveEndpoint(pathname: string) {
@@ -74,7 +78,7 @@ export async function generateBestiaryWithAi(input: BestiaryAiRequest) {
   });
 
   const payload = (await response.json().catch(() => null)) as
-    | (BestiaryAiResponse & { message?: string })
+    | (BestiaryAiResponse & { debug?: AiDebugInfo; message?: string })
     | null;
 
   if (!response.ok || !payload?.name) {
@@ -84,6 +88,7 @@ export async function generateBestiaryWithAi(input: BestiaryAiRequest) {
         payload?.message ||
         "No se pudo generar la bestia con IA. Revisa la configuracion del endpoint.",
       entry: null,
+      debug: payload?.debug ?? null,
     };
   }
 
@@ -91,6 +96,7 @@ export async function generateBestiaryWithAi(input: BestiaryAiRequest) {
     status: "ready" as const,
     message: "Bestia generada por IA. Revisa el texto y guardala si te convence.",
     entry: payload,
+    debug: payload.debug ?? null,
   };
 }
 
@@ -104,7 +110,7 @@ export async function generateMagicDraftWithAi(input: MagicAiRequest) {
   });
 
   const payload = (await response.json().catch(() => null)) as
-    | ({ message?: string } & Partial<MagicAiResponse>)
+    | ({ message?: string; debug?: AiDebugInfo } & Partial<MagicAiResponse>)
     | null;
 
   if (!response.ok || !payload?.draftText) {
@@ -115,6 +121,7 @@ export async function generateMagicDraftWithAi(input: MagicAiRequest) {
         "No se pudo generar la magia con IA. Revisa la configuracion del endpoint.",
       draftText: "",
       promptSummary: "",
+      debug: payload?.debug ?? null,
     };
   }
 
@@ -123,5 +130,6 @@ export async function generateMagicDraftWithAi(input: MagicAiRequest) {
     message: "Magia generada por IA. Se interpreto el formato y ya puedes revisarla.",
     draftText: payload.draftText,
     promptSummary: payload.promptSummary ?? "",
+    debug: payload.debug ?? null,
   };
 }

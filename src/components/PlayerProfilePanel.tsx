@@ -265,7 +265,7 @@ export function PlayerProfilePanel({
             Tu sesion de jugador
           </h2>
           <p className="max-w-2xl text-sm leading-6 text-stone-400">
-            Un mismo perfil para mercado, taberna, fichas y control del oro.
+            Perfil unificado para oro, fichas y mercado.
           </p>
         </div>
 
@@ -683,8 +683,7 @@ export function PlayerProfilePanel({
                 Explora fichas del reino
               </h3>
               <p className="mt-2 text-sm leading-6 text-stone-400">
-                Consulta personajes cargados, revisa referencias y ubica
-                cazadores sin conectarte primero.
+                Consulta personajes cargados sin conectarte.
               </p>
               <button
                 type="button"

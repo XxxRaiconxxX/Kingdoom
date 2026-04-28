@@ -389,6 +389,8 @@ function WorldSubSection() {
                 <img
                   src={mapInfo.src}
                   alt={mapInfo.alt}
+                  loading="lazy"
+                  decoding="async"
                   className="block h-auto w-full select-none object-contain"
                   draggable={false}
                 />

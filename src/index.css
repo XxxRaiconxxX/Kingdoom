@@ -98,6 +98,9 @@
   }
 
   html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
     font-family: var(--font-sans);
     background-color: #0c0a09;
     color: #d6d3d1;
@@ -105,6 +108,9 @@
   }
 
   body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
     min-height: 100dvh;
     background-color: #0c0a09;
     background-image:
@@ -157,6 +163,9 @@
   }
 
   #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
     min-height: 100dvh;
   }
 }
@@ -545,13 +554,105 @@
 }
 
 @media (max-width: 767px) {
+  .kd-ambient,
+  .kd-shell,
+  .kd-stage {
+    max-width: 100dvw;
+    overflow-x: clip;
+  }
+
+  .kd-shell :where(section, article, div, form, label, input, textarea, button) {
+    min-width: 0;
+  }
+
+  .kd-shell {
+    width: 100dvw !important;
+    max-width: 100dvw !important;
+    margin-inline: auto !important;
+    padding-inline: 0 !important;
+    transform: scale(0.9);
+    transform-origin: top center;
+  }
+
   .kd-shell::before {
     inset: 0 0 5.1rem;
     border-radius: 1.75rem;
   }
 
   .kd-bottom-nav {
+    width: min(calc(100dvw - 1rem), 22rem) !important;
     max-width: min(100%, calc(100dvw - 1rem));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding-inline: 0.55rem;
+    transform: scale(0.9);
+    transform-origin: bottom center;
+  }
+
+  .kd-nav-item {
+    min-width: 0;
+    padding-inline: 0.25rem;
+  }
+
+  .kd-nav-item > span:last-child {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kd-ambient::after {
+    height: 42dvh;
+    filter: blur(12px);
+    animation-duration: 24s;
+  }
+
+  .kd-glass {
+    backdrop-filter: blur(12px);
+  }
+
+  .kd-glass::before {
+    display: none;
+  }
+
+  .kd-stagger > * {
+    animation-duration: 520ms;
+  }
+}
+
+@media (max-width: 420px) {
+  .kd-shell {
+    width: 100dvw !important;
+    max-width: 100dvw !important;
+    transform: scale(0.9);
+    transform-origin: top center;
+  }
+
+  .kd-hero-panel h1 {
+    font-size: clamp(2rem, 8.4vw, 2.45rem);
+  }
+
+  nav.fixed {
+    overflow-x: hidden;
+    padding-inline: 0.15rem;
+  }
+
+  .kd-bottom-nav {
+    width: min(calc(100dvw - 1rem), 21rem) !important;
+    max-width: min(calc(100dvw - 1rem), 21rem) !important;
+    gap: 0.25rem;
+    padding-inline: 0.25rem;
+    transform: scale(0.9);
+    transform-origin: bottom center;
+  }
+
+  .kd-nav-icon-shell {
+    height: 1.95rem;
+    width: 1.95rem;
+  }
+
+  .kd-nav-item {
+    font-size: 0.54rem;
   }
 }
 

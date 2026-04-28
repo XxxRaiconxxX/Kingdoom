@@ -255,6 +255,8 @@ export function TavernGame() {
                       <img
                         src={cofreCerrado}
                         alt="Cofre cerrado"
+                        loading="lazy"
+                        decoding="async"
                         className="h-16 w-16 object-contain md:h-20 md:w-20"
                         style={{ imageRendering: "pixelated" }}
                       />
@@ -272,6 +274,8 @@ export function TavernGame() {
                         <img
                           src={getChestImage(index)}
                           alt={result === "x0" ? "Cofre vacio" : "Cofre con oro"}
+                          loading="lazy"
+                          decoding="async"
                           className="h-16 w-16 object-contain md:h-20 md:w-20"
                           style={{ imageRendering: "pixelated" }}
                         />

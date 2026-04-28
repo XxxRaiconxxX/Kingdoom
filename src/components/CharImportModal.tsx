@@ -216,6 +216,8 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
                         <img
                           src={portraitPreviewUrl}
                           alt={`Retrato de ${parsedData.name || "personaje"}`}
+                          loading="lazy"
+                          decoding="async"
                           className="h-48 w-full object-cover"
                         />
                       </div>

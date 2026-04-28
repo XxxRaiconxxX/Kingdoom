@@ -1,6 +1,7 @@
 import { lazy, StrictMode, Suspense, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { PlayerSessionProvider } from "./context/PlayerSessionContext";
 import "./index.css";
 
@@ -44,9 +45,11 @@ function DeferredVercelInsights() {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <PlayerSessionProvider>
-      <App />
-      <DeferredVercelInsights />
-    </PlayerSessionProvider>
+    <AppErrorBoundary>
+      <PlayerSessionProvider>
+        <App />
+        <DeferredVercelInsights />
+      </PlayerSessionProvider>
+    </AppErrorBoundary>
   </StrictMode>
 );

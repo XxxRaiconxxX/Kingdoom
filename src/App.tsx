@@ -29,26 +29,6 @@ import {
   KINGDOM_ANNOUNCEMENTS,
   KINGDOM_STATUS,
 } from "./data/home";
-import {
-  fetchPublicEventParticipants,
-  fetchPlayerEventParticipations,
-  fetchRealmEvents,
-  isSupabaseEventId,
-  joinRealmEvent,
-  leaveRealmEvent,
-} from "./utils/events";
-import {
-  claimRealmMission,
-  fetchPlayerMissionClaims,
-  getMissionClaimStatusLabel,
-  fetchPublicRealmMissions,
-  getMissionDifficultyLabel,
-  getMissionStatusLabel,
-  getMissionTypeLabel,
-  isSupabaseMissionId,
-  submitMissionClaimEvidence,
-} from "./utils/missions";
-import { fetchCommunityAppDownloadUrl } from "./utils/siteSettings";
 import { useGsapStaggerReveal } from "./hooks/useGsapStaggerReveal";
 import type {
   NavItem,
@@ -58,6 +38,44 @@ import type {
   RealmMissionClaim,
   TabId,
 } from "./types";
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isSupabaseRecordId(value?: string) {
+  return Boolean(value && UUID_PATTERN.test(value.trim()));
+}
+
+const missionDifficultyLabels = {
+  easy: "Facil",
+  medium: "Media",
+  hard: "Dificil",
+  elite: "Elite",
+} as const;
+
+const missionStatusLabels = {
+  available: "Disponible",
+  "in-progress": "En curso",
+  closed: "Cerrada",
+} as const;
+
+const missionTypeLabels = {
+  story: "Historia",
+  hunt: "Caceria",
+  escort: "Escolta",
+  investigation: "Investigacion",
+  event: "Evento",
+} as const;
+
+const missionClaimStatusLabels = {
+  claimed: "Postulado",
+  completed: "Pendiente validar",
+  rewarded: "Aprobada",
+} as const;
+
+const loadEventUtils = () => import("./utils/events");
+const loadMissionUtils = () => import("./utils/missions");
+const loadSiteSettingsUtils = () => import("./utils/siteSettings");
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -268,6 +286,15 @@ function HomeSection({
     let cancelled = false;
 
     async function loadHomeData() {
+      const [
+        { fetchRealmEvents },
+        { fetchPublicRealmMissions },
+        { fetchCommunityAppDownloadUrl },
+      ] = await Promise.all([
+        loadEventUtils(),
+        loadMissionUtils(),
+        loadSiteSettingsUtils(),
+      ]);
       const [eventsResult, missionsResult, nextUrl] = await Promise.all([
         fetchRealmEvents(),
         fetchPublicRealmMissions(),
@@ -305,8 +332,9 @@ function HomeSection({
 
       const missionIds = missions
         .map((mission) => mission.id ?? "")
-        .filter((id) => isSupabaseMissionId(id));
+        .filter((id) => isSupabaseRecordId(id));
 
+      const { fetchPlayerMissionClaims } = await loadMissionUtils();
       const claimsResult = await fetchPlayerMissionClaims(player.id, missionIds);
 
       if (cancelled) {
@@ -338,7 +366,8 @@ function HomeSection({
 
     const missionIds = missions
       .map((mission) => mission.id ?? "")
-      .filter((id) => isSupabaseMissionId(id));
+      .filter((id) => isSupabaseRecordId(id));
+    const { fetchPlayerMissionClaims } = await loadMissionUtils();
     const claimsResult = await fetchPlayerMissionClaims(player.id, missionIds);
     setPlayerMissionClaims(claimsResult.claimsByMissionId);
   }
@@ -349,7 +378,7 @@ function HomeSection({
     async function loadEventParticipationData() {
       const eventIds = events
         .map((event) => event.id ?? "")
-        .filter((id) => isSupabaseEventId(id));
+        .filter((id) => isSupabaseRecordId(id));
 
       if (eventIds.length === 0) {
         if (!cancelled) {
@@ -359,6 +388,10 @@ function HomeSection({
         return;
       }
 
+      const {
+        fetchPublicEventParticipants,
+        fetchPlayerEventParticipations,
+      } = await loadEventUtils();
       const participantsResult = await fetchPublicEventParticipants(eventIds);
 
       if (!cancelled) {
@@ -389,7 +422,7 @@ function HomeSection({
   async function refreshEventParticipationData() {
     const eventIds = events
       .map((event) => event.id ?? "")
-      .filter((id) => isSupabaseEventId(id));
+      .filter((id) => isSupabaseRecordId(id));
 
     if (eventIds.length === 0) {
       setEventParticipantsByEventId({});
@@ -397,6 +430,8 @@ function HomeSection({
       return;
     }
 
+    const { fetchPublicEventParticipants, fetchPlayerEventParticipations } =
+      await loadEventUtils();
     const participantsResult = await fetchPublicEventParticipants(eventIds);
     setEventParticipantsByEventId(participantsResult.participantsByEventId);
 
@@ -421,12 +456,13 @@ function HomeSection({
       return;
     }
 
-    if (!event?.id || !isSupabaseEventId(event.id)) {
+    if (!event?.id || !isSupabaseRecordId(event.id)) {
       return;
     }
 
     const eventId = event.id;
     setEventLoadingId(eventId);
+    const { joinRealmEvent } = await loadEventUtils();
     const result = await joinRealmEvent(eventId, player.id);
     setEventLoadingId("");
     setEventFeedback((current) => ({
@@ -444,12 +480,13 @@ function HomeSection({
       return;
     }
 
-    if (!event?.id || !isSupabaseEventId(event.id)) {
+    if (!event?.id || !isSupabaseRecordId(event.id)) {
       return;
     }
 
     const eventId = event.id;
     setEventLoadingId(eventId);
+    const { leaveRealmEvent } = await loadEventUtils();
     const result = await leaveRealmEvent(eventId, player.id);
     setEventLoadingId("");
     setEventFeedback((current) => ({
@@ -476,6 +513,7 @@ function HomeSection({
     }
 
     setClaimingMissionId(mission.id);
+    const { claimRealmMission } = await loadMissionUtils();
     const result = await claimRealmMission(mission.id, player.id);
     setClaimingMissionId("");
     setClaimFeedback((current) => ({
@@ -511,6 +549,7 @@ function HomeSection({
     }
 
     setSubmittingEvidenceMissionId(mission.id);
+    const { submitMissionClaimEvidence } = await loadMissionUtils();
     const result = await submitMissionClaimEvidence(currentClaim.id, player.id, {
       proofText: evidence.proofText,
       proofLink: "",
@@ -662,7 +701,7 @@ function HomeSection({
         />
         <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {missions.map((mission) => {
-            const hasPersistedMission = isSupabaseMissionId(mission.id);
+            const hasPersistedMission = isSupabaseRecordId(mission.id);
             const missionClaim = mission.id
               ? playerMissionClaims[mission.id]
               : undefined;
@@ -710,7 +749,7 @@ function HomeSection({
         <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {events.map((event) => {
             const eventId = event.id ?? "";
-            const hasPersistedEvent = isSupabaseEventId(eventId);
+            const hasPersistedEvent = isSupabaseRecordId(eventId);
             const participants = hasPersistedEvent
               ? eventParticipantsByEventId[eventId] ?? []
               : [];
@@ -912,7 +951,7 @@ function MissionCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300/80">
-            {getMissionTypeLabel(mission.type)}
+            {missionTypeLabels[mission.type]}
           </p>
           <h3 className="mt-2 text-lg font-black leading-tight text-stone-100">
             {mission.title}
@@ -934,17 +973,17 @@ function MissionCard({
 
       <div className="mt-4 flex flex-wrap gap-2">
         <span className="rounded-full border border-stone-700 bg-stone-950/70 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-300">
-          {getMissionDifficultyLabel(mission.difficulty)}
+          {missionDifficultyLabels[mission.difficulty]}
         </span>
         <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-200">
-          {getMissionStatusLabel(mission.status)}
+          {missionStatusLabels[mission.status]}
         </span>
         <span className="rounded-full border border-stone-700 bg-stone-950/70 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-300">
           Cupos {mission.maxParticipants}
         </span>
         {claim ? (
           <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-200">
-            {getMissionClaimStatusLabel(claim.status)}
+            {missionClaimStatusLabels[claim.status]}
           </span>
         ) : null}
       </div>
@@ -981,7 +1020,7 @@ function MissionCard({
                 Estado actual
               </p>
               <p className="mt-1 text-sm font-bold text-stone-100">
-                {getMissionClaimStatusLabel(claim.status)}
+                {missionClaimStatusLabels[claim.status]}
               </p>
               {claim.status === "completed" ? (
                 <p className="mt-1 text-xs text-amber-200">
@@ -1046,6 +1085,8 @@ function MissionCard({
             <img
               src={proofImagePreview}
               alt="Vista previa de evidencia"
+              loading="lazy"
+              decoding="async"
               className="h-20 w-20 rounded-lg border border-cyan-500/30 object-cover"
             />
           ) : null}

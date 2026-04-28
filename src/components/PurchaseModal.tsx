@@ -195,6 +195,7 @@ const purchaseResult = await purchaseMarketItemSecure({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar compra"
             className="rounded-full border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-stone-200"
           >
             <X className="h-5 w-5" />
@@ -208,6 +209,8 @@ const purchaseResult = await purchaseMarketItemSecure({
                 <img
                   src={item.imageUrl}
                   alt={item.name}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover"
                   style={{
                     objectFit: item.imageFit ?? "cover",

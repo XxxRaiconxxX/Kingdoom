@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Castle, ChevronDown, Users } from "lucide-react";
 import type { EventStatus, RealmEvent, RealmEventParticipant } from "../types";
-import { getEventParticipationStatusLabel } from "../utils/events";
 
 const eventStatusStyles: Record<
   EventStatus,
@@ -23,6 +22,11 @@ const eventStatusStyles: Record<
     dot: "bg-stone-400",
   },
 };
+
+const eventParticipationStatusLabels = {
+  joined: "Postulado",
+  rewarded: "Recompensado",
+} as const;
 
 type EventCardProps = {
   event: RealmEvent;
@@ -58,7 +62,7 @@ export function EventCard({
   const capacityLabel =
     maxParticipants > 0
       ? `${participants.length}/${maxParticipants}`
-      : `${participants.length}/∞`;
+      : `${participants.length} sin limite`;
 
   return (
     <article className="kd-glass kd-hover-lift overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/80">
@@ -117,7 +121,7 @@ export function EventCard({
           ) : null}
           {myParticipation ? (
             <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-200">
-              {getEventParticipationStatusLabel(myParticipation.status)}
+              {eventParticipationStatusLabels[myParticipation.status]}
             </span>
           ) : null}
         </div>

@@ -135,6 +135,7 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
               </div>
               <button 
                 onClick={onClose} 
+                aria-label="Cerrar ficha"
                 className="p-2 bg-stone-900 hover:bg-stone-800 text-stone-400 hover:text-white rounded-xl transition-colors border border-stone-800"
                 title="Cerrar ficha"
               >
@@ -157,6 +158,8 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                         <img
                           src={character.portraitUrl}
                           alt={`Retrato de ${character.name || 'personaje'}`}
+                          loading="lazy"
+                          decoding="async"
                           className="h-72 w-full object-cover"
                         />
                       ) : (

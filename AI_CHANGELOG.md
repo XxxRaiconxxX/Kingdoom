@@ -32,6 +32,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 28/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/sections/MarketSection.tsx`
+*   **Resumen de Tareas:** Se corrigieron desbordes visuales del Mercado/Taberna en iPhone 12 Pro Max.
+*   **Cambios Clave:**
+    *   El selector de minijuegos ahora usa etiquetas cortas y ancho controlado en movil para evitar texto montado.
+    *   Se agrego espacio inferior seguro a la zona de juego para que la navegacion fija no tape controles.
+*   **Notas/Advertencias:** Ajuste visual mobile-first; no cambia logica ni economia de minijuegos.
+
+### [Fecha: 28/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernTowerDefense.tsx`
 *   **Resumen de Tareas:** Se ajusto la dificultad y el layout activo del minijuego tower defense.
 *   **Cambios Clave:**

@@ -36,6 +36,7 @@ type TavernMode =
 const TAVERN_MODES: {
   id: TavernMode;
   label: string;
+  shortLabel: string;
   description: string;
   status: string;
   icon: LucideIcon;
@@ -43,6 +44,7 @@ const TAVERN_MODES: {
   {
     id: "expedition",
     label: "Expedicion",
+    shortLabel: "Exped.",
     description: "Combate PvE arcade: eliges contrato, atacas, te defiendes y cazas recompensas sin saturar la pantalla.",
     status: "PvE",
     icon: Swords,
@@ -50,6 +52,7 @@ const TAVERN_MODES: {
   {
     id: "liveHunt",
     label: "Comunal",
+    shortLabel: "Comunal",
     description:
       "Evento exclusivo de la app: host, sala en vivo, fichas reales de Expedicion y rondas cooperativas para tumbar contratos entre varios jugadores.",
     status: "App",
@@ -58,6 +61,7 @@ const TAVERN_MODES: {
   {
     id: "chests",
     label: "Cofres",
+    shortLabel: "Cofres",
     description: "Doble o nada con cofres malditos y recompensas inmediatas.",
     status: "Azar",
     icon: Box,
@@ -65,6 +69,7 @@ const TAVERN_MODES: {
   {
     id: "roulette",
     label: "Ruleta",
+    shortLabel: "Ruleta",
     description: "Gira la rueda y apuesta por multiplicadores impredecibles.",
     status: "Riesgo",
     icon: RotateCcw,
@@ -72,6 +77,7 @@ const TAVERN_MODES: {
   {
     id: "cards",
     label: "Cartas",
+    shortLabel: "Cartas",
     description: "Adivina si la siguiente carta sube o baja para llevarte el pozo.",
     status: "Azar",
     icon: ScrollText,
@@ -79,6 +85,7 @@ const TAVERN_MODES: {
   {
     id: "scratch",
     label: "Rasca",
+    shortLabel: "Rasca",
     description: "Compra un rasca y gana y prueba suerte por un premio entre 500 y 1000 de oro.",
     status: "Rapido",
     icon: Ticket,
@@ -86,6 +93,7 @@ const TAVERN_MODES: {
   {
     id: "crash",
     label: "Multiplicador",
+    shortLabel: "Multi",
     description: "El Multiplicador del Vacio: Retira tu apuesta antes de que la energia colapse.",
     status: "Riesgo",
     icon: TrendingUp,
@@ -93,6 +101,7 @@ const TAVERN_MODES: {
   {
     id: "towerDefense",
     label: "Defensa",
+    shortLabel: "Defensa",
     description: "Tower defense tactico: construye torres, resiste 5 oleadas y cobra oro si la base sobrevive.",
     status: "PvE",
     icon: Shield,
@@ -345,7 +354,7 @@ export function MarketSection() {
         </summary>
 
         <div className="mt-5 border-t border-stone-800 pt-5">
-          <div className="flex w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-full gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {tavernModes.map((mode) => {
               const Icon = mode.icon;
               const active = tavernMode === mode.id;
@@ -355,20 +364,21 @@ export function MarketSection() {
                   key={mode.id}
                   type="button"
                   onClick={() => selectTavernMode(mode.id)}
-                  className={`kd-touch flex min-w-[8.2rem] flex-col gap-2 rounded-2xl border px-3 py-3 text-left transition ${
+                  className={`kd-touch flex min-w-[4.9rem] max-w-[5.4rem] shrink-0 flex-col items-center gap-1 overflow-hidden rounded-2xl border px-2 py-2 text-center transition sm:min-w-[8.2rem] sm:max-w-none sm:items-start sm:gap-2 sm:px-3 sm:py-3 sm:text-left ${
                     active
                       ? "border-amber-400/35 bg-amber-500/12 text-amber-100"
                       : "border-stone-800 bg-stone-950/55 text-stone-400 hover:border-amber-500/20"
                   }`}
                 >
-                  <span className="flex items-center justify-between gap-2">
-                    <Icon className={`h-4 w-4 ${active ? "text-amber-300" : "text-stone-500"}`} />
-                    <span className="rounded-full border border-stone-700/70 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em]">
+                  <span className="flex w-full items-center justify-center gap-1 sm:justify-between sm:gap-2">
+                    <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300" : "text-stone-500"}`} />
+                    <span className="rounded-full border border-stone-700/70 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] sm:px-2 sm:text-[9px] sm:tracking-[0.12em]">
                       {mode.status}
                     </span>
                   </span>
-                  <span className="text-xs font-black uppercase tracking-[0.14em]">
-                    {mode.label}
+                  <span className="block w-full truncate text-[10px] font-black uppercase tracking-[0.08em] sm:text-xs sm:tracking-[0.14em]">
+                    <span className="sm:hidden">{mode.shortLabel}</span>
+                    <span className="hidden sm:inline">{mode.label}</span>
                   </span>
                 </button>
               );
@@ -396,7 +406,7 @@ export function MarketSection() {
             </div>
           ) : null}
 
-          <div className="mt-5">
+          <div className="mt-5 pb-[calc(env(safe-area-inset-bottom)+7rem)] md:pb-0">
             <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la mesa de juego..." />}>
               {tavernContent}
             </Suspense>

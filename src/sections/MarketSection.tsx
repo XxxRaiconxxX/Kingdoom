@@ -7,6 +7,7 @@ import {
   Info,
   RotateCcw,
   ScrollText,
+  Shield,
   Sparkles,
   Swords,
   Ticket,
@@ -29,7 +30,8 @@ type TavernMode =
   | "roulette"
   | "cards"
   | "scratch"
-  | "crash";
+  | "crash"
+  | "towerDefense";
 
 const TAVERN_MODES: {
   id: TavernMode;
@@ -88,6 +90,13 @@ const TAVERN_MODES: {
     status: "Riesgo",
     icon: TrendingUp,
   },
+  {
+    id: "towerDefense",
+    label: "Defensa",
+    description: "Tower defense tactico: construye torres, resiste 5 oleadas y cobra oro si la base sobrevive.",
+    status: "PvE",
+    icon: Shield,
+  },
 ];
 
 const MARKET_RARITY_FILTERS: Array<{ id: Rarity | "all"; label: string }> = [
@@ -141,6 +150,11 @@ const TavernScratch = lazy(() =>
 const TavernCrash = lazy(() =>
   import("../components/TavernCrash").then((module) => ({
     default: module.TavernCrash,
+  }))
+);
+const TavernTowerDefense = lazy(() =>
+  import("../components/TavernTowerDefense").then((module) => ({
+    default: module.TavernTowerDefense,
   }))
 );
 const PurchaseModal = lazy(() =>
@@ -262,6 +276,8 @@ export function MarketSection() {
         return <TavernScratch />;
       case "crash":
         return <TavernCrash />;
+      case "towerDefense":
+        return <TavernTowerDefense />;
       default:
         return <TavernGame />;
     }

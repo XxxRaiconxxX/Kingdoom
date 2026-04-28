@@ -115,28 +115,28 @@ const DIFFICULTIES: Difficulty[] = [
     id: "frontier",
     label: "Frontera",
     reward: 850,
-    startGold: 185,
-    lives: 18,
-    hpScale: 0.88,
-    speedScale: 0.92,
+    startGold: 155,
+    lives: 15,
+    hpScale: 1,
+    speedScale: 0.98,
   },
   {
     id: "siege",
     label: "Asedio",
     reward: 1500,
-    startGold: 165,
-    lives: 14,
-    hpScale: 1.08,
-    speedScale: 1,
+    startGold: 135,
+    lives: 11,
+    hpScale: 1.25,
+    speedScale: 1.1,
   },
   {
     id: "abyss",
     label: "Abismo",
     reward: 2600,
-    startGold: 145,
-    lives: 11,
-    hpScale: 1.32,
-    speedScale: 1.12,
+    startGold: 120,
+    lives: 8,
+    hpScale: 1.55,
+    speedScale: 1.22,
   },
 ];
 
@@ -195,7 +195,7 @@ const TOWERS: TowerBlueprint[] = [
     id: "sentinel",
     label: "Centinela",
     short: "Arco",
-    cost: 45,
+    cost: 58,
     range: 112,
     damage: 18,
     fireRate: 0.65,
@@ -206,7 +206,7 @@ const TOWERS: TowerBlueprint[] = [
     id: "rune",
     label: "Runa",
     short: "Mana",
-    cost: 72,
+    cost: 92,
     range: 98,
     damage: 34,
     fireRate: 1.1,
@@ -218,7 +218,7 @@ const TOWERS: TowerBlueprint[] = [
     id: "ballista",
     label: "Ballesta",
     short: "Crit",
-    cost: 96,
+    cost: 122,
     range: 150,
     damage: 55,
     fireRate: 1.65,
@@ -229,7 +229,7 @@ const TOWERS: TowerBlueprint[] = [
     id: "frost",
     label: "Escarcha",
     short: "Lento",
-    cost: 82,
+    cost: 108,
     range: 122,
     damage: 20,
     fireRate: 0.95,
@@ -389,7 +389,7 @@ export function TavernTowerDefense() {
 
     runtime.phase = "playing";
     runtime.wave += 1;
-    runtime.spawnLeft = 7 + runtime.wave * 3;
+    runtime.spawnLeft = 9 + runtime.wave * 4;
     runtime.spawnTimer = 0;
     runtime.message = `Oleada ${runtime.wave}/${MAX_WAVE} en marcha.`;
     setHud(snapshot(runtime));
@@ -457,7 +457,7 @@ export function TavernTowerDefense() {
       ? ENEMY_KINDS
       : ENEMY_KINDS.slice(0, Math.min(3, 1 + Math.ceil(runtime.wave / 2)));
     const kind = pool[Math.floor(Math.random() * pool.length)];
-    const hp = Math.round(kind.hp * difficultyValue.hpScale * (1 + runtime.wave * 0.18));
+    const hp = Math.round(kind.hp * difficultyValue.hpScale * (1 + runtime.wave * 0.24));
 
     runtime.enemies.push({
       id: runtime.nextEnemyId,
@@ -482,7 +482,7 @@ export function TavernTowerDefense() {
       if (runtime.spawnLeft > 0 && runtime.spawnTimer <= 0) {
         spawnEnemy(runtime);
         runtime.spawnLeft -= 1;
-        runtime.spawnTimer = Math.max(0.38, 0.95 - runtime.wave * 0.08);
+        runtime.spawnTimer = Math.max(0.3, 0.82 - runtime.wave * 0.085);
       }
 
       const path = mapRef.current.path.map(pointToCanvas);
@@ -602,7 +602,7 @@ export function TavernTowerDefense() {
         }
 
         runtime.phase = "between";
-        runtime.buildGold += 32 + runtime.wave * 12;
+        runtime.buildGold += 26 + runtime.wave * 10;
         runtime.message = "Oleada contenida. Refuerza la defensa.";
       }
     },
@@ -859,49 +859,60 @@ export function TavernTowerDefense() {
         </div>
 
         <aside className="space-y-3">
-          <Panel title="Partida" icon={<Shield className="h-4 w-4" />}>
-            <div className="grid grid-cols-1 gap-2">
-              {DIFFICULTIES.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setDifficultyId(item.id)}
-                  disabled={hud.phase === "playing"}
-                  className={`kd-touch rounded-2xl border px-3 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                    difficultyId === item.id
-                      ? "border-amber-300/50 bg-amber-500/15 text-amber-50"
-                      : "border-stone-800 bg-stone-950/55 text-stone-300"
-                  }`}
-                >
-                  <span className="flex items-center justify-between gap-2 text-sm font-black">
-                    {item.label}
-                    <span className="text-xs text-amber-300">+{item.reward}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </Panel>
+          {hud.phase !== "playing" ? (
+            <>
+              <Panel title="Partida" icon={<Shield className="h-4 w-4" />}>
+                <div className="grid grid-cols-1 gap-2">
+                  {DIFFICULTIES.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setDifficultyId(item.id)}
+                      className={`kd-touch rounded-2xl border px-3 py-3 text-left transition ${
+                        difficultyId === item.id
+                          ? "border-amber-300/50 bg-amber-500/15 text-amber-50"
+                          : "border-stone-800 bg-stone-950/55 text-stone-300"
+                      }`}
+                    >
+                      <span className="flex items-center justify-between gap-2 text-sm font-black">
+                        {item.label}
+                        <span className="text-xs text-amber-300">+{item.reward}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </Panel>
 
-          <Panel title="Mapa" icon={<Crosshair className="h-4 w-4" />}>
-            <div className="space-y-2">
-              {MAPS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setMapId(item.id)}
-                  disabled={hud.phase === "playing"}
-                  className={`kd-touch w-full rounded-2xl border px-3 py-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                    mapId === item.id
-                      ? "border-emerald-300/45 bg-emerald-500/12 text-emerald-50"
-                      : "border-stone-800 bg-stone-950/55 text-stone-300"
-                  }`}
-                >
-                  <span className="block text-sm font-black">{item.label}</span>
-                  <span className="mt-1 block text-xs text-stone-500">{item.hint}</span>
-                </button>
-              ))}
+              <Panel title="Mapa" icon={<Crosshair className="h-4 w-4" />}>
+                <div className="space-y-2">
+                  {MAPS.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setMapId(item.id)}
+                      className={`kd-touch w-full rounded-2xl border px-3 py-3 text-left transition ${
+                        mapId === item.id
+                          ? "border-emerald-300/45 bg-emerald-500/12 text-emerald-50"
+                          : "border-stone-800 bg-stone-950/55 text-stone-300"
+                      }`}
+                    >
+                      <span className="block text-sm font-black">{item.label}</span>
+                      <span className="mt-1 block text-xs text-stone-500">{item.hint}</span>
+                    </button>
+                  ))}
+                </div>
+              </Panel>
+            </>
+          ) : (
+            <div className="rounded-[1.4rem] border border-emerald-500/20 bg-emerald-950/30 p-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
+                En combate
+              </p>
+              <p className="mt-2 text-sm font-bold text-stone-200">
+                {difficulty.label} · {currentMap.label}
+              </p>
             </div>
-          </Panel>
+          )}
 
           <Panel title="Control" icon={<Swords className="h-4 w-4" />}>
             <div className="grid grid-cols-2 gap-2">

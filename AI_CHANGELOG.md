@@ -32,6 +32,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 28/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernTowerDefense.tsx`
+*   **Resumen de Tareas:** Se ajusto la dificultad y el layout activo del minijuego tower defense.
+*   **Cambios Clave:**
+    *   Se aumentaron los costes de las torres y se redujeron recursos/vidas iniciales por dificultad.
+    *   Las oleadas ahora tienen mas enemigos, aparecen mas rapido y escalan mas vida por ronda.
+    *   Durante una oleada activa se ocultan los paneles de Partida y Mapa, dejando solo estado y controles para ganar espacio en movil.
+*   **Notas/Advertencias:** Cambio validado como ajuste de balance del minijuego; no se modificaron recompensas ni schema Supabase.
+
+### [Fecha: 28/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernTowerDefense.tsx`, `src/sections/MarketSection.tsx`
 *   **Resumen de Tareas:** Se anadio un minijuego tower defense completo a la taberna del Mercado.
 *   **Cambios Clave:**

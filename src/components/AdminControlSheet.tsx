@@ -36,6 +36,7 @@ import {
   slugifyMarketItem,
   upsertMarketItem,
 } from "../utils/market";
+import { fetchPinterestReference } from "../utils/pinterestPicker";
 import type {
   EventRewardNotification,
   EventStatus,
@@ -164,6 +165,16 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [marketItemCategory, setMarketItemCategory] = useState<MarketCategoryId>("swords");
   const [marketItemStockStatus, setMarketItemStockStatus] = useState<StockStatus>("available");
   const [marketItemFeatured, setMarketItemFeatured] = useState(false);
+  const [marketPinterestUrl, setMarketPinterestUrl] = useState("");
+  const [marketPinterestFeedback, setMarketPinterestFeedback] = useState("");
+  const [marketPinterestPreview, setMarketPinterestPreview] = useState<{
+    imageUrl: string;
+    title: string;
+    description: string;
+    sourceUrl: string;
+  } | null>(null);
+  const [isLoadingPinterestReference, setIsLoadingPinterestReference] =
+    useState(false);
   const [showAllPlayersList, setShowAllPlayersList] = useState(false);
   const [showAllEventsList, setShowAllEventsList] = useState(false);
   const [showAllMarketItemsList, setShowAllMarketItemsList] = useState(false);
@@ -592,6 +603,45 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemStockStatus("available");
     setMarketItemFeatured(false);
     setMarketFeedback("");
+    setMarketPinterestUrl("");
+    setMarketPinterestFeedback("");
+    setMarketPinterestPreview(null);
+  }
+
+  async function handleLoadPinterestReference() {
+    const cleanUrl = marketPinterestUrl.trim();
+
+    if (!cleanUrl) {
+      setMarketPinterestFeedback("Pega primero una URL de Pinterest.");
+      return;
+    }
+
+    setIsLoadingPinterestReference(true);
+    setMarketPinterestFeedback("");
+
+    const result = await fetchPinterestReference(cleanUrl);
+
+    setIsLoadingPinterestReference(false);
+
+    if (result.status === "error") {
+      setMarketPinterestPreview(null);
+      setMarketPinterestFeedback(result.message);
+      return;
+    }
+
+    setMarketPinterestPreview(result.reference);
+    setMarketPinterestFeedback(
+      "Referencia cargada. Se aplico la imagen y se completaron campos vacios cuando fue posible."
+    );
+    setMarketItemImageUrl(result.reference.imageUrl);
+    setMarketItemImageFit("cover");
+    setMarketItemImagePosition("center");
+    setMarketItemName((current) =>
+      current.trim() ? current : result.reference.title || current
+    );
+    setMarketItemDescription((current) =>
+      current.trim() ? current : result.reference.description || current
+    );
   }
 
   function preloadMarketItem(item: MarketItem) {
@@ -608,6 +658,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemStockStatus(item.stockStatus);
     setMarketItemFeatured(item.featured ?? false);
     setMarketFeedback("");
+    setMarketPinterestFeedback("");
+    setMarketPinterestPreview(null);
     setActiveTab("market");
   }
 
@@ -1673,6 +1725,81 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     onChange={setMarketItemImageUrl}
                     placeholder="https://..."
                   />
+
+                  <div className="rounded-[1.35rem] border border-cyan-500/15 bg-cyan-500/6 p-4">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-200">
+                          Picker experimental de Pinterest
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-stone-400">
+                          Pega una URL de pin y probamos si Pinterest deja extraer la imagen de referencia.
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-cyan-400/20 bg-stone-950/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100">
+                        Test
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                      <input
+                        type="text"
+                        value={marketPinterestUrl}
+                        onChange={(event) => setMarketPinterestUrl(event.target.value)}
+                        placeholder="https://www.pinterest.com/pin/..."
+                        className="min-w-0 flex-1 rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-300/35"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void handleLoadPinterestReference()}
+                        disabled={isLoadingPinterestReference}
+                        className="kd-touch inline-flex min-w-[11rem] items-center justify-center gap-2 rounded-2xl border border-cyan-400/25 bg-cyan-500/12 px-4 py-3 text-sm font-bold text-cyan-100 transition hover:bg-cyan-500/18 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isLoadingPinterestReference ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Probando...
+                          </>
+                        ) : (
+                          "Probar pin"
+                        )}
+                      </button>
+                    </div>
+
+                    {marketPinterestPreview ? (
+                      <div className="mt-3 flex gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/45 p-3">
+                        <img
+                          src={marketPinterestPreview.imageUrl}
+                          alt={marketPinterestPreview.title || "Referencia de Pinterest"}
+                          className="h-20 w-20 shrink-0 rounded-2xl border border-stone-800 bg-stone-900 object-cover"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold text-stone-100">
+                            {marketPinterestPreview.title || "Referencia cargada"}
+                          </p>
+                          {marketPinterestPreview.description ? (
+                            <p className="mt-1 line-clamp-3 text-xs leading-5 text-stone-400">
+                              {marketPinterestPreview.description}
+                            </p>
+                          ) : null}
+                          <a
+                            href={marketPinterestPreview.sourceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-2 inline-flex text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-200 hover:text-cyan-100"
+                          >
+                            Abrir pin
+                          </a>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {marketPinterestFeedback ? (
+                      <p className="mt-3 rounded-[1rem] border border-stone-800 bg-stone-950/45 px-3 py-2 text-xs leading-5 text-stone-300">
+                        {marketPinterestFeedback}
+                      </p>
+                    ) : null}
+                  </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="space-y-2">

@@ -1,5 +1,5 @@
 export type AiAttemptDebug = {
-  provider: "gemini" | "groq" | "nvidia";
+  provider: "gemini" | "groq" | "nvidia" | "openrouter";
   model: string;
   keyIndex: number | null;
   status: "success" | "fallback" | "error";
@@ -7,7 +7,7 @@ export type AiAttemptDebug = {
 };
 
 export type AiDebugInfo = {
-  provider: "gemini" | "groq" | "nvidia";
+  provider: "gemini" | "groq" | "nvidia" | "openrouter";
   model: string;
   totalKeysConfigured: number;
   keyIndexUsed: number | null;

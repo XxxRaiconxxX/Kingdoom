@@ -83,7 +83,9 @@ export function AdminAiDebugCard({
           ? `g${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`
           : attempt.provider === "groq"
             ? `groq${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`
-            : `nvidia${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`;
+            : attempt.provider === "nvidia"
+              ? `nvidia${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`
+              : `openrouter${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`;
       const label =
         attempt.status === "success"
           ? "ok"
@@ -95,28 +97,40 @@ export function AdminAiDebugCard({
     })
     .join(" · ");
 
+  const providerLabel =
+    debug.provider === "gemini"
+      ? "Gemini"
+      : debug.provider === "groq"
+        ? "Groq"
+        : debug.provider === "nvidia"
+          ? "NVIDIA"
+          : "OpenRouter";
+
+  const metaSummary = [
+    debug.keyIndexUsed ? `key #${debug.keyIndexUsed}` : "sin key",
+    debug.quotaFailures > 0
+      ? `${debug.quotaFailures} salto${debug.quotaFailures > 1 ? "s" : ""}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/6 px-3 py-2.5">
+    <div className="rounded-2xl border border-cyan-500/18 bg-cyan-500/6 px-3 py-2.5">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="mr-1 text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-200">
-          Debug IA admin
-        </p>
-        <CompactDebugPill label={debug.provider} tone="info" />
-        <CompactDebugPill label={debug.model} tone="info" />
-        <CompactDebugPill
-          label={`key ${debug.keyIndexUsed ? `#${debug.keyIndexUsed}` : "ninguna"}`}
-        />
-        <CompactDebugPill label={`fallback ${debug.fallbackUsed ? "si" : "no"}`} />
-        <CompactDebugPill label={`margen ${debug.remainingKeysAfterSuccess}`} />
-        <CompactDebugPill label={`cuotas ${debug.quotaFailures}`} />
+        <CompactDebugPill label="IA" tone="info" />
+        <CompactDebugPill label={providerLabel} tone="info" />
+        <CompactDebugPill label={debug.model} />
+        {debug.fallbackUsed ? <CompactDebugPill label="fallback" tone="warn" /> : null}
         {debug.exhaustedByQuota ? (
           <CompactDebugPill label="pool agotado" tone="danger" />
         ) : null}
       </div>
 
-      <p className="mt-2 text-[11px] leading-5 text-cyan-100/75">
-        {attemptSummary || "Sin intentos registrados."}
-      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] uppercase tracking-[0.14em] text-cyan-100/70">
+        {metaSummary ? <span>{metaSummary}</span> : null}
+        {attemptSummary ? <span className="text-cyan-100/50">{attemptSummary}</span> : null}
+      </div>
     </div>
   );
 }
@@ -231,14 +245,16 @@ function CompactDebugPill({
   tone,
 }: {
   label: string;
-  tone?: "default" | "info" | "danger";
+  tone?: "default" | "info" | "danger" | "warn";
 }) {
   const toneClass =
     tone === "info"
       ? "border-cyan-400/25 text-cyan-100"
-      : tone === "danger"
-        ? "border-red-400/25 text-red-200"
-        : "border-stone-700 text-stone-200";
+      : tone === "warn"
+        ? "border-amber-400/25 text-amber-200"
+        : tone === "danger"
+          ? "border-red-400/25 text-red-200"
+          : "border-stone-700 text-stone-200";
 
   return (
     <span

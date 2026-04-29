@@ -32,6 +32,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 29/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/admin/AdminControlPrimitives.tsx`, `src/utils/aiDebug.ts`
+*   **Resumen de Tareas:** El debug visual de IA se redujo a un badge mas compacto y ahora soporta respuestas servidas por OpenRouter.
+*   **Cambios Clave:**
+    *   El panel ahora prioriza `proveedor + modelo` en formato minimalista.
+    *   Solo aparecen indicadores extra si hubo `fallback` o si el pool quedo agotado.
+    *   Los tipos de debug fueron ampliados para aceptar `openrouter` como proveedor valido.
+*   **Notas/Advertencias:** Validar con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 29/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/_serverAiProviders.ts`, `api/admin/_aiOrchestrator.ts`, `.env.example`
 *   **Resumen de Tareas:** Se agrego OpenRouter como proveedor backend adicional de IA para la web, usando una sola key y una cadena de modelos free.
 *   **Cambios Clave:**

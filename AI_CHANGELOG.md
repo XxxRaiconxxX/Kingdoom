@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 29/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/admin/AdminStaffAssistant.tsx`
+*   **Resumen de Tareas:** Se rediseño el panel `Staff IA` para que cualquier miembro del staff pueda usarlo sin perderse.
+*   **Cambios Clave:**
+    *   El formulario ahora se organiza en 3 pasos claros: que revisar, parametros de trabajo y limites/condiciones.
+    *   Cada tipo (`Mision`, `Evento`, `Recompensa`, `Lore`, `Mercado`, `General`) muestra ayuda contextual, ejemplos y mini checklist.
+    *   Se agregaron presets rapidos de carga baja/media/alta y una vista resumen de participantes, dificultad y oro antes de analizar.
+    *   El estado vacio del dictamen ahora explica mejor que debe hacer el staff para obtener una recomendacion.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. No aparecio `package-lock.json`.
+
+### [Fecha: 29/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/advise-staff.ts`, `src/utils/staffAi.ts`, `src/components/admin/AdminStaffAssistant.tsx`
 *   **Resumen de Tareas:** Se corrigio el crash del Asistente de staff cuando la IA devolvia respuesta incompleta o vacia.
 *   **Cambios Clave:**

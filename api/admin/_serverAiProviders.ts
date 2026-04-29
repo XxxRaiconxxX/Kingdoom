@@ -1,4 +1,4 @@
-type AiProvider = "gemini" | "groq" | "nvidia";
+type AiProvider = "gemini" | "groq" | "nvidia" | "openrouter";
 
 export type AiAttemptDebug = {
   provider: AiProvider;
@@ -50,6 +50,13 @@ export type NvidiaConfig = {
   apiKeys: string[];
   primaryModel: string;
   fallbackModel: string;
+};
+
+export type OpenRouterConfig = {
+  apiKeys: string[];
+  primaryModel: string;
+  fallbackModel: string;
+  tertiaryModel: string;
 };
 
 type ProviderKeyedSuccess = {
@@ -163,15 +170,40 @@ export function readNvidiaConfig(): NvidiaConfig {
   };
 }
 
+export function readOpenRouterConfig(): OpenRouterConfig {
+  return {
+    apiKeys: [
+      ...(process.env.OPENROUTER_API_KEYS ?? "")
+        .split(/[\n,]/g)
+        .map((value) => value.trim())
+        .filter(Boolean),
+      ...(process.env.OPENROUTER_API_KEY?.trim()
+        ? [process.env.OPENROUTER_API_KEY.trim()]
+        : []),
+    ],
+    primaryModel:
+      process.env.OPENROUTER_MODEL_PRIMARY?.trim() ||
+      "nvidia/nemotron-3-super-120b-a12b:free",
+    fallbackModel:
+      process.env.OPENROUTER_MODEL_FALLBACK?.trim() ||
+      "google/gemma-4-31b-it:free",
+    tertiaryModel:
+      process.env.OPENROUTER_MODEL_TERTIARY?.trim() ||
+      "google/gemma-4-26b-a4b-it:free",
+  };
+}
+
 export function hasTextGenerationProvider(
   gemini: GeminiConfig,
   groq: GroqConfig,
-  nvidia?: NvidiaConfig
+  nvidia?: NvidiaConfig,
+  openrouter?: OpenRouterConfig
 ) {
   return (
     gemini.apiKeys.length > 0 ||
     groq.apiKeys.length > 0 ||
-    Boolean(nvidia?.apiKeys.length)
+    Boolean(nvidia?.apiKeys.length) ||
+    Boolean(openrouter?.apiKeys.length)
   );
 }
 
@@ -619,11 +651,119 @@ async function requestNvidiaText(input: {
   } satisfies ProviderFailure;
 }
 
+async function requestOpenRouterText(input: {
+  prompt: string;
+  apiKeys: string[];
+  primaryModel: string;
+  fallbackModel: string;
+  tertiaryModel: string;
+  temperature: number;
+  topP: number;
+}): Promise<TextProviderResult> {
+  let lastError = "OpenRouter no respondio correctamente.";
+  const attempts: AiAttemptDebug[] = [];
+  const models = Array.from(
+    new Set(
+      [input.primaryModel, input.fallbackModel, input.tertiaryModel].filter(Boolean)
+    )
+  );
+
+  for (let keyIndex = 0; keyIndex < input.apiKeys.length; keyIndex += 1) {
+    const apiKey = input.apiKeys[keyIndex];
+
+    for (let modelIndex = 0; modelIndex < models.length; modelIndex += 1) {
+      const model = models[modelIndex];
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "HTTP-Referer": "https://kingdoom.vercel.app",
+          "X-Title": "Kingdoom",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: input.prompt }],
+          temperature: input.temperature,
+          top_p: input.topP,
+        }),
+      });
+
+      if (response.ok) {
+        const payload = await response.json();
+        const text = sanitizeAiText(extractOpenAiCompatibleText(payload));
+
+        if (!text) {
+          attempts.push({
+            provider: "openrouter",
+            model,
+            keyIndex: keyIndex + 1,
+            status: "error",
+            reason: "OpenRouter respondio sin texto util.",
+          });
+          continue;
+        }
+
+        attempts.push({
+          provider: "openrouter",
+          model,
+          keyIndex: keyIndex + 1,
+          status: "success",
+          reason: "Respuesta valida.",
+        });
+
+        return {
+          provider: "openrouter",
+          model,
+          text,
+          totalKeysConfigured: input.apiKeys.length,
+          keyIndexUsed: keyIndex + 1,
+          remainingKeysAfterSuccess: Math.max(
+            0,
+            input.apiKeys.length - (keyIndex + 1)
+          ),
+          attempts,
+        };
+      }
+
+      const errorMessage = await parseProviderError(response);
+      lastError = errorMessage;
+      const retryable = isRetryableAiError(errorMessage);
+      const hasMoreAttempts =
+        modelIndex < models.length - 1 || keyIndex < input.apiKeys.length - 1;
+
+      attempts.push({
+        provider: "openrouter",
+        model,
+        keyIndex: keyIndex + 1,
+        status: retryable && hasMoreAttempts ? "fallback" : "error",
+        reason: errorMessage,
+      });
+
+      if (retryable && hasMoreAttempts) {
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  throw {
+    provider: "openrouter",
+    model: models[models.length - 1] || input.primaryModel,
+    totalKeysConfigured: input.apiKeys.length,
+    exhaustedByQuota: isRetryableAiError(lastError),
+    attempts,
+    message: lastError,
+  } satisfies ProviderFailure;
+}
+
 export async function requestAiTextWithFallback(input: {
   prompt: string;
   gemini: GeminiConfig;
   groq: GroqConfig;
   nvidia?: NvidiaConfig;
+  openrouter?: OpenRouterConfig;
   temperature: number;
   topP: number;
 }) {
@@ -692,6 +832,28 @@ export async function requestAiTextWithFallback(input: {
     }
   }
 
+  if (input.openrouter?.apiKeys.length) {
+    try {
+      const success = await requestOpenRouterText({
+        prompt: input.prompt,
+        apiKeys: input.openrouter.apiKeys,
+        primaryModel: input.openrouter.primaryModel,
+        fallbackModel: input.openrouter.fallbackModel,
+        tertiaryModel: input.openrouter.tertiaryModel,
+        temperature: input.temperature,
+        topP: input.topP,
+      });
+
+      return {
+        text: success.text,
+        debug: buildDebugFromSuccess(success, previousAttempts),
+      };
+    } catch (error) {
+      lastFailure = error as ProviderFailure;
+      previousAttempts.push(...lastFailure.attempts);
+    }
+  }
+
   if (lastFailure) {
     throw {
       message: lastFailure.message,
@@ -700,7 +862,7 @@ export async function requestAiTextWithFallback(input: {
   }
 
   throw new Error(
-    "Falta GEMINI_API_KEYS/GEMINI_API_KEY, GROQ_API_KEYS/GROQ_API_KEY o NVIDIA_API_KEYS/NVIDIA_API_KEY en el backend."
+    "Falta GEMINI_API_KEYS/GEMINI_API_KEY, GROQ_API_KEYS/GROQ_API_KEY, NVIDIA_API_KEYS/NVIDIA_API_KEY u OPENROUTER_API_KEYS/OPENROUTER_API_KEY en el backend."
   );
 }
 
@@ -709,6 +871,7 @@ export async function requestAiJsonWithFallback<T>(input: {
   gemini: GeminiConfig;
   groq: GroqConfig;
   nvidia?: NvidiaConfig;
+  openrouter?: OpenRouterConfig;
   temperature: number;
   topP: number;
 }) {
@@ -752,6 +915,21 @@ export async function requestAiJsonWithFallback<T>(input: {
               apiKeys: input.nvidia!.apiKeys,
               primaryModel: input.nvidia!.primaryModel,
               fallbackModel: input.nvidia!.fallbackModel,
+              temperature: input.temperature,
+              topP: input.topP,
+            }),
+        }
+      : null,
+    input.openrouter?.apiKeys.length
+      ? {
+          provider: "openrouter" as const,
+          run: () =>
+            requestOpenRouterText({
+              prompt: input.prompt,
+              apiKeys: input.openrouter!.apiKeys,
+              primaryModel: input.openrouter!.primaryModel,
+              fallbackModel: input.openrouter!.fallbackModel,
+              tertiaryModel: input.openrouter!.tertiaryModel,
               temperature: input.temperature,
               topP: input.topP,
             }),
@@ -803,6 +981,6 @@ export async function requestAiJsonWithFallback<T>(input: {
   }
 
   throw new Error(
-    "Falta GEMINI_API_KEYS/GEMINI_API_KEY, GROQ_API_KEYS/GROQ_API_KEY o NVIDIA_API_KEYS/NVIDIA_API_KEY en el backend."
+    "Falta GEMINI_API_KEYS/GEMINI_API_KEY, GROQ_API_KEYS/GROQ_API_KEY, NVIDIA_API_KEYS/NVIDIA_API_KEY u OPENROUTER_API_KEYS/OPENROUTER_API_KEY en el backend."
   );
 }

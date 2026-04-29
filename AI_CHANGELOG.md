@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 29/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `api/admin/_serverAiProviders.ts`, `api/admin/_aiOrchestrator.ts`, `.env.example`
+*   **Resumen de Tareas:** Se agrego OpenRouter como proveedor backend adicional de IA para la web, usando una sola key y una cadena de modelos free.
+*   **Cambios Clave:**
+    *   El orquestador backend ahora reconoce `OPENROUTER_API_KEY` y `OPENROUTER_API_KEYS` como nueva fuente valida de generacion de texto y JSON.
+    *   Se implemento fallback interno por modelos en OpenRouter con `nvidia/nemotron-3-super-120b-a12b:free`, `google/gemma-4-31b-it:free` y `google/gemma-4-26b-a4b-it:free`.
+    *   OpenRouter se suma al flujo de debug de intentos para que el staff pueda detectar cuando la IA cae a este proveedor.
+    *   `.env.example` ahora documenta la key unica y los tres modelos configurables de OpenRouter.
+*   **Notas/Advertencias:** Validar con `npx tsc --noEmit` y `npm run build`. El orden actual mantiene Gemini, Groq y NVIDIA directos primero; OpenRouter entra como proveedor adicional/fallback del backend.
+
+### [Fecha: 29/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/generate-market-item.ts`, `src/utils/marketAi.ts`, `src/components/AdminControlSheet.tsx`, `.env.example`
 *   **Resumen de Tareas:** El picker de Pinterest dejo de ser solo visual y ahora puede generar borradores de items del mercado con IA a partir del pin cargado.
 *   **Cambios Clave:**

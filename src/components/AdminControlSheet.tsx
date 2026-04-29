@@ -36,6 +36,7 @@ import {
   slugifyMarketItem,
   upsertMarketItem,
 } from "../utils/market";
+import { generateMarketItemWithAi } from "../utils/marketAi";
 import { fetchPinterestReference } from "../utils/pinterestPicker";
 import type {
   EventRewardNotification,
@@ -173,6 +174,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     description: string;
     sourceUrl: string;
   } | null>(null);
+  const [marketAiTheme, setMarketAiTheme] = useState("");
+  const [marketAiFeedback, setMarketAiFeedback] = useState("");
+  const [isGeneratingMarketItemAi, setIsGeneratingMarketItemAi] = useState(false);
   const [isLoadingPinterestReference, setIsLoadingPinterestReference] =
     useState(false);
   const [showAllPlayersList, setShowAllPlayersList] = useState(false);
@@ -606,6 +610,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketPinterestUrl("");
     setMarketPinterestFeedback("");
     setMarketPinterestPreview(null);
+    setMarketAiTheme("");
+    setMarketAiFeedback("");
   }
 
   async function handleLoadPinterestReference() {
@@ -618,6 +624,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
     setIsLoadingPinterestReference(true);
     setMarketPinterestFeedback("");
+    setMarketAiFeedback("");
 
     const result = await fetchPinterestReference(cleanUrl);
 
@@ -646,6 +653,48 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     );
   }
 
+  async function handleGenerateMarketItemFromPin() {
+    if (!marketPinterestPreview) {
+      setMarketAiFeedback("Primero carga una referencia valida desde Pinterest.");
+      return;
+    }
+
+    setIsGeneratingMarketItemAi(true);
+    setMarketAiFeedback("");
+
+    const result = await generateMarketItemWithAi({
+      pinterestReference: marketPinterestPreview,
+      category: marketItemCategory,
+      rarity: marketItemRarity,
+      stockStatus: marketItemStockStatus,
+      priceTarget: marketItemPrice,
+      theme: marketAiTheme,
+    });
+
+    setIsGeneratingMarketItemAi(false);
+
+    if (result.status === "error" || !result.draft) {
+      setMarketAiFeedback(result.message);
+      return;
+    }
+
+    setMarketItemName(result.draft.name);
+    setMarketItemDescription(result.draft.description);
+    setMarketItemAbility(result.draft.ability);
+    setMarketItemPrice(result.draft.price);
+    setMarketItemRarity(result.draft.rarity);
+    setMarketItemCategory(result.draft.category);
+    setMarketItemStockStatus(result.draft.stockStatus);
+    setMarketItemImageUrl(marketPinterestPreview.imageUrl);
+    setMarketItemImageFit(result.draft.imageFit || "cover");
+    setMarketItemImagePosition(result.draft.imagePosition || "center");
+    setMarketAiFeedback(
+      result.promptSummary
+        ? `Borrador generado. ${result.promptSummary}`
+        : "Borrador generado desde el pin. Revisa el item antes de guardarlo."
+    );
+  }
+
   function preloadMarketItem(item: MarketItem) {
     setMarketItemId(item.id);
     setMarketItemName(item.name);
@@ -662,6 +711,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketFeedback("");
     setMarketPinterestFeedback("");
     setMarketPinterestPreview(null);
+    setMarketAiFeedback("");
     setActiveTab("market");
   }
 
@@ -1732,15 +1782,17 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-200">
-                          Picker experimental de Pinterest
+                          Referencia visual desde Pinterest
                         </p>
                         <p className="mt-1 text-xs leading-5 text-stone-400">
-                          Pega una URL de pin y probamos si Pinterest deja extraer la imagen de referencia.
+                          Pega un pin, carga la imagen y si te sirve conviertelo en borrador IA para el mercado.
                         </p>
                       </div>
-                      <span className="rounded-full border border-cyan-400/20 bg-stone-950/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100">
-                        Test
-                      </span>
+                      {marketPinterestPreview ? (
+                        <span className="rounded-full border border-cyan-400/20 bg-stone-950/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100">
+                          Lista
+                        </span>
+                      ) : null}
                     </div>
 
                     <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -1801,6 +1853,49 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         {marketPinterestFeedback}
                       </p>
                     ) : null}
+
+                    <div className="mt-4 rounded-[1.2rem] border border-cyan-500/12 bg-stone-950/35 p-3">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-100">
+                            Crear item con IA
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-stone-400">
+                            Usa el pin como semilla visual. La IA completa nombre, descripcion, habilidad y valores del item.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void handleGenerateMarketItemFromPin()}
+                          disabled={!marketPinterestPreview || isGeneratingMarketItemAi}
+                          className="kd-touch inline-flex min-w-[12rem] items-center justify-center gap-2 rounded-2xl border border-cyan-400/25 bg-cyan-500/14 px-4 py-3 text-sm font-bold text-cyan-100 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isGeneratingMarketItemAi ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Generando...
+                            </>
+                          ) : (
+                            "Generar item IA"
+                          )}
+                        </button>
+                      </div>
+
+                      <div className="mt-3">
+                        <LabeledInput
+                          label="Idea del staff (opcional)"
+                          value={marketAiTheme}
+                          onChange={setMarketAiTheme}
+                          placeholder="maldito, noble, necromantico, reliquia roja..."
+                        />
+                      </div>
+
+                      {marketAiFeedback ? (
+                        <p className="mt-3 rounded-[1rem] border border-stone-800 bg-stone-950/45 px-3 py-2 text-xs leading-5 text-stone-300">
+                          {marketAiFeedback}
+                        </p>
+                      ) : null}
+                    </div>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">

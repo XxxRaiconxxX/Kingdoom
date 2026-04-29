@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 29/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `api/admin/generate-market-item.ts`, `src/utils/marketAi.ts`, `src/components/AdminControlSheet.tsx`, `.env.example`
+*   **Resumen de Tareas:** El picker de Pinterest dejo de ser solo visual y ahora puede generar borradores de items del mercado con IA a partir del pin cargado.
+*   **Cambios Clave:**
+    *   Se creo un endpoint IA para mercado que toma la referencia visual del pin y devuelve un borrador normalizado con nombre, descripcion, habilidad, precio, rareza, categoria y stock.
+    *   El panel admin del mercado ahora incluye un bloque `Crear item con IA` que usa el pin como semilla y aplica el borrador directamente al formulario.
+    *   La interfaz se rehizo para que Pinterest se vea como una referencia visual util y no solo como un test tecnico.
+    *   Se agrego `VITE_MARKET_AI_API_URL` para poder apuntar el generador de items a un endpoint explicito si hace falta.
+*   **Notas/Advertencias:** Validar con `npx tsc --noEmit` y `npm run build`. El flujo usa Pinterest como referencia de entrada, no como almacenamiento final recomendado para la imagen del item.
+
+### [Fecha: 29/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/extract-pinterest-reference.ts`, `src/components/AdminControlSheet.tsx`
 *   **Resumen de Tareas:** Se limpio el comportamiento del picker de Pinterest para evitar que meta texto basura en los items del mercado.
 *   **Cambios Clave:**

@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { BookMarked, FileSearch, Loader2, Send, Sparkles } from "lucide-react";
+import {
+  BookMarked,
+  Brain,
+  FileSearch,
+  Loader2,
+  Plus,
+  Send,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { askArchivistAi } from "../utils/archivistAi";
 import type { ArchivistMode } from "../utils/archivistAi";
@@ -13,6 +22,8 @@ type ChatMessage = {
   text: string;
   sources?: Array<{ title: string; type: string; category: string }>;
 };
+
+const TOPIC_MEMORY_STORAGE_KEY = "kingdoom-archivist-topic-memory";
 
 export function ArchivistSection() {
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
@@ -29,6 +40,8 @@ export function ArchivistSection() {
   const [isAsking, setIsAsking] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [mode, setMode] = useState<ArchivistMode>("canon");
+  const [topicMemory, setTopicMemory] = useState<string[]>([]);
+  const [memoryDraft, setMemoryDraft] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -50,10 +63,64 @@ export function ArchivistSection() {
     };
   }, []);
 
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(TOPIC_MEMORY_STORAGE_KEY);
+      if (!stored) return;
+
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        setTopicMemory(
+          parsed
+            .map((topic) => String(topic).trim())
+            .filter(Boolean)
+            .slice(0, 8)
+        );
+      }
+    } catch {
+      setTopicMemory([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        TOPIC_MEMORY_STORAGE_KEY,
+        JSON.stringify(topicMemory)
+      );
+    } catch {
+      // Local memory is optional. If storage is blocked, the chat still works.
+    }
+  }, [topicMemory]);
+
   const suggestedSources = useMemo(
-    () => pickKnowledgeContext(documents, question || "kingdoom lore", 4),
-    [documents, question]
+    () =>
+      pickKnowledgeContext(
+        documents,
+        [question, ...topicMemory].filter(Boolean).join(" ") || "kingdoom lore",
+        4
+      ),
+    [documents, question, topicMemory]
   );
+
+  function addMemoryTopic(value?: string) {
+    const topic = (value ?? memoryDraft).trim();
+    if (!topic) return;
+
+    setTopicMemory((current) => {
+      const normalized = topic.toLowerCase();
+      const withoutDuplicate = current.filter(
+        (entry) => entry.toLowerCase() !== normalized
+      );
+
+      return [topic, ...withoutDuplicate].slice(0, 8);
+    });
+    setMemoryDraft("");
+  }
+
+  function removeMemoryTopic(topic: string) {
+    setTopicMemory((current) => current.filter((entry) => entry !== topic));
+  }
 
   async function handleAsk() {
     const cleanQuestion = question.trim();
@@ -61,7 +128,7 @@ export function ArchivistSection() {
 
     const contextDocuments = pickKnowledgeFragments(
       documents,
-      cleanQuestion,
+      [cleanQuestion, ...topicMemory].join(" "),
       mode === "deep" || mode === "staff" ? 12 : mode === "mechanics" ? 9 : 7
     );
 
@@ -85,6 +152,7 @@ export function ArchivistSection() {
       question: cleanQuestion,
       contextDocuments,
       mode,
+      topicMemory,
     });
 
     setIsAsking(false);
@@ -180,6 +248,69 @@ export function ArchivistSection() {
                   {label}
                 </button>
               ))}
+            </div>
+            <div className="mb-3 rounded-[1.2rem] border border-cyan-500/15 bg-cyan-500/6 p-3">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-200">
+                  <Brain className="h-4 w-4" />
+                  Memoria tematica
+                </div>
+                {topicMemory.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setTopicMemory([])}
+                    className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500 transition hover:text-stone-200"
+                  >
+                    Limpiar
+                  </button>
+                ) : null}
+              </div>
+              {topicMemory.length > 0 ? (
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {topicMemory.map((topic) => (
+                    <button
+                      key={topic}
+                      type="button"
+                      onClick={() => removeMemoryTopic(topic)}
+                      className="inline-flex items-center gap-1 rounded-full border border-cyan-400/20 bg-stone-950/55 px-2.5 py-1 text-[11px] font-bold text-cyan-100"
+                    >
+                      {topic}
+                      <X className="h-3 w-3" />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={memoryDraft}
+                  onChange={(event) => setMemoryDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      addMemoryTopic();
+                    }
+                  }}
+                  placeholder="Tema activo: faccion, magia, evento..."
+                  className="min-w-0 flex-1 rounded-xl border border-stone-700 bg-stone-950/75 px-3 py-2 text-xs text-stone-100 outline-none placeholder:text-stone-500 focus:border-cyan-300/40"
+                />
+                <button
+                  type="button"
+                  onClick={() => addMemoryTopic(question)}
+                  disabled={!question.trim()}
+                  className="kd-touch inline-flex items-center gap-1 rounded-xl border border-stone-700 bg-stone-950/60 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-stone-300 transition hover:border-cyan-300/30 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Actual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addMemoryTopic()}
+                  disabled={!memoryDraft.trim()}
+                  className="kd-touch inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-400 text-stone-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
             </div>
             <div className="flex gap-2">
               <input

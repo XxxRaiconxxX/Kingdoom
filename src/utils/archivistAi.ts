@@ -42,6 +42,7 @@ export async function askArchivistAi(input: {
   question: string;
   contextDocuments: KnowledgeDocument[];
   mode?: ArchivistMode;
+  topicMemory?: string[];
   includeDebug?: boolean;
 }): Promise<ArchivistAskResult> {
   const response = await fetch(getArchivistEndpoint(), {
@@ -50,6 +51,7 @@ export async function askArchivistAi(input: {
     body: JSON.stringify({
       question: input.question,
       mode: input.mode ?? "canon",
+      topicMemory: input.topicMemory ?? [],
       documents: input.contextDocuments.map((document) => ({
         title: document.title,
         type: document.type,

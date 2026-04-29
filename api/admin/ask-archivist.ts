@@ -49,11 +49,18 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     question?: string;
     mode?: ArchivistMode;
     documents?: ArchivistPromptDocument[];
+    topicMemory?: string[];
     includeDebug?: boolean;
   };
   const question = body.question?.trim() ?? "";
   const documents = Array.isArray(body.documents) ? body.documents : [];
   const mode = normalizeArchivistMode(body.mode);
+  const topicMemory = Array.isArray(body.topicMemory)
+    ? body.topicMemory
+        .map((topic) => topic.trim())
+        .filter(Boolean)
+        .slice(0, 8)
+    : [];
   const includeDebug = body.includeDebug === true;
 
   if (!question) {
@@ -71,6 +78,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       "archivist",
       mode,
       question.toLowerCase(),
+      topicMemory,
       documents.map((document) => [
         document.title,
         document.type,
@@ -85,7 +93,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     }
 
     const result = await runAiText({
-      prompt: buildArchivistPrompt({ question, documents, mode }),
+      prompt: buildArchivistPrompt({ question, documents, mode, topicMemory }),
       temperature: mode === "mechanics" ? 0.28 : 0.35,
       topP: mode === "mechanics" ? 0.78 : 0.85,
       config: aiConfig,

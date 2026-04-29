@@ -67,6 +67,7 @@ type AdminTab =
   | "missions"
   | "events"
   | "market"
+  | "staff"
   | "magic"
   | "bestiary"
   | "flora"
@@ -94,6 +95,7 @@ const AdminMissionManager = lazy(() =>
     default: module.AdminMissionManager,
   }))
 );
+const AdminStaffAssistant = lazy(() => import("./admin/AdminStaffAssistant"));
 const AdminKnowledgeManager = lazy(() =>
   import("./admin/AdminKnowledgeManager").then((module) => ({
     default: module.AdminKnowledgeManager,
@@ -798,6 +800,13 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 label="Mercado"
                 active={activeTab === "market"}
                 onClick={() => setActiveTab("market")}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <AdminTabButton
+                label="Staff IA"
+                active={activeTab === "staff"}
+                onClick={() => setActiveTab("staff")}
               />
             </div>
             <div className="flex-shrink-0">
@@ -1847,6 +1856,21 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   />
                 </div>
               </section>
+            </div>
+          ) : null}
+
+          {activeTab === "staff" ? (
+            <div data-gsap-admin>
+              <Suspense
+                fallback={
+                  <AdminInfoCard
+                    title="Cargando Staff IA"
+                    message="Preparando asistente operativo."
+                  />
+                }
+              >
+                <AdminStaffAssistant />
+              </Suspense>
             </div>
           ) : null}
 

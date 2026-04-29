@@ -10,6 +10,14 @@ export type ArchivistPromptDocument = {
   content: string;
 };
 
+export type StaffAdvisorTaskType =
+  | "mission"
+  | "event"
+  | "reward"
+  | "lore"
+  | "market"
+  | "general";
+
 export type MagicBalanceMode = "review" | "buff" | "nerf" | "improve";
 
 export type MagicBalanceAbility = {
@@ -28,6 +36,16 @@ export type MagicBalancePromptInput = {
   title: string;
   description: string;
   levels: Record<number, MagicBalanceAbility[]>;
+};
+
+export type StaffAdvisorPromptInput = {
+  taskType: StaffAdvisorTaskType;
+  title: string;
+  description: string;
+  participants: number;
+  difficulty: string;
+  rewardGold: number;
+  constraints: string;
 };
 
 export function normalizeArchivistMode(mode?: string): ArchivistMode {
@@ -72,7 +90,12 @@ export function buildArchivistPrompt(input: {
   question: string;
   documents: ArchivistPromptDocument[];
   mode: ArchivistMode;
+  topicMemory?: string[];
 }) {
+  const topicMemory = (input.topicMemory ?? [])
+    .map((topic) => topic.trim())
+    .filter(Boolean)
+    .slice(0, 8);
   const context = input.documents
     .map((document, index) => {
       const contentLimit = input.mode === "deep" || input.mode === "staff" ? 9000 : 6500;
@@ -107,11 +130,82 @@ Reglas:
 - No uses markdown complejo.
 - Si haces una inferencia, marcala como inferencia.
 
+Memoria tematica activa:
+${
+  topicMemory.length > 0
+    ? topicMemory.map((topic) => `- ${topic}`).join("\n")
+    : "Sin memoria tematica activa."
+}
+
+Regla de memoria: la memoria tematica orienta continuidad y busqueda, pero no es canon por si sola.
+
 Pregunta del usuario:
 ${input.question}
 
 Base documental:
 ${context}
+`.trim();
+}
+
+export function normalizeStaffAdvisorTaskType(
+  value?: string
+): StaffAdvisorTaskType {
+  if (
+    value === "mission" ||
+    value === "event" ||
+    value === "reward" ||
+    value === "lore" ||
+    value === "market"
+  ) {
+    return value;
+  }
+
+  return "general";
+}
+
+export function buildStaffAdvisorPrompt(input: StaffAdvisorPromptInput) {
+  return `
+Actua como asistente operativo de staff para Kingdoom.
+
+OBJETIVO
+Ayuda al staff a decidir dificultad, recompensa, cupos, riesgos y pasos de validacion para una accion del rol.
+
+CONTEXTO DE KINGDOOM
+- Comunidad de rol medieval fantastico administrada por staff.
+- Muchas misiones y eventos se realizan por WhatsApp y luego se validan manualmente.
+- La IA ayuda a ordenar decisiones, no ejecuta pagos ni cambia canon.
+- Las recompensas deben ser gratificantes pero no inflar la economia.
+- Evita contenido absoluto, recompensas excesivas o requisitos ambiguos.
+
+DATOS
+Tipo: ${input.taskType}
+Titulo: ${input.title || "Sin titulo"}
+Descripcion:
+${input.description || "Sin descripcion"}
+
+Participantes estimados: ${input.participants || 0}
+Dificultad actual: ${input.difficulty || "No definida"}
+Oro propuesto: ${input.rewardGold || 0}
+Condiciones:
+${input.constraints || "Sin condiciones adicionales."}
+
+RESPONDE SOLO CON JSON VALIDO, sin markdown ni comentarios:
+{
+  "summary": "diagnostico breve",
+  "riskLevel": "low|medium|high",
+  "recommendedRewardGold": 0,
+  "recommendedDifficulty": "easy|medium|hard|elite",
+  "recommendedParticipants": { "min": 1, "max": 4 },
+  "validationChecklist": ["paso claro para validar"],
+  "staffNotes": ["nota operativa corta"],
+  "playerFacingBrief": "texto corto que el staff puede publicar al jugador"
+}
+
+Reglas de salida:
+- validationChecklist maximo 5 items.
+- staffNotes maximo 5 items.
+- playerFacingBrief debe ser claro, corto y publicable.
+- Si falta informacion, usa valores prudentes y marca el hueco en staffNotes.
 `.trim();
 }
 

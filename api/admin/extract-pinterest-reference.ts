@@ -68,6 +68,53 @@ function decodeHtml(value: string) {
     .replace(/&gt;/g, ">");
 }
 
+function sanitizePinterestTitle(value: string) {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const blockedPatterns = [
+    /^pin by /i,
+    / discover \(and save!\) /i,
+    / on pinterest$/i,
+    /^watch/i,
+    /^explore /i,
+  ];
+
+  if (blockedPatterns.some((pattern) => pattern.test(normalized))) {
+    return "";
+  }
+
+  return normalized
+    .replace(/\s*\|\s*pinterest.*$/i, "")
+    .replace(/\s*-\s*pinterest.*$/i, "")
+    .trim();
+}
+
+function sanitizePinterestDescription(value: string) {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const blockedPatterns = [
+    /discover \(and save!\) your own pins on pinterest/i,
+    /^aug \d{1,2}, \d{4}/i,
+    /^this pin was discovered by /i,
+    /^watch/i,
+    /^find and save ideas about /i,
+  ];
+
+  if (blockedPatterns.some((pattern) => pattern.test(normalized))) {
+    return "";
+  }
+
+  return normalized.replace(/\s+Pinterest\s*$/i, "").trim();
+}
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   setCorsHeaders(req, res);
 
@@ -115,14 +162,16 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const imageUrl =
       extractMetaContent(html, "og:image") ||
       extractMetaContent(html, "twitter:image");
-    const title =
+    const title = sanitizePinterestTitle(
       extractMetaContent(html, "og:title") ||
-      extractMetaContent(html, "twitter:title") ||
-      extractTitle(html);
-    const description =
+        extractMetaContent(html, "twitter:title") ||
+        extractTitle(html)
+    );
+    const description = sanitizePinterestDescription(
       extractMetaContent(html, "og:description") ||
-      extractMetaContent(html, "description") ||
-      extractMetaContent(html, "twitter:description");
+        extractMetaContent(html, "description") ||
+        extractMetaContent(html, "twitter:description")
+    );
 
     if (!imageUrl) {
       return res.status(422).json({

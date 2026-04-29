@@ -630,9 +630,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     }
 
     setMarketPinterestPreview(result.reference);
-    setMarketPinterestFeedback(
-      "Referencia cargada. Se aplico la imagen y se completaron campos vacios cuando fue posible."
-    );
     setMarketItemImageUrl(result.reference.imageUrl);
     setMarketItemImageFit("cover");
     setMarketItemImagePosition("center");
@@ -641,6 +638,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     );
     setMarketItemDescription((current) =>
       current.trim() ? current : result.reference.description || current
+    );
+    setMarketPinterestFeedback(
+      result.reference.title || result.reference.description
+        ? "Referencia cargada. Se aplico la imagen y tambien se aprovecharon los textos utiles del pin."
+        : "Referencia cargada. Se aplico solo la imagen porque Pinterest no devolvio texto util para el item."
     );
   }
 

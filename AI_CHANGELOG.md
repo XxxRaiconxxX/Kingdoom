@@ -32,6 +32,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 29/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `api/admin/extract-pinterest-reference.ts`, `src/components/AdminControlSheet.tsx`
+*   **Resumen de Tareas:** Se limpio el comportamiento del picker de Pinterest para evitar que meta texto basura en los items del mercado.
+*   **Cambios Clave:**
+    *   El backend ahora filtra titulos y descripciones genericas de Pinterest como `Pin by...`, `discovered by...` o textos promocionales del sitio.
+    *   Si Pinterest solo entrega una imagen util, el panel aplica esa imagen pero no ensucia nombre/descripcion con metadata irrelevante.
+    *   El feedback visual ahora aclara si se aprovecho solo la imagen o si tambien hubo texto util para autocompletar.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. Sigue siendo un test de referencia visual, no una integracion oficial de catalogo Pinterest.
+
+### [Fecha: 29/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/extract-pinterest-reference.ts`, `src/utils/pinterestPicker.ts`, `src/components/AdminControlSheet.tsx`, `.env.example`
 *   **Resumen de Tareas:** Se agrego un `Pinterest image picker` experimental por URL para testear referencias visuales en el panel de mercado.
 *   **Cambios Clave:**

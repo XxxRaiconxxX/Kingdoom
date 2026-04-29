@@ -77,6 +77,7 @@ export default function AdminStaffAssistant() {
     setIsLoading(false);
 
     if (response.status === "error") {
+      setResult(null);
       setFeedback(response.message);
       setDebug(response.debug ?? null);
       return;

@@ -31,32 +31,42 @@ type StaffAdvisorResult = {
   playerFacingBrief: string;
 };
 
-function normalizeStaffAdvisorResult(value: Partial<StaffAdvisorResult>) {
+function normalizeStaffAdvisorResult(
+  value?: Partial<StaffAdvisorResult> | null
+) {
+  const safeValue =
+    value && typeof value === "object"
+      ? value
+      : ({} as Partial<StaffAdvisorResult>);
   const riskLevel =
-    value.riskLevel === "high" || value.riskLevel === "medium"
-      ? value.riskLevel
+    safeValue.riskLevel === "high" || safeValue.riskLevel === "medium"
+      ? safeValue.riskLevel
       : "low";
   const recommendedDifficulty =
-    value.recommendedDifficulty === "elite" ||
-    value.recommendedDifficulty === "hard" ||
-    value.recommendedDifficulty === "medium"
-      ? value.recommendedDifficulty
+    safeValue.recommendedDifficulty === "elite" ||
+    safeValue.recommendedDifficulty === "hard" ||
+    safeValue.recommendedDifficulty === "medium"
+      ? safeValue.recommendedDifficulty
       : "easy";
 
   return {
-    summary: value.summary || "Analisis listo para revision del staff.",
+    summary:
+      safeValue.summary ||
+      "Analisis listo para revision del staff. La IA no devolvio todos los campos y se completo una respuesta segura.",
     riskLevel,
-    recommendedRewardGold: Number(value.recommendedRewardGold) || 0,
+    recommendedRewardGold: Number(safeValue.recommendedRewardGold) || 0,
     recommendedDifficulty,
     recommendedParticipants: {
-      min: Math.max(1, Number(value.recommendedParticipants?.min) || 1),
-      max: Math.max(1, Number(value.recommendedParticipants?.max) || 1),
+      min: Math.max(1, Number(safeValue.recommendedParticipants?.min) || 1),
+      max: Math.max(1, Number(safeValue.recommendedParticipants?.max) || 1),
     },
-    validationChecklist: Array.isArray(value.validationChecklist)
-      ? value.validationChecklist.slice(0, 5)
+    validationChecklist: Array.isArray(safeValue.validationChecklist)
+      ? safeValue.validationChecklist.slice(0, 5)
       : [],
-    staffNotes: Array.isArray(value.staffNotes) ? value.staffNotes.slice(0, 5) : [],
-    playerFacingBrief: value.playerFacingBrief || "",
+    staffNotes: Array.isArray(safeValue.staffNotes)
+      ? safeValue.staffNotes.slice(0, 5)
+      : [],
+    playerFacingBrief: safeValue.playerFacingBrief || "",
   } satisfies StaffAdvisorResult;
 }
 

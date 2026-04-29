@@ -78,9 +78,50 @@ export async function requestStaffAdvice(input: {
     };
   }
 
+  const result = payload?.result;
+
+  if (!result || typeof result !== "object") {
+    return {
+      status: "error",
+      message:
+        "La IA respondio sin estructura valida para el Asistente de staff. Intenta otra vez.",
+      debug: payload?.debug ?? null,
+    };
+  }
+
   return {
     status: "ready",
-    result: payload?.result,
+    result: {
+      summary:
+        typeof result.summary === "string" && result.summary.trim()
+          ? result.summary
+          : "Analisis listo para revision del staff.",
+      riskLevel:
+        result.riskLevel === "high" || result.riskLevel === "medium"
+          ? result.riskLevel
+          : "low",
+      recommendedRewardGold: Number(result.recommendedRewardGold) || 0,
+      recommendedDifficulty:
+        result.recommendedDifficulty === "elite" ||
+        result.recommendedDifficulty === "hard" ||
+        result.recommendedDifficulty === "medium"
+          ? result.recommendedDifficulty
+          : "easy",
+      recommendedParticipants: {
+        min: Math.max(1, Number(result.recommendedParticipants?.min) || 1),
+        max: Math.max(1, Number(result.recommendedParticipants?.max) || 1),
+      },
+      validationChecklist: Array.isArray(result.validationChecklist)
+        ? result.validationChecklist.slice(0, 5)
+        : [],
+      staffNotes: Array.isArray(result.staffNotes)
+        ? result.staffNotes.slice(0, 5)
+        : [],
+      playerFacingBrief:
+        typeof result.playerFacingBrief === "string"
+          ? result.playerFacingBrief
+          : "",
+    },
     debug: payload?.debug ?? null,
   };
 }

@@ -1,13 +1,14 @@
 import {
-  readGeminiConfig,
-  readGroqConfig,
-  readNvidiaConfig,
-  requestAiJsonWithFallback,
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-  hasTextGenerationProvider,
 } from "./_serverAiProviders.js";
+import {
+  ensureAiProvider,
+  missingAiProviderMessage,
+  readAiServerConfig,
+  runAiJson,
+} from "./_aiOrchestrator.js";
 
 type BestiaryRarity =
   | "common"
@@ -154,14 +155,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const gemini = readGeminiConfig();
-  const groq = readGroqConfig();
-  const nvidia = readNvidiaConfig();
+  const aiConfig = readAiServerConfig();
 
-  if (!hasTextGenerationProvider(gemini, groq, nvidia)) {
+  if (!ensureAiProvider(aiConfig)) {
     return res.status(500).json({
       message:
-        "Falta GEMINI_API_KEYS/GEMINI_API_KEY, GROQ_API_KEYS/GROQ_API_KEY o NVIDIA_API_KEYS/NVIDIA_API_KEY en el backend. Configuralas en Vercel antes de usar el generador.",
+        `${missingAiProviderMessage()} Configuralas en Vercel antes de usar el generador.`,
     });
   }
 
@@ -181,13 +180,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   };
 
   try {
-    const result = await requestAiJsonWithFallback<BestiaryAiResponse>({
+    const result = await runAiJson<BestiaryAiResponse>({
       prompt: getPrompt(defaults),
-      gemini,
-      groq,
-      nvidia,
       temperature: 0.95,
       topP: 0.9,
+      config: aiConfig,
     });
     return res.status(200).json({
       ...normalizeEntry(result.data, defaults),

@@ -62,7 +62,18 @@ export type MagicBalanceAiRequest = {
 };
 
 export type MagicBalanceAiResponse = {
-  analysisText: string;
+  summary: string;
+  recommendation: "maintain" | "buff" | "nerf" | "improve";
+  scores: {
+    abuseRisk: number;
+    narrativeUtility: number;
+    clarity: number;
+    powerCurve: number;
+  };
+  risks: string[];
+  levelAdjustments: Array<{ level: string; suggestion: string }>;
+  suggestedDraftText: string;
+  verdict: string;
   debug?: AiDebugInfo;
 };
 
@@ -177,13 +188,13 @@ export async function analyzeMagicBalanceWithAi(input: MagicBalanceAiRequest) {
     | ({ message?: string; debug?: AiDebugInfo } & Partial<MagicBalanceAiResponse>)
     | null;
 
-  if (!response.ok || !payload?.analysisText) {
+  if (!response.ok || !payload?.summary) {
     return {
       status: "error" as const,
       message:
         payload?.message ||
         "No se pudo analizar la magia con IA. Revisa la configuracion del endpoint.",
-      analysisText: "",
+      analysis: null,
       debug: payload?.debug ?? null,
     };
   }
@@ -191,7 +202,20 @@ export async function analyzeMagicBalanceWithAi(input: MagicBalanceAiRequest) {
   return {
     status: "ready" as const,
     message: "Analisis generado. Usa la sugerencia como criterio de staff.",
-    analysisText: payload.analysisText,
+    analysis: {
+      summary: payload.summary,
+      recommendation: payload.recommendation ?? "maintain",
+      scores: payload.scores ?? {
+        abuseRisk: 5,
+        narrativeUtility: 5,
+        clarity: 5,
+        powerCurve: 5,
+      },
+      risks: payload.risks ?? [],
+      levelAdjustments: payload.levelAdjustments ?? [],
+      suggestedDraftText: payload.suggestedDraftText ?? "",
+      verdict: payload.verdict ?? "",
+    },
     debug: payload.debug ?? null,
   };
 }

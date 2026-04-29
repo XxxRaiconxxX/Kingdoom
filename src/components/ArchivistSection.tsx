@@ -4,7 +4,7 @@ import { SectionHeader } from "./SectionHeader";
 import { askArchivistAi } from "../utils/archivistAi";
 import type { ArchivistMode } from "../utils/archivistAi";
 import { fetchArchivistKnowledgeDocuments } from "../utils/archivistSources";
-import { pickKnowledgeContext } from "../utils/knowledge";
+import { pickKnowledgeContext, pickKnowledgeFragments } from "../utils/knowledge";
 import type { KnowledgeDocument } from "../types";
 
 type ChatMessage = {
@@ -59,10 +59,10 @@ export function ArchivistSection() {
     const cleanQuestion = question.trim();
     if (!cleanQuestion || isAsking) return;
 
-    const contextDocuments = pickKnowledgeContext(
+    const contextDocuments = pickKnowledgeFragments(
       documents,
       cleanQuestion,
-      mode === "deep" ? 10 : mode === "mechanics" ? 8 : 6
+      mode === "deep" || mode === "staff" ? 12 : mode === "mechanics" ? 9 : 7
     );
 
     if (contextDocuments.length === 0) {
@@ -164,6 +164,8 @@ export function ArchivistSection() {
                 ["canon", "Canon"],
                 ["deep", "Profundo"],
                 ["mechanics", "Mecanicas"],
+                ["narrator", "Narrador"],
+                ["staff", "Staff"],
               ].map(([value, label]) => (
                 <button
                   key={value}

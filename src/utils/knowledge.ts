@@ -217,3 +217,57 @@ export function pickKnowledgeContext(
     .slice(0, maxDocuments)
     .map((entry) => entry.document);
 }
+
+export function buildKnowledgeFragments(
+  documents: KnowledgeDocument[],
+  options?: { chunkSize?: number; overlap?: number }
+) {
+  const chunkSize = options?.chunkSize ?? 2200;
+  const overlap = options?.overlap ?? 240;
+
+  return documents.flatMap((document) => {
+    const content = document.content.trim();
+
+    if (content.length <= chunkSize) {
+      return [document];
+    }
+
+    const fragments: KnowledgeDocument[] = [];
+    let cursor = 0;
+    let fragmentIndex = 1;
+
+    while (cursor < content.length) {
+      const end = Math.min(content.length, cursor + chunkSize);
+      const fragmentContent = content.slice(cursor, end).trim();
+
+      if (fragmentContent) {
+        fragments.push({
+          ...document,
+          id: `${document.id}::fragment-${fragmentIndex}`,
+          title: `${document.title} (${fragmentIndex})`,
+          summary: document.summary || `Fragmento ${fragmentIndex} de ${document.title}`,
+          content: fragmentContent,
+        });
+      }
+
+      if (end >= content.length) break;
+
+      cursor = Math.max(0, end - overlap);
+      fragmentIndex += 1;
+    }
+
+    return fragments;
+  });
+}
+
+export function pickKnowledgeFragments(
+  documents: KnowledgeDocument[],
+  question: string,
+  maxFragments = 8
+) {
+  return pickKnowledgeContext(
+    buildKnowledgeFragments(documents),
+    question,
+    maxFragments
+  );
+}

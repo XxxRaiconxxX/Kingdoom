@@ -25,7 +25,7 @@ import {
   generateBestiaryWithAi,
   generateMagicDraftWithAi,
 } from "../utils/grimoireAi";
-import type { MagicBalanceMode } from "../utils/grimoireAi";
+import type { MagicBalanceAiResponse, MagicBalanceMode } from "../utils/grimoireAi";
 import type { AiDebugInfo } from "../utils/aiDebug";
 
 type AdminMagicStyle = MagicStyle & {
@@ -291,7 +291,8 @@ export function AdminMagicManager() {
   const [aiScientificAngle, setAiScientificAngle] = useState("");
   const [balanceMode, setBalanceMode] = useState<MagicBalanceMode>("review");
   const [balanceFocus, setBalanceFocus] = useState("");
-  const [balanceText, setBalanceText] = useState("");
+  const [balanceAnalysis, setBalanceAnalysis] =
+    useState<MagicBalanceAiResponse | null>(null);
   const [balanceDebug, setBalanceDebug] = useState<AiDebugInfo | null>(null);
   const [isBalancingAi, setIsBalancingAi] = useState(false);
 
@@ -336,7 +337,7 @@ export function AdminMagicManager() {
     setShowAdvancedLevels(false);
     setFeedback("");
     setAiDebug(null);
-    setBalanceText("");
+    setBalanceAnalysis(null);
     setBalanceDebug(null);
   }
 
@@ -351,7 +352,7 @@ export function AdminMagicManager() {
     setShowAdvancedLevels(false);
     setFeedback("");
     setAiDebug(null);
-    setBalanceText("");
+    setBalanceAnalysis(null);
     setBalanceDebug(null);
   }
 
@@ -422,7 +423,7 @@ export function AdminMagicManager() {
 
     setIsBalancingAi(true);
     setFeedback("");
-    setBalanceText("");
+    setBalanceAnalysis(null);
     setBalanceDebug(null);
 
     const result = await analyzeMagicBalanceWithAi({
@@ -443,8 +444,15 @@ export function AdminMagicManager() {
       return;
     }
 
-    setBalanceText(result.analysisText);
+    setBalanceAnalysis(result.analysis);
     setFeedback(result.message);
+  }
+
+  function handleApplyBalanceDraft() {
+    if (!balanceAnalysis?.suggestedDraftText) return;
+
+    setDraftText(balanceAnalysis.suggestedDraftText);
+    applyDraftText(balanceAnalysis.suggestedDraftText);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -614,14 +622,68 @@ export function AdminMagicManager() {
               )}
               Analizar balance
             </button>
-            {balanceText ? (
+            {balanceAnalysis ? (
               <div className="mt-4 rounded-[1.2rem] border border-emerald-500/20 bg-stone-950/55 p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
-                  Sugerencia IA
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-200">
+                    {balanceAnalysis.recommendation}
+                  </span>
+                  <span className="text-sm font-bold text-stone-100">
+                    {balanceAnalysis.summary}
+                  </span>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {[
+                    ["Abuso", balanceAnalysis.scores.abuseRisk],
+                    ["Narrativa", balanceAnalysis.scores.narrativeUtility],
+                    ["Claridad", balanceAnalysis.scores.clarity],
+                    ["Curva", balanceAnalysis.scores.powerCurve],
+                  ].map(([label, value]) => (
+                    <div
+                      key={label}
+                      className="rounded-xl border border-stone-800 bg-stone-950/70 px-3 py-2"
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">
+                        {label}
+                      </p>
+                      <p className="mt-1 text-lg font-black text-emerald-200">
+                        {value}/10
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                {balanceAnalysis.risks.length ? (
+                  <div className="mt-3 space-y-2">
+                    {balanceAnalysis.risks.map((risk) => (
+                      <p key={risk} className="text-sm leading-6 text-stone-300">
+                        {risk}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
+                {balanceAnalysis.levelAdjustments.length ? (
+                  <div className="mt-3 space-y-2">
+                    {balanceAnalysis.levelAdjustments.map((entry) => (
+                      <p key={`${entry.level}-${entry.suggestion}`} className="text-sm leading-6 text-stone-300">
+                        <span className="font-bold text-emerald-200">{entry.level}:</span>{" "}
+                        {entry.suggestion}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
+                <p className="mt-3 text-sm font-bold leading-6 text-stone-100">
+                  {balanceAnalysis.verdict}
                 </p>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-stone-200">
-                  {balanceText}
-                </p>
+                {balanceAnalysis.suggestedDraftText ? (
+                  <button
+                    type="button"
+                    onClick={handleApplyBalanceDraft}
+                    className="kd-touch mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/12 px-4 py-3 text-sm font-extrabold text-emerald-100 transition hover:bg-emerald-500/18"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Aplicar al borrador
+                  </button>
+                ) : null}
               </div>
             ) : null}
             <div className="mt-4">

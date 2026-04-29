@@ -1,15 +1,19 @@
 import {
-  readGeminiConfig,
-  readGroqConfig,
-  readNvidiaConfig,
-  requestAiTextWithFallback,
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-  hasTextGenerationProvider,
 } from "./_serverAiProviders.js";
-
-type BalanceMode = "review" | "buff" | "nerf" | "improve";
+import {
+  ensureAiProvider,
+  missingAiProviderMessage,
+  readAiServerConfig,
+  runAiJson,
+} from "./_aiOrchestrator.js";
+import {
+  buildMagicBalancePrompt,
+  normalizeMagicBalanceMode,
+  type MagicBalanceMode,
+} from "./_aiPrompts.js";
 
 type AbilityLevel = {
   level: number;
@@ -21,7 +25,7 @@ type AbilityLevel = {
 };
 
 type MagicBalanceRequest = {
-  mode?: BalanceMode;
+  mode?: MagicBalanceMode;
   focus?: string;
   categoryTitle?: string;
   title?: string;
@@ -30,87 +34,57 @@ type MagicBalanceRequest = {
   includeDebug?: boolean;
 };
 
-function normalizeMode(mode?: string): BalanceMode {
-  if (mode === "buff" || mode === "nerf" || mode === "improve") return mode;
-  return "review";
+type MagicBalanceResponse = {
+  summary: string;
+  recommendation: "maintain" | "buff" | "nerf" | "improve";
+  scores: {
+    abuseRisk: number;
+    narrativeUtility: number;
+    clarity: number;
+    powerCurve: number;
+  };
+  risks: string[];
+  levelAdjustments: Array<{ level: string; suggestion: string }>;
+  suggestedDraftText: string;
+  verdict: string;
+};
+
+function clampScore(value: unknown) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return 5;
+  return Math.max(1, Math.min(10, Math.round(numericValue)));
 }
 
-function summarizeLevels(levels?: Record<number, AbilityLevel[]>) {
-  if (!levels) return "Sin niveles cargados.";
-
-  return [1, 2, 3, 4, 5]
-    .map((level) => {
-      const entries = levels[level] ?? [];
-      if (entries.length === 0) return `Lv${level}: sin habilidades.`;
-
-      return `Lv${level}:\n${entries
-        .map(
-          (entry, index) =>
-            `${index + 1}. ${entry.name}\nEfecto: ${entry.effect}\nCD: ${entry.cd}\nLimitante: ${entry.limit}\nAnti-Mano Negra: ${entry.antiManoNegra}`
-        )
-        .join("\n")}`;
-    })
-    .join("\n\n");
-}
-
-function buildPrompt(input: Required<Omit<MagicBalanceRequest, "includeDebug">>) {
-  const intent =
-    input.mode === "buff"
-      ? "proponer un buff prudente"
-      : input.mode === "nerf"
-        ? "proponer un nerf justo"
-        : input.mode === "improve"
-          ? "mejorar claridad, utilidad narrativa y balance"
-          : "auditar balance general";
-
-  return `
-Actua como balanceador senior de sistemas de magia para Kingdoom.
-
-OBJETIVO
-Debes ${intent} para una magia existente, sin romper el formato actual del grimorio.
-
-CRITERIO DE KINGDOOM
-- Fantasia oscura medieval con base tecnica/cientifica.
-- Cada habilidad debe tener utilidad narrativa y costo real.
-- Evita powergaming, efectos absolutos baratos, cooldowns irreales y contradicciones.
-- Si propones subir poder, compensa con costo, alcance, preparacion, riesgo o CD.
-- Si propones bajar poder, conserva identidad y utilidad de la magia.
-- No inventes cambios masivos si bastan ajustes pequenos.
-- No devuelvas JSON. Devuelve texto breve y accionable.
-
-MAGIA
-Categoria: ${input.categoryTitle}
-Nombre: ${input.title}
-Fundamento:
-${input.description}
-
-Niveles:
-${summarizeLevels(input.levels)}
-
-ENFOQUE DEL STAFF
-${input.focus || "Revisar equilibrio general, abusos posibles y mejoras narrativas."}
-
-FORMATO DE RESPUESTA
-Diagnostico:
-- 2 a 4 puntos.
-
-Riesgos:
-- Abusos o contradicciones principales.
-
-Sugerencia:
-- Indica si conviene Buff, Nerf, Mejora menor o Mantener.
-- Explica por que.
-
-Ajustes por nivel:
-- Lv1:
-- Lv2:
-- Lv3:
-- Lv4:
-- Lv5:
-
-Veredicto:
-- Una decision corta para el staff.
-`.trim();
+function normalizeBalancePayload(payload: Partial<MagicBalanceResponse>) {
+  return {
+    summary: payload.summary?.trim() || "Analisis sin resumen.",
+    recommendation:
+      payload.recommendation === "buff" ||
+      payload.recommendation === "nerf" ||
+      payload.recommendation === "improve"
+        ? payload.recommendation
+        : "maintain",
+    scores: {
+      abuseRisk: clampScore(payload.scores?.abuseRisk),
+      narrativeUtility: clampScore(payload.scores?.narrativeUtility),
+      clarity: clampScore(payload.scores?.clarity),
+      powerCurve: clampScore(payload.scores?.powerCurve),
+    },
+    risks: Array.isArray(payload.risks)
+      ? payload.risks.map((risk) => String(risk).trim()).filter(Boolean).slice(0, 5)
+      : [],
+    levelAdjustments: Array.isArray(payload.levelAdjustments)
+      ? payload.levelAdjustments
+          .map((entry) => ({
+            level: String(entry.level ?? "").trim() || "Lv?",
+            suggestion: String(entry.suggestion ?? "").trim(),
+          }))
+          .filter((entry) => entry.suggestion)
+          .slice(0, 5)
+      : [],
+    suggestedDraftText: payload.suggestedDraftText?.trim() || "",
+    verdict: payload.verdict?.trim() || "Revisar manualmente antes de guardar.",
+  };
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
@@ -124,14 +98,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  const gemini = readGeminiConfig();
-  const groq = readGroqConfig();
-  const nvidia = readNvidiaConfig();
+  const aiConfig = readAiServerConfig();
 
-  if (!hasTextGenerationProvider(gemini, groq, nvidia)) {
+  if (!ensureAiProvider(aiConfig)) {
     return res.status(500).json({
-      message:
-        "Falta GEMINI_API_KEYS/GEMINI_API_KEY, GROQ_API_KEYS/GROQ_API_KEY o NVIDIA_API_KEYS/NVIDIA_API_KEY en el backend.",
+      message: missingAiProviderMessage(),
     });
   }
 
@@ -146,24 +117,22 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   try {
-    const result = await requestAiTextWithFallback({
-      prompt: buildPrompt({
-        mode: normalizeMode(body.mode),
+    const result = await runAiJson<MagicBalanceResponse>({
+      prompt: buildMagicBalancePrompt({
+        mode: normalizeMagicBalanceMode(body.mode),
         focus: body.focus?.trim() || "",
         categoryTitle: body.categoryTitle?.trim() || "General",
         title,
         description: body.description?.trim() || "Sin fundamento cargado.",
         levels: body.levels ?? {},
       }),
-      gemini,
-      groq,
-      nvidia,
       temperature: 0.45,
       topP: 0.82,
+      config: aiConfig,
     });
 
     return res.status(200).json({
-      analysisText: result.text,
+      ...normalizeBalancePayload(result.data),
       ...(includeDebug ? { debug: result.debug } : {}),
     });
   } catch (error) {

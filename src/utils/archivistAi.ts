@@ -1,7 +1,7 @@
 import type { KnowledgeDocument } from "../types";
 import type { AiDebugInfo } from "./aiDebug";
 
-export type ArchivistMode = "canon" | "deep" | "mechanics";
+export type ArchivistMode = "canon" | "deep" | "mechanics" | "narrator" | "staff";
 
 type ArchivistAskResult =
   | {

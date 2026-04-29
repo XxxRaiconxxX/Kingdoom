@@ -188,14 +188,25 @@ export function pickKnowledgeContext(
     .filter((token) => token.length > 2);
 
   const scored = documents.map((document) => {
-    const haystack = `${document.title} ${document.category} ${document.tags.join(" ")} ${document.summary} ${document.content}`
+    const title = document.title
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
-    const score = tokens.reduce(
-      (total, token) => total + (haystack.includes(token) ? 1 : 0),
-      0
-    );
+    const metadata = `${document.type} ${document.category} ${document.tags.join(" ")} ${document.source} ${document.summary}`
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    const content = document.content
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    const score = tokens.reduce((total, token) => {
+      const titleHit = title.includes(token) ? 6 : 0;
+      const metadataHit = metadata.includes(token) ? 3 : 0;
+      const contentHit = content.includes(token) ? 1 : 0;
+
+      return total + titleHit + metadataHit + contentHit;
+    }, 0);
 
     return { document, score };
   });

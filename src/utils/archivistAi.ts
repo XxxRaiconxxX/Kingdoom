@@ -1,6 +1,8 @@
 import type { KnowledgeDocument } from "../types";
 import type { AiDebugInfo } from "./aiDebug";
 
+export type ArchivistMode = "canon" | "deep" | "mechanics";
+
 type ArchivistAskResult =
   | {
       status: "ready";
@@ -39,6 +41,7 @@ function getArchivistEndpoint() {
 export async function askArchivistAi(input: {
   question: string;
   contextDocuments: KnowledgeDocument[];
+  mode?: ArchivistMode;
   includeDebug?: boolean;
 }): Promise<ArchivistAskResult> {
   const response = await fetch(getArchivistEndpoint(), {
@@ -46,6 +49,7 @@ export async function askArchivistAi(input: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       question: input.question,
+      mode: input.mode ?? "canon",
       documents: input.contextDocuments.map((document) => ({
         title: document.title,
         type: document.type,

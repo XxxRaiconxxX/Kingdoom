@@ -19,11 +19,21 @@ type ArchivistDocument = {
   content: string;
 };
 
+type ArchivistMode = "canon" | "deep" | "mechanics";
 
-function buildPrompt(question: string, documents: ArchivistDocument[]) {
+function normalizeMode(mode?: string): ArchivistMode {
+  if (mode === "deep" || mode === "mechanics") return mode;
+  return "canon";
+}
+
+function buildPrompt(
+  question: string,
+  documents: ArchivistDocument[],
+  mode: ArchivistMode
+) {
   const context = documents
     .map((document, index) => {
-      const content = document.content.slice(0, 6500);
+      const content = document.content.slice(0, mode === "deep" ? 9000 : 6500);
       return `
 [${index + 1}] ${document.title}
 Tipo: ${document.type}
@@ -36,19 +46,28 @@ ${content}
 `.trim();
     })
     .join("\n\n---\n\n");
+  const modeInstruction =
+    mode === "deep"
+      ? "Modo profundo: cruza fuentes, separa hechos confirmados de inferencias y da una respuesta mas completa."
+      : mode === "mechanics"
+        ? "Modo mecanicas: prioriza balance, reglas, limites, cooldowns, riesgos de abuso y coherencia de sistema."
+        : "Modo canon: responde directo, con prudencia y sin extenderte mas de lo necesario.";
 
   return `
 Eres el Archivista de Argentis, asistente de consulta para Kingdoom.
 
 Responde usando SOLO la base documental entregada. Si la respuesta no aparece en los documentos, dilo con claridad y sugiere que el staff cargue mas lore.
 
+${modeInstruction}
+
 Reglas:
 - No inventes canon.
 - No des por oficial algo que no este en los documentos.
 - Responde en espanol, con tono claro y elegante.
 - Si hay contradicciones, mencionalas como posible conflicto de fuentes.
-- Mantente breve pero util.
+- Cita nombres de fuentes cuando ayuden a ubicar la respuesta.
 - No uses markdown complejo.
+- Si haces una inferencia, marcala como inferencia.
 
 Pregunta del usuario:
 ${question}
@@ -82,11 +101,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   const body = (req.body ?? {}) as {
     question?: string;
+    mode?: ArchivistMode;
     documents?: ArchivistDocument[];
     includeDebug?: boolean;
   };
   const question = body.question?.trim() ?? "";
   const documents = Array.isArray(body.documents) ? body.documents : [];
+  const mode = normalizeMode(body.mode);
   const includeDebug = body.includeDebug === true;
 
   if (!question) {
@@ -101,12 +122,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   try {
     const result = await requestAiTextWithFallback({
-      prompt: buildPrompt(question, documents),
+      prompt: buildPrompt(question, documents, mode),
       gemini,
       groq,
       nvidia,
-      temperature: 0.35,
-      topP: 0.85,
+      temperature: mode === "mechanics" ? 0.28 : 0.35,
+      topP: mode === "mechanics" ? 0.78 : 0.85,
     });
 
     return res.status(200).json({

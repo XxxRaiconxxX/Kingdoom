@@ -81,7 +81,9 @@ export function AdminAiDebugCard({
       const providerLabel =
         attempt.provider === "gemini"
           ? `g${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`
-          : `groq${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`;
+          : attempt.provider === "groq"
+            ? `groq${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`
+            : `nvidia${attempt.keyIndex ? `#${attempt.keyIndex}` : ""}`;
       const label =
         attempt.status === "success"
           ? "ok"

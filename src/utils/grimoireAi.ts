@@ -1,4 +1,4 @@
-import type { BestiaryEntry, BestiaryRarity } from "../types";
+import type { AbilityLevel, BestiaryEntry, BestiaryRarity } from "../types";
 import type { AiDebugInfo } from "./aiDebug";
 
 export type BestiaryAiRequest = {
@@ -49,6 +49,23 @@ export type MagicAiResponse = {
   debug?: AiDebugInfo;
 };
 
+export type MagicBalanceMode = "review" | "buff" | "nerf" | "improve";
+
+export type MagicBalanceAiRequest = {
+  mode: MagicBalanceMode;
+  focus?: string;
+  categoryTitle: string;
+  title: string;
+  description: string;
+  levels: Record<number, AbilityLevel[]>;
+  includeDebug?: boolean;
+};
+
+export type MagicBalanceAiResponse = {
+  analysisText: string;
+  debug?: AiDebugInfo;
+};
+
 function deriveEndpoint(pathname: string) {
   const missionUrl = import.meta.env.VITE_MISSION_AI_API_URL?.trim();
   if (missionUrl?.includes("/generate-mission")) {
@@ -70,6 +87,15 @@ function resolveBestiaryAiEndpoint() {
 function resolveMagicAiEndpoint() {
   const configuredUrl = import.meta.env.VITE_MAGIC_AI_API_URL?.trim();
   return configuredUrl || deriveEndpoint("/generate-magic") || "/api/admin/generate-magic";
+}
+
+function resolveMagicBalanceAiEndpoint() {
+  const configuredUrl = import.meta.env.VITE_MAGIC_BALANCE_AI_API_URL?.trim();
+  return (
+    configuredUrl ||
+    deriveEndpoint("/analyze-magic-balance") ||
+    "/api/admin/analyze-magic-balance"
+  );
 }
 
 export async function generateBestiaryWithAi(input: BestiaryAiRequest) {
@@ -134,6 +160,38 @@ export async function generateMagicDraftWithAi(input: MagicAiRequest) {
     message: "Magia generada por IA. Se interpreto el formato y ya puedes revisarla.",
     draftText: payload.draftText,
     promptSummary: payload.promptSummary ?? "",
+    debug: payload.debug ?? null,
+  };
+}
+
+export async function analyzeMagicBalanceWithAi(input: MagicBalanceAiRequest) {
+  const response = await fetch(resolveMagicBalanceAiEndpoint(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  const payload = (await response.json().catch(() => null)) as
+    | ({ message?: string; debug?: AiDebugInfo } & Partial<MagicBalanceAiResponse>)
+    | null;
+
+  if (!response.ok || !payload?.analysisText) {
+    return {
+      status: "error" as const,
+      message:
+        payload?.message ||
+        "No se pudo analizar la magia con IA. Revisa la configuracion del endpoint.",
+      analysisText: "",
+      debug: payload?.debug ?? null,
+    };
+  }
+
+  return {
+    status: "ready" as const,
+    message: "Analisis generado. Usa la sugerencia como criterio de staff.",
+    analysisText: payload.analysisText,
     debug: payload.debug ?? null,
   };
 }

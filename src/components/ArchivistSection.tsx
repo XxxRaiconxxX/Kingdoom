@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BookMarked, FileSearch, Loader2, Send, Sparkles } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { askArchivistAi } from "../utils/archivistAi";
+import type { ArchivistMode } from "../utils/archivistAi";
 import { fetchArchivistKnowledgeDocuments } from "../utils/archivistSources";
 import { pickKnowledgeContext } from "../utils/knowledge";
 import type { KnowledgeDocument } from "../types";
@@ -27,6 +28,7 @@ export function ArchivistSection() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [isAsking, setIsAsking] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [mode, setMode] = useState<ArchivistMode>("canon");
 
   useEffect(() => {
     let cancelled = false;
@@ -57,7 +59,11 @@ export function ArchivistSection() {
     const cleanQuestion = question.trim();
     if (!cleanQuestion || isAsking) return;
 
-    const contextDocuments = pickKnowledgeContext(documents, cleanQuestion, 6);
+    const contextDocuments = pickKnowledgeContext(
+      documents,
+      cleanQuestion,
+      mode === "deep" ? 10 : mode === "mechanics" ? 8 : 6
+    );
 
     if (contextDocuments.length === 0) {
       setFeedback("Todavia no hay documentos visibles para consultar.");
@@ -78,6 +84,7 @@ export function ArchivistSection() {
     const result = await askArchivistAi({
       question: cleanQuestion,
       contextDocuments,
+      mode,
     });
 
     setIsAsking(false);
@@ -152,6 +159,26 @@ export function ArchivistSection() {
           </div>
 
           <div className="border-t border-stone-800 p-3 md:p-4">
+            <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+              {[
+                ["canon", "Canon"],
+                ["deep", "Profundo"],
+                ["mechanics", "Mecanicas"],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setMode(value as ArchivistMode)}
+                  className={`kd-touch shrink-0 rounded-full border px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
+                    mode === value
+                      ? "border-amber-400/40 bg-amber-500/14 text-amber-200"
+                      : "border-stone-700 bg-stone-950/60 text-stone-400"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <div className="flex gap-2">
               <input
                 type="text"

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import { BookOpen, Flower2, ImagePlus, Loader2, PawPrint, Sparkles, Trash2 } from "lucide-react";
+import { BookOpen, Flower2, ImagePlus, Loader2, PawPrint, Scale, Sparkles, Trash2 } from "lucide-react";
 import type { AbilityLevel, BestiaryEntry, BestiaryRarity, FloraEntry, MagicStyle } from "../types";
 import {
   BESTIARY_RARITIES,
@@ -21,9 +21,11 @@ import {
   ExpandableListToggle,
 } from "./admin/AdminControlPrimitives";
 import {
+  analyzeMagicBalanceWithAi,
   generateBestiaryWithAi,
   generateMagicDraftWithAi,
 } from "../utils/grimoireAi";
+import type { MagicBalanceMode } from "../utils/grimoireAi";
 import type { AiDebugInfo } from "../utils/aiDebug";
 
 type AdminMagicStyle = MagicStyle & {
@@ -287,6 +289,11 @@ export function AdminMagicManager() {
     "optional"
   );
   const [aiScientificAngle, setAiScientificAngle] = useState("");
+  const [balanceMode, setBalanceMode] = useState<MagicBalanceMode>("review");
+  const [balanceFocus, setBalanceFocus] = useState("");
+  const [balanceText, setBalanceText] = useState("");
+  const [balanceDebug, setBalanceDebug] = useState<AiDebugInfo | null>(null);
+  const [isBalancingAi, setIsBalancingAi] = useState(false);
 
   async function loadStyles() {
     const result = await fetchAdminMagicStyles();
@@ -329,6 +336,8 @@ export function AdminMagicManager() {
     setShowAdvancedLevels(false);
     setFeedback("");
     setAiDebug(null);
+    setBalanceText("");
+    setBalanceDebug(null);
   }
 
   function preloadStyle(style: AdminMagicStyle) {
@@ -342,6 +351,8 @@ export function AdminMagicManager() {
     setShowAdvancedLevels(false);
     setFeedback("");
     setAiDebug(null);
+    setBalanceText("");
+    setBalanceDebug(null);
   }
 
   function applyDraftText(raw: string) {
@@ -392,6 +403,48 @@ export function AdminMagicManager() {
 
     setDraftText(result.draftText);
     applyDraftText(result.draftText);
+  }
+
+  async function handleBalanceWithAi() {
+    if (!title.trim()) {
+      setFeedback("Selecciona o carga una magia antes de analizar balance.");
+      return;
+    }
+
+    let levels: Record<number, AbilityLevel[]>;
+
+    try {
+      levels = parseLevels(levelsText);
+    } catch {
+      setFeedback("No puedo analizar: el JSON Lv1-Lv5 no es valido.");
+      return;
+    }
+
+    setIsBalancingAi(true);
+    setFeedback("");
+    setBalanceText("");
+    setBalanceDebug(null);
+
+    const result = await analyzeMagicBalanceWithAi({
+      mode: balanceMode,
+      focus: balanceFocus,
+      categoryTitle,
+      title,
+      description,
+      levels,
+      includeDebug: true,
+    });
+
+    setIsBalancingAi(false);
+    setBalanceDebug(result.debug ?? null);
+
+    if (result.status !== "ready") {
+      setFeedback(result.message);
+      return;
+    }
+
+    setBalanceText(result.analysisText);
+    setFeedback(result.message);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -519,6 +572,60 @@ export function AdminMagicManager() {
             </button>
             <div className="mt-4">
               <AdminAiDebugCard debug={aiDebug} />
+            </div>
+          </div>
+
+          <div className="rounded-[1.4rem] border border-emerald-500/20 bg-emerald-500/5 p-4">
+            <div className="flex items-center gap-2">
+              <Scale className="h-4 w-4 text-emerald-300" />
+              <p className="text-sm font-bold text-stone-100">Balanceador</p>
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-[0.42fr_1fr]">
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-stone-200">Modo</span>
+                <select
+                  value={balanceMode}
+                  onChange={(event) => setBalanceMode(event.target.value as MagicBalanceMode)}
+                  className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-emerald-400/40 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.08)]"
+                >
+                  <option value="review">Revisar</option>
+                  <option value="buff">Buff</option>
+                  <option value="nerf">Nerf</option>
+                  <option value="improve">Mejorar</option>
+                </select>
+              </label>
+              <AdminTextField
+                label="Enfoque"
+                value={balanceFocus}
+                onChange={setBalanceFocus}
+                placeholder="Ej: revisar abuso en Lv4 o volverla mas narrativa."
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => void handleBalanceWithAi()}
+              disabled={isBalancingAi}
+              className="kd-touch mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-extrabold text-emerald-100 transition hover:bg-emerald-500/15 disabled:opacity-60"
+            >
+              {isBalancingAi ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Scale className="h-4 w-4" />
+              )}
+              Analizar balance
+            </button>
+            {balanceText ? (
+              <div className="mt-4 rounded-[1.2rem] border border-emerald-500/20 bg-stone-950/55 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
+                  Sugerencia IA
+                </p>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-stone-200">
+                  {balanceText}
+                </p>
+              </div>
+            ) : null}
+            <div className="mt-4">
+              <AdminAiDebugCard debug={balanceDebug} />
             </div>
           </div>
 

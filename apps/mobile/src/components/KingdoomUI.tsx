@@ -25,11 +25,11 @@ export function RealmCard({
   return (
     <View
       style={{
-        borderRadius: 18,
+        borderRadius: 16,
         borderWidth: 1,
         borderColor,
         backgroundColor: "rgba(17,16,13,0.92)",
-        padding: 14,
+        padding: 12,
         gap: 10,
         overflow: "hidden",
       }}
@@ -303,7 +303,10 @@ export function ErrorPanel({
 }) {
   return (
     <RealmCard tone="danger">
-      <Text style={{ color: MOBILE_THEME.danger, lineHeight: 20 }}>{message}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+        <MaterialIcons name="sync-problem" size={18} color={MOBILE_THEME.danger} />
+        <Text style={{ color: MOBILE_THEME.danger, lineHeight: 19, flex: 1 }}>{message}</Text>
+      </View>
       {onRetry ? <PrimaryAction label="Reintentar" icon="refresh" variant="ghost" onPress={onRetry} /> : null}
     </RealmCard>
   );

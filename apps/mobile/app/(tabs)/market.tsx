@@ -217,42 +217,44 @@ export default function MarketScreen() {
         </RealmCard>
       </StaggerItem>
 
-      <StaggerItem index={1}>
-        <RealmCard tone="teal">
-          <SectionHeader eyebrow="Categorias" title="Resumen rapido" />
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-            {(Object.keys(CATEGORY_META) as MarketCategoryId[]).map((category) => {
-              const meta = CATEGORY_META[category];
-              return (
-                <Pressable
-                  key={category}
-                  onPress={() => setCategoryFilter(category)}
-                  style={({ pressed }) => ({
-                    width: "47.5%",
-                    minHeight: 84,
-                    borderRadius: 15,
-                    borderWidth: 1,
-                    borderColor: categoryFilter === category ? "rgba(240,179,47,0.7)" : MOBILE_THEME.border,
-                    backgroundColor: pressed || categoryFilter === category ? "rgba(240,179,47,0.1)" : "rgba(5,5,4,0.58)",
-                    padding: 12,
-                    justifyContent: "space-between",
-                  })}
-                >
-                  <MaterialIcons
-                    name={meta.icon}
-                    size={20}
-                    color={meta.tone === "teal" ? MOBILE_THEME.teal : MOBILE_THEME.gold}
-                  />
-                  <View>
-                    <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>{meta.title}</Text>
-                    <Text style={{ color: MOBILE_THEME.dimText, fontSize: 11 }}>{categoryStats[category]} items</Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
-        </RealmCard>
-      </StaggerItem>
+      {sortedItems.length > 0 ? (
+        <StaggerItem index={1}>
+          <RealmCard tone="teal">
+            <SectionHeader eyebrow="Categorias" title="Resumen rapido" />
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {(Object.keys(CATEGORY_META) as MarketCategoryId[]).map((category) => {
+                const meta = CATEGORY_META[category];
+                return (
+                  <Pressable
+                    key={category}
+                    onPress={() => setCategoryFilter(category)}
+                    style={({ pressed }) => ({
+                      width: "47.5%",
+                      minHeight: 78,
+                      borderRadius: 14,
+                      borderWidth: 1,
+                      borderColor: categoryFilter === category ? "rgba(240,179,47,0.7)" : MOBILE_THEME.border,
+                      backgroundColor: pressed || categoryFilter === category ? "rgba(240,179,47,0.1)" : "rgba(5,5,4,0.58)",
+                      padding: 11,
+                      justifyContent: "space-between",
+                    })}
+                  >
+                    <MaterialIcons
+                      name={meta.icon}
+                      size={19}
+                      color={meta.tone === "teal" ? MOBILE_THEME.teal : MOBILE_THEME.gold}
+                    />
+                    <View>
+                      <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>{meta.title}</Text>
+                      <Text style={{ color: MOBILE_THEME.dimText, fontSize: 11 }}>{categoryStats[category]} items</Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </RealmCard>
+        </StaggerItem>
+      ) : null}
 
       {marketQuery.isLoading ? (
         <StaggerItem index={2}>
@@ -397,7 +399,7 @@ export default function MarketScreen() {
         );
       })}
 
-      {!marketQuery.isLoading && filteredItems.length === 0 ? (
+      {!marketQuery.isLoading && !marketQuery.data?.errorMessage && filteredItems.length === 0 ? (
         <EmptyState title="Sin items" message="No hay objetos para ese filtro." icon="inventory-2" />
       ) : null}
 

@@ -5,7 +5,7 @@ import type {
   FloraEntry,
   MagicStyle,
 } from "@/src/features/shared/types";
-import { supabase, supabaseConfigError } from "@/src/services/supabase";
+import { formatSupabaseReadError, supabase, supabaseConfigError } from "@/src/services/supabase";
 
 type MagicStyleRow = {
   id: string;
@@ -129,10 +129,8 @@ export async function fetchGrimoireNative() {
       .order("name", { ascending: true }),
   ]);
 
-  const errorMessage =
-    magicResult.error || bestiaryResult.error || floraResult.error
-      ? "No se pudo cargar todo el grimorio desde Supabase."
-      : "";
+  const firstError = magicResult.error || bestiaryResult.error || floraResult.error;
+  const errorMessage = firstError ? formatSupabaseReadError("el grimorio", firstError) : "";
 
   return {
     magic: ((magicResult.data ?? []) as MagicStyleRow[]).map(mapMagicStyle),

@@ -215,7 +215,7 @@ export default function GrimoireScreen() {
           ))
         : null}
 
-      {!grimoireQuery.isLoading && activeCount === 0 ? (
+      {!grimoireQuery.isLoading && !grimoireQuery.data?.errorMessage && activeCount === 0 ? (
         <EmptyState title="Sin entradas" message="No hay registros para esta busqueda." icon="auto-stories" />
       ) : null}
 

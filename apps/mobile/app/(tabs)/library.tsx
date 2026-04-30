@@ -425,11 +425,11 @@ export default function LibraryScreen() {
             );
           })}
 
-      {!isLoading && mode === "events" && filteredEvents.length === 0 ? (
+      {!isLoading && !activeError && mode === "events" && filteredEvents.length === 0 ? (
         <EmptyState title="Sin eventos" message="No hay eventos para ese filtro." icon="event-busy" />
       ) : null}
 
-      {!isLoading && mode === "missions" && filteredMissions.length === 0 ? (
+      {!isLoading && !activeError && mode === "missions" && filteredMissions.length === 0 ? (
         <EmptyState title="Sin misiones" message="No hay misiones publicadas." icon="flag" />
       ) : null}
 

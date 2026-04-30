@@ -98,7 +98,7 @@ function MessageCard({ message }: { message: ChatMessage }) {
           </Text>
           {message.sources.slice(0, 4).map((source, index) => (
             <Text key={`${source.title}-${index}`} style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-              {source.title} · {TYPE_LABELS[source.type] ?? source.type}
+              {source.title} - {TYPE_LABELS[source.type] ?? source.type}
             </Text>
           ))}
         </View>
@@ -117,7 +117,7 @@ export default function ArchivistScreen() {
       id: "welcome",
       role: "archivist",
       content:
-        "Pregunta por lore, magias, bestias, flora, misiones o eventos. Respondo usando el archivo disponible de Kingdoom.",
+        "Pregunta por lore, magias, bestias, flora, misiones o eventos.",
     },
   ]);
   const [isAsking, setIsAsking] = useState(false);
@@ -340,7 +340,7 @@ export default function ArchivistScreen() {
                 Posibles fuentes
               </Text>
               <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 19 }} numberOfLines={3}>
-                {likelySources.map((source) => source.title).join(" · ")}
+                {likelySources.map((source) => source.title).join(" - ")}
               </Text>
             </View>
           ) : null}

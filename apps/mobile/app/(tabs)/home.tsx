@@ -96,7 +96,7 @@ export default function HomeScreen() {
 
   return (
     <ScreenShell
-      title="Kingdoom Native"
+      title="Kingdoom"
       subtitle="Perfil, oro y pulso del reino"
       rightSlot={
         player ? (

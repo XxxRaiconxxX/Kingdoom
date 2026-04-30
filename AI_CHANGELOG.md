@@ -32,6 +32,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 30/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/src/services/supabase.ts`, `apps/mobile/src/features/session/sessionStore.ts`, `apps/mobile/src/features/grimoire/grimoireService.ts`, `apps/mobile/src/features/events/eventsService.ts`, `apps/mobile/src/features/market/marketService.ts`, `apps/mobile/src/features/missions/missionsService.ts`, `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/src/components/ScreenShell.tsx`, `apps/mobile/app/(tabs)/home.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/app/(tabs)/grimoire.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/archivist.tsx`, `apps/mobile/README.md`
+*   **Resumen de Tareas:** Se revisaron los errores de carga vistos en la APK beta y se compacto la UI nativa para mostrar estados mas simples, utiles y menos redundantes.
+*   **Cambios Clave:**
+    *   Los errores de Supabase ahora distinguen configuracion faltante, tablas ausentes, permisos RLS y cambios de columnas.
+    *   Inicio acepta coincidencias parciales de jugador cuando hay un solo resultado y evita mensajes confusos al conectar perfil.
+    *   Mercado, Biblioteca y Grimorio ya no mezclan error con estados vacios, reduciendo ruido visual en mobile.
+    *   Las tarjetas, cabeceras y paneles de error se compactaron para iPhone y Android sin perder informacion accionable.
+    *   El Archivista se limpio con textos mas breves y separadores consistentes.
+*   **Notas/Advertencias:** Validado con `npm run typecheck` en `apps/mobile`, `npx tsc --noEmit` y `npm run build`. La APK beta necesita variables `EXPO_PUBLIC_*` configuradas en EAS para conectar Supabase.
+
+### [Fecha: 30/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/home.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/app/(tabs)/grimoire.tsx`
 *   **Resumen de Tareas:** Se avanzaron las Fases 4, 5 y 6 de nivelacion nativa con mejoras de navegacion, mercado y grimorio sin tocar reglas de economia ni SQL.
 *   **Cambios Clave:**

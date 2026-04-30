@@ -62,7 +62,7 @@ export function ScreenShell({
       />
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 18, gap: 14, paddingBottom: 118 }}
+        contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 16, gap: 12, paddingBottom: 118 }}
         style={{ flex: 1 }}
         refreshControl={
           onRefresh ? (
@@ -80,10 +80,10 @@ export function ScreenShell({
               <Text style={{ color: MOBILE_THEME.gold, fontSize: 11, fontWeight: "900", textTransform: "uppercase" }}>
                 {eyebrow}
               </Text>
-              <Text style={{ color: MOBILE_THEME.text, fontSize: 31, fontWeight: "900", marginTop: 6 }}>
+              <Text style={{ color: MOBILE_THEME.text, fontSize: 29, fontWeight: "900", marginTop: 6 }}>
                 {title}
               </Text>
-              <Text style={{ color: MOBILE_THEME.mutedText, marginTop: 7, lineHeight: 20, fontSize: 14 }}>
+              <Text style={{ color: MOBILE_THEME.mutedText, marginTop: 6, lineHeight: 19, fontSize: 13 }}>
                 {subtitle}
               </Text>
             </View>
@@ -100,7 +100,7 @@ export function ScreenShell({
         <Animated.View
           entering={FadeInDown.delay(80).duration(460).easing(entranceCurve)}
           layout={LinearTransition.duration(180)}
-          style={{ gap: 14 }}
+          style={{ gap: 12 }}
         >
           {children}
         </Animated.View>

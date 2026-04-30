@@ -13,6 +13,15 @@ Base nativa de la app movil de Kingdoom usando Expo + React Native + Expo Router
 2. Completa:
    - `EXPO_PUBLIC_SUPABASE_URL`
    - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+   - `EXPO_PUBLIC_ARCHIVIST_AI_API_URL`
+
+Para builds de EAS, estas variables tambien deben existir en Expo/EAS dentro del entorno usado (`preview` para APK beta). No alcanza con tener `VITE_SUPABASE_URL` en Vercel, porque la app nativa lee variables `EXPO_PUBLIC_*` durante el build.
+
+Variables minimas para APK beta:
+
+- `EXPO_PUBLIC_SUPABASE_URL`
+- `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+- `EXPO_PUBLIC_ARCHIVIST_AI_API_URL`
 
 ## Comandos desde raiz del repo
 

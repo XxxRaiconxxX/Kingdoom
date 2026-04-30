@@ -4,7 +4,7 @@ import type {
   RealmEventParticipant,
   RealmEventParticipationStatus,
 } from "@/src/features/shared/types";
-import { supabase, supabaseConfigError } from "@/src/services/supabase";
+import { formatSupabaseReadError, supabase, supabaseConfigError } from "@/src/services/supabase";
 
 type RealmEventRow = {
   id: string;
@@ -126,7 +126,7 @@ export async function fetchRealmEventsNative() {
   if (error) {
     return {
       events: [] as RealmEvent[],
-      errorMessage: "No se pudieron cargar los eventos desde Supabase.",
+      errorMessage: formatSupabaseReadError("los eventos", error),
     };
   }
 
@@ -166,7 +166,7 @@ export async function fetchPublicEventParticipantsNative(eventIds: string[]) {
   if (error || !data) {
     return {
       participantsByEventId: {} as Record<string, RealmEventParticipant[]>,
-      errorMessage: "No se pudieron cargar los participantes.",
+      errorMessage: formatSupabaseReadError("los participantes", error),
     };
   }
 
@@ -213,7 +213,7 @@ export async function fetchPlayerEventParticipationsNative(
   if (error || !data) {
     return {
       participationsByEventId: {} as Record<string, RealmEventParticipant>,
-      errorMessage: "No se pudo leer tu estado en eventos.",
+      errorMessage: formatSupabaseReadError("tu estado en eventos", error),
     };
   }
 

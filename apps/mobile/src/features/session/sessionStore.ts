@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { supabase, supabaseConfigError } from "@/src/services/supabase";
+import { formatSupabaseReadError, supabase, supabaseConfigError } from "@/src/services/supabase";
 
 type SessionPlayer = {
   id: string;
@@ -44,14 +44,55 @@ export const useSessionStore = create<SessionState>()(
         const { data, error } = await supabase
           .from("players")
           .select("id, username, gold")
-          .eq("username", normalized)
-          .maybeSingle();
+          .ilike("username", normalized)
+          .limit(1);
 
-        if (error || !data) {
+        const exactPlayer = data?.[0];
+
+        if (error) {
           set({
             isLoading: false,
             player: null,
-            errorMessage: "No se encontro ese jugador en Supabase.",
+            errorMessage: formatSupabaseReadError("los jugadores", error),
+          });
+          return;
+        }
+
+        if (!exactPlayer) {
+          const { data: partialData, error: partialError } = await supabase
+            .from("players")
+            .select("id, username, gold")
+            .ilike("username", `%${normalized}%`)
+            .limit(2);
+
+          if (partialError) {
+            set({
+              isLoading: false,
+              player: null,
+              errorMessage: formatSupabaseReadError("los jugadores", partialError),
+            });
+            return;
+          }
+
+          if (!partialData || partialData.length !== 1) {
+            set({
+              isLoading: false,
+              player: null,
+              errorMessage:
+                partialData && partialData.length > 1
+                  ? "Hay varios jugadores parecidos. Escribe el nombre completo."
+                  : "No se encontro ese jugador. Usa el nombre registrado por el staff.",
+            });
+            return;
+          }
+
+          set({
+            isLoading: false,
+            player: {
+              id: partialData[0].id,
+              username: partialData[0].username,
+              gold: Number(partialData[0].gold ?? 0),
+            },
           });
           return;
         }
@@ -59,9 +100,9 @@ export const useSessionStore = create<SessionState>()(
         set({
           isLoading: false,
           player: {
-            id: data.id,
-            username: data.username,
-            gold: Number(data.gold ?? 0),
+            id: exactPlayer.id,
+            username: exactPlayer.username,
+            gold: Number(exactPlayer.gold ?? 0),
           },
         });
       },
@@ -82,7 +123,7 @@ export const useSessionStore = create<SessionState>()(
           .maybeSingle();
 
         if (error || !data) {
-          set({ errorMessage: "No se pudo refrescar el oro actual." });
+          set({ errorMessage: formatSupabaseReadError("el oro actual", error) });
           return;
         }
 

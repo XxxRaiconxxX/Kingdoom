@@ -1,5 +1,5 @@
 import type { MarketItem, MarketCategoryId, Rarity, StockStatus } from "@/src/features/shared/types";
-import { supabase, supabaseConfigError } from "@/src/services/supabase";
+import { formatSupabaseReadError, supabase, supabaseConfigError } from "@/src/services/supabase";
 
 type MarketItemRow = {
   id: string;
@@ -48,7 +48,7 @@ export async function fetchMarketItemsNative() {
   if (error) {
     return {
       items: [] as MarketItem[],
-      errorMessage: "No se pudo cargar el mercado desde Supabase.",
+      errorMessage: formatSupabaseReadError("el mercado", error),
     };
   }
 

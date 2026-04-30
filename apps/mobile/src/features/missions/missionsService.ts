@@ -6,7 +6,7 @@ import type {
   RealmMissionClaim,
   RealmMissionClaimStatus,
 } from "@/src/features/shared/types";
-import { supabase, supabaseConfigError } from "@/src/services/supabase";
+import { formatSupabaseReadError, supabase, supabaseConfigError } from "@/src/services/supabase";
 
 type RealmMissionRow = {
   id: string;
@@ -93,7 +93,7 @@ export async function fetchMissionsNative() {
   if (error) {
     return {
       missions: [] as RealmMission[],
-      errorMessage: "No se pudieron cargar las misiones desde Supabase.",
+      errorMessage: formatSupabaseReadError("las misiones", error),
     };
   }
 
@@ -137,7 +137,7 @@ export async function fetchPlayerMissionClaimsNative(
   if (error || !data) {
     return {
       claimsByMissionId: {} as Record<string, RealmMissionClaim>,
-      errorMessage: "No se pudo leer tu estado de misiones.",
+      errorMessage: formatSupabaseReadError("tu estado de misiones", error),
     };
   }
 

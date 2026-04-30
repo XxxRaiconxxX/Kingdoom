@@ -27,6 +27,7 @@ type SelectedEntry =
 export default function GrimoireScreen() {
   const [mode, setMode] = useState<GrimoireMode>("magic");
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedEntry, setSelectedEntry] = useState<SelectedEntry>(null);
   const grimoireQuery = useQuery({ queryKey: ["grimoire-native"], queryFn: fetchGrimoireNative });
 
@@ -36,39 +37,56 @@ export default function GrimoireScreen() {
     () =>
       (grimoireQuery.data?.magic ?? []).filter(
         (entry) =>
-          !normalized ||
-          entry.title.toLowerCase().includes(normalized) ||
-          entry.categoryTitle.toLowerCase().includes(normalized) ||
-          entry.description.toLowerCase().includes(normalized)
+          (!normalized ||
+            entry.title.toLowerCase().includes(normalized) ||
+            entry.categoryTitle.toLowerCase().includes(normalized) ||
+            entry.description.toLowerCase().includes(normalized)) &&
+          (categoryFilter === "all" || entry.categoryTitle === categoryFilter)
       ),
-    [grimoireQuery.data?.magic, normalized]
+    [categoryFilter, grimoireQuery.data?.magic, normalized]
   );
 
   const bestiary = useMemo(
     () =>
       (grimoireQuery.data?.bestiary ?? []).filter(
         (entry) =>
-          !normalized ||
-          entry.name.toLowerCase().includes(normalized) ||
-          entry.category.toLowerCase().includes(normalized) ||
-          entry.type.toLowerCase().includes(normalized)
+          (!normalized ||
+            entry.name.toLowerCase().includes(normalized) ||
+            entry.category.toLowerCase().includes(normalized) ||
+            entry.type.toLowerCase().includes(normalized)) &&
+          (categoryFilter === "all" || entry.category === categoryFilter)
       ),
-    [grimoireQuery.data?.bestiary, normalized]
+    [categoryFilter, grimoireQuery.data?.bestiary, normalized]
   );
 
   const flora = useMemo(
     () =>
       (grimoireQuery.data?.flora ?? []).filter(
         (entry) =>
-          !normalized ||
-          entry.name.toLowerCase().includes(normalized) ||
-          entry.category.toLowerCase().includes(normalized) ||
-          entry.type.toLowerCase().includes(normalized)
+          (!normalized ||
+            entry.name.toLowerCase().includes(normalized) ||
+            entry.category.toLowerCase().includes(normalized) ||
+            entry.type.toLowerCase().includes(normalized)) &&
+          (categoryFilter === "all" || entry.category === categoryFilter)
       ),
-    [grimoireQuery.data?.flora, normalized]
+    [categoryFilter, grimoireQuery.data?.flora, normalized]
   );
 
   const activeCount = mode === "magic" ? magic.length : mode === "bestiary" ? bestiary.length : flora.length;
+  const activeCategories = useMemo(() => {
+    const source =
+      mode === "magic"
+        ? (grimoireQuery.data?.magic ?? []).map((entry) => entry.categoryTitle)
+        : mode === "bestiary"
+          ? (grimoireQuery.data?.bestiary ?? []).map((entry) => entry.category)
+          : (grimoireQuery.data?.flora ?? []).map((entry) => entry.category);
+    return Array.from(new Set(source.filter(Boolean))).slice(0, 8);
+  }, [grimoireQuery.data?.bestiary, grimoireQuery.data?.flora, grimoireQuery.data?.magic, mode]);
+
+  function selectMode(nextMode: GrimoireMode) {
+    setMode(nextMode);
+    setCategoryFilter("all");
+  }
 
   return (
     <ScreenShell
@@ -89,11 +107,26 @@ export default function GrimoireScreen() {
           <SearchInput value={search} onChangeText={setSearch} placeholder="Buscar entrada" />
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={{ flexDirection: "row", gap: 8 }}>
-              <Pill label="Magias" icon="auto-stories" active={mode === "magic"} onPress={() => setMode("magic")} />
-              <Pill label="Bestiario" icon="pets" active={mode === "bestiary"} onPress={() => setMode("bestiary")} />
-              <Pill label="Flora" icon="local-florist" active={mode === "flora"} onPress={() => setMode("flora")} />
+              <Pill label={`Magias ${grimoireQuery.data?.magic.length ?? 0}`} icon="auto-stories" active={mode === "magic"} onPress={() => selectMode("magic")} />
+              <Pill label={`Bestiario ${grimoireQuery.data?.bestiary.length ?? 0}`} icon="pets" active={mode === "bestiary"} onPress={() => selectMode("bestiary")} />
+              <Pill label={`Flora ${grimoireQuery.data?.flora.length ?? 0}`} icon="local-florist" active={mode === "flora"} onPress={() => selectMode("flora")} />
             </View>
           </ScrollView>
+          {activeCategories.length ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <Pill label="Todo" active={categoryFilter === "all"} onPress={() => setCategoryFilter("all")} />
+                {activeCategories.map((category) => (
+                  <Pill
+                    key={category}
+                    label={category}
+                    active={categoryFilter === category}
+                    onPress={() => setCategoryFilter(category)}
+                  />
+                ))}
+              </View>
+            </ScrollView>
+          ) : null}
         </RealmCard>
       </StaggerItem>
 
@@ -233,11 +266,13 @@ function MagicDetail({ entry }: { entry: MagicStyle }) {
       {levels.map(([level, abilities]) => (
         <RealmCard key={level}>
           <SectionHeader eyebrow={`Lv ${level}`} title={`Habilidades (${abilities.length})`} />
-          {abilities.slice(0, 3).map((ability) => (
+          {abilities.map((ability) => (
             <View key={`${level}-${ability.name}`} style={{ gap: 4 }}>
               <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>{ability.name}</Text>
               <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 19 }}>{ability.effect}</Text>
               <Text style={{ color: MOBILE_THEME.dimText, fontSize: 12 }}>CD: {ability.cd}</Text>
+              <Text style={{ color: MOBILE_THEME.dimText, fontSize: 12 }}>Limite: {ability.limit}</Text>
+              <Text style={{ color: MOBILE_THEME.dimText, fontSize: 12 }}>Anti abuso: {ability.antiManoNegra}</Text>
             </View>
           ))}
         </RealmCard>
@@ -252,6 +287,7 @@ function BestiaryDetail({ entry }: { entry: BestiaryEntry }) {
       <Text style={{ color: MOBILE_THEME.text, lineHeight: 22 }}>{entry.description}</Text>
       <Text style={{ color: MOBILE_THEME.gold, fontWeight: "900" }}>Amenaza: {entry.threatLevel}</Text>
       <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Datos: {entry.generalData}</Text>
+      <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Origen: {entry.originPlace}</Text>
       <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Habitat: {entry.foundAt}</Text>
       <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Habilidad: {entry.ability}</Text>
       <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Domesticacion: {entry.domestication}</Text>
@@ -267,6 +303,7 @@ function FloraDetail({ entry }: { entry: FloraEntry }) {
       <Text style={{ color: MOBILE_THEME.gold, fontWeight: "900" }}>Rareza: {entry.rarity}</Text>
       <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Datos: {entry.generalData}</Text>
       <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Propiedades: {entry.properties}</Text>
+      <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Origen: {entry.originPlace}</Text>
       <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Donde se encuentra: {entry.foundAt}</Text>
       <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>Uso: {entry.usage}</Text>
     </RealmCard>

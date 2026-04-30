@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 30/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/home.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/app/(tabs)/grimoire.tsx`
+*   **Resumen de Tareas:** Se avanzaron las Fases 4, 5 y 6 de nivelacion nativa con mejoras de navegacion, mercado y grimorio sin tocar reglas de economia ni SQL.
+*   **Cambios Clave:**
+    *   Inicio ahora funciona como mesa de mando con actividad destacada y accesos rapidos a misiones, mercado, grimorio y Archivista.
+    *   Mercado suma oro visible, conteos por categoria, resumen compacto de categorias, total por compra y bloqueo visual si no alcanza el oro.
+    *   Grimorio suma conteos por seccion, filtros por categoria y detalles mas completos de magias, bestiario y flora.
+    *   Se mantuvo un enfoque mobile-first con tarjetas compactas, chips horizontales y sin textos redundantes.
+*   **Notas/Advertencias:** Validado con `npm run typecheck` en `apps/mobile`. No se modificaron recompensas, precios, RPC ni estructura de Supabase.
+
+### [Fecha: 30/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/archivist.tsx`, `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/src/features/archivist/archivistService.ts`, `apps/mobile/src/features/shared/types.ts`, `apps/mobile/.env.example`
 *   **Resumen de Tareas:** Se avanzo la Fase 3 de nivelacion de la app nativa con un Archivista IA propio, sin WebView y sin exponer claves en el APK.
 *   **Cambios Clave:**

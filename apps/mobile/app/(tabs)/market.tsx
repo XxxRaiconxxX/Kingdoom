@@ -29,6 +29,13 @@ const CATEGORY_FILTERS: Array<{ id: "all" | MarketCategoryId; label: string }> =
   { id: "others", label: "Otros" },
 ];
 
+const CATEGORY_META: Record<MarketCategoryId, { title: string; icon: keyof typeof MaterialIcons.glyphMap; tone: "gold" | "teal" | "default" }> = {
+  potions: { title: "Pociones", icon: "auto-fix-high", tone: "teal" },
+  armors: { title: "Armaduras", icon: "shield", tone: "gold" },
+  swords: { title: "Espadas", icon: "hardware", tone: "default" },
+  others: { title: "Otros", icon: "category", tone: "default" },
+};
+
 type MarketFeedback = {
   type: "success" | "error";
   message: string;
@@ -154,10 +161,37 @@ export default function MarketScreen() {
     });
   }, [categoryFilter, search, sortedItems]);
 
+  const categoryStats = useMemo(() => {
+    return sortedItems.reduce<Record<MarketCategoryId, number>>(
+      (acc, item) => {
+        acc[item.category] += 1;
+        return acc;
+      },
+      { potions: 0, armors: 0, swords: 0, others: 0 }
+    );
+  }, [sortedItems]);
+
   return (
     <ScreenShell
       title="Mercado"
       subtitle="Compra segura nativa"
+      rightSlot={
+        <View
+          style={{
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: MOBILE_THEME.border,
+            backgroundColor: "rgba(17,16,13,0.88)",
+            paddingHorizontal: 12,
+            paddingVertical: 9,
+            alignItems: "center",
+            minWidth: 86,
+          }}
+        >
+          <Text style={{ color: MOBILE_THEME.dimText, fontSize: 10, fontWeight: "900" }}>ORO</Text>
+          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "900" }}>{player?.gold ?? 0}</Text>
+        </View>
+      }
       onRefresh={() => {
         void marketQuery.refetch();
         void refreshGold();
@@ -173,7 +207,7 @@ export default function MarketScreen() {
               {CATEGORY_FILTERS.map((chip) => (
                 <Pill
                   key={chip.id}
-                  label={chip.label}
+                  label={chip.id === "all" ? `${chip.label} ${sortedItems.length}` : `${chip.label} ${categoryStats[chip.id]}`}
                   active={chip.id === categoryFilter}
                   onPress={() => setCategoryFilter(chip.id)}
                 />
@@ -183,8 +217,45 @@ export default function MarketScreen() {
         </RealmCard>
       </StaggerItem>
 
+      <StaggerItem index={1}>
+        <RealmCard tone="teal">
+          <SectionHeader eyebrow="Categorias" title="Resumen rapido" />
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            {(Object.keys(CATEGORY_META) as MarketCategoryId[]).map((category) => {
+              const meta = CATEGORY_META[category];
+              return (
+                <Pressable
+                  key={category}
+                  onPress={() => setCategoryFilter(category)}
+                  style={({ pressed }) => ({
+                    width: "47.5%",
+                    minHeight: 84,
+                    borderRadius: 15,
+                    borderWidth: 1,
+                    borderColor: categoryFilter === category ? "rgba(240,179,47,0.7)" : MOBILE_THEME.border,
+                    backgroundColor: pressed || categoryFilter === category ? "rgba(240,179,47,0.1)" : "rgba(5,5,4,0.58)",
+                    padding: 12,
+                    justifyContent: "space-between",
+                  })}
+                >
+                  <MaterialIcons
+                    name={meta.icon}
+                    size={20}
+                    color={meta.tone === "teal" ? MOBILE_THEME.teal : MOBILE_THEME.gold}
+                  />
+                  <View>
+                    <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>{meta.title}</Text>
+                    <Text style={{ color: MOBILE_THEME.dimText, fontSize: 11 }}>{categoryStats[category]} items</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        </RealmCard>
+      </StaggerItem>
+
       {marketQuery.isLoading ? (
-        <StaggerItem index={1}>
+        <StaggerItem index={2}>
           <RealmCard>
             <ActivityIndicator color={MOBILE_THEME.gold} />
           </RealmCard>
@@ -192,7 +263,7 @@ export default function MarketScreen() {
       ) : null}
 
       {marketQuery.data?.errorMessage ? (
-        <StaggerItem index={1}>
+        <StaggerItem index={2}>
           <ErrorPanel
             message={marketQuery.data.errorMessage}
             onRetry={() => {
@@ -204,7 +275,7 @@ export default function MarketScreen() {
       ) : null}
 
       {feedback ? (
-        <StaggerItem index={2}>
+        <StaggerItem index={3}>
           <RealmCard tone={feedback.type === "error" ? "danger" : "teal"}>
             <Text style={{ color: feedback.type === "error" ? MOBILE_THEME.danger : MOBILE_THEME.text, lineHeight: 20 }}>
               {feedback.message}
@@ -216,10 +287,12 @@ export default function MarketScreen() {
       {filteredItems.map((item, index) => {
         const quantity = quantityByItemId[item.id] ?? 1;
         const pending = pendingItemId === item.id;
-        const disabled = !player || item.stockStatus === "sold-out" || pending;
+        const totalPrice = item.price * quantity;
+        const notEnoughGold = Boolean(player && totalPrice > player.gold);
+        const disabled = !player || item.stockStatus === "sold-out" || pending || notEnoughGold;
 
         return (
-          <StaggerItem key={item.id} index={index + 3}>
+          <StaggerItem key={item.id} index={index + 4}>
             <RealmCard tone={item.featured ? "gold" : "default"}>
               <View style={{ flexDirection: "row", gap: 12 }}>
                 <ItemThumb item={item} />
@@ -280,13 +353,31 @@ export default function MarketScreen() {
                 />
               </View>
 
+              <View
+                style={{
+                  borderRadius: 14,
+                  borderWidth: 1,
+                  borderColor: notEnoughGold ? "rgba(225,100,100,0.4)" : MOBILE_THEME.border,
+                  backgroundColor: "rgba(5,5,4,0.62)",
+                  padding: 11,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text style={{ color: MOBILE_THEME.dimText, fontWeight: "900", fontSize: 11 }}>TOTAL</Text>
+                <Text style={{ color: notEnoughGold ? MOBILE_THEME.danger : MOBILE_THEME.gold, fontWeight: "900" }}>
+                  {totalPrice} oro
+                </Text>
+              </View>
+
               <View style={{ flexDirection: "row", gap: 8 }}>
                 <View style={{ flex: 1 }}>
                   <PrimaryAction label="Detalle" icon="visibility" variant="ghost" disabled={pending} onPress={() => setSelectedItem(item)} />
                 </View>
                 <View style={{ flex: 1.25 }}>
                   <PrimaryAction
-                    label={item.stockStatus === "sold-out" ? "Agotado" : !player ? "Conecta perfil" : "Comprar"}
+                    label={item.stockStatus === "sold-out" ? "Agotado" : !player ? "Conecta perfil" : notEnoughGold ? "Sin oro" : "Comprar"}
                     icon="shopping-bag"
                     loading={pending}
                     disabled={disabled}

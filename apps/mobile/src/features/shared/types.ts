@@ -9,6 +9,16 @@ export type MissionType = "story" | "hunt" | "escort" | "investigation" | "event
 export type RealmMissionClaimStatus = "claimed" | "completed" | "rewarded";
 export type RealmEventParticipationStatus = "joined" | "rewarded";
 export type BestiaryRarity = "common" | "uncommon" | "rare" | "legendary" | "calamity";
+export type KnowledgeDocumentType =
+  | "lore"
+  | "rules"
+  | "magic"
+  | "bestiary"
+  | "flora"
+  | "event"
+  | "mission"
+  | "faction"
+  | "other";
 
 export type MarketItem = {
   id: string;
@@ -118,6 +128,20 @@ export type FloraEntry = {
   description: string;
   rarity: BestiaryRarity;
   imageUrl: string;
+};
+
+export type KnowledgeDocument = {
+  id: string;
+  title: string;
+  type: KnowledgeDocumentType;
+  category: string;
+  tags: string[];
+  source: string;
+  content: string;
+  summary: string;
+  visible: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type RealmMission = {

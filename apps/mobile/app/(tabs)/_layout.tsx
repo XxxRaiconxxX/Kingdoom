@@ -32,7 +32,7 @@ export default function TabLayout() {
           paddingVertical: 2,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: "700",
           marginBottom: 2,
         },
@@ -76,6 +76,13 @@ export default function TabLayout() {
         options={{
           title: "Perfil",
           tabBarIcon: ({ color, size }) => <MaterialIcons name="person" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="archivist"
+        options={{
+          title: "Archivista",
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="auto-awesome" color={color} size={size} />,
         }}
       />
     </Tabs>

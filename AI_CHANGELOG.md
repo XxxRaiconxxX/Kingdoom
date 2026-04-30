@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 30/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/archivist.tsx`, `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/src/features/archivist/archivistService.ts`, `apps/mobile/src/features/shared/types.ts`, `apps/mobile/.env.example`
+*   **Resumen de Tareas:** Se avanzo la Fase 3 de nivelacion de la app nativa con un Archivista IA propio, sin WebView y sin exponer claves en el APK.
+*   **Cambios Clave:**
+    *   Se agrego una pestania nativa `Archivista` con chat, modos de respuesta, memoria corta y fuentes sugeridas.
+    *   El contexto del Archivista ahora combina Archivo IA, grimorio, bestiario, flora, misiones y eventos antes de consultar el endpoint seguro de Vercel.
+    *   Se sumaron metricas compactas de fuentes disponibles y badge de proveedor/modelo cuando el backend lo devuelve.
+    *   `.env.example` de la app documenta `EXPO_PUBLIC_ARCHIVIST_AI_API_URL` para builds nativos.
+*   **Notas/Advertencias:** Validado con `npm run typecheck` en `apps/mobile`. La IA depende del endpoint de Vercel y de las variables backend ya configuradas alli.
+
+### [Fecha: 30/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/profile.tsx`
 *   **Resumen de Tareas:** Se continuo la nivelacion de la app nativa con una Fase 2 enfocada en convertir el perfil movil en centro de actividad del jugador.
 *   **Cambios Clave:**

@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 30/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/profile.tsx`
+*   **Resumen de Tareas:** Se continuo la nivelacion de la app nativa con una Fase 2 enfocada en convertir el perfil movil en centro de actividad del jugador.
+*   **Cambios Clave:**
+    *   El perfil ahora resume misiones tomadas, eventos en los que participa y evidencias pendientes de revision.
+    *   Se agregaron tarjetas compactas para ver misiones y eventos activos del jugador sin salir de Perfil.
+    *   El pull-to-refresh del perfil ahora refresca oro, inventario, misiones, eventos y estados personales.
+    *   Se mantuvieron compras, inventario e historial local sin cambiar reglas de economia.
+*   **Notas/Advertencias:** Validado con `npm run typecheck` en `apps/mobile`, `npx tsc --noEmit` y `npm run build` desde raiz. No se tocaron reglas de recompensas ni SQL.
+
+### [Fecha: 30/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/src/features/events/eventsService.ts`, `apps/mobile/src/features/missions/missionsService.ts`, `apps/mobile/src/features/shared/types.ts`
 *   **Resumen de Tareas:** Se inicio la Fase 1 de nivelacion entre web y app nativa, llevando misiones y eventos desde lectura simple hacia flujos accionables para jugadores.
 *   **Cambios Clave:**

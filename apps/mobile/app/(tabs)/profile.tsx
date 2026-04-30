@@ -12,8 +12,18 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { DetailSheet } from "@/src/components/DetailSheet";
 import { ScreenShell } from "@/src/components/ScreenShell";
+import {
+  fetchPlayerEventParticipationsNative,
+  fetchRealmEventsNative,
+  getEventParticipationStatusLabel,
+} from "@/src/features/events/eventsService";
 import { fetchPlayerInventoryNative } from "@/src/features/inventory/inventoryService";
 import { usePurchaseHistoryStore } from "@/src/features/market/purchaseHistoryStore";
+import {
+  fetchMissionsNative,
+  fetchPlayerMissionClaimsNative,
+  getMissionClaimStatusLabel,
+} from "@/src/features/missions/missionsService";
 import type { InventoryCategoryId, InventoryEntry } from "@/src/features/shared/types";
 import { MOBILE_THEME } from "@/src/theme/colors";
 import { useSessionStore } from "@/src/features/session/sessionStore";
@@ -74,6 +84,34 @@ export default function ProfileScreen() {
     queryFn: () => fetchPlayerInventoryNative(player!.id),
     enabled: Boolean(player?.id),
   });
+  const missionsQuery = useQuery({
+    queryKey: ["realm-missions", "profile"],
+    queryFn: fetchMissionsNative,
+    enabled: Boolean(player?.id),
+  });
+  const eventsQuery = useQuery({
+    queryKey: ["realm-events", "profile"],
+    queryFn: fetchRealmEventsNative,
+    enabled: Boolean(player?.id),
+  });
+  const missionIds = useMemo(
+    () => (missionsQuery.data?.missions ?? []).map((mission) => mission.id),
+    [missionsQuery.data?.missions]
+  );
+  const eventIds = useMemo(
+    () => (eventsQuery.data?.events ?? []).map((event) => event.id),
+    [eventsQuery.data?.events]
+  );
+  const playerMissionQuery = useQuery({
+    queryKey: ["player-mission-claims", "profile", player?.id, missionIds],
+    queryFn: () => fetchPlayerMissionClaimsNative(player?.id ?? "", missionIds),
+    enabled: Boolean(player?.id) && missionIds.length > 0,
+  });
+  const playerEventQuery = useQuery({
+    queryKey: ["player-event-participations", "profile", player?.id, eventIds],
+    queryFn: () => fetchPlayerEventParticipationsNative(player?.id ?? "", eventIds),
+    enabled: Boolean(player?.id) && eventIds.length > 0,
+  });
 
   const filteredInventoryItems = useMemo(() => {
     const normalized = inventorySearch.trim().toLowerCase();
@@ -115,11 +153,50 @@ export default function ProfileScreen() {
     const inventoryItems = inventoryQuery.data?.items ?? [];
     const totalUnits = inventoryItems.reduce((acc, item) => acc + item.quantity, 0);
     const uniqueItems = inventoryItems.length;
+    const missionClaims = Object.values(playerMissionQuery.data?.claimsByMissionId ?? {});
+    const eventParticipations = Object.values(playerEventQuery.data?.participationsByEventId ?? {});
+    const pendingMissionReviews = missionClaims.filter((claim) => claim.status === "completed").length;
 
-    return { spent7d, spent30d, buys7d, buys30d, totalUnits, uniqueItems };
-  }, [inventoryQuery.data?.items, playerAllEntries]);
+    return {
+      spent7d,
+      spent30d,
+      buys7d,
+      buys30d,
+      totalUnits,
+      uniqueItems,
+      activeMissions: missionClaims.length,
+      activeEvents: eventParticipations.length,
+      pendingMissionReviews,
+    };
+  }, [
+    inventoryQuery.data?.items,
+    playerAllEntries,
+    playerEventQuery.data?.participationsByEventId,
+    playerMissionQuery.data?.claimsByMissionId,
+  ]);
 
-  const isRefreshing = inventoryQuery.isRefetching;
+  const playerMissionCards = useMemo(() => {
+    const claimsByMissionId = playerMissionQuery.data?.claimsByMissionId ?? {};
+    return (missionsQuery.data?.missions ?? [])
+      .map((mission) => ({ mission, claim: claimsByMissionId[mission.id] }))
+      .filter((entry) => Boolean(entry.claim))
+      .slice(0, 4);
+  }, [missionsQuery.data?.missions, playerMissionQuery.data?.claimsByMissionId]);
+
+  const playerEventCards = useMemo(() => {
+    const participationsByEventId = playerEventQuery.data?.participationsByEventId ?? {};
+    return (eventsQuery.data?.events ?? [])
+      .map((event) => ({ event, participation: participationsByEventId[event.id] }))
+      .filter((entry) => Boolean(entry.participation))
+      .slice(0, 4);
+  }, [eventsQuery.data?.events, playerEventQuery.data?.participationsByEventId]);
+
+  const isRefreshing =
+    inventoryQuery.isRefetching ||
+    missionsQuery.isRefetching ||
+    eventsQuery.isRefetching ||
+    playerMissionQuery.isRefetching ||
+    playerEventQuery.isRefetching;
 
   async function handleShareHistory() {
     if (!player || playerPurchaseEntries.length === 0) {
@@ -156,6 +233,10 @@ export default function ProfileScreen() {
         }
         void refreshGold();
         void inventoryQuery.refetch();
+        void missionsQuery.refetch();
+        void eventsQuery.refetch();
+        void playerMissionQuery.refetch();
+        void playerEventQuery.refetch();
       }}
       refreshing={isRefreshing}
     >
@@ -294,6 +375,114 @@ export default function ProfileScreen() {
               </Text>
             </View>
           </View>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                backgroundColor: MOBILE_THEME.bg,
+                padding: 10,
+                gap: 3,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>MISIONES</Text>
+              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
+                {profileMetrics.activeMissions}
+              </Text>
+              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>
+                {profileMetrics.pendingMissionReviews} en revision
+              </Text>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                backgroundColor: MOBILE_THEME.bg,
+                padding: 10,
+                gap: 3,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>EVENTOS</Text>
+              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
+                {profileMetrics.activeEvents}
+              </Text>
+              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>participando</Text>
+            </View>
+          </View>
+        </View>
+      ) : null}
+
+      {player ? (
+        <View
+          style={{
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: MOBILE_THEME.border,
+            backgroundColor: MOBILE_THEME.surfaceSoft,
+            padding: 14,
+            gap: 10,
+          }}
+        >
+          <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 16 }}>
+            Actividad del rol
+          </Text>
+          {missionsQuery.isLoading || eventsQuery.isLoading ? <ActivityIndicator color={MOBILE_THEME.gold} /> : null}
+          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "800", fontSize: 12 }}>MISIONES TOMADAS</Text>
+          {playerMissionCards.map(({ mission, claim }) => (
+            <View
+              key={mission.id}
+              style={{
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                padding: 10,
+                backgroundColor: MOBILE_THEME.bg,
+                gap: 4,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800" }}>{mission.title}</Text>
+              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
+                {claim ? getMissionClaimStatusLabel(claim.status) : "-"} | {mission.rewardGold} oro
+              </Text>
+              {claim?.proofText ? (
+                <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }} numberOfLines={2}>
+                  {claim.proofText}
+                </Text>
+              ) : null}
+            </View>
+          ))}
+          {playerMissionCards.length === 0 ? (
+            <Text style={{ color: MOBILE_THEME.mutedText }}>Sin misiones tomadas.</Text>
+          ) : null}
+          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "800", fontSize: 12, marginTop: 4 }}>EVENTOS</Text>
+          {playerEventCards.map(({ event, participation }) => (
+            <View
+              key={event.id}
+              style={{
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                padding: 10,
+                backgroundColor: MOBILE_THEME.bg,
+                gap: 4,
+              }}
+            >
+              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800" }}>{event.title}</Text>
+              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
+                {participation ? getEventParticipationStatusLabel(participation.status) : "-"} | {event.participationRewardGold} oro
+              </Text>
+              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
+                {event.startDate} / {event.endDate}
+              </Text>
+            </View>
+          ))}
+          {playerEventCards.length === 0 ? (
+            <Text style={{ color: MOBILE_THEME.mutedText }}>Sin eventos tomados.</Text>
+          ) : null}
         </View>
       ) : null}
 

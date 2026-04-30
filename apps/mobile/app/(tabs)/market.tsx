@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DetailSheet } from "@/src/components/DetailSheet";
 import {
   EmptyState,
   ErrorPanel,
+  LoadingPanel,
   Pill,
   PrimaryAction,
   RealmCard,
@@ -258,9 +259,7 @@ export default function MarketScreen() {
 
       {marketQuery.isLoading ? (
         <StaggerItem index={2}>
-          <RealmCard>
-            <ActivityIndicator color={MOBILE_THEME.gold} />
-          </RealmCard>
+          <LoadingPanel label="Cargando mercado" />
         </StaggerItem>
       ) : null}
 

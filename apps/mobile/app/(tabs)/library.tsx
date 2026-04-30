@@ -14,6 +14,7 @@ import { DetailSheet } from "@/src/components/DetailSheet";
 import {
   EmptyState,
   ErrorPanel,
+  LoadingPanel,
   MetricTile,
   Pill,
   PrimaryAction,
@@ -320,9 +321,7 @@ export default function LibraryScreen() {
       ) : null}
 
       {isLoading ? (
-        <RealmCard>
-          <ActivityIndicator color={MOBILE_THEME.gold} />
-        </RealmCard>
+        <LoadingPanel label={mode === "events" ? "Cargando eventos" : "Cargando misiones"} />
       ) : null}
 
       {activeError ? (

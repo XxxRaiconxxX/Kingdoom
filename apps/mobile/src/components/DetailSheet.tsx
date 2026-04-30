@@ -32,20 +32,43 @@ export function DetailSheet({ visible, title, subtitle, onClose, children }: Det
           <SafeAreaView
             style={{
               maxHeight: "100%",
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
               borderWidth: 1,
               borderColor: MOBILE_THEME.border,
-              backgroundColor: MOBILE_THEME.surface,
+              backgroundColor: "rgba(17,16,13,0.98)",
               paddingHorizontal: 16,
-              paddingTop: 14,
+              paddingTop: 10,
               paddingBottom: 16,
               gap: 12,
+              overflow: "hidden",
             }}
           >
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                top: -95,
+                right: -80,
+                width: 190,
+                height: 190,
+                borderRadius: 95,
+                backgroundColor: "rgba(240,179,47,0.08)",
+              }}
+            />
+            <View
+              style={{
+                alignSelf: "center",
+                width: 42,
+                height: 4,
+                borderRadius: 999,
+                backgroundColor: "rgba(240,179,47,0.28)",
+                marginBottom: 2,
+              }}
+            />
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <View style={{ flex: 1, paddingRight: 12 }}>
-                <Text style={{ color: MOBILE_THEME.text, fontSize: 21, fontWeight: "800" }}>{title}</Text>
+                <Text style={{ color: MOBILE_THEME.text, fontSize: 21, lineHeight: 25, fontWeight: "900" }}>{title}</Text>
                 {subtitle ? (
                   <Text style={{ color: MOBILE_THEME.mutedText, marginTop: 4, fontSize: 12 }}>{subtitle}</Text>
                 ) : null}
@@ -60,6 +83,7 @@ export function DetailSheet({ visible, title, subtitle, onClose, children }: Det
                   height: 34,
                   alignItems: "center",
                   justifyContent: "center",
+                  backgroundColor: "rgba(5,5,4,0.58)",
                 }}
               >
                 <MaterialIcons name="close" color={MOBILE_THEME.text} size={18} />

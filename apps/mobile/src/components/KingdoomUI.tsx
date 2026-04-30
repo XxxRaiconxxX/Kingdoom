@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, { Easing, FadeInDown, LinearTransition } from "react-native-reanimated";
 import { MOBILE_THEME } from "@/src/theme/colors";
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
@@ -23,15 +24,20 @@ export function RealmCard({
           : MOBILE_THEME.border;
 
   return (
-    <View
+    <Animated.View
+      layout={LinearTransition.duration(180)}
       style={{
         borderRadius: 16,
         borderWidth: 1,
         borderColor,
-        backgroundColor: "rgba(17,16,13,0.92)",
+        backgroundColor: "rgba(17,16,13,0.9)",
         padding: 12,
         gap: 10,
         overflow: "hidden",
+        shadowColor: tone === "teal" ? MOBILE_THEME.teal : tone === "danger" ? MOBILE_THEME.danger : MOBILE_THEME.gold,
+        shadowOpacity: tone === "default" ? 0.08 : 0.14,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 10 },
       }}
     >
       <View
@@ -51,8 +57,26 @@ export function RealmCard({
                 : "rgba(240,179,47,0.08)",
         }}
       />
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          right: -50,
+          bottom: -80,
+          width: 160,
+          height: 160,
+          borderRadius: 80,
+          borderWidth: 1,
+          borderColor:
+            tone === "teal"
+              ? "rgba(49,209,179,0.1)"
+              : tone === "danger"
+                ? "rgba(225,100,100,0.1)"
+                : "rgba(240,179,47,0.1)",
+        }}
+      />
       {children}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -132,7 +156,16 @@ export function Pill({
   }
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [style, { opacity: pressed ? 0.78 : 1 }]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        style,
+        {
+          opacity: pressed ? 0.86 : 1,
+          transform: [{ scale: pressed ? 0.97 : 1 }],
+        },
+      ]}
+    >
       {content}
     </Pressable>
   );
@@ -147,13 +180,15 @@ export function SearchInput({
   onChangeText: (value: string) => void;
   placeholder: string;
 }) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View
       style={{
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: MOBILE_THEME.border,
-        backgroundColor: "rgba(5,5,4,0.76)",
+        borderColor: focused ? "rgba(240,179,47,0.55)" : MOBILE_THEME.border,
+        backgroundColor: focused ? "rgba(11,10,8,0.9)" : "rgba(5,5,4,0.76)",
         paddingHorizontal: 12,
         flexDirection: "row",
         alignItems: "center",
@@ -164,7 +199,12 @@ export function SearchInput({
       <TextInput
         value={value}
         onChangeText={onChangeText}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
+        keyboardAppearance="dark"
         placeholder={placeholder}
         placeholderTextColor={MOBILE_THEME.dimText}
         style={{
@@ -224,7 +264,12 @@ export function PrimaryAction({
         justifyContent: "center",
         flexDirection: "row",
         gap: 8,
-        opacity: pressed ? 0.84 : 1,
+        opacity: pressed ? 0.9 : 1,
+        transform: [{ scale: pressed ? 0.98 : 1 }],
+        shadowColor: isGold ? MOBILE_THEME.gold : isDanger ? MOBILE_THEME.danger : MOBILE_THEME.black,
+        shadowOpacity: isGold && !disabled ? 0.18 : 0.08,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 8 },
       })}
     >
       {loading ? (
@@ -294,6 +339,41 @@ export function EmptyState({
   );
 }
 
+export function LoadingPanel({
+  label = "Cargando datos",
+}: {
+  label?: string;
+}) {
+  return (
+    <RealmCard>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <ActivityIndicator color={MOBILE_THEME.gold} />
+        <View style={{ flex: 1, gap: 7 }}>
+          <Text style={{ color: MOBILE_THEME.text, fontSize: 13, fontWeight: "900" }}>{label}</Text>
+          <View
+            style={{
+              height: 7,
+              borderRadius: 999,
+              backgroundColor: "rgba(240,179,47,0.12)",
+              overflow: "hidden",
+            }}
+          >
+            <Animated.View
+              entering={FadeInDown.duration(360)}
+              style={{
+                width: "42%",
+                height: "100%",
+                borderRadius: 999,
+                backgroundColor: "rgba(240,179,47,0.55)",
+              }}
+            />
+          </View>
+        </View>
+      </View>
+    </RealmCard>
+  );
+}
+
 export function ErrorPanel({
   message,
   onRetry,
@@ -304,8 +384,21 @@ export function ErrorPanel({
   return (
     <RealmCard tone="danger">
       <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
-        <MaterialIcons name="sync-problem" size={18} color={MOBILE_THEME.danger} />
-        <Text style={{ color: MOBILE_THEME.danger, lineHeight: 19, flex: 1 }}>{message}</Text>
+        <View
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(225,100,100,0.1)",
+            borderWidth: 1,
+            borderColor: "rgba(225,100,100,0.18)",
+          }}
+        >
+          <MaterialIcons name="sync-problem" size={15} color={MOBILE_THEME.danger} />
+        </View>
+        <Text style={{ color: MOBILE_THEME.danger, lineHeight: 18, flex: 1, fontSize: 13 }}>{message}</Text>
       </View>
       {onRetry ? <PrimaryAction label="Reintentar" icon="refresh" variant="ghost" onPress={onRetry} /> : null}
     </RealmCard>
@@ -320,7 +413,12 @@ export function StaggerItem({
   children: ReactNode;
 }) {
   return (
-    <Animated.View entering={FadeInDown.delay(70 * index).duration(420)}>
+    <Animated.View
+      entering={FadeInDown.delay(62 * index)
+        .duration(460)
+        .easing(Easing.bezier(0.22, 1, 0.36, 1))}
+      layout={LinearTransition.duration(180)}
+    >
       {children}
     </Animated.View>
   );

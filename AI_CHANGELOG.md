@@ -32,6 +32,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 30/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/app/(tabs)/grimoire.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/DetailSheet.tsx`, `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/src/components/ScreenShell.tsx`
+*   **Resumen de Tareas:** Se hizo una pasada premium de UI/UX nativa con foco en mobile, errores visuales, microinteracciones y estados de carga mas claros.
+*   **Cambios Clave:**
+    *   La barra inferior ahora resalta la pestaña activa con una capsula visual mas premium y menos ruido en pantallas estrechas.
+    *   Tarjetas, botones y chips suman profundidad, glow sutil, escala tactil y transiciones con curva pesada.
+    *   Los inputs de busqueda ahora tienen foco dorado, teclado oscuro y autocorreccion desactivada para nombres del rol.
+    *   Se agrego un loader compacto reutilizable para Mercado, Biblioteca y Grimorio.
+    *   Los paneles de detalle ahora tienen handle, atmosfera visual y cierre mas claro.
+*   **Notas/Advertencias:** Validado con `npm run typecheck` en `apps/mobile`, `npx tsc --noEmit` y `npm run build`. No se tocaron reglas de oro, compras, misiones ni Supabase.
+
+### [Fecha: 30/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/src/services/supabase.ts`, `apps/mobile/src/features/session/sessionStore.ts`, `apps/mobile/src/features/grimoire/grimoireService.ts`, `apps/mobile/src/features/events/eventsService.ts`, `apps/mobile/src/features/market/marketService.ts`, `apps/mobile/src/features/missions/missionsService.ts`, `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/src/components/ScreenShell.tsx`, `apps/mobile/app/(tabs)/home.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/app/(tabs)/grimoire.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/archivist.tsx`, `apps/mobile/README.md`
 *   **Resumen de Tareas:** Se revisaron los errores de carga vistos en la APK beta y se compacto la UI nativa para mostrar estados mas simples, utiles y menos redundantes.
 *   **Cambios Clave:**

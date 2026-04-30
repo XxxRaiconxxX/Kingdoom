@@ -42,6 +42,18 @@ export function ScreenShell({
         pointerEvents="none"
         style={{
           position: "absolute",
+          bottom: 90,
+          left: -150,
+          width: 260,
+          height: 260,
+          borderRadius: 130,
+          backgroundColor: "rgba(49,209,179,0.045)",
+        }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
           left: 14,
           top: 0,
           bottom: 0,
@@ -60,9 +72,20 @@ export function ScreenShell({
           backgroundColor: "rgba(49,209,179,0.09)",
         }}
       />
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          height: 130,
+          backgroundColor: "rgba(240,179,47,0.025)",
+        }}
+      />
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 16, gap: 12, paddingBottom: 118 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14, gap: 12, paddingBottom: 122 }}
         style={{ flex: 1 }}
         refreshControl={
           onRefresh ? (
@@ -80,20 +103,21 @@ export function ScreenShell({
               <Text style={{ color: MOBILE_THEME.gold, fontSize: 11, fontWeight: "900", textTransform: "uppercase" }}>
                 {eyebrow}
               </Text>
-              <Text style={{ color: MOBILE_THEME.text, fontSize: 29, fontWeight: "900", marginTop: 6 }}>
+              <Text style={{ color: MOBILE_THEME.text, fontSize: 28, lineHeight: 33, fontWeight: "900", marginTop: 5 }}>
                 {title}
               </Text>
-              <Text style={{ color: MOBILE_THEME.mutedText, marginTop: 6, lineHeight: 19, fontSize: 13 }}>
+              <Text style={{ color: MOBILE_THEME.mutedText, marginTop: 5, lineHeight: 18, fontSize: 13 }}>
                 {subtitle}
               </Text>
             </View>
             {rightSlot}
           </View>
-          <View
+          <Animated.View
+            entering={FadeInDown.delay(120).duration(520).easing(entranceCurve)}
             style={{
               height: 1,
-              marginTop: 16,
-              backgroundColor: "rgba(240,179,47,0.2)",
+              marginTop: 14,
+              backgroundColor: "rgba(240,179,47,0.22)",
             }}
           />
         </Animated.View>

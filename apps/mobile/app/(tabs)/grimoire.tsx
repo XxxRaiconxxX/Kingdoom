@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { DetailSheet } from "@/src/components/DetailSheet";
 import {
   EmptyState,
   ErrorPanel,
+  LoadingPanel,
   Pill,
   RealmCard,
   SearchInput,
@@ -131,9 +132,7 @@ export default function GrimoireScreen() {
       </StaggerItem>
 
       {grimoireQuery.isLoading ? (
-        <RealmCard>
-          <ActivityIndicator color={MOBILE_THEME.gold} />
-        </RealmCard>
+        <LoadingPanel label="Cargando grimorio" />
       ) : null}
 
       {grimoireQuery.data?.errorMessage ? (

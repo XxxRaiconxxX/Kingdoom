@@ -31,6 +31,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
+### [Fecha: 30/04/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/src/features/events/eventsService.ts`, `apps/mobile/src/features/missions/missionsService.ts`, `apps/mobile/src/features/shared/types.ts`
+*   **Resumen de Tareas:** Se inicio la Fase 1 de nivelacion entre web y app nativa, llevando misiones y eventos desde lectura simple hacia flujos accionables para jugadores.
+*   **Cambios Clave:**
+    *   La app nativa ahora permite postularse a misiones desde Biblioteca, ver el estado propio y enviar un resumen de evidencia para revision del staff.
+    *   Eventos ahora muestran participantes publicos, estado personal del jugador, cupos, recompensa de participacion y acciones para unirse o salir antes del inicio.
+    *   Se agregaron servicios nativos para claims de misiones, participaciones de eventos y validaciones basicas contra Supabase.
+    *   La pantalla Biblioteca se adapto a un flujo mobile-first con tarjetas compactas, detalle expandible y feedback contextual.
+*   **Notas/Advertencias:** Validado con `npm run typecheck` en `apps/mobile`, `npx tsc --noEmit` y `npm run build` desde raiz. Esta fase no agrega panel admin nativo ni subida de imagen de evidencia en la app.
+
 ### [Fecha: 29/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/admin/AdminControlPrimitives.tsx`, `src/utils/aiDebug.ts`
 *   **Resumen de Tareas:** El debug visual de IA se redujo a un badge mas compacto y ahora soporta respuestas servidas por OpenRouter.

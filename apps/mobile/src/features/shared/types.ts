@@ -6,6 +6,8 @@ export type StockStatus = "available" | "limited" | "sold-out";
 export type MissionStatus = "available" | "in-progress" | "closed";
 export type MissionDifficulty = "easy" | "medium" | "hard" | "elite";
 export type MissionType = "story" | "hunt" | "escort" | "investigation" | "event";
+export type RealmMissionClaimStatus = "claimed" | "completed" | "rewarded";
+export type RealmEventParticipationStatus = "joined" | "rewarded";
 export type BestiaryRarity = "common" | "uncommon" | "rare" | "legendary" | "calamity";
 
 export type MarketItem = {
@@ -35,6 +37,20 @@ export type RealmEvent = {
   factions: string[];
   rewards: string;
   requirements: string;
+  participationRewardGold: number;
+  maxParticipants: number;
+};
+
+export type RealmEventParticipant = {
+  id: string;
+  eventId: string;
+  playerId: string;
+  playerName: string;
+  status: RealmEventParticipationStatus;
+  rewardDelivered: boolean;
+  rewardDeliveredAt: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type InventoryEntry = {
@@ -115,4 +131,17 @@ export type RealmMission = {
   type: MissionType;
   status: MissionStatus;
   visible: boolean;
+};
+
+export type RealmMissionClaim = {
+  id: string;
+  missionId: string;
+  playerId: string;
+  status: RealmMissionClaimStatus;
+  rewardDelivered: boolean;
+  proofText: string;
+  submittedAt: string | null;
+  rewardDeliveredAt: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };

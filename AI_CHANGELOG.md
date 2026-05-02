@@ -32,6 +32,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 02/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernPenalty.tsx`, `src/utils/scratchUtils.ts`
+*   **Resumen de Tareas:** Se agrego limite diario de ganancia neta al minijuego de Penales.
+*   **Cambios Clave:**
+    *   Penales ahora limita la ganancia neta diaria a 350.000 de oro por jugador.
+    *   El contador solo aumenta por oro ganado, no por la apuesta devuelta.
+    *   Si el tiro falla por poste o atajada, la apuesta se pierde y no suma al limite.
+    *   Los cobros se recortan automaticamente si la jugada supera el margen diario restante.
+    *   Se agrego una barra compacta de ganancia diaria dentro del panel de apuesta.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. El limite usa almacenamiento local igual que el flujo actual de Cartas.
+
+### [Fecha: 02/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernPenalty.tsx`
 *   **Resumen de Tareas:** Se ajusto el minijuego de Penales para permitir apuestas superiores y limpiar la interfaz lateral.
 *   **Cambios Clave:**

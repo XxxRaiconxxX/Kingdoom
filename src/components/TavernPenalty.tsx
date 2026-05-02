@@ -2,6 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Coins, Crosshair, RefreshCw, Shield, Trophy, Zap } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import keeperSprites from "../assets/penalty-keeper-sprites.png";
+import {
+  addPlayerDailyPenaltyNetWins,
+  buildScratchDateKey,
+  getPlayerDailyPenaltyNetWins,
+  MAX_DAILY_PENALTY_WIN_LIMIT,
+} from "../utils/scratchUtils";
 import type { ReactNode } from "react";
 
 type DirectionId =
@@ -397,16 +403,31 @@ export function TavernPenalty() {
   const [lockedBet, setLockedBet] = useState(0);
   const [shotState, setShotState] = useState<ShotState>(DEFAULT_SHOT);
   const [message, setMessage] = useState("Supera 4 penales seguidos para llegar al x12.");
+  const [dailyNetWins, setDailyNetWins] = useState(0);
   const [updating, setUpdating] = useState(false);
 
   const balance = player?.gold ?? 0;
+  const dateKey = useMemo(() => buildScratchDateKey(), []);
   const maxAllowedBet = Math.max(1, balance);
   const safeBet = clamp(Math.round(bet || 0), 1, maxAllowedBet);
   const canShoot = Boolean(player && phase === "aiming" && safeBet > 0 && safeBet <= balance && !updating);
   const currentMultiplier = getRoundMultiplier(roundIndex);
-  const potentialPrize = (lockedBet || safeBet) * currentMultiplier;
+  const remainingDailyNet = Math.max(0, MAX_DAILY_PENALTY_WIN_LIMIT - dailyNetWins);
+  const limitReached = dailyNetWins >= MAX_DAILY_PENALTY_WIN_LIMIT;
+  const activeStake = lockedBet || safeBet;
+  const potentialNetWin = activeStake * (currentMultiplier - 1);
+  const potentialPrize = activeStake + Math.min(potentialNetWin, remainingDailyNet);
   const completedRoundBonus = phase === "resolved" && shotState.result === "goal" ? 1 : 0;
   const progressPercent = ((roundIndex + completedRoundBonus) / MAX_ROUNDS) * 100;
+
+  useEffect(() => {
+    if (!player) {
+      setDailyNetWins(0);
+      return;
+    }
+
+    setDailyNetWins(getPlayerDailyPenaltyNetWins(player.id, dateKey));
+  }, [dateKey, player]);
 
   useEffect(() => {
     const image = new Image();
@@ -468,11 +489,14 @@ export function TavernPenalty() {
   async function handleRefresh() {
     setUpdating(true);
     await refreshPlayer();
+    if (player) {
+      setDailyNetWins(getPlayerDailyPenaltyNetWins(player.id, dateKey));
+    }
     setUpdating(false);
   }
 
   function startAiming() {
-    if (!player || safeBet > balance || updating) {
+    if (!player || safeBet > balance || updating || limitReached) {
       return;
     }
 
@@ -529,8 +553,10 @@ export function TavernPenalty() {
         return;
       }
 
-      const prize = result === "goal" ? stake * currentMultiplier : result === "post" ? stake : 0;
-      const nextGold = result === "post" ? player.gold : player.gold - stake + prize;
+      const rawNetWin = result === "goal" ? stake * (currentMultiplier - 1) : 0;
+      const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
+      const prize = result === "goal" ? stake + cappedNetWin : 0;
+      const nextGold = player.gold - stake + prize;
       const updated = await setPlayerGold(nextGold);
 
       if (!updated) {
@@ -542,9 +568,17 @@ export function TavernPenalty() {
 
       setPhase("resolved");
       if (result === "goal") {
-        setMessage(`Tanda perfecta. Cobras ${prize.toLocaleString("es-PY")} oro.`);
+        if (cappedNetWin > 0) {
+          const nextDailyWins = addPlayerDailyPenaltyNetWins(player.id, dateKey, cappedNetWin);
+          setDailyNetWins(nextDailyWins);
+        }
+        setMessage(
+          cappedNetWin < rawNetWin
+            ? `Cobras ${prize.toLocaleString("es-PY")} oro por el limite diario.`
+            : `Tanda perfecta. Cobras ${prize.toLocaleString("es-PY")} oro.`
+        );
       } else if (result === "post") {
-        setMessage("Al poste. Se devuelve la apuesta.");
+        setMessage("Al poste. Pierdes la apuesta de la tanda.");
       } else {
         setMessage("Atajada. Pierdes la apuesta de la tanda.");
       }
@@ -571,7 +605,9 @@ export function TavernPenalty() {
 
     setUpdating(true);
     const stake = lockedBet || safeBet;
-    const prize = stake * currentMultiplier;
+    const rawNetWin = stake * (currentMultiplier - 1);
+    const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
+    const prize = stake + cappedNetWin;
     const updated = await setPlayerGold(player.gold - stake + prize);
 
     if (!updated) {
@@ -580,7 +616,15 @@ export function TavernPenalty() {
       return;
     }
 
-    setMessage(`Cobro seguro: ${prize.toLocaleString("es-PY")} oro.`);
+    if (cappedNetWin > 0) {
+      const nextDailyWins = addPlayerDailyPenaltyNetWins(player.id, dateKey, cappedNetWin);
+      setDailyNetWins(nextDailyWins);
+    }
+    setMessage(
+      cappedNetWin < rawNetWin
+        ? `Cobro limitado: ${prize.toLocaleString("es-PY")} oro.`
+        : `Cobro seguro: ${prize.toLocaleString("es-PY")} oro.`
+    );
     setUpdating(false);
     setRoundIndex(MAX_ROUNDS - 1);
   }
@@ -601,6 +645,15 @@ export function TavernPenalty() {
 
   if (!player) {
     return <PenaltyMessage title="Penal del Reino" description="Conecta tu perfil para apostar en la tanda." />;
+  }
+
+  if (limitReached && phase === "betting") {
+    return (
+      <PenaltyMessage
+        title="Limite diario alcanzado"
+        description={`Ya ganaste ${MAX_DAILY_PENALTY_WIN_LIMIT.toLocaleString("es-PY")} de oro neto hoy en Penales. La tanda vuelve manana.`}
+      />
+    );
   }
 
   return (
@@ -687,6 +740,20 @@ export function TavernPenalty() {
 
         <aside className="space-y-3">
           <Panel title="Apuesta" icon={<Coins className="h-4 w-4" />}>
+            <div className="mb-3 rounded-2xl border border-amber-500/15 bg-black/35 px-3 py-2">
+              <div className="flex justify-between text-[9px] font-black uppercase tracking-[0.14em] text-stone-500">
+                <span>Ganancia diaria</span>
+                <span className="text-amber-300">
+                  {dailyNetWins.toLocaleString("es-PY")} / {MAX_DAILY_PENALTY_WIN_LIMIT.toLocaleString("es-PY")}
+                </span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-900">
+                <div
+                  className="h-full rounded-full bg-amber-500 transition-all"
+                  style={{ width: `${clamp((dailyNetWins / MAX_DAILY_PENALTY_WIN_LIMIT) * 100, 0, 100)}%` }}
+                />
+              </div>
+            </div>
             <input
               type="number"
               min={1}

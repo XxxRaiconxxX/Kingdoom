@@ -68,6 +68,7 @@ export function getDailyScratchConfig(): DailyScratchConfig {
 
 // -- TavernCards daily limit -------------------------------------------------
 export const MAX_DAILY_CARDS_WIN_LIMIT = 350000;
+export const MAX_DAILY_PENALTY_WIN_LIMIT = 350000;
 
 export function getPlayerDailyCardsGrossWins(
   playerId: string,
@@ -90,4 +91,28 @@ export function addPlayerDailyCardsGrossWins(
 
 function keyForCards(playerId: string, dateKey: string) {
   return `kingdoom.daily-cards.${playerId}.${dateKey}`;
+}
+
+// -- TavernPenalty daily limit ----------------------------------------------
+export function getPlayerDailyPenaltyNetWins(
+  playerId: string,
+  dateKey: string
+): number {
+  const stored = window.localStorage.getItem(keyForPenalty(playerId, dateKey));
+  return stored ? parseInt(stored, 10) : 0;
+}
+
+export function addPlayerDailyPenaltyNetWins(
+  playerId: string,
+  dateKey: string,
+  amount: number
+): number {
+  const current = getPlayerDailyPenaltyNetWins(playerId, dateKey);
+  const newValue = current + amount;
+  window.localStorage.setItem(keyForPenalty(playerId, dateKey), newValue.toString());
+  return newValue;
+}
+
+function keyForPenalty(playerId: string, dateKey: string) {
+  return `kingdoom.daily-penalty.${playerId}.${dateKey}`;
 }

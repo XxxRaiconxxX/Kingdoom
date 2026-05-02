@@ -48,7 +48,6 @@ const HEIGHT = 420;
 const CONTACT_MS = 800;
 const BALL_MS = 820;
 const RESULT_MS = 900;
-const MAX_BET = 2500;
 const ROUND_MULTIPLIERS = [2, 4, 8, 12] as const;
 const MAX_ROUNDS = ROUND_MULTIPLIERS.length;
 
@@ -401,7 +400,8 @@ export function TavernPenalty() {
   const [updating, setUpdating] = useState(false);
 
   const balance = player?.gold ?? 0;
-  const safeBet = clamp(Math.round(bet || 0), 1, Math.min(MAX_BET, Math.max(1, balance)));
+  const maxAllowedBet = Math.max(1, balance);
+  const safeBet = clamp(Math.round(bet || 0), 1, maxAllowedBet);
   const canShoot = Boolean(player && phase === "aiming" && safeBet > 0 && safeBet <= balance && !updating);
   const currentMultiplier = getRoundMultiplier(roundIndex);
   const potentialPrize = (lockedBet || safeBet) * currentMultiplier;
@@ -690,7 +690,7 @@ export function TavernPenalty() {
             <input
               type="number"
               min={1}
-              max={Math.min(MAX_BET, balance)}
+              max={maxAllowedBet}
               value={bet}
               onChange={(event) => setBet(Number(event.target.value))}
               disabled={phase !== "betting"}
@@ -776,22 +776,6 @@ export function TavernPenalty() {
             </div>
           </Panel>
 
-          <Panel title="Zonas" icon={<Crosshair className="h-4 w-4" />}>
-            <div className="grid grid-cols-2 gap-2 text-xs font-bold text-stone-400">
-              <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
-                R1: x2
-              </span>
-              <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
-                R2: x4
-              </span>
-              <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
-                R3: x8
-              </span>
-              <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
-                R4: x12
-              </span>
-            </div>
-          </Panel>
         </aside>
       </div>
     </div>

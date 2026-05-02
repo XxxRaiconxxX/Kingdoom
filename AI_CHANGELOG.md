@@ -32,6 +32,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 02/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernPenalty.tsx`
+*   **Resumen de Tareas:** Se ajusto el minijuego de Penales para permitir apuestas superiores y limpiar la interfaz lateral.
+*   **Cambios Clave:**
+    *   Se elimino el limite fijo de 2500 de la apuesta; ahora el maximo se ajusta al oro disponible del jugador.
+    *   Se retiro el panel redundante de `Zonas`, ya cubierto por la barra de multiplicadores x2/x4/x8/x12.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. El flujo sigue impidiendo apostar mas oro del disponible.
+
+### [Fecha: 02/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/assets/penalty-keeper-sprites.png`
 *   **Resumen de Tareas:** Se reemplazo el spritesheet del portero de Penales por una version pixel-art nueva con transparencia real.
 *   **Cambios Clave:**

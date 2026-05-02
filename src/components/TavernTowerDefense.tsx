@@ -297,10 +297,10 @@ const TOWERS: TowerBlueprint[] = [
 ];
 
 const ENEMY_KINDS: EnemyKind[] = [
-  { id: "imp", label: "Trasgo", hp: 62, speed: 48, reward: 9, color: "#84cc16", accent: "#bef264", size: 13 },
-  { id: "shade", label: "Sombra", hp: 44, speed: 72, reward: 11, color: "#a855f7", accent: "#e9d5ff", size: 11 },
-  { id: "brute", label: "Bruto", hp: 132, speed: 34, reward: 16, color: "#ef4444", accent: "#fecdd3", size: 15 },
-  { id: "breaker", label: "Rompemuros", hp: 238, speed: 24, reward: 30, color: "#f97316", accent: "#fed7aa", size: 18 },
+  { id: "imp", label: "Trasgo", hp: 62, speed: 48, reward: 12, color: "#84cc16", accent: "#bef264", size: 13 },
+  { id: "shade", label: "Sombra", hp: 44, speed: 72, reward: 15, color: "#a855f7", accent: "#e9d5ff", size: 11 },
+  { id: "brute", label: "Bruto", hp: 132, speed: 34, reward: 20, color: "#ef4444", accent: "#fecdd3", size: 15 },
+  { id: "breaker", label: "Rompemuros", hp: 238, speed: 24, reward: 35, color: "#f97316", accent: "#fed7aa", size: 18 },
   { id: "boss", label: "Baron de Asedio", hp: 980, speed: 19, reward: 150, color: "#d4af37", accent: "#fff7ad", size: 28, boss: true },
 ];
 

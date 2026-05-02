@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Coins, Crosshair, Gem, Play, RotateCcw, Shield, Skull, Swords } from "lucide-react";
+import { Coins, Crosshair, Gem, Play, RotateCcw, Shield, Skull, Sparkles, Swords } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import type { PointerEvent, ReactNode } from "react";
 
 type DifficultyId = "frontier" | "siege" | "abyss";
 type MapId = "northGate" | "emberRoad" | "lostBridge";
-type TowerId = "sentinel" | "rune" | "ballista" | "frost";
+type TowerId = "sentinel" | "rune" | "ballista" | "frost" | "alchemist" | "warden";
+type AttackStyle = "bolt" | "splash" | "pierce" | "slow" | "aura" | "guard";
 type Phase = "ready" | "playing" | "between" | "victory" | "defeat";
 
 type Difficulty = {
@@ -28,8 +29,11 @@ type TowerBlueprint = {
   fireRate: number;
   color: string;
   accent: string;
+  attack: AttackStyle;
+  text: string;
   splash?: number;
   slow?: number;
+  pierce?: number;
 };
 
 type MapDefinition = {
@@ -37,15 +41,19 @@ type MapDefinition = {
   label: string;
   hint: string;
   path: Array<[number, number]>;
+  buildSlots: Array<[number, number]>;
 };
 
 type EnemyKind = {
+  id: string;
   label: string;
   hp: number;
   speed: number;
   reward: number;
   color: string;
+  accent: string;
   size: number;
+  boss?: boolean;
 };
 
 type Enemy = {
@@ -57,6 +65,7 @@ type Enemy = {
   maxHp: number;
   pathIndex: number;
   slowUntil: number;
+  seed: number;
 };
 
 type Tower = {
@@ -73,8 +82,10 @@ type Projectile = {
   damage: number;
   speed: number;
   color: string;
+  attack: AttackStyle;
   splash?: number;
   slow?: number;
+  pierce?: number;
 };
 
 type Runtime = {
@@ -86,11 +97,22 @@ type Runtime = {
   enemies: Enemy[];
   towers: Tower[];
   projectiles: Projectile[];
+  effects: Effect[];
   spawnLeft: number;
   spawnTimer: number;
+  bossSpawned: boolean;
   nextEnemyId: number;
   message: string;
   victoryReported: boolean;
+};
+
+type Effect = {
+  x: number;
+  y: number;
+  radius: number;
+  age: number;
+  life: number;
+  color: string;
 };
 
 type Hud = {
@@ -115,28 +137,28 @@ const DIFFICULTIES: Difficulty[] = [
     id: "frontier",
     label: "Frontera",
     reward: 850,
-    startGold: 155,
+    startGold: 185,
     lives: 15,
-    hpScale: 1,
-    speedScale: 0.98,
+    hpScale: 1.08,
+    speedScale: 1.02,
   },
   {
     id: "siege",
     label: "Asedio",
     reward: 1500,
-    startGold: 135,
-    lives: 11,
-    hpScale: 1.25,
-    speedScale: 1.1,
+    startGold: 170,
+    lives: 10,
+    hpScale: 1.42,
+    speedScale: 1.16,
   },
   {
     id: "abyss",
     label: "Abismo",
     reward: 2600,
-    startGold: 120,
-    lives: 8,
-    hpScale: 1.55,
-    speedScale: 1.22,
+    startGold: 158,
+    lives: 7,
+    hpScale: 1.78,
+    speedScale: 1.28,
   },
 ];
 
@@ -155,6 +177,10 @@ const MAPS: MapDefinition[] = [
       [14, 4],
       [18, 4],
     ],
+    buildSlots: [
+      [1, 3], [1, 7], [4, 1], [5, 4], [6, 7], [9, 4],
+      [10, 8], [12, 5], [13, 2], [16, 3], [16, 6],
+    ],
   },
   {
     id: "emberRoad",
@@ -169,6 +195,10 @@ const MAPS: MapDefinition[] = [
       [13, 1],
       [13, 6],
       [18, 6],
+    ],
+    buildSlots: [
+      [1, 5], [2, 8], [5, 5], [6, 2], [8, 7], [10, 2],
+      [11, 5], [12, 8], [15, 4], [16, 7],
     ],
   },
   {
@@ -187,6 +217,10 @@ const MAPS: MapDefinition[] = [
       [15, 2],
       [18, 2],
     ],
+    buildSlots: [
+      [1, 1], [3, 5], [4, 8], [5, 2], [7, 5], [8, 1],
+      [10, 5], [12, 2], [13, 8], [14, 4], [16, 1], [16, 5],
+    ],
   },
 ];
 
@@ -195,55 +229,92 @@ const TOWERS: TowerBlueprint[] = [
     id: "sentinel",
     label: "Centinela",
     short: "Arco",
-    cost: 58,
+    cost: 72,
     range: 112,
     damage: 18,
     fireRate: 0.65,
     color: "#f59e0b",
     accent: "#fff7ad",
+    attack: "bolt",
+    text: "Disparo rapido contra el primero en rango.",
   },
   {
     id: "rune",
-    label: "Runa",
-    short: "Mana",
-    cost: 92,
+    label: "Obelisco Runico",
+    short: "Runa",
+    cost: 118,
     range: 98,
-    damage: 34,
+    damage: 28,
     fireRate: 1.1,
     color: "#22d3ee",
     accent: "#a5f3fc",
-    splash: 38,
+    attack: "splash",
+    text: "Explota en un area media con dano estable.",
+    splash: 42,
   },
   {
     id: "ballista",
     label: "Ballesta",
     short: "Crit",
-    cost: 122,
-    range: 150,
-    damage: 55,
+    cost: 152,
+    range: 160,
+    damage: 62,
     fireRate: 1.65,
     color: "#fb7185",
     accent: "#ffe4e6",
+    attack: "pierce",
+    text: "Lento, caro y atraviesa enemigos alineados.",
+    pierce: 2,
   },
   {
     id: "frost",
-    label: "Escarcha",
+    label: "Faro de Escarcha",
     short: "Lento",
-    cost: 108,
+    cost: 132,
     range: 122,
     damage: 20,
     fireRate: 0.95,
     color: "#93c5fd",
     accent: "#dbeafe",
+    attack: "slow",
+    text: "Ralentiza para abrir ventanas de dano.",
     slow: 1.35,
+  },
+  {
+    id: "alchemist",
+    label: "Caldera Alquimica",
+    short: "Area",
+    cost: 138,
+    range: 104,
+    damage: 14,
+    fireRate: 0.72,
+    color: "#34d399",
+    accent: "#bbf7d0",
+    attack: "aura",
+    text: "Poco dano, area grande. Brilla si la colocas en curvas.",
+    splash: 58,
+  },
+  {
+    id: "warden",
+    label: "Bastion de Hierro",
+    short: "Guardia",
+    cost: 96,
+    range: 82,
+    damage: 24,
+    fireRate: 1.35,
+    color: "#a3a3a3",
+    accent: "#f5f5f4",
+    attack: "guard",
+    text: "Corto alcance, golpe pesado y barato para cerrar fugas.",
   },
 ];
 
 const ENEMY_KINDS: EnemyKind[] = [
-  { label: "Goblin", hp: 58, speed: 45, reward: 9, color: "#84cc16", size: 13 },
-  { label: "Sombra", hp: 42, speed: 68, reward: 11, color: "#a855f7", size: 11 },
-  { label: "Orco", hp: 118, speed: 34, reward: 16, color: "#ef4444", size: 15 },
-  { label: "Troll", hp: 220, speed: 25, reward: 28, color: "#f97316", size: 18 },
+  { id: "imp", label: "Trasgo", hp: 62, speed: 48, reward: 9, color: "#84cc16", accent: "#bef264", size: 13 },
+  { id: "shade", label: "Sombra", hp: 44, speed: 72, reward: 11, color: "#a855f7", accent: "#e9d5ff", size: 11 },
+  { id: "brute", label: "Bruto", hp: 132, speed: 34, reward: 16, color: "#ef4444", accent: "#fecdd3", size: 15 },
+  { id: "breaker", label: "Rompemuros", hp: 238, speed: 24, reward: 30, color: "#f97316", accent: "#fed7aa", size: 18 },
+  { id: "boss", label: "Baron de Asedio", hp: 980, speed: 19, reward: 150, color: "#d4af37", accent: "#fff7ad", size: 28, boss: true },
 ];
 
 const STATUS_LABEL: Record<Phase, string> = {
@@ -264,32 +335,15 @@ const DEFAULT_HUD: Hud = {
   message: "Selecciona mapa y dificultad.",
 };
 
+function cellKey(col: number, row: number) {
+  return `${col}:${row}`;
+}
+
 function pointToCanvas([col, row]: [number, number]) {
   return {
     x: col * CELL + CELL / 2,
     y: row * CELL + CELL / 2,
   };
-}
-
-function buildPathCells(path: Array<[number, number]>) {
-  const cells = new Set<string>();
-
-  for (let index = 0; index < path.length - 1; index += 1) {
-    const [aCol, aRow] = path[index];
-    const [bCol, bRow] = path[index + 1];
-    const minCol = Math.max(0, Math.min(aCol, bCol));
-    const maxCol = Math.min(COLS - 1, Math.max(aCol, bCol));
-    const minRow = Math.max(0, Math.min(aRow, bRow));
-    const maxRow = Math.min(ROWS - 1, Math.max(aRow, bRow));
-
-    for (let col = minCol; col <= maxCol; col += 1) {
-      for (let row = minRow; row <= maxRow; row += 1) {
-        cells.add(`${col}:${row}`);
-      }
-    }
-  }
-
-  return cells;
 }
 
 function createRuntime(difficulty: Difficulty): Runtime {
@@ -302,8 +356,10 @@ function createRuntime(difficulty: Difficulty): Runtime {
     enemies: [],
     towers: [],
     projectiles: [],
+    effects: [],
     spawnLeft: 0,
     spawnTimer: 0,
+    bossSpawned: false,
     nextEnemyId: 1,
     message: "Protege la base hasta la oleada 5.",
     victoryReported: false,
@@ -331,6 +387,190 @@ function rewardKey(playerId: string, difficultyId: DifficultyId) {
   return `kingdoom:tower-defense:${playerId}:${dateKey}:${difficultyId}`;
 }
 
+function drawBuildSlot(ctx: CanvasRenderingContext2D, col: number, row: number, occupied: boolean) {
+  const x = col * CELL + CELL / 2;
+  const y = row * CELL + CELL / 2;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = occupied ? "rgba(16, 185, 129, 0.18)" : "rgba(245, 158, 11, 0.16)";
+  ctx.strokeStyle = occupied ? "rgba(110, 231, 183, 0.5)" : "rgba(251, 191, 36, 0.55)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, -16);
+  ctx.lineTo(15, 0);
+  ctx.lineTo(0, 16);
+  ctx.lineTo(-15, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = occupied ? "rgba(110, 231, 183, 0.85)" : "rgba(252, 211, 77, 0.78)";
+  ctx.fillRect(-4, -4, 8, 8);
+  ctx.restore();
+}
+
+function drawTower(ctx: CanvasRenderingContext2D, tower: Tower, now: number) {
+  const x = tower.col * CELL + CELL / 2;
+  const y = tower.row * CELL + CELL / 2;
+  const { blueprint } = tower;
+  const pulse = 1 + Math.sin(now * 0.006 + x) * 0.05;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = "rgba(0,0,0,0.36)";
+  ctx.beginPath();
+  ctx.ellipse(0, 15, 17, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = blueprint.color;
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.lineWidth = 2;
+
+  if (blueprint.attack === "splash") {
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-13, -13, 26, 26);
+    ctx.strokeRect(-13, -13, 26, 26);
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillStyle = blueprint.accent;
+    ctx.beginPath();
+    ctx.arc(0, 0, 7 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (blueprint.attack === "pierce") {
+    ctx.fillRect(-16, 2, 32, 12);
+    ctx.fillRect(-7, -13, 14, 28);
+    ctx.strokeRect(-16, 2, 32, 12);
+    ctx.fillStyle = blueprint.accent;
+    ctx.fillRect(-3, -20, 6, 22);
+    ctx.fillRect(-20, -1, 40, 4);
+  } else if (blueprint.attack === "slow") {
+    ctx.beginPath();
+    ctx.arc(0, 0, 15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle = blueprint.accent;
+    ctx.beginPath();
+    ctx.moveTo(-11, -3);
+    ctx.lineTo(-2, -3);
+    ctx.lineTo(-7, 8);
+    ctx.lineTo(8, -7);
+    ctx.stroke();
+  } else if (blueprint.attack === "aura") {
+    ctx.fillRect(-13, -8, 26, 21);
+    ctx.fillStyle = blueprint.accent;
+    ctx.fillRect(-9, -16, 18, 9);
+    ctx.fillStyle = "rgba(52, 211, 153, 0.2)";
+    ctx.beginPath();
+    ctx.arc(0, 0, 21 + Math.sin(now * 0.005) * 3, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (blueprint.attack === "guard") {
+    ctx.fillRect(-15, -10, 30, 28);
+    ctx.clearRect(-6, -4, 12, 7);
+    ctx.fillStyle = blueprint.accent;
+    ctx.fillRect(-9, -18, 18, 8);
+    ctx.fillRect(-3, -25, 6, 7);
+  } else {
+    ctx.fillRect(-13, -13, 26, 26);
+    ctx.strokeRect(-13, -13, 26, 26);
+    ctx.fillStyle = blueprint.accent;
+    ctx.fillRect(-5, -20, 10, 11);
+    ctx.fillRect(-2, -26, 4, 8);
+  }
+
+  ctx.restore();
+}
+
+function drawEnemy(ctx: CanvasRenderingContext2D, enemy: Enemy, now: number) {
+  const size = enemy.kind.size;
+  const bob = Math.sin(now * 0.008 + enemy.seed) * 2;
+
+  ctx.save();
+  ctx.translate(enemy.x, enemy.y + bob);
+  ctx.fillStyle = "rgba(0,0,0,0.42)";
+  ctx.beginPath();
+  ctx.ellipse(0, size + 2, size * 0.95, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = enemy.kind.color;
+  ctx.strokeStyle = enemy.kind.boss ? "rgba(255, 247, 173, 0.75)" : "rgba(0,0,0,0.38)";
+  ctx.lineWidth = enemy.kind.boss ? 3 : 2;
+
+  if (enemy.kind.boss) {
+    ctx.fillRect(-size, -size + 4, size * 2, size * 1.6);
+    ctx.fillRect(-size * 0.68, -size - 10, size * 1.36, 16);
+    ctx.fillStyle = enemy.kind.accent;
+    ctx.fillRect(-size * 0.42, -size - 18, size * 0.84, 8);
+    ctx.fillRect(-size * 0.1, -size - 27, size * 0.2, 11);
+    ctx.strokeRect(-size, -size + 4, size * 2, size * 1.6);
+  } else if (enemy.kind.id === "shade") {
+    ctx.beginPath();
+    ctx.moveTo(0, -size);
+    ctx.lineTo(size, size);
+    ctx.lineTo(-size, size);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  } else if (enemy.kind.id === "breaker") {
+    ctx.fillRect(-size, -size * 0.8, size * 2, size * 1.65);
+    ctx.fillStyle = enemy.kind.accent;
+    ctx.fillRect(-size - 5, -size * 0.15, 5, 14);
+    ctx.fillRect(size, -size * 0.15, 5, 14);
+  } else {
+    ctx.fillRect(-size, -size, size * 2, size * 2);
+    ctx.strokeRect(-size, -size, size * 2, size * 2);
+  }
+
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(-size + 4, -4, 4, 4);
+  ctx.fillRect(size - 8, -4, 4, 4);
+  ctx.fillStyle = "#ef4444";
+  ctx.fillRect(-16, -size - 13, 32, 4);
+  ctx.fillStyle = enemy.kind.boss ? "#facc15" : "#22c55e";
+  ctx.fillRect(-16, -size - 13, Math.max(0, 32 * (enemy.hp / enemy.maxHp)), 4);
+  ctx.restore();
+}
+
+function drawProjectile(ctx: CanvasRenderingContext2D, projectile: Projectile) {
+  ctx.save();
+  ctx.strokeStyle = projectile.color;
+  ctx.fillStyle = projectile.color;
+  ctx.shadowColor = projectile.color;
+  ctx.shadowBlur = 10;
+
+  if (projectile.attack === "pierce") {
+    ctx.fillRect(projectile.x - 8, projectile.y - 2, 16, 4);
+  } else if (projectile.attack === "slow") {
+    ctx.beginPath();
+    ctx.arc(projectile.x, projectile.y, 6, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillRect(projectile.x - 2, projectile.y - 2, 4, 4);
+  } else if (projectile.attack === "aura") {
+    ctx.beginPath();
+    ctx.arc(projectile.x, projectile.y, 7, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.arc(projectile.x, projectile.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawEffect(ctx: CanvasRenderingContext2D, effect: Effect) {
+  const progress = effect.age / effect.life;
+
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, 1 - progress);
+  ctx.strokeStyle = effect.color;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = effect.color;
+  ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.arc(effect.x, effect.y, effect.radius * (0.35 + progress), 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function TavernTowerDefense() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const runtimeRef = useRef<Runtime | null>(null);
@@ -339,7 +579,7 @@ export function TavernTowerDefense() {
   const difficultyRef = useRef(DIFFICULTIES[0]);
   const mapRef = useRef(MAPS[0]);
   const selectedTowerRef = useRef<TowerBlueprint>(TOWERS[0]);
-  const pathCellsRef = useRef(buildPathCells(MAPS[0].path));
+  const buildSlotsRef = useRef(new Set(MAPS[0].buildSlots.map(([col, row]) => cellKey(col, row))));
   const victoryTokenRef = useRef(0);
   const { player, refreshPlayer, setPlayerGold } = usePlayerSession();
   const [difficultyId, setDifficultyId] = useState<DifficultyId>("frontier");
@@ -365,7 +605,7 @@ export function TavernTowerDefense() {
   const resetGame = useCallback(() => {
     difficultyRef.current = difficulty;
     mapRef.current = currentMap;
-    pathCellsRef.current = buildPathCells(currentMap.path);
+    buildSlotsRef.current = new Set(currentMap.buildSlots.map(([col, row]) => cellKey(col, row)));
     const nextRuntime = createRuntime(difficulty);
     runtimeRef.current = nextRuntime;
     setHud(snapshot(nextRuntime));
@@ -389,7 +629,7 @@ export function TavernTowerDefense() {
 
     runtime.phase = "playing";
     runtime.wave += 1;
-    runtime.spawnLeft = 9 + runtime.wave * 4;
+    runtime.spawnLeft = runtime.wave >= MAX_WAVE ? 9 : 9 + runtime.wave * 4;
     runtime.spawnTimer = 0;
     runtime.message = `Oleada ${runtime.wave}/${MAX_WAVE} en marcha.`;
     setHud(snapshot(runtime));
@@ -410,8 +650,8 @@ export function TavernTowerDefense() {
       return;
     }
 
-    if (pathCellsRef.current.has(`${col}:${row}`)) {
-      runtime.message = "No puedes construir sobre la ruta.";
+    if (!buildSlotsRef.current.has(cellKey(col, row))) {
+      runtime.message = "Construye en los anclajes dorados del mapa.";
       setHud(snapshot(runtime));
       return;
     }
@@ -430,6 +670,14 @@ export function TavernTowerDefense() {
 
     runtime.buildGold -= selected.cost;
     runtime.towers.push({ col, row, blueprint: selected, cooldown: 0 });
+    runtime.effects.push({
+      x: col * CELL + CELL / 2,
+      y: row * CELL + CELL / 2,
+      radius: 18,
+      age: 0,
+      life: 0.42,
+      color: selected.accent,
+    });
     runtime.message = `${selected.label} desplegada.`;
     setHud(snapshot(runtime));
   }, []);
@@ -453,8 +701,30 @@ export function TavernTowerDefense() {
   const spawnEnemy = useCallback((runtime: Runtime) => {
     const difficultyValue = difficultyRef.current;
     const pathStart = pointToCanvas(mapRef.current.path[0]);
+    const bossKind = ENEMY_KINDS.find((kind) => kind.boss) ?? ENEMY_KINDS[0];
+
+    if (runtime.wave >= MAX_WAVE && !runtime.bossSpawned) {
+      const bossHp = Math.round(bossKind.hp * difficultyValue.hpScale * 1.18);
+      runtime.enemies.push({
+        id: runtime.nextEnemyId,
+        kind: bossKind,
+        x: pathStart.x,
+        y: pathStart.y,
+        hp: bossHp,
+        maxHp: bossHp,
+        pathIndex: 1,
+        slowUntil: 0,
+        seed: Math.random() * 1000,
+      });
+      runtime.nextEnemyId += 1;
+      runtime.bossSpawned = true;
+      runtime.message = "El Baron de Asedio entro al campo.";
+      return;
+    }
+
+    const regularKinds = ENEMY_KINDS.filter((kind) => !kind.boss);
     const pool = runtime.wave >= 5
-      ? ENEMY_KINDS
+      ? regularKinds
       : ENEMY_KINDS.slice(0, Math.min(3, 1 + Math.ceil(runtime.wave / 2)));
     const kind = pool[Math.floor(Math.random() * pool.length)];
     const hp = Math.round(kind.hp * difficultyValue.hpScale * (1 + runtime.wave * 0.24));
@@ -468,12 +738,17 @@ export function TavernTowerDefense() {
       maxHp: hp,
       pathIndex: 1,
       slowUntil: 0,
+      seed: Math.random() * 1000,
     });
     runtime.nextEnemyId += 1;
   }, []);
 
   const updateRuntime = useCallback(
     (runtime: Runtime, delta: number, now: number) => {
+      runtime.effects = runtime.effects
+        .map((effect) => ({ ...effect, age: effect.age + delta }))
+        .filter((effect) => effect.age < effect.life);
+
       if (runtime.phase !== "playing") {
         return;
       }
@@ -534,10 +809,12 @@ export function TavernTowerDefense() {
           y: towerY,
           targetId: target.id,
           damage: tower.blueprint.damage,
-          speed: 340,
+          speed: tower.blueprint.attack === "pierce" ? 430 : 340,
           color: tower.blueprint.accent,
+          attack: tower.blueprint.attack,
           splash: tower.blueprint.splash,
           slow: tower.blueprint.slow,
+          pierce: tower.blueprint.pierce,
         });
         tower.cooldown = tower.blueprint.fireRate;
       });
@@ -568,6 +845,25 @@ export function TavernTowerDefense() {
           if (projectile.slow) {
             enemy.slowUntil = now + projectile.slow;
           }
+        });
+
+        if (projectile.pierce) {
+          runtime.enemies
+            .filter((enemy) => enemy.id !== target.id)
+            .filter((enemy) => distance(target.x, target.y, enemy.x, enemy.y) <= 62)
+            .slice(0, projectile.pierce)
+            .forEach((enemy) => {
+              enemy.hp -= Math.round(projectile.damage * 0.58);
+            });
+        }
+
+        runtime.effects.push({
+          x: target.x,
+          y: target.y,
+          radius: projectile.splash ?? (projectile.attack === "pierce" ? 42 : 22),
+          age: 0,
+          life: projectile.attack === "aura" ? 0.48 : 0.32,
+          color: projectile.color,
         });
 
         return false;
@@ -609,7 +905,7 @@ export function TavernTowerDefense() {
     [spawnEnemy]
   );
 
-  const drawRuntime = useCallback((ctx: CanvasRenderingContext2D, runtime: Runtime | null) => {
+  const drawRuntime = useCallback((ctx: CanvasRenderingContext2D, runtime: Runtime | null, now: number) => {
     const map = mapRef.current;
     const selected = selectedTowerRef.current;
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -632,8 +928,8 @@ export function TavernTowerDefense() {
     const path = map.path.map(pointToCanvas);
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "rgba(120, 53, 15, 0.78)";
-    ctx.lineWidth = 34;
+    ctx.strokeStyle = "rgba(74, 36, 16, 0.9)";
+    ctx.lineWidth = 36;
     ctx.beginPath();
     path.forEach((point, index) => {
       if (index === 0) {
@@ -643,54 +939,43 @@ export function TavernTowerDefense() {
       }
     });
     ctx.stroke();
-    ctx.strokeStyle = "rgba(245, 158, 11, 0.45)";
-    ctx.lineWidth = 8;
+    ctx.strokeStyle = "rgba(245, 158, 11, 0.32)";
+    ctx.lineWidth = 7;
     ctx.stroke();
 
-    ctx.fillStyle = "rgba(20, 184, 166, 0.24)";
-    pathCellsRef.current.forEach((key) => {
-      const [col, row] = key.split(":").map(Number);
-      ctx.fillRect(col * CELL + 5, row * CELL + 5, CELL - 10, CELL - 10);
+    map.buildSlots.forEach(([col, row]) => {
+      const occupied = Boolean(runtime?.towers.some((tower) => tower.col === col && tower.row === row));
+      drawBuildSlot(ctx, col, row, occupied);
     });
 
     const base = path[path.length - 1];
+    ctx.save();
+    ctx.translate(base.x, base.y);
     ctx.fillStyle = "#f59e0b";
-    ctx.fillRect(base.x - 16, base.y - 18, 32, 36);
+    ctx.fillRect(-20, -18, 40, 34);
     ctx.fillStyle = "#111827";
-    ctx.fillRect(base.x - 8, base.y - 4, 16, 22);
+    ctx.fillRect(-8, -2, 16, 18);
+    ctx.fillStyle = "#fef3c7";
+    ctx.fillRect(-14, -28, 6, 10);
+    ctx.fillRect(8, -28, 6, 10);
+    ctx.fillRect(-19, -24, 38, 7);
+    ctx.restore();
 
     if (runtime) {
       runtime.towers.forEach((tower) => {
-        const x = tower.col * CELL + CELL / 2;
-        const y = tower.row * CELL + CELL / 2;
-        ctx.fillStyle = "rgba(0,0,0,0.35)";
-        ctx.fillRect(x - 15, y + 10, 30, 7);
-        ctx.fillStyle = tower.blueprint.color;
-        ctx.fillRect(x - 13, y - 13, 26, 26);
-        ctx.fillStyle = "#0b0b0b";
-        ctx.fillRect(x - 8, y - 7, 16, 14);
-        ctx.fillStyle = tower.blueprint.accent;
-        ctx.fillRect(x - 4, y - 18, 8, 10);
+        drawTower(ctx, tower, now);
       });
 
       runtime.enemies.forEach((enemy) => {
-        const size = enemy.kind.size;
-        ctx.fillStyle = "rgba(0,0,0,0.38)";
-        ctx.fillRect(enemy.x - size, enemy.y + size - 2, size * 2, 5);
-        ctx.fillStyle = enemy.kind.color;
-        ctx.fillRect(enemy.x - size, enemy.y - size, size * 2, size * 2);
-        ctx.fillStyle = "#020617";
-        ctx.fillRect(enemy.x - size + 4, enemy.y - 4, 4, 4);
-        ctx.fillRect(enemy.x + size - 8, enemy.y - 4, 4, 4);
-        ctx.fillStyle = "#ef4444";
-        ctx.fillRect(enemy.x - 14, enemy.y - size - 10, 28, 4);
-        ctx.fillStyle = "#22c55e";
-        ctx.fillRect(enemy.x - 14, enemy.y - size - 10, Math.max(0, 28 * (enemy.hp / enemy.maxHp)), 4);
+        drawEnemy(ctx, enemy, now);
       });
 
       runtime.projectiles.forEach((projectile) => {
-        ctx.fillStyle = projectile.color;
-        ctx.fillRect(projectile.x - 3, projectile.y - 3, 6, 6);
+        drawProjectile(ctx, projectile);
+      });
+
+      runtime.effects.forEach((effect) => {
+        drawEffect(ctx, effect);
       });
     }
 
@@ -752,7 +1037,7 @@ export function TavernTowerDefense() {
         }
       }
 
-      drawRuntime(ctx, runtime);
+      drawRuntime(ctx, runtime, time);
       frameId = window.requestAnimationFrame(tick);
     };
 
@@ -802,7 +1087,7 @@ export function TavernTowerDefense() {
 
   return (
     <div className="overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-[#03170c] shadow-2xl shadow-emerald-950/30">
-      <div className="border-b border-emerald-500/15 bg-gradient-to-r from-emerald-950 via-green-950 to-stone-950 p-4 sm:p-5">
+      <div className="border-b border-emerald-500/15 bg-[radial-gradient(circle_at_18%_0%,rgba(245,158,11,0.18),transparent_32%),linear-gradient(120deg,#052e16,#052014_46%,#12070b)] p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300">
@@ -811,6 +1096,9 @@ export function TavernTowerDefense() {
             <h3 className="mt-2 text-2xl font-black text-stone-50 sm:text-3xl">
               Guardia de la muralla
             </h3>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-stone-400">
+              Construye solo en anclajes dorados. La quinta oleada trae un boss.
+            </p>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold uppercase tracking-[0.12em] text-stone-300">
             <StatusChip label="Oleada" value={`${hud.wave}/${MAX_WAVE}`} />
@@ -832,7 +1120,7 @@ export function TavernTowerDefense() {
             />
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {TOWERS.map((tower) => (
               <button
                 key={tower.id}
@@ -852,6 +1140,9 @@ export function TavernTowerDefense() {
                 </span>
                 <span className="mt-2 block text-[11px] uppercase tracking-[0.14em] text-stone-500">
                   Dmg {tower.damage} / Rango {tower.range}
+                </span>
+                <span className="mt-2 block text-xs leading-5 text-stone-400">
+                  {tower.text}
                 </span>
               </button>
             ))}
@@ -878,6 +1169,9 @@ export function TavernTowerDefense() {
                         {item.label}
                         <span className="text-xs text-amber-300">+{item.reward}</span>
                       </span>
+                      <span className="mt-1 block text-xs text-stone-500">
+                        Inicio {item.startGold} / Base {item.lives}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -897,7 +1191,9 @@ export function TavernTowerDefense() {
                       }`}
                     >
                       <span className="block text-sm font-black">{item.label}</span>
-                      <span className="mt-1 block text-xs text-stone-500">{item.hint}</span>
+                      <span className="mt-1 block text-xs text-stone-500">
+                        {item.hint} {item.buildSlots.length} anclajes.
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -957,6 +1253,19 @@ export function TavernTowerDefense() {
               </div>
             ) : null}
           </Panel>
+
+          {hud.phase !== "playing" ? (
+            <Panel title="Lectura" icon={<Sparkles className="h-4 w-4" />}>
+              <div className="grid grid-cols-2 gap-2 text-xs font-bold text-stone-400">
+                <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
+                  Area: {TOWERS.find((tower) => tower.attack === "aura")?.label}
+                </span>
+                <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
+                  Boss: oleada {MAX_WAVE}
+                </span>
+              </div>
+            </Panel>
+          ) : null}
         </aside>
       </div>
     </div>

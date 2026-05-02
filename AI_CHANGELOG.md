@@ -31,6 +31,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
+### [Fecha: 02/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernTowerDefense.tsx`
+*   **Resumen de Tareas:** Se mejoro el minijuego Tower Defense con balance mas desafiante, construccion por anclajes, nuevas torres y una oleada final con boss.
+*   **Cambios Clave:**
+    *   Los mapas ahora tienen puntos especificos de construccion para evitar acumular todas las torretas en el inicio.
+    *   Se ajustaron recursos iniciales, costes, escalado de dificultad y vidas para que Asedio y Abismo sean mas tensos sin sentirse injustos.
+    *   Se agregaron Caldera Alquimica y Bastion de Hierro, junto con ataques de area, ralentizacion, perforacion y efectos visuales por impacto.
+    *   La oleada 5 ahora invoca un boss principal con menos enemigos de relleno.
+    *   El render del canvas usa torres, enemigos, proyectiles y anclajes con siluetas pixel-art mas reconocibles.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. No se modifico la logica diaria de cobro de recompensa ni Supabase.
+
 ### [Fecha: 30/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/app/(tabs)/grimoire.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/DetailSheet.tsx`, `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/src/components/ScreenShell.tsx`
 *   **Resumen de Tareas:** Se hizo una pasada premium de UI/UX nativa con foco en mobile, errores visuales, microinteracciones y estados de carga mas claros.

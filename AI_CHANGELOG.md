@@ -32,6 +32,25 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 02/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernPenalty.tsx`, `src/assets/penalty-keeper-sprites.png`
+*   **Resumen de Tareas:** Se pulio el minijuego de Penales con sprites reales del portero, tanda progresiva x2/x4/x8/x12 y una UI mas arcade.
+*   **Cambios Clave:**
+    *   Se integro un spritesheet compacto del portero para usar poses de espera, salto y atajada en canvas.
+    *   La apuesta ahora funciona como tanda de 4 rondas con multiplicadores progresivos y opcion de cobrar o arriesgar.
+    *   Se agrego barra de avance, chips de multiplicador, feedback de ronda y canvas mas atmosferico.
+    *   Se corrigio el avance visual de la barra para que solo progrese cuando el tiro termina en gol.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. No se modifico el limite maximo de apuesta ni reglas globales de oro.
+
+### [Fecha: 02/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernTowerDefense.tsx`
+*   **Resumen de Tareas:** Se ajusto la construccion del Tower Defense para permitir colocar torres en cualquier casilla libre del tablero.
+*   **Cambios Clave:**
+    *   Se elimino la restriccion de anclajes de construccion.
+    *   Se mantiene el bloqueo de construccion sobre la ruta para evitar romper el movimiento de enemigos.
+    *   Se limpiaron textos del modo que mencionaban anclajes y se actualizo la indicacion de mapa.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. No se tocaron recompensas ni cobro de oro.
+
+### [Fecha: 02/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernPenalty.tsx`, `src/sections/MarketSection.tsx`
 *   **Resumen de Tareas:** Se agrego el minijuego Penales a la taberna como apuesta arcade con canvas, direccion de tiro, reaccion del portero y cobro de oro.
 *   **Cambios Clave:**

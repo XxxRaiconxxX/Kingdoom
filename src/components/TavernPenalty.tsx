@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Coins, Crosshair, RefreshCw, Shield, Trophy, Zap } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
+import keeperSprites from "../assets/penalty-keeper-sprites.png";
 import type { ReactNode } from "react";
 
 type DirectionId =
@@ -14,6 +15,7 @@ type DirectionId =
 
 type Phase = "betting" | "aiming" | "charging" | "resolved";
 type Result = "goal" | "save" | "post" | null;
+type KeeperPose = "idle" | "leftLow" | "leftMid" | "leftHigh" | "centerHigh" | "rightLow" | "rightMid" | "rightHigh";
 
 type Direction = {
   id: DirectionId;
@@ -32,13 +34,23 @@ type ShotState = {
   keeperDelay: number;
 };
 
+type SpriteRect = {
+  sx: number;
+  sy: number;
+  sw: number;
+  sh: number;
+  dw: number;
+  dh: number;
+};
+
 const WIDTH = 720;
 const HEIGHT = 420;
 const CONTACT_MS = 800;
 const BALL_MS = 820;
 const RESULT_MS = 900;
-const END_MS = 1280;
 const MAX_BET = 2500;
+const ROUND_MULTIPLIERS = [2, 4, 8, 12] as const;
+const MAX_ROUNDS = ROUND_MULTIPLIERS.length;
 
 const DIRECTIONS: Direction[] = [
   { id: "left_low", label: "Izq. baja", x: 210, y: 254, keeperX: 238, keeperY: 244 },
@@ -90,20 +102,19 @@ function resolvePenalty(shot: DirectionId, keeper: DirectionId): Result {
   return shot === keeper ? "save" : "goal";
 }
 
-function getPayout(direction: DirectionId, result: Result) {
-  if (result !== "goal") {
-    return 0;
-  }
+const KEEPER_SPRITES: Record<KeeperPose, SpriteRect> = {
+  idle: { sx: 8, sy: 0, sw: 120, sh: 210, dw: 80, dh: 140 },
+  leftHigh: { sx: 136, sy: 0, sw: 250, sh: 190, dw: 168, dh: 128 },
+  leftMid: { sx: 394, sy: 0, sw: 250, sh: 188, dw: 168, dh: 126 },
+  leftLow: { sx: 652, sy: 0, sw: 264, sh: 86, dw: 178, dh: 58 },
+  centerHigh: { sx: 924, sy: 0, sw: 108, sh: 208, dw: 78, dh: 150 },
+  rightLow: { sx: 1040, sy: 0, sw: 270, sh: 86, dw: 182, dh: 58 },
+  rightMid: { sx: 1318, sy: 0, sw: 248, sh: 180, dw: 168, dh: 122 },
+  rightHigh: { sx: 1574, sy: 0, sw: 244, sh: 184, dw: 166, dh: 126 },
+};
 
-  if (direction.includes("high")) {
-    return 2.15;
-  }
-
-  if (direction.includes("mid")) {
-    return 1.85;
-  }
-
-  return 1.72;
+function getRoundMultiplier(roundIndex: number) {
+  return ROUND_MULTIPLIERS[clamp(roundIndex, 0, ROUND_MULTIPLIERS.length - 1)];
 }
 
 function drawPixelPlayer(
@@ -149,8 +160,67 @@ function drawPixelPlayer(
   ctx.restore();
 }
 
+function getKeeperPose(direction: DirectionId | null): KeeperPose {
+  switch (direction) {
+    case "left_low":
+      return "leftLow";
+    case "left_mid":
+      return "leftMid";
+    case "left_high":
+      return "leftHigh";
+    case "center_high":
+      return "centerHigh";
+    case "right_low":
+      return "rightLow";
+    case "right_mid":
+      return "rightMid";
+    case "right_high":
+      return "rightHigh";
+    default:
+      return "idle";
+  }
+}
+
+function drawKeeperSprite(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement | null,
+  pose: KeeperPose,
+  x: number,
+  y: number,
+  alpha = 1
+) {
+  const sprite = KEEPER_SPRITES[pose];
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.imageSmoothingEnabled = false;
+
+  if (image?.complete && image.naturalWidth > 0) {
+    ctx.drawImage(
+      image,
+      sprite.sx,
+      sprite.sy,
+      sprite.sw,
+      sprite.sh,
+      x - sprite.dw / 2,
+      y - sprite.dh / 2,
+      sprite.dw,
+      sprite.dh
+    );
+  } else {
+    drawPixelPlayer(ctx, x, y + 38, {
+      shirt: "#21c33b",
+      accent: "#2563eb",
+      scale: 0.88,
+    });
+  }
+
+  ctx.restore();
+}
+
 function drawKeeper(
   ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement | null,
   direction: DirectionId | null,
   progress: number
 ) {
@@ -159,17 +229,10 @@ function drawKeeper(
   const idleY = 186;
   const x = idleX + (target.keeperX - idleX) * progress;
   const y = idleY + (target.keeperY - idleY) * progress;
-  const left = direction?.startsWith("left");
-  const right = direction?.startsWith("right");
-  const lean = left ? -0.95 * progress : right ? 0.95 * progress : 0;
   const stretch = direction === "center_high" ? -36 * progress : 0;
+  const pose = progress > 0.18 ? getKeeperPose(direction) : "idle";
 
-  drawPixelPlayer(ctx, x, y + stretch, {
-    shirt: "#21c33b",
-    accent: "#2563eb",
-    lean,
-    scale: 0.88 + progress * 0.08,
-  });
+  drawKeeperSprite(ctx, image, pose, x, y + stretch, 0.98);
 
   if (progress > 0.2) {
     ctx.save();
@@ -210,7 +273,14 @@ function drawBall(ctx: CanvasRenderingContext2D, shot: DirectionId | null, elaps
   ctx.restore();
 }
 
-function drawScene(ctx: CanvasRenderingContext2D, shotState: ShotState, phase: Phase, now: number) {
+function drawScene(
+  ctx: CanvasRenderingContext2D,
+  shotState: ShotState,
+  phase: Phase,
+  now: number,
+  keeperImage: HTMLImageElement | null,
+  roundIndex: number
+) {
   const elapsed = shotState.startedAt ? now - shotState.startedAt : 0;
   const runProgress = phase === "charging" ? clamp(elapsed / CONTACT_MS, 0, 1) : 0;
   const keeperProgress =
@@ -220,9 +290,9 @@ function drawScene(ctx: CanvasRenderingContext2D, shotState: ShotState, phase: P
 
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   const sky = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-  sky.addColorStop(0, "#101820");
-  sky.addColorStop(0.5, "#14251a");
-  sky.addColorStop(1, "#06130c");
+  sky.addColorStop(0, "#06140f");
+  sky.addColorStop(0.48, "#102619");
+  sky.addColorStop(1, "#07110b");
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -237,6 +307,9 @@ function drawScene(ctx: CanvasRenderingContext2D, shotState: ShotState, phase: P
 
   ctx.fillStyle = "#102d18";
   ctx.fillRect(0, 276, WIDTH, 144);
+  ctx.fillStyle = "rgba(250, 204, 21, 0.12)";
+  ctx.fillRect(0, 0, WIDTH, 12);
+  ctx.fillRect(0, HEIGHT - 12, WIDTH, 12);
   ctx.strokeStyle = "rgba(255,255,255,0.25)";
   ctx.lineWidth = 3;
   ctx.strokeRect(160, 72, 400, 214);
@@ -258,16 +331,20 @@ function drawScene(ctx: CanvasRenderingContext2D, shotState: ShotState, phase: P
   ctx.fillRect(154, 64, 9, 222);
   ctx.fillRect(557, 64, 9, 222);
 
-  DIRECTIONS.forEach((direction) => {
+  DIRECTIONS.forEach((direction, index) => {
     ctx.fillStyle = shotState.shot === direction.id ? "rgba(250, 204, 21, 0.24)" : "rgba(255,255,255,0.05)";
     ctx.strokeStyle = "rgba(255,255,255,0.14)";
     ctx.beginPath();
-    ctx.arc(direction.x, direction.y, 18, 0, Math.PI * 2);
+    ctx.roundRect(direction.x - 42, direction.y - 17, 84, 34, 13);
     ctx.fill();
     ctx.stroke();
+    ctx.fillStyle = shotState.shot === direction.id ? "#fde68a" : "rgba(255,255,255,0.28)";
+    ctx.font = "bold 10px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(String(index + 1), direction.x, direction.y + 4);
   });
 
-  drawKeeper(ctx, shotState.keeper, keeperProgress);
+  drawKeeper(ctx, keeperImage, shotState.keeper, keeperProgress);
 
   const shooterX = 360 - 72 + runProgress * 58;
   const shooterY = 342;
@@ -296,26 +373,49 @@ function drawScene(ctx: CanvasRenderingContext2D, shotState: ShotState, phase: P
     ctx.stroke();
     ctx.restore();
   }
+
+  ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  ctx.fillRect(24, 22, 176, 40);
+  ctx.fillStyle = "#facc15";
+  ctx.font = "bold 14px monospace";
+  ctx.textAlign = "left";
+  ctx.fillText(`RONDA ${Math.min(roundIndex + 1, MAX_ROUNDS)}/${MAX_ROUNDS}`, 38, 46);
+  ctx.fillStyle = "#f8fafc";
+  ctx.fillText(`x${getRoundMultiplier(roundIndex)}`, 142, 46);
+  ctx.restore();
 }
 
 export function TavernPenalty() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const keeperImageRef = useRef<HTMLImageElement | null>(null);
   const frameRef = useRef(0);
   const timeoutRefs = useRef<number[]>([]);
   const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
   const [phase, setPhase] = useState<Phase>("betting");
   const [bet, setBet] = useState(100);
+  const [roundIndex, setRoundIndex] = useState(0);
+  const [lockedBet, setLockedBet] = useState(0);
   const [shotState, setShotState] = useState<ShotState>(DEFAULT_SHOT);
-  const [message, setMessage] = useState("Elige una zona, carga el tiro y espera la reaccion del portero.");
+  const [message, setMessage] = useState("Supera 4 penales seguidos para llegar al x12.");
   const [updating, setUpdating] = useState(false);
 
   const balance = player?.gold ?? 0;
   const safeBet = clamp(Math.round(bet || 0), 1, Math.min(MAX_BET, Math.max(1, balance)));
   const canShoot = Boolean(player && phase === "aiming" && safeBet > 0 && safeBet <= balance && !updating);
-  const payoutPreview = useMemo(() => {
-    const direction = shotState.shot ?? "center_high";
-    return getPayout(direction, "goal");
-  }, [shotState.shot]);
+  const currentMultiplier = getRoundMultiplier(roundIndex);
+  const potentialPrize = (lockedBet || safeBet) * currentMultiplier;
+  const completedRoundBonus = phase === "resolved" && shotState.result === "goal" ? 1 : 0;
+  const progressPercent = ((roundIndex + completedRoundBonus) / MAX_ROUNDS) * 100;
+
+  useEffect(() => {
+    const image = new Image();
+    image.src = keeperSprites;
+    image.onload = () => {
+      keeperImageRef.current = image;
+    };
+    keeperImageRef.current = image;
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -339,7 +439,7 @@ export function TavernPenalty() {
     };
 
     const tick = (time: number) => {
-      drawScene(ctx, shotState, phase, time);
+      drawScene(ctx, shotState, phase, time, keeperImageRef.current, roundIndex);
       frameRef.current = window.requestAnimationFrame(tick);
     };
 
@@ -351,7 +451,7 @@ export function TavernPenalty() {
       window.cancelAnimationFrame(frameRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [phase, shotState]);
+  }, [phase, roundIndex, shotState]);
 
   useEffect(
     () => () => {
@@ -377,9 +477,11 @@ export function TavernPenalty() {
     }
 
     setBet(safeBet);
+    setLockedBet(safeBet);
+    setRoundIndex(0);
     setPhase("aiming");
     setShotState(DEFAULT_SHOT);
-    setMessage("Toca una zona del arco para preparar el golpe.");
+    setMessage("Ronda 1. Marca una zona del arco.");
   }
 
   function selectDirection(direction: DirectionId) {
@@ -388,7 +490,7 @@ export function TavernPenalty() {
     }
 
     setShotState((current) => ({ ...current, shot: direction }));
-    setMessage("Zona marcada. El portero reaccionara despues del contacto.");
+    setMessage(`Zona marcada. Premio actual x${currentMultiplier}.`);
   }
 
   function shoot() {
@@ -418,9 +520,17 @@ export function TavernPenalty() {
     queue(() => setMessage("El portero reacciona."), CONTACT_MS + keeperDelay);
     queue(async () => {
       setUpdating(true);
-      const payout = getPayout(shot, result);
-      const prize = Math.round(safeBet * payout);
-      const nextGold = result === "post" ? player.gold : player.gold - safeBet + prize;
+      const stake = lockedBet || safeBet;
+
+      if (result === "goal" && roundIndex < MAX_ROUNDS - 1) {
+        setPhase("resolved");
+        setMessage(`Gol. Racha x${currentMultiplier}. Siguiente ronda: x${getRoundMultiplier(roundIndex + 1)}.`);
+        setUpdating(false);
+        return;
+      }
+
+      const prize = result === "goal" ? stake * currentMultiplier : result === "post" ? stake : 0;
+      const nextGold = result === "post" ? player.gold : player.gold - stake + prize;
       const updated = await setPlayerGold(nextGold);
 
       if (!updated) {
@@ -432,22 +542,57 @@ export function TavernPenalty() {
 
       setPhase("resolved");
       if (result === "goal") {
-        setMessage(`Gol. Cobras ${prize.toLocaleString("es-PY")} oro.`);
+        setMessage(`Tanda perfecta. Cobras ${prize.toLocaleString("es-PY")} oro.`);
       } else if (result === "post") {
         setMessage("Al poste. Se devuelve la apuesta.");
       } else {
-        setMessage("Atajada. La casa se queda la apuesta.");
+        setMessage("Atajada. Pierdes la apuesta de la tanda.");
       }
       setUpdating(false);
     }, RESULT_MS);
+  }
+
+  function continueRun() {
+    if (phase !== "resolved" || shotState.result !== "goal" || roundIndex >= MAX_ROUNDS - 1) {
+      return;
+    }
+
+    const nextRound = roundIndex + 1;
+    setRoundIndex(nextRound);
+    setPhase("aiming");
+    setShotState(DEFAULT_SHOT);
+    setMessage(`Ronda ${nextRound + 1}. Multiplicador x${getRoundMultiplier(nextRound)}.`);
+  }
+
+  async function cashOutRun() {
+    if (!player || phase !== "resolved" || shotState.result !== "goal" || updating) {
+      return;
+    }
+
+    setUpdating(true);
+    const stake = lockedBet || safeBet;
+    const prize = stake * currentMultiplier;
+    const updated = await setPlayerGold(player.gold - stake + prize);
+
+    if (!updated) {
+      setMessage("No se pudo cobrar. Refresca tu perfil.");
+      setUpdating(false);
+      return;
+    }
+
+    setMessage(`Cobro seguro: ${prize.toLocaleString("es-PY")} oro.`);
+    setUpdating(false);
+    setRoundIndex(MAX_ROUNDS - 1);
   }
 
   function resetRound() {
     timeoutRefs.current.forEach((id) => window.clearTimeout(id));
     timeoutRefs.current = [];
     setPhase("betting");
+    setRoundIndex(0);
+    setLockedBet(0);
     setShotState(DEFAULT_SHOT);
-    setMessage("Elige una zona, carga el tiro y espera la reaccion del portero.");
+    setMessage("Supera 4 penales seguidos para llegar al x12.");
   }
 
   if (isHydrating) {
@@ -467,19 +612,49 @@ export function TavernPenalty() {
               Penalty arcade
             </p>
             <h3 className="mt-2 text-2xl font-black text-stone-50 sm:text-3xl">
-              Tanda del coliseo
+              Tanda x12
             </h3>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold uppercase tracking-[0.12em] text-stone-300">
             <StatusChip label="Oro" value={balance.toLocaleString("es-PY")} />
-            <StatusChip label="Apuesta" value={safeBet} />
-            <StatusChip label="Pago" value={`${payoutPreview.toFixed(2)}x`} />
+            <StatusChip label="Ronda" value={`${roundIndex + 1}/${MAX_ROUNDS}`} />
+            <StatusChip label="Premio" value={`${potentialPrize.toLocaleString("es-PY")}`} />
           </div>
         </div>
       </div>
 
       <div className="grid gap-4 p-3 sm:p-5 xl:grid-cols-[minmax(0,1fr)_19rem]">
         <div className="space-y-3">
+          <div className="rounded-[1.4rem] border border-amber-500/20 bg-stone-950/70 p-3">
+            <div className="grid grid-cols-4 gap-2">
+              {ROUND_MULTIPLIERS.map((multiplier, index) => {
+                const active = index === roundIndex;
+                const done = index < roundIndex || (phase === "resolved" && shotState.result === "goal" && index <= roundIndex);
+
+                return (
+                  <div
+                    key={multiplier}
+                    className={`rounded-2xl border px-2 py-2 text-center text-xs font-black transition ${
+                      done
+                        ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-100"
+                        : active
+                          ? "border-amber-300/45 bg-amber-500/15 text-amber-100"
+                          : "border-stone-800 bg-black/35 text-stone-500"
+                    }`}
+                  >
+                    x{multiplier}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/60">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-amber-500 via-emerald-400 to-cyan-300 transition-all duration-500"
+                style={{ width: `${clamp(progressPercent, 0, 100)}%` }}
+              />
+            </div>
+          </div>
+
           <div className="relative overflow-hidden rounded-[1.5rem] border border-amber-500/20 bg-black/55 p-2">
             <canvas
               ref={canvasRef}
@@ -560,6 +735,25 @@ export function TavernPenalty() {
                   Disparar
                 </button>
               ) : null}
+              {phase === "resolved" && shotState.result === "goal" && roundIndex < MAX_ROUNDS - 1 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={continueRun}
+                    className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-3 py-3 text-sm font-black text-black transition active:scale-[0.98]"
+                  >
+                    Seguir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void cashOutRun()}
+                    disabled={updating}
+                    className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-400/35 bg-amber-500/10 px-3 py-3 text-sm font-black text-amber-100 transition active:scale-[0.98] disabled:opacity-50"
+                  >
+                    Cobrar
+                  </button>
+                </div>
+              ) : null}
               {phase === "resolved" ? (
                 <button
                   type="button"
@@ -585,16 +779,16 @@ export function TavernPenalty() {
           <Panel title="Zonas" icon={<Crosshair className="h-4 w-4" />}>
             <div className="grid grid-cols-2 gap-2 text-xs font-bold text-stone-400">
               <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
-                Altas: 2.15x
+                R1: x2
               </span>
               <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
-                Medias: 1.85x
+                R2: x4
               </span>
               <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
-                Bajas: 1.72x
+                R3: x8
               </span>
               <span className="rounded-2xl border border-stone-800 bg-black/30 p-2">
-                Poste: reembolso
+                R4: x12
               </span>
             </div>
           </Panel>

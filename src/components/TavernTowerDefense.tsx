@@ -41,7 +41,6 @@ type MapDefinition = {
   label: string;
   hint: string;
   path: Array<[number, number]>;
-  buildSlots: Array<[number, number]>;
 };
 
 type EnemyKind = {
@@ -177,10 +176,6 @@ const MAPS: MapDefinition[] = [
       [14, 4],
       [18, 4],
     ],
-    buildSlots: [
-      [1, 3], [1, 7], [4, 1], [5, 4], [6, 7], [9, 4],
-      [10, 8], [12, 5], [13, 2], [16, 3], [16, 6],
-    ],
   },
   {
     id: "emberRoad",
@@ -195,10 +190,6 @@ const MAPS: MapDefinition[] = [
       [13, 1],
       [13, 6],
       [18, 6],
-    ],
-    buildSlots: [
-      [1, 5], [2, 8], [5, 5], [6, 2], [8, 7], [10, 2],
-      [11, 5], [12, 8], [15, 4], [16, 7],
     ],
   },
   {
@@ -216,10 +207,6 @@ const MAPS: MapDefinition[] = [
       [15, 6],
       [15, 2],
       [18, 2],
-    ],
-    buildSlots: [
-      [1, 1], [3, 5], [4, 8], [5, 2], [7, 5], [8, 1],
-      [10, 5], [12, 2], [13, 8], [14, 4], [16, 1], [16, 5],
     ],
   },
 ];
@@ -346,6 +333,27 @@ function pointToCanvas([col, row]: [number, number]) {
   };
 }
 
+function buildPathCells(path: Array<[number, number]>) {
+  const cells = new Set<string>();
+
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const [aCol, aRow] = path[index];
+    const [bCol, bRow] = path[index + 1];
+    const minCol = Math.max(0, Math.min(aCol, bCol));
+    const maxCol = Math.min(COLS - 1, Math.max(aCol, bCol));
+    const minRow = Math.max(0, Math.min(aRow, bRow));
+    const maxRow = Math.min(ROWS - 1, Math.max(aRow, bRow));
+
+    for (let col = minCol; col <= maxCol; col += 1) {
+      for (let row = minRow; row <= maxRow; row += 1) {
+        cells.add(cellKey(col, row));
+      }
+    }
+  }
+
+  return cells;
+}
+
 function createRuntime(difficulty: Difficulty): Runtime {
   return {
     phase: "ready",
@@ -385,28 +393,6 @@ function distance(aX: number, aY: number, bX: number, bY: number) {
 function rewardKey(playerId: string, difficultyId: DifficultyId) {
   const dateKey = new Date().toISOString().slice(0, 10);
   return `kingdoom:tower-defense:${playerId}:${dateKey}:${difficultyId}`;
-}
-
-function drawBuildSlot(ctx: CanvasRenderingContext2D, col: number, row: number, occupied: boolean) {
-  const x = col * CELL + CELL / 2;
-  const y = row * CELL + CELL / 2;
-
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.fillStyle = occupied ? "rgba(16, 185, 129, 0.18)" : "rgba(245, 158, 11, 0.16)";
-  ctx.strokeStyle = occupied ? "rgba(110, 231, 183, 0.5)" : "rgba(251, 191, 36, 0.55)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(0, -16);
-  ctx.lineTo(15, 0);
-  ctx.lineTo(0, 16);
-  ctx.lineTo(-15, 0);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = occupied ? "rgba(110, 231, 183, 0.85)" : "rgba(252, 211, 77, 0.78)";
-  ctx.fillRect(-4, -4, 8, 8);
-  ctx.restore();
 }
 
 function drawTower(ctx: CanvasRenderingContext2D, tower: Tower, now: number) {
@@ -579,7 +565,7 @@ export function TavernTowerDefense() {
   const difficultyRef = useRef(DIFFICULTIES[0]);
   const mapRef = useRef(MAPS[0]);
   const selectedTowerRef = useRef<TowerBlueprint>(TOWERS[0]);
-  const buildSlotsRef = useRef(new Set(MAPS[0].buildSlots.map(([col, row]) => cellKey(col, row))));
+  const pathCellsRef = useRef(buildPathCells(MAPS[0].path));
   const victoryTokenRef = useRef(0);
   const { player, refreshPlayer, setPlayerGold } = usePlayerSession();
   const [difficultyId, setDifficultyId] = useState<DifficultyId>("frontier");
@@ -605,7 +591,7 @@ export function TavernTowerDefense() {
   const resetGame = useCallback(() => {
     difficultyRef.current = difficulty;
     mapRef.current = currentMap;
-    buildSlotsRef.current = new Set(currentMap.buildSlots.map(([col, row]) => cellKey(col, row)));
+    pathCellsRef.current = buildPathCells(currentMap.path);
     const nextRuntime = createRuntime(difficulty);
     runtimeRef.current = nextRuntime;
     setHud(snapshot(nextRuntime));
@@ -650,8 +636,8 @@ export function TavernTowerDefense() {
       return;
     }
 
-    if (!buildSlotsRef.current.has(cellKey(col, row))) {
-      runtime.message = "Construye en los anclajes dorados del mapa.";
+    if (pathCellsRef.current.has(cellKey(col, row))) {
+      runtime.message = "No puedes construir sobre la ruta.";
       setHud(snapshot(runtime));
       return;
     }
@@ -943,11 +929,6 @@ export function TavernTowerDefense() {
     ctx.lineWidth = 7;
     ctx.stroke();
 
-    map.buildSlots.forEach(([col, row]) => {
-      const occupied = Boolean(runtime?.towers.some((tower) => tower.col === col && tower.row === row));
-      drawBuildSlot(ctx, col, row, occupied);
-    });
-
     const base = path[path.length - 1];
     ctx.save();
     ctx.translate(base.x, base.y);
@@ -1097,7 +1078,7 @@ export function TavernTowerDefense() {
               Guardia de la muralla
             </h3>
             <p className="mt-2 max-w-xl text-sm leading-6 text-stone-400">
-              Construye solo en anclajes dorados. La quinta oleada trae un boss.
+              Construye en cualquier casilla libre. La quinta oleada trae un boss.
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold uppercase tracking-[0.12em] text-stone-300">
@@ -1192,7 +1173,7 @@ export function TavernTowerDefense() {
                     >
                       <span className="block text-sm font-black">{item.label}</span>
                       <span className="mt-1 block text-xs text-stone-500">
-                        {item.hint} {item.buildSlots.length} anclajes.
+                        {item.hint}
                       </span>
                     </button>
                   ))}

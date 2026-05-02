@@ -32,6 +32,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 02/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/assets/penalty-keeper-sprites.png`
+*   **Resumen de Tareas:** Se reemplazo el spritesheet del portero de Penales por una version pixel-art nueva con transparencia real.
+*   **Cambios Clave:**
+    *   Se elimino el fondo gris que aparecia dentro del arco.
+    *   Se recrearon las poses principales del portero en una hoja transparente compatible con el canvas actual.
+    *   El asset bajo de 542 KB a 18.86 KB en el build.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. No se tocaron apuestas, multiplicadores ni reglas de oro.
+
+### [Fecha: 02/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernPenalty.tsx`, `src/assets/penalty-keeper-sprites.png`
 *   **Resumen de Tareas:** Se pulio el minijuego de Penales con sprites reales del portero, tanda progresiva x2/x4/x8/x12 y una UI mas arcade.
 *   **Cambios Clave:**

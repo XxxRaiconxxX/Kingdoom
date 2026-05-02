@@ -1,0 +1,1 @@
+import{j as o}from"./motion-CUEKfUlm.js";function s({label:t,active:e,onClick:r}){return o.jsx("button",{type:"button",onClick:r,className:`rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${e?"border-amber-400/30 bg-amber-500/10 text-amber-300":"border-stone-700 bg-stone-900/70 text-stone-400"}`,children:t})}export{s as F};

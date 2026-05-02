@@ -32,6 +32,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 02/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernPenalty.tsx`, `src/sections/MarketSection.tsx`
+*   **Resumen de Tareas:** Se agrego el minijuego Penales a la taberna como apuesta arcade con canvas, direccion de tiro, reaccion del portero y cobro de oro.
+*   **Cambios Clave:**
+    *   Nuevo modo `Penales` dentro de Juegos de azar, cargado de forma lazy para no aumentar la carga inicial.
+    *   El penal se resuelve con timeline sincronizado: carrera, contacto, salida del balon, reaccion tardia del portero y resultado.
+    *   Se agregaron 7 zonas de tiro, pagos por riesgo, reembolso por poste y cobro/perdida sobre el oro del jugador conectado.
+    *   El canvas dibuja cancha, arco, shooter, portero, balon y marcas de punteria con estilo pixel arcade responsive.
+    *   La UI se adapto para escritorio y movil con apuesta compacta, controles grandes y feedback claro.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`. La actualizacion de oro usa el flujo existente de `PlayerSessionContext`.
+
+### [Fecha: 02/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernTowerDefense.tsx`
 *   **Resumen de Tareas:** Se mejoro el minijuego Tower Defense con balance mas desafiante, construccion por anclajes, nuevas torres y una oleada final con boss.
 *   **Cambios Clave:**

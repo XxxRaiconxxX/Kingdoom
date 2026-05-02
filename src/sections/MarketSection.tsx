@@ -5,6 +5,7 @@ import {
   ChevronDown,
   Dices,
   Info,
+  Goal,
   RotateCcw,
   ScrollText,
   Shield,
@@ -31,7 +32,8 @@ type TavernMode =
   | "cards"
   | "scratch"
   | "crash"
-  | "towerDefense";
+  | "towerDefense"
+  | "penalty";
 
 const TAVERN_MODES: {
   id: TavernMode;
@@ -106,6 +108,14 @@ const TAVERN_MODES: {
     status: "PvE",
     icon: Shield,
   },
+  {
+    id: "penalty",
+    label: "Penales",
+    shortLabel: "Penal",
+    description: "Penalty arcade: apunta, dispara y cobra si el portero reacciona tarde.",
+    status: "Azar",
+    icon: Goal,
+  },
 ];
 
 const MARKET_RARITY_FILTERS: Array<{ id: Rarity | "all"; label: string }> = [
@@ -164,6 +174,11 @@ const TavernCrash = lazy(() =>
 const TavernTowerDefense = lazy(() =>
   import("../components/TavernTowerDefense").then((module) => ({
     default: module.TavernTowerDefense,
+  }))
+);
+const TavernPenalty = lazy(() =>
+  import("../components/TavernPenalty").then((module) => ({
+    default: module.TavernPenalty,
   }))
 );
 const PurchaseModal = lazy(() =>
@@ -287,6 +302,8 @@ export function MarketSection() {
         return <TavernCrash />;
       case "towerDefense":
         return <TavernTowerDefense />;
+      case "penalty":
+        return <TavernPenalty />;
       default:
         return <TavernGame />;
     }

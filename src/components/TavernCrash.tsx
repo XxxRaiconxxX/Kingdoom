@@ -225,15 +225,27 @@ export function TavernCrash() {
       return;
     }
 
-    crashPointRef.current = generateCrashPoint();
-    setMultiplier(1.0);
-    multiplierRef.current = 1.0;
-    setLastWin(0);
-    autoCashedRef.current = false;
-    pointsRef.current = [{ time: 0, multiplier: 1.0 }];
-    
-    setStatus("starting");
-    setUpdating(false);
+    const crashPoint = generateCrashPoint();
+crashPointRef.current = crashPoint;
+
+if (crashPoint <= 1.00) {
+  setMultiplier(1.00);
+  setStatus("crashed");
+  setHistory(prev => [1.00, ...prev].slice(0, 10));
+  setLastWin(0);
+  setUpdating(false);
+  return;
+}
+
+setMultiplier(1.0);
+multiplierRef.current = 1.0;
+setLastWin(0);
+autoCashedRef.current = false;
+pointsRef.current = [{ time: 0, multiplier: 1.0 }];
+
+setStatus("starting");
+setUpdating(false);
+
     
     setTimeout(() => {
       setStatus("rising");

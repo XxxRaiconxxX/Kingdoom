@@ -74,7 +74,7 @@ export function TavernCards() {
         return;
       }
 
-      applySession(result.session);
+    applySession(result.session, false);
     }
 
     void loadSession();
@@ -84,9 +84,10 @@ export function TavernCards() {
     };
   }, [player]);
 
-  function applySession(session: CardsSessionState) {
-    setBet(session.bet);
-    setPool(session.pool);
+function applySession(session: CardsSessionState, overrideBet = true) {
+  if (overrideBet) setBet(session.bet);
+  setPool(session.pool);
+
     setStreak(session.streak);
     setCurrentCard(session.currentCard);
     setNextCard(session.nextCard);

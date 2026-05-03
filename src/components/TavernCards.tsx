@@ -298,9 +298,21 @@ export function TavernCards() {
                 >
                   -
                 </button>
-                <div className="flex h-20 w-32 items-center justify-center rounded-2xl border-2 border-stone-700 bg-stone-900 text-3xl font-black text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
-                  {bet}
-                </div>
+                <input
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  value={bet === 0 ? "" : bet}
+  onChange={(e) => {
+    const raw = e.target.value.replace(/[^0-9]/g, "");
+    if (raw === "") { setBet(0); return; }
+    const parsed = parseInt(raw);
+    if (!isNaN(parsed)) setBet(Math.min(player.gold, Math.max(0, parsed)));
+  }}
+  placeholder="0"
+  className="flex h-20 w-32 items-center justify-center rounded-2xl border-2 border-stone-700 bg-stone-900 text-center text-3xl font-black text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.1)] focus:outline-none focus:border-amber-500/50"
+/>
+
                 <button
                   type="button"
                   onClick={() => setBet(Math.min(player.gold, bet + 10))}

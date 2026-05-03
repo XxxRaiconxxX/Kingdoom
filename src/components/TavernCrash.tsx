@@ -438,7 +438,13 @@ setUpdating(false);
                         <input 
                             type="number"
                             value={bet}
-                            onChange={(e) => setBet(Math.min(player.gold, Math.max(0, parseInt(e.target.value) || 0)))}
+                            onChange={(e) => {
+  const raw = e.target.value;
+  if (raw === "" || raw === "-") return;
+  const parsed = parseInt(raw);
+  if (!isNaN(parsed)) setBet(Math.min(player.gold, Math.max(0, parsed)));
+}}
+
                             disabled={status === "rising" || status === "starting"}
                             className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 text-lg font-black text-stone-100 focus:outline-none focus:border-amber-500/50 transition"
                         />

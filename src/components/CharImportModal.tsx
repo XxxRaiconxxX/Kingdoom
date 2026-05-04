@@ -39,9 +39,17 @@ interface CharImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (sheet: Partial<CharacterSheet>, portraitFile?: File | null) => Promise<void> | void;
+  initialSheet?: CharacterSheet | null;
+  mode?: "create" | "edit";
 }
 
-export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClose, onSave }) => {
+export const CharImportModal: React.FC<CharImportModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  initialSheet = null,
+  mode = "create",
+}) => {
   const [rawText, setRawText] = useState('');
   const [parsedData, setParsedData] = useState<Partial<CharacterSheet> | null>(null);
   const [isParsing, setIsParsing] = useState(false);
@@ -49,6 +57,7 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
   const [portraitPreviewUrl, setPortraitPreviewUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const isEditMode = mode === "edit";
 
   useEffect(() => {
     return () => {
@@ -57,6 +66,24 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
       }
     };
   }, [portraitPreviewUrl]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    if (isEditMode && initialSheet) {
+      setRawText("");
+      setParsedData(initialSheet);
+      setPortraitFile(null);
+      setPortraitPreviewUrl(initialSheet.portraitUrl ?? "");
+      setSaveError("");
+      return;
+    }
+
+    resetForm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isEditMode, initialSheet?.id]);
 
   const handlePortraitSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -130,7 +157,7 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
           <div className="flex items-center justify-between p-4 border-b border-green-500/20 bg-green-950/20">
             <h2 className="text-xl font-bold text-green-400 flex items-center gap-2">
               <Wand2 className="w-5 h-5" />
-              Importar Ficha de WhatsApp
+              {isEditMode ? "Editar ficha" : "Importar ficha de WhatsApp"}
             </h2>
             <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
               <X className="w-6 h-6" />
@@ -171,7 +198,12 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
               <div className="space-y-6">
                 <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-4">
                   <h3 className="text-lg font-bold text-white border-b border-zinc-800 pb-2">Vista Previa de Extracción</h3>
-                  
+                  {isEditMode ? (
+                    <p className="text-sm text-zinc-400">
+                      Ajusta los campos necesarios y guarda sin borrar la ficha.
+                    </p>
+                  ) : null}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs text-zinc-500 uppercase font-bold">Nombre / Apodo</label>
@@ -247,27 +279,29 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({ isOpen, onClos
                 </div>
 
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => {
-                      setParsedData(null);
-                      setPortraitFile(null);
-                      setSaveError("");
-                      if (portraitPreviewUrl.startsWith("blob:")) {
-                        URL.revokeObjectURL(portraitPreviewUrl);
-                      }
-                      setPortraitPreviewUrl("");
-                    }}
-                    className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-colors"
-                  >
-                    Volver a Pegar
-                  </button>
+                  {!isEditMode ? (
+                    <button
+                      onClick={() => {
+                        setParsedData(null);
+                        setPortraitFile(null);
+                        setSaveError("");
+                        if (portraitPreviewUrl.startsWith("blob:")) {
+                          URL.revokeObjectURL(portraitPreviewUrl);
+                        }
+                        setPortraitPreviewUrl("");
+                      }}
+                      className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-colors"
+                    >
+                      Volver a pegar
+                    </button>
+                  ) : null}
                   <button
                     onClick={() => void handleSave()}
                     disabled={isSaving}
                     className="flex-1 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <Check className="w-5 h-5" />
-                    {isSaving ? "Guardando..." : "Guardar Ficha"}
+                    {isSaving ? "Guardando..." : isEditMode ? "Actualizar ficha" : "Guardar ficha"}
                   </button>
                 </div>
                 {saveError ? (

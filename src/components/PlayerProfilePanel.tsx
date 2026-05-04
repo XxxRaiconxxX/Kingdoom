@@ -1,4 +1,3 @@
-import { supabase } from "../lib/supabase";
 import { lazy, Suspense, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -14,6 +13,7 @@ import {
   ScrollText,
   Plus,
   Eye,
+  Pencil,
   Trash2,
   Search,
   type LucideIcon,
@@ -26,6 +26,10 @@ import {
   saveCharacterSheet,
   deleteCharacterSheet,
 } from "../utils/characterSheets";
+import {
+  deleteCharacterPortraitByUrl,
+  uploadCharacterPortrait,
+} from "../utils/characterPortraits";
 import {
   resolveActivePveSheetId,
   setActivePveSheetId,
@@ -86,6 +90,7 @@ export function PlayerProfilePanel({
   const [isRegistryOpen, setIsRegistryOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
+  const [sheetToEdit, setSheetToEdit] = useState<CharacterSheet | null>(null);
   const [playerSheets, setPlayerSheets] = useState<CharacterSheet[]>([]);
   const [sheetToDelete, setSheetToDelete] = useState<string | null>(null);
   const [sheetFeedback, setSheetFeedback] = useState("");
@@ -112,10 +117,13 @@ export function PlayerProfilePanel({
 
   const handleSaveSheet = async (
     partialSheet: Partial<CharacterSheet>,
-    portraitFile?: File | null
+    portraitFile?: File | null,
+    existingSheet?: CharacterSheet | null
   ) => {
     if (!player) return;
-    if (playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS) {
+    const isEditing = Boolean(existingSheet);
+
+    if (!isEditing && playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS) {
       setSheetFeedback(
         `Cada cuenta puede tener hasta ${MAX_PLAYER_CHARACTER_SHEETS} fichas. Elimina una antes de importar otra.`
       );
@@ -130,25 +138,23 @@ export function PlayerProfilePanel({
       magicDefense: 0,
     };
 
-    let portraitUrl: string | undefined = undefined;
+    const sheetId = existingSheet?.id ?? crypto.randomUUID();
+    let portraitUrl: string | undefined = existingSheet?.portraitUrl;
 
     if (portraitFile) {
-      const ext = portraitFile.name.split(".").pop() ?? "jpg";
-      const path = `portraits/${player.id}/${crypto.randomUUID()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("character-portraits")
-        .upload(path, portraitFile, { upsert: true });
-
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage
-      .from("character-portraits")
-      .getPublicUrl(path);
-        portraitUrl = urlData.publicUrl;
+      if (existingSheet?.portraitUrl) {
+        await deleteCharacterPortraitByUrl(existingSheet.portraitUrl);
       }
+
+      portraitUrl = await uploadCharacterPortrait({
+        file: portraitFile,
+        playerId: player.id,
+        sheetId,
+      });
     }
 
-    const newSheet: CharacterSheet = {
-      id: crypto.randomUUID(),
+    const savedSheet: CharacterSheet = {
+      id: sheetId,
       playerId: player.id,
       playerUsername: player.username,
       portraitUrl,
@@ -177,21 +183,27 @@ export function PlayerProfilePanel({
       extras: partialSheet.extras ?? "",
       weaknesses: partialSheet.weaknesses ?? "",
       inventory: partialSheet.inventory ?? "",
-      createdAt: new Date().toISOString(),
+      createdAt: existingSheet?.createdAt ?? new Date().toISOString(),
     };
 
-    await saveCharacterSheet(newSheet);
+    await saveCharacterSheet(savedSheet);
     const updatedSheets = await getPlayerSheets(player.id);
     setPlayerSheets(updatedSheets);
+    const updatedSelectedSheet = updatedSheets.find((sheet) => sheet.id === savedSheet.id);
+    setSelectedSheet((current) =>
+      current?.id === savedSheet.id ? updatedSelectedSheet ?? savedSheet : current
+    );
     const nextActiveSheetId =
       activeExpeditionSheetId &&
       updatedSheets.some((sheet) => sheet.id === activeExpeditionSheetId)
         ? activeExpeditionSheetId
-        : newSheet.id;
+        : savedSheet.id;
     setActivePveSheetId(player.id, nextActiveSheetId);
     setActiveExpeditionSheetId(nextActiveSheetId);
     setSheetFeedback(
-      `Ficha importada. ${newSheet.name || "Personaje"} ya puede usarse en Expedicion.`
+      isEditing
+        ? `Ficha actualizada. ${savedSheet.name || "Personaje"} ya refleja los cambios.`
+        : `Ficha importada. ${savedSheet.name || "Personaje"} ya puede usarse en Expedicion.`
     );
   };
 
@@ -594,6 +606,13 @@ export function PlayerProfilePanel({
                             Ver ficha
                           </button>
                           <button
+                            onClick={() => setSheetToEdit(sheet)}
+                            className="inline-flex items-center justify-center rounded-lg bg-emerald-500/10 p-2 text-emerald-300 transition-colors hover:bg-emerald-500/20"
+                            title="Editar ficha"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
                             onClick={() => handleDeleteSheet(sheet.id)}
                             className="rounded-lg bg-rose-500/10 p-2 text-rose-400 transition-colors hover:bg-rose-500/20"
                             title="Eliminar ficha"
@@ -741,6 +760,19 @@ export function PlayerProfilePanel({
             isOpen={isImportModalOpen}
             onClose={() => setIsImportModalOpen(false)}
             onSave={handleSaveSheet}
+          />
+        </Suspense>
+      ) : null}
+      {sheetToEdit ? (
+        <Suspense fallback={<ProfileSheetFallback message="Preparando la edicion de ficha..." />}>
+          <CharImportModal
+            isOpen={!!sheetToEdit}
+            mode="edit"
+            initialSheet={sheetToEdit}
+            onClose={() => setSheetToEdit(null)}
+            onSave={(partialSheet, portraitFile) =>
+              handleSaveSheet(partialSheet, portraitFile, sheetToEdit)
+            }
           />
         </Suspense>
       ) : null}

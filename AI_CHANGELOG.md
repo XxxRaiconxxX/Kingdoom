@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 02/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`
+*   **Resumen de Tareas:** Se agrego edicion directa de fichas ya creadas desde el panel de jugador.
+*   **Cambios Clave:**
+    *   Cada tarjeta de personaje ahora incluye accion de editar sin eliminar la ficha.
+    *   El modal de fichas reutiliza el flujo existente para importar o actualizar.
+    *   Al editar, se conservan el id, jugador, fecha de creacion y retrato actual si no se carga otro.
+    *   El limite de 2 fichas solo aplica al crear/importar, no al actualizar una existente.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 02/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernPenalty.tsx`, `src/utils/scratchUtils.ts`
 *   **Resumen de Tareas:** Se agrego limite diario de ganancia neta al minijuego de Penales.
 *   **Cambios Clave:**

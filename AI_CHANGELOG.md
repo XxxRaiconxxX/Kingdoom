@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/TavernSlotsNative.tsx`, `apps/mobile/src/features/session/sessionStore.ts`, `apps/mobile/assets/images/icon.png`, `apps/mobile/assets/images/adaptive-icon.png`, `apps/mobile/assets/images/splash-icon.png`, `apps/mobile/assets/images/favicon.png`
+*   **Resumen de Tareas:** Se llevo el minijuego de Slots a la app nativa y se reemplazo el paquete de iconos por una identidad KD.
+*   **Cambios Clave:**
+    *   Mercado nativo ahora incluye `Slots del Tesoro`, con carretes animados, presets de apuesta, ALL IN, refresco de oro y limite diario de 350.000 oro neto.
+    *   La app puede actualizar el oro del jugador desde el store nativo para que los minijuegos no dependan de la WebView.
+    *   Los premios siguen la tabla x1.25/x2/x3/x5/x8/x12 y la apuesta se pierde si no hay premio.
+    *   Se regeneraron icono, adaptive icon, splash y favicon con fondo negro, sello dorado e iniciales KD.
+*   **Notas/Advertencias:** Validado con `npm run typecheck` en `apps/mobile` y `npx expo export --platform android --output-dir .expo-export-check`. El export temporal fue eliminado.
+
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernSlots.tsx`, `src/sections/MarketSection.tsx`, `src/utils/scratchUtils.ts`
 *   **Resumen de Tareas:** Se agrego el minijuego `Slots` a la taberna del mercado.
 *   **Cambios Clave:**

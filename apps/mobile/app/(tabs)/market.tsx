@@ -3,6 +3,7 @@ import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DetailSheet } from "@/src/components/DetailSheet";
+import { TavernSlotsNative } from "@/src/components/TavernSlotsNative";
 import {
   EmptyState,
   ErrorPanel,
@@ -285,6 +286,10 @@ export default function MarketScreen() {
         </StaggerItem>
       ) : null}
 
+      <StaggerItem index={4}>
+        <TavernSlotsNative />
+      </StaggerItem>
+
       {filteredItems.map((item, index) => {
         const quantity = quantityByItemId[item.id] ?? 1;
         const pending = pendingItemId === item.id;
@@ -293,7 +298,7 @@ export default function MarketScreen() {
         const disabled = !player || item.stockStatus === "sold-out" || pending || notEnoughGold;
 
         return (
-          <StaggerItem key={item.id} index={index + 4}>
+          <StaggerItem key={item.id} index={index + 5}>
             <RealmCard tone={item.featured ? "gold" : "default"}>
               <View style={{ flexDirection: "row", gap: 12 }}>
                 <ItemThumb item={item} />

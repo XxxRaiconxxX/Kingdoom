@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/sections/MarketSection.tsx`, `src/components/RealmStockExchange.tsx`, `src/features/realmExchange/*`, `docs/superpowers/plans/2026-05-04-bolsa-del-reino-implementation.md`
+*   **Resumen de Tareas:** Se implemento la primera version de la Bolsa del Reino dentro de Mercado.
+*   **Cambios Clave:**
+    *   Se agrego un modulo plegable independiente para activos de reinos, separado de la taberna y cargado con lazy loading.
+    *   La Bolsa incluye simulacion deterministica de precios, grafico SVG animado, compra/venta local de acciones y predicciones de 2 horas por reino.
+    *   Las operaciones descuentan o suman oro mediante la sesion activa del jugador, manteniendo posiciones y predicciones en `localStorage` como prototipo seguro.
+*   **Notas/Advertencias:** Esta fase no crea tablas nuevas en Supabase; la persistencia bursatil es local para validar jugabilidad antes de blindar economia en backend.
+*   **Validacion:** `npx tsc --noEmit` y `npm run build` ejecutados correctamente.
+
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/DetailSheet.tsx`, `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/src/components/ScreenShell.tsx`, `apps/mobile/src/theme/colors.ts`
 *   **Resumen de Tareas:** Se hizo una pasada visual premium sobre la UI nativa de Kingdoom.
 *   **Cambios Clave:**

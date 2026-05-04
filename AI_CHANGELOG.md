@@ -32,6 +32,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernSlots.tsx`, `src/sections/MarketSection.tsx`, `src/utils/scratchUtils.ts`
+*   **Resumen de Tareas:** Se agrego el minijuego `Slots` a la taberna del mercado.
+*   **Cambios Clave:**
+    *   La taberna ahora incluye una maquina tragaperras arcana con 3 carretes, simbolos medievales y animacion escalonada.
+    *   El minijuego usa el oro del perfil activo y descuenta la apuesta al girar.
+    *   Si no hay premio, la apuesta se pierde; si hay premio, se cobra segun tabla x1.25/x2/x3/x5/x8/x12.
+    *   Se agrego limite diario de 350.000 de oro neto ganado para evitar farmeo excesivo.
+    *   La interfaz se adapto para escritorio y movil con paneles compactos, tabla de pagos y refresco de oro.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `supabase_grimoire_flora.sql`, `src/utils/inventory.ts`
 *   **Resumen de Tareas:** Se corrigio el flujo de flora administrable y se blindo el inventario contra categorias legacy.
 *   **Cambios Clave:**

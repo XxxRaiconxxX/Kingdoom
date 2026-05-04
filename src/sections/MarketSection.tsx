@@ -3,6 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import {
   Box,
   ChevronDown,
+  Crown,
   Dices,
   Info,
   Goal,
@@ -33,7 +34,8 @@ type TavernMode =
   | "scratch"
   | "crash"
   | "towerDefense"
-  | "penalty";
+  | "penalty"
+  | "slots";
 
 const TAVERN_MODES: {
   id: TavernMode;
@@ -91,6 +93,14 @@ const TAVERN_MODES: {
     description: "Compra un rasca y gana y prueba suerte por un premio entre 500 y 1000 de oro.",
     status: "Rapido",
     icon: Ticket,
+  },
+  {
+    id: "slots",
+    label: "Slots",
+    shortLabel: "Slots",
+    description: "Tragaperras arcano: tres carretes, simbolos del reino y premios directos sobre tu oro.",
+    status: "Azar",
+    icon: Crown,
   },
   {
     id: "crash",
@@ -164,6 +174,11 @@ const TavernCards = lazy(() =>
 const TavernScratch = lazy(() =>
   import("../components/TavernScratch").then((module) => ({
     default: module.TavernScratch,
+  }))
+);
+const TavernSlots = lazy(() =>
+  import("../components/TavernSlots").then((module) => ({
+    default: module.TavernSlots,
   }))
 );
 const TavernCrash = lazy(() =>
@@ -298,6 +313,8 @@ export function MarketSection() {
         return <TavernCards />;
       case "scratch":
         return <TavernScratch />;
+      case "slots":
+        return <TavernSlots />;
       case "crash":
         return <TavernCrash />;
       case "towerDefense":

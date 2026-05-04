@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/RealmStockExchangeNative.tsx`, `apps/mobile/src/features/realmExchange/*`
+*   **Resumen de Tareas:** Se porto la Bolsa del Reino a la app nativa.
+*   **Cambios Clave:**
+    *   Mercado nativo ahora incluye una seccion de Bolsa con activos por reino, grafico compacto, acciones y predicciones de 2 horas.
+    *   El techo maximo de precio tambien queda en 500 dentro de la app mediante `REALM_EXCHANGE_PRICE_CEILING`.
+    *   Las posiciones y predicciones se guardan por jugador con AsyncStorage y usan el oro real del perfil conectado.
+*   **Notas/Advertencias:** La simulacion bursatil nativa sigue siendo local, igual que el prototipo web; no se agregan tablas ni RPC de Supabase.
+*   **Validacion:** `npm run typecheck` y `npx expo export --platform android` ejecutados correctamente en `apps/mobile`.
+
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/realmExchange/realmExchange.data.ts`
 *   **Resumen de Tareas:** Se ajusto el techo maximo de precio de la Bolsa del Reino.
 *   **Cambios Clave:**

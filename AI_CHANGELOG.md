@@ -32,6 +32,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/features/realmExchange/realmExchange.data.ts`
+*   **Resumen de Tareas:** Se ajusto el techo maximo de precio de la Bolsa del Reino.
+*   **Cambios Clave:**
+    *   Los activos ahora pueden subir hasta 500 de precio maximo mediante `REALM_EXCHANGE_PRICE_CEILING`.
+*   **Notas/Advertencias:** La simulacion sigue siendo local; no cambia reglas de Supabase ni tablas.
+*   **Validacion:** `npx tsc --noEmit` y `npm run build` ejecutados correctamente.
+
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/sections/MarketSection.tsx`, `src/components/RealmStockExchange.tsx`, `src/features/realmExchange/*`, `docs/superpowers/plans/2026-05-04-bolsa-del-reino-implementation.md`
 *   **Resumen de Tareas:** Se implemento la primera version de la Bolsa del Reino dentro de Mercado.
 *   **Cambios Clave:**

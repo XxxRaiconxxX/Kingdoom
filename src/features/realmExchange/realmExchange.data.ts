@@ -4,6 +4,7 @@ export const REALM_EXCHANGE_TRADE_LOT = 10;
 export const REALM_EXCHANGE_PREDICTION_HOURS = 2;
 export const REALM_EXCHANGE_MIN_STAKE = 100;
 export const REALM_EXCHANGE_MAX_STAKE = 50000;
+export const REALM_EXCHANGE_PRICE_CEILING = 500;
 
 export const REALM_EXCHANGE_PAYOUTS: Record<RealmExchangeVolatility, number> = {
   low: 1.4,
@@ -21,7 +22,7 @@ export const REALM_EXCHANGE_ASSETS: RealmExchangeAsset[] = [
     description: "Mineral arcano usado para rituales, runas y motores de mana.",
     basePrice: 124,
     priceFloor: 72,
-    priceCeiling: 196,
+    priceCeiling: REALM_EXCHANGE_PRICE_CEILING,
     volatility: "high",
     bias: 1,
     tickIntervalMinutes: 10,
@@ -35,7 +36,7 @@ export const REALM_EXCHANGE_ASSETS: RealmExchangeAsset[] = [
     description: "Resina oscura de bosques profundos, codiciada por alquimistas y cazadores.",
     basePrice: 88,
     priceFloor: 48,
-    priceCeiling: 154,
+    priceCeiling: REALM_EXCHANGE_PRICE_CEILING,
     volatility: "high",
     bias: -1,
     tickIntervalMinutes: 10,
@@ -49,7 +50,7 @@ export const REALM_EXCHANGE_ASSETS: RealmExchangeAsset[] = [
     description: "Metal pesado de forja militar, estable pero sensible a guerras de frontera.",
     basePrice: 146,
     priceFloor: 104,
-    priceCeiling: 205,
+    priceCeiling: REALM_EXCHANGE_PRICE_CEILING,
     volatility: "low",
     bias: 0,
     tickIntervalMinutes: 10,
@@ -63,11 +64,10 @@ export const REALM_EXCHANGE_ASSETS: RealmExchangeAsset[] = [
     description: "Textil noble que sube con festivales, pactos comerciales y moda cortesana.",
     basePrice: 102,
     priceFloor: 64,
-    priceCeiling: 168,
+    priceCeiling: REALM_EXCHANGE_PRICE_CEILING,
     volatility: "medium",
     bias: 1,
     tickIntervalMinutes: 10,
     accent: "#ffd76a",
   },
 ];
-

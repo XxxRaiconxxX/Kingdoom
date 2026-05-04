@@ -32,6 +32,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/components/RealmRegistry.tsx`
+*   **Resumen de Tareas:** Se estabilizo el registro publico de fichas para que la cabecera y la `X` de cierre no se pierdan cuando hay muchas fichas cargadas.
+*   **Cambios Clave:**
+    *   El modal de registro ahora se monta por portal en `document.body`, igual que otros paneles grandes del perfil.
+    *   La cabecera y la zona de busqueda quedaron fijas dentro del recuadro, con altura segura de viewport y mejor comportamiento en movil.
+*   **Notas/Advertencias:** El contenido sigue desplazandose dentro del listado, pero el cierre ya permanece visible durante toda la navegacion.
+
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/realmExchange/realmExchange.simulation.ts`, `apps/mobile/src/features/realmExchange/realmExchangeSimulation.ts`
 *   **Resumen de Tareas:** Se corrigio la simulacion de la Bolsa del Reino para que el rango hasta 500 sea realmente alcanzable.
 *   **Cambios Clave:**

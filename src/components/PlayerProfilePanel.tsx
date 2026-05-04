@@ -786,11 +786,18 @@ export function PlayerProfilePanel({
         </Suspense>
       ) : null}
 
-      {isRegistryOpen ? (
-        <Suspense fallback={<ProfileSheetFallback message="Abriendo el registro publico de fichas..." />}>
-          <RealmRegistry onClose={() => setIsRegistryOpen(false)} />
-        </Suspense>
-      ) : null}
+      {isRegistryOpen
+        ? createPortal(
+            <Suspense
+              fallback={
+                <ProfileSheetFallback message="Abriendo el registro publico de fichas..." />
+              }
+            >
+              <RealmRegistry onClose={() => setIsRegistryOpen(false)} />
+            </Suspense>,
+            document.body,
+          )
+        : null}
 
       {/* Delete Confirmation Modal */}
       {sheetToDelete ? (

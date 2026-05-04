@@ -133,14 +133,14 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
   }, [allSheets, playerNamesById, searchQuery]);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-4">
+    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/80 p-3 backdrop-blur-sm sm:items-center sm:p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-stone-800 bg-[#0a0a0a] shadow-2xl"
+        className="relative mt-4 flex max-h-[92dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-stone-800 bg-[#0a0a0a] shadow-2xl sm:mt-0"
       >
-        <div className="shrink-0 border-b border-stone-800 bg-stone-900/30 p-4 sm:p-6">
+        <div className="sticky top-0 z-20 shrink-0 border-b border-stone-800 bg-stone-900/95 p-4 backdrop-blur-sm sm:p-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
               <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
@@ -157,14 +157,15 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
             </div>
             <button
               onClick={onClose}
-              className="rounded-xl border border-stone-800 bg-stone-900 p-2 text-stone-400 transition-colors hover:bg-stone-800 hover:text-white"
+              className="shrink-0 rounded-xl border border-stone-800 bg-stone-900 p-2 text-stone-400 transition-colors hover:bg-stone-800 hover:text-white"
+              aria-label="Cerrar registro publico"
             >
               <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
         </div>
 
-        <div className="border-b border-stone-800 bg-stone-900/10 p-4 sm:p-6">
+        <div className="sticky top-[89px] z-10 border-b border-stone-800 bg-stone-900/88 p-4 backdrop-blur-sm sm:top-[109px] sm:p-6">
           <div className="relative">
             <input
               type="text"

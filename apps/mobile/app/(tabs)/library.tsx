@@ -16,6 +16,7 @@ import {
   ErrorPanel,
   LoadingPanel,
   MetricTile,
+  NoticeBanner,
   Pill,
   PrimaryAction,
   RealmCard,
@@ -314,9 +315,12 @@ export default function LibraryScreen() {
 
       {feedback ? (
         <StaggerItem index={1}>
-          <RealmCard tone={feedback.toLowerCase().includes("no se") ? "danger" : "teal"}>
-            <Text style={{ color: MOBILE_THEME.text, lineHeight: 20 }}>{feedback}</Text>
-          </RealmCard>
+          <NoticeBanner
+            title={feedback.toLowerCase().includes("no se") ? "Accion pendiente" : "Movimiento registrado"}
+            message={feedback}
+            tone={feedback.toLowerCase().includes("no se") ? "danger" : "teal"}
+            icon={feedback.toLowerCase().includes("no se") ? "warning" : "task-alt"}
+          />
         </StaggerItem>
       ) : null}
 

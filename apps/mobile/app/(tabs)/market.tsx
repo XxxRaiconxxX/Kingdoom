@@ -8,6 +8,7 @@ import {
   EmptyState,
   ErrorPanel,
   LoadingPanel,
+  NoticeBanner,
   Pill,
   PrimaryAction,
   RealmCard,
@@ -278,11 +279,12 @@ export default function MarketScreen() {
 
       {feedback ? (
         <StaggerItem index={3}>
-          <RealmCard tone={feedback.type === "error" ? "danger" : "teal"}>
-            <Text style={{ color: feedback.type === "error" ? MOBILE_THEME.danger : MOBILE_THEME.text, lineHeight: 20 }}>
-              {feedback.message}
-            </Text>
-          </RealmCard>
+          <NoticeBanner
+            title={feedback.type === "error" ? "Compra no completada" : "Compra confirmada"}
+            message={feedback.message}
+            tone={feedback.type === "error" ? "danger" : "teal"}
+            icon={feedback.type === "error" ? "error-outline" : "inventory"}
+          />
         </StaggerItem>
       ) : null}
 

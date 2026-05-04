@@ -32,6 +32,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/DetailSheet.tsx`, `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/src/components/ScreenShell.tsx`, `apps/mobile/src/theme/colors.ts`
+*   **Resumen de Tareas:** Se hizo una pasada visual premium sobre la UI nativa de Kingdoom.
+*   **Cambios Clave:**
+    *   `ScreenShell` ahora tiene halos ambientales animados, textura vertical sutil y cabecera con divisor brillante.
+    *   Las tarjetas compartidas tienen cristal oscuro, rail dorado/teal/danger, sombras mas profundas y brillos internos.
+    *   Cargas, errores y avisos usan paneles animados reutilizables para que Mercado y Biblioteca se sientan mas pulidos.
+    *   La barra inferior tiene iconos activos con glow, cambio de ancho y linea inferior animada.
+    *   Las hojas de detalle ganaron fondo mas teatral, halo dorado/teal y cierre mas claro.
+*   **Notas/Advertencias:** Validado con `npm run typecheck` y `npx expo export --platform android --output-dir .expo-export-check` en `apps/mobile`. El export temporal fue eliminado.
+
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/TavernSlotsNative.tsx`, `apps/mobile/src/features/session/sessionStore.ts`, `apps/mobile/assets/images/icon.png`, `apps/mobile/assets/images/adaptive-icon.png`, `apps/mobile/assets/images/splash-icon.png`, `apps/mobile/assets/images/favicon.png`
 *   **Resumen de Tareas:** Se llevo el minijuego de Slots a la app nativa y se reemplazo el paquete de iconos por una identidad KD.
 *   **Cambios Clave:**

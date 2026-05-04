@@ -32,16 +32,19 @@ export function DetailSheet({ visible, title, subtitle, onClose, children }: Det
           <SafeAreaView
             style={{
               maxHeight: "100%",
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
+              borderTopLeftRadius: 28,
+              borderTopRightRadius: 28,
               borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              backgroundColor: "rgba(17,16,13,0.98)",
+              borderColor: "rgba(240,179,47,0.28)",
+              backgroundColor: "rgba(13,12,10,0.99)",
               paddingHorizontal: 16,
               paddingTop: 10,
               paddingBottom: 16,
               gap: 12,
               overflow: "hidden",
+              shadowColor: MOBILE_THEME.gold,
+              shadowOpacity: 0.18,
+              shadowRadius: 24,
             }}
           >
             <View
@@ -53,16 +56,28 @@ export function DetailSheet({ visible, title, subtitle, onClose, children }: Det
                 width: 190,
                 height: 190,
                 borderRadius: 95,
-                backgroundColor: "rgba(240,179,47,0.08)",
+                backgroundColor: "rgba(240,179,47,0.11)",
+              }}
+            />
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                left: -80,
+                bottom: -110,
+                width: 190,
+                height: 190,
+                borderRadius: 95,
+                backgroundColor: "rgba(49,209,179,0.06)",
               }}
             />
             <View
               style={{
                 alignSelf: "center",
-                width: 42,
+                width: 48,
                 height: 4,
                 borderRadius: 999,
-                backgroundColor: "rgba(240,179,47,0.28)",
+                backgroundColor: "rgba(240,179,47,0.42)",
                 marginBottom: 2,
               }}
             />
@@ -78,12 +93,12 @@ export function DetailSheet({ visible, title, subtitle, onClose, children }: Det
                 style={{
                   borderRadius: 999,
                   borderWidth: 1,
-                  borderColor: MOBILE_THEME.border,
+                  borderColor: "rgba(240,179,47,0.24)",
                   width: 34,
                   height: 34,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "rgba(5,5,4,0.58)",
+                  backgroundColor: "rgba(5,5,4,0.72)",
                 }}
               >
                 <MaterialIcons name="close" color={MOBILE_THEME.text} size={18} />

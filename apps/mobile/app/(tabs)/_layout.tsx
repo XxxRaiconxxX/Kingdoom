@@ -2,6 +2,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import type { ReactNode } from "react";
 import { View } from "react-native";
+import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import { MOBILE_THEME } from "@/src/theme/colors";
 
 function TabIcon({
@@ -12,20 +13,39 @@ function TabIcon({
   children: ReactNode;
 }) {
   return (
-    <View
+    <Animated.View
+      entering={focused ? FadeIn.duration(180) : undefined}
+      layout={LinearTransition.duration(180)}
       style={{
-        width: 42,
-        height: 34,
-        borderRadius: 17,
+        width: focused ? 48 : 42,
+        height: 36,
+        borderRadius: 18,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: focused ? "rgba(240,179,47,0.13)" : "transparent",
+        backgroundColor: focused ? "rgba(240,179,47,0.18)" : "transparent",
         borderWidth: focused ? 1 : 0,
-        borderColor: "rgba(240,179,47,0.25)",
+        borderColor: "rgba(255,211,106,0.38)",
+        shadowColor: focused ? MOBILE_THEME.gold : MOBILE_THEME.black,
+        shadowOpacity: focused ? 0.24 : 0,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 6 },
       }}
     >
+      {focused ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            bottom: 3,
+            width: 18,
+            height: 2,
+            borderRadius: 999,
+            backgroundColor: MOBILE_THEME.gold,
+          }}
+        />
+      ) : null}
       {children}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -42,18 +62,19 @@ export default function TabLayout() {
           left: 14,
           right: 14,
           bottom: 12,
-          borderRadius: 24,
-          backgroundColor: "rgba(17,16,13,0.96)",
+          borderRadius: 28,
+          backgroundColor: "rgba(9,8,7,0.97)",
           borderTopColor: "transparent",
           borderWidth: 1,
-          borderColor: MOBILE_THEME.border,
-          height: 72,
+          borderColor: "rgba(240,179,47,0.22)",
+          height: 74,
           paddingTop: 7,
           paddingBottom: 8,
           shadowColor: MOBILE_THEME.black,
-          shadowOpacity: 0.42,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.55,
+          shadowRadius: 22,
+          shadowOffset: { width: 0, height: 12 },
+          elevation: 16,
         },
         tabBarItemStyle: {
           paddingVertical: 2,

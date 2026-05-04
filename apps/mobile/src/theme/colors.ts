@@ -1,6 +1,7 @@
 export const MOBILE_THEME = {
   bg: "#050504",
   bgSoft: "#0a0907",
+  bgInk: "#020202",
   surface: "#11100d",
   surfaceSoft: "#191611",
   surfaceRaised: "#211b13",
@@ -10,10 +11,13 @@ export const MOBILE_THEME = {
   mutedText: "#a39a86",
   dimText: "#716a5d",
   gold: "#f0b32f",
+  goldBright: "#ffd36a",
   goldSoft: "#7a4f10",
   teal: "#31d1b3",
+  tealSoft: "#0f6f62",
   green: "#42b883",
   violet: "#a78bfa",
   danger: "#e16464",
+  dangerSoft: "#512020",
   black: "#000000",
 } as const;

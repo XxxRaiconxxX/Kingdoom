@@ -32,6 +32,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/features/realmExchange/realmExchange.simulation.ts`, `apps/mobile/src/features/realmExchange/realmExchangeSimulation.ts`
+*   **Resumen de Tareas:** Se corrigio la simulacion de la Bolsa del Reino para que el rango hasta 500 sea realmente alcanzable.
+*   **Cambios Clave:**
+    *   La formula dejo de orbitar solo alrededor del `basePrice` y ahora usa el rango completo entre `priceFloor` y `priceCeiling`.
+    *   Web y app comparten el mismo comportamiento, por lo que ya no quedan activos clavados cerca de 150 aunque el techo sea 500.
+*   **Notas/Advertencias:** El ajuste cambia la amplitud real del mercado, pero mantiene la misma persistencia local y la misma duracion de predicciones.
+*   **Validacion:** `npx tsc --noEmit`, `npm run build`, `npm run typecheck` y `npx expo export --platform android` ejecutados correctamente.
+
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/RealmStockExchangeNative.tsx`, `apps/mobile/src/features/realmExchange/*`
 *   **Resumen de Tareas:** Se porto la Bolsa del Reino a la app nativa.
 *   **Cambios Clave:**

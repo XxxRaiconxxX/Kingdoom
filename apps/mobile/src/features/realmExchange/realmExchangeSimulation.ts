@@ -9,10 +9,10 @@ import type {
 } from "./realmExchangeTypes";
 
 const VOLATILITY_AMPLITUDE = {
-  low: 0.075,
-  medium: 0.13,
-  high: 0.2,
-  extreme: 0.28,
+  low: 0.38,
+  medium: 0.54,
+  high: 0.72,
+  extreme: 0.9,
 };
 
 function hashSeed(input: string): number {
@@ -44,13 +44,20 @@ export function getAssetPriceAt(asset: RealmExchangeAsset, at = Date.now()): num
   const amplitude = VOLATILITY_AMPLITUDE[asset.volatility];
   const phase = (hashSeed(asset.id) % 628) / 100;
   const noise = seededUnit(`${asset.id}:${tick}`) - 0.5;
-  const longWave = Math.sin(tick / 5.2 + phase) * amplitude * 0.48;
-  const shortWave = Math.sin(tick / 1.8 + phase * 0.7) * amplitude * 0.22;
-  const bias = asset.bias * amplitude * 0.12 * Math.sin(tick / 13 + phase);
-  const randomPush = noise * amplitude * 0.62;
-  const price = asset.basePrice * (1 + longWave + shortWave + bias + randomPush);
+  const range = asset.priceCeiling - asset.priceFloor;
+  const longWave = Math.sin(tick / 5.2 + phase) * 0.34;
+  const shortWave = Math.sin(tick / 1.85 + phase * 0.72) * 0.2;
+  const microWave = Math.sin(tick / 0.95 + phase * 1.3) * 0.08;
+  const bias = asset.bias * 0.08 + asset.bias * 0.06 * Math.sin(tick / 13 + phase * 0.55);
+  const randomPush = noise * 0.16;
+  const normalized = clamp(
+    0.5 + (longWave + shortWave + microWave + randomPush) * amplitude + bias,
+    0,
+    1
+  );
+  const price = asset.priceFloor + normalized * range;
 
-  return Math.round(clamp(price, asset.priceFloor, asset.priceCeiling));
+  return Math.round(price);
 }
 
 export function getNextTickAt(asset: RealmExchangeAsset, at = Date.now()): number {

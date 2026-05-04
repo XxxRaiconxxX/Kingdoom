@@ -31,6 +31,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
+### [Fecha: 04/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `supabase_grimoire_flora.sql`, `src/utils/inventory.ts`
+*   **Resumen de Tareas:** Se corrigio el flujo de flora administrable y se blindo el inventario contra categorias legacy.
+*   **Cambios Clave:**
+    *   Flora ahora incluye politicas RLS equivalentes a bestiario y magias dentro del SQL del proyecto.
+    *   El inventario normaliza categorias inesperadas como `potions` para evitar que la vista se caiga al renderizar items legacy.
+    *   Con esto, una fila mal categorizada deja de romper la hoja completa del inventario.
+*   **Notas/Advertencias:** Para que Flora quede operativa en Supabase, hay que ejecutar el SQL actualizado de `supabase_grimoire_flora.sql`.
+
 ### [Fecha: 02/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`
 *   **Resumen de Tareas:** Se agrego edicion directa de fichas ya creadas desde el panel de jugador.

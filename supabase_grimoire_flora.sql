@@ -31,3 +31,20 @@ create trigger set_grimoire_flora_updated_at
 before update on public.grimoire_flora_entries
 for each row
 execute function public.set_grimoire_flora_updated_at();
+
+alter table public.grimoire_flora_entries enable row level security;
+
+drop policy if exists "Grimoire flora is readable by everyone" on public.grimoire_flora_entries;
+create policy "Grimoire flora is readable by everyone"
+on public.grimoire_flora_entries
+for select
+to public
+using (true);
+
+drop policy if exists "Admins can manage grimoire flora" on public.grimoire_flora_entries;
+create policy "Admins can manage grimoire flora"
+on public.grimoire_flora_entries
+for all
+to public
+using (true)
+with check (true);

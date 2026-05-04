@@ -31,7 +31,7 @@ type InventoryRow = {
   player_id: string;
   item_id: string;
   item_name: string;
-  item_category: InventoryCategoryId;
+  item_category: string;
   item_description: string;
   item_ability?: string | null;
   item_image_url: string;
@@ -49,12 +49,14 @@ export type InventorySyncResult =
   | { status: "synced"; previousQuantity: number };
 
 function mapInventoryRow(row: InventoryRow): InventoryEntry {
+  const normalizedCategory = normalizeInventoryCategory(row.item_category);
+
   return {
     id: row.id,
     playerId: row.player_id,
     itemId: row.item_id,
     itemName: row.item_name,
-    itemCategory: row.item_category,
+    itemCategory: normalizedCategory,
     itemDescription: row.item_description,
     itemAbility: row.item_ability ?? undefined,
     itemImageUrl: row.item_image_url,
@@ -65,6 +67,16 @@ function mapInventoryRow(row: InventoryRow): InventoryEntry {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+function normalizeInventoryCategory(
+  category: string | null | undefined
+): InventoryCategoryId {
+  if (category === "armors" || category === "swords" || category === "others") {
+    return category;
+  }
+
+  return "others";
 }
 
 function isTrackableItem(item: MarketItem) {

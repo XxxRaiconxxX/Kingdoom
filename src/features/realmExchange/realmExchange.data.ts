@@ -3,8 +3,8 @@ import type { RealmExchangeAsset, RealmExchangeVolatility } from "./realmExchang
 export const REALM_EXCHANGE_TRADE_LOT = 10;
 export const REALM_EXCHANGE_PREDICTION_HOURS = 2;
 export const REALM_EXCHANGE_MIN_STAKE = 100;
-export const REALM_EXCHANGE_MAX_STAKE = 50000;
-export const REALM_EXCHANGE_PRICE_CEILING = 500;
+export const REALM_EXCHANGE_MAX_STAKE = 150000;
+export const REALM_EXCHANGE_PRICE_CEILING = 200;
 
 export const REALM_EXCHANGE_PAYOUTS: Record<RealmExchangeVolatility, number> = {
   low: 1.4,

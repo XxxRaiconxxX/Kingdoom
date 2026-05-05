@@ -504,12 +504,12 @@ export function TavernSlots() {
 
           <Panel title="Pagos" icon={<Crown className="h-4 w-4" />}>
             <div className="grid gap-2 text-xs font-bold text-stone-300">
-              <PayRow label="3 coronas" value="x12" />
-              <PayRow label="3 gemas" value="x8" />
-              <PayRow label="3 espadas" value="x5" />
-              <PayRow label="3 pociones" value="x3" />
-              <PayRow label="3 escudos" value="x2" />
-              <PayRow label="2 iguales" value="x1.25" />
+              <PayRow label="3 coronas" value="x24" />
+              <PayRow label="3 gemas" value="x16" />
+              <PayRow label="3 espadas" value="x10" />
+              <PayRow label="3 pociones" value="x6" />
+              <PayRow label="3 escudos" value="x4" />
+              <PayRow label="2 iguales" value="x2" />
             </div>
           </Panel>
         </aside>

@@ -52,6 +52,11 @@ export function PurchaseModal({
   );
   const remainingDelaySeconds = Math.ceil(remainingDelayMs / 1000);
   const isDelayActive = remainingDelayMs > 0;
+  const stockLimit = Math.max(0, Math.floor(item.stockLimit ?? 0));
+  const stockSold = Math.max(0, Math.floor(item.stockSold ?? 0));
+  const remainingStock = stockLimit > 0 ? Math.max(0, stockLimit - stockSold) : null;
+  const isSoldOut = item.stockStatus === "sold-out" || remainingStock === 0;
+  const maxPurchaseQuantity = remainingStock ?? 99;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,6 +73,18 @@ export function PurchaseModal({
       setFeedbackMessage(
         "Conecta primero tu perfil del reino para poder comprar en el mercado."
       );
+      return;
+    }
+
+    if (isSoldOut) {
+      setSubmitState("error");
+      setFeedbackMessage("Ese item esta agotado.");
+      return;
+    }
+
+    if (formValues.quantity > maxPurchaseQuantity) {
+      setSubmitState("error");
+      setFeedbackMessage(`Solo quedan ${maxPurchaseQuantity} unidades disponibles.`);
       return;
     }
 
@@ -343,23 +360,29 @@ const purchaseResult = await purchaseMarketItemSecure({
                   <input
                     required
                     min={1}
-                    max={99}
+                    max={maxPurchaseQuantity}
                     type="number"
                     value={formValues.quantity}
                     onChange={(event) =>
                       setFormValues((current) => ({
                         ...current,
-                        quantity: Math.max(1, Number(event.target.value || 1)),
+                        quantity: Math.min(
+                          maxPurchaseQuantity,
+                          Math.max(1, Number(event.target.value || 1))
+                        ),
                       }))
                     }
                     className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
                   />
                 </label>
 
-                <PurchaseReadonlyField
-                  label="Total"
-                  value={`${totalPrice} de oro`}
-                />
+                <PurchaseReadonlyField label="Total" value={`${totalPrice} de oro`} />
+                {remainingStock !== null ? (
+                  <PurchaseReadonlyField
+                    label="Disponibles"
+                    value={`${remainingStock} de ${stockLimit}`}
+                  />
+                ) : null}
 
                 <div className="hidden">
                   <label>
@@ -389,9 +412,9 @@ const purchaseResult = await purchaseMarketItemSecure({
 
               <button
                 type="submit"
-                disabled={!player || submitState === "submitting" || isDelayActive}
+                disabled={!player || submitState === "submitting" || isDelayActive || isSoldOut}
                 className={`flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-extrabold transition ${
-                  !player || submitState === "submitting" || isDelayActive
+                  !player || submitState === "submitting" || isDelayActive || isSoldOut
                     ? "cursor-not-allowed bg-stone-800 text-stone-500"
                     : "bg-amber-500 text-stone-950 hover:bg-amber-400"
                 }`}
@@ -399,7 +422,9 @@ const purchaseResult = await purchaseMarketItemSecure({
                 <PackageCheck className="h-4 w-4" />
                 {submitState === "submitting"
                   ? "Enviando pedido..."
-                  : isDelayActive
+                  : isSoldOut
+                    ? "Agotado"
+                    : isDelayActive
                     ? `Preparando formulario... ${remainingDelaySeconds}s`
                     : "Enviar pedido"}
               </button>

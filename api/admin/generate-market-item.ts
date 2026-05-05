@@ -11,7 +11,7 @@ import {
 } from "./_aiOrchestrator.js";
 
 type MarketCategoryId = "potions" | "armors" | "swords" | "others";
-type Rarity = "legendary" | "epic" | "rare" | "common";
+type Rarity = "mythic" | "legendary" | "epic" | "rare" | "common";
 type StockStatus = "available" | "limited" | "sold-out";
 
 type MarketItemAiRequest = {
@@ -71,6 +71,7 @@ function normalizeCategory(value?: string): MarketCategoryId {
 function normalizeRarity(value?: string): Rarity {
   if (
     value === "legendary" ||
+    value === "mythic" ||
     value === "epic" ||
     value === "rare" ||
     value === "common"
@@ -95,6 +96,8 @@ function normalizeStockStatus(value?: string): StockStatus {
 
 function defaultPriceForRarity(rarity: Rarity) {
   switch (rarity) {
+    case "mythic":
+      return 2400;
     case "legendary":
       return 1250;
     case "epic":
@@ -166,7 +169,7 @@ REFERENCIA VISUAL
 
 PISTAS DEL STAFF
 - category preferida: ${input.category} (${categoryLabel(input.category)})
-- rarity preferida: ${input.rarity}
+- rarity preferida: ${input.rarity} (mythic es superior a legendary y debe reservarse para piezas excepcionales)
 - stockStatus preferido: ${input.stockStatus} (${stockLabel(input.stockStatus)})
 - priceTarget: ${input.priceTarget}
 - theme: ${input.theme}
@@ -190,7 +193,7 @@ Responde SOLO con un objeto JSON valido con esta estructura exacta:
     "description": "string",
     "ability": "string",
     "price": 0,
-    "rarity": "legendary|epic|rare|common",
+    "rarity": "mythic|legendary|epic|rare|common",
     "category": "potions|armors|swords|others",
     "stockStatus": "available|limited|sold-out",
     "imageFit": "cover",

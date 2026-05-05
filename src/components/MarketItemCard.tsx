@@ -16,6 +16,20 @@ const rarityStyles: Record<
     sheenAnimation?: string;
   }
 > = {
+  mythic: {
+    label: "Mitico",
+    card: "border-red-200/90 bg-red-950/40 shadow-[0_0_42px_rgba(220,38,38,0.36),0_0_90px_rgba(127,29,29,0.28)]",
+    badge: "bg-red-500/20 text-red-100 ring-1 ring-red-200/45 shadow-[0_0_18px_rgba(248,113,113,0.28)]",
+    imageRing: "ring-red-300/60",
+    glow:
+      "bg-[radial-gradient(circle_at_18%_0%,rgba(255,255,255,0.18),transparent_22%),radial-gradient(circle_at_top,rgba(248,113,113,0.46),transparent_48%),radial-gradient(circle_at_bottom,rgba(127,29,29,0.38),transparent_54%),linear-gradient(135deg,rgba(185,28,28,0.24),transparent_58%)] shadow-[0_0_34px_rgba(239,68,68,0.52),0_0_88px_rgba(153,27,27,0.42)]",
+    glowBorder:
+      "border border-red-100/65 shadow-[inset_0_0_24px_rgba(248,113,113,0.36),0_0_20px_rgba(239,68,68,0.22)]",
+    glowAnimation: "market-neon-mythic",
+    sheen:
+      "bg-[linear-gradient(115deg,transparent_10%,rgba(255,255,255,0.04)_21%,rgba(254,202,202,0.34)_36%,rgba(255,255,255,0.18)_48%,rgba(220,38,38,0.28)_58%,rgba(255,228,230,0.08)_66%,transparent_82%)] opacity-90 blur-xl",
+    sheenAnimation: "market-sheen-mythic",
+  },
   legendary: {
     label: "Legendario",
     card: "border-amber-200/80 bg-amber-500/12 shadow-[0_0_34px_rgba(245,158,11,0.22)]",
@@ -92,7 +106,18 @@ export function MarketItemCard({
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isAbilityExpanded, setIsAbilityExpanded] = useState(false);
   const style = rarityStyles[item.rarity];
-  const stock = stockStyles[item.stockStatus];
+  const stockLimit = Math.max(0, Math.floor(item.stockLimit ?? 0));
+  const stockSold = Math.max(0, Math.floor(item.stockSold ?? 0));
+  const remainingStock = stockLimit > 0 ? Math.max(0, stockLimit - stockSold) : null;
+  const effectiveStockStatus =
+    item.stockStatus === "sold-out" || remainingStock === 0
+      ? "sold-out"
+      : item.stockStatus;
+  const stock = stockStyles[effectiveStockStatus];
+  const stockLabel =
+    effectiveStockStatus === "limited" && remainingStock !== null
+      ? `${stock.label} ${remainingStock}/${stockLimit}`
+      : stock.label;
 
   return (
     <article
@@ -160,7 +185,7 @@ export function MarketItemCard({
             <span
               className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold md:px-3 md:text-xs ${stock.badge}`}
             >
-              {stock.label}
+              {stockLabel}
             </span>
           </div>
         </div>
@@ -242,7 +267,7 @@ export function MarketItemCard({
           }`}
         >
           <PackageCheck className="h-4 w-4" />
-          {stock.buttonDisabled ? "No disponible" : "Comprar"}
+          {stock.buttonDisabled ? "Agotado" : "Comprar"}
         </button>
       </div>
     </article>

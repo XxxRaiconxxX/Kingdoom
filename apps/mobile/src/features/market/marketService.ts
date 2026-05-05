@@ -13,6 +13,8 @@ type MarketItemRow = {
   image_position: string | null;
   category: MarketCategoryId;
   stock_status: StockStatus;
+  stock_limit?: number | null;
+  stock_sold?: number | null;
   featured: boolean;
 };
 
@@ -29,6 +31,8 @@ function mapMarketItemRow(row: MarketItemRow): MarketItem {
     imagePosition: row.image_position ?? undefined,
     category: row.category,
     stockStatus: row.stock_status,
+    stockLimit: row.stock_limit ?? undefined,
+    stockSold: row.stock_sold ?? undefined,
     featured: row.featured,
   };
 }
@@ -38,12 +42,26 @@ export async function fetchMarketItemsNative() {
     return { items: [] as MarketItem[], errorMessage: supabaseConfigError };
   }
 
-  const { data, error } = await supabase
+  const result = await supabase
     .from("market_items")
     .select(
-      "id, name, description, ability, price, rarity, image_url, image_fit, image_position, category, stock_status, featured"
+      "id, name, description, ability, price, rarity, image_url, image_fit, image_position, category, stock_status, stock_limit, stock_sold, featured"
     )
     .order("created_at", { ascending: false });
+  let data: MarketItemRow[] | null = result.data as MarketItemRow[] | null;
+  let error = result.error;
+
+  if (error?.message.toLowerCase().includes("stock_")) {
+    const legacyResult = await supabase
+      .from("market_items")
+      .select(
+        "id, name, description, ability, price, rarity, image_url, image_fit, image_position, category, stock_status, featured"
+      )
+      .order("created_at", { ascending: false });
+
+    data = legacyResult.data as MarketItemRow[] | null;
+    error = legacyResult.error;
+  }
 
   if (error) {
     return {

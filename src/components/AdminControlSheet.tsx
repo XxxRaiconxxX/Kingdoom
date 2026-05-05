@@ -165,6 +165,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [marketItemImagePosition, setMarketItemImagePosition] = useState("center");
   const [marketItemCategory, setMarketItemCategory] = useState<MarketCategoryId>("swords");
   const [marketItemStockStatus, setMarketItemStockStatus] = useState<StockStatus>("available");
+  const [marketItemStockLimit, setMarketItemStockLimit] = useState(0);
+  const [marketItemStockSold, setMarketItemStockSold] = useState(0);
   const [marketItemFeatured, setMarketItemFeatured] = useState(false);
   const [marketPinterestUrl, setMarketPinterestUrl] = useState("");
   const [marketPinterestFeedback, setMarketPinterestFeedback] = useState("");
@@ -296,6 +298,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       imagePosition: marketItemImagePosition.trim() || "center",
       category: marketItemCategory,
       stockStatus: marketItemStockStatus,
+      stockLimit: marketItemStockLimit,
+      stockSold: marketItemStockSold,
       featured: marketItemFeatured,
     }),
     [
@@ -310,6 +314,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       marketItemName,
       marketItemPrice,
       marketItemRarity,
+      marketItemStockLimit,
+      marketItemStockSold,
       marketItemStockStatus,
     ]
   );
@@ -605,6 +611,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemImagePosition("center");
     setMarketItemCategory("swords");
     setMarketItemStockStatus("available");
+    setMarketItemStockLimit(0);
+    setMarketItemStockSold(0);
     setMarketItemFeatured(false);
     setMarketFeedback("");
     setMarketPinterestUrl("");
@@ -685,6 +693,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemRarity(result.draft.rarity);
     setMarketItemCategory(result.draft.category);
     setMarketItemStockStatus(result.draft.stockStatus);
+    setMarketItemStockLimit(result.draft.stockStatus === "limited" ? 1 : 0);
+    setMarketItemStockSold(0);
     setMarketItemImageUrl(marketPinterestPreview.imageUrl);
     setMarketItemImageFit(result.draft.imageFit || "cover");
     setMarketItemImagePosition(result.draft.imagePosition || "center");
@@ -707,6 +717,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemImagePosition(item.imagePosition ?? "center");
     setMarketItemCategory(item.category);
     setMarketItemStockStatus(item.stockStatus);
+    setMarketItemStockLimit(item.stockLimit ?? 0);
+    setMarketItemStockSold(item.stockSold ?? 0);
     setMarketItemFeatured(item.featured ?? false);
     setMarketFeedback("");
     setMarketPinterestFeedback("");
@@ -724,6 +736,18 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     }
 
     const id = marketItemId || slugifyMarketItem(marketItemName, marketItemCategory);
+    const cleanStockLimit =
+      marketItemStockStatus === "limited"
+        ? Math.max(0, Math.floor(marketItemStockLimit))
+        : 0;
+    const cleanStockSold =
+      cleanStockLimit > 0
+        ? Math.min(cleanStockLimit, Math.max(0, Math.floor(marketItemStockSold)))
+        : 0;
+    const cleanStockStatus =
+      cleanStockLimit > 0 && cleanStockSold >= cleanStockLimit
+        ? "sold-out"
+        : marketItemStockStatus;
     setIsSavingMarketItem(true);
     setMarketFeedback("");
 
@@ -738,7 +762,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       imageFit: marketItemImageFit,
       imagePosition: marketItemImagePosition,
       category: marketItemCategory,
-      stockStatus: marketItemStockStatus,
+      stockStatus: cleanStockStatus,
+      stockLimit: cleanStockLimit,
+      stockSold: cleanStockSold,
       featured: marketItemFeatured,
     });
 
@@ -1743,6 +1769,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                         onChange={(e) => setMarketItemRarity(e.target.value as Rarity)}
                         className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
                       >
+                        <option value="mythic">Mitico</option>
                         <option value="legendary">Legendario</option>
                         <option value="epic">Epico</option>
                         <option value="rare">Raro</option>
@@ -1768,6 +1795,25 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       label="Precio (oro)"
                       value={marketItemPrice}
                       onChange={setMarketItemPrice}
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <NumericInput
+                      label="Unidades limitadas"
+                      value={marketItemStockLimit}
+                      onChange={(value) => {
+                        const nextLimit = Math.max(0, Math.floor(value));
+                        setMarketItemStockLimit(nextLimit);
+                        if (nextLimit > 0 && marketItemStockStatus === "available") {
+                          setMarketItemStockStatus("limited");
+                        }
+                      }}
+                    />
+                    <NumericInput
+                      label="Unidades vendidas"
+                      value={marketItemStockSold}
+                      onChange={(value) => setMarketItemStockSold(Math.max(0, Math.floor(value)))}
                     />
                   </div>
 
@@ -2063,6 +2109,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                           <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
                             oro &middot; {adminStockLabel(item.stockStatus)}
                           </p>
+                          {item.stockLimit ? (
+                            <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-red-200/80">
+                              {Math.max(0, item.stockLimit - (item.stockSold ?? 0))}/{item.stockLimit}
+                            </p>
+                          ) : null}
                         </div>
                       </button>
                     ))

@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
 export type TabId = "home" | "grimoire" | "library" | "market" | "archivist";
-export type Rarity = "legendary" | "epic" | "rare" | "common";
+export type Rarity = "mythic" | "legendary" | "epic" | "rare" | "common";
 export type PlayerStatus = "alive" | "dead";
 export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
 export type InventoryCategoryId = Exclude<MarketCategoryId, "potions">;
@@ -44,6 +44,8 @@ export type MarketItem = {
   imagePosition?: string;
   category: MarketCategoryId;
   stockStatus: StockStatus;
+  stockLimit?: number;
+  stockSold?: number;
   featured?: boolean;
 };
 

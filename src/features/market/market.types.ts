@@ -12,6 +12,8 @@ export type MarketItemRow = {
   image_position: string | null;
   category: MarketCategoryId;
   stock_status: StockStatus;
+  stock_limit?: number | null;
+  stock_sold?: number | null;
   featured: boolean;
 };
 
@@ -33,6 +35,7 @@ export type AdminMarketItemInput = {
   imagePosition: string;
   category: MarketCategoryId;
   stockStatus: StockStatus;
+  stockLimit: number;
+  stockSold: number;
   featured: boolean;
 };
-

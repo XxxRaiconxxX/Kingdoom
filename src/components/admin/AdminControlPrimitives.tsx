@@ -327,6 +327,7 @@ export function adminCategoryLabel(category: MarketCategoryId) {
 
 export function adminRarityLabel(rarity: Rarity) {
   const labels: Record<Rarity, string> = {
+    mythic: "Mitico",
     common: "Comun",
     rare: "Raro",
     epic: "Epico",

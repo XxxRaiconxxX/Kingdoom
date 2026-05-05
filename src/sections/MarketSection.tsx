@@ -130,6 +130,7 @@ const TAVERN_MODES: {
 
 const MARKET_RARITY_FILTERS: Array<{ id: Rarity | "all"; label: string }> = [
   { id: "all", label: "Todas" },
+  { id: "mythic", label: "Mitico" },
   { id: "common", label: "Comun" },
   { id: "rare", label: "Raro" },
   { id: "epic", label: "Epico" },

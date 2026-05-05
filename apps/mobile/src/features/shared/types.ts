@@ -1,4 +1,4 @@
-export type Rarity = "legendary" | "epic" | "rare" | "common";
+export type Rarity = "mythic" | "legendary" | "epic" | "rare" | "common";
 export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
 export type InventoryCategoryId = Exclude<MarketCategoryId, "potions">;
 export type EventStatus = "active" | "in-production" | "finished";
@@ -32,6 +32,8 @@ export type MarketItem = {
   imagePosition?: string;
   category: MarketCategoryId;
   stockStatus: StockStatus;
+  stockLimit?: number;
+  stockSold?: number;
   featured?: boolean;
 };
 

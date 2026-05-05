@@ -21,10 +21,12 @@ export function RealmCard({
   tone = "default",
 }: {
   children: ReactNode;
-  tone?: "default" | "gold" | "teal" | "danger";
+  tone?: "default" | "gold" | "teal" | "danger" | "mythic";
 }) {
   const borderColor =
-    tone === "gold"
+    tone === "mythic"
+      ? "rgba(255,86,86,0.62)"
+      : tone === "gold"
       ? "rgba(240,179,47,0.42)"
       : tone === "teal"
         ? "rgba(49,209,179,0.36)"
@@ -32,7 +34,13 @@ export function RealmCard({
           ? "rgba(225,100,100,0.42)"
           : MOBILE_THEME.border;
   const accentColor =
-    tone === "teal" ? MOBILE_THEME.teal : tone === "danger" ? MOBILE_THEME.danger : MOBILE_THEME.gold;
+    tone === "mythic"
+      ? "#ff3b47"
+      : tone === "teal"
+        ? MOBILE_THEME.teal
+        : tone === "danger"
+          ? MOBILE_THEME.danger
+          : MOBILE_THEME.gold;
 
   return (
     <Animated.View
@@ -46,8 +54,8 @@ export function RealmCard({
         gap: 10,
         overflow: "hidden",
         shadowColor: accentColor,
-        shadowOpacity: tone === "default" ? 0.1 : 0.18,
-        shadowRadius: tone === "default" ? 16 : 22,
+        shadowOpacity: tone === "mythic" ? 0.28 : tone === "default" ? 0.1 : 0.18,
+        shadowRadius: tone === "mythic" ? 30 : tone === "default" ? 16 : 22,
         shadowOffset: { width: 0, height: 10 },
       }}
     >
@@ -74,7 +82,9 @@ export function RealmCard({
           height: 190,
           borderRadius: 95,
           backgroundColor:
-            tone === "teal"
+            tone === "mythic"
+              ? "rgba(255,59,71,0.12)"
+              : tone === "teal"
               ? "rgba(49,209,179,0.08)"
               : tone === "danger"
                 ? "rgba(225,100,100,0.08)"
@@ -92,7 +102,9 @@ export function RealmCard({
           borderRadius: 80,
           borderWidth: 1,
           borderColor:
-            tone === "teal"
+            tone === "mythic"
+              ? "rgba(255,59,71,0.2)"
+              : tone === "teal"
               ? "rgba(49,209,179,0.1)"
               : tone === "danger"
                 ? "rgba(225,100,100,0.1)"

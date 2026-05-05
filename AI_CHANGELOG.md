@@ -32,6 +32,18 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 05/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/types.ts`, `src/components/MarketItemCard.tsx`, `src/components/PurchaseModal.tsx`, `src/components/AdminControlSheet.tsx`, `src/features/market/*`, `src/sections/MarketSection.tsx`, `api/admin/generate-market-item.ts`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/features/market/*`, `apps/mobile/src/features/shared/types.ts`, `apps/mobile/src/components/KingdoomUI.tsx`, `supabase_market_mythic_limited_stock.sql`
+*   **Resumen de Tareas:** Se agrego la rareza `Mitico` al mercado, superior a legendario, con estetica carmesi destacada y soporte para stock limitado hasta quedar agotado.
+*   **Cambios Clave:**
+    *   El mercado web y la app nativa ahora reconocen `mythic` como rareza valida y la muestran como `Mitico`.
+    *   Las tarjetas miticas tienen brillo carmesi, animacion propia y presencia visual superior a legendario.
+    *   El admin puede cargar unidades limitadas y unidades vendidas para items limitados.
+    *   Las compras web y nativas bloquean cantidades superiores al stock restante y muestran `Agotado` cuando se termina.
+    *   Se preparo SQL para agregar `stock_limit`, `stock_sold`, permitir rareza `mythic` y actualizar el RPC de compra con control atomico de stock.
+*   **Notas/Advertencias:** Ejecutar `supabase_market_mythic_limited_stock.sql` en Supabase para activar persistencia real de unidades limitadas y agotado automatico. Sin ese SQL, la lectura/guardado intenta fallback legacy para no romper el mercado actual.
+*   **Validacion:** `npx tsc --noEmit`, `npm run mobile:typecheck` y `npm run build` ejecutados correctamente.
+
+### [Fecha: 05/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/components/TavernCrash.tsx`, `src/components/TavernPenalty.tsx`, `src/components/TavernSlots.tsx`, `src/utils/scratchSecure.ts`
 *   **Resumen de Tareas:** Se hizo una auditoria de seguridad funcional sobre los cobros de minijuegos y se corrigieron varios puntos donde un saldo viejo podia sobrescribir el oro real del jugador.
 *   **Cambios Clave:**

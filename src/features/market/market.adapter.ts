@@ -34,6 +34,8 @@ export function mapMarketItemRow(row: MarketItemRow): MarketItem {
     imagePosition: row.image_position ?? undefined,
     category: row.category,
     stockStatus: row.stock_status,
+    stockLimit: row.stock_limit ?? undefined,
+    stockSold: row.stock_sold ?? undefined,
     featured: row.featured,
   };
 }
@@ -51,7 +53,8 @@ export function buildMarketItemPayload(input: AdminMarketItemInput) {
     image_position: input.imagePosition.trim() || null,
     category: input.category,
     stock_status: input.stockStatus,
+    stock_limit: Math.max(0, Math.floor(input.stockLimit || 0)),
+    stock_sold: Math.max(0, Math.floor(input.stockSold || 0)),
     featured: input.featured,
   };
 }
-

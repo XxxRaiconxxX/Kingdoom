@@ -45,7 +45,17 @@ type MarketFeedback = {
   message: string;
 };
 
+function getRarityLabel(item: MarketItem) {
+  if (item.rarity === "mythic") return "Mitico";
+  if (item.rarity === "legendary") return "Legendario";
+  if (item.rarity === "epic") return "Epico";
+  if (item.rarity === "rare") return "Raro";
+  return "Comun";
+}
+
 function ItemThumb({ item }: { item: MarketItem }) {
+  const isMythic = item.rarity === "mythic";
+
   if (!item.imageUrl) {
     return (
       <View
@@ -54,13 +64,13 @@ function ItemThumb({ item }: { item: MarketItem }) {
           height: 58,
           borderRadius: 16,
           borderWidth: 1,
-          borderColor: MOBILE_THEME.border,
+          borderColor: isMythic ? "rgba(255,86,86,0.62)" : MOBILE_THEME.border,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "rgba(240,179,47,0.08)",
+          backgroundColor: isMythic ? "rgba(255,59,71,0.12)" : "rgba(240,179,47,0.08)",
         }}
       >
-        <MaterialIcons name="inventory-2" size={22} color={MOBILE_THEME.gold} />
+        <MaterialIcons name="inventory-2" size={22} color={isMythic ? "#ff5666" : MOBILE_THEME.gold} />
       </View>
     );
   }
@@ -74,7 +84,7 @@ function ItemThumb({ item }: { item: MarketItem }) {
         height: 58,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: MOBILE_THEME.borderStrong,
+        borderColor: isMythic ? "rgba(255,86,86,0.72)" : MOBILE_THEME.borderStrong,
         backgroundColor: MOBILE_THEME.bg,
       }}
     />
@@ -298,15 +308,20 @@ export default function MarketScreen() {
       </StaggerItem>
 
       {filteredItems.map((item, index) => {
-        const quantity = quantityByItemId[item.id] ?? 1;
+        const stockLimit = Math.max(0, Math.floor(item.stockLimit ?? 0));
+        const stockSold = Math.max(0, Math.floor(item.stockSold ?? 0));
+        const remainingStock = stockLimit > 0 ? Math.max(0, stockLimit - stockSold) : null;
+        const isSoldOut = item.stockStatus === "sold-out" || remainingStock === 0;
+        const maxQuantity = remainingStock ?? 99;
+        const quantity = Math.min(quantityByItemId[item.id] ?? 1, maxQuantity);
         const pending = pendingItemId === item.id;
         const totalPrice = item.price * quantity;
         const notEnoughGold = Boolean(player && totalPrice > player.gold);
-        const disabled = !player || item.stockStatus === "sold-out" || pending || notEnoughGold;
+        const disabled = !player || isSoldOut || pending || notEnoughGold;
 
         return (
           <StaggerItem key={item.id} index={index + 6}>
-            <RealmCard tone={item.featured ? "gold" : "default"}>
+            <RealmCard tone={item.rarity === "mythic" ? "mythic" : item.featured ? "gold" : "default"}>
               <View style={{ flexDirection: "row", gap: 12 }}>
                 <ItemThumb item={item} />
                 <View style={{ flex: 1, gap: 5 }}>
@@ -319,9 +334,15 @@ export default function MarketScreen() {
                   <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 18 }} numberOfLines={2}>
                     {item.description}
                   </Text>
-                  <Text style={{ color: MOBILE_THEME.dimText, fontSize: 11 }}>
-                    {item.category} / {item.rarity} / {item.stockStatus}
-                  </Text>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                    <Pill label={getRarityLabel(item)} active={item.rarity === "mythic"} />
+                    <Pill label={isSoldOut ? "Agotado" : remainingStock !== null ? "Limitado" : "Disponible"} />
+                  </View>
+                  {remainingStock !== null ? (
+                    <Text style={{ color: isSoldOut ? MOBILE_THEME.danger : MOBILE_THEME.gold, fontSize: 11, fontWeight: "900" }}>
+                      Limitado: {remainingStock}/{stockLimit}
+                    </Text>
+                  ) : null}
                 </View>
               </View>
 
@@ -360,7 +381,7 @@ export default function MarketScreen() {
                   onPress={() =>
                     setQuantityByItemId((current) => ({
                       ...current,
-                      [item.id]: Math.min(99, quantity + 1),
+                      [item.id]: Math.min(maxQuantity, quantity + 1),
                     }))
                   }
                 />
@@ -390,7 +411,7 @@ export default function MarketScreen() {
                 </View>
                 <View style={{ flex: 1.25 }}>
                   <PrimaryAction
-                    label={item.stockStatus === "sold-out" ? "Agotado" : !player ? "Conecta perfil" : notEnoughGold ? "Sin oro" : "Comprar"}
+                    label={isSoldOut ? "Agotado" : !player ? "Conecta perfil" : notEnoughGold ? "Sin oro" : "Comprar"}
                     icon="shopping-bag"
                     loading={pending}
                     disabled={disabled}

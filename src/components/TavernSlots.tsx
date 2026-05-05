@@ -161,15 +161,15 @@ function generateSpinOutcome(): SpinOutcome {
 
   if (roll < 0.008) {
     reels = ["crown", "crown", "crown"];
-  } else if (roll < 0.035) {
+  } else if (roll < 0.099) {
     reels = ["gem", "gem", "gem"];
-  } else if (roll < 0.045) {
+  } else if (roll < 0.125) {
     reels = ["sword", "sword", "sword"];
-  } else if (roll < 0.100) {
+  } else if (roll < 0.200) {
     reels = ["potion", "potion", "potion"];
-  } else if (roll < 0.170) {
+  } else if (roll < 0.250) {
     reels = ["shield", "shield", "shield"];
-  } else if (roll < 0.385) {
+  } else if (roll < 0.450) {
     reels = buildPairReels();
   } else {
     reels = buildLosingReels();

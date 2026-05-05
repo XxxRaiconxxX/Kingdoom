@@ -43,19 +43,11 @@ function hasAvailableStock(item: MarketItem) {
 }
 
 function selectRotatedItems(items: MarketItem[], rarity: Rarity, windowId: number, count: number) {
-  const rarityItems = items.filter((item) => item.rarity === rarity);
-  const availableItems = rarityItems.filter(hasAvailableStock);
-  const pool = availableItems.length >= count ? availableItems : rarityItems;
+  const pool = items.filter((item) => item.rarity === rarity && hasAvailableStock(item));
 
   return pool
     .slice()
     .sort((a, b) => {
-      const availableDifference = Number(hasAvailableStock(b)) - Number(hasAvailableStock(a));
-
-      if (availableDifference !== 0) {
-        return availableDifference;
-      }
-
       return (
         hashSeed(`${windowId}:${rarity}:${a.id}`) -
         hashSeed(`${windowId}:${rarity}:${b.id}`)

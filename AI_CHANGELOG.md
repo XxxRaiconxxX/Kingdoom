@@ -32,6 +32,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 05/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/features/market/market.rotation.ts`, `apps/mobile/src/features/market/marketRotation.ts`
+*   **Resumen de Tareas:** Se ajusto la vitrina rotativa para mostrar solo items disponibles cuando no se completa el cupo por rareza.
+*   **Cambios Clave:**
+    *   Si una rareza tiene menos items disponibles que su cupo, se muestran solo esos items disponibles.
+    *   Los items agotados ya no rellenan cupos faltantes dentro de la rotacion.
+*   **Notas/Advertencias:** No cambia precios, compras ni probabilidades; solo evita que la vitrina rotativa enseñe agotados como reemplazo.
+*   **Validacion:** `npx tsc --noEmit`, `npm run mobile:typecheck` y `npm run build` ejecutados correctamente.
+
+### [Fecha: 05/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/market/market.rotation.ts`, `src/sections/MarketSection.tsx`, `apps/mobile/src/features/market/marketRotation.ts`, `apps/mobile/app/(tabs)/market.tsx`
 *   **Resumen de Tareas:** Se agrego rotacion probabilistica de la vitrina del mercado cada 5 horas.
 *   **Cambios Clave:**

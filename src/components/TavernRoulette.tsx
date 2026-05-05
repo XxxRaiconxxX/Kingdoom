@@ -173,7 +173,8 @@ export function TavernRoulette() {
 
     window.setTimeout(async () => {
       if (result.totalPayout > 0) {
-        await setPlayerGold(balanceAfterBet + result.totalPayout);
+        const freshPlayer = await refreshPlayer();
+        await setPlayerGold((freshPlayer?.gold ?? balanceAfterBet) + result.totalPayout);
       }
 
       setRoundResult(result);

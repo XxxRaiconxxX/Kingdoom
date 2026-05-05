@@ -261,7 +261,9 @@ setUpdating(false);
     const winAmount = Math.floor(betRef.current * m);
     
     setUpdating(true);
-    const success = await setPlayerGoldRef.current(playerRef.current.gold + winAmount);
+    const freshPlayer = await refreshPlayer();
+    const goldBase = freshPlayer?.gold ?? playerRef.current.gold;
+    const success = await setPlayerGoldRef.current(goldBase + winAmount);
     
     if (success) {
       setLastWin(winAmount);

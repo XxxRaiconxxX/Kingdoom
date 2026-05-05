@@ -166,8 +166,13 @@ export async function playScratchBatchSecure(
       winningTickets += 1;
     }
 
+    ticketPrize = Math.min(ticketPrize, Math.max(0, config.maxDailyLimit - dailyGrossWins));
     totalPrize += ticketPrize;
     dailyGrossWins += ticketPrize;
+
+    if (dailyGrossWins >= config.maxDailyLimit) {
+      break;
+    }
   }
 
   const refundedTickets = Math.max(0, safeQuantity - usedTickets);

@@ -31,6 +31,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
+### [Fecha: 05/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernRoulette.tsx`, `src/components/TavernCrash.tsx`, `src/components/TavernPenalty.tsx`, `src/components/TavernSlots.tsx`, `src/utils/scratchSecure.ts`
+*   **Resumen de Tareas:** Se hizo una auditoria de seguridad funcional sobre los cobros de minijuegos y se corrigieron varios puntos donde un saldo viejo podia sobrescribir el oro real del jugador.
+*   **Cambios Clave:**
+    *   Ruleta, Crash, Penalty y Slots ahora refrescan el perfil antes de liquidar premio o perdida, reduciendo el riesgo de pisar cambios recientes de oro.
+    *   Rasca y gana ahora respeta mejor el tope diario local y no deja que el ultimo ticket ganador se pase del limite por acumulacion.
+    *   Se validaron `npx tsc --noEmit` y `npm run build` despues de los ajustes.
+*   **Notas/Advertencias:** La auditoria confirmo que aun quedan minijuegos con logica client-side o `localStorage` en vez de RPC 100% de Supabase. Quedo estable para uso actual, pero la siguiente mejora recomendable es migrar liquidaciones criticas a backend atomico.
+
 ### [Fecha: 04/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/components/RealmRegistry.tsx`
 *   **Resumen de Tareas:** Se estabilizo el registro publico de fichas para que la cabecera y la `X` de cierre no se pierdan cuando hay muchas fichas cargadas.

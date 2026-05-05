@@ -556,7 +556,9 @@ export function TavernPenalty() {
       const rawNetWin = result === "goal" ? stake * (currentMultiplier - 1) : 0;
       const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
       const prize = result === "goal" ? stake + cappedNetWin : 0;
-      const nextGold = player.gold - stake + prize;
+      const freshPlayer = await refreshPlayer();
+      const goldBase = freshPlayer?.gold ?? player.gold;
+      const nextGold = goldBase - stake + prize;
       const updated = await setPlayerGold(nextGold);
 
       if (!updated) {
@@ -608,7 +610,9 @@ export function TavernPenalty() {
     const rawNetWin = stake * (currentMultiplier - 1);
     const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
     const prize = stake + cappedNetWin;
-    const updated = await setPlayerGold(player.gold - stake + prize);
+    const freshPlayer = await refreshPlayer();
+    const goldBase = freshPlayer?.gold ?? player.gold;
+    const updated = await setPlayerGold(goldBase - stake + prize);
 
     if (!updated) {
       setMessage("No se pudo cobrar. Refresca tu perfil.");

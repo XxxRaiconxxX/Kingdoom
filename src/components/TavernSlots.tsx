@@ -270,7 +270,9 @@ export function TavernSlots() {
     const rawNetWin = Math.max(0, rawPayout - lockedBet);
     const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
     const finalPayout = outcome.multiplier > 0 ? lockedBet + cappedNetWin : 0;
-    const nextGold = player.gold - lockedBet + finalPayout;
+    const freshPlayer = await refreshPlayer();
+    const goldBase = freshPlayer?.gold ?? player.gold;
+    const nextGold = goldBase - lockedBet + finalPayout;
     const updated = await setPlayerGold(nextGold);
 
     if (!updated) {

@@ -132,12 +132,12 @@ function resolveMultiplier(reels: [SymbolId, SymbolId, SymbolId]) {
   const triple = SYMBOL_IDS.find((symbol) => counts[symbol] === 3);
   const pair = SYMBOL_IDS.find((symbol) => counts[symbol] === 2 && symbol !== "skull");
 
-  if (triple === "crown") return 12;
-  if (triple === "gem") return 8;
-  if (triple === "sword") return 5;
-  if (triple === "potion") return 3;
-  if (triple === "shield") return 2;
-  if (pair) return 1.25;
+  if (triple === "crown") return 24;
+  if (triple === "gem") return 16;
+  if (triple === "sword") return 10;
+  if (triple === "potion") return 6;
+  if (triple === "shield") return 4;
+  if (pair) return 1.5;
   return 0;
 }
 
@@ -161,15 +161,15 @@ function generateSpinOutcome(): SpinOutcome {
 
   if (roll < 0.008) {
     reels = ["crown", "crown", "crown"];
-  } else if (roll < 0.02) {
+  } else if (roll < 0.035) {
     reels = ["gem", "gem", "gem"];
   } else if (roll < 0.045) {
     reels = ["sword", "sword", "sword"];
-  } else if (roll < 0.085) {
+  } else if (roll < 0.100) {
     reels = ["potion", "potion", "potion"];
-  } else if (roll < 0.145) {
+  } else if (roll < 0.170) {
     reels = ["shield", "shield", "shield"];
-  } else if (roll < 0.325) {
+  } else if (roll < 0.385) {
     reels = buildPairReels();
   } else {
     reels = buildLosingReels();

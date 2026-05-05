@@ -32,6 +32,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 05/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/features/market/market.rotation.ts`, `src/sections/MarketSection.tsx`, `apps/mobile/src/features/market/marketRotation.ts`, `apps/mobile/app/(tabs)/market.tsx`
+*   **Resumen de Tareas:** Se agrego rotacion probabilistica de la vitrina del mercado cada 5 horas.
+*   **Cambios Clave:**
+    *   La tienda ahora selecciona items visibles por rareza con probabilidades: comun 100%, raro 90%, epico 50%, legendario 10% y mitico 1%.
+    *   Los cupos por ventana son: comunes 5, raros 5, epicos 4, legendarios 3 y miticos 2.
+    *   La rotacion es deterministica por ventana de 5 horas, por lo que todos ven la misma vitrina hasta el siguiente refresco.
+    *   Web y app nativa comparten la misma regla, priorizando items comprables antes que agotados.
+*   **Notas/Advertencias:** Esta mecanica filtra la vitrina visible, pero no cambia el RPC de compra ni el oro. Los admins siguen gestionando el catalogo completo desde el panel.
+*   **Validacion:** `npx tsc --noEmit`, `npm run mobile:typecheck`, `npm run build` y `npx expo export --platform android` ejecutados correctamente.
+
+### [Fecha: 05/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/types.ts`, `src/components/MarketItemCard.tsx`, `src/components/PurchaseModal.tsx`, `src/components/AdminControlSheet.tsx`, `src/features/market/*`, `src/sections/MarketSection.tsx`, `api/admin/generate-market-item.ts`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/features/market/*`, `apps/mobile/src/features/shared/types.ts`, `apps/mobile/src/components/KingdoomUI.tsx`, `supabase_market_mythic_limited_stock.sql`
 *   **Resumen de Tareas:** Se agrego la rareza `Mitico` al mercado, superior a legendario, con estetica carmesi destacada y soporte para stock limitado hasta quedar agotado.
 *   **Cambios Clave:**

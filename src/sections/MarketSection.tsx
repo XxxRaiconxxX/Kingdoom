@@ -20,6 +20,7 @@ import { MarketItemCard } from "../components/MarketItemCard";
 import { SectionHeader } from "../components/SectionHeader";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "../data/market";
 import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
+import { getMarketRotationState } from "../features/market/market.rotation";
 import { fetchMarketItems } from "../utils/market";
 import { isNativeApp } from "../utils/platform";
 import type { LucideIcon } from "lucide-react";
@@ -221,6 +222,7 @@ export function MarketSection() {
   const [rarityFilter, setRarityFilter] = useState<Rarity | "all">("all");
   const [priceSort, setPriceSort] = useState<PriceSort>("featured");
   const [marketItems, setMarketItems] = useState<MarketItem[]>(MARKET_ITEMS);
+  const [marketRotationNow, setMarketRotationNow] = useState(() => Date.now());
 
   useEffect(() => {
     const storedMode = window.localStorage.getItem(TAVERN_MODE_STORAGE_KEY) as TavernMode | null;
@@ -258,6 +260,19 @@ export function MarketSection() {
     };
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setMarketRotationNow(Date.now());
+    }, 60000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const marketRotation = useMemo(
+    () => getMarketRotationState(marketItems, marketRotationNow),
+    [marketItems, marketRotationNow]
+  );
+
   const categoriesToRender = useMemo(
     () =>
       selectedCategoryId === "all"
@@ -268,8 +283,8 @@ export function MarketSection() {
 
   const filteredMarketItems = useMemo(() => {
     const filteredItems = rarityFilter === "all"
-      ? marketItems
-      : marketItems.filter((item) => item.rarity === rarityFilter);
+      ? marketRotation.items
+      : marketRotation.items.filter((item) => item.rarity === rarityFilter);
 
     return filteredItems.slice().sort((a, b) => {
       if (priceSort === "low") {
@@ -282,7 +297,7 @@ export function MarketSection() {
 
       return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
     });
-  }, [marketItems, priceSort, rarityFilter]);
+  }, [marketRotation.items, priceSort, rarityFilter]);
 
   const featuredItems = useMemo(
     () => filteredMarketItems.filter((item) => item.featured),
@@ -348,6 +363,7 @@ export function MarketSection() {
       rarityFilter,
       priceSort,
       tavernMode,
+      marketRotation.windowId,
       categoriesToRender.length,
       featuredItems.length,
     ],
@@ -363,9 +379,14 @@ export function MarketSection() {
           eyebrow="Mercado negro"
           title="Catalogos del reino"
           rightSlot={
-            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
-              {marketItems.length} articulos
-            </span>
+            <div className="flex flex-wrap justify-end gap-2">
+              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
+                {marketRotation.items.length} visibles
+              </span>
+              <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-200">
+                {marketRotation.nextRefreshLabel}
+              </span>
+            </div>
           }
         />
       </div>

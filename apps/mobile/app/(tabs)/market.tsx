@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ import {
 } from "@/src/components/KingdoomUI";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import { fetchMarketItemsNative } from "@/src/features/market/marketService";
+import { getMarketRotationState } from "@/src/features/market/marketRotation";
 import { usePurchaseHistoryStore } from "@/src/features/market/purchaseHistoryStore";
 import { purchaseMarketItemNative } from "@/src/features/market/purchaseService";
 import type { MarketCategoryId, MarketItem } from "@/src/features/shared/types";
@@ -100,6 +101,7 @@ export default function MarketScreen() {
   const [quantityByItemId, setQuantityByItemId] = useState<Record<string, number>>({});
   const [feedback, setFeedback] = useState<MarketFeedback | null>(null);
   const [pendingItemId, setPendingItemId] = useState<string | null>(null);
+  const [marketRotationNow, setMarketRotationNow] = useState(() => Date.now());
   const { player, refreshGold } = useSessionStore();
 
   const marketQuery = useQuery({
@@ -107,12 +109,33 @@ export default function MarketScreen() {
     queryFn: fetchMarketItemsNative,
   });
 
-  const sortedItems = useMemo(
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setMarketRotationNow(Date.now());
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const allMarketItems = useMemo(
     () =>
       (marketQuery.data?.items ?? [])
         .slice()
         .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))),
     [marketQuery.data?.items]
+  );
+
+  const marketRotation = useMemo(
+    () => getMarketRotationState(allMarketItems, marketRotationNow),
+    [allMarketItems, marketRotationNow]
+  );
+
+  const sortedItems = useMemo(
+    () =>
+      marketRotation.items
+        .slice()
+        .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))),
+    [marketRotation.items]
   );
 
   const purchaseMutation = useMutation({
@@ -133,7 +156,7 @@ export default function MarketScreen() {
         type: "success",
         message: `${result.message} Pedido ${result.orderRef}.`,
       });
-      const boughtItem = sortedItems.find((item) => item.id === variables.itemId);
+      const boughtItem = allMarketItems.find((item) => item.id === variables.itemId);
       if (player && boughtItem) {
         addHistoryEntry({
           id: `${result.orderRef}-${Date.now()}`,
@@ -226,6 +249,7 @@ export default function MarketScreen() {
                   onPress={() => setCategoryFilter(chip.id)}
                 />
               ))}
+              <Pill label={`Rotacion ${marketRotation.nextRefreshLabel}`} />
             </View>
           </ScrollView>
         </RealmCard>

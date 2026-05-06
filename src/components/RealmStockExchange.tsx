@@ -28,7 +28,7 @@ import {
 } from "../features/realmExchange/realmExchange.simulation";
 import {
   applyExchangeBankruptcies,
-  buyAssetShares,
+  buyAssetSharesSecure,
   findActivePrediction,
   findPosition,
   loadExchangeState,
@@ -251,7 +251,7 @@ export function RealmStockExchange() {
 
   async function applyOperation(
     result:
-      | ReturnType<typeof buyAssetShares>
+      | Awaited<ReturnType<typeof buyAssetSharesSecure>>
       | Awaited<ReturnType<typeof sellAssetSharesSecure>>
   ) {
     const currentPlayer = playerRef.current;
@@ -339,7 +339,8 @@ export function RealmStockExchange() {
     }
 
     await applyOperation(
-      buyAssetShares({
+      await buyAssetSharesSecure({
+        playerId: currentPlayer.id,
         state: stateRef.current,
         asset: selectedAsset,
         gold: currentPlayer.gold,

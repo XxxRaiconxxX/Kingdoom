@@ -382,6 +382,71 @@ export function buyAssetShares(input: {
   };
 }
 
+type BuySharesRow = {
+  success: boolean;
+  message: string | null;
+  remaining_gold: number | null;
+  positions: unknown;
+  predictions: unknown;
+};
+
+export async function buyAssetSharesSecure(input: {
+  playerId: string;
+  state: RealmExchangePlayerState;
+  asset: RealmExchangeAsset;
+  gold: number;
+  lots: number;
+  at?: number;
+}) {
+  const result = buyAssetShares(input);
+
+  if (result.status === "error" || !supabase) {
+    return result;
+  }
+
+  const lots = Math.max(1, Math.floor(input.lots));
+  const shares = lots * REALM_EXCHANGE_TRADE_LOT;
+  const cost = Math.max(0, input.gold - result.nextGold);
+
+  const { data, error } = await supabase.rpc("buy_realm_exchange_shares", {
+    p_player_id: input.playerId,
+    p_asset_id: input.asset.id,
+    p_shares: shares,
+    p_cost: cost,
+  });
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: "No se pudo confirmar la compra en Supabase. Ejecuta el SQL actualizado de la bolsa.",
+      state: input.state,
+      nextGold: input.gold,
+    };
+  }
+
+  const row = (Array.isArray(data) ? data[0] : data) as BuySharesRow | null;
+
+  if (!row?.success) {
+    return {
+      status: "error" as const,
+      message: row?.message ?? "No se pudo confirmar la compra.",
+      state: input.state,
+      nextGold: row?.remaining_gold ?? input.gold,
+    };
+  }
+
+  return {
+    status: "success" as const,
+    message: row.message ?? result.message,
+    state: normalizeState({
+      positions: row.positions as RealmExchangePlayerState["positions"],
+      predictions: row.predictions as RealmExchangePlayerState["predictions"],
+    }),
+    nextGold: Number(row.remaining_gold ?? result.nextGold),
+    remoteApplied: true,
+  };
+}
+
 export function sellAssetShares(input: {
   state: RealmExchangePlayerState;
   asset: RealmExchangeAsset;

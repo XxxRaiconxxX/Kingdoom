@@ -23,7 +23,7 @@ import {
 } from "@/src/features/realmExchange/realmExchangeSimulation";
 import {
   applyExchangeBankruptcies,
-  buyAssetShares,
+  buyAssetSharesSecure,
   createEmptyExchangeState,
   findActivePrediction,
   findPosition,
@@ -529,17 +529,20 @@ export function RealmStockExchangeNative() {
               label="Comprar"
               icon="trending-up"
               disabled={!player || pending || bankruptcy.isBankrupt}
-              onPress={() =>
-                void applyOperation(
-                  buyAssetShares({
+              onPress={() => {
+                void (async () => {
+                  const result = await buyAssetSharesSecure({
+                    playerId: playerRef.current?.id ?? "",
                     state: exchangeStateRef.current,
                     asset: selectedAsset,
                     gold: playerRef.current?.gold ?? 0,
                     lots,
                     at: now,
-                  })
-                )
-              }
+                  });
+
+                  await applyOperation(result);
+                })();
+              }}
             />
           </View>
           <View style={{ flex: 1 }}>

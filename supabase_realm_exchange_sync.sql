@@ -18,6 +18,121 @@ with check (true);
 create index if not exists player_realm_exchange_states_updated_at_idx
   on public.player_realm_exchange_states (updated_at desc);
 
+create or replace function public.buy_realm_exchange_shares(
+  p_player_id uuid,
+  p_asset_id text,
+  p_shares integer,
+  p_cost integer
+)
+returns table (
+  success boolean,
+  message text,
+  remaining_gold integer,
+  positions jsonb,
+  predictions jsonb
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_player public.players%rowtype;
+  v_state public.player_realm_exchange_states%rowtype;
+  v_position jsonb;
+  v_entry jsonb;
+  v_next_positions jsonb := '[]'::jsonb;
+  v_current_shares integer := 0;
+  v_current_invested integer := 0;
+  v_total_shares integer := 0;
+  v_total_invested integer := 0;
+  v_updated_at bigint := floor(extract(epoch from clock_timestamp()) * 1000)::bigint;
+begin
+  if p_player_id is null or coalesce(p_asset_id, '') = '' then
+    return query select false, 'Compra invalida.', 0, '[]'::jsonb, '[]'::jsonb;
+    return;
+  end if;
+
+  if coalesce(p_shares, 0) <= 0 or coalesce(p_cost, 0) <= 0 then
+    return query select false, 'Cantidad de compra invalida.', 0, '[]'::jsonb, '[]'::jsonb;
+    return;
+  end if;
+
+  select *
+  into v_player
+  from public.players
+  where id = p_player_id
+  for update;
+
+  if not found then
+    return query select false, 'Jugador no encontrado.', 0, '[]'::jsonb, '[]'::jsonb;
+    return;
+  end if;
+
+  insert into public.player_realm_exchange_states (player_id, positions, predictions)
+  values (p_player_id, '[]'::jsonb, '[]'::jsonb)
+  on conflict (player_id) do nothing;
+
+  select *
+  into v_state
+  from public.player_realm_exchange_states
+  where player_id = p_player_id
+  for update;
+
+  if v_player.gold < p_cost then
+    return query select false, 'Oro insuficiente para comprar ese lote.', v_player.gold, v_state.positions, v_state.predictions;
+    return;
+  end if;
+
+  for v_entry in
+    select value from jsonb_array_elements(coalesce(v_state.positions, '[]'::jsonb))
+  loop
+    if v_entry->>'assetId' = p_asset_id then
+      v_position := v_entry;
+    else
+      v_next_positions := v_next_positions || jsonb_build_array(v_entry);
+    end if;
+  end loop;
+
+  v_current_shares := greatest(coalesce((v_position->>'sharesOwned')::integer, 0), 0);
+  v_current_invested := greatest(coalesce((v_position->>'totalInvested')::integer, 0), 0);
+  v_total_shares := v_current_shares + p_shares;
+  v_total_invested := v_current_invested + p_cost;
+
+  v_next_positions := v_next_positions || jsonb_build_array(
+    jsonb_build_object(
+      'assetId', p_asset_id,
+      'sharesOwned', v_total_shares,
+      'totalInvested', v_total_invested,
+      'averagePrice', case when v_total_shares > 0 then round(v_total_invested::numeric / v_total_shares)::integer else 0 end,
+      'updatedAt', v_updated_at
+    )
+  );
+
+  update public.players
+  set gold = greatest(0, gold - p_cost)
+  where id = p_player_id
+  returning * into v_player;
+
+  update public.player_realm_exchange_states
+  set
+    positions = v_next_positions,
+    updated_at = now()
+  where player_id = p_player_id
+  returning * into v_state;
+
+  return query
+    select
+      true,
+      'Compra confirmada.',
+      v_player.gold,
+      v_next_positions,
+      coalesce(v_state.predictions, '[]'::jsonb);
+end;
+$$;
+
+revoke all on function public.buy_realm_exchange_shares(uuid, text, integer, integer) from public;
+grant execute on function public.buy_realm_exchange_shares(uuid, text, integer, integer) to anon, authenticated, service_role;
+
 create or replace function public.sell_realm_exchange_shares(
   p_player_id uuid,
   p_asset_id text,

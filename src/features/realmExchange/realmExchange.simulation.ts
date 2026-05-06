@@ -1,9 +1,12 @@
 import {
+  REALM_EXCHANGE_BANKRUPTCY_CHANCE,
+  REALM_EXCHANGE_BANKRUPTCY_LOCK_MINUTES,
   REALM_EXCHANGE_PAYOUTS,
   REALM_EXCHANGE_PREDICTION_HOURS,
 } from "./realmExchange.data";
 import type {
   RealmExchangeAsset,
+  RealmExchangeBankruptcyState,
   RealmExchangePoint,
   RealmExchangePrediction,
 } from "./realmExchange.types";
@@ -37,6 +40,67 @@ function clamp(value: number, min: number, max: number): number {
 
 export function getAssetTick(asset: RealmExchangeAsset, at = Date.now()): number {
   return Math.floor(at / (asset.tickIntervalMinutes * 60 * 1000));
+}
+
+function getAssetTickAt(asset: RealmExchangeAsset, tick: number): number {
+  return tick * asset.tickIntervalMinutes * 60 * 1000;
+}
+
+function isBankruptcyTick(asset: RealmExchangeAsset, tick: number): boolean {
+  return seededUnit(`${asset.id}:bankruptcy:${tick}`) < REALM_EXCHANGE_BANKRUPTCY_CHANCE;
+}
+
+export function getAssetBankruptcyState(
+  asset: RealmExchangeAsset,
+  at = Date.now()
+): RealmExchangeBankruptcyState {
+  const tickMs = asset.tickIntervalMinutes * 60 * 1000;
+  const lockMs = REALM_EXCHANGE_BANKRUPTCY_LOCK_MINUTES * 60 * 1000;
+  const currentTick = getAssetTick(asset, at);
+  const lookbackTicks = Math.ceil(lockMs / tickMs);
+
+  for (let offset = 0; offset <= lookbackTicks; offset += 1) {
+    const tick = currentTick - offset;
+
+    if (!isBankruptcyTick(asset, tick)) {
+      continue;
+    }
+
+    const startedAt = getAssetTickAt(asset, tick);
+    const endsAt = startedAt + lockMs;
+
+    if (at >= startedAt && at < endsAt) {
+      return { isBankrupt: true, startedAt, endsAt };
+    }
+  }
+
+  return { isBankrupt: false, startedAt: null, endsAt: null };
+}
+
+export function getLatestBankruptcySince(
+  asset: RealmExchangeAsset,
+  since: number,
+  until = Date.now()
+): RealmExchangeBankruptcyState {
+  const tickMs = asset.tickIntervalMinutes * 60 * 1000;
+  const firstTick = Math.max(0, Math.floor(since / tickMs));
+  const lastTick = getAssetTick(asset, until);
+
+  for (let tick = lastTick; tick >= firstTick; tick -= 1) {
+    if (!isBankruptcyTick(asset, tick)) {
+      continue;
+    }
+
+    const startedAt = getAssetTickAt(asset, tick);
+
+    return {
+      isBankrupt: true,
+      startedAt,
+      endsAt: startedAt + REALM_EXCHANGE_BANKRUPTCY_LOCK_MINUTES * 60 * 1000,
+    };
+  }
+
+  return { isBankrupt: false, startedAt: null, endsAt: null };
 }
 
 export function getAssetPriceAt(asset: RealmExchangeAsset, at = Date.now()): number {

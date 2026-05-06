@@ -16,11 +16,13 @@ import {
 import {
   buildAssetHistory,
   getAssetDelta,
+  getAssetBankruptcyState,
   getAssetPriceAt,
   getNextTickAt,
   resolvePrediction,
 } from "@/src/features/realmExchange/realmExchangeSimulation";
 import {
+  applyExchangeBankruptcies,
   buyAssetShares,
   createEmptyExchangeState,
   findActivePrediction,
@@ -66,7 +68,15 @@ function getAssetById(assetId: string): RealmExchangeAsset {
   return REALM_EXCHANGE_ASSETS.find((asset) => asset.id === assetId) ?? REALM_EXCHANGE_ASSETS[0];
 }
 
-function MiniChart({ asset, now }: { asset: RealmExchangeAsset; now: number }) {
+function MiniChart({
+  asset,
+  now,
+  isBankrupt = false,
+}: {
+  asset: RealmExchangeAsset;
+  now: number;
+  isBankrupt?: boolean;
+}) {
   const points = buildAssetHistory(asset, now, 14);
   const prices = points.map((point) => point.price);
   const min = Math.min(...prices);
@@ -76,7 +86,7 @@ function MiniChart({ asset, now }: { asset: RealmExchangeAsset; now: number }) {
   const chartHeight = 128;
   const coords = points.map((point, index) => ({
     x: 10 + (index / Math.max(1, points.length - 1)) * (chartWidth - 20),
-    y: 12 + (1 - (point.price - min) / range) * (chartHeight - 24),
+    y: isBankrupt ? chartHeight - 12 : 12 + (1 - (point.price - min) / range) * (chartHeight - 24),
   }));
 
   return (
@@ -121,10 +131,10 @@ function MiniChart({ asset, now }: { asset: RealmExchangeAsset; now: number }) {
               width: length,
               height: 3,
               borderRadius: 999,
-              backgroundColor: asset.accent,
+              backgroundColor: isBankrupt ? MOBILE_THEME.danger : asset.accent,
               transform: [{ rotateZ: angle }],
               transformOrigin: "0px 1.5px",
-              shadowColor: asset.accent,
+              shadowColor: isBankrupt ? MOBILE_THEME.danger : asset.accent,
               shadowOpacity: 0.55,
               shadowRadius: 8,
             }}
@@ -141,7 +151,7 @@ function MiniChart({ asset, now }: { asset: RealmExchangeAsset; now: number }) {
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: asset.accent,
+            backgroundColor: isBankrupt ? MOBILE_THEME.danger : asset.accent,
           }}
         />
       ))}
@@ -213,6 +223,10 @@ export function RealmStockExchangeNative() {
   const selectedAsset = useMemo(() => getAssetById(selectedAssetId), [selectedAssetId]);
   const currentPrice = useMemo(() => getAssetPriceAt(selectedAsset, now), [now, selectedAsset]);
   const delta = useMemo(() => getAssetDelta(selectedAsset, now), [now, selectedAsset]);
+  const bankruptcy = useMemo(
+    () => getAssetBankruptcyState(selectedAsset, now),
+    [now, selectedAsset]
+  );
   const nextTickAt = useMemo(() => getNextTickAt(selectedAsset, now), [now, selectedAsset]);
   const position = useMemo(() => findPosition(exchangeState, selectedAsset.id), [exchangeState, selectedAsset.id]);
   const activePrediction = useMemo(
@@ -222,7 +236,7 @@ export function RealmStockExchangeNative() {
   const lots = Math.max(1, Math.floor(Number(lotInput) || 1));
   const stakeGold = Math.max(0, Math.floor(Number(stakeInput) || 0));
   const tradeCost = lots * REALM_EXCHANGE_TRADE_LOT * currentPrice;
-  const ownedValue = position ? position.sharesOwned * currentPrice : 0;
+  const ownedValue = bankruptcy.isBankrupt ? 0 : position ? position.sharesOwned * currentPrice : 0;
   const floatingProfit = position ? ownedValue - position.totalInvested : 0;
 
   useEffect(() => {
@@ -262,6 +276,17 @@ export function RealmStockExchangeNative() {
 
   useEffect(() => {
     if (!player || pending) {
+      return;
+    }
+
+    const bankruptcyApplied = applyExchangeBankruptcies(exchangeState, now);
+
+    if (bankruptcyApplied.lostPositions.length > 0) {
+      const nextState = bankruptcyApplied.state;
+      exchangeStateRef.current = nextState;
+      setExchangeState(nextState);
+      void saveExchangeState(player.id, nextState);
+      setFeedback({ type: "error", message: "Banca rota: el reino huyo con tus acciones." });
       return;
     }
 
@@ -448,14 +473,27 @@ export function RealmStockExchangeNative() {
           </View>
           <View style={{ alignItems: "flex-end" }}>
             <Text style={{ color: MOBILE_THEME.dimText, fontSize: 10, fontWeight: "900" }}>PRECIO</Text>
-            <Text style={{ color: selectedAsset.accent, fontSize: 24, fontWeight: "900" }}>{formatGold(currentPrice)}</Text>
-            <Text style={{ color: delta >= 0 ? MOBILE_THEME.teal : MOBILE_THEME.danger, fontSize: 12, fontWeight: "900" }}>
-              {delta >= 0 ? "+" : ""}{formatGold(delta)}
+            <Text style={{ color: bankruptcy.isBankrupt ? MOBILE_THEME.danger : selectedAsset.accent, fontSize: 24, fontWeight: "900" }}>
+              {bankruptcy.isBankrupt ? "0" : formatGold(currentPrice)}
             </Text>
+            {!bankruptcy.isBankrupt ? (
+              <Text style={{ color: delta >= 0 ? MOBILE_THEME.teal : MOBILE_THEME.danger, fontSize: 12, fontWeight: "900" }}>
+                {delta >= 0 ? "+" : ""}{formatGold(delta)}
+              </Text>
+            ) : null}
           </View>
         </View>
 
-        <MiniChart asset={selectedAsset} now={now} />
+        <MiniChart asset={selectedAsset} now={now} isBankrupt={bankruptcy.isBankrupt} />
+
+        {bankruptcy.isBankrupt ? (
+          <NoticeBanner
+            title="Banca rota"
+            message={`El reino huyo con tus acciones. Estabiliza en ${formatClock((bankruptcy.endsAt ?? now) - now)}.`}
+            tone="danger"
+            icon="warning"
+          />
+        ) : null}
 
         <View style={{ flexDirection: "row", gap: 8 }}>
           <StatBox label="Tick" value={formatClock(nextTickAt - now)} />
@@ -491,7 +529,7 @@ export function RealmStockExchangeNative() {
             <PrimaryAction
               label="Comprar"
               icon="trending-up"
-              disabled={!player || pending}
+              disabled={!player || pending || bankruptcy.isBankrupt}
               onPress={() =>
                 void applyOperation(
                   buyAssetShares({
@@ -510,7 +548,7 @@ export function RealmStockExchangeNative() {
               label="Vender"
               icon="trending-down"
               variant="ghost"
-              disabled={!player || pending || !position}
+              disabled={!player || pending || !position || bankruptcy.isBankrupt}
               onPress={() => {
                 void (async () => {
                   const result = await sellAssetSharesSecure({
@@ -559,7 +597,7 @@ export function RealmStockExchangeNative() {
             <PrimaryAction
               label="Sube"
               icon="north"
-              disabled={!player || pending || Boolean(activePrediction)}
+              disabled={!player || pending || Boolean(activePrediction) || bankruptcy.isBankrupt}
               onPress={() =>
                 void applyOperation(
                   openAssetPrediction({
@@ -579,7 +617,7 @@ export function RealmStockExchangeNative() {
               label="Baja"
               icon="south"
               variant="ghost"
-              disabled={!player || pending || Boolean(activePrediction)}
+              disabled={!player || pending || Boolean(activePrediction) || bankruptcy.isBankrupt}
               onPress={() =>
                 void applyOperation(
                   openAssetPrediction({

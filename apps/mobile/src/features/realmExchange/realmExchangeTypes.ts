@@ -21,6 +21,12 @@ export type RealmExchangePoint = {
   price: number;
 };
 
+export type RealmExchangeBankruptcyState = {
+  isBankrupt: boolean;
+  startedAt: number | null;
+  endsAt: number | null;
+};
+
 export type RealmExchangePosition = {
   assetId: string;
   sharesOwned: number;

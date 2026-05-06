@@ -7,6 +7,7 @@ import {
   Clock3,
   Coins,
   RefreshCw,
+  ShieldAlert,
   WalletCards,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -20,11 +21,13 @@ import {
 import {
   buildAssetHistory,
   getAssetDelta,
+  getAssetBankruptcyState,
   getAssetPriceAt,
   getNextTickAt,
   resolvePrediction,
 } from "../features/realmExchange/realmExchange.simulation";
 import {
+  applyExchangeBankruptcies,
   buyAssetShares,
   findActivePrediction,
   findPosition,
@@ -57,9 +60,13 @@ function formatClock(ms: number) {
   return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
 }
 
-function buildChartPath(points: Array<{ price: number }>) {
+function buildChartPath(points: Array<{ price: number }>, forceFloor = false) {
   if (points.length === 0) {
     return "";
+  }
+
+  if (forceFloor) {
+    return "M 14 136 L 306 136";
   }
 
   const width = 320;
@@ -130,15 +137,22 @@ export function RealmStockExchange() {
   const selectedAsset = useMemo(() => getAssetById(selectedAssetId), [selectedAssetId]);
   const currentPrice = useMemo(() => getAssetPriceAt(selectedAsset, now), [now, selectedAsset]);
   const delta = useMemo(() => getAssetDelta(selectedAsset, now), [now, selectedAsset]);
+  const bankruptcy = useMemo(
+    () => getAssetBankruptcyState(selectedAsset, now),
+    [now, selectedAsset]
+  );
   const history = useMemo(() => buildAssetHistory(selectedAsset, now), [now, selectedAsset]);
-  const chartPath = useMemo(() => buildChartPath(history), [history]);
+  const chartPath = useMemo(
+    () => buildChartPath(history, bankruptcy.isBankrupt),
+    [bankruptcy.isBankrupt, history]
+  );
   const position = useMemo(() => findPosition(state, selectedAsset.id), [selectedAsset.id, state]);
   const activePrediction = useMemo(
     () => findActivePrediction(state, selectedAsset.id),
     [selectedAsset.id, state]
   );
   const shareCost = tradeLots * REALM_EXCHANGE_TRADE_LOT * currentPrice;
-  const ownedValue = position ? position.sharesOwned * currentPrice : 0;
+  const ownedValue = bankruptcy.isBankrupt ? 0 : position ? position.sharesOwned * currentPrice : 0;
   const floatingProfit = position ? ownedValue - position.totalInvested : 0;
   const nextTickAt = useMemo(() => getNextTickAt(selectedAsset, now), [now, selectedAsset]);
 
@@ -176,6 +190,17 @@ export function RealmStockExchange() {
 
   useEffect(() => {
     if (!player || isUpdating) {
+      return;
+    }
+
+    const bankruptcyApplied = applyExchangeBankruptcies(state, now);
+
+    if (bankruptcyApplied.lostPositions.length > 0) {
+      const nextState = bankruptcyApplied.state;
+      stateRef.current = nextState;
+      setState(nextState);
+      void saveExchangeState(player.id, nextState);
+      setFeedback("Banca rota: el reino huyo con tus acciones.");
       return;
     }
 
@@ -408,7 +433,9 @@ export function RealmStockExchange() {
                   <span className="block truncate text-[10px] font-black uppercase tracking-[0.16em]">
                     {asset.kingdomName}
                   </span>
-                  <span className="mt-2 block text-lg font-black">{formatGold(price)}</span>
+                  <span className="mt-2 block text-lg font-black">
+                    {getAssetBankruptcyState(asset, now).isBankrupt ? "0" : formatGold(price)}
+                  </span>
                 </button>
               );
             })}
@@ -418,7 +445,7 @@ export function RealmStockExchange() {
         <div className="grid grid-cols-3 gap-2 rounded-[1.4rem] border border-stone-800 bg-stone-950/62 p-3">
           <Metric label="Oro" value={player ? formatGold(player.gold) : "0"} icon={<Coins className="h-4 w-4" />} />
           <Metric label="Tick" value={formatClock(nextTickAt - now)} icon={<Clock3 className="h-4 w-4" />} />
-          <Metric label="Precio" value={formatGold(currentPrice)} icon={<CandlestickChart className="h-4 w-4" />} />
+          <Metric label="Precio" value={bankruptcy.isBankrupt ? "0" : formatGold(currentPrice)} icon={<CandlestickChart className="h-4 w-4" />} />
         </div>
       </div>
 
@@ -433,35 +460,57 @@ export function RealmStockExchange() {
                   <stop offset="100%" stopColor={selectedAsset.accent} stopOpacity="0" />
                 </linearGradient>
               </defs>
-              <path d={`${chartPath} L 306 140 L 14 140 Z`} fill="url(#realmExchangeFill)" opacity="0.7" />
+              {!bankruptcy.isBankrupt ? (
+                <path d={`${chartPath} L 306 140 L 14 140 Z`} fill="url(#realmExchangeFill)" opacity="0.7" />
+              ) : null}
               <motion.path
                 d={chartPath}
                 fill="none"
-                stroke={selectedAsset.accent}
+                stroke={bankruptcy.isBankrupt ? "#ef4444" : selectedAsset.accent}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="4"
+                strokeWidth={bankruptcy.isBankrupt ? "6" : "4"}
                 initial={{ pathLength: 0, opacity: 0.4 }}
                 animate={{ pathLength: 1, opacity: 1 }}
                 transition={{ duration: 0.7 }}
               />
             </svg>
+            {bankruptcy.isBankrupt ? (
+              <div className="absolute inset-0 flex items-center justify-center p-4">
+                <div className="max-w-sm rounded-[1.4rem] border border-rose-400/35 bg-rose-950/86 px-4 py-4 text-center shadow-[0_0_36px_rgba(239,68,68,0.25)] backdrop-blur-md">
+                  <ShieldAlert className="mx-auto h-8 w-8 text-rose-200" />
+                  <p className="mt-2 text-xs font-black uppercase tracking-[0.2em] text-rose-200">
+                    Banca rota
+                  </p>
+                  <p className="mt-2 text-lg font-black text-white">
+                    El reino huyo con tus acciones
+                  </p>
+                  <p className="mt-2 text-xs font-bold text-rose-100/80">
+                    Estabiliza en {formatClock((bankruptcy.endsAt ?? now) - now)}
+                  </p>
+                </div>
+              </div>
+            ) : null}
             <div className="absolute left-4 top-4 rounded-2xl border border-stone-700 bg-stone-950/70 px-3 py-2">
               <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">
                 Actual
               </span>
-              <span className="text-2xl font-black text-stone-100">{formatGold(currentPrice)}</span>
+              <span className="text-2xl font-black text-stone-100">
+                {bankruptcy.isBankrupt ? "0" : formatGold(currentPrice)}
+              </span>
             </div>
-            <div
-              className={`absolute bottom-4 right-4 rounded-2xl border px-3 py-2 text-sm font-black ${
-                delta >= 0
-                  ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-200"
-                  : "border-rose-400/25 bg-rose-500/10 text-rose-200"
-              }`}
-            >
-              {delta >= 0 ? "+" : ""}
-              {formatGold(delta)}
-            </div>
+            {!bankruptcy.isBankrupt ? (
+              <div
+                className={`absolute bottom-4 right-4 rounded-2xl border px-3 py-2 text-sm font-black ${
+                  delta >= 0
+                    ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-200"
+                    : "border-rose-400/25 bg-rose-500/10 text-rose-200"
+                }`}
+              >
+                {delta >= 0 ? "+" : ""}
+                {formatGold(delta)}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -474,14 +523,14 @@ export function RealmStockExchange() {
                 value={stakeGold}
                 min={REALM_EXCHANGE_MIN_STAKE}
                 max={REALM_EXCHANGE_MAX_STAKE}
-                disabled={disabled || Boolean(activePrediction)}
+                disabled={disabled || Boolean(activePrediction) || bankruptcy.isBankrupt}
                 onChange={(event) => setStakeGold(Math.max(0, Number(event.target.value)))}
                 className="w-full rounded-2xl border border-stone-700 bg-black px-4 py-3 text-sm font-black text-stone-100 outline-none transition focus:border-amber-400/60"
               />
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  disabled={disabled || Boolean(activePrediction)}
+                  disabled={disabled || Boolean(activePrediction) || bankruptcy.isBankrupt}
                   onClick={() => void handlePrediction("up")}
                   className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-400/25 bg-emerald-500/12 px-3 py-3 text-sm font-black text-emerald-100 transition hover:border-emerald-300/45 disabled:cursor-not-allowed disabled:opacity-45"
                 >
@@ -490,7 +539,7 @@ export function RealmStockExchange() {
                 </button>
                 <button
                   type="button"
-                  disabled={disabled || Boolean(activePrediction)}
+                  disabled={disabled || Boolean(activePrediction) || bankruptcy.isBankrupt}
                   onClick={() => void handlePrediction("down")}
                   className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-400/25 bg-rose-500/12 px-3 py-3 text-sm font-black text-rose-100 transition hover:border-rose-300/45 disabled:cursor-not-allowed disabled:opacity-45"
                 >
@@ -501,7 +550,11 @@ export function RealmStockExchange() {
               <div className="rounded-2xl border border-stone-800 bg-stone-950/70 p-3 text-xs text-stone-400">
                 Pago: x{activePrediction?.lockedPayoutMultiplier.toFixed(2) ?? "segun riesgo"} / Min {formatGold(REALM_EXCHANGE_MIN_STAKE)} / Max {formatGold(REALM_EXCHANGE_MAX_STAKE)}
               </div>
-              {activePrediction ? <PredictionChip prediction={activePrediction} /> : null}
+              {bankruptcy.isBankrupt ? (
+                <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 p-3 text-xs font-bold text-rose-100">
+                  Predicciones pausadas hasta que el reino se estabilice.
+                </div>
+              ) : activePrediction ? <PredictionChip prediction={activePrediction} /> : null}
             </div>
           </div>
 
@@ -530,7 +583,7 @@ export function RealmStockExchange() {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  disabled={disabled || shareCost <= 0}
+                  disabled={disabled || shareCost <= 0 || bankruptcy.isBankrupt}
                   onClick={() => void handleBuy()}
                   className="kd-touch rounded-2xl border border-sky-300/25 bg-sky-500/12 px-3 py-3 text-sm font-black text-sky-100 transition hover:border-sky-300/45 disabled:cursor-not-allowed disabled:opacity-45"
                 >
@@ -538,7 +591,7 @@ export function RealmStockExchange() {
                 </button>
                 <button
                   type="button"
-                  disabled={disabled || !position}
+                  disabled={disabled || !position || bankruptcy.isBankrupt}
                   onClick={() => void handleSell()}
                   className="kd-touch rounded-2xl border border-amber-300/25 bg-amber-500/12 px-3 py-3 text-sm font-black text-amber-100 transition hover:border-amber-300/45 disabled:cursor-not-allowed disabled:opacity-45"
                 >

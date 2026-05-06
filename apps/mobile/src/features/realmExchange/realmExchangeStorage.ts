@@ -1,13 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "@/src/services/supabase";
 import {
+  REALM_EXCHANGE_ASSETS,
   REALM_EXCHANGE_MAX_STAKE,
   REALM_EXCHANGE_MIN_STAKE,
   REALM_EXCHANGE_TRADE_LOT,
 } from "./realmExchangeData";
 import {
   buildPredictionId,
+  getAssetBankruptcyState,
   getAssetPriceAt,
+  getLatestBankruptcySince,
   getPredictionPayout,
   getPredictionSettleAt,
 } from "./realmExchangeSimulation";
@@ -86,6 +89,41 @@ async function clearLegacyLocalState(playerId: string) {
 
 function isStateEmpty(state: RealmExchangePlayerState) {
   return state.positions.length === 0 && state.predictions.length === 0;
+}
+
+function getAssetById(assetId: string): RealmExchangeAsset | null {
+  return REALM_EXCHANGE_ASSETS.find((asset) => asset.id === assetId) ?? null;
+}
+
+export function applyExchangeBankruptcies(
+  state: RealmExchangePlayerState,
+  at = Date.now()
+): {
+  state: RealmExchangePlayerState;
+  lostPositions: RealmExchangePosition[];
+} {
+  const lostPositions: RealmExchangePosition[] = [];
+  const positions = state.positions.filter((position) => {
+    const asset = getAssetById(position.assetId);
+
+    if (!asset) {
+      return true;
+    }
+
+    const bankruptcy = getLatestBankruptcySince(asset, position.updatedAt, at);
+
+    if (!bankruptcy.isBankrupt) {
+      return true;
+    }
+
+    lostPositions.push(position);
+    return false;
+  });
+
+  return {
+    state: lostPositions.length > 0 ? { ...state, positions } : state,
+    lostPositions,
+  };
 }
 
 function buildPredictionMergeKey(prediction: RealmExchangePrediction) {
@@ -235,21 +273,24 @@ export async function loadExchangeState(playerId: string): Promise<RealmExchange
   const remoteState = await fetchRemoteExchangeState(playerId);
 
   if (!remoteState) {
-    return localState;
+    const bankruptcyApplied = applyExchangeBankruptcies(localState);
+    return bankruptcyApplied.state;
   }
 
   const mergedState = mergeExchangeStates(remoteState, localState);
+  const bankruptcyApplied = applyExchangeBankruptcies(mergedState);
+  const safeState = bankruptcyApplied.state;
 
-  if (JSON.stringify(mergedState) !== JSON.stringify(remoteState)) {
-    const synced = await persistRemoteExchangeState(playerId, mergedState);
+  if (JSON.stringify(safeState) !== JSON.stringify(remoteState)) {
+    const synced = await persistRemoteExchangeState(playerId, safeState);
 
     if (!synced) {
-      return mergedState;
+      return safeState;
     }
   }
 
   await clearLegacyLocalState(playerId);
-  return mergedState;
+  return safeState;
 }
 
 export async function saveExchangeState(playerId: string, state: RealmExchangePlayerState) {
@@ -289,6 +330,17 @@ export function buyAssetShares(input: {
   lots: number;
   at?: number;
 }) {
+  const bankruptcy = getAssetBankruptcyState(input.asset, input.at);
+
+  if (bankruptcy.isBankrupt) {
+    return {
+      status: "error" as const,
+      message: "Banca rota activa. Espera a que el reino se estabilice.",
+      state: input.state,
+      nextGold: input.gold,
+    };
+  }
+
   const lots = Math.max(1, Math.floor(input.lots));
   const shares = lots * REALM_EXCHANGE_TRADE_LOT;
   const price = getAssetPriceAt(input.asset, input.at);
@@ -337,6 +389,17 @@ export function sellAssetShares(input: {
   lots: number;
   at?: number;
 }) {
+  const bankruptcy = getAssetBankruptcyState(input.asset, input.at);
+
+  if (bankruptcy.isBankrupt) {
+    return {
+      status: "error" as const,
+      message: "Banca rota activa. Las acciones quedaron sin valor.",
+      state: input.state,
+      nextGold: input.gold,
+    };
+  }
+
   const lots = Math.max(1, Math.floor(input.lots));
   const shares = lots * REALM_EXCHANGE_TRADE_LOT;
   const current = findPosition(input.state, input.asset.id);
@@ -440,6 +503,17 @@ export function openAssetPrediction(input: {
   stakeGold: number;
   at?: number;
 }) {
+  const bankruptcy = getAssetBankruptcyState(input.asset, input.at);
+
+  if (bankruptcy.isBankrupt) {
+    return {
+      status: "error" as const,
+      message: "No se puede abrir prediccion durante una banca rota.",
+      state: input.state,
+      nextGold: input.gold,
+    };
+  }
+
   const stakeGold = Math.floor(input.stakeGold);
   const now = input.at ?? Date.now();
 

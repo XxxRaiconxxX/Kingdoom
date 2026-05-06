@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import type { CharacterSheet } from "../types";
+import { PlayerNotificationBell } from "./PlayerNotificationBell";
 import {
   MAX_PLAYER_CHARACTER_SHEETS,
   getPlayerSheets,
@@ -266,6 +267,7 @@ export function PlayerProfilePanel({
     <section className="kd-glass relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
       <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.18),transparent_62%)] blur-2xl" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+      {player ? <PlayerNotificationBell playerId={player.id} /> : null}
 
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">

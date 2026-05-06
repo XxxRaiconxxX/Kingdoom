@@ -1,5 +1,6 @@
 import { supabase } from "./supabaseClient";
 import { fetchPlayerByUsername } from "./players";
+import { createPlayerNotification } from "./playerNotifications";
 import type { PlayerAccount, InventoryEntry } from "../types";
 
 export async function transferGold(
@@ -46,6 +47,16 @@ export async function transferGold(
     await supabase.from("players").update({ gold: fromPlayer.gold }).eq("id", fromPlayer.id);
     return { success: false, message: "Error al enviar oro. Operación cancelada." };
   }
+
+  await createPlayerNotification({
+    playerId: targetPlayer.id,
+    senderPlayerId: fromPlayer.id,
+    senderName: fromPlayer.username,
+    kind: "gold",
+    title: "Oro recibido",
+    message: `${fromPlayer.username} te envio ${amount} de oro.`,
+    amount,
+  });
 
   return { success: true, message: "Oro enviado correctamente.", newGold: newSenderGold };
 }
@@ -167,6 +178,17 @@ export async function transferItem(
        return { success: false, message: "Error al añadir el objeto al destinatario. Operación cancelada." };
     }
   }
+
+  await createPlayerNotification({
+    playerId: targetPlayer.id,
+    senderPlayerId: fromPlayer.id,
+    senderName: fromPlayer.username,
+    kind: "item",
+    title: "Objeto recibido",
+    message: `${fromPlayer.username} te envio ${amount} x ${item.itemName}.`,
+    amount,
+    itemName: item.itemName,
+  });
 
   return { success: true, message: "Objeto enviado correctamente." };
 }

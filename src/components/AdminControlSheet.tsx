@@ -5,6 +5,7 @@ import {
   Coins,
   FileText,
   Flag,
+  ImagePlus,
   ScrollText,
   Store,
   UserPlus,
@@ -103,6 +104,15 @@ const AdminKnowledgeManager = lazy(() =>
     default: module.AdminKnowledgeManager,
   }))
 );
+
+function readImageAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const adminRevealRef = useRef<HTMLDivElement | null>(null);
@@ -703,6 +713,24 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
         ? `Borrador generado. ${result.promptSummary}`
         : "Borrador generado desde el pin. Revisa el item antes de guardarlo."
     );
+  }
+
+  async function handleMarketImageUpload(file?: File) {
+    if (!file) return;
+
+    try {
+      setMarketFeedback("");
+      setMarketItemImageUrl(await readImageAsDataUrl(file));
+      setMarketItemImageFit((current) => current || "cover");
+      setMarketItemImagePosition((current) => current.trim() || "center");
+      setMarketPinterestFeedback(
+        "Imagen cargada desde galeria. Puedes guardar el item sin depender de una URL externa."
+      );
+    } catch {
+      setMarketFeedback(
+        "No pude leer la imagen de la galeria. Intenta con otro archivo."
+      );
+    }
   }
 
   function preloadMarketItem(item: MarketItem) {
@@ -1821,8 +1849,21 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     label="URL de imagen"
                     value={marketItemImageUrl}
                     onChange={setMarketItemImageUrl}
-                    placeholder="https://..."
+                    placeholder="https://... o data URL"
                   />
+
+                  <label className="kd-touch inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-amber-500/35 bg-amber-500/5 px-4 py-3 text-sm font-bold text-amber-100 transition hover:border-amber-400/45 hover:bg-amber-500/10">
+                    <ImagePlus className="h-4 w-4" />
+                    Cargar imagen desde galeria
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) =>
+                        void handleMarketImageUpload(event.target.files?.[0])
+                      }
+                    />
+                  </label>
 
                   <div className="rounded-[1.35rem] border border-cyan-500/15 bg-cyan-500/6 p-4">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

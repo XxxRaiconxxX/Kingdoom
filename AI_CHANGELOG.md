@@ -31,6 +31,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
+### [Fecha: 06/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`
+*   **Resumen de Tareas:** Se habilito la carga de imagenes desde galeria en el formulario de mercado dentro del panel admin.
+*   **Cambios Clave:**
+    *   Se agrego un boton `Cargar imagen desde galeria` debajo del campo `URL de imagen`.
+    *   La imagen seleccionada se convierte a data URL local para no depender de enlaces externos.
+    *   El formulario deja feedback claro cuando la imagen se carga correctamente o falla la lectura.
+*   **Notas/Advertencias:** La carga reutiliza el mismo criterio practico ya usado en bestiario y flora, manteniendo consistencia en el panel admin.
+
 ### [Fecha: 05/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/market/market.rotation.ts`, `apps/mobile/src/features/market/marketRotation.ts`
 *   **Resumen de Tareas:** Se ajusto la vitrina rotativa para mostrar solo items disponibles cuando no se completa el cupo por rareza.

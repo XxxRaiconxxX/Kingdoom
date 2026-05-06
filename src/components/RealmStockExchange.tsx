@@ -32,7 +32,8 @@ import {
   findActivePrediction,
   findPosition,
   loadExchangeState,
-  openAssetPrediction,
+  openAssetPredictionSecure,
+  resolveRealmExchangePredictionsSecure,
   saveExchangeState,
   sellAssetSharesSecure,
 } from "../features/realmExchange/realmExchange.storage";
@@ -131,6 +132,7 @@ export function RealmStockExchange() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [now, setNow] = useState(Date.now());
   const operationLockRef = useRef(false);
+  const predictionSettlementLockRef = useRef(false);
   const stateRef = useRef(state);
   const playerRef = useRef(player);
 
@@ -189,7 +191,7 @@ export function RealmStockExchange() {
   }, [player]);
 
   useEffect(() => {
-    if (!player || isUpdating) {
+    if (!player || isUpdating || predictionSettlementLockRef.current) {
       return;
     }
 
@@ -204,51 +206,48 @@ export function RealmStockExchange() {
       return;
     }
 
-    const activePredictions = state.predictions.filter((prediction) => prediction.status === "active");
+    const currentState = stateRef.current;
+    const activePredictions = currentState.predictions.filter((prediction) => prediction.status === "active");
 
     if (activePredictions.length === 0) {
       return;
     }
 
-    const resolved = state.predictions.map((prediction) =>
+    const resolved = currentState.predictions.map((prediction) =>
       resolvePrediction(prediction, getAssetById(prediction.assetId), now)
     );
-    const payout = resolved.reduce((total, prediction, index) => {
-      const previous = state.predictions[index];
-      const justResolved = previous.status === "active" && prediction.status !== "active";
-      return total + (justResolved ? prediction.payoutGold ?? 0 : 0);
-    }, 0);
-    const changed = resolved.some((prediction, index) => prediction.status !== state.predictions[index].status);
+    const changed = resolved.some((prediction, index) => prediction.status !== currentState.predictions[index].status);
 
     if (!changed) {
       return;
     }
 
-    const nextState = { ...state, predictions: resolved };
-    stateRef.current = nextState;
-    setState(nextState);
+    predictionSettlementLockRef.current = true;
+    setIsUpdating(true);
 
-    if (payout > 0) {
-      void saveExchangeState(player.id, nextState).then((saved) => {
-        if (!saved) {
-          setFeedback("No se pudo asegurar la prediccion resuelta. Refresca antes de cobrar.");
-          return;
-        }
+    void resolveRealmExchangePredictionsSecure({
+      playerId: player.id,
+      state: currentState,
+      resolvedPredictions: resolved,
+    }).then(async (result) => {
+      if (result.status === "error") {
+        setFeedback(result.message);
+        return;
+      }
 
-        void setPlayerGold(player.gold + payout).then((updated) => {
-          if (!updated) {
-            setFeedback("La prediccion se resolvio, pero no se pudo pagar el oro.");
-            return;
-          }
-
-          setFeedback(`Prediccion resuelta. Cobraste ${formatGold(payout)} de oro.`);
-        });
-      });
-    } else {
-      void saveExchangeState(player.id, nextState);
-      setFeedback("Prediccion resuelta sin premio.");
-    }
-  }, [isUpdating, now, player, setPlayerGold, state]);
+      stateRef.current = result.state;
+      setState(result.state);
+      await refreshPlayer();
+      setFeedback(
+        result.payoutGold > 0
+          ? `Prediccion resuelta. Cobraste ${formatGold(result.payoutGold)} de oro.`
+          : result.message
+      );
+    }).finally(() => {
+      predictionSettlementLockRef.current = false;
+      setIsUpdating(false);
+    });
+  }, [isUpdating, now, player, refreshPlayer, state]);
 
   async function applyOperation(
     result:
@@ -377,7 +376,8 @@ export function RealmStockExchange() {
     }
 
     await applyOperation(
-      openAssetPrediction({
+      await openAssetPredictionSecure({
+        playerId: currentPlayer.id,
         state: stateRef.current,
         asset: selectedAsset,
         gold: currentPlayer.gold,

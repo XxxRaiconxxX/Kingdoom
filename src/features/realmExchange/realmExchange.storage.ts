@@ -488,6 +488,154 @@ export async function sellAssetSharesSecure(input: {
   };
 }
 
+type ResolvePredictionRow = {
+  success: boolean;
+  message: string | null;
+  remaining_gold: number | null;
+  payout_gold: number | null;
+  positions: unknown;
+  predictions: unknown;
+};
+
+type OpenPredictionRow = {
+  success: boolean;
+  message: string | null;
+  remaining_gold: number | null;
+  positions: unknown;
+  predictions: unknown;
+};
+
+export async function openAssetPredictionSecure(input: {
+  playerId: string;
+  state: RealmExchangePlayerState;
+  asset: RealmExchangeAsset;
+  gold: number;
+  direction: RealmExchangeDirection;
+  stakeGold: number;
+  at?: number;
+}) {
+  const result = openAssetPrediction(input);
+
+  if (result.status === "error") {
+    return result;
+  }
+
+  const prediction = result.state.predictions[result.state.predictions.length - 1];
+
+  if (!prediction) {
+    return {
+      status: "error" as const,
+      message: "No se pudo preparar la prediccion.",
+      state: input.state,
+      nextGold: input.gold,
+    };
+  }
+
+  const { data, error } = await supabase.rpc("open_realm_exchange_prediction", {
+    p_player_id: input.playerId,
+    p_prediction: prediction,
+    p_stake_gold: prediction.stakeGold,
+  });
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: "No se pudo abrir la prediccion segura en Supabase. Ejecuta el SQL actualizado de la bolsa.",
+      state: input.state,
+      nextGold: input.gold,
+    };
+  }
+
+  const row = (Array.isArray(data) ? data[0] : data) as OpenPredictionRow | null;
+
+  if (!row?.success) {
+    return {
+      status: "error" as const,
+      message: row?.message ?? "No se pudo abrir la prediccion.",
+      state: input.state,
+      nextGold: row?.remaining_gold ?? input.gold,
+    };
+  }
+
+  return {
+    status: "success" as const,
+    message: row.message ?? result.message,
+    state: normalizeState({
+      positions: row.positions as RealmExchangePlayerState["positions"],
+      predictions: row.predictions as RealmExchangePlayerState["predictions"],
+    }),
+    nextGold: Number(row.remaining_gold ?? result.nextGold),
+    remoteApplied: true,
+  };
+}
+
+export async function resolveRealmExchangePredictionsSecure(input: {
+  playerId: string;
+  state: RealmExchangePlayerState;
+  resolvedPredictions: RealmExchangePrediction[];
+}) {
+  const resolvedById = new Map(input.resolvedPredictions.map((prediction) => [prediction.id, prediction]));
+  const payablePredictions = input.state.predictions
+    .filter((prediction) => prediction.status === "active")
+    .map((prediction) => resolvedById.get(prediction.id))
+    .filter(
+      (prediction): prediction is RealmExchangePrediction =>
+        prediction !== undefined && prediction.status !== "active"
+    );
+
+  if (payablePredictions.length === 0) {
+    return {
+      status: "success" as const,
+      message: "No habia predicciones listas para resolver.",
+      state: input.state,
+      nextGold: null,
+      payoutGold: 0,
+      remoteApplied: false,
+    };
+  }
+
+  const { data, error } = await supabase.rpc("resolve_realm_exchange_predictions", {
+    p_player_id: input.playerId,
+    p_resolved_predictions: payablePredictions,
+  });
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: "No se pudo confirmar la prediccion en Supabase. Ejecuta el SQL actualizado de la bolsa.",
+      state: input.state,
+      nextGold: null,
+      payoutGold: 0,
+      remoteApplied: false,
+    };
+  }
+
+  const row = (Array.isArray(data) ? data[0] : data) as ResolvePredictionRow | null;
+
+  if (!row?.success) {
+    return {
+      status: "error" as const,
+      message: row?.message ?? "No se pudo resolver la prediccion.",
+      state: input.state,
+      nextGold: row?.remaining_gold ?? null,
+      payoutGold: 0,
+      remoteApplied: false,
+    };
+  }
+
+  return {
+    status: "success" as const,
+    message: row.message ?? "Prediccion resuelta.",
+    state: normalizeState({
+      positions: row.positions as RealmExchangePlayerState["positions"],
+      predictions: row.predictions as RealmExchangePlayerState["predictions"],
+    }),
+    nextGold: row.remaining_gold ?? null,
+    payoutGold: Number(row.payout_gold ?? 0),
+    remoteApplied: true,
+  };
+}
+
 export function openAssetPrediction(input: {
   state: RealmExchangePlayerState;
   asset: RealmExchangeAsset;

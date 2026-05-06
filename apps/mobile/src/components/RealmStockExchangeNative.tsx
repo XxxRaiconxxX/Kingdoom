@@ -28,7 +28,8 @@ import {
   findActivePrediction,
   findPosition,
   loadExchangeState,
-  openAssetPrediction,
+  openAssetPredictionSecure,
+  resolveRealmExchangePredictionsSecure,
   saveExchangeState,
   sellAssetSharesSecure,
 } from "@/src/features/realmExchange/realmExchangeStorage";
@@ -217,6 +218,7 @@ export function RealmStockExchangeNative() {
   const [pending, setPending] = useState(false);
   const [now, setNow] = useState(Date.now());
   const operationLockRef = useRef(false);
+  const predictionSettlementLockRef = useRef(false);
   const exchangeStateRef = useRef(exchangeState);
   const playerRef = useRef(player);
 
@@ -275,7 +277,7 @@ export function RealmStockExchangeNative() {
   }, [player]);
 
   useEffect(() => {
-    if (!player || pending) {
+    if (!player || pending || predictionSettlementLockRef.current) {
       return;
     }
 
@@ -290,47 +292,44 @@ export function RealmStockExchangeNative() {
       return;
     }
 
-    const resolved = exchangeState.predictions.map((prediction) =>
+    const currentState = exchangeStateRef.current;
+    const resolved = currentState.predictions.map((prediction) =>
       resolvePrediction(prediction, getAssetById(prediction.assetId), now)
     );
-    const changed = resolved.some((prediction, index) => prediction.status !== exchangeState.predictions[index]?.status);
+    const changed = resolved.some((prediction, index) => prediction.status !== currentState.predictions[index]?.status);
 
     if (!changed) {
       return;
     }
 
-    const payout = resolved.reduce((total, prediction, index) => {
-      const previous = exchangeState.predictions[index];
-      const justResolved = previous?.status === "active" && prediction.status !== "active";
-      return total + (justResolved ? prediction.payoutGold ?? 0 : 0);
-    }, 0);
-    const nextState = { ...exchangeState, predictions: resolved };
+    predictionSettlementLockRef.current = true;
+    setPending(true);
 
-    exchangeStateRef.current = nextState;
-    setExchangeState(nextState);
+    void resolveRealmExchangePredictionsSecure({
+      playerId: player.id,
+      state: currentState,
+      resolvedPredictions: resolved,
+    }).then(async (result) => {
+      if (result.status === "error") {
+        setFeedback({ type: "error", message: result.message });
+        return;
+      }
 
-    if (payout > 0) {
-      void saveExchangeState(player.id, nextState).then((saved) => {
-        if (!saved) {
-          setFeedback({
-            type: "error",
-            message: "No se pudo asegurar la prediccion resuelta. Refresca antes de cobrar.",
-          });
-          return;
-        }
-
-        void updateGold(player.gold + payout).then((ok) => {
-          setFeedback({
-            type: ok ? "success" : "error",
-            message: ok ? `Prediccion resuelta: +${formatGold(payout)} oro.` : "No se pudo pagar la prediccion.",
-          });
-        });
+      exchangeStateRef.current = result.state;
+      setExchangeState(result.state);
+      await refreshGold();
+      setFeedback({
+        type: "success",
+        message:
+          result.payoutGold > 0
+            ? `Prediccion resuelta: +${formatGold(result.payoutGold)} oro.`
+            : result.message,
       });
-    } else {
-      void saveExchangeState(player.id, nextState);
-      setFeedback({ type: "error", message: "Prediccion resuelta sin premio." });
-    }
-  }, [exchangeState, now, pending, player, updateGold]);
+    }).finally(() => {
+      predictionSettlementLockRef.current = false;
+      setPending(false);
+    });
+  }, [exchangeState, now, pending, player, refreshGold]);
 
   async function applyOperation(result: {
     status: "success" | "error";
@@ -598,18 +597,21 @@ export function RealmStockExchangeNative() {
               label="Sube"
               icon="north"
               disabled={!player || pending || Boolean(activePrediction) || bankruptcy.isBankrupt}
-              onPress={() =>
-                void applyOperation(
-                  openAssetPrediction({
+              onPress={() => {
+                void (async () => {
+                  const result = await openAssetPredictionSecure({
+                    playerId: playerRef.current?.id ?? "",
                     state: exchangeStateRef.current,
                     asset: selectedAsset,
                     gold: playerRef.current?.gold ?? 0,
                     direction: "up",
                     stakeGold,
                     at: now,
-                  })
-                )
-              }
+                  });
+
+                  await applyOperation(result);
+                })();
+              }}
             />
           </View>
           <View style={{ flex: 1 }}>
@@ -618,18 +620,21 @@ export function RealmStockExchangeNative() {
               icon="south"
               variant="ghost"
               disabled={!player || pending || Boolean(activePrediction) || bankruptcy.isBankrupt}
-              onPress={() =>
-                void applyOperation(
-                  openAssetPrediction({
+              onPress={() => {
+                void (async () => {
+                  const result = await openAssetPredictionSecure({
+                    playerId: playerRef.current?.id ?? "",
                     state: exchangeStateRef.current,
                     asset: selectedAsset,
                     gold: playerRef.current?.gold ?? 0,
                     direction: "down",
                     stakeGold,
                     at: now,
-                  })
-                )
-              }
+                  });
+
+                  await applyOperation(result);
+                })();
+              }}
             />
           </View>
         </View>

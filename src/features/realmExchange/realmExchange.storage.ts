@@ -371,6 +371,60 @@ export function sellAssetShares(input: {
   };
 }
 
+export async function sellAssetSharesSecure(input: {
+  playerId: string;
+  state: RealmExchangePlayerState;
+  asset: RealmExchangeAsset;
+  gold: number;
+  lots: number;
+  at?: number;
+}) {
+  const result = sellAssetShares(input);
+
+  if (result.status === "error") {
+    return result;
+  }
+
+  const lots = Math.max(1, Math.floor(input.lots));
+  const shares = lots * REALM_EXCHANGE_TRADE_LOT;
+  const remainingPosition = findPosition(result.state, input.asset.id);
+
+  const { data, error } = await supabase.rpc("sell_realm_exchange_shares", {
+    p_player_id: input.playerId,
+    p_asset_id: input.asset.id,
+    p_shares: shares,
+    p_revenue: Math.max(0, result.nextGold - input.gold),
+    p_remaining_total_invested: remainingPosition?.totalInvested ?? 0,
+    p_average_price: remainingPosition?.averagePrice ?? 0,
+  });
+
+  if (error) {
+    return result;
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+
+  if (!row?.success) {
+    return {
+      status: "error" as const,
+      message: row?.message ?? "No se pudo confirmar la venta en Supabase.",
+      state: input.state,
+      nextGold: input.gold,
+    };
+  }
+
+  return {
+    status: "success" as const,
+    message: row.message ?? result.message,
+    state: normalizeState({
+      positions: row.positions as RealmExchangePlayerState["positions"],
+      predictions: row.predictions as RealmExchangePlayerState["predictions"],
+    }),
+    nextGold: Number(row.remaining_gold ?? result.nextGold),
+    remoteApplied: true,
+  };
+}
+
 export function openAssetPrediction(input: {
   state: RealmExchangePlayerState;
   asset: RealmExchangeAsset;

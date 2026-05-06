@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDown,
@@ -31,7 +31,7 @@ import {
   loadExchangeState,
   openAssetPrediction,
   saveExchangeState,
-  sellAssetShares,
+  sellAssetSharesSecure,
 } from "../features/realmExchange/realmExchange.storage";
 import type {
   RealmExchangeAsset,
@@ -123,6 +123,9 @@ export function RealmStockExchange() {
   const [feedback, setFeedback] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const operationLockRef = useRef(false);
+  const stateRef = useRef(state);
+  const playerRef = useRef(player);
 
   const selectedAsset = useMemo(() => getAssetById(selectedAssetId), [selectedAssetId]);
   const currentPrice = useMemo(() => getAssetPriceAt(selectedAsset, now), [now, selectedAsset]);
@@ -143,6 +146,14 @@ export function RealmStockExchange() {
     const interval = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  useEffect(() => {
+    playerRef.current = player;
+  }, [player]);
 
   useEffect(() => {
     let cancelled = false;
@@ -189,49 +200,125 @@ export function RealmStockExchange() {
     }
 
     const nextState = { ...state, predictions: resolved };
+    stateRef.current = nextState;
     setState(nextState);
-    void saveExchangeState(player.id, nextState);
 
     if (payout > 0) {
-      void setPlayerGold(player.gold + payout).then(() => {
-        setFeedback(`Prediccion resuelta. Cobraste ${formatGold(payout)} de oro.`);
+      void saveExchangeState(player.id, nextState).then((saved) => {
+        if (!saved) {
+          setFeedback("No se pudo asegurar la prediccion resuelta. Refresca antes de cobrar.");
+          return;
+        }
+
+        void setPlayerGold(player.gold + payout).then((updated) => {
+          if (!updated) {
+            setFeedback("La prediccion se resolvio, pero no se pudo pagar el oro.");
+            return;
+          }
+
+          setFeedback(`Prediccion resuelta. Cobraste ${formatGold(payout)} de oro.`);
+        });
       });
     } else {
+      void saveExchangeState(player.id, nextState);
       setFeedback("Prediccion resuelta sin premio.");
     }
   }, [isUpdating, now, player, setPlayerGold, state]);
 
-  async function applyOperation(result: ReturnType<typeof buyAssetShares>) {
-    if (!player || result.status === "error") {
+  async function applyOperation(
+    result:
+      | ReturnType<typeof buyAssetShares>
+      | Awaited<ReturnType<typeof sellAssetSharesSecure>>
+  ) {
+    const currentPlayer = playerRef.current;
+
+    if (!currentPlayer || result.status === "error") {
       setFeedback(result.message);
       return;
     }
 
-    setIsUpdating(true);
-    const updated = await setPlayerGold(result.nextGold);
+    if (operationLockRef.current) {
+      return;
+    }
 
-    if (!updated) {
-      setFeedback("No se pudo actualizar el oro del jugador.");
+    operationLockRef.current = true;
+    setIsUpdating(true);
+    const previousState = stateRef.current;
+    const remoteApplied = "remoteApplied" in result && result.remoteApplied;
+
+    if (remoteApplied) {
+      stateRef.current = result.state;
+      setState(result.state);
+      await refreshPlayer();
+      setFeedback(result.message);
+      operationLockRef.current = false;
       setIsUpdating(false);
       return;
     }
 
-    setState(result.state);
-    await saveExchangeState(player.id, result.state);
+    const isPayout = result.nextGold > currentPlayer.gold;
+
+    if (isPayout) {
+      stateRef.current = result.state;
+      setState(result.state);
+
+      const saved = await saveExchangeState(currentPlayer.id, result.state);
+
+      if (!saved) {
+        stateRef.current = previousState;
+        setState(previousState);
+        setFeedback("No se pudo asegurar la venta. No se acredito oro para evitar cobro duplicado.");
+        operationLockRef.current = false;
+        setIsUpdating(false);
+        return;
+      }
+    }
+
+    const updated = await setPlayerGold(result.nextGold);
+
+    if (!updated) {
+      setFeedback("No se pudo actualizar el oro del jugador.");
+      if (isPayout) {
+        stateRef.current = previousState;
+        setState(previousState);
+        await saveExchangeState(currentPlayer.id, previousState);
+      }
+      operationLockRef.current = false;
+      setIsUpdating(false);
+      return;
+    }
+
+    if (!isPayout) {
+      stateRef.current = result.state;
+      setState(result.state);
+
+      const saved = await saveExchangeState(currentPlayer.id, result.state);
+
+      if (!saved) {
+        setFeedback("Operacion aplicada al oro, pero la cartera quedo pendiente de sincronizacion.");
+        operationLockRef.current = false;
+        setIsUpdating(false);
+        return;
+      }
+    }
+
     setFeedback(result.message);
+    operationLockRef.current = false;
     setIsUpdating(false);
   }
 
   async function handleBuy() {
-    if (!player || isUpdating) {
+    const currentPlayer = playerRef.current;
+
+    if (!currentPlayer || operationLockRef.current) {
       return;
     }
 
     await applyOperation(
       buyAssetShares({
-        state,
+        state: stateRef.current,
         asset: selectedAsset,
-        gold: player.gold,
+        gold: currentPlayer.gold,
         lots: tradeLots,
         at: now,
       })
@@ -239,15 +326,18 @@ export function RealmStockExchange() {
   }
 
   async function handleSell() {
-    if (!player || isUpdating) {
+    const currentPlayer = playerRef.current;
+
+    if (!currentPlayer || operationLockRef.current) {
       return;
     }
 
     await applyOperation(
-      sellAssetShares({
-        state,
+      await sellAssetSharesSecure({
+        playerId: currentPlayer.id,
+        state: stateRef.current,
         asset: selectedAsset,
-        gold: player.gold,
+        gold: currentPlayer.gold,
         lots: tradeLots,
         at: now,
       })
@@ -255,15 +345,17 @@ export function RealmStockExchange() {
   }
 
   async function handlePrediction(direction: "up" | "down") {
-    if (!player || isUpdating) {
+    const currentPlayer = playerRef.current;
+
+    if (!currentPlayer || operationLockRef.current) {
       return;
     }
 
     await applyOperation(
       openAssetPrediction({
-        state,
+        state: stateRef.current,
         asset: selectedAsset,
-        gold: player.gold,
+        gold: currentPlayer.gold,
         direction,
         stakeGold,
         at: now,

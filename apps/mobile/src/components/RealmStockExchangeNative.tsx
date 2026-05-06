@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import Animated, {
@@ -28,7 +28,7 @@ import {
   loadExchangeState,
   openAssetPrediction,
   saveExchangeState,
-  sellAssetShares,
+  sellAssetSharesSecure,
 } from "@/src/features/realmExchange/realmExchangeStorage";
 import type {
   RealmExchangeAsset,
@@ -198,7 +198,7 @@ function PredictionCard({ prediction, now }: { prediction: RealmExchangePredicti
 }
 
 export function RealmStockExchangeNative() {
-  const { player, updateGold } = useSessionStore();
+  const { player, refreshGold, updateGold } = useSessionStore();
   const [selectedAssetId, setSelectedAssetId] = useState(REALM_EXCHANGE_ASSETS[0].id);
   const [exchangeState, setExchangeState] = useState<RealmExchangePlayerState>(createEmptyExchangeState);
   const [stakeInput, setStakeInput] = useState("500");
@@ -206,6 +206,9 @@ export function RealmStockExchangeNative() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [pending, setPending] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const operationLockRef = useRef(false);
+  const exchangeStateRef = useRef(exchangeState);
+  const playerRef = useRef(player);
 
   const selectedAsset = useMemo(() => getAssetById(selectedAssetId), [selectedAssetId]);
   const currentPrice = useMemo(() => getAssetPriceAt(selectedAsset, now), [now, selectedAsset]);
@@ -226,6 +229,14 @@ export function RealmStockExchangeNative() {
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    exchangeStateRef.current = exchangeState;
+  }, [exchangeState]);
+
+  useEffect(() => {
+    playerRef.current = player;
+  }, [player]);
 
   useEffect(() => {
     let cancelled = false;
@@ -270,17 +281,28 @@ export function RealmStockExchangeNative() {
     }, 0);
     const nextState = { ...exchangeState, predictions: resolved };
 
+    exchangeStateRef.current = nextState;
     setExchangeState(nextState);
-    void saveExchangeState(player.id, nextState);
 
     if (payout > 0) {
-      void updateGold(player.gold + payout).then((ok) => {
-        setFeedback({
-          type: ok ? "success" : "error",
-          message: ok ? `Prediccion resuelta: +${formatGold(payout)} oro.` : "No se pudo pagar la prediccion.",
+      void saveExchangeState(player.id, nextState).then((saved) => {
+        if (!saved) {
+          setFeedback({
+            type: "error",
+            message: "No se pudo asegurar la prediccion resuelta. Refresca antes de cobrar.",
+          });
+          return;
+        }
+
+        void updateGold(player.gold + payout).then((ok) => {
+          setFeedback({
+            type: ok ? "success" : "error",
+            message: ok ? `Prediccion resuelta: +${formatGold(payout)} oro.` : "No se pudo pagar la prediccion.",
+          });
         });
       });
     } else {
+      void saveExchangeState(player.id, nextState);
       setFeedback({ type: "error", message: "Prediccion resuelta sin premio." });
     }
   }, [exchangeState, now, pending, player, updateGold]);
@@ -290,8 +312,11 @@ export function RealmStockExchangeNative() {
     message: string;
     state: RealmExchangePlayerState;
     nextGold: number;
+    remoteApplied?: boolean;
   }) {
-    if (!player) {
+    const currentPlayer = playerRef.current;
+
+    if (!currentPlayer) {
       setFeedback({ type: "error", message: "Conecta tu perfil primero." });
       return;
     }
@@ -301,18 +326,79 @@ export function RealmStockExchangeNative() {
       return;
     }
 
-    setPending(true);
-    const updated = await updateGold(result.nextGold);
+    if (operationLockRef.current) {
+      return;
+    }
 
-    if (!updated) {
-      setFeedback({ type: "error", message: "No se pudo actualizar el oro." });
+    operationLockRef.current = true;
+    setPending(true);
+    const previousState = exchangeStateRef.current;
+    const remoteApplied = "remoteApplied" in result && result.remoteApplied;
+
+    if (remoteApplied) {
+      exchangeStateRef.current = result.state;
+      setExchangeState(result.state);
+      await refreshGold();
+      setFeedback({ type: "success", message: result.message });
+      operationLockRef.current = false;
       setPending(false);
       return;
     }
 
-    await saveExchangeState(player.id, result.state);
-    setExchangeState(result.state);
+    const isPayout = result.nextGold > currentPlayer.gold;
+
+    if (isPayout) {
+      exchangeStateRef.current = result.state;
+      setExchangeState(result.state);
+
+      const saved = await saveExchangeState(currentPlayer.id, result.state);
+
+      if (!saved) {
+        exchangeStateRef.current = previousState;
+        setExchangeState(previousState);
+        setFeedback({
+          type: "error",
+          message: "No se pudo asegurar la venta. No se acredito oro para evitar cobro duplicado.",
+        });
+        operationLockRef.current = false;
+        setPending(false);
+        return;
+      }
+    }
+
+    const updated = await updateGold(result.nextGold);
+
+    if (!updated) {
+      setFeedback({ type: "error", message: "No se pudo actualizar el oro." });
+      if (isPayout) {
+        exchangeStateRef.current = previousState;
+        setExchangeState(previousState);
+        await saveExchangeState(currentPlayer.id, previousState);
+      }
+      operationLockRef.current = false;
+      setPending(false);
+      return;
+    }
+
+    if (!isPayout) {
+      exchangeStateRef.current = result.state;
+      setExchangeState(result.state);
+
+      const saved = await saveExchangeState(currentPlayer.id, result.state);
+
+      if (!saved) {
+        setFeedback({
+          type: "error",
+          message: "Operacion aplicada al oro, pero la cartera quedo pendiente de sincronizacion.",
+        });
+        operationLockRef.current = false;
+        setPending(false);
+        return;
+      }
+    }
+
     setFeedback({ type: "success", message: result.message });
+    operationLockRef.current = false;
     setPending(false);
   }
 
@@ -409,9 +495,9 @@ export function RealmStockExchangeNative() {
               onPress={() =>
                 void applyOperation(
                   buyAssetShares({
-                    state: exchangeState,
+                    state: exchangeStateRef.current,
                     asset: selectedAsset,
-                    gold: player?.gold ?? 0,
+                    gold: playerRef.current?.gold ?? 0,
                     lots,
                     at: now,
                   })
@@ -425,17 +511,20 @@ export function RealmStockExchangeNative() {
               icon="trending-down"
               variant="ghost"
               disabled={!player || pending || !position}
-              onPress={() =>
-                void applyOperation(
-                  sellAssetShares({
-                    state: exchangeState,
+              onPress={() => {
+                void (async () => {
+                  const result = await sellAssetSharesSecure({
+                    playerId: playerRef.current?.id ?? "",
+                    state: exchangeStateRef.current,
                     asset: selectedAsset,
-                    gold: player?.gold ?? 0,
+                    gold: playerRef.current?.gold ?? 0,
                     lots,
                     at: now,
-                  })
-                )
-              }
+                  });
+
+                  await applyOperation(result);
+                })();
+              }}
             />
           </View>
         </View>
@@ -474,9 +563,9 @@ export function RealmStockExchangeNative() {
               onPress={() =>
                 void applyOperation(
                   openAssetPrediction({
-                    state: exchangeState,
+                    state: exchangeStateRef.current,
                     asset: selectedAsset,
-                    gold: player?.gold ?? 0,
+                    gold: playerRef.current?.gold ?? 0,
                     direction: "up",
                     stakeGold,
                     at: now,
@@ -494,9 +583,9 @@ export function RealmStockExchangeNative() {
               onPress={() =>
                 void applyOperation(
                   openAssetPrediction({
-                    state: exchangeState,
+                    state: exchangeStateRef.current,
                     asset: selectedAsset,
-                    gold: player?.gold ?? 0,
+                    gold: playerRef.current?.gold ?? 0,
                     direction: "down",
                     stakeGold,
                     at: now,

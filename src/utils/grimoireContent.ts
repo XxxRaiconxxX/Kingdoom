@@ -7,6 +7,7 @@ import type {
   GrimoireCategory,
   MagicStyle,
 } from "../types";
+import { applyMagicBalanceToCategories, applyMagicBalanceToStyles } from "./magicBalance";
 import { formatAdminPermissionMessage } from "./supabaseErrors";
 import { supabase } from "./supabaseClient";
 
@@ -295,7 +296,9 @@ export async function fetchGrimoireContent(): Promise<GrimoireContentState> {
       magicResult.error || bestiaryResult.error || floraResult.error
         ? "El Grimorio usa contenido local mientras faltan tablas administrables en Supabase."
         : "",
-    categories: magicRows.length > 0 ? mergeMagicRowsWithStatic(magicRows) : GRIMOIRE_DATA,
+    categories: applyMagicBalanceToCategories(
+      magicRows.length > 0 ? mergeMagicRowsWithStatic(magicRows) : GRIMOIRE_DATA
+    ),
     bestiary: bestiaryRows.map(mapBestiaryRow),
     flora: floraRows.map(mapFloraRow),
   };
@@ -313,20 +316,21 @@ export async function fetchAdminMagicStyles() {
       status: "fallback" as const,
       message:
         "Aun no hay magias administradas en Supabase. Se muestran los estilos base del proyecto como plantilla.",
-      styles: flattenStaticMagicStyles(),
+      styles: applyMagicBalanceToStyles(flattenStaticMagicStyles()),
     };
   }
 
   return {
     status: "ready" as const,
     message: "",
-    styles: mergeMagicRowsWithStatic(data as MagicStyleRow[]).flatMap((category) =>
-      category.styles.map((style, index) => ({
-        ...style,
-        categoryId: category.id,
-        categoryTitle: category.title,
-        sortOrder: index,
-      }))
+    styles: applyMagicBalanceToCategories(mergeMagicRowsWithStatic(data as MagicStyleRow[])).flatMap(
+      (category) =>
+        category.styles.map((style, index) => ({
+          ...style,
+          categoryId: category.id,
+          categoryTitle: category.title,
+          sortOrder: index,
+        }))
     ),
   };
 }

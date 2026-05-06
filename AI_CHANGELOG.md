@@ -32,6 +32,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
 ### [Fecha: 06/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/utils/magicBalance.ts`, `src/utils/grimoireContent.ts`, `docs/grimoire_balance_audit.md`
+*   **Resumen de Tareas:** Se agrego una capa global de balance para el Grimorio, revisando magias de Lv1-Lv5 y corrigiendo habilidades con riesgo de Mano Negra.
+*   **Cambios Clave:**
+    *   Se aplican guardas por nivel para mantener progresion clara entre Lv1 y Lv5.
+    *   Se agregaron reworks para habilidades con instakill, invulnerabilidad, defensa absoluta, control permanente o destruccion masiva sin respuesta.
+    *   El balance se aplica tanto al contenido local como al contenido administrado desde Supabase.
+    *   Se dejo una auditoria de criterios y familias afectadas en `docs/grimoire_balance_audit.md`.
+*   **Notas/Advertencias:** La correccion no borra el material original; se aplica como capa de lectura y administracion para conservar compatibilidad con el formato actual.
+
+### [Fecha: 06/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/realmExchange/realmExchange.storage.ts`, `src/components/RealmStockExchange.tsx`, `apps/mobile/src/features/realmExchange/realmExchangeStorage.ts`, `supabase_realm_exchange_sync.sql`
 *   **Resumen de Tareas:** Se corrigio la divergencia de carteras de la Bolsa del Reino entre web y app movil, migrando la persistencia hacia Supabase con compatibilidad para estados locales anteriores.
 *   **Cambios Clave:**

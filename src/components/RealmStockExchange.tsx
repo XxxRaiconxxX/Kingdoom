@@ -145,12 +145,22 @@ export function RealmStockExchange() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!player) {
       setState({ positions: [], predictions: [] });
       return;
     }
 
-    setState(loadExchangeState(player.id));
+    void loadExchangeState(player.id).then((loaded) => {
+      if (!cancelled) {
+        setState(loaded);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [player]);
 
   useEffect(() => {
@@ -180,7 +190,7 @@ export function RealmStockExchange() {
 
     const nextState = { ...state, predictions: resolved };
     setState(nextState);
-    saveExchangeState(player.id, nextState);
+    void saveExchangeState(player.id, nextState);
 
     if (payout > 0) {
       void setPlayerGold(player.gold + payout).then(() => {
@@ -207,7 +217,7 @@ export function RealmStockExchange() {
     }
 
     setState(result.state);
-    saveExchangeState(player.id, result.state);
+    await saveExchangeState(player.id, result.state);
     setFeedback(result.message);
     setIsUpdating(false);
   }

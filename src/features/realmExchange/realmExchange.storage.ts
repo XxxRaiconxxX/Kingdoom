@@ -1,3 +1,4 @@
+import { supabase } from "../../utils/supabaseClient";
 import {
   REALM_EXCHANGE_MAX_STAKE,
   REALM_EXCHANGE_MIN_STAKE,
@@ -17,10 +18,24 @@ import type {
   RealmExchangePrediction,
 } from "./realmExchange.types";
 
-const STATE_VERSION = 1;
+const STATE_VERSION = 2;
+const EXCHANGE_TABLE = "player_realm_exchange_states";
+
+type RealmExchangeStateRow = {
+  player_id: string;
+  positions: unknown;
+  predictions: unknown;
+};
 
 function getStorageKey(playerId: string) {
   return `kingdoom.realm-exchange.v${STATE_VERSION}.${playerId}`;
+}
+
+function getLegacyStorageKeys(playerId: string) {
+  return [
+    `kingdoom.realm-exchange.v1.${playerId}`,
+    `kingdoom.realm-exchange.v${STATE_VERSION}.${playerId}`,
+  ];
 }
 
 export function createEmptyExchangeState(): RealmExchangePlayerState {
@@ -30,27 +45,216 @@ export function createEmptyExchangeState(): RealmExchangePlayerState {
   };
 }
 
-export function loadExchangeState(playerId: string): RealmExchangePlayerState {
-  const stored = window.localStorage.getItem(getStorageKey(playerId));
+function normalizeState(raw: Partial<RealmExchangePlayerState> | null | undefined) {
+  return {
+    positions: Array.isArray(raw?.positions) ? raw.positions : [],
+    predictions: Array.isArray(raw?.predictions) ? raw.predictions : [],
+  } satisfies RealmExchangePlayerState;
+}
 
-  if (!stored) {
-    return createEmptyExchangeState();
+function loadLegacyLocalState(playerId: string): RealmExchangePlayerState {
+  for (const key of getLegacyStorageKeys(playerId)) {
+    const stored = window.localStorage.getItem(key);
+
+    if (!stored) {
+      continue;
+    }
+
+    try {
+      return normalizeState(JSON.parse(stored) as Partial<RealmExchangePlayerState>);
+    } catch {
+      return createEmptyExchangeState();
+    }
   }
 
-  try {
-    const parsed = JSON.parse(stored) as Partial<RealmExchangePlayerState>;
+  return createEmptyExchangeState();
+}
 
-    return {
-      positions: Array.isArray(parsed.positions) ? parsed.positions : [],
-      predictions: Array.isArray(parsed.predictions) ? parsed.predictions : [],
-    };
-  } catch {
-    return createEmptyExchangeState();
+function saveLegacyLocalState(playerId: string, state: RealmExchangePlayerState) {
+  window.localStorage.setItem(getStorageKey(playerId), JSON.stringify(state));
+}
+
+function clearLegacyLocalState(playerId: string) {
+  for (const key of getLegacyStorageKeys(playerId)) {
+    window.localStorage.removeItem(key);
   }
 }
 
-export function saveExchangeState(playerId: string, state: RealmExchangePlayerState) {
-  window.localStorage.setItem(getStorageKey(playerId), JSON.stringify(state));
+function isStateEmpty(state: RealmExchangePlayerState) {
+  return state.positions.length === 0 && state.predictions.length === 0;
+}
+
+function buildPredictionMergeKey(prediction: RealmExchangePrediction) {
+  return [
+    prediction.assetId,
+    prediction.openedAt,
+    prediction.direction,
+    prediction.stakeGold,
+    prediction.entryPrice,
+  ].join(":");
+}
+
+function mergePositions(
+  remotePositions: RealmExchangePosition[],
+  localPositions: RealmExchangePosition[]
+) {
+  const byAsset = new Map<string, RealmExchangePosition>();
+
+  for (const position of [...remotePositions, ...localPositions]) {
+    const current = byAsset.get(position.assetId);
+
+    if (!current) {
+      byAsset.set(position.assetId, { ...position });
+      continue;
+    }
+
+    const sharesOwned = current.sharesOwned + position.sharesOwned;
+    const totalInvested = current.totalInvested + position.totalInvested;
+
+    byAsset.set(position.assetId, {
+      assetId: position.assetId,
+      sharesOwned,
+      totalInvested,
+      averagePrice:
+        sharesOwned > 0 ? Math.round(totalInvested / sharesOwned) : 0,
+      updatedAt: Math.max(current.updatedAt, position.updatedAt),
+    });
+  }
+
+  return Array.from(byAsset.values()).filter((entry) => entry.sharesOwned > 0);
+}
+
+function mergePredictions(
+  remotePredictions: RealmExchangePrediction[],
+  localPredictions: RealmExchangePrediction[]
+) {
+  const byPrediction = new Map<string, RealmExchangePrediction>();
+
+  for (const prediction of [...remotePredictions, ...localPredictions]) {
+    const key = buildPredictionMergeKey(prediction);
+    const current = byPrediction.get(key);
+
+    if (!current) {
+      byPrediction.set(key, prediction);
+      continue;
+    }
+
+    const next =
+      current.status === "active" && prediction.status !== "active"
+        ? prediction
+        : current.resolvedAt && prediction.resolvedAt
+          ? current.resolvedAt >= prediction.resolvedAt
+            ? current
+            : prediction
+          : current;
+
+    byPrediction.set(key, next);
+  }
+
+  return Array.from(byPrediction.values()).sort(
+    (left, right) => left.openedAt - right.openedAt
+  );
+}
+
+function mergeExchangeStates(
+  remoteState: RealmExchangePlayerState,
+  localState: RealmExchangePlayerState
+) {
+  if (isStateEmpty(remoteState)) {
+    return localState;
+  }
+
+  if (isStateEmpty(localState)) {
+    return remoteState;
+  }
+
+  if (JSON.stringify(remoteState) === JSON.stringify(localState)) {
+    return remoteState;
+  }
+
+  return {
+    positions: mergePositions(remoteState.positions, localState.positions),
+    predictions: mergePredictions(
+      remoteState.predictions,
+      localState.predictions
+    ),
+  } satisfies RealmExchangePlayerState;
+}
+
+async function fetchRemoteExchangeState(
+  playerId: string
+): Promise<RealmExchangePlayerState | null> {
+  const { data, error } = await supabase
+    .from(EXCHANGE_TABLE)
+    .select("player_id, positions, predictions")
+    .eq("player_id", playerId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const row = data as RealmExchangeStateRow;
+  return normalizeState({
+    positions: row.positions as RealmExchangePlayerState["positions"],
+    predictions: row.predictions as RealmExchangePlayerState["predictions"],
+  });
+}
+
+async function persistRemoteExchangeState(
+  playerId: string,
+  state: RealmExchangePlayerState
+) {
+  const { error } = await supabase.from(EXCHANGE_TABLE).upsert(
+    {
+      player_id: playerId,
+      positions: state.positions,
+      predictions: state.predictions,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "player_id" }
+  );
+
+  return !error;
+}
+
+export async function loadExchangeState(
+  playerId: string
+): Promise<RealmExchangePlayerState> {
+  const localState = loadLegacyLocalState(playerId);
+
+  const remoteState = await fetchRemoteExchangeState(playerId);
+  if (!remoteState) {
+    return localState;
+  }
+
+  const mergedState = mergeExchangeStates(remoteState, localState);
+
+  if (JSON.stringify(mergedState) !== JSON.stringify(remoteState)) {
+    const synced = await persistRemoteExchangeState(playerId, mergedState);
+
+    if (!synced) {
+      return mergedState;
+    }
+  }
+
+  clearLegacyLocalState(playerId);
+  return mergedState;
+}
+
+export async function saveExchangeState(
+  playerId: string,
+  state: RealmExchangePlayerState
+) {
+  const synced = await persistRemoteExchangeState(playerId, state);
+
+  if (!synced) {
+    saveLegacyLocalState(playerId, state);
+    return false;
+  }
+
+  clearLegacyLocalState(playerId);
+  return true;
 }
 
 export function findPosition(
@@ -227,4 +431,3 @@ export function openAssetPrediction(input: {
     nextGold: input.gold - stakeGold,
   };
 }
-

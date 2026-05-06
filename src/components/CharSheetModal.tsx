@@ -109,6 +109,9 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
     strength: pveProgress?.stats.strength ?? 0,
     defense: pveProgress?.stats.defense ?? 0,
     life: pveProgress?.stats.life ?? 0,
+    agility: pveProgress?.stats.agility ?? 0,
+    intelligence: pveProgress?.stats.intelligence ?? 0,
+    magicDefense: pveProgress?.stats.magicDefense ?? 0,
   };
 
   return (
@@ -197,12 +200,7 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                     <div className="bg-stone-900/40 border border-stone-800/50 p-5 rounded-xl space-y-5">
                       {statConfig.map(stat => {
                         const baseValue = character.stats[stat.key as keyof typeof character.stats] || 0;
-                        const bonusValue =
-                          stat.key === 'strength'
-                            ? pveBonuses.strength
-                            : stat.key === 'defense'
-                              ? pveBonuses.defense
-                              : 0;
+                        const bonusValue = 0;
                         const val = baseValue + bonusValue;
                         const max = 20;
                         const percentage = Math.min(100, (val / max) * 100);
@@ -253,7 +251,8 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                             <p>PODER: {pvePower}</p>
                             <p>
                               STATS PVE: F {pveProgress.stats.strength} - V {pveProgress.stats.life} - D{" "}
-                              {pveProgress.stats.defense}
+                              {pveProgress.stats.defense} - A {pveProgress.stats.agility} - I{" "}
+                              {pveProgress.stats.intelligence} - DM {pveProgress.stats.magicDefense}
                             </p>
                           </div>
                         </div>
@@ -261,10 +260,13 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                           <InfoItem label="Nivel PvE" value={`Lv ${pveProgress.level}`} />
                           <InfoItem label="Poder PvE" value={`${pvePower}`} />
                         </div>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                           <InfoItem label="Fuerza" value={`${pveProgress.stats.strength}`} />
                           <InfoItem label="Vida" value={`${pveProgress.stats.life}`} />
                           <InfoItem label="Defensa" value={`${pveProgress.stats.defense}`} />
+                          <InfoItem label="Agilidad" value={`${pveProgress.stats.agility}`} />
+                          <InfoItem label="Intel." value={`${pveProgress.stats.intelligence}`} />
+                          <InfoItem label="Def. Mag." value={`${pveProgress.stats.magicDefense}`} />
                         </div>
                         {pveLevelProgress ? (
                           <div>

@@ -367,12 +367,21 @@ export type CharacterStats = {
   magicDefense: number;
 };
 
-export type PveStatKey = "strength" | "life" | "defense";
+export type PveStatKey =
+  | "strength"
+  | "life"
+  | "defense"
+  | "agility"
+  | "intelligence"
+  | "magicDefense";
 
 export type PveCombatStats = {
   strength: number;
   life: number;
   defense: number;
+  agility: number;
+  intelligence: number;
+  magicDefense: number;
 };
 
 export type PvePlayerProgress = {

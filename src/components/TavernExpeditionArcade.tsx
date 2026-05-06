@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BadgeAlert,
+  Brain,
 
   Coins,
   Heart,
@@ -9,6 +10,7 @@ import {
   Sparkles,
   Swords,
   UserRound,
+  Zap,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { ARCADE_ENCOUNTERS } from "../data/pve";
@@ -27,8 +29,8 @@ import {
   setActivePveSheetId,
   spendPvePoint,
 } from "../utils/pveProgress";
-import { getPlayerSheets } from "../utils/characterSheets";
-import type { CharacterSheet, PveCombatStats, PvePlayerProgress, PveStatKey } from "../types";
+import { getPlayerSheets, saveCharacterSheet } from "../utils/characterSheets";
+import type { CharacterSheet, CharacterStats, PveCombatStats, PvePlayerProgress, PveStatKey } from "../types";
 
 type CombatAction = "attack" | "ability" | "defend";
 type CombatResult = "idle" | "active" | "victory" | "defeat";
@@ -96,6 +98,59 @@ const MEDIUM_CRIT_MULTIPLIER = 1.8;
 const HARD_CRIT_MULTIPLIER = 2.1;
 const PROGRESS_WINDOW_MS =
   Math.max(...ARCADE_ENCOUNTERS.map((encounter) => encounter.windowHours)) * 60 * 60 * 1000;
+type SheetStatKey = keyof CharacterStats;
+
+type ExpeditionUpgradeConfig = {
+  stat: PveStatKey;
+  sheetStat?: SheetStatKey;
+  icon: typeof Swords;
+  label: string;
+  detail: (value: number) => string;
+};
+
+const EXPEDITION_UPGRADES: ExpeditionUpgradeConfig[] = [
+  {
+    stat: "strength",
+    sheetStat: "strength",
+    icon: Swords,
+    label: "Fuerza",
+    detail: (value) => `Ataque +${value * STRENGTH_ATTACK_BONUS}`,
+  },
+  {
+    stat: "life",
+    icon: Heart,
+    label: "Vida",
+    detail: (value) => `HP +${value * LIFE_BONUS_PER_POINT}`,
+  },
+  {
+    stat: "defense",
+    sheetStat: "defense",
+    icon: Shield,
+    label: "Defensa",
+    detail: (value) => `Dano -${value * DEFENSE_DAMAGE_REDUCTION}`,
+  },
+  {
+    stat: "agility",
+    sheetStat: "agility",
+    icon: Zap,
+    label: "Agilidad",
+    detail: (value) => `Esquiva +${value}`,
+  },
+  {
+    stat: "intelligence",
+    sheetStat: "intelligence",
+    icon: Brain,
+    label: "Inteligencia",
+    detail: (value) => `Tecnica +${value}`,
+  },
+  {
+    stat: "magicDefense",
+    sheetStat: "magicDefense",
+    icon: Sparkles,
+    label: "Defensa magica",
+    detail: (value) => `Resistencia +${value}`,
+  },
+];
 
 const CONTRACT_MUTATORS: Record<"controlled" | "medium" | "hard", EncounterMutator[]> = {
   controlled: [
@@ -308,6 +363,9 @@ function getSheetCombatBonuses(sheet: CharacterSheet | null) {
       strength: 0,
       life: 0,
       defense: 0,
+      agility: 0,
+      intelligence: 0,
+      magicDefense: 0,
       ability: 0,
     };
   }
@@ -316,6 +374,9 @@ function getSheetCombatBonuses(sheet: CharacterSheet | null) {
     strength: Math.floor((sheet.stats.strength ?? 0) / 4),
     life: Math.floor(((sheet.stats.defense ?? 0) + (sheet.stats.magicDefense ?? 0)) / 6),
     defense: Math.floor(((sheet.stats.defense ?? 0) + (sheet.stats.agility ?? 0)) / 6),
+    agility: Math.floor((sheet.stats.agility ?? 0) / 4),
+    intelligence: Math.floor((sheet.stats.intelligence ?? 0) / 4),
+    magicDefense: Math.floor((sheet.stats.magicDefense ?? 0) / 4),
     ability: Math.floor((sheet.stats.intelligence ?? 0) / 4),
   };
 }
@@ -403,6 +464,9 @@ export function TavernExpeditionArcade() {
       strength: safeProgress.stats.strength + sheetBonuses.strength,
       life: safeProgress.stats.life + sheetBonuses.life,
       defense: safeProgress.stats.defense + sheetBonuses.defense,
+      agility: safeProgress.stats.agility + sheetBonuses.agility,
+      intelligence: safeProgress.stats.intelligence + sheetBonuses.intelligence,
+      magicDefense: safeProgress.stats.magicDefense + sheetBonuses.magicDefense,
     }),
     [safeProgress, sheetBonuses]
   );
@@ -768,12 +832,33 @@ export function TavernExpeditionArcade() {
     setBattle(null);
   }
 
-  function upgradeStat(stat: PveStatKey) {
-    if (!player || !progress || progress.availablePoints <= 0 || battle?.result === "active") {
+  async function upgradeStat(stat: PveStatKey) {
+    if (!player || !progress || !activeSheet || progress.availablePoints <= 0 || battle?.result === "active" || isUpdating) {
       return;
     }
 
+    const upgrade = EXPEDITION_UPGRADES.find((item) => item.stat === stat);
     const nextProgress = spendPvePoint(progress, stat);
+
+    if (upgrade?.sheetStat) {
+      setIsUpdating(true);
+      try {
+        const nextSheet: CharacterSheet = {
+          ...activeSheet,
+          stats: {
+            ...activeSheet.stats,
+            [upgrade.sheetStat]: (activeSheet.stats[upgrade.sheetStat] ?? 0) + 1,
+          },
+        };
+        await saveCharacterSheet(nextSheet);
+        setPlayerSheets((currentSheets) =>
+          currentSheets.map((sheet) => (sheet.id === nextSheet.id ? nextSheet : sheet))
+        );
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+
     savePveProgress(nextProgress);
     setProgress(nextProgress);
   }
@@ -947,34 +1032,25 @@ export function TavernExpeditionArcade() {
 
           {showUpgrades ? (
             <>
-              <div className="grid gap-3 md:grid-cols-3">
-                <UpgradeCard
-                  icon={Swords}
-                  label="Fuerza"
-                  value={effectiveStats.strength}
-                  hint={`PvE ${safeProgress.stats.strength} | Ficha +${sheetBonuses.strength}`}
-                  detail={`Ataque +${effectiveStats.strength * STRENGTH_ATTACK_BONUS}`}
-                  disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-                  onUpgrade={() => upgradeStat("strength")}
-                />
-                <UpgradeCard
-                  icon={Heart}
-                  label="Vida"
-                  value={effectiveStats.life}
-                  hint={`PvE ${safeProgress.stats.life} | Ficha +${sheetBonuses.life}`}
-                  detail={`HP +${effectiveStats.life * LIFE_BONUS_PER_POINT}`}
-                  disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-                  onUpgrade={() => upgradeStat("life")}
-                />
-                <UpgradeCard
-                  icon={Shield}
-                  label="Defensa"
-                  value={effectiveStats.defense}
-                  hint={`PvE ${safeProgress.stats.defense} | Ficha +${sheetBonuses.defense}`}
-                  detail={`Dano -${effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION}`}
-                  disabled={safeProgress.availablePoints <= 0 || battle?.result === "active"}
-                  onUpgrade={() => upgradeStat("defense")}
-                />
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {EXPEDITION_UPGRADES.map((upgrade) => {
+                  const sheetValue = upgrade.sheetStat
+                    ? activeSheet.stats[upgrade.sheetStat] ?? 0
+                    : 0;
+
+                  return (
+                    <UpgradeCard
+                      key={upgrade.stat}
+                      icon={upgrade.icon}
+                      label={upgrade.label}
+                      value={effectiveStats[upgrade.stat]}
+                      hint={`PvE ${safeProgress.stats[upgrade.stat]} | Ficha +${sheetValue}`}
+                      detail={upgrade.detail(effectiveStats[upgrade.stat])}
+                      disabled={safeProgress.availablePoints <= 0 || battle?.result === "active" || isUpdating}
+                      onUpgrade={() => void upgradeStat(upgrade.stat)}
+                    />
+                  );
+                })}
               </div>
             </>
           ) : null}

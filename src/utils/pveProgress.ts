@@ -7,6 +7,9 @@ const EMPTY_STATS = {
   strength: 0,
   life: 0,
   defense: 0,
+  agility: 0,
+  intelligence: 0,
+  magicDefense: 0,
 } as const;
 
 type ProgressStore = Record<string, PvePlayerProgress>;
@@ -115,7 +118,10 @@ export function getPvePower(progress: Pick<PvePlayerProgress, "level" | "stats">
     progress.level * 12 +
     progress.stats.strength * 8 +
     progress.stats.life * 7 +
-    progress.stats.defense * 7
+    progress.stats.defense * 7 +
+    progress.stats.agility * 5 +
+    progress.stats.intelligence * 5 +
+    progress.stats.magicDefense * 5
   );
 }
 
@@ -164,6 +170,9 @@ export function loadPveProgressForSheet(
       strength: base.stats?.strength ?? 0,
       life: base.stats?.life ?? 0,
       defense: base.stats?.defense ?? 0,
+      agility: base.stats?.agility ?? 0,
+      intelligence: base.stats?.intelligence ?? 0,
+      magicDefense: base.stats?.magicDefense ?? 0,
     },
     usage: pruneUsage(base.usage ?? {}, windowMs),
   };
@@ -290,7 +299,7 @@ export function spendPvePoint(progress: PvePlayerProgress, stat: PveStatKey) {
     availablePoints: progress.availablePoints - 1,
     stats: {
       ...progress.stats,
-      [stat]: progress.stats[stat] + 1,
+      [stat]: (progress.stats[stat] ?? 0) + 1,
     },
   };
 }

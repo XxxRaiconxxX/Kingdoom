@@ -31,6 +31,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 07/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`
+*   **Resumen de Tareas:** Se dejo la cabecera de Anime Hub solo como buscador compacto.
+*   **Cambios Clave:**
+    *   Se retiraron los filtros visibles de genero y el badge `Remoto/Demo`.
+    *   La busqueda queda como unica accion superior con boton pequeno de lupa.
+    *   Las consultas remotas siguen funcionando sin filtro de genero visible.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 07/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`
 *   **Resumen de Tareas:** Se compacto la cabecera de Anime Hub para liberar espacio de resultados, vista previa y episodios.
 *   **Cambios Clave:**
     *   El buscador paso a una barra superior horizontal con boton pequeno de lupa.

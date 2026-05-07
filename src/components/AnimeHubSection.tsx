@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { ExpandableText } from "./ExpandableText";
 import {
-  ANIME_HUB_GENRES,
   mockAnimeHubProvider,
   remoteAnimeHubProvider,
   type AnimeEpisodeLinks,
@@ -38,7 +37,6 @@ function summaryToDetail(series: AnimeSeriesSummary): AnimeSeriesDetail {
 
 export function AnimeHubSection() {
   const [query, setQuery] = useState("");
-  const [genre, setGenre] = useState<string>("Todos");
   const [results, setResults] = useState<AnimeSeriesSummary[]>([]);
   const [selectedSeries, setSelectedSeries] = useState<AnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>("");
@@ -52,7 +50,6 @@ export function AnimeHubSection() {
     []
   );
 
-  const sourceBadge = providerIsRemote() ? "Remoto" : "Demo";
   const selectedEpisode = useMemo(
     () =>
       selectedSeries?.episodes.find((episode) => episode.id === selectedEpisodeId) ??
@@ -99,7 +96,7 @@ export function AnimeHubSection() {
     try {
       const nextResults = await activeProvider.searchSeries({
         query,
-        genre: genre === "Todos" ? "" : genre,
+        genre: "",
       });
       const nextSelected = nextResults[0] ? await resolveSeriesDetail(nextResults[0]) : null;
 
@@ -153,7 +150,7 @@ export function AnimeHubSection() {
   return (
     <section className="space-y-5">
       <article className="rounded-[1.5rem] border border-stone-800 bg-stone-950/70 p-2.5 shadow-[0_24px_70px_rgba(0,0,0,0.25)]">
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+        <div className="flex items-center">
           <form
             className="flex min-w-0 flex-1 items-center gap-2"
             onSubmit={(event) => {
@@ -178,38 +175,6 @@ export function AnimeHubSection() {
               <Search className="h-4 w-4" />
             </button>
           </form>
-
-          <div className="flex min-w-0 gap-2 overflow-x-auto pb-1 lg:max-w-[36rem] lg:pb-0">
-            <button
-              type="button"
-              onClick={() => setGenre("Todos")}
-              className={`shrink-0 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
-                genre === "Todos"
-                  ? "border-amber-300/60 bg-amber-300 text-black"
-                  : "border-stone-800 bg-black/25 text-stone-400 hover:text-stone-100"
-              }`}
-            >
-              Todos
-            </button>
-            {ANIME_HUB_GENRES.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setGenre(item)}
-                className={`shrink-0 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
-                  genre === item
-                    ? "border-fuchsia-300/60 bg-fuchsia-400/20 text-fuchsia-100"
-                    : "border-stone-800 bg-black/25 text-stone-400 hover:text-stone-100"
-                }`}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-
-          <span className="w-fit shrink-0 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-cyan-100">
-            {sourceBadge}
-          </span>
         </div>
         <p className="sr-only" aria-live="polite">
           {feedback}

@@ -25,17 +25,12 @@ export async function fetchMobileAnimeShell(query: string, genre?: string) {
       });
       if (res.ok) {
         const data = await res.json();
-        return (data || []).map((item: any) => ({
-          id: item.id || item.slug,
+        const results = data?.data?.results || [];
+        return results.map((item: any) => ({
+          id: item.url || item.id,
           title: item.title,
-          altTitle: item.alt_title,
-          coverImage: item.image || item.poster,
-          synopsis: item.description || "Sin sinopsis.",
-          genres: item.genres || [],
-          year: item.year?.toString() || "N/A",
-          statusLabel: item.status || "Finalizado",
-          providerLabel: "anime1v-remote",
-          score: item.score?.toString(),
+          image: item.image,
+          genres: item.genres || []
         }));
       }
     } catch (e) {
@@ -68,7 +63,9 @@ export async function fetchMobileAnimeShellDetail(seriesId: string) {
         }
       });
       if (res.ok) {
-        const item = await res.json();
+        const data = await res.json();
+        const item = data?.data;
+        if (!item) return null;
         return {
           id: item.id || seriesId,
           title: item.title,

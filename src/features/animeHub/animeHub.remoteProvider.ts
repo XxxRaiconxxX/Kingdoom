@@ -29,9 +29,10 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
       if (!response.ok) return [];
       
       const data = await response.json();
+      const results = data?.data?.results || [];
       
-      return (data || []).map((item: any) => ({
-        id: item.id || item.slug,
+      return results.map((item: any) => ({
+        id: item.url || item.id,
         title: item.title,
         altTitle: item.alt_title,
         coverImage: item.image || item.poster,

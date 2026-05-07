@@ -1,6 +1,7 @@
 import { MOBILE_ANIME_LIBRARY } from "./animeHubMock";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_ANIME_HUB_API_URL;
+const API_KEY = process.env.EXPO_PUBLIC_ANIME_HUB_API_KEY || 'dev-anime1v-key';
 
 export const MOBILE_ANIME_ENDPOINTS = {
   search: "/api/v1/anime/search",
@@ -17,7 +18,11 @@ export async function fetchMobileAnimeShell(query: string, genre?: string) {
       url.searchParams.append("q", query);
       if (genre) url.searchParams.append("genre", genre);
 
-      const res = await fetch(url.toString());
+      const res = await fetch(url.toString(), {
+        headers: {
+          'x-api-key': API_KEY
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         return (data || []).map((item: any) => ({
@@ -57,7 +62,11 @@ export async function fetchMobileAnimeShell(query: string, genre?: string) {
 export async function fetchMobileAnimeShellDetail(seriesId: string) {
   if (API_BASE_URL) {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/anime/info?id=${seriesId}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/anime/info?id=${seriesId}`, {
+        headers: {
+          'x-api-key': API_KEY
+        }
+      });
       if (res.ok) {
         const item = await res.json();
         return {

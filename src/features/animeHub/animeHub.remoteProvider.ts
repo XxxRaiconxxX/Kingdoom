@@ -1,6 +1,7 @@
 import type { AnimeHubProvider } from "./animeHub.types";
 
 const API_BASE_URL = import.meta.env.VITE_ANIME_HUB_API_URL;
+const API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY || 'dev-anime1v-key';
 
 export const remoteAnimeHubProvider: AnimeHubProvider = {
   id: "anime1v-remote",
@@ -20,7 +21,11 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
       const url = new URL(`${API_BASE_URL}/api/v1/anime/search`);
       url.searchParams.append("q", filters.query);
       
-      const response = await fetch(url.toString());
+      const response = await fetch(url.toString(), {
+        headers: {
+          'x-api-key': API_KEY
+        }
+      });
       if (!response.ok) return [];
       
       const data = await response.json();
@@ -46,7 +51,11 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     if (!API_BASE_URL) return null;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/anime/info?id=${seriesId}`);
+      const response = await fetch(`${API_BASE_URL}/api/v1/anime/info?id=${seriesId}`, {
+        headers: {
+          'x-api-key': API_KEY
+        }
+      });
       if (!response.ok) return null;
 
       const item = await response.json();

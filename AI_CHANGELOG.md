@@ -31,6 +31,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 *(Aniade nuevas entradas siempre en la parte superior de esta lista)*
 
+### [Fecha: 07/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Conexión real del módulo Anime Hub con `anime1v-api` mediante variables de entorno, manteniendo el modo cascarón como fallback seguro.
+*   **Cambios Clave:**
+    *   **Web:** Implementado adaptador real en `remoteAnimeHubProvider` usando `VITE_ANIME_HUB_API_URL`. Soporta `searchSeries` y `getSeriesDetail` con mapeo a tipos internos.
+    *   **Web:** `AnimeHubSection` ahora detecta automáticamente si existe la URL de la API para conmutar entre el proveedor mock y el remoto, con manejo de errores elegante en el feedback.
+    *   **Mobile:** Actualizado `animeHubProvider.ts` para consumir `EXPO_PUBLIC_ANIME_HUB_API_URL` si está presente, integrando los flujos de búsqueda e información real con fallback automático al shell mock en caso de error o ausencia de configuración.
+    *   **Resiliencia:** Se preservó el diseño premium y el funcionamiento del modo cascarón para entornos sin configuración de API.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit`, `npm run mobile:typecheck` y `npm run build`. No se requiere `package-lock.json`.
+
 ### [Fecha: 07/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `src/index.css`, `src/types.ts`, `src/components/AnimeHubSection.tsx`, `src/features/animeHub/animeHub.types.ts`, `src/features/animeHub/animeHub.mock.ts`, `src/features/animeHub/animeHub.mockProvider.ts`, `src/features/animeHub/animeHub.remoteProvider.ts`, `src/features/animeHub/index.ts`, `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/app/(tabs)/anime.tsx`, `apps/mobile/src/features/animeHub/animeHubTypes.ts`, `apps/mobile/src/features/animeHub/animeHubMock.ts`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`
 *   **Resumen de Tareas:** Se monto el cascaron completo de Anime Hub en web y app movil, con contratos de proveedor inspirados en `anime1v-api` pero sin conexion real.

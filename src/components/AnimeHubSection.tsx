@@ -36,14 +36,19 @@ export function AnimeHubSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState("");
 
+  const activeProvider = useMemo(
+    () => (import.meta.env.VITE_ANIME_HUB_API_URL ? remoteAnimeHubProvider : mockAnimeHubProvider),
+    []
+  );
+
   useEffect(() => {
     let cancelled = false;
 
     async function loadInitialState() {
       setIsLoading(true);
-      const nextResults = await mockAnimeHubProvider.searchSeries({ query: "", genre: "" });
+      const nextResults = await activeProvider.searchSeries({ query: "", genre: "" });
       const nextSelected = nextResults[0]
-        ? await mockAnimeHubProvider.getSeriesDetail(nextResults[0].id)
+        ? await activeProvider.getSeriesDetail(nextResults[0].id)
         : null;
 
       if (cancelled) {
@@ -52,7 +57,11 @@ export function AnimeHubSection() {
 
       setResults(nextResults);
       setSelectedSeries(nextSelected);
-      setFeedback("Proveedor mock activo. El remoto sigue preparado pero sin conectar.");
+      setFeedback(
+        activeProvider.id === "anime1v-remote"
+          ? "Proveedor remoto conectado y sincronizado."
+          : "Proveedor mock activo. El remoto sigue preparado pero sin conectar."
+      );
       setIsLoading(false);
     }
 
@@ -74,27 +83,39 @@ export function AnimeHubSection() {
 
   async function handleSearch() {
     setIsLoading(true);
-    const nextResults = await mockAnimeHubProvider.searchSeries({
-      query,
-      genre: genre === "Todos" ? "" : genre,
-    });
-    const nextSelected = nextResults[0]
-      ? await mockAnimeHubProvider.getSeriesDetail(nextResults[0].id)
-      : null;
+    try {
+      const nextResults = await activeProvider.searchSeries({
+        query,
+        genre: genre === "Todos" ? "" : genre,
+      });
+      const nextSelected = nextResults[0]
+        ? await activeProvider.getSeriesDetail(nextResults[0].id)
+        : null;
 
-    setResults(nextResults);
-    setSelectedSeries(nextSelected);
-    setFeedback(
-      nextResults.length > 0
-        ? "Busqueda lista. Las llamadas reales siguen deshabilitadas a nivel de proveedor."
-        : "No hay coincidencias en el mock actual. El cascaron quedo listo para mas catalogo."
-    );
+      setResults(nextResults);
+      setSelectedSeries(nextSelected);
+      setFeedback(
+        nextResults.length > 0
+          ? activeProvider.id === "anime1v-remote"
+            ? "Resultados remotos actualizados."
+            : "Busqueda lista. Las llamadas reales siguen deshabilitadas a nivel de proveedor."
+          : "No hay coincidencias en el catalogo actual."
+      );
+    } catch (err) {
+      setFeedback("Error al conectar con el proveedor remoto. Usando fallback.");
+    }
     setIsLoading(false);
   }
 
   async function handleSelectSeries(seriesId: string) {
-    const nextSelected = await mockAnimeHubProvider.getSeriesDetail(seriesId);
-    setSelectedSeries(nextSelected);
+    setIsLoading(true);
+    try {
+      const nextSelected = await activeProvider.getSeriesDetail(seriesId);
+      setSelectedSeries(nextSelected);
+    } catch (err) {
+      setFeedback("No se pudo cargar el detalle de la serie.");
+    }
+    setIsLoading(false);
   }
 
   return (

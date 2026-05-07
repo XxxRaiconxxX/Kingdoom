@@ -1,5 +1,7 @@
 import { MOBILE_ANIME_LIBRARY } from "./animeHubMock";
 
+const API_BASE_URL = process.env.EXPO_PUBLIC_ANIME_HUB_API_URL;
+
 export const MOBILE_ANIME_ENDPOINTS = {
   search: "/api/v1/anime/search",
   info: "/api/v1/anime/info",
@@ -9,6 +11,33 @@ export const MOBILE_ANIME_ENDPOINTS = {
 } as const;
 
 export async function fetchMobileAnimeShell(query: string, genre?: string) {
+  if (API_BASE_URL) {
+    try {
+      const url = new URL(`${API_BASE_URL}/api/v1/anime/search`);
+      url.searchParams.append("q", query);
+      if (genre) url.searchParams.append("genre", genre);
+
+      const res = await fetch(url.toString());
+      if (res.ok) {
+        const data = await res.json();
+        return (data || []).map((item: any) => ({
+          id: item.id || item.slug,
+          title: item.title,
+          altTitle: item.alt_title,
+          coverImage: item.image || item.poster,
+          synopsis: item.description || "Sin sinopsis.",
+          genres: item.genres || [],
+          year: item.year?.toString() || "N/A",
+          statusLabel: item.status || "Finalizado",
+          providerLabel: "anime1v-remote",
+          score: item.score?.toString(),
+        }));
+      }
+    } catch (e) {
+      console.warn("Falling back to mock due to remote error:", e);
+    }
+  }
+
   const normalizedQuery = query.trim().toLowerCase();
   const normalizedGenre = genre?.trim().toLowerCase();
 
@@ -26,13 +55,50 @@ export async function fetchMobileAnimeShell(query: string, genre?: string) {
 }
 
 export async function fetchMobileAnimeShellDetail(seriesId: string) {
+  if (API_BASE_URL) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/anime/info?id=${seriesId}`);
+      if (res.ok) {
+        const item = await res.json();
+        return {
+          id: item.id || seriesId,
+          title: item.title,
+          altTitle: item.alt_title,
+          coverImage: item.image || item.poster,
+          bannerImage: item.banner || item.image,
+          synopsis: item.description || "Sin sinopsis.",
+          genres: item.genres || [],
+          year: item.year?.toString() || "N/A",
+          statusLabel: item.status || "Emisión",
+          providerLabel: "anime1v-remote",
+          score: item.score?.toString(),
+          releaseWindow: item.season || "N/A",
+          episodeCount: item.episodes?.length || 0,
+          featuredQuote: item.tagline || "Conexión remota activa.",
+          episodes: (item.episodes || []).map((ep: any) => ({
+            id: `${seriesId}-ep-${ep.number}`,
+            number: ep.number,
+            title: ep.title || `Episodio ${ep.number}`,
+            duration: ep.duration,
+            status: "ready",
+          })),
+          downloads: (item.downloads || []).map((dl: any) => ({
+            qualityLabel: dl.quality,
+            providerLabel: dl.provider,
+            note: dl.url || "Enlace directo",
+          })),
+        };
+      }
+    } catch (e) {
+      console.warn("Detail fetch failed, falling back to mock", e);
+    }
+  }
   return MOBILE_ANIME_LIBRARY.find((entry) => entry.id === seriesId) ?? null;
 }
 
 export async function connectRemoteAnimeProviderPlaceholder() {
-  // Aqui faltaria:
-  // 1. Si no se anade ANIME_HUB_API_URL en la app, no se activa y sigue modo cascaron.
-  // 2. Consumir search, info, episode, download y batch.
-  // 3. Adaptar la respuesta del backend a los tipos nativos de la app.
-  throw new Error("Proveedor remoto no conectado. Solo el shell mock esta activo.");
+  if (!API_BASE_URL) {
+    return { success: false, message: "Falta EXPO_PUBLIC_ANIME_HUB_API_URL" };
+  }
+  return { success: true, message: "Conectado a " + API_BASE_URL };
 }

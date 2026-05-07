@@ -34,8 +34,10 @@ function normalizeGenres(value: unknown): string[] {
 }
 
 function normalizeSummary(item: any): AnimeSeriesSummary {
+  const fallbackId = String(item?.title ?? item?.name ?? "anime-remoto");
+
   return {
-    id: String(item?.url ?? item?.id ?? item?.slug ?? item?.title ?? crypto.randomUUID()),
+    id: String(item?.url ?? item?.id ?? item?.slug ?? fallbackId),
     title: item?.title ?? item?.name ?? "Titulo no disponible",
     altTitle: item?.alt_title ?? item?.titleJapanese ?? item?.alternativeTitle,
     coverImage: item?.image ?? item?.poster ?? item?.coverImage ?? FALLBACK_IMAGE,
@@ -47,6 +49,18 @@ function normalizeSummary(item: any): AnimeSeriesSummary {
     providerLabel: "anime1v-remote",
     score: item?.score ? String(item.score) : undefined,
   };
+}
+
+async function fetchSeriesDetail(seriesId: string, paramName: "id" | "url") {
+  const url = new URL(endpoint("/api/v1/anime/info"));
+  url.searchParams.set(paramName, seriesId);
+
+  const response = await fetch(url.toString(), { headers: requestHeaders() });
+  if (!response.ok) {
+    return null;
+  }
+
+  return normalizeDetail(await response.json(), seriesId);
 }
 
 function normalizeEpisodes(value: unknown): AnimeEpisodeSummary[] {
@@ -136,15 +150,10 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     }
 
     try {
-      const url = new URL(endpoint("/api/v1/anime/info"));
-      url.searchParams.set("id", seriesId);
-
-      const response = await fetch(url.toString(), { headers: requestHeaders() });
-      if (!response.ok) {
-        return null;
-      }
-
-      return normalizeDetail(await response.json(), seriesId);
+      return (
+        (await fetchSeriesDetail(seriesId, "id")) ??
+        (await fetchSeriesDetail(seriesId, "url"))
+      );
     } catch (error) {
       console.error("AnimeHub Remote Detail Error:", error);
       return null;

@@ -23,6 +23,21 @@ function providerIsRemote() {
   return Boolean(import.meta.env.VITE_ANIME_HUB_API_URL);
 }
 
+function summaryToDetail(series: AnimeSeriesSummary): AnimeSeriesDetail {
+  const synopsis = series.synopsis || "Sin sinopsis disponible.";
+
+  return {
+    ...series,
+    episodeCount: 0,
+    releaseWindow: series.year || "N/A",
+    featuredQuote:
+      synopsis.length > 150 ? `${synopsis.slice(0, 150).trim()}...` : synopsis,
+    synopsis,
+    episodes: [],
+    downloads: [],
+  };
+}
+
 export function AnimeHubSection() {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState<string>("Todos");
@@ -41,15 +56,17 @@ export function AnimeHubSection() {
 
   const sourceBadge = providerIsRemote() ? "Remoto" : "Demo";
 
+  async function resolveSeriesDetail(series: AnimeSeriesSummary) {
+    return (await activeProvider.getSeriesDetail(series.id)) ?? summaryToDetail(series);
+  }
+
   useEffect(() => {
     let cancelled = false;
 
     async function loadInitialState() {
       setIsLoading(true);
       const nextResults = await activeProvider.searchSeries({ query: "", genre: "" });
-      const nextSelected = nextResults[0]
-        ? await activeProvider.getSeriesDetail(nextResults[0].id)
-        : null;
+      const nextSelected = nextResults[0] ? await resolveSeriesDetail(nextResults[0]) : null;
 
       if (cancelled) {
         return;
@@ -80,9 +97,7 @@ export function AnimeHubSection() {
         query,
         genre: genre === "Todos" ? "" : genre,
       });
-      const nextSelected = nextResults[0]
-        ? await activeProvider.getSeriesDetail(nextResults[0].id)
-        : null;
+      const nextSelected = nextResults[0] ? await resolveSeriesDetail(nextResults[0]) : null;
 
       setResults(nextResults);
       setSelectedSeries(nextSelected);
@@ -94,17 +109,22 @@ export function AnimeHubSection() {
     }
   }
 
-  async function handleSelectSeries(seriesId: string) {
+  async function handleSelectSeries(series: AnimeSeriesSummary) {
     setIsLoading(true);
     setSelectedEpisodeLinks(null);
     setSelectedEpisodeId("");
+    setSelectedSeries(summaryToDetail(series));
 
     try {
-      const nextSelected = await activeProvider.getSeriesDetail(seriesId);
-      setSelectedSeries(nextSelected);
-      setFeedback(nextSelected ? "Ficha cargada." : "Ficha no disponible.");
+      const nextSelected = await activeProvider.getSeriesDetail(series.id);
+      if (nextSelected) {
+        setSelectedSeries(nextSelected);
+      }
+      setFeedback(
+        nextSelected ? "Ficha cargada." : "Ficha basica cargada. Episodios pendientes."
+      );
     } catch {
-      setFeedback("No se pudo abrir la ficha.");
+      setFeedback("Ficha basica cargada. El proveedor no entrego detalle.");
     } finally {
       setIsLoading(false);
     }
@@ -228,7 +248,7 @@ export function AnimeHubSection() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.035, duration: 0.2 }}
-                  onClick={() => void handleSelectSeries(item.id)}
+                  onClick={() => void handleSelectSeries(item)}
                   className={`group grid grid-cols-[5.4rem_1fr] gap-3 overflow-hidden rounded-2xl border p-2 text-left transition ${
                     selectedSeries?.id === item.id
                       ? "border-amber-300/50 bg-amber-300/10"
@@ -344,6 +364,11 @@ export function AnimeHubSection() {
                             <PlayCircle className="h-4 w-4 shrink-0 text-cyan-200" />
                           </button>
                         ))}
+                        {selectedSeries.episodes.length === 0 ? (
+                          <div className="rounded-xl border border-stone-800 bg-stone-950/60 px-3 py-4 text-sm text-stone-500 sm:col-span-2">
+                            El proveedor mostro la serie, pero aun no entrego episodios para esta ficha.
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   </div>

@@ -47,7 +47,7 @@ export default function AnimeScreen() {
       }
 
       setEntries(nextEntries);
-      setSelected(nextSelected);
+      setSelected(nextSelected ?? nextEntries[0] ?? null);
       setLoading(false);
     }
 
@@ -71,16 +71,18 @@ export default function AnimeScreen() {
       : null;
 
     setEntries(nextEntries);
-    setSelected(nextSelected);
+    setSelected(nextSelected ?? nextEntries[0] ?? null);
     setFeedback(nextEntries.length > 0 ? "Catalogo actualizado." : "Sin resultados.");
     setLoading(false);
   }
 
-  async function handleSelectSeries(seriesId: string) {
+  async function handleSelectSeries(entry: MobileAnimeSeriesDetail) {
     setLoading(true);
     setEpisodeLinks(null);
     setSelectedEpisodeId("");
-    setSelected(await fetchMobileAnimeShellDetail(seriesId));
+    setSelected(entry);
+    const nextSelected = await fetchMobileAnimeShellDetail(entry.id);
+    setSelected(nextSelected ?? entry);
     setLoading(false);
   }
 
@@ -151,7 +153,7 @@ export default function AnimeScreen() {
               {entries.map((entry, index) => (
                 <Animated.View key={entry.id} entering={FadeInDown.delay(index * 45).duration(220)}>
                   <Pressable
-                    onPress={() => void handleSelectSeries(entry.id)}
+                    onPress={() => void handleSelectSeries(entry)}
                     style={({ pressed }) => ({
                       width: 178,
                       borderRadius: 18,
@@ -249,6 +251,12 @@ export default function AnimeScreen() {
                 <MaterialIcons name="play-circle" size={20} color={MOBILE_THEME.teal} />
               </Pressable>
             ))}
+            {selected.episodes.length === 0 ? (
+              <EmptyState
+                title="Ficha sin episodios"
+                message="El proveedor mostro la serie, pero aun no entrego episodios."
+              />
+            ) : null}
           </View>
         </RealmCard>
       ) : null}

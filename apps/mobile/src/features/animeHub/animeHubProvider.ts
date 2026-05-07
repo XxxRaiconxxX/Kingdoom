@@ -112,12 +112,14 @@ export async function fetchMobileAnimeShell(query: string, genre?: string) {
 export async function fetchMobileAnimeShellDetail(seriesId: string) {
   if (API_BASE_URL) {
     try {
-      const url = new URL(`${API_BASE_URL}/api/v1/anime/info`);
-      url.searchParams.set("id", seriesId);
-      const response = await fetch(url.toString(), { headers: headers() });
+      for (const paramName of ["id", "url"] as const) {
+        const url = new URL(`${API_BASE_URL}/api/v1/anime/info`);
+        url.searchParams.set(paramName, seriesId);
+        const response = await fetch(url.toString(), { headers: headers() });
 
-      if (response.ok) {
-        return normalizeDetail(unwrap(await response.json()), seriesId);
+        if (response.ok) {
+          return normalizeDetail(unwrap(await response.json()), seriesId);
+        }
       }
     } catch (error) {
       console.warn("Anime detail fallback:", error);

@@ -35,4 +35,10 @@ export const mockAnimeHubProvider: AnimeHubProvider = {
   async getSeriesDetail(seriesId) {
     return ANIME_HUB_LIBRARY.find((entry) => entry.id === seriesId) ?? null;
   },
+  async getEpisodeLinks() {
+    return {
+      stream: [{ server: "Mock Stream", url: "#" }],
+      download: [{ server: "Mock Download", url: "#" }],
+    };
+  },
 };

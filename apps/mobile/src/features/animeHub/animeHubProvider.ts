@@ -67,32 +67,27 @@ export async function fetchMobileAnimeShellDetail(seriesId: string) {
         const item = data?.data;
         if (!item) return null;
         return {
-          id: item.id || seriesId,
+          id: item.url || item.id || seriesId,
           title: item.title,
-          altTitle: item.alt_title,
-          coverImage: item.image || item.poster,
-          bannerImage: item.banner || item.image,
+          altTitle: item.titleJapanese,
+          coverImage: item.image,
+          bannerImage: item.backdrop,
           synopsis: item.description || "Sin sinopsis.",
-          genres: item.genres || [],
+          genres: item.genres?.map((g: any) => g.name) || [],
           year: item.year?.toString() || "N/A",
-          statusLabel: item.status || "Emisión",
+          statusLabel: item.status || "Finalizado",
           providerLabel: "anime1v-remote",
           score: item.score?.toString(),
-          releaseWindow: item.season || "N/A",
-          episodeCount: item.episodes?.length || 0,
-          featuredQuote: item.tagline || "Conexión remota activa.",
+          releaseWindow: item.year || "N/A",
+          episodeCount: item.totalEpisodes || 0,
+          featuredQuote: item.description?.slice(0, 100) + '...',
           episodes: (item.episodes || []).map((ep: any) => ({
-            id: `${seriesId}-ep-${ep.number}`,
+            id: ep.url,
             number: ep.number,
             title: ep.title || `Episodio ${ep.number}`,
-            duration: ep.duration,
             status: "ready",
           })),
-          downloads: (item.downloads || []).map((dl: any) => ({
-            qualityLabel: dl.quality,
-            providerLabel: dl.provider,
-            note: dl.url || "Enlace directo",
-          })),
+          downloads: [],
         };
       }
     } catch (e) {
@@ -100,6 +95,30 @@ export async function fetchMobileAnimeShellDetail(seriesId: string) {
     }
   }
   return MOBILE_ANIME_LIBRARY.find((entry) => entry.id === seriesId) ?? null;
+}
+
+export async function fetchMobileEpisodeLinks(episodeUrl: string) {
+  if (API_BASE_URL) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/anime/episode?url=${encodeURIComponent(episodeUrl)}`, {
+        headers: {
+          'x-api-key': API_KEY
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const info = data?.data;
+        if (!info) return null;
+        return {
+          stream: info.servers?.sub || [],
+          download: info.downloadLinks?.SUB || []
+        };
+      }
+    } catch (e) {
+      console.warn("Links fetch failed", e);
+    }
+  }
+  return null;
 }
 
 export async function connectRemoteAnimeProviderPlaceholder() {

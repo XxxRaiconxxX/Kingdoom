@@ -36,6 +36,11 @@ export type AnimeDownloadRequest = {
   note: string;
 };
 
+export type AnimeEpisodeLinks = {
+  stream: { server: string; url: string; quality?: string }[];
+  download: { server: string; url: string; quality?: string }[];
+};
+
 export type AnimeSeriesDetail = AnimeSeriesSummary & {
   episodeCount: number;
   releaseWindow: string;
@@ -57,4 +62,5 @@ export type AnimeHubProvider = {
   };
   searchSeries: (filters: AnimeSearchFilters) => Promise<AnimeSeriesSummary[]>;
   getSeriesDetail: (seriesId: string) => Promise<AnimeSeriesDetail | null>;
+  getEpisodeLinks: (episodeUrl: string) => Promise<AnimeEpisodeLinks | null>;
 };

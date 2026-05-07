@@ -80,21 +80,53 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
         year: item.year?.toString() || "N/A",
         statusLabel: item.status || "Emisión",
         providerLabel: "anime1v-remote",
-        score: item.score?.toString(),
-        episodeCount: item.episodes?.length || 0,
-        releaseWindow: item.season || "N/A",
-        featuredQuote: item.tagline || "Conexión remota activa.",
-        episodes,
-        downloads: (item.downloads || []).map((dl: any) => ({
-          qualityLabel: dl.quality,
-          providerLabel: dl.provider,
-          status: "mock",
-          note: dl.url || "Enlace directo",
+        altTitle: item.titleJapanese,
+        coverImage: item.image,
+        bannerImage: item.backdrop,
+        synopsis: item.description || '',
+        genres: item.genres?.map((g: any) => g.name) || [],
+        year: item.year || '',
+        statusLabel: item.status || '',
+        providerLabel: "anime1v-remote",
+        episodeCount: item.totalEpisodes || 0,
+        releaseWindow: item.year || '',
+        featuredQuote: item.description?.slice(0, 100) + '...',
+        episodes: (item.episodes || []).map((ep: any) => ({
+          id: ep.url,
+          number: ep.number,
+          title: ep.title,
+          status: "ready"
         })),
+        downloads: []
       };
-    } catch (error) {
-      console.error("AnimeHub Remote Detail Error:", error);
+    } catch (err) {
+      console.error("AnimeHub Remote Detail Error:", err);
       return null;
     }
   },
+
+  async getEpisodeLinks(episodeUrl: string) {
+    if (!API_BASE_URL) return null;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/anime/episode?url=${encodeURIComponent(episodeUrl)}`, {
+        headers: {
+          'x-api-key': API_KEY
+        }
+      });
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      const info = data?.data;
+      if (!info) return null;
+
+      return {
+        stream: info.servers?.sub || [],
+        download: info.downloadLinks?.SUB || []
+      };
+    } catch (err) {
+      console.error("AnimeHub Remote Links Error:", err);
+      return null;
+    }
+  }
 };

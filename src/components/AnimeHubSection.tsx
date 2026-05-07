@@ -33,6 +33,7 @@ export function AnimeHubSection() {
   const [genre, setGenre] = useState<string>("Todos");
   const [results, setResults] = useState<AnimeSeriesSummary[]>([]);
   const [selectedSeries, setSelectedSeries] = useState<AnimeSeriesDetail | null>(null);
+  const [selectedEpisodeLinks, setSelectedEpisodeLinks] = useState<{ stream: any[], download: any[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState("");
 
@@ -109,6 +110,7 @@ export function AnimeHubSection() {
 
   async function handleSelectSeries(seriesId: string) {
     setIsLoading(true);
+    setSelectedEpisodeLinks(null);
     try {
       const nextSelected = await activeProvider.getSeriesDetail(seriesId);
       setSelectedSeries(nextSelected);
@@ -116,6 +118,17 @@ export function AnimeHubSection() {
       setFeedback("No se pudo cargar el detalle de la serie.");
     }
     setIsLoading(false);
+  }
+
+  async function handleSelectEpisode(episodeUrl: string) {
+    setFeedback("Obteniendo enlaces del episodio...");
+    try {
+      const links = await activeProvider.getEpisodeLinks(episodeUrl);
+      setSelectedEpisodeLinks(links);
+      setFeedback("Enlaces obtenidos. Selecciona un servidor para visualizar.");
+    } catch (err) {
+      setFeedback("Error al obtener enlaces del episodio.");
+    }
   }
 
   return (
@@ -373,10 +386,10 @@ export function AnimeHubSection() {
                         <p className="text-[11px] font-black uppercase tracking-[0.2em]">Episodios</p>
                       </div>
                       <div className="mt-4 grid gap-2">
-                        {selectedSeries.episodes.map((episode) => (
-                          <div
+                          <button
                             key={episode.id}
-                            className="flex items-center justify-between gap-3 rounded-[1.15rem] border border-stone-800 bg-black/25 px-4 py-3"
+                            onClick={() => void handleSelectEpisode(episode.id)}
+                            className="flex w-full items-center justify-between gap-3 rounded-[1.15rem] border border-stone-800 bg-black/25 px-4 py-3 text-left transition hover:border-cyan-400/30"
                           >
                             <div>
                               <p className="font-bold text-stone-100">
@@ -389,9 +402,43 @@ export function AnimeHubSection() {
                             <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-cyan-100">
                               {episode.status === "ready" ? "Listo" : "Provider"}
                             </span>
-                          </div>
+                          </button>
                         ))}
                       </div>
+
+                      {selectedEpisodeLinks && (
+                        <div className="mt-4 rounded-[1.5rem] border border-cyan-500/15 bg-cyan-500/5 p-4">
+                          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-200">Enlaces de reproduccion</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {selectedEpisodeLinks.stream.map((link) => (
+                              <a
+                                key={link.url}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-xs font-bold text-cyan-100 hover:bg-cyan-400/20"
+                              >
+                                Ver en {link.server}
+                              </a>
+                            ))}
+                          </div>
+                          
+                          <p className="mt-4 text-[11px] font-black uppercase tracking-[0.2em] text-amber-200">Descarga directa</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {selectedEpisodeLinks.download.map((link) => (
+                              <a
+                                key={link.url}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-100 hover:bg-amber-500/20"
+                              >
+                                {link.server} ({link.quality || 'HD'})
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

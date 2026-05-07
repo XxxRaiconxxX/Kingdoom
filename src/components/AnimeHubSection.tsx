@@ -55,6 +55,12 @@ export function AnimeHubSection() {
   );
 
   const sourceBadge = providerIsRemote() ? "Remoto" : "Demo";
+  const selectedEpisode = useMemo(
+    () =>
+      selectedSeries?.episodes.find((episode) => episode.id === selectedEpisodeId) ??
+      null,
+    [selectedEpisodeId, selectedSeries]
+  );
 
   async function resolveSeriesDetail(series: AnimeSeriesSummary) {
     return (await activeProvider.getSeriesDetail(series.id)) ?? summaryToDetail(series);
@@ -324,44 +330,61 @@ export function AnimeHubSection() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-                  <div className="space-y-4">
-                    <div className="rounded-2xl border border-stone-800 bg-black/25 p-4">
-                      <ExpandableText text={selectedSeries.synopsis} lines={4} />
-                    </div>
+                <div className="space-y-4 p-4">
+                  <div className="rounded-2xl border border-stone-800 bg-black/25 p-4">
+                    <ExpandableText text={selectedSeries.synopsis} lines={3} />
+                  </div>
 
+                  <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.82fr)]">
                     <div className="rounded-2xl border border-stone-800 bg-black/25 p-4">
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2 text-cyan-200">
                           <PlayCircle className="h-4 w-4" />
-                          <p className="text-[10px] font-black uppercase tracking-[0.2em]">Episodios</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em]">
+                            Episodios
+                          </p>
                         </div>
                         {isEpisodeLoading ? (
-                          <span className="text-xs font-bold text-stone-500">Cargando...</span>
-                        ) : null}
+                          <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-cyan-100">
+                            Cargando
+                          </span>
+                        ) : (
+                          <span className="rounded-full border border-stone-700 bg-stone-950/70 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-stone-400">
+                            {selectedSeries.episodes.length} eps
+                          </span>
+                        )}
                       </div>
 
-                      <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                      <div className="mt-3 grid max-h-[26rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                         {selectedSeries.episodes.map((episode) => (
                           <button
                             key={episode.id}
                             type="button"
                             onClick={() => void handleSelectEpisode(episode.id)}
-                            className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left transition ${
+                            className={`group flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition ${
                               selectedEpisodeId === episode.id
-                                ? "border-cyan-300/50 bg-cyan-300/10"
-                                : "border-stone-800 bg-stone-950/60 hover:border-cyan-400/25"
+                                ? "border-cyan-300/55 bg-cyan-300/10 shadow-[0_0_22px_rgba(34,211,238,0.12)]"
+                                : "border-stone-800 bg-stone-950/60 hover:border-cyan-400/25 hover:bg-cyan-400/5"
                             }`}
                           >
-                            <div className="min-w-0">
+                            <span
+                              className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border text-xs font-black ${
+                                selectedEpisodeId === episode.id
+                                  ? "border-cyan-300/50 bg-cyan-300/20 text-cyan-100"
+                                  : "border-stone-700 bg-black/35 text-stone-400"
+                              }`}
+                            >
+                              {episode.number}
+                            </span>
+                            <div className="min-w-0 flex-1">
                               <p className="truncate text-sm font-black text-stone-100">
-                                {episode.number}. {episode.title}
+                                {episode.title}
                               </p>
                               <p className="mt-1 text-[11px] text-stone-500">
                                 {episode.duration || "Disponible"}
                               </p>
                             </div>
-                            <PlayCircle className="h-4 w-4 shrink-0 text-cyan-200" />
+                            <PlayCircle className="h-4 w-4 shrink-0 text-cyan-200 opacity-70 transition group-hover:opacity-100" />
                           </button>
                         ))}
                         {selectedSeries.episodes.length === 0 ? (
@@ -371,62 +394,84 @@ export function AnimeHubSection() {
                         ) : null}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-4">
-                    <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-4">
-                      <div className="flex items-center gap-2 text-cyan-200">
-                        <PlayCircle className="h-4 w-4" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Ver</p>
-                      </div>
-                      <div className="mt-3 grid gap-2">
-                        {(selectedEpisodeLinks?.stream ?? []).map((link) => (
-                          <a
-                            key={link.url}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-between gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-3 text-sm font-bold text-cyan-100 transition hover:bg-cyan-400/20"
-                          >
-                            {link.server}
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        ))}
-                        {selectedEpisodeLinks && selectedEpisodeLinks.stream.length === 0 ? (
-                          <p className="text-sm text-stone-500">Sin servidores de reproduccion.</p>
-                        ) : null}
-                        {!selectedEpisodeLinks ? (
-                          <p className="text-sm text-stone-500">Selecciona un episodio.</p>
+                    <div className="rounded-2xl border border-amber-300/20 bg-gradient-to-br from-stone-950 via-stone-950 to-amber-950/20 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-300">
+                            Acciones
+                          </p>
+                          <h4 className="mt-1 text-lg font-black text-stone-100">
+                            {selectedEpisode
+                              ? `Episodio ${selectedEpisode.number}`
+                              : "Selecciona episodio"}
+                          </h4>
+                        </div>
+                        {selectedEpisode ? (
+                          <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-cyan-100">
+                            Listo
+                          </span>
                         ) : null}
                       </div>
-                    </div>
 
-                    <div className="rounded-2xl border border-amber-400/15 bg-amber-400/5 p-4">
-                      <div className="flex items-center gap-2 text-amber-200">
-                        <Download className="h-4 w-4" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Descargar</p>
-                      </div>
-                      <div className="mt-3 grid gap-2">
-                        {(selectedEpisodeLinks?.download ?? []).map((link) => (
-                          <a
-                            key={link.url}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-between gap-2 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-3 text-sm font-bold text-amber-100 transition hover:bg-amber-400/20"
-                          >
-                            <span className="truncate">
-                              {link.server} {link.quality ? `(${link.quality})` : ""}
-                            </span>
-                            <Download className="h-4 w-4 shrink-0" />
-                          </a>
-                        ))}
-                        {selectedEpisodeLinks && selectedEpisodeLinks.download.length === 0 ? (
-                          <p className="text-sm text-stone-500">Sin descargas disponibles.</p>
-                        ) : null}
-                        {!selectedEpisodeLinks ? (
-                          <p className="text-sm text-stone-500">Los enlaces apareceran aqui.</p>
-                        ) : null}
+                      <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-1">
+                        <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-3">
+                          <div className="flex items-center gap-2 text-cyan-200">
+                            <PlayCircle className="h-4 w-4" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">Ver</p>
+                          </div>
+                          <div className="mt-3 grid gap-2">
+                            {(selectedEpisodeLinks?.stream ?? []).map((link) => (
+                              <a
+                                key={link.url}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-between gap-3 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-3 text-sm font-black text-cyan-50 transition hover:bg-cyan-400/20 active:scale-[0.98]"
+                              >
+                                <span className="truncate">{link.server}</span>
+                                <ExternalLink className="h-4 w-4 shrink-0" />
+                              </a>
+                            ))}
+                            {selectedEpisodeLinks && selectedEpisodeLinks.stream.length === 0 ? (
+                              <p className="text-sm text-stone-500">Sin servidores.</p>
+                            ) : null}
+                            {!selectedEpisodeLinks ? (
+                              <p className="text-sm text-stone-500">Elige un episodio.</p>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-amber-400/15 bg-amber-400/5 p-3">
+                          <div className="flex items-center gap-2 text-amber-200">
+                            <Download className="h-4 w-4" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">
+                              Descargar
+                            </p>
+                          </div>
+                          <div className="mt-3 grid gap-2">
+                            {(selectedEpisodeLinks?.download ?? []).map((link) => (
+                              <a
+                                key={link.url}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-between gap-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-3 text-sm font-black text-amber-50 transition hover:bg-amber-400/20 active:scale-[0.98]"
+                              >
+                                <span className="truncate">
+                                  {link.server} {link.quality ? `(${link.quality})` : ""}
+                                </span>
+                                <Download className="h-4 w-4 shrink-0" />
+                              </a>
+                            ))}
+                            {selectedEpisodeLinks && selectedEpisodeLinks.download.length === 0 ? (
+                              <p className="text-sm text-stone-500">Sin descargas.</p>
+                            ) : null}
+                            {!selectedEpisodeLinks ? (
+                              <p className="text-sm text-stone-500">Apareceran aqui.</p>
+                            ) : null}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

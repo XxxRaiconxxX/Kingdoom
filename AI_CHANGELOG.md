@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 07/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`
+*   **Resumen de Tareas:** Se reorganizo el panel de detalle de Anime Hub para mejorar lectura y acciones en escritorio y movil.
+*   **Cambios Clave:**
+    *   La sinopsis queda como banda superior compacta y deja de competir con episodios y enlaces.
+    *   Los episodios ahora usan tarjetas horizontales mas legibles, con numero fijo, seleccion clara y mayor altura util.
+    *   Las acciones de ver y descargar se agruparon en una consola lateral responsive, apilable en movil.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 07/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`, `src/features/animeHub/animeHub.remoteProvider.ts`, `apps/mobile/app/(tabs)/anime.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`
 *   **Resumen de Tareas:** Se corrigio la seleccion de series en Anime Hub cuando el proveedor remoto no entrega ficha completa.
 *   **Cambios Clave:**

@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 07/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`, `src/features/animeHub/animeHub.remoteProvider.ts`
+*   **Resumen de Tareas:** Se pulio la vista de Anime Hub y se mejoro la deteccion de imagenes remotas.
+*   **Cambios Clave:**
+    *   El panel de acciones queda debajo de episodios salvo pantallas ultra amplias, evitando compresion lateral.
+    *   El scroll de resultados recibio margen estable y estilo visual propio.
+    *   El proveedor remoto ahora reconoce mas campos de portada/banner y normaliza URLs relativas.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 07/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`
 *   **Resumen de Tareas:** Se dejo la cabecera de Anime Hub solo como buscador compacto.
 *   **Cambios Clave:**

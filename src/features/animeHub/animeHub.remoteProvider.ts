@@ -33,15 +33,70 @@ function normalizeGenres(value: unknown): string[] {
     .filter(Boolean);
 }
 
+function firstText(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return undefined;
+}
+
+function normalizeAssetUrl(...values: unknown[]): string | undefined {
+  const raw = firstText(...values);
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    return new URL(raw, API_BASE_URL || window.location.origin).toString();
+  } catch {
+    return raw;
+  }
+}
+
+function pickImage(item: any) {
+  return (
+    normalizeAssetUrl(
+      item?.image,
+      item?.imageUrl,
+      item?.poster,
+      item?.posterUrl,
+      item?.cover,
+      item?.coverUrl,
+      item?.coverImage,
+      item?.thumbnail,
+      item?.thumbnailUrl,
+      item?.img
+    ) ?? FALLBACK_IMAGE
+  );
+}
+
+function pickBanner(item: any, coverImage: string) {
+  return (
+    normalizeAssetUrl(
+      item?.backdrop,
+      item?.backdropUrl,
+      item?.banner,
+      item?.bannerUrl,
+      item?.bannerImage,
+      item?.image,
+      item?.imageUrl
+    ) ?? coverImage
+  );
+}
+
 function normalizeSummary(item: any): AnimeSeriesSummary {
   const fallbackId = String(item?.title ?? item?.name ?? "anime-remoto");
+  const coverImage = pickImage(item);
 
   return {
     id: String(item?.url ?? item?.id ?? item?.slug ?? fallbackId),
     title: item?.title ?? item?.name ?? "Titulo no disponible",
     altTitle: item?.alt_title ?? item?.titleJapanese ?? item?.alternativeTitle,
-    coverImage: item?.image ?? item?.poster ?? item?.coverImage ?? FALLBACK_IMAGE,
-    bannerImage: item?.backdrop ?? item?.banner ?? item?.image,
+    coverImage,
+    bannerImage: pickBanner(item, coverImage),
     synopsis: item?.description ?? item?.synopsis ?? "Sin sinopsis disponible.",
     genres: normalizeGenres(item?.genres),
     year: String(item?.year ?? item?.releaseYear ?? "N/A"),

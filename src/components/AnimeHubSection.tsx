@@ -195,7 +195,7 @@ export function AnimeHubSection() {
               <Film className="h-5 w-5 text-stone-500" />
             </div>
 
-            <div className="mt-4 grid max-h-[48rem] gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-1">
+            <div className="mt-4 grid max-h-[48rem] gap-3 overflow-y-auto pr-3 [scrollbar-gutter:stable] md:grid-cols-2 xl:grid-cols-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-amber-400/70 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-black/30">
               {results.map((item, index) => (
                 <motion.button
                   key={item.id}
@@ -284,7 +284,7 @@ export function AnimeHubSection() {
                     <ExpandableText text={selectedSeries.synopsis} lines={3} />
                   </div>
 
-                  <div className="grid gap-4 min-[1700px]:grid-cols-[minmax(0,1fr)_minmax(21rem,0.72fr)]">
+                  <div className="grid gap-4 min-[2000px]:grid-cols-[minmax(0,1fr)_minmax(21rem,0.72fr)]">
                     <div className="rounded-2xl border border-stone-800 bg-black/25 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2 text-cyan-200">
@@ -363,7 +363,7 @@ export function AnimeHubSection() {
                         ) : null}
                       </div>
 
-                      <div className="mt-4 grid gap-3 lg:grid-cols-2 min-[1700px]:grid-cols-1">
+                      <div className="mt-4 grid gap-3 lg:grid-cols-2 min-[2000px]:grid-cols-1">
                         <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-3">
                           <div className="flex items-center gap-2 text-cyan-200">
                             <PlayCircle className="h-4 w-4" />

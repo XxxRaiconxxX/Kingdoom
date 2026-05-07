@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Download,
   FileSearch,
+  Film,
   Home,
   Library,
   ScrollText,
@@ -82,6 +83,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "grimoire", label: "Grimorio", icon: Sparkles },
   { id: "library", label: "Biblioteca", icon: Library },
   { id: "market", label: "Mercado", icon: Store },
+  { id: "anime", label: "Anime", icon: Film },
   { id: "archivist", label: "Archivista", icon: FileSearch },
 ];
 
@@ -101,6 +103,10 @@ const loadArchivistSection = () =>
   import("./components/ArchivistSection").then((module) => ({
     default: module.ArchivistSection,
   }));
+const loadAnimeHubSection = () =>
+  import("./components/AnimeHubSection").then((module) => ({
+    default: module.AnimeHubSection,
+  }));
 const loadPlayerProfilePanel = () =>
   import("./components/PlayerProfilePanel").then((module) => ({
     default: module.PlayerProfilePanel,
@@ -109,6 +115,7 @@ const LibrarySection = lazy(loadLibrarySection);
 const GrimoireSection = lazy(loadGrimoireSection);
 const MarketSection = lazy(loadMarketSection);
 const ArchivistSection = lazy(loadArchivistSection);
+const AnimeHubSection = lazy(loadAnimeHubSection);
 const PlayerProfilePanel = lazy(loadPlayerProfilePanel);
 
 function preloadTab(tabId: TabId) {
@@ -121,6 +128,9 @@ function preloadTab(tabId: TabId) {
       break;
     case "market":
       void loadMarketSection();
+      break;
+    case "anime":
+      void loadAnimeHubSection();
       break;
     case "archivist":
       void loadArchivistSection();
@@ -193,6 +203,11 @@ export default function App() {
               <MarketSection />
             </Suspense>
           ) : null}
+          {activeTab === "anime" ? (
+            <Suspense fallback={<FullscreenLoadingOverlay message="Inicializando el portal anime..." />}>
+              <AnimeHubSection />
+            </Suspense>
+          ) : null}
           {activeTab === "archivist" ? (
             <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el archivo de Argentis..." />}>
               <ArchivistSection />
@@ -202,7 +217,7 @@ export default function App() {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4">
-        <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-5 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
+        <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-6 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
 

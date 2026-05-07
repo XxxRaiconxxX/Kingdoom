@@ -136,6 +136,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="anime"
+        options={{
+          title: "Anime",
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon focused={focused}>
+              <MaterialIcons name="movie" color={color} size={size} />
+            </TabIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Perfil",

@@ -249,6 +249,14 @@
   --kd-accent-shadow: rgb(16 185 129 / 0.18);
 }
 
+.kd-ambient[data-kd-theme="anime"] {
+  --kd-accent-rgb: 217 70 239;
+  --kd-accent-strong: rgb(245 208 254);
+  --kd-accent-soft: rgb(217 70 239 / 0.28);
+  --kd-accent-bg: rgb(217 70 239 / 0.12);
+  --kd-accent-shadow: rgb(34 211 238 / 0.16);
+}
+
 .kd-glass {
   position: relative;
   border-color: rgb(146 64 14 / 0.26) !important;

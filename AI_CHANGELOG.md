@@ -31,6 +31,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 07/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`
+*   **Resumen de Tareas:** Se compacto la cabecera de Anime Hub para liberar espacio de resultados, vista previa y episodios.
+*   **Cambios Clave:**
+    *   El buscador paso a una barra superior horizontal con boton pequeno de lupa.
+    *   Los filtros quedaron en una fila desplazable y se retiro el bloque visual de `Estado`.
+    *   Se elimino el encabezado grande de catalogo para reducir altura en movil y escritorio.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 07/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`
 *   **Resumen de Tareas:** Se ajusto la lista de episodios de Anime Hub para evitar compresion visual en escritorio y movil.
 *   **Cambios Clave:**
     *   El detalle de serie recibe mas ancho frente a la lista de resultados en escritorio.

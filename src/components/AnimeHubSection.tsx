@@ -5,9 +5,7 @@ import {
   ExternalLink,
   Film,
   PlayCircle,
-  RefreshCw,
   Search,
-  ServerCog,
 } from "lucide-react";
 import { ExpandableText } from "./ExpandableText";
 import {
@@ -154,85 +152,71 @@ export function AnimeHubSection() {
 
   return (
     <section className="space-y-5">
-      <div className="grid gap-5 xl:grid-cols-[19rem_1fr]">
-        <aside className="space-y-4">
-          <article className="rounded-[1.75rem] border border-stone-800 bg-stone-950/70 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.25)]">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-300">
-                  Anime Hub
-                </p>
-                <h2 className="mt-1 text-2xl font-black text-stone-100">Catalogo</h2>
-              </div>
-              <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-cyan-100">
-                {sourceBadge}
-              </span>
-            </div>
-
-            <label className="mt-4 flex items-center gap-2 rounded-2xl border border-stone-800 bg-black/35 px-3 py-3">
+      <article className="rounded-[1.5rem] border border-stone-800 bg-stone-950/70 p-2.5 shadow-[0_24px_70px_rgba(0,0,0,0.25)]">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+          <form
+            className="flex min-w-0 flex-1 items-center gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleSearch();
+            }}
+          >
+            <label className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-stone-800 bg-black/35 px-3 py-3">
               <Search className="h-4 w-4 text-stone-500" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    void handleSearch();
-                  }
-                }}
                 placeholder="Buscar serie..."
                 className="min-w-0 flex-1 bg-transparent text-sm text-stone-100 outline-none placeholder:text-stone-600"
               />
             </label>
+            <button
+              type="submit"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-amber-300/35 bg-amber-300 text-black transition hover:brightness-110 active:scale-[0.96]"
+              aria-label="Buscar anime"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </form>
 
-            <div className="mt-3 flex flex-wrap gap-2">
+          <div className="flex min-w-0 gap-2 overflow-x-auto pb-1 lg:max-w-[36rem] lg:pb-0">
+            <button
+              type="button"
+              onClick={() => setGenre("Todos")}
+              className={`shrink-0 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
+                genre === "Todos"
+                  ? "border-amber-300/60 bg-amber-300 text-black"
+                  : "border-stone-800 bg-black/25 text-stone-400 hover:text-stone-100"
+              }`}
+            >
+              Todos
+            </button>
+            {ANIME_HUB_GENRES.map((item) => (
               <button
+                key={item}
                 type="button"
-                onClick={() => setGenre("Todos")}
-                className={`rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
-                  genre === "Todos"
-                    ? "border-amber-300/60 bg-amber-300 text-black"
+                onClick={() => setGenre(item)}
+                className={`shrink-0 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
+                  genre === item
+                    ? "border-fuchsia-300/60 bg-fuchsia-400/20 text-fuchsia-100"
                     : "border-stone-800 bg-black/25 text-stone-400 hover:text-stone-100"
                 }`}
               >
-                Todos
+                {item}
               </button>
-              {ANIME_HUB_GENRES.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setGenre(item)}
-                  className={`rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
-                    genre === item
-                      ? "border-fuchsia-300/60 bg-fuchsia-400/20 text-fuchsia-100"
-                      : "border-stone-800 bg-black/25 text-stone-400 hover:text-stone-100"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
+            ))}
+          </div>
 
-            <button
-              type="button"
-              onClick={() => void handleSearch()}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-300/35 bg-amber-300 px-4 py-3 text-sm font-black text-black transition hover:brightness-110 active:scale-[0.98]"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Buscar
-            </button>
-          </article>
+          <span className="w-fit shrink-0 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-cyan-100">
+            {sourceBadge}
+          </span>
+        </div>
+        <p className="sr-only" aria-live="polite">
+          {feedback}
+        </p>
+      </article>
 
-          <article className="rounded-[1.75rem] border border-stone-800 bg-stone-950/60 p-4">
-            <div className="flex items-center gap-2 text-cyan-200">
-              <ServerCog className="h-4 w-4" />
-              <p className="text-[10px] font-black uppercase tracking-[0.2em]">Estado</p>
-            </div>
-            <p className="mt-3 text-sm font-bold text-stone-200">{activeProvider.label}</p>
-            <p className="mt-2 text-sm text-stone-500">{feedback}</p>
-          </article>
-        </aside>
-
-        <div className="grid gap-5 xl:grid-cols-[minmax(16rem,0.72fr)_minmax(0,1.68fr)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(16rem,0.72fr)_minmax(0,1.68fr)]">
           <article className="rounded-[1.75rem] border border-stone-800 bg-stone-950/65 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -481,7 +465,6 @@ export function AnimeHubSection() {
               <div className="p-8 text-center text-stone-400">Selecciona una serie.</div>
             )}
           </article>
-        </div>
       </div>
     </section>
   );

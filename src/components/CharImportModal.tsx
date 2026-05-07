@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Wand2, AlertCircle, ImagePlus } from 'lucide-react';
-import { CharacterSheet } from '../types';
+import type { CharacterSheet, CharacterStats } from '../types';
 import { parseWhatsAppSheet } from '../utils/sheetParser';
 
 const WHATSAPP_SHEET_TEMPLATE = `-Nombre Completo/ Apodo:
@@ -42,6 +42,71 @@ interface CharImportModalProps {
   initialSheet?: CharacterSheet | null;
   mode?: "create" | "edit";
 }
+
+type EditableSheetField = keyof Pick<
+  CharacterSheet,
+  | "name"
+  | "age"
+  | "gender"
+  | "height"
+  | "race"
+  | "powers"
+  | "weapon"
+  | "combatStyle"
+  | "birthRealm"
+  | "socialClass"
+  | "nobleTitle"
+  | "profession"
+  | "nonMagicSkills"
+  | "personality"
+  | "history"
+  | "extras"
+  | "weaknesses"
+  | "inventory"
+>;
+
+const BASIC_FIELDS: Array<{ key: EditableSheetField; label: string }> = [
+  { key: "name", label: "Nombre / Apodo" },
+  { key: "age", label: "Edad" },
+  { key: "gender", label: "Genero" },
+  { key: "height", label: "Estatura" },
+  { key: "race", label: "Raza" },
+  { key: "profession", label: "Profesion" },
+  { key: "birthRealm", label: "Reino donde nacio" },
+  { key: "socialClass", label: "Clase social" },
+  { key: "nobleTitle", label: "Titulo de nobleza" },
+];
+
+const COMBAT_FIELDS: Array<{ key: EditableSheetField; label: string }> = [
+  { key: "weapon", label: "Arma principal" },
+  { key: "combatStyle", label: "Estilo de combate" },
+];
+
+const LONG_FIELDS: Array<{ key: EditableSheetField; label: string; rows?: number }> = [
+  { key: "powers", label: "Poderes oficiales", rows: 5 },
+  { key: "nonMagicSkills", label: "Habilidades no magicas", rows: 4 },
+  { key: "personality", label: "Personalidad", rows: 4 },
+  { key: "history", label: "Historia", rows: 6 },
+  { key: "extras", label: "Extras", rows: 4 },
+  { key: "weaknesses", label: "Debilidades", rows: 4 },
+  { key: "inventory", label: "Inventario", rows: 4 },
+];
+
+const STAT_FIELDS: Array<{ key: keyof CharacterStats; label: string }> = [
+  { key: "strength", label: "Fuerza" },
+  { key: "agility", label: "Agilidad" },
+  { key: "intelligence", label: "Inteligencia" },
+  { key: "defense", label: "Defensa" },
+  { key: "magicDefense", label: "Defensa magica" },
+];
+
+const DEFAULT_STATS: CharacterStats = {
+  strength: 0,
+  agility: 0,
+  intelligence: 0,
+  defense: 0,
+  magicDefense: 0,
+};
 
 export const CharImportModal: React.FC<CharImportModalProps> = ({
   isOpen,
@@ -109,7 +174,7 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({
 
     if (portraitPreviewUrl.startsWith("blob:")) {
       URL.revokeObjectURL(portraitPreviewUrl);
-    };
+    }
 
     setPortraitPreviewUrl("");
   };
@@ -121,27 +186,61 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({
       const data = parseWhatsAppSheet(rawText);
       setParsedData(data);
       setIsParsing(false);
-    }, 600); // Fake delay for effect
+    }, 600);
   };
 
   const handleSave = async () => {
-    if (parsedData) {
-      try {
-        setIsSaving(true);
-        setSaveError("");
-        await onSave(parsedData, portraitFile);
-        resetForm();
-        onClose();
-      } catch (error) {
-        setSaveError(
-          error instanceof Error
-            ? error.message
-            : "No se pudo guardar la ficha con su retrato."
-        );
-      } finally {
-        setIsSaving(false);
-      }
+    if (!parsedData) {
+      return;
     }
+
+    try {
+      setIsSaving(true);
+      setSaveError("");
+      await onSave(parsedData, portraitFile);
+      resetForm();
+      onClose();
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo guardar la ficha con su retrato."
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const updateParsedField = (key: EditableSheetField, value: string) => {
+    setParsedData((current) => (current ? { ...current, [key]: value } : current));
+  };
+
+  const updateParsedStat = (key: keyof CharacterStats, value: string) => {
+    const numericValue = Number(value);
+    setParsedData((current) =>
+      current
+        ? {
+            ...current,
+            stats: {
+              ...DEFAULT_STATS,
+              ...current.stats,
+              [key]: Number.isFinite(numericValue) ? numericValue : 0,
+            },
+          }
+        : current
+    );
+  };
+
+  const clearParsedData = () => {
+    setParsedData(null);
+    setPortraitFile(null);
+    setSaveError("");
+
+    if (portraitPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(portraitPreviewUrl);
+    }
+
+    setPortraitPreviewUrl("");
   };
 
   return (
@@ -154,166 +253,187 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="bg-zinc-900 border border-green-500/30 rounded-xl shadow-2xl shadow-green-900/20 w-full max-w-2xl overflow-hidden flex flex-col max-h-[calc(100svh-8rem)] sm:max-h-[90vh]"
           >
-          <div className="flex items-center justify-between p-4 border-b border-green-500/20 bg-green-950/20">
-            <h2 className="text-xl font-bold text-green-400 flex items-center gap-2">
-              <Wand2 className="w-5 h-5" />
-              {isEditMode ? "Editar ficha" : "Importar ficha de WhatsApp"}
-            </h2>
-            <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+            <div className="flex items-center justify-between p-4 border-b border-green-500/20 bg-green-950/20">
+              <h2 className="text-xl font-bold text-green-400 flex items-center gap-2">
+                <Wand2 className="w-5 h-5" />
+                {isEditMode ? "Editar ficha" : "Importar ficha de WhatsApp"}
+              </h2>
+              <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-          <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
-            {!parsedData ? (
-              <div className="space-y-4">
-                <div className="bg-green-950/30 border border-green-500/20 rounded-lg p-4 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
-                  <p className="text-sm text-green-200/80">
-                    Pega aqui tu ficha de WhatsApp para importarla.
-                  </p>
-                </div>
-                <textarea
-                  value={rawText}
-                  onChange={(e) => setRawText(e.target.value)}
-                  placeholder={WHATSAPP_SHEET_TEMPLATE}
-                  className="w-full h-64 bg-black/50 border border-green-500/30 rounded-lg p-4 text-green-100 placeholder:text-green-900/50 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 resize-none font-mono text-sm"
-                />
-                <button
-                  onClick={handleParse}
-                  disabled={!rawText.trim() || isParsing}
-                  className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isParsing ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Wand2 className="w-5 h-5" />
-                      Procesar Ficha
-                    </>
-                  )}
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-4">
-                  <h3 className="text-lg font-bold text-white border-b border-zinc-800 pb-2">Vista Previa de Extracción</h3>
-                  {isEditMode ? (
-                    <p className="text-sm text-zinc-400">
-                      Ajusta los campos necesarios y guarda sin borrar la ficha.
+            <div className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1">
+              {!parsedData ? (
+                <div className="space-y-4">
+                  <div className="bg-green-950/30 border border-green-500/20 rounded-lg p-4 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                    <p className="text-sm text-green-200/80">
+                      Pega aqui tu ficha de WhatsApp para importarla.
                     </p>
-                  ) : null}
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs text-zinc-500 uppercase font-bold">Nombre / Apodo</label>
-                      <input 
-                        type="text" 
-                        value={parsedData.name || ''} 
-                        onChange={e => setParsedData({...parsedData, name: e.target.value})}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white mt-1"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-zinc-500 uppercase font-bold">Raza</label>
-                      <input 
-                        type="text" 
-                        value={parsedData.race || ''} 
-                        onChange={e => setParsedData({...parsedData, race: e.target.value})}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white mt-1"
-                      />
-                    </div>
                   </div>
-
-                  <div>
-                    <label className="text-xs text-zinc-500 uppercase font-bold">Retrato del personaje</label>
-                    <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-green-500/30 bg-green-600/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:bg-green-600/20">
-                        <ImagePlus className="w-4 h-4" />
-                        Añadir desde galeria
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handlePortraitSelect}
-                          className="hidden"
-                        />
-                      </label>
-                      <p className="text-xs text-zinc-500">
-                        Se usara como retrato visible dentro de la ficha.
+                  <textarea
+                    value={rawText}
+                    onChange={(event) => setRawText(event.target.value)}
+                    placeholder={WHATSAPP_SHEET_TEMPLATE}
+                    className="w-full h-64 bg-black/50 border border-green-500/30 rounded-lg p-4 text-green-100 placeholder:text-green-900/50 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 resize-none font-mono text-sm"
+                  />
+                  <button
+                    onClick={handleParse}
+                    disabled={!rawText.trim() || isParsing}
+                    className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isParsing ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Wand2 className="w-5 h-5" />
+                        Procesar Ficha
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-4">
+                    <h3 className="text-lg font-bold text-white border-b border-zinc-800 pb-2">
+                      {isEditMode ? "Editor de ficha" : "Vista previa de extraccion"}
+                    </h3>
+                    {isEditMode ? (
+                      <p className="text-sm text-zinc-400">
+                        Ajusta los campos necesarios y guarda sin borrar la ficha.
                       </p>
+                    ) : null}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {BASIC_FIELDS.map((field) => (
+                        <div key={field.key}>
+                          <label className="text-xs text-zinc-500 uppercase font-bold">
+                            {field.label}
+                          </label>
+                          <input
+                            type="text"
+                            value={String(parsedData[field.key] ?? "")}
+                            onChange={(event) => updateParsedField(field.key, event.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white mt-1"
+                          />
+                        </div>
+                      ))}
                     </div>
 
-                    {portraitPreviewUrl ? (
-                      <div className="mt-3 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950/80">
-                        <img
-                          src={portraitPreviewUrl}
-                          alt={`Retrato de ${parsedData.name || "personaje"}`}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-48 w-full object-cover"
-                        />
+                    <div>
+                      <label className="text-xs text-zinc-500 uppercase font-bold">
+                        Retrato del personaje
+                      </label>
+                      <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-green-500/30 bg-green-600/10 px-4 py-2 text-sm font-semibold text-green-300 transition hover:bg-green-600/20">
+                          <ImagePlus className="w-4 h-4" />
+                          Anadir desde galeria
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePortraitSelect}
+                            className="hidden"
+                          />
+                        </label>
+                        <p className="text-xs text-zinc-500">
+                          Se usara como retrato visible dentro de la ficha.
+                        </p>
                       </div>
-                    ) : null}
-                  </div>
 
-                  <div>
-                    <label className="text-xs text-zinc-500 uppercase font-bold">Estadísticas Extraídas</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-1">
-                      {Object.entries(parsedData.stats || {}).map(([key, val]) => (
-                        <div key={key} className="bg-zinc-900 border border-zinc-700 rounded p-2 text-center">
-                          <div className="text-[10px] text-zinc-400 uppercase truncate">{key}</div>
-                          <div className="text-green-400 font-bold">{val}</div>
+                      {portraitPreviewUrl ? (
+                        <div className="mt-3 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950/80">
+                          <img
+                            src={portraitPreviewUrl}
+                            alt={`Retrato de ${parsedData.name || "personaje"}`}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-48 w-full object-cover"
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-zinc-500 uppercase font-bold">Estadisticas</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-1">
+                        {STAT_FIELDS.map((field) => (
+                          <div key={field.key} className="bg-zinc-900 border border-zinc-700 rounded p-2">
+                            <label className="text-[10px] text-zinc-400 uppercase truncate">
+                              {field.label}
+                            </label>
+                            <input
+                              type="number"
+                              value={parsedData.stats?.[field.key] ?? 0}
+                              onChange={(event) => updateParsedStat(field.key, event.target.value)}
+                              className="mt-1 w-full rounded border border-zinc-700 bg-black/40 p-1 text-center font-bold text-green-400"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {COMBAT_FIELDS.map((field) => (
+                        <div key={field.key}>
+                          <label className="text-xs text-zinc-500 uppercase font-bold">
+                            {field.label}
+                          </label>
+                          <textarea
+                            value={String(parsedData[field.key] ?? "")}
+                            onChange={(event) => updateParsedField(field.key, event.target.value)}
+                            rows={3}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white mt-1 resize-y text-sm"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="space-y-3">
+                      {LONG_FIELDS.map((field) => (
+                        <div key={field.key}>
+                          <label className="text-xs text-zinc-500 uppercase font-bold">
+                            {field.label}
+                          </label>
+                          <textarea
+                            value={String(parsedData[field.key] ?? "")}
+                            onChange={(event) => updateParsedField(field.key, event.target.value)}
+                            rows={field.rows ?? 4}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-white mt-1 resize-y text-sm"
+                          />
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div>
-                    <label className="text-xs text-zinc-500 uppercase font-bold">Historia (Fragmento)</label>
-                    <textarea 
-                      value={parsedData.history || ''} 
-                      onChange={e => setParsedData({...parsedData, history: e.target.value})}
-                      className="w-full h-24 bg-zinc-900 border border-zinc-700 rounded p-2 text-white mt-1 resize-none text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  {!isEditMode ? (
+                  <div className="flex gap-3">
+                    {!isEditMode ? (
+                      <button
+                        onClick={clearParsedData}
+                        className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-colors"
+                      >
+                        Volver a pegar
+                      </button>
+                    ) : null}
                     <button
-                      onClick={() => {
-                        setParsedData(null);
-                        setPortraitFile(null);
-                        setSaveError("");
-                        if (portraitPreviewUrl.startsWith("blob:")) {
-                          URL.revokeObjectURL(portraitPreviewUrl);
-                        }
-                        setPortraitPreviewUrl("");
-                      }}
-                      className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-colors"
+                      onClick={() => void handleSave()}
+                      disabled={isSaving}
+                      className="flex-1 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      Volver a pegar
+                      <Check className="w-5 h-5" />
+                      {isSaving ? "Guardando..." : isEditMode ? "Actualizar ficha" : "Guardar ficha"}
                     </button>
-                  ) : null}
-                  <button
-                    onClick={() => void handleSave()}
-                    disabled={isSaving}
-                    className="flex-1 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    <Check className="w-5 h-5" />
-                    {isSaving ? "Guardando..." : isEditMode ? "Actualizar ficha" : "Guardar ficha"}
-                  </button>
-                </div>
-                {saveError ? (
-                  <div className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                    {saveError}
                   </div>
-                ) : null}
-              </div>
-            )}
-          </div>
-        </motion.div>
-      </div>
+                  {saveError ? (
+                    <div className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                      {saveError}
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

@@ -391,6 +391,7 @@ function getSheetSummary(sheet: CharacterSheet | null) {
 
 export function TavernExpeditionArcade() {
   const { player, isHydrating, setPlayerGold, refreshPlayer } = usePlayerSession();
+  const playerId = player?.id ?? null;
   const [selectedEncounterId, setSelectedEncounterId] = useState(
     ARCADE_ENCOUNTERS[0]?.id ?? ""
   );
@@ -406,7 +407,7 @@ export function TavernExpeditionArcade() {
     let cancelled = false;
 
     async function hydrateExpeditionState() {
-      if (!player) {
+      if (!playerId) {
         setProgress(null);
         setPlayerSheets([]);
         setActiveSheetId(null);
@@ -414,14 +415,14 @@ export function TavernExpeditionArcade() {
         return;
       }
 
-      const sheets = await getPlayerSheets(player.id);
+      const sheets = await getPlayerSheets(playerId);
       if (cancelled) {
         return;
       }
 
       setPlayerSheets(sheets);
       const resolvedSheetId = resolveActivePveSheetId(
-        player.id,
+        playerId,
         sheets.map((sheet) => sheet.id)
       );
       setActiveSheetId(resolvedSheetId);
@@ -432,7 +433,7 @@ export function TavernExpeditionArcade() {
         return;
       }
 
-      setProgress(loadPveProgressForSheet(player.id, resolvedSheetId, PROGRESS_WINDOW_MS));
+      setProgress(loadPveProgressForSheet(playerId, resolvedSheetId, PROGRESS_WINDOW_MS));
       setBattle((currentBattle) =>
         currentBattle?.usedSheetId === resolvedSheetId ? currentBattle : null
       );
@@ -443,7 +444,7 @@ export function TavernExpeditionArcade() {
     return () => {
       cancelled = true;
     };
-  }, [player]);
+  }, [playerId]);
 
   const selectedEncounter = useMemo(
     () =>

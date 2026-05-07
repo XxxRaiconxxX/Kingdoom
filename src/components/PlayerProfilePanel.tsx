@@ -116,6 +116,31 @@ export function PlayerProfilePanel({
     }
   }, [player]);
 
+  async function refreshPlayerSheetsForProfile() {
+    if (!player) {
+      return [] as CharacterSheet[];
+    }
+
+    const sheets = await getPlayerSheets(player.id);
+    setPlayerSheets(sheets);
+    const nextActiveSheetId = resolveActivePveSheetId(
+      player.id,
+      sheets.map((sheet) => sheet.id)
+    );
+    setActiveExpeditionSheetId(nextActiveSheetId);
+    return sheets;
+  }
+
+  async function handleOpenSheet(sheet: CharacterSheet) {
+    const sheets = await refreshPlayerSheetsForProfile();
+    setSelectedSheet(sheets.find((freshSheet) => freshSheet.id === sheet.id) ?? sheet);
+  }
+
+  async function handleEditSheet(sheet: CharacterSheet) {
+    const sheets = await refreshPlayerSheetsForProfile();
+    setSheetToEdit(sheets.find((freshSheet) => freshSheet.id === sheet.id) ?? sheet);
+  }
+
   const handleSaveSheet = async (
     partialSheet: Partial<CharacterSheet>,
     portraitFile?: File | null,
@@ -601,14 +626,14 @@ export function PlayerProfilePanel({
 
                         <div className="mt-auto flex items-center gap-2">
                           <button
-                            onClick={() => setSelectedSheet(sheet)}
+                            onClick={() => void handleOpenSheet(sheet)}
                             className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-stone-800 py-2 text-xs font-semibold text-stone-200 transition-colors hover:bg-stone-700"
                           >
                             <Eye className="h-3.5 w-3.5" />
                             Ver ficha
                           </button>
                           <button
-                            onClick={() => setSheetToEdit(sheet)}
+                            onClick={() => void handleEditSheet(sheet)}
                             className="inline-flex items-center justify-center rounded-lg bg-emerald-500/10 p-2 text-emerald-300 transition-colors hover:bg-emerald-500/20"
                             title="Editar ficha"
                           >

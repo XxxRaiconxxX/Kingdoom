@@ -29,7 +29,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
-*(Aniade nuevas entradas siempre en la parte superior de esta lista)*
+### [Fecha: 07/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/features/animeHub/animeHub.types.ts`, `src/features/animeHub/animeHub.remoteProvider.ts`, `src/features/animeHub/animeHub.mockProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Finalizada la integración de Anime Hub con soporte completo para reproducción (streaming) y descargas directas desde la API real.
+*   **Cambios Clave:**
+    *   **Tipado:** Extendida la interfaz `AnimeHubProvider` con `getEpisodeLinks` para soportar la obtención dinámica de servidores.
+    *   **Web/Remote:** Implementado fetcher de enlaces en `remoteAnimeHubProvider` y corregido el mapeo de detalles de serie (id, episodios y metadata).
+    *   **UI Web:** `AnimeHubSection` ahora permite seleccionar episodios, cargando dinámicamente los servidores de streaming y enlaces de descarga en un panel integrado.
+    *   **Mobile:** Actualizado el proveedor nativo para incluir `fetchMobileEpisodeLinks` y corregido el mapeo de series para consistencia con la API.
+    *   **API Hotfix:** Se redirigió el almacenamiento temporal de la API para evitar errores 500 en entornos serverless (Vercel).
+*   **Notas/Advertencias:** Validado y sincronizado en GitHub. El sistema mantiene fallback automático al modo cascarón si la API no responde.
+
 
 ### [Fecha: 07/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `AI_CHANGELOG.md`

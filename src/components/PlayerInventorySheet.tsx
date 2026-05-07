@@ -25,6 +25,7 @@ export function PlayerInventorySheet({
   onClose: () => void;
 }) {
   const { player, inventoryRefreshToken } = usePlayerSession();
+  const playerId = player?.id ?? null;
   const [items, setItems] = useState<InventoryEntry[]>([]);
   const [filter, setFilter] = useState<InventoryFilter>("all");
   const [status, setStatus] = useState<"loading" | "ready" | "empty" | "unavailable">(
@@ -37,14 +38,14 @@ export function PlayerInventorySheet({
     let isCancelled = false;
 
     async function loadInventory() {
-      if (!player) {
+      if (!playerId) {
         return;
       }
 
       setStatus("loading");
       setMessage("");
 
-      const result = await fetchPlayerInventory(player.id);
+      const result = await fetchPlayerInventory(playerId);
 
       if (isCancelled) {
         return;
@@ -72,7 +73,7 @@ export function PlayerInventorySheet({
     return () => {
       isCancelled = true;
     };
-  }, [inventoryRefreshToken, player]);
+  }, [inventoryRefreshToken, playerId]);
 
   const filteredItems = useMemo(
     () =>
@@ -88,12 +89,12 @@ export function PlayerInventorySheet({
   );
 
   async function handleRefresh() {
-    if (!player) {
+    if (!playerId) {
       return;
     }
 
     setIsRefreshing(true);
-    const result = await fetchPlayerInventory(player.id);
+    const result = await fetchPlayerInventory(playerId);
     setIsRefreshing(false);
 
     if (result.status === "unavailable") {

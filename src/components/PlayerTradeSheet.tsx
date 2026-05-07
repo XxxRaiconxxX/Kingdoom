@@ -22,6 +22,7 @@ type TradeMode = "gold" | "item";
 
 export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
   const { player, inventoryRefreshToken, notifyInventoryChanged, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const playerId = player?.id ?? null;
   
   const [items, setItems] = useState<InventoryEntry[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
@@ -42,9 +43,9 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
     let isCancelled = false;
 
     async function loadInventory() {
-      if (!player) return;
+      if (!playerId) return;
       setStatus("loading");
-      const result = await fetchPlayerInventory(player.id);
+      const result = await fetchPlayerInventory(playerId);
       
       if (isCancelled) return;
       
@@ -61,7 +62,7 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
 
     void loadInventory();
     return () => { isCancelled = true; };
-  }, [inventoryRefreshToken, player]);
+  }, [inventoryRefreshToken, playerId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

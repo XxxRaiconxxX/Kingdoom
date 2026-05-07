@@ -31,6 +31,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 07/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`
+*   **Resumen de Tareas:** Se ajusto la lista de episodios de Anime Hub para evitar compresion visual en escritorio y movil.
+*   **Cambios Clave:**
+    *   El detalle de serie recibe mas ancho frente a la lista de resultados en escritorio.
+    *   El panel de acciones solo pasa a lateral en pantallas muy amplias, dejando los episodios como bloque principal.
+    *   La grilla de episodios usa tarjetas con ancho minimo automatico para no deformarse.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 07/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`
 *   **Resumen de Tareas:** Se reorganizo el panel de detalle de Anime Hub para mejorar lectura y acciones en escritorio y movil.
 *   **Cambios Clave:**
     *   La sinopsis queda como banda superior compacta y deja de competir con episodios y enlaces.

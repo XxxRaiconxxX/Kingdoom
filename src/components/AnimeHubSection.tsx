@@ -232,7 +232,7 @@ export function AnimeHubSection() {
           </article>
         </aside>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.3fr)]">
+        <div className="grid gap-5 xl:grid-cols-[minmax(16rem,0.72fr)_minmax(0,1.68fr)]">
           <article className="rounded-[1.75rem] border border-stone-800 bg-stone-950/65 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -335,7 +335,7 @@ export function AnimeHubSection() {
                     <ExpandableText text={selectedSeries.synopsis} lines={3} />
                   </div>
 
-                  <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.82fr)]">
+                  <div className="grid gap-4 min-[1700px]:grid-cols-[minmax(0,1fr)_minmax(21rem,0.72fr)]">
                     <div className="rounded-2xl border border-stone-800 bg-black/25 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2 text-cyan-200">
@@ -355,7 +355,7 @@ export function AnimeHubSection() {
                         )}
                       </div>
 
-                      <div className="mt-3 grid max-h-[26rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                      <div className="mt-3 grid max-h-[26rem] grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-2 overflow-y-auto pr-1">
                         {selectedSeries.episodes.map((episode) => (
                           <button
                             key={episode.id}
@@ -414,7 +414,7 @@ export function AnimeHubSection() {
                         ) : null}
                       </div>
 
-                      <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-1">
+                      <div className="mt-4 grid gap-3 lg:grid-cols-2 min-[1700px]:grid-cols-1">
                         <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-3">
                           <div className="flex items-center gap-2 text-cyan-200">
                             <PlayCircle className="h-4 w-4" />

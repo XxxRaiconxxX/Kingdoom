@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import {
   EmptyState,
   Pill,
@@ -10,27 +11,32 @@ import {
 } from "@/src/components/KingdoomUI";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import {
-  MOBILE_ANIME_ENDPOINTS,
   fetchMobileAnimeShell,
   fetchMobileAnimeShellDetail,
+  fetchMobileEpisodeLinks,
 } from "@/src/features/animeHub/animeHubProvider";
 import { MOBILE_ANIME_GENRES } from "@/src/features/animeHub/animeHubMock";
 import type { MobileAnimeSeriesDetail } from "@/src/features/animeHub/animeHubTypes";
 import { MOBILE_THEME } from "@/src/theme/colors";
+
+type EpisodeLinks = Awaited<ReturnType<typeof fetchMobileEpisodeLinks>>;
 
 export default function AnimeScreen() {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState("Todos");
   const [entries, setEntries] = useState<MobileAnimeSeriesDetail[]>([]);
   const [selected, setSelected] = useState<MobileAnimeSeriesDetail | null>(null);
-  const [feedback, setFeedback] = useState(
-    "Proveedor mock activo. El remoto sigue apagado."
-  );
+  const [selectedEpisodeId, setSelectedEpisodeId] = useState("");
+  const [episodeLinks, setEpisodeLinks] = useState<EpisodeLinks>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingLinks, setLoadingLinks] = useState(false);
+  const [feedback, setFeedback] = useState("Catalogo listo.");
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
+      setLoading(true);
       const nextEntries = await fetchMobileAnimeShell("", "");
       const nextSelected = nextEntries[0]
         ? await fetchMobileAnimeShellDetail(nextEntries[0].id)
@@ -42,6 +48,7 @@ export default function AnimeScreen() {
 
       setEntries(nextEntries);
       setSelected(nextSelected);
+      setLoading(false);
     }
 
     void load();
@@ -50,7 +57,11 @@ export default function AnimeScreen() {
     };
   }, []);
 
-  async function handleRefreshShell() {
+  async function handleSearch() {
+    setLoading(true);
+    setEpisodeLinks(null);
+    setSelectedEpisodeId("");
+
     const nextEntries = await fetchMobileAnimeShell(
       query,
       genre === "Todos" ? "" : genre
@@ -61,238 +72,245 @@ export default function AnimeScreen() {
 
     setEntries(nextEntries);
     setSelected(nextSelected);
-    setFeedback(
-      nextEntries.length > 0
-        ? "Catalogo refrescado. Falta conectar el proveedor remoto."
-        : "Sin coincidencias en el mock actual."
-    );
+    setFeedback(nextEntries.length > 0 ? "Catalogo actualizado." : "Sin resultados.");
+    setLoading(false);
+  }
+
+  async function handleSelectSeries(seriesId: string) {
+    setLoading(true);
+    setEpisodeLinks(null);
+    setSelectedEpisodeId("");
+    setSelected(await fetchMobileAnimeShellDetail(seriesId));
+    setLoading(false);
+  }
+
+  async function handleSelectEpisode(episodeId: string) {
+    setSelectedEpisodeId(episodeId);
+    setEpisodeLinks(null);
+    setLoadingLinks(true);
+    const links = await fetchMobileEpisodeLinks(episodeId);
+    setEpisodeLinks(links);
+    setFeedback(links ? "Enlaces cargados." : "Sin enlaces disponibles.");
+    setLoadingLinks(false);
+  }
+
+  async function openUrl(url?: string) {
+    if (!url || url === "#") {
+      return;
+    }
+    await Linking.openURL(url);
   }
 
   return (
-    <ScreenShell
-      title="Anime Hub"
-      subtitle="Catalogo privado y shell listo para proveedor externo"
-      eyebrow="anime shell"
-    >
+    <ScreenShell title="Anime Hub" subtitle="Catalogo y episodios" eyebrow="kingdoom native">
       <RealmCard tone="mythic">
-        <SectionHeader eyebrow="Busqueda" title="Portal anime" />
-        <SearchInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Buscar anime..."
-        />
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-          <Pill
-            label="Todos"
-            active={genre === "Todos"}
-            onPress={() => setGenre("Todos")}
-          />
-          {MOBILE_ANIME_GENRES.map((item) => (
-            <Pill
-              key={item}
-              label={item}
-              active={genre === item}
-              onPress={() => setGenre(item)}
-            />
-          ))}
-        </View>
-        <Pressable
-          onPress={() => void handleRefreshShell()}
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: "rgba(255,211,106,0.28)",
-            backgroundColor: "rgba(240,179,47,0.12)",
-            paddingVertical: 12,
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "900" }}>
-            Refrescar shell
-          </Text>
-        </Pressable>
-        <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 18 }}>
-          {feedback}
-        </Text>
-      </RealmCard>
-
-      <RealmCard tone="teal">
-        <SectionHeader eyebrow="Rutas" title="Endpoints preparados" />
-        <View style={{ gap: 8 }}>
-          {Object.entries(MOBILE_ANIME_ENDPOINTS).map(([key, value]) => (
-            <View
-              key={key}
-              style={{
+        <SectionHeader
+          eyebrow="buscar"
+          title="Portal anime"
+          trailing={
+            <Pressable
+              onPress={() => void handleSearch()}
+              style={({ pressed }) => ({
+                width: 42,
+                height: 42,
                 borderRadius: 14,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                backgroundColor: "rgba(4,4,3,0.46)",
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-              }}
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: MOBILE_THEME.gold,
+                opacity: pressed ? 0.82 : 1,
+              })}
             >
-              <Text
-                style={{
-                  color: MOBILE_THEME.dimText,
-                  fontSize: 10,
-                  fontWeight: "900",
-                  textTransform: "uppercase",
-                }}
-              >
-                {key}
-              </Text>
-              <Text
-                style={{
-                  color: MOBILE_THEME.text,
-                  marginTop: 4,
-                  fontSize: 12,
-                }}
-              >
-                {value}
-              </Text>
-            </View>
-          ))}
-        </View>
+              <MaterialIcons name="refresh" size={20} color={MOBILE_THEME.black} />
+            </Pressable>
+          }
+        />
+        <SearchInput value={query} onChangeText={setQuery} placeholder="Buscar serie..." />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+            <Pill label="Todos" active={genre === "Todos"} onPress={() => setGenre("Todos")} />
+            {MOBILE_ANIME_GENRES.map((item) => (
+              <Pill
+                key={item}
+                label={item}
+                active={genre === item}
+                onPress={() => setGenre(item)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+        <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>{feedback}</Text>
       </RealmCard>
 
       <RealmCard>
-        <SectionHeader eyebrow="Catalogo" title={`${entries.length} resultados`} />
-        {entries.length === 0 ? (
-          <EmptyState
-            title="Sin resultados"
-            message="El shell quedo listo para mas catalogo mock o proveedor real."
-          />
+        <SectionHeader eyebrow="catalogo" title={loading ? "Cargando..." : `${entries.length} titulos`} />
+        {entries.length === 0 && !loading ? (
+          <EmptyState title="Sin resultados" message="Prueba con otro termino." />
         ) : (
-          <View style={{ gap: 10 }}>
-            {entries.map((entry) => (
-              <Pressable
-                key={entry.id}
-                onPress={() => setSelected(entry)}
-                style={{
-                  borderRadius: 16,
-                  borderWidth: 1,
-                  borderColor:
-                    selected?.id === entry.id
-                      ? "rgba(255,211,106,0.34)"
-                      : MOBILE_THEME.border,
-                  backgroundColor:
-                    selected?.id === entry.id
-                      ? "rgba(240,179,47,0.08)"
-                      : "rgba(6,6,5,0.5)",
-                  overflow: "hidden",
-                }}
-              >
-                <View style={{ flexDirection: "row", gap: 12, padding: 12 }}>
-                  <Image
-                    source={{ uri: entry.coverImage }}
-                    style={{
-                      width: 68,
-                      height: 92,
-                      borderRadius: 14,
-                      backgroundColor: MOBILE_THEME.bg,
-                    }}
-                  />
-                  <View style={{ flex: 1, gap: 6 }}>
-                    <Text
-                      style={{
-                        color: MOBILE_THEME.text,
-                        fontSize: 17,
-                        fontWeight: "900",
-                      }}
-                    >
-                      {entry.title}
-                    </Text>
-                    <Text style={{ color: MOBILE_THEME.dimText, fontSize: 11 }}>
-                      {entry.year} | {entry.providerLabel}
-                    </Text>
-                    <Text
-                      style={{ color: MOBILE_THEME.mutedText, lineHeight: 18 }}
-                      numberOfLines={3}
-                    >
-                      {entry.synopsis}
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            ))}
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={{ flexDirection: "row", gap: 12, paddingRight: 8 }}>
+              {entries.map((entry, index) => (
+                <Animated.View key={entry.id} entering={FadeInDown.delay(index * 45).duration(220)}>
+                  <Pressable
+                    onPress={() => void handleSelectSeries(entry.id)}
+                    style={({ pressed }) => ({
+                      width: 178,
+                      borderRadius: 18,
+                      borderWidth: 1,
+                      borderColor:
+                        selected?.id === entry.id
+                          ? "rgba(255,211,106,0.55)"
+                          : MOBILE_THEME.border,
+                      backgroundColor: "rgba(5,5,4,0.72)",
+                      overflow: "hidden",
+                      opacity: pressed ? 0.88 : 1,
+                    })}
+                  >
+                    <Image
+                      source={{ uri: entry.coverImage }}
+                      style={{ height: 230, width: "100%", backgroundColor: MOBILE_THEME.bg }}
+                    />
+                    <View style={{ padding: 12, gap: 6 }}>
+                      <Text
+                        numberOfLines={2}
+                        style={{ color: MOBILE_THEME.text, fontSize: 15, fontWeight: "900" }}
+                      >
+                        {entry.title}
+                      </Text>
+                      <Text style={{ color: MOBILE_THEME.dimText, fontSize: 11 }}>
+                        {entry.year} | {entry.statusLabel}
+                      </Text>
+                    </View>
+                  </Pressable>
+                </Animated.View>
+              ))}
+            </View>
+          </ScrollView>
         )}
       </RealmCard>
 
       {selected ? (
         <RealmCard tone="gold">
-          <SectionHeader eyebrow="Ficha" title={selected.title} />
-          <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }}>
+          <Image
+            source={{ uri: selected.bannerImage || selected.coverImage }}
+            style={{ height: 150, borderRadius: 16, backgroundColor: MOBILE_THEME.bg }}
+          />
+          <SectionHeader eyebrow={selected.providerLabel} title={selected.title} />
+          <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }} numberOfLines={5}>
             {selected.synopsis}
           </Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {selected.genres.map((item) => (
+            {selected.genres.slice(0, 5).map((item) => (
               <Pill key={item} label={item} />
             ))}
           </View>
+        </RealmCard>
+      ) : null}
+
+      {selected ? (
+        <RealmCard tone="teal">
+          <SectionHeader
+            eyebrow="episodios"
+            title={`${selected.episodes.length || selected.episodeCount} disponibles`}
+            trailing={loadingLinks ? <Text style={{ color: MOBILE_THEME.dimText }}>...</Text> : null}
+          />
           <View style={{ gap: 8 }}>
-            {selected.episodes.slice(0, 4).map((episode) => (
-              <View
+            {selected.episodes.slice(0, 12).map((episode) => (
+              <Pressable
                 key={episode.id}
-                style={{
+                onPress={() => void handleSelectEpisode(episode.id)}
+                style={({ pressed }) => ({
                   borderRadius: 14,
                   borderWidth: 1,
-                  borderColor: MOBILE_THEME.border,
-                  backgroundColor: "rgba(4,4,3,0.46)",
+                  borderColor:
+                    selectedEpisodeId === episode.id
+                      ? "rgba(49,209,179,0.55)"
+                      : MOBILE_THEME.border,
+                  backgroundColor:
+                    selectedEpisodeId === episode.id
+                      ? "rgba(49,209,179,0.12)"
+                      : "rgba(4,4,3,0.46)",
                   paddingHorizontal: 12,
-                  paddingVertical: 10,
+                  paddingVertical: 11,
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 10,
-                }}
+                  opacity: pressed ? 0.86 : 1,
+                })}
               >
                 <View style={{ flex: 1 }}>
-                  <Text
-                    style={{ color: MOBILE_THEME.text, fontWeight: "900" }}
-                  >
+                  <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }} numberOfLines={1}>
                     {episode.number}. {episode.title}
                   </Text>
-                  <Text
-                    style={{
-                      color: MOBILE_THEME.dimText,
-                      fontSize: 11,
-                      marginTop: 2,
-                    }}
-                  >
-                    {episode.duration ?? "Duracion pendiente"}
+                  <Text style={{ color: MOBILE_THEME.dimText, fontSize: 11, marginTop: 2 }}>
+                    {episode.duration ?? "Disponible"}
                   </Text>
                 </View>
-                <MaterialIcons
-                  name="cloud-off"
-                  size={18}
-                  color={MOBILE_THEME.gold}
-                />
-              </View>
+                <MaterialIcons name="play-circle" size={20} color={MOBILE_THEME.teal} />
+              </Pressable>
             ))}
           </View>
+        </RealmCard>
+      ) : null}
+
+      {selectedEpisodeId ? (
+        <RealmCard tone="gold">
+          <SectionHeader eyebrow="acciones" title="Ver o descargar" />
           <View style={{ gap: 8 }}>
-            {selected.downloads.map((download) => (
-              <View
-                key={`${selected.id}-${download.qualityLabel}`}
-                style={{
+            {(episodeLinks?.stream ?? []).map((link: any) => (
+              <Pressable
+                key={link.url}
+                onPress={() => void openUrl(link.url)}
+                style={({ pressed }) => ({
+                  minHeight: 44,
                   borderRadius: 14,
+                  backgroundColor: "rgba(49,209,179,0.14)",
                   borderWidth: 1,
-                  borderColor: "rgba(255,211,106,0.18)",
-                  backgroundColor: "rgba(240,179,47,0.06)",
+                  borderColor: "rgba(49,209,179,0.28)",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   paddingHorizontal: 12,
-                  paddingVertical: 10,
-                  gap: 4,
-                }}
+                  opacity: pressed ? 0.86 : 1,
+                })}
               >
                 <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>
-                  {download.qualityLabel} | {download.providerLabel}
+                  Ver en {link.server ?? link.name ?? "Servidor"}
                 </Text>
-                <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 18 }}>
-                  {download.note}
-                </Text>
-              </View>
+                <MaterialIcons name="open-in-new" size={18} color={MOBILE_THEME.teal} />
+              </Pressable>
             ))}
+
+            {(episodeLinks?.download ?? []).map((link: any) => (
+              <Pressable
+                key={link.url}
+                onPress={() => void openUrl(link.url)}
+                style={({ pressed }) => ({
+                  minHeight: 44,
+                  borderRadius: 14,
+                  backgroundColor: "rgba(240,179,47,0.14)",
+                  borderWidth: 1,
+                  borderColor: "rgba(240,179,47,0.28)",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingHorizontal: 12,
+                  opacity: pressed ? 0.86 : 1,
+                })}
+              >
+                <Text style={{ color: MOBILE_THEME.text, fontWeight: "900" }}>
+                  {link.server ?? link.name ?? "Descarga"} {link.quality ? `(${link.quality})` : ""}
+                </Text>
+                <MaterialIcons name="download" size={18} color={MOBILE_THEME.gold} />
+              </Pressable>
+            ))}
+
+            {episodeLinks && episodeLinks.stream.length === 0 && episodeLinks.download.length === 0 ? (
+              <Text style={{ color: MOBILE_THEME.mutedText }}>Sin enlaces disponibles.</Text>
+            ) : null}
+            {!episodeLinks && !loadingLinks ? (
+              <Text style={{ color: MOBILE_THEME.mutedText }}>Selecciona un episodio para cargar enlaces.</Text>
+            ) : null}
           </View>
         </RealmCard>
       ) : null}

@@ -1,7 +1,13 @@
 import { MOBILE_ANIME_LIBRARY } from "./animeHubMock";
+import type {
+  MobileAnimeEpisode,
+  MobileAnimeSeriesDetail,
+} from "./animeHubTypes";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_ANIME_HUB_API_URL;
-const API_KEY = process.env.EXPO_PUBLIC_ANIME_HUB_API_KEY || 'dev-anime1v-key';
+const API_KEY = process.env.EXPO_PUBLIC_ANIME_HUB_API_KEY;
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=80";
 
 export const MOBILE_ANIME_ENDPOINTS = {
   search: "/api/v1/anime/search",
@@ -11,30 +17,79 @@ export const MOBILE_ANIME_ENDPOINTS = {
   batch: "/api/v1/anime/batch",
 } as const;
 
+function headers() {
+  return API_KEY ? { "x-api-key": API_KEY } : undefined;
+}
+
+function asList<T = unknown>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+function unwrap(data: any) {
+  return data?.data ?? data;
+}
+
+function normalizeGenres(value: unknown): string[] {
+  return asList<any>(value)
+    .map((genre) => (typeof genre === "string" ? genre : genre?.name))
+    .filter(Boolean);
+}
+
+function normalizeEpisodes(value: unknown): MobileAnimeEpisode[] {
+  return asList<any>(value).map((episode, index) => {
+    const number = Number(episode?.number ?? episode?.episode ?? index + 1);
+    return {
+      id: String(episode?.url ?? episode?.id ?? `episode-${number}`),
+      number,
+      title: episode?.title ?? `Episodio ${number}`,
+      duration: episode?.duration,
+      status: "ready",
+    };
+  });
+}
+
+function normalizeDetail(item: any, fallbackId: string): MobileAnimeSeriesDetail {
+  const genres = normalizeGenres(item?.genres);
+  const episodes = normalizeEpisodes(item?.episodes);
+  const synopsis = item?.description ?? item?.synopsis ?? "Sin sinopsis disponible.";
+
+  return {
+    id: String(item?.url ?? item?.id ?? fallbackId),
+    title: item?.title ?? item?.name ?? "Titulo no disponible",
+    altTitle: item?.titleJapanese ?? item?.alt_title,
+    coverImage: item?.image ?? item?.poster ?? FALLBACK_IMAGE,
+    bannerImage: item?.backdrop ?? item?.banner ?? item?.image,
+    synopsis,
+    genres,
+    year: String(item?.year ?? "N/A"),
+    statusLabel: item?.status ?? "Catalogo",
+    providerLabel: "anime1v remoto",
+    score: item?.score ? String(item.score) : undefined,
+    releaseWindow: String(item?.season ?? item?.year ?? "N/A"),
+    episodeCount: Number(item?.totalEpisodes ?? episodes.length),
+    featuredQuote: synopsis.length > 110 ? `${synopsis.slice(0, 110).trim()}...` : synopsis,
+    episodes,
+    downloads: [],
+  };
+}
+
 export async function fetchMobileAnimeShell(query: string, genre?: string) {
   if (API_BASE_URL) {
     try {
       const url = new URL(`${API_BASE_URL}/api/v1/anime/search`);
-      url.searchParams.append("q", query);
-      if (genre) url.searchParams.append("genre", genre);
-
-      const res = await fetch(url.toString(), {
-        headers: {
-          'x-api-key': API_KEY
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const results = data?.data?.results || [];
-        return results.map((item: any) => ({
-          id: item.url || item.id,
-          title: item.title,
-          image: item.image,
-          genres: item.genres || []
-        }));
+      url.searchParams.set("q", query);
+      if (genre) {
+        url.searchParams.set("genre", genre);
       }
-    } catch (e) {
-      console.warn("Falling back to mock due to remote error:", e);
+
+      const response = await fetch(url.toString(), { headers: headers() });
+      if (response.ok) {
+        const data = await response.json();
+        const results = asList<any>(data?.data?.results ?? data?.results ?? data?.data);
+        return results.map((item) => normalizeDetail(item, item?.url ?? item?.id ?? item?.title));
+      }
+    } catch (error) {
+      console.warn("Anime search fallback:", error);
     }
   }
 
@@ -57,73 +112,50 @@ export async function fetchMobileAnimeShell(query: string, genre?: string) {
 export async function fetchMobileAnimeShellDetail(seriesId: string) {
   if (API_BASE_URL) {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/anime/info?id=${seriesId}`, {
-        headers: {
-          'x-api-key': API_KEY
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const item = data?.data;
-        if (!item) return null;
-        return {
-          id: item.url || item.id || seriesId,
-          title: item.title,
-          altTitle: item.titleJapanese,
-          coverImage: item.image,
-          bannerImage: item.backdrop,
-          synopsis: item.description || "Sin sinopsis.",
-          genres: item.genres?.map((g: any) => g.name) || [],
-          year: item.year?.toString() || "N/A",
-          statusLabel: item.status || "Finalizado",
-          providerLabel: "anime1v-remote",
-          score: item.score?.toString(),
-          releaseWindow: item.year || "N/A",
-          episodeCount: item.totalEpisodes || 0,
-          featuredQuote: item.description?.slice(0, 100) + '...',
-          episodes: (item.episodes || []).map((ep: any) => ({
-            id: ep.url,
-            number: ep.number,
-            title: ep.title || `Episodio ${ep.number}`,
-            status: "ready",
-          })),
-          downloads: [],
-        };
+      const url = new URL(`${API_BASE_URL}/api/v1/anime/info`);
+      url.searchParams.set("id", seriesId);
+      const response = await fetch(url.toString(), { headers: headers() });
+
+      if (response.ok) {
+        return normalizeDetail(unwrap(await response.json()), seriesId);
       }
-    } catch (e) {
-      console.warn("Detail fetch failed, falling back to mock", e);
+    } catch (error) {
+      console.warn("Anime detail fallback:", error);
     }
   }
+
   return MOBILE_ANIME_LIBRARY.find((entry) => entry.id === seriesId) ?? null;
 }
 
 export async function fetchMobileEpisodeLinks(episodeUrl: string) {
-  if (API_BASE_URL) {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/anime/episode?url=${encodeURIComponent(episodeUrl)}`, {
-        headers: {
-          'x-api-key': API_KEY
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const info = data?.data;
-        if (!info) return null;
-        return {
-          stream: info.servers?.sub || [],
-          download: info.downloadLinks?.SUB || []
-        };
-      }
-    } catch (e) {
-      console.warn("Links fetch failed", e);
-    }
+  if (!API_BASE_URL) {
+    return null;
   }
-  return null;
+
+  try {
+    const url = new URL(`${API_BASE_URL}/api/v1/anime/episode`);
+    url.searchParams.set("url", episodeUrl);
+    const response = await fetch(url.toString(), { headers: headers() });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const info = unwrap(await response.json());
+    return {
+      stream: asList<any>(info?.servers?.sub ?? info?.servers?.SUB ?? info?.stream),
+      download: asList<any>(info?.downloadLinks?.SUB ?? info?.download ?? info?.downloads),
+    };
+  } catch (error) {
+    console.warn("Anime links unavailable:", error);
+    return null;
+  }
 }
 
 export async function connectRemoteAnimeProviderPlaceholder() {
   if (!API_BASE_URL) {
     return { success: false, message: "Falta EXPO_PUBLIC_ANIME_HUB_API_URL" };
   }
+
   return { success: true, message: "Conectado a " + API_BASE_URL };
 }

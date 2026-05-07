@@ -1,7 +1,99 @@
-import type { AnimeHubProvider } from "./animeHub.types";
+import type {
+  AnimeEpisodeLinks,
+  AnimeEpisodeSummary,
+  AnimeHubProvider,
+  AnimeSeriesDetail,
+  AnimeSeriesSummary,
+} from "./animeHub.types";
 
 const API_BASE_URL = import.meta.env.VITE_ANIME_HUB_API_URL;
-const API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY || 'dev-anime1v-key';
+const API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY;
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=80";
+
+function endpoint(path: string) {
+  return new URL(path, API_BASE_URL).toString();
+}
+
+function requestHeaders() {
+  return API_KEY ? { "x-api-key": API_KEY } : undefined;
+}
+
+function asList<T = unknown>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+function unwrapPayload(data: any) {
+  return data?.data ?? data;
+}
+
+function normalizeGenres(value: unknown): string[] {
+  return asList<any>(value)
+    .map((genre) => (typeof genre === "string" ? genre : genre?.name))
+    .filter(Boolean);
+}
+
+function normalizeSummary(item: any): AnimeSeriesSummary {
+  return {
+    id: String(item?.url ?? item?.id ?? item?.slug ?? item?.title ?? crypto.randomUUID()),
+    title: item?.title ?? item?.name ?? "Titulo no disponible",
+    altTitle: item?.alt_title ?? item?.titleJapanese ?? item?.alternativeTitle,
+    coverImage: item?.image ?? item?.poster ?? item?.coverImage ?? FALLBACK_IMAGE,
+    bannerImage: item?.backdrop ?? item?.banner ?? item?.image,
+    synopsis: item?.description ?? item?.synopsis ?? "Sin sinopsis disponible.",
+    genres: normalizeGenres(item?.genres),
+    year: String(item?.year ?? item?.releaseYear ?? "N/A"),
+    statusLabel: item?.status ?? item?.statusLabel ?? "Catalogo",
+    providerLabel: "anime1v-remote",
+    score: item?.score ? String(item.score) : undefined,
+  };
+}
+
+function normalizeEpisodes(value: unknown): AnimeEpisodeSummary[] {
+  return asList<any>(value).map((episode, index) => {
+    const number = Number(episode?.number ?? episode?.episode ?? index + 1);
+    return {
+      id: String(episode?.url ?? episode?.id ?? `episode-${number}`),
+      number,
+      title: episode?.title ?? `Episodio ${number}`,
+      duration: episode?.duration,
+      status: "ready",
+    };
+  });
+}
+
+function normalizeDetail(raw: any, seriesId: string): AnimeSeriesDetail {
+  const item = unwrapPayload(raw);
+  const summary = normalizeSummary({ ...item, id: item?.id ?? item?.url ?? seriesId });
+  const episodes = normalizeEpisodes(item?.episodes);
+  const synopsis = summary.synopsis;
+
+  return {
+    ...summary,
+    episodeCount: Number(item?.totalEpisodes ?? item?.episodeCount ?? episodes.length),
+    releaseWindow: String(item?.season ?? item?.year ?? item?.releaseWindow ?? "N/A"),
+    featuredQuote:
+      synopsis.length > 150 ? `${synopsis.slice(0, 150).trim()}...` : synopsis,
+    episodes,
+    downloads: [],
+  };
+}
+
+function normalizeLinks(raw: any): AnimeEpisodeLinks {
+  const info = unwrapPayload(raw);
+  return {
+    stream: asList<any>(info?.servers?.sub ?? info?.servers?.SUB ?? info?.stream).map((link) => ({
+      server: link?.server ?? link?.name ?? "Servidor",
+      url: link?.url ?? link?.link ?? "#",
+      quality: link?.quality,
+    })),
+    download: asList<any>(info?.downloadLinks?.SUB ?? info?.download ?? info?.downloads).map((link) => ({
+      server: link?.server ?? link?.name ?? "Descarga",
+      url: link?.url ?? link?.link ?? "#",
+      quality: link?.quality,
+    })),
+  };
+}
 
 export const remoteAnimeHubProvider: AnimeHubProvider = {
   id: "anime1v-remote",
@@ -15,118 +107,67 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     batch: "/api/v1/anime/batch",
   },
   async searchSeries(filters) {
-    if (!API_BASE_URL) return [];
+    if (!API_BASE_URL) {
+      return [];
+    }
 
     try {
-      const url = new URL(`${API_BASE_URL}/api/v1/anime/search`);
-      url.searchParams.append("q", filters.query);
-      
-      const response = await fetch(url.toString(), {
-        headers: {
-          'x-api-key': API_KEY
-        }
-      });
-      if (!response.ok) return [];
-      
+      const url = new URL(endpoint("/api/v1/anime/search"));
+      url.searchParams.set("q", filters.query);
+      if (filters.genre) {
+        url.searchParams.set("genre", filters.genre);
+      }
+
+      const response = await fetch(url.toString(), { headers: requestHeaders() });
+      if (!response.ok) {
+        return [];
+      }
+
       const data = await response.json();
-      const results = data?.data?.results || [];
-      
-      return results.map((item: any) => ({
-        id: item.url || item.id,
-        title: item.title,
-        altTitle: item.alt_title,
-        coverImage: item.image || item.poster,
-        synopsis: item.description || "Sin sinopsis disponible.",
-        genres: item.genres || [],
-        year: item.year?.toString() || "N/A",
-        statusLabel: item.status || "Finalizado",
-        providerLabel: "anime1v-remote",
-        score: item.score?.toString(),
-      }));
+      return asList<any>(data?.data?.results ?? data?.results ?? data?.data).map(normalizeSummary);
     } catch (error) {
       console.error("AnimeHub Remote Search Error:", error);
       return [];
     }
   },
   async getSeriesDetail(seriesId) {
-    if (!API_BASE_URL) return null;
+    if (!API_BASE_URL) {
+      return null;
+    }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/anime/info?id=${seriesId}`, {
-        headers: {
-          'x-api-key': API_KEY
-        }
-      });
-      if (!response.ok) return null;
+      const url = new URL(endpoint("/api/v1/anime/info"));
+      url.searchParams.set("id", seriesId);
 
-      const item = await response.json();
+      const response = await fetch(url.toString(), { headers: requestHeaders() });
+      if (!response.ok) {
+        return null;
+      }
 
-      const episodes = (item.episodes || []).map((ep: any) => ({
-        id: `${seriesId}-ep-${ep.number}`,
-        number: ep.number,
-        title: ep.title || `Episodio ${ep.number}`,
-        duration: ep.duration,
-        status: "ready",
-      }));
-
-      return {
-        id: item.id || seriesId,
-        title: item.title,
-        altTitle: item.alt_title,
-        coverImage: item.image || item.poster,
-        bannerImage: item.banner || item.image,
-        synopsis: item.description || "Sin sinopsis.",
-        genres: item.genres || [],
-        year: item.year?.toString() || "N/A",
-        statusLabel: item.status || "Emisión",
-        providerLabel: "anime1v-remote",
-        altTitle: item.titleJapanese,
-        coverImage: item.image,
-        bannerImage: item.backdrop,
-        synopsis: item.description || '',
-        genres: item.genres?.map((g: any) => g.name) || [],
-        year: item.year || '',
-        statusLabel: item.status || '',
-        providerLabel: "anime1v-remote",
-        episodeCount: item.totalEpisodes || 0,
-        releaseWindow: item.year || '',
-        featuredQuote: item.description?.slice(0, 100) + '...',
-        episodes: (item.episodes || []).map((ep: any) => ({
-          id: ep.url,
-          number: ep.number,
-          title: ep.title,
-          status: "ready"
-        })),
-        downloads: []
-      };
-    } catch (err) {
-      console.error("AnimeHub Remote Detail Error:", err);
+      return normalizeDetail(await response.json(), seriesId);
+    } catch (error) {
+      console.error("AnimeHub Remote Detail Error:", error);
       return null;
     }
   },
-
-  async getEpisodeLinks(episodeUrl: string) {
-    if (!API_BASE_URL) return null;
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/anime/episode?url=${encodeURIComponent(episodeUrl)}`, {
-        headers: {
-          'x-api-key': API_KEY
-        }
-      });
-      if (!response.ok) return null;
-
-      const data = await response.json();
-      const info = data?.data;
-      if (!info) return null;
-
-      return {
-        stream: info.servers?.sub || [],
-        download: info.downloadLinks?.SUB || []
-      };
-    } catch (err) {
-      console.error("AnimeHub Remote Links Error:", err);
+  async getEpisodeLinks(episodeUrl) {
+    if (!API_BASE_URL) {
       return null;
     }
-  }
+
+    try {
+      const url = new URL(endpoint("/api/v1/anime/episode"));
+      url.searchParams.set("url", episodeUrl);
+
+      const response = await fetch(url.toString(), { headers: requestHeaders() });
+      if (!response.ok) {
+        return null;
+      }
+
+      return normalizeLinks(await response.json());
+    } catch (error) {
+      console.error("AnimeHub Remote Links Error:", error);
+      return null;
+    }
+  },
 };

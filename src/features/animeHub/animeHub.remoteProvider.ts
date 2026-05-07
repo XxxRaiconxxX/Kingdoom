@@ -10,6 +10,14 @@ const API_BASE_URL = import.meta.env.VITE_ANIME_HUB_API_URL;
 const API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY;
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=80";
+const PLACEHOLDER_PALETTES = [
+  ["#3b0712", "#f43f5e", "#fed7aa"],
+  ["#082f49", "#22d3ee", "#dbeafe"],
+  ["#2e1065", "#a855f7", "#f5d0fe"],
+  ["#052e16", "#34d399", "#dcfce7"],
+  ["#451a03", "#f59e0b", "#fef3c7"],
+  ["#111827", "#94a3b8", "#f8fafc"],
+] as const;
 
 function endpoint(path: string) {
   return new URL(path, API_BASE_URL).toString();
@@ -54,6 +62,63 @@ function normalizeAssetUrl(...values: unknown[]): string | undefined {
   } catch {
     return raw;
   }
+}
+
+function hashText(value: string) {
+  return value.split("").reduce((hash, char) => {
+    return (hash * 31 + char.charCodeAt(0)) >>> 0;
+  }, 2166136261);
+}
+
+function escapeSvgText(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function makeGeneratedCover(title: string, variant = 0) {
+  const seed = hashText(`${title}-${variant}`);
+  const [base, accent, ink] = PLACEHOLDER_PALETTES[seed % PLACEHOLDER_PALETTES.length];
+  const initials =
+    title
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "AN";
+  const safeTitle = escapeSvgText(title.slice(0, 34));
+  const runeA = 24 + (seed % 42);
+  const runeB = 118 + (seed % 30);
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 460">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="34%" r="70%">
+          <stop offset="0%" stop-color="${accent}" stop-opacity="0.85"/>
+          <stop offset="48%" stop-color="${base}" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="#030303"/>
+        </radialGradient>
+        <linearGradient id="veil" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <rect width="320" height="460" rx="28" fill="url(#glow)"/>
+      <path d="M0 ${runeA} C80 ${runeB}, 172 6, 320 ${runeA + 58} L320 0 L0 0Z" fill="url(#veil)"/>
+      <g opacity="0.16" fill="none" stroke="${ink}" stroke-width="2">
+        <circle cx="74" cy="90" r="46"/>
+        <circle cx="252" cy="286" r="58"/>
+        <path d="M40 360 C104 310, 186 418, 284 350"/>
+      </g>
+      <rect x="28" y="28" width="264" height="404" rx="22" fill="none" stroke="${ink}" stroke-opacity="0.32" stroke-width="3"/>
+      <text x="160" y="214" text-anchor="middle" font-family="Georgia, serif" font-size="76" font-weight="800" fill="${ink}">${escapeSvgText(initials)}</text>
+      <text x="160" y="284" text-anchor="middle" font-family="Verdana, sans-serif" font-size="18" font-weight="700" letter-spacing="4" fill="${ink}" fill-opacity="0.88">ANIME HUB</text>
+      <text x="160" y="332" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="700" fill="${ink}" fill-opacity="0.92">${safeTitle}</text>
+    </svg>`;
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
 function pickImage(item: any) {
@@ -104,6 +169,80 @@ function normalizeSummary(item: any): AnimeSeriesSummary {
     providerLabel: "anime1v-remote",
     score: item?.score ? String(item.score) : undefined,
   };
+}
+
+function withDistinctCovers(items: AnimeSeriesSummary[]) {
+  const counts = new Map<string, number>();
+  items.forEach((item) => {
+    counts.set(item.coverImage, (counts.get(item.coverImage) ?? 0) + 1);
+  });
+
+  return items.map((item, index) => {
+    const isSharedCover = (counts.get(item.coverImage) ?? 0) > 1;
+    if (!isSharedCover && item.coverImage !== FALLBACK_IMAGE) {
+      return item;
+    }
+
+    const generatedCover = makeGeneratedCover(item.title, index);
+    return {
+      ...item,
+      coverImage: generatedCover,
+      bannerImage:
+        !item.bannerImage || item.bannerImage === item.coverImage
+          ? generatedCover
+          : item.bannerImage,
+    };
+  });
+}
+
+function uniqueById(items: AnimeSeriesSummary[]) {
+  const seenIds = new Set<string>();
+  const seenTitles = new Set<string>();
+  return items.filter((item) => {
+    const titleKey = item.title.toLowerCase().replace(/\s+/g, " ").trim();
+    if (seenIds.has(item.id) || seenTitles.has(titleKey)) {
+      return false;
+    }
+
+    seenIds.add(item.id);
+    seenTitles.add(titleKey);
+    return true;
+  });
+}
+
+function normalizeSearchText(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function getSearchVariants(query: string) {
+  const normalized = normalizeSearchText(query);
+  if (!normalized) {
+    return [""];
+  }
+
+  const compact = normalized.replace(/\s+/g, "");
+  const hyphenated = normalized.replace(/\s+/g, "-");
+  const spacedFromCamel = normalized.replace(/([a-z])([A-Z])/g, "$1 $2");
+  const lower = normalized.toLowerCase();
+  const variants = [normalized, spacedFromCamel, hyphenated, compact, lower];
+
+  return [...new Set(variants.map((item) => item.trim()).filter(Boolean))];
+}
+
+async function fetchSearchResults(query: string, genre?: string) {
+  const url = new URL(endpoint("/api/v1/anime/search"));
+  url.searchParams.set("q", query);
+  if (genre) {
+    url.searchParams.set("genre", genre);
+  }
+
+  const response = await fetch(url.toString(), { headers: requestHeaders() });
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = await response.json();
+  return asList<any>(data?.data?.results ?? data?.results ?? data?.data).map(normalizeSummary);
 }
 
 async function fetchSeriesDetail(seriesId: string, paramName: "id" | "url") {
@@ -181,19 +320,19 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     }
 
     try {
-      const url = new URL(endpoint("/api/v1/anime/search"));
-      url.searchParams.set("q", filters.query);
-      if (filters.genre) {
-        url.searchParams.set("genre", filters.genre);
+      const variants = getSearchVariants(filters.query);
+      const collected: AnimeSeriesSummary[] = [];
+
+      for (const variant of variants) {
+        const nextResults = await fetchSearchResults(variant, filters.genre);
+        collected.push(...nextResults);
+
+        if (nextResults.length > 0 && collected.length >= 8) {
+          break;
+        }
       }
 
-      const response = await fetch(url.toString(), { headers: requestHeaders() });
-      if (!response.ok) {
-        return [];
-      }
-
-      const data = await response.json();
-      return asList<any>(data?.data?.results ?? data?.results ?? data?.data).map(normalizeSummary);
+      return withDistinctCovers(uniqueById(collected));
     } catch (error) {
       console.error("AnimeHub Remote Search Error:", error);
       return [];
@@ -205,10 +344,11 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     }
 
     try {
-      return (
+      const detail = (
         (await fetchSeriesDetail(seriesId, "id")) ??
         (await fetchSeriesDetail(seriesId, "url"))
       );
+      return detail;
     } catch (error) {
       console.error("AnimeHub Remote Detail Error:", error);
       return null;

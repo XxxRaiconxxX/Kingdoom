@@ -35,6 +35,28 @@ function summaryToDetail(series: AnimeSeriesSummary): AnimeSeriesDetail {
   };
 }
 
+function preserveGeneratedArtwork(
+  detail: AnimeSeriesDetail,
+  seed: AnimeSeriesSummary
+): AnimeSeriesDetail {
+  const shouldPreserveSeedArtwork =
+    seed.coverImage.startsWith("data:image/svg+xml") ||
+    detail.coverImage === seed.coverImage;
+
+  if (!shouldPreserveSeedArtwork) {
+    return detail;
+  }
+
+  return {
+    ...detail,
+    coverImage: seed.coverImage,
+    bannerImage:
+      !detail.bannerImage || detail.bannerImage === detail.coverImage
+        ? seed.bannerImage ?? seed.coverImage
+        : detail.bannerImage,
+  };
+}
+
 export function AnimeHubSection() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<AnimeSeriesSummary[]>([]);
@@ -58,7 +80,8 @@ export function AnimeHubSection() {
   );
 
   async function resolveSeriesDetail(series: AnimeSeriesSummary) {
-    return (await activeProvider.getSeriesDetail(series.id)) ?? summaryToDetail(series);
+    const detail = (await activeProvider.getSeriesDetail(series.id)) ?? summaryToDetail(series);
+    return preserveGeneratedArtwork(detail, series);
   }
 
   useEffect(() => {
@@ -119,7 +142,7 @@ export function AnimeHubSection() {
     try {
       const nextSelected = await activeProvider.getSeriesDetail(series.id);
       if (nextSelected) {
-        setSelectedSeries(nextSelected);
+        setSelectedSeries(preserveGeneratedArtwork(nextSelected, series));
       }
       setFeedback(
         nextSelected ? "Ficha cargada." : "Ficha basica cargada. Episodios pendientes."

@@ -31,6 +31,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 07/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`, `src/features/animeHub/animeHub.remoteProvider.ts`
+*   **Resumen de Tareas:** Se corrigio la repeticion visual de portadas y se amplio la busqueda remota de Anime Hub.
+*   **Cambios Clave:**
+    *   Cuando el proveedor repite o no entrega portada, se genera una portada unica por titulo.
+    *   Al abrir ficha se conserva el arte unico generado desde resultados.
+    *   La busqueda prueba variantes con espacios, sin espacios, guiones y camelCase para casos como `Solo Leveling`.
+    *   Los resultados se deduplican por ID y titulo normalizado.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 07/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/AnimeHubSection.tsx`, `src/features/animeHub/animeHub.remoteProvider.ts`
 *   **Resumen de Tareas:** Se pulio la vista de Anime Hub y se mejoro la deteccion de imagenes remotas.
 *   **Cambios Clave:**
     *   El panel de acciones queda debajo de episodios salvo pantallas ultra amplias, evitando compresion lateral.

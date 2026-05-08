@@ -17,7 +17,11 @@ import {
 } from "../features/animeHub";
 
 function providerIsRemote() {
-  return Boolean(import.meta.env.VITE_ANIME_HUB_API_URL);
+  return Boolean(
+    import.meta.env.VITE_ANIME_HUB_API_URL ||
+      import.meta.env.VITE_ANIME_WEBSITE_API_URL ||
+      import.meta.env.VITE_ANIME_PLATFORM_API_URL
+  );
 }
 
 function summaryToDetail(series: AnimeSeriesSummary): AnimeSeriesDetail {

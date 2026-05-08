@@ -55,6 +55,26 @@ function headers(apiKey?: string) {
   };
 }
 
+function buildAnime1vUrl(path: string, params?: Record<string, string | undefined>) {
+  if (!ANIME1V_BASE_URL) {
+    throw new Error(`Missing anime1v base URL for ${path}`);
+  }
+
+  const url = new URL(path, ANIME1V_BASE_URL);
+
+  Object.entries(params ?? {}).forEach(([key, value]) => {
+    if (typeof value === "string" && value.trim()) {
+      url.searchParams.set(key, value);
+    }
+  });
+
+  if (ANIME1V_API_KEY) {
+    url.searchParams.set("apiKey", ANIME1V_API_KEY);
+  }
+
+  return url.toString();
+}
+
 function asList<T = unknown>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
@@ -204,13 +224,10 @@ async function searchAnime1v(query: string, genre?: string) {
     return [];
   }
 
-  const url = new URL(`${ANIME1V_BASE_URL}/api/v1/anime/search`);
-  url.searchParams.set("q", query);
-  if (genre) {
-    url.searchParams.set("genre", genre);
-  }
-
-  const data = await fetchJson(url.toString(), headers(ANIME1V_API_KEY));
+  const data = await fetchJson(
+    buildAnime1vUrl("/api/v1/anime/search", { q: query, genre }),
+    headers(ANIME1V_API_KEY)
+  );
   const results = asList<any>(data?.data?.results ?? data?.results ?? data?.data);
   return results.map((item) => normalizeDetail("anime1v", item, item?.url ?? item?.id, item?.title));
 }
@@ -301,9 +318,10 @@ async function fetchAnime1vDetail(reference: SeriesReference) {
   const lastParamName = candidates[candidates.length - 1]?.[0];
 
   for (const [paramName, value] of candidates) {
-    const url = new URL(`${ANIME1V_BASE_URL}/api/v1/anime/info`);
-    url.searchParams.set(paramName, value);
-    const data = await fetchJson(url.toString(), headers(ANIME1V_API_KEY));
+    const data = await fetchJson(
+      buildAnime1vUrl("/api/v1/anime/info", { [paramName]: value }),
+      headers(ANIME1V_API_KEY)
+    );
     if (!data) {
       continue;
     }
@@ -527,9 +545,10 @@ export async function fetchMobileEpisodeLinks(episodeId: string) {
         if (!ANIME1V_BASE_URL || !reference.url) {
           return null;
         }
-        const url = new URL(`${ANIME1V_BASE_URL}/api/v1/anime/episode`);
-        url.searchParams.set("url", reference.url);
-        const data = await fetchJson(url.toString(), headers(ANIME1V_API_KEY));
+        const data = await fetchJson(
+          buildAnime1vUrl("/api/v1/anime/episode", { url: reference.url }),
+          headers(ANIME1V_API_KEY)
+        );
         const info = unwrap(data);
         return {
           stream: asList<any>(info?.servers?.sub ?? info?.servers?.SUB ?? info?.stream),

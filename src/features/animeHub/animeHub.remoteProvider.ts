@@ -66,6 +66,22 @@ function requestHeaders(apiKey?: string) {
   };
 }
 
+function buildAnime1vUrl(path: string, params?: Record<string, string | undefined>) {
+  const url = new URL(endpoint(path, ANIME1V_BASE_URL));
+
+  Object.entries(params ?? {}).forEach(([key, value]) => {
+    if (typeof value === "string" && value.trim()) {
+      url.searchParams.set(key, value);
+    }
+  });
+
+  if (ANIME1V_API_KEY) {
+    url.searchParams.set("apiKey", ANIME1V_API_KEY);
+  }
+
+  return url.toString();
+}
+
 function asList<T = unknown>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
@@ -433,13 +449,10 @@ async function searchAnime1v(query: string, genre?: string) {
     return [];
   }
 
-  const url = new URL(endpoint("/api/v1/anime/search", ANIME1V_BASE_URL));
-  url.searchParams.set("q", query);
-  if (genre) {
-    url.searchParams.set("genre", genre);
-  }
-
-  const data = await fetchJson(url.toString(), requestHeaders(ANIME1V_API_KEY));
+  const data = await fetchJson(
+    buildAnime1vUrl("/api/v1/anime/search", { q: query, genre }),
+    requestHeaders(ANIME1V_API_KEY)
+  );
   return asList<any>(data?.data?.results ?? data?.results ?? data?.data).map((item) =>
     normalizeSummary("anime1v", item)
   );
@@ -457,10 +470,10 @@ async function fetchAnime1vDetail(reference: SeriesReference) {
   const lastParamName = candidates[candidates.length - 1]?.[0];
 
   for (const [paramName, value] of candidates) {
-    const url = new URL(endpoint("/api/v1/anime/info", ANIME1V_BASE_URL));
-    url.searchParams.set(paramName, value);
-
-    const data = await fetchJson(url.toString(), requestHeaders(ANIME1V_API_KEY));
+    const data = await fetchJson(
+      buildAnime1vUrl("/api/v1/anime/info", { [paramName]: value }),
+      requestHeaders(ANIME1V_API_KEY)
+    );
     if (!data) {
       continue;
     }
@@ -479,9 +492,10 @@ async function fetchAnime1vLinks(reference: EpisodeReference) {
     return null;
   }
 
-  const url = new URL(endpoint("/api/v1/anime/episode", ANIME1V_BASE_URL));
-  url.searchParams.set("url", reference.url);
-  const data = await fetchJson(url.toString(), requestHeaders(ANIME1V_API_KEY));
+  const data = await fetchJson(
+    buildAnime1vUrl("/api/v1/anime/episode", { url: reference.url }),
+    requestHeaders(ANIME1V_API_KEY)
+  );
   return data ? normalizeLinks(data) : null;
 }
 

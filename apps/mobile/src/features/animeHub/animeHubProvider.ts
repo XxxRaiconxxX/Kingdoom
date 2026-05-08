@@ -246,6 +246,21 @@ async function searchAnimeWebsiteStreaming(query: string) {
   );
 }
 
+async function resolveAnime1vSeed(reference: SeriesReference) {
+  if (!ANIME1V_BASE_URL || !reference.title) {
+    return null;
+  }
+
+  const results = await searchAnime1v(reference.title);
+  const normalizedTitle = reference.title.toLowerCase().trim();
+
+  return (
+    results.find((item) => item.title.toLowerCase().trim() === normalizedTitle) ??
+    results[0] ??
+    null
+  );
+}
+
 async function searchAnimePlatform(query: string) {
   if (!ANIME_PLATFORM_BASE_URL) {
     return [];
@@ -370,10 +385,38 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
   const fallbackEpisodes = await fetchAnimeWebsiteEpisodes(
     String(seed?.id ?? reference.id ?? "")
   );
-  return {
+  const websiteDetail = {
     ...detail,
     episodes: fallbackEpisodes,
     episodeCount: fallbackEpisodes.length || detail.episodeCount,
+  };
+
+  if (websiteDetail.episodes.length > 0) {
+    return websiteDetail;
+  }
+
+  const anime1vSeed = await resolveAnime1vSeed({
+    ...reference,
+    title: String(seed?.title ?? reference.title ?? ""),
+  });
+  if (!anime1vSeed) {
+    return websiteDetail;
+  }
+
+  const anime1vReference = decodeReference<SeriesReference>(
+    anime1vSeed.id,
+    "anime1v"
+  );
+  const anime1vDetail = await fetchAnime1vDetail(anime1vReference);
+  if (!anime1vDetail?.episodes.length) {
+    return websiteDetail;
+  }
+
+  return {
+    ...websiteDetail,
+    episodeCount: anime1vDetail.episodeCount || websiteDetail.episodeCount,
+    episodes: anime1vDetail.episodes,
+    downloads: anime1vDetail.downloads,
   };
 }
 
@@ -404,14 +447,17 @@ export async function fetchMobileAnimeShell(query: string, genre?: string) {
       const remoteResults: MobileAnimeSeriesDetail[] = [];
 
       for (const variant of variants) {
-        remoteResults.push(...(await searchAnime1v(variant, genre)));
+        remoteResults.push(...(await searchAnimeWebsiteCatalog(variant)));
 
         if (remoteResults.length < 8) {
-          remoteResults.push(...(await searchAnimeWebsiteCatalog(variant)));
-          remoteResults.push(...(await searchAnimeWebsiteStreaming(variant)));
+          remoteResults.push(...(await searchAnime1v(variant, genre)));
         }
 
         if (remoteResults.length < 10) {
+          remoteResults.push(...(await searchAnimeWebsiteStreaming(variant)));
+        }
+
+        if (remoteResults.length < 12) {
           remoteResults.push(...(await searchAnimePlatform(variant)));
         }
 

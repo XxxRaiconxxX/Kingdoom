@@ -518,6 +518,21 @@ async function searchAnimeWebsiteStreaming(query: string) {
   ).map((item) => normalizeSummary("anime-website", item));
 }
 
+async function resolveAnime1vSeed(reference: SeriesReference) {
+  if (!ANIME1V_BASE_URL || !reference.title) {
+    return null;
+  }
+
+  const results = await searchAnime1v(reference.title);
+  const normalizedTitle = reference.title.toLowerCase().trim();
+
+  return (
+    results.find(
+      (item) => item.title.toLowerCase().trim() === normalizedTitle
+    ) ?? results[0] ?? null
+  );
+}
+
 async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
   if (!ANIME_WEBSITE_BASE_URL) {
     return null;
@@ -606,10 +621,38 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
   const fallbackEpisodes = await fetchAnimeWebsiteEpisodes(
     String(seed?.id ?? reference.id ?? "")
   );
-  return {
+  const websiteDetail = {
     ...detail,
     episodes: fallbackEpisodes,
     episodeCount: fallbackEpisodes.length || detail.episodeCount,
+  };
+
+  if (websiteDetail.episodes.length > 0) {
+    return websiteDetail;
+  }
+
+  const anime1vSeed = await resolveAnime1vSeed({
+    ...reference,
+    title: String(seed?.title ?? reference.title ?? ""),
+  });
+  if (!anime1vSeed) {
+    return websiteDetail;
+  }
+
+  const anime1vReference = decodeReference<SeriesReference>(
+    anime1vSeed.id,
+    "anime1v"
+  );
+  const anime1vDetail = await fetchAnime1vDetail(anime1vReference);
+  if (!anime1vDetail?.episodes.length) {
+    return websiteDetail;
+  }
+
+  return {
+    ...websiteDetail,
+    episodeCount: anime1vDetail.episodeCount || websiteDetail.episodeCount,
+    episodes: anime1vDetail.episodes,
+    downloads: anime1vDetail.downloads,
   };
 }
 
@@ -694,11 +737,13 @@ async function fetchAnimePlatformDetail(reference: SeriesReference) {
 function sortByCoverage(items: AnimeSeriesSummary[]) {
   return [...items].sort((left, right) => {
     const leftScore =
-      (left.providerLabel === "anime1v remoto" ? 3 : 0) +
+      (left.providerLabel === "anime website" ? 4 : 0) +
+      (left.providerLabel === "anime1v remoto" ? 2 : 0) +
       (left.bannerImage ? 2 : 0) +
       (left.coverImage.startsWith("data:image/svg+xml") ? 0 : 1);
     const rightScore =
-      (right.providerLabel === "anime1v remoto" ? 3 : 0) +
+      (right.providerLabel === "anime website" ? 4 : 0) +
+      (right.providerLabel === "anime1v remoto" ? 2 : 0) +
       (right.bannerImage ? 2 : 0) +
       (right.coverImage.startsWith("data:image/svg+xml") ? 0 : 1);
     return rightScore - leftScore;
@@ -728,16 +773,19 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
       const collected: AnimeSeriesSummary[] = [];
 
       for (const variant of variants) {
-        if (ANIME1V_BASE_URL) {
+        if (ANIME_WEBSITE_BASE_URL) {
+          collected.push(...(await searchAnimeWebsiteCatalog(variant)));
+        }
+
+        if (collected.length < 8 && ANIME1V_BASE_URL) {
           collected.push(...(await searchAnime1v(variant, filters.genre)));
         }
 
-        if (collected.length < 8 && ANIME_WEBSITE_BASE_URL) {
-          collected.push(...(await searchAnimeWebsiteCatalog(variant)));
+        if (collected.length < 10 && ANIME_WEBSITE_BASE_URL) {
           collected.push(...(await searchAnimeWebsiteStreaming(variant)));
         }
 
-        if (collected.length < 10 && ANIME_PLATFORM_BASE_URL) {
+        if (collected.length < 12 && ANIME_PLATFORM_BASE_URL) {
           collected.push(...(await searchAnimePlatform(variant, filters.genre)));
         }
 

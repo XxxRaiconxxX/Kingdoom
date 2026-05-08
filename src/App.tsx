@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Download,
   FileSearch,
-  Film,
   Home,
   Library,
   ScrollText,
@@ -83,7 +82,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: "grimoire", label: "Grimorio", icon: Sparkles },
   { id: "library", label: "Biblioteca", icon: Library },
   { id: "market", label: "Mercado", icon: Store },
-  { id: "anime", label: "Anime", icon: Film },
   { id: "archivist", label: "Archivista", icon: FileSearch },
 ];
 
@@ -171,6 +169,8 @@ export default function App() {
             <PlayerProfilePanel
               collapsed={isProfileCollapsed}
               onCollapsedChange={setIsProfileCollapsed}
+              showAnimeShortcut={activeTab === "home"}
+              onOpenAnime={() => startTransition(() => setActiveTab("anime"))}
             />
           </Suspense>
         </div>
@@ -217,9 +217,9 @@ export default function App() {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4">
-        <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-6 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
+        <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-5 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-            const isActive = activeTab === id;
+            const isActive = activeTab === id || (id === "home" && activeTab === "anime");
 
             return (
               <button

@@ -70,9 +70,13 @@ const PlayerTradeSheet = lazy(() =>
 export function PlayerProfilePanel({
   collapsed,
   onCollapsedChange,
+  showAnimeShortcut = false,
+  onOpenAnime,
 }: {
   collapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
+  showAnimeShortcut?: boolean;
+  onOpenAnime?: () => void;
 }) {
   const {
     player,
@@ -292,9 +296,31 @@ export function PlayerProfilePanel({
     <section className="kd-glass relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
       <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.18),transparent_62%)] blur-2xl" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
-      {player ? <PlayerNotificationBell playerId={player.id} /> : null}
+      {player || showAnimeShortcut ? (
+        <div className="absolute right-4 top-4 z-30 flex items-center gap-2">
+          {showAnimeShortcut ? (
+            <button
+              type="button"
+              onClick={onOpenAnime}
+              className="group inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-rose-400/35 bg-white/95 p-1.5 shadow-[0_14px_34px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:border-rose-300/70 hover:shadow-[0_18px_38px_rgba(127,29,29,0.4)]"
+              title="Abrir portal anime"
+            >
+              <img
+                src={`${import.meta.env.BASE_URL}icons/anime-torii.png`}
+                alt="Portal anime"
+                className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.04]"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+          ) : null}
+          {player ? (
+            <PlayerNotificationBell playerId={player.id} className="relative" />
+          ) : null}
+        </div>
+      ) : null}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-3 pr-28 md:pr-32">
         <div className="space-y-2">
           <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
             <span className="h-2 w-2 rounded-full bg-amber-400/80 shadow-[0_0_14px_rgba(251,191,36,0.45)]" />
@@ -303,17 +329,6 @@ export function PlayerProfilePanel({
           <h2 className="text-2xl font-black text-stone-100 md:text-3xl">
             Tu sesion de jugador
           </h2>
-          <p className="max-w-2xl text-sm leading-6 text-stone-400">
-            Perfil unificado para oro, fichas y mercado.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <ProfilePill label="Jugador" value={player?.username ?? "Sin sesion"} />
-          <ProfilePill
-            label="Activo"
-            value={activeSheet?.name ?? "Ninguno"}
-          />
         </div>
       </div>
 
@@ -852,19 +867,6 @@ export function PlayerProfilePanel({
         </div>
       ) : null}
     </section>
-  );
-}
-
-function ProfilePill({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-full border border-stone-800 bg-stone-950/60 px-3 py-2">
-      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
-        {label}
-      </p>
-      <p className="mt-1 max-w-28 truncate text-xs font-semibold text-stone-200">
-        {value}
-      </p>
-    </div>
   );
 }
 

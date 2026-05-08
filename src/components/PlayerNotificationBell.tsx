@@ -8,7 +8,13 @@ import {
   type PlayerNotification,
 } from "../utils/playerNotifications";
 
-export function PlayerNotificationBell({ playerId }: { playerId: string }) {
+export function PlayerNotificationBell({
+  playerId,
+  className,
+}: {
+  playerId: string;
+  className?: string;
+}) {
   const [notifications, setNotifications] = useState<PlayerNotification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +53,7 @@ export function PlayerNotificationBell({ playerId }: { playerId: string }) {
   };
 
   return (
-    <div className="absolute right-4 top-4 z-30">
+    <div className={className ?? "absolute right-4 top-4 z-30"}>
       <motion.button
         type="button"
         onClick={handleToggle}

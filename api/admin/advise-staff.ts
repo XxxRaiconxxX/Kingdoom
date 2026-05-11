@@ -145,7 +145,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       topP: 0.82,
       config: aiConfig,
     });
-    const result = normalizeStaffAdvisorResult(aiResult.json);
+    const result = normalizeStaffAdvisorResult(aiResult.data);
 
     setCachedAiResponse(cacheKey, result, 8 * 60 * 1000);
 

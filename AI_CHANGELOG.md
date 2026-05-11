@@ -2250,3 +2250,11 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   Se creo este archivo para establecer un canal de comunicacion y registro entre Antigravity y Jarvis.
     *   Se definieron las reglas de uso y la plantilla estandar de registro.
 *   **Notas/Advertencias:** Ninguna. Todo listo para empezar.
+---
+### [Fecha: 11/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `api/admin/advise-staff.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Correccion de compatibilidad entre el endpoint de Staff IA y el nuevo contrato del orquestador serverless.
+*   **Cambios Clave:**
+    *   Se reemplazo el acceso obsoleto `aiResult.json` por `aiResult.data` en `api/admin/advise-staff.ts`.
+    *   Con esto se resuelve el error de TypeScript que bloqueaba el build en Vercel para el endpoint `api/admin/advise-staff.ts`.
+*   **Notas/Advertencias:** El build local con `npm run build` paso correctamente despues del ajuste.

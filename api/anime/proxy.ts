@@ -28,7 +28,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   // Mapear provider interno a source de la nueva API
   const source = provider === "animeflv" ? "animeflv" : 
-                 provider === "monoschinos" ? "monoschinos" : 
+                 provider === "tioanime" ? "tioanime" : 
                  "gogoanime";
   const baseUrl = process.env.VITE_ANIME_HUB_API_URL || "https://scraping-web-anime-api.vercel.app";
 

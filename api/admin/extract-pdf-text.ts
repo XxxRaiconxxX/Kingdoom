@@ -12,6 +12,10 @@ type ApiResponse = {
   };
 };
 
+declare const process: {
+  env: Record<string, string | undefined>;
+};
+
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://xxxraiconxxx.github.io",
   "https://kingdoom.vercel.app",
@@ -20,7 +24,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
 function getAllowedOrigin(requestOrigin?: string) {
   const configuredOrigins = process.env.MISSION_AI_ALLOWED_ORIGINS
     ?.split(",")
-    .map((value) => value.trim())
+    .map((value: string) => value.trim())
     .filter(Boolean);
   const origins = configuredOrigins?.length
     ? configuredOrigins
@@ -37,8 +41,12 @@ function getAllowedOrigin(requestOrigin?: string) {
   return origins[0] ?? "*";
 }
 
+function normalizeHeaderValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 function setCorsHeaders(req: ApiRequest, res: ApiResponse) {
-  const allowedOrigin = getAllowedOrigin(req.headers.origin);
+  const allowedOrigin = getAllowedOrigin(normalizeHeaderValue(req.headers.origin));
   res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -48,7 +56,7 @@ function readGeminiConfig() {
   const geminiApiKeys = [
     ...(process.env.GEMINI_API_KEYS ?? "")
       .split(/[\n,]/g)
-      .map((value) => value.trim())
+      .map((value: string) => value.trim())
       .filter(Boolean),
     ...(process.env.GEMINI_API_KEY?.trim()
       ? [process.env.GEMINI_API_KEY.trim()]

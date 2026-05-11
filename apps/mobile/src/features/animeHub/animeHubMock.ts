@@ -22,7 +22,7 @@ export const MOBILE_ANIME_LIBRARY: MobileAnimeSeriesDetail[] = [
     genres: ["Accion", "Oscuro", "Fantasia"],
     year: "1997",
     statusLabel: "Catalogo privado",
-    providerLabel: "anime1v shell",
+    providerLabel: "anime shell",
     score: "9.1",
     releaseWindow: "Invierno 1997",
     episodeCount: 25,
@@ -37,12 +37,12 @@ export const MOBILE_ANIME_LIBRARY: MobileAnimeSeriesDetail[] = [
     downloads: [
       {
         qualityLabel: "720p MP4",
-        providerLabel: "AnimeAV1",
+        providerLabel: "Proveedor remoto",
         note: "Aqui faltaria conectar el endpoint de descarga real del proveedor.",
       },
       {
         qualityLabel: "1080p HLS",
-        providerLabel: "AnimeFLV",
+        providerLabel: "Proveedor remoto",
         note: "Aqui faltaria resolver mirrors y manifest antes de mostrar el enlace final.",
       },
     ],
@@ -60,7 +60,7 @@ export const MOBILE_ANIME_LIBRARY: MobileAnimeSeriesDetail[] = [
     genres: ["Cyberpunk", "Accion"],
     year: "2022",
     statusLabel: "Demo navegable",
-    providerLabel: "anime1v shell",
+    providerLabel: "anime shell",
     score: "8.8",
     releaseWindow: "Otono 2022",
     episodeCount: 10,

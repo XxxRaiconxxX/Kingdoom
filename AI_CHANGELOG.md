@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 11/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/app/(tabs)/anime.tsx`, `src/features/animeHub/animeHub.mockProvider.ts`, `src/features/animeHub/animeHub.mock.ts`, `apps/mobile/src/features/animeHub/animeHubMock.ts`, `.env.example`, `apps/mobile/.env.example`
+*   **Resumen de Tareas:** Se retiro la dependencia operativa de `anime1v` y se dejo Anime Hub centrado en `anime-website` y `anime-platform`, tanto en web como en la app.
+*   **Cambios Clave:**
+    *   Se eliminaron rutas, mensajes de entorno y prioridad visual ligadas a `anime1v`.
+    *   Se reescribieron los proveedores remotos web y movil para dejar solo `anime-website` y `anime-platform`.
+    *   Se limpiaron los mocks y las tarjetas de detalle para que no sigan mostrando etiquetas o contratos antiguos de `anime1v`.
+*   **Notas/Advertencias:** `anime-website` sigue siendo la fuente principal. Para episodios y enlaces completos, su deploy debe responder correctamente en los endpoints `gogoanime`.
+
+### [Fecha: 11/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`
 *   **Resumen de Tareas:** Se endurecio el fallback de Anime Hub para evitar que las rutas averiadas de `gogoanime` generen resultados huerfanos o ruido innecesario en consola.
 *   **Cambios Clave:**

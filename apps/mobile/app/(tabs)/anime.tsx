@@ -24,7 +24,6 @@ type EpisodeLinks = Awaited<ReturnType<typeof fetchMobileEpisodeLinks>>;
 export default function AnimeScreen() {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState("Todos");
-  const [provider, setProvider] = useState("mixed");
   const [entries, setEntries] = useState<MobileAnimeSeriesDetail[]>([]);
   const [selected, setSelected] = useState<MobileAnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState("");
@@ -32,13 +31,15 @@ export default function AnimeScreen() {
   const [loading, setLoading] = useState(true);
   const [loadingLinks, setLoadingLinks] = useState(false);
   const [feedback, setFeedback] = useState("Catalogo listo.");
+  const provider = "mixed";
+  const providerFilters: Array<{ value: string; label: string }> = [];
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       setLoading(true);
-      const nextEntries = await fetchMobileAnimeShell("", "", "mixed");
+      const nextEntries = await fetchMobileAnimeShell("", "");
       const nextSelected = nextEntries[0]
         ? await fetchMobileAnimeShellDetail(nextEntries[0].id)
         : null;
@@ -65,8 +66,7 @@ export default function AnimeScreen() {
 
     const nextEntries = await fetchMobileAnimeShell(
       query,
-      genre === "Todos" ? "" : genre,
-      provider
+      genre === "Todos" ? "" : genre
     );
     const nextSelected = nextEntries[0]
       ? await fetchMobileAnimeShellDetail(nextEntries[0].id)
@@ -105,16 +105,6 @@ export default function AnimeScreen() {
     await Linking.openURL(url);
   }
 
-  const providerFilters = [
-    { value: "mixed", label: "Mixto" },
-    { value: "animeav1", label: "AnimeAV1" },
-    { value: "animeflv", label: "AnimeFLV" },
-    { value: "tioanime", label: "TioAnime" },
-    { value: "jkanime", label: "JKAnime" },
-    { value: "hentaila", label: "HentaiLA" },
-    { value: "monoschinos", label: "MonosChinos" },
-  ];
-
   return (
     <ScreenShell title="Anime Hub" subtitle="Catalogo y episodios" eyebrow="kingdoom native">
       <RealmCard tone="mythic">
@@ -148,18 +138,6 @@ export default function AnimeScreen() {
                 label={item}
                 active={genre === item}
                 onPress={() => setGenre(item)}
-              />
-            ))}
-          </View>
-        </ScrollView>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
-            {providerFilters.map((item) => (
-              <Pill
-                key={item.value}
-                label={item.label}
-                active={provider === item.value}
-                onPress={() => setProvider(item.value)}
               />
             ))}
           </View>

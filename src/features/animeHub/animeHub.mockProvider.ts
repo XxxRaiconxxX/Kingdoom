@@ -17,15 +17,15 @@ function matchesFilters(entryTitle: string, synopsis: string, genres: string[], 
 }
 
 export const mockAnimeHubProvider: AnimeHubProvider = {
-  id: "anime1v-shell-mock",
-  label: "anime1v shell",
+  id: "anime-shell-mock",
+  label: "anime shell",
   status: "mock",
   endpointMap: {
-    search: "/api/v1/anime/search",
-    info: "/api/v1/anime/info",
-    episode: "/api/v1/anime/episode",
-    download: "/api/v1/anime/download",
-    batch: "/api/v1/anime/batch",
+    search: "/search/media/anime-database",
+    info: "/media-info/anime/consumet/gogoanime",
+    episode: "/episodes/consumet/gogoanime/episode",
+    download: "Pendiente de proveedor real",
+    batch: "No configurado",
   },
   async searchSeries(filters) {
     return ANIME_HUB_LIBRARY.filter((entry) =>

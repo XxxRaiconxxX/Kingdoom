@@ -6,7 +6,7 @@ import type {
   AnimeSeriesSummary,
 } from "./animeHub.types";
 
-type ProviderSource = "anime1v" | "anime-website" | "anime-platform";
+type ProviderSource = "anime-website" | "anime-platform";
 
 type SeriesReference = {
   source: ProviderSource;
@@ -23,17 +23,6 @@ type EpisodeReference = {
   url?: string;
 };
 
-const ANIME1V_PROVIDER_DOMAINS = {
-  animeav1: "animeav1.com",
-  animeflv: "animeflv.net",
-  tioanime: "tioanime.com",
-  jkanime: "jkanime.net",
-  hentaila: "hentaila.com",
-  monoschinos: "monoschinos2.com",
-} as const;
-
-const ANIME1V_BASE_URL = import.meta.env.VITE_ANIME_HUB_API_URL;
-const ANIME1V_API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY;
 const ANIME_WEBSITE_BASE_URL = import.meta.env.VITE_ANIME_WEBSITE_API_URL;
 const ANIME_WEBSITE_API_KEY = import.meta.env.VITE_ANIME_WEBSITE_API_KEY;
 const ANIME_PLATFORM_BASE_URL = import.meta.env.VITE_ANIME_PLATFORM_API_URL;
@@ -51,9 +40,7 @@ const PLACEHOLDER_PALETTES = [
 ] as const;
 
 function hasRemoteAnimeProvider() {
-  return Boolean(
-    ANIME1V_BASE_URL || ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL
-  );
+  return Boolean(ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL);
 }
 
 function endpoint(path: string, baseUrl?: string) {
@@ -73,22 +60,6 @@ function requestHeaders(apiKey?: string) {
     "x-api-key": apiKey,
     Authorization: `Bearer ${apiKey}`,
   };
-}
-
-function buildAnime1vUrl(path: string, params?: Record<string, string | undefined>) {
-  const url = new URL(endpoint(path, ANIME1V_BASE_URL));
-
-  Object.entries(params ?? {}).forEach(([key, value]) => {
-    if (typeof value === "string" && value.trim()) {
-      url.searchParams.set(key, value);
-    }
-  });
-
-  if (ANIME1V_API_KEY) {
-    url.searchParams.set("apiKey", ANIME1V_API_KEY);
-  }
-
-  return url.toString();
 }
 
 function asList<T = unknown>(value: unknown): T[] {
@@ -245,8 +216,6 @@ function pickBanner(baseUrl: string | undefined, item: any, coverImage: string) 
 
 function providerLabel(source: ProviderSource) {
   switch (source) {
-    case "anime1v":
-      return "anime1v remoto";
     case "anime-website":
       return "anime website";
     case "anime-platform":
@@ -256,58 +225,18 @@ function providerLabel(source: ProviderSource) {
   }
 }
 
-function anime1vProviderLabel(providerId?: unknown) {
-  switch (String(providerId ?? "").toLowerCase()) {
-    case "animeav1":
-      return "AnimeAV1";
-    case "animeflv":
-      return "AnimeFLV";
-    case "tioanime":
-      return "TioAnime";
-    case "jkanime":
-      return "JKAnime";
-    case "hentaila":
-      return "HentaiLA";
-    case "monoschinos":
-      return "MonosChinos";
-    default:
-      return "anime1v remoto";
-  }
-}
-
-function anime1vDomainFromFilter(filter?: string) {
-  if (!filter) {
-    return undefined;
-  }
-
-  const normalized = filter.trim().toLowerCase();
-  if (!normalized || normalized === "mixed") {
-    return undefined;
-  }
-
-  return ANIME1V_PROVIDER_DOMAINS[
-    normalized as keyof typeof ANIME1V_PROVIDER_DOMAINS
-  ];
-}
-
 function normalizeSummary(
   source: ProviderSource,
   item: any,
   fallbackRef?: Partial<SeriesReference>
 ): AnimeSeriesSummary {
   const baseUrl =
-    source === "anime1v"
-      ? ANIME1V_BASE_URL
-      : source === "anime-website"
-        ? ANIME_WEBSITE_BASE_URL
-        : ANIME_PLATFORM_BASE_URL;
+    source === "anime-website"
+      ? ANIME_WEBSITE_BASE_URL
+      : ANIME_PLATFORM_BASE_URL;
   const coverImage = pickImage(baseUrl, item);
   const title = item?.title ?? item?.name ?? fallbackRef?.title ?? "Titulo no disponible";
-  const rawUrl =
-    item?.url ??
-    item?.link ??
-    item?.href ??
-    fallbackRef?.url;
+  const rawUrl = item?.url ?? item?.link ?? item?.href ?? fallbackRef?.url;
   const rawId =
     item?.id ??
     item?._id ??
@@ -346,10 +275,7 @@ function normalizeSummary(
         "N/A"
     ),
     statusLabel: item?.status ?? item?.statusLabel ?? item?.state ?? "Catalogo",
-    providerLabel:
-      source === "anime1v"
-        ? anime1vProviderLabel(item?.source ?? item?.provider)
-        : providerLabel(source),
+    providerLabel: providerLabel(source),
     score: item?.score ? String(item.score) : item?.rating ? String(item.rating) : undefined,
   };
 }
@@ -418,7 +344,8 @@ function normalizeEpisodes(
   return asList<any>(value).map((episode, index) => {
     const number = Number(episode?.number ?? episode?.episode ?? index + 1);
     const episodeUrl = episode?.url ?? episode?.link ?? episode?.href;
-    const episodeId = episode?.id ?? episode?._id ?? episode?.episodeId ?? episodeUrl ?? `episode-${number}`;
+    const episodeId =
+      episode?.id ?? episode?._id ?? episode?.episodeId ?? episodeUrl ?? `episode-${number}`;
 
     return {
       id: encodeReference<EpisodeReference>({
@@ -450,11 +377,7 @@ function normalizeDetail(
       item?.totalEpisodes ?? item?.episodeCount ?? item?.episodesCount ?? episodes.length
     ),
     releaseWindow: String(
-      item?.season ??
-        item?.year ??
-        item?.releaseWindow ??
-        item?.seasonYear ??
-        "N/A"
+      item?.season ?? item?.year ?? item?.releaseWindow ?? item?.seasonYear ?? "N/A"
     ),
     featuredQuote:
       synopsis.length > 150 ? `${synopsis.slice(0, 150).trim()}...` : synopsis,
@@ -495,113 +418,18 @@ async function fetchJson<T = any>(url: string, headers?: Record<string, string>)
   return (await response.json()) as T;
 }
 
-async function searchAnime1v(query: string, genre?: string, provider?: string) {
-  if (!ANIME1V_BASE_URL) {
-    return [];
-  }
-
-  const data = await fetchJson(
-    buildAnime1vUrl("/api/v1/anime/search", {
-      q: query,
-      genre,
-      domain: anime1vDomainFromFilter(provider),
-    }),
-    requestHeaders(ANIME1V_API_KEY)
-  );
-  return asList<any>(data?.data?.results ?? data?.results ?? data?.data).map((item) =>
-    normalizeSummary("anime1v", item)
-  );
-}
-
-async function fetchAnime1vDetail(reference: SeriesReference) {
-  if (!ANIME1V_BASE_URL) {
-    return null;
-  }
-
-  const candidates = [
-    reference.url ? ["url", reference.url] : null,
-    reference.id ? ["id", reference.id] : null,
-  ].filter(Boolean) as [string, string][];
-  const lastParamName = candidates[candidates.length - 1]?.[0];
-
-  for (const [paramName, value] of candidates) {
-    const data = await fetchJson(
-      buildAnime1vUrl("/api/v1/anime/info", { [paramName]: value }),
-      requestHeaders(ANIME1V_API_KEY)
-    );
-    if (!data) {
-      continue;
-    }
-
-    const detail = normalizeDetail("anime1v", data, reference);
-    if (detail.episodes.length > 0 || paramName === lastParamName) {
-      return detail;
-    }
-  }
-
-  return null;
-}
-
-async function fetchAnime1vLinks(reference: EpisodeReference) {
-  if (!ANIME1V_BASE_URL || !reference.url) {
-    return null;
-  }
-
-  const data = await fetchJson(
-    buildAnime1vUrl("/api/v1/anime/episode", {
-      url: reference.url,
-      includeMega: "true",
-    }),
-    requestHeaders(ANIME1V_API_KEY)
-  );
-  return data ? normalizeLinks(data) : null;
-}
-
 async function searchAnimeWebsiteCatalog(query: string) {
   if (!ANIME_WEBSITE_BASE_URL) {
     return [];
   }
 
-  const url = new URL(
-    endpoint("/search/media/anime-database", ANIME_WEBSITE_BASE_URL)
-  );
+  const url = new URL(endpoint("/search/media/anime-database", ANIME_WEBSITE_BASE_URL));
   url.searchParams.set("title", query);
   url.searchParams.set("limit", "12");
 
   const data = await fetchJson(url.toString(), requestHeaders(ANIME_WEBSITE_API_KEY));
-  return asList<any>(
-    data?.results ?? data?.data?.results ?? data?.data ?? data
-  ).map((item) => normalizeSummary("anime-website", item));
-}
-
-async function searchAnimeWebsiteStreaming(query: string) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return [];
-  }
-
-  const url = new URL(
-    endpoint("/search/anime/consumet/gogoanime", ANIME_WEBSITE_BASE_URL)
-  );
-  url.searchParams.set("query", query);
-
-  const data = await fetchJson(url.toString(), requestHeaders(ANIME_WEBSITE_API_KEY));
-  return asList<any>(
-    data?.results ?? data?.data?.results ?? data?.data ?? data
-  ).map((item) => normalizeSummary("anime-website", item));
-}
-
-async function resolveAnime1vSeed(reference: SeriesReference) {
-  if (!ANIME1V_BASE_URL || !reference.title) {
-    return null;
-  }
-
-  const results = await searchAnime1v(reference.title);
-  const normalizedTitle = reference.title.toLowerCase().trim();
-
-  return (
-    results.find(
-      (item) => item.title.toLowerCase().trim() === normalizedTitle
-    ) ?? results[0] ?? null
+  return asList<any>(data?.results ?? data?.data?.results ?? data?.data ?? data).map((item) =>
+    normalizeSummary("anime-website", item)
   );
 }
 
@@ -619,12 +447,13 @@ async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
 
     const data = await fetchJson(url.toString(), requestHeaders(ANIME_WEBSITE_API_KEY));
     const results = asList<any>(data?.results ?? data?.data?.results ?? data?.data ?? data);
-    const bestMatch = results.find((item) => {
-      const itemTitle = String(item?.title ?? item?.name ?? "").toLowerCase().trim();
-      const refTitle = String(reference.title ?? "").toLowerCase().trim();
-      const refId = String(reference.id ?? "").toLowerCase().trim();
-      return itemTitle === refTitle || String(item?.id ?? "").toLowerCase().trim() === refId;
-    }) ?? results[0];
+    const bestMatch =
+      results.find((item) => {
+        const itemTitle = String(item?.title ?? item?.name ?? "").toLowerCase().trim();
+        const refTitle = String(reference.title ?? "").toLowerCase().trim();
+        const refId = String(reference.id ?? "").toLowerCase().trim();
+        return itemTitle === refTitle || String(item?.id ?? "").toLowerCase().trim() === refId;
+      }) ?? results[0];
 
     if (bestMatch) {
       return bestMatch;
@@ -639,9 +468,7 @@ async function fetchAnimeWebsiteEpisodes(seriesId: string) {
     return [];
   }
 
-  const url = new URL(
-    endpoint("/episodes/consumet/gogoanime/all", ANIME_WEBSITE_BASE_URL)
-  );
+  const url = new URL(endpoint("/episodes/consumet/gogoanime/all", ANIME_WEBSITE_BASE_URL));
   url.searchParams.set("id", seriesId);
 
   const data = await fetchJson(url.toString(), requestHeaders(ANIME_WEBSITE_API_KEY));
@@ -658,22 +485,16 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
 
   const seed = await resolveAnimeWebsiteSeed(reference);
   if (!seed) {
-    const anime1vSeed = await resolveAnime1vSeed(reference);
-    if (!anime1vSeed) {
-      return normalizeDetail("anime-website", {}, reference);
-    }
-
-    const anime1vReference = decodeReference<SeriesReference>(
-      anime1vSeed.id,
-      "anime1v"
-    );
-    return await fetchAnime1vDetail(anime1vReference);
+    return normalizeDetail("anime-website", {}, reference);
   }
 
   const detailUrl = new URL(
     endpoint("/media-info/anime/consumet/gogoanime", ANIME_WEBSITE_BASE_URL)
   );
-  detailUrl.searchParams.set("query", String(seed?.id ?? seed?.title ?? reference.title ?? ""));
+  detailUrl.searchParams.set(
+    "query",
+    String(seed?.id ?? seed?.title ?? reference.title ?? "")
+  );
 
   const detailData = await fetchJson(
     detailUrl.toString(),
@@ -699,41 +520,11 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
     return detail;
   }
 
-  const fallbackEpisodes = await fetchAnimeWebsiteEpisodes(
-    String(seed?.id ?? reference.id ?? "")
-  );
-  const websiteDetail = {
+  const fallbackEpisodes = await fetchAnimeWebsiteEpisodes(String(seed?.id ?? reference.id ?? ""));
+  return {
     ...detail,
     episodes: fallbackEpisodes,
     episodeCount: fallbackEpisodes.length || detail.episodeCount,
-  };
-
-  if (websiteDetail.episodes.length > 0) {
-    return websiteDetail;
-  }
-
-  const anime1vSeed = await resolveAnime1vSeed({
-    ...reference,
-    title: String(seed?.title ?? reference.title ?? ""),
-  });
-  if (!anime1vSeed) {
-    return websiteDetail;
-  }
-
-  const anime1vReference = decodeReference<SeriesReference>(
-    anime1vSeed.id,
-    "anime1v"
-  );
-  const anime1vDetail = await fetchAnime1vDetail(anime1vReference);
-  if (!anime1vDetail?.episodes.length) {
-    return websiteDetail;
-  }
-
-  return {
-    ...websiteDetail,
-    episodeCount: anime1vDetail.episodeCount || websiteDetail.episodeCount,
-    episodes: anime1vDetail.episodes,
-    downloads: anime1vDetail.downloads,
   };
 }
 
@@ -793,9 +584,12 @@ async function fetchAnimePlatformDetail(reference: SeriesReference) {
   const candidates = [reference.title, reference.id].filter(Boolean) as string[];
   for (const query of candidates) {
     const results = await searchAnimePlatform(query);
-    const match = results.find(
-      (item) => item.title.toLowerCase().trim() === String(reference.title ?? "").toLowerCase().trim()
-    ) ?? results[0];
+    const match =
+      results.find(
+        (item) =>
+          item.title.toLowerCase().trim() ===
+          String(reference.title ?? "").toLowerCase().trim()
+      ) ?? results[0];
 
     if (match) {
       return {
@@ -819,12 +613,10 @@ function sortByCoverage(items: AnimeSeriesSummary[]) {
   return [...items].sort((left, right) => {
     const leftScore =
       (left.providerLabel === "anime website" ? 4 : 0) +
-      (left.providerLabel === "anime1v remoto" ? 2 : 0) +
       (left.bannerImage ? 2 : 0) +
       (left.coverImage.startsWith("data:image/svg+xml") ? 0 : 1);
     const rightScore =
       (right.providerLabel === "anime website" ? 4 : 0) +
-      (right.providerLabel === "anime1v remoto" ? 2 : 0) +
       (right.bannerImage ? 2 : 0) +
       (right.coverImage.startsWith("data:image/svg+xml") ? 0 : 1);
     return rightScore - leftScore;
@@ -836,13 +628,11 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
   label: "anime remoto",
   status: hasRemoteAnimeProvider() ? "ready" : "placeholder",
   endpointMap: {
-    search:
-      "/api/v1/anime/search | /search/media/anime-database | /search/anime/consumet/gogoanime | /api/v1/anime",
-    info: "/api/v1/anime/info | /media-info/anime/consumet/gogoanime",
-    episode:
-      "/api/v1/anime/episode | /episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all",
-    download: "/api/v1/anime/download",
-    batch: "/api/v1/anime/batch-download",
+    search: "/search/media/anime-database | /api/v1/anime",
+    info: "/media-info/anime/consumet/gogoanime",
+    episode: "/episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all",
+    download: "Integrado por proveedor remoto",
+    batch: "No configurado",
   },
   async searchSeries(filters) {
     if (!hasRemoteAnimeProvider()) {
@@ -854,19 +644,11 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
       const collected: AnimeSeriesSummary[] = [];
 
       for (const variant of variants) {
-        const anime1vOnly = Boolean(anime1vDomainFromFilter(filters.provider));
-
-        if (!anime1vOnly && ANIME_WEBSITE_BASE_URL) {
+        if (ANIME_WEBSITE_BASE_URL) {
           collected.push(...(await searchAnimeWebsiteCatalog(variant)));
         }
 
-        if (collected.length < 8 && ANIME1V_BASE_URL) {
-          collected.push(
-            ...(await searchAnime1v(variant, filters.genre, filters.provider))
-          );
-        }
-
-        if (!anime1vOnly && collected.length < 12 && ANIME_PLATFORM_BASE_URL) {
+        if (collected.length < 12 && ANIME_PLATFORM_BASE_URL) {
           collected.push(...(await searchAnimePlatform(variant, filters.genre)));
         }
 
@@ -887,11 +669,9 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     }
 
     try {
-      const reference = decodeReference<SeriesReference>(seriesId, "anime1v");
+      const reference = decodeReference<SeriesReference>(seriesId, "anime-website");
 
       switch (reference.source) {
-        case "anime1v":
-          return await fetchAnime1vDetail(reference);
         case "anime-website":
           return await fetchAnimeWebsiteDetail(reference);
         case "anime-platform":
@@ -910,11 +690,9 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     }
 
     try {
-      const reference = decodeReference<EpisodeReference>(episodeId, "anime1v");
+      const reference = decodeReference<EpisodeReference>(episodeId, "anime-website");
 
       switch (reference.source) {
-        case "anime1v":
-          return await fetchAnime1vLinks(reference);
         case "anime-website":
           return await fetchAnimeWebsiteLinks(reference);
         case "anime-platform":

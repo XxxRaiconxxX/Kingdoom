@@ -28,7 +28,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   try {
     if (provider === "animeflv") {
-      const baseUrl = process.env.VITE_ANIMEFLV_API_URL || "https://animeflv.ahmedrangel.com/api";
+      const baseUrl =
+        process.env.ANIMEFLV_API_URL ||
+        process.env.VITE_ANIMEFLV_API_URL ||
+        "https://animeflv.ahmedrangel.com/api";
       const episodeNumber = number || "1";
       
       // Intentar obtener de la ruta de episodio con timeout y User-Agent

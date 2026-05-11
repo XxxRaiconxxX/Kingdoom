@@ -202,9 +202,6 @@ export function AnimeHubSection() {
                 onChange={(e) => setSelectedProvider(e.target.value)}
                 className="hidden h-11 rounded-2xl border border-stone-800 bg-black/35 px-3 text-xs text-stone-400 outline-none transition focus:border-amber-300/50 md:block"
               >
-                <option value="all">Todos</option>
-                <option value="anime-website">Anime Website</option>
-                <option value="anime-platform">Anime Platform</option>
                 <option value="animeflv">AnimeFLV</option>
               </select>
               <button

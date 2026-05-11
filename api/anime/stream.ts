@@ -4,6 +4,10 @@ import {
   type ApiResponse,
 } from "../admin/_serverAiProviders.js";
 
+declare const process: {
+  env: Record<string, string | undefined>;
+};
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   setCorsHeaders(req, res);
   

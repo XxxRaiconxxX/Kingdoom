@@ -619,12 +619,12 @@ async function fetchAnimeFlvLinks(reference: EpisodeReference) {
 }
 
 async function searchTioAnime(query: string) {
-  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
-  proxyUrl.searchParams.set("provider", "tioanime");
-  proxyUrl.searchParams.set("action", "search");
-  proxyUrl.searchParams.set("query", query);
-
-  const data = await fetchJson(proxyUrl.toString());
+  const params = new URLSearchParams({
+    provider: "tioanime",
+    action: "search",
+    query: query
+  });
+  const data = await fetchJson(`/api/anime/proxy?${params.toString()}`);
   return asList<any>(data?.results ?? data).map((item) =>
     normalizeSummary("tioanime", item)
   );
@@ -632,23 +632,23 @@ async function searchTioAnime(query: string) {
 
 async function fetchTioAnimeDetail(reference: SeriesReference) {
   if (!reference.id) return null;
-  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
-  proxyUrl.searchParams.set("provider", "tioanime");
-  proxyUrl.searchParams.set("action", "detail");
-  proxyUrl.searchParams.set("id", reference.id);
-
-  const data = await fetchJson(proxyUrl.toString());
+  const params = new URLSearchParams({
+    provider: "tioanime",
+    action: "detail",
+    id: reference.id
+  });
+  const data = await fetchJson(`/api/anime/proxy?${params.toString()}`);
   return normalizeDetail("tioanime", data, reference);
 }
 
 async function fetchTioAnimeLinks(reference: EpisodeReference) {
   if (!reference.id) return null;
-  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
-  proxyUrl.searchParams.set("provider", "tioanime");
-  proxyUrl.searchParams.set("action", "links");
-  proxyUrl.searchParams.set("id", reference.id);
-
-  const data = await fetchJson(proxyUrl.toString());
+  const params = new URLSearchParams({
+    provider: "tioanime",
+    action: "links",
+    id: reference.id
+  });
+  const data = await fetchJson(`/api/anime/proxy?${params.toString()}`);
   return normalizeLinks(data);
 }
 
@@ -671,12 +671,12 @@ async function searchAnimePlatform(query: string, genre?: string) {
 }
 
 async function searchAnimeFlv(query: string) {
-  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
-  proxyUrl.searchParams.set("provider", "animeflv");
-  proxyUrl.searchParams.set("action", "search");
-  proxyUrl.searchParams.set("query", query);
-
-  const data = await fetchJson(proxyUrl.toString());
+  const params = new URLSearchParams({
+    provider: "animeflv",
+    action: "search",
+    query: query
+  });
+  const data = await fetchJson(`/api/anime/proxy?${params.toString()}`);
   const finalData = data || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/search?query=${encodeURIComponent(query)}&page=1`, ANIMEFLV_BASE_URL)) : null);
 
   return asList<any>(finalData?.data?.media ?? finalData?.media ?? finalData?.data ?? finalData).map((item) =>

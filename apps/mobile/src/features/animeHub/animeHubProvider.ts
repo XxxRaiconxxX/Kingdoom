@@ -247,16 +247,15 @@ async function searchAnimePlatform(query: string) {
 }
 
 async function searchAnimeFlv(query: string) {
-  if (!ANIMEFLV_BASE_URL) {
-    return [];
-  }
+  const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
+  const proxyUrl = new URL(`${apiBase}/api/anime/search`);
+  proxyUrl.searchParams.set("provider", "animeflv");
+  proxyUrl.searchParams.set("query", query);
 
-  const url = new URL(endpoint(ANIMEFLV_BASE_URL, "/search"));
-  url.searchParams.set("query", query);
-  url.searchParams.set("page", "1");
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(ANIMEFLV_BASE_URL, `/search?query=${encodeURIComponent(query)}&page=1`)) : null);
 
-  const data = await fetchJson(url.toString());
-  const results = asList<any>(data?.data?.media ?? data?.media ?? data?.data ?? data);
+  const results = asList<any>(finalData?.data?.media ?? finalData?.media ?? finalData?.data ?? finalData);
   return results.map((item) =>
     normalizeDetail("animeflv", item, item?.slug ?? item?.id ?? item?.title ?? query, item?.title)
   );
@@ -374,18 +373,23 @@ async function fetchAnimePlatformDetail(reference: SeriesReference) {
 }
 
 async function fetchAnimeFlvDetail(reference: SeriesReference) {
-  if (!ANIMEFLV_BASE_URL || !reference.id) {
+  if (!reference.id) {
     return null;
   }
 
-  const data = await fetchJson(
-    endpoint(ANIMEFLV_BASE_URL, `/anime/${encodeURIComponent(reference.id)}`)
-  );
-  if (!data) {
+  const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
+  const proxyUrl = new URL(`${apiBase}/api/anime/detail`);
+  proxyUrl.searchParams.set("provider", "animeflv");
+  proxyUrl.searchParams.set("id", reference.id);
+
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(ANIMEFLV_BASE_URL, `/anime/${encodeURIComponent(reference.id)}`)) : null);
+
+  if (!finalData) {
     return normalizeDetail("animeflv", {}, reference.id, reference.title);
   }
 
-  return normalizeDetail("animeflv", data?.data ?? data, reference.id, reference.title);
+  return normalizeDetail("animeflv", finalData?.data ?? finalData, reference.id, reference.title);
 }
 
 export async function fetchMobileAnimeShell(query: string, genre?: string, provider?: string) {

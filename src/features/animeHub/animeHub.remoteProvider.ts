@@ -641,33 +641,35 @@ async function searchAnimePlatform(query: string, genre?: string) {
 }
 
 async function searchAnimeFlv(query: string) {
-  if (!ANIMEFLV_BASE_URL) {
-    return [];
-  }
+  const proxyUrl = new URL("/api/anime/search", window.location.origin);
+  proxyUrl.searchParams.set("provider", "animeflv");
+  proxyUrl.searchParams.set("query", query);
 
-  const url = new URL(endpoint("/search", ANIMEFLV_BASE_URL));
-  url.searchParams.set("query", query);
-  url.searchParams.set("page", "1");
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/search?query=${encodeURIComponent(query)}&page=1`, ANIMEFLV_BASE_URL)) : null);
 
-  const data = await fetchJson(url.toString());
-  return asList<any>(data?.data?.media ?? data?.media ?? data?.data ?? data).map((item) =>
+  return asList<any>(finalData?.data?.media ?? finalData?.media ?? finalData?.data ?? finalData).map((item) =>
     normalizeSummary("animeflv", item)
   );
 }
 
 async function fetchAnimeFlvDetail(reference: SeriesReference) {
-  if (!ANIMEFLV_BASE_URL || !reference.id) {
+  if (!reference.id) {
     return null;
   }
 
-  const data = await fetchJson(
-    endpoint(`/anime/${encodeURIComponent(reference.id)}`, ANIMEFLV_BASE_URL)
-  );
-  if (!data) {
+  const proxyUrl = new URL("/api/anime/detail", window.location.origin);
+  proxyUrl.searchParams.set("provider", "animeflv");
+  proxyUrl.searchParams.set("id", reference.id);
+
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/anime/${encodeURIComponent(reference.id)}`, ANIMEFLV_BASE_URL)) : null);
+
+  if (!finalData) {
     return normalizeDetail("animeflv", {}, reference);
   }
 
-  return normalizeDetail("animeflv", data, reference);
+  return normalizeDetail("animeflv", finalData, reference);
 }
 
 async function fetchAnimePlatformDetail(reference: SeriesReference) {

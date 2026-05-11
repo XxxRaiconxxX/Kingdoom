@@ -6,7 +6,7 @@ import type {
   AnimeSeriesSummary,
 } from "./animeHub.types";
 
-type ProviderSource = "anime-website" | "anime-platform";
+type ProviderSource = "anime-website" | "anime-platform" | "animeflv";
 
 type SeriesReference = {
   source: ProviderSource;
@@ -27,6 +27,7 @@ const ANIME_WEBSITE_BASE_URL = import.meta.env.VITE_ANIME_WEBSITE_API_URL;
 const ANIME_WEBSITE_API_KEY = import.meta.env.VITE_ANIME_WEBSITE_API_KEY;
 const ANIME_PLATFORM_BASE_URL = import.meta.env.VITE_ANIME_PLATFORM_API_URL;
 const ANIME_PLATFORM_API_KEY = import.meta.env.VITE_ANIME_PLATFORM_API_KEY;
+const ANIMEFLV_BASE_URL = import.meta.env.VITE_ANIMEFLV_API_URL;
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=80";
@@ -40,7 +41,7 @@ const PLACEHOLDER_PALETTES = [
 ] as const;
 
 function hasRemoteAnimeProvider() {
-  return Boolean(ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL);
+  return Boolean(ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL || ANIMEFLV_BASE_URL);
 }
 
 function endpoint(path: string, baseUrl?: string) {
@@ -220,6 +221,8 @@ function providerLabel(source: ProviderSource) {
       return "anime website";
     case "anime-platform":
       return "anime api";
+    case "animeflv":
+      return "animeflv";
     default:
       return "anime remoto";
   }
@@ -233,7 +236,9 @@ function normalizeSummary(
   const baseUrl =
     source === "anime-website"
       ? ANIME_WEBSITE_BASE_URL
-      : ANIME_PLATFORM_BASE_URL;
+      : source === "anime-platform"
+        ? ANIME_PLATFORM_BASE_URL
+        : ANIMEFLV_BASE_URL;
   const coverImage = pickImage(baseUrl, item);
   const title = item?.title ?? item?.name ?? fallbackRef?.title ?? "Titulo no disponible";
   const rawUrl = item?.url ?? item?.link ?? item?.href ?? fallbackRef?.url;
@@ -576,6 +581,36 @@ async function searchAnimePlatform(query: string, genre?: string) {
   );
 }
 
+async function searchAnimeFlv(query: string) {
+  if (!ANIMEFLV_BASE_URL) {
+    return [];
+  }
+
+  const url = new URL(endpoint("/search", ANIMEFLV_BASE_URL));
+  url.searchParams.set("query", query);
+  url.searchParams.set("page", "1");
+
+  const data = await fetchJson(url.toString());
+  return asList<any>(data?.data?.media ?? data?.media ?? data?.data ?? data).map((item) =>
+    normalizeSummary("animeflv", item)
+  );
+}
+
+async function fetchAnimeFlvDetail(reference: SeriesReference) {
+  if (!ANIMEFLV_BASE_URL || !reference.id) {
+    return null;
+  }
+
+  const data = await fetchJson(
+    endpoint(`/anime/${encodeURIComponent(reference.id)}`, ANIMEFLV_BASE_URL)
+  );
+  if (!data) {
+    return normalizeDetail("animeflv", {}, reference);
+  }
+
+  return normalizeDetail("animeflv", data, reference);
+}
+
 async function fetchAnimePlatformDetail(reference: SeriesReference) {
   if (!ANIME_PLATFORM_BASE_URL) {
     return null;
@@ -613,10 +648,12 @@ function sortByCoverage(items: AnimeSeriesSummary[]) {
   return [...items].sort((left, right) => {
     const leftScore =
       (left.providerLabel === "anime website" ? 4 : 0) +
+      (left.providerLabel === "animeflv" ? 3 : 0) +
       (left.bannerImage ? 2 : 0) +
       (left.coverImage.startsWith("data:image/svg+xml") ? 0 : 1);
     const rightScore =
       (right.providerLabel === "anime website" ? 4 : 0) +
+      (right.providerLabel === "animeflv" ? 3 : 0) +
       (right.bannerImage ? 2 : 0) +
       (right.coverImage.startsWith("data:image/svg+xml") ? 0 : 1);
     return rightScore - leftScore;
@@ -628,9 +665,9 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
   label: "anime remoto",
   status: hasRemoteAnimeProvider() ? "ready" : "placeholder",
   endpointMap: {
-    search: "/search/media/anime-database | /api/v1/anime",
-    info: "/media-info/anime/consumet/gogoanime",
-    episode: "/episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all",
+    search: "/search/media/anime-database | /search | /api/v1/anime",
+    info: "/media-info/anime/consumet/gogoanime | /anime/{slug}",
+    episode: "/episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all | /anime/{slug}/episode/{number}",
     download: "Integrado por proveedor remoto",
     batch: "No configurado",
   },
@@ -650,6 +687,10 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
 
         if (collected.length < 12 && ANIME_PLATFORM_BASE_URL) {
           collected.push(...(await searchAnimePlatform(variant, filters.genre)));
+        }
+
+        if (collected.length < 12 && ANIMEFLV_BASE_URL) {
+          collected.push(...(await searchAnimeFlv(variant)));
         }
 
         if (collected.length >= 12) {
@@ -676,6 +717,8 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           return await fetchAnimeWebsiteDetail(reference);
         case "anime-platform":
           return await fetchAnimePlatformDetail(reference);
+        case "animeflv":
+          return await fetchAnimeFlvDetail(reference);
         default:
           return null;
       }
@@ -696,6 +739,8 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
         case "anime-website":
           return await fetchAnimeWebsiteLinks(reference);
         case "anime-platform":
+          return null;
+        case "animeflv":
           return null;
         default:
           return null;

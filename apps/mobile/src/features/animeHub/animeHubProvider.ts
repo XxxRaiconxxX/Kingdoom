@@ -4,7 +4,7 @@ import type {
   MobileAnimeSeriesDetail,
 } from "./animeHubTypes";
 
-type ProviderSource = "anime-website" | "anime-platform";
+type ProviderSource = "anime-website" | "anime-platform" | "animeflv";
 
 type SeriesReference = {
   source: ProviderSource;
@@ -23,19 +23,20 @@ const ANIME_WEBSITE_BASE_URL = process.env.EXPO_PUBLIC_ANIME_WEBSITE_API_URL;
 const ANIME_WEBSITE_API_KEY = process.env.EXPO_PUBLIC_ANIME_WEBSITE_API_KEY;
 const ANIME_PLATFORM_BASE_URL = process.env.EXPO_PUBLIC_ANIME_PLATFORM_API_URL;
 const ANIME_PLATFORM_API_KEY = process.env.EXPO_PUBLIC_ANIME_PLATFORM_API_KEY;
+const ANIMEFLV_BASE_URL = process.env.EXPO_PUBLIC_ANIMEFLV_API_URL;
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=80";
 
 export const MOBILE_ANIME_ENDPOINTS = {
-  search: "/search/media/anime-database | /api/v1/anime",
-  info: "/media-info/anime/consumet/gogoanime",
-  episode: "/episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all",
+  search: "/search/media/anime-database | /search | /api/v1/anime",
+  info: "/media-info/anime/consumet/gogoanime | /anime/{slug}",
+  episode: "/episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all | /anime/{slug}/episode/{number}",
   download: "Integrado por proveedor remoto",
   batch: "No configurado",
 } as const;
 
 function hasRemoteProvider() {
-  return Boolean(ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL);
+  return Boolean(ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL || ANIMEFLV_BASE_URL);
 }
 
 function headers(apiKey?: string) {
@@ -47,6 +48,10 @@ function headers(apiKey?: string) {
     "x-api-key": apiKey,
     Authorization: `Bearer ${apiKey}`,
   };
+}
+
+function endpoint(baseUrl: string, path: string) {
+  return `${baseUrl.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
 }
 
 function asList<T = unknown>(value: unknown): T[] {
@@ -119,6 +124,8 @@ function providerLabel(source: ProviderSource) {
       return "anime website";
     case "anime-platform":
       return "anime api";
+    case "animeflv":
+      return "animeflv";
     default:
       return "anime remoto";
   }
@@ -221,6 +228,22 @@ async function searchAnimePlatform(query: string) {
   const results = asList<any>(data?.data ?? data?.results ?? data);
   return results.map((item) =>
     normalizeDetail("anime-platform", item, item?.id ?? item?.title ?? query, item?.title)
+  );
+}
+
+async function searchAnimeFlv(query: string) {
+  if (!ANIMEFLV_BASE_URL) {
+    return [];
+  }
+
+  const url = new URL(endpoint(ANIMEFLV_BASE_URL, "/search"));
+  url.searchParams.set("query", query);
+  url.searchParams.set("page", "1");
+
+  const data = await fetchJson(url.toString());
+  const results = asList<any>(data?.data?.media ?? data?.media ?? data?.data ?? data);
+  return results.map((item) =>
+    normalizeDetail("animeflv", item, item?.slug ?? item?.id ?? item?.title ?? query, item?.title)
   );
 }
 
@@ -335,6 +358,21 @@ async function fetchAnimePlatformDetail(reference: SeriesReference) {
   return null;
 }
 
+async function fetchAnimeFlvDetail(reference: SeriesReference) {
+  if (!ANIMEFLV_BASE_URL || !reference.id) {
+    return null;
+  }
+
+  const data = await fetchJson(
+    endpoint(ANIMEFLV_BASE_URL, `/anime/${encodeURIComponent(reference.id)}`)
+  );
+  if (!data) {
+    return normalizeDetail("animeflv", {}, reference.id, reference.title);
+  }
+
+  return normalizeDetail("animeflv", data?.data ?? data, reference.id, reference.title);
+}
+
 export async function fetchMobileAnimeShell(query: string, genre?: string) {
   if (hasRemoteProvider()) {
     try {
@@ -346,6 +384,10 @@ export async function fetchMobileAnimeShell(query: string, genre?: string) {
 
         if (remoteResults.length < 12) {
           remoteResults.push(...(await searchAnimePlatform(variant)));
+        }
+
+        if (remoteResults.length < 12) {
+          remoteResults.push(...(await searchAnimeFlv(variant)));
         }
 
         if (remoteResults.length >= 12) {
@@ -388,6 +430,8 @@ export async function fetchMobileAnimeShellDetail(seriesId: string) {
           return await fetchAnimeWebsiteDetail(reference);
         case "anime-platform":
           return await fetchAnimePlatformDetail(reference);
+        case "animeflv":
+          return await fetchAnimeFlvDetail(reference);
         default:
           return null;
       }
@@ -421,10 +465,12 @@ export async function fetchMobileEpisodeLinks(episodeId: string) {
           download: asList<any>(info?.downloads ?? info?.download),
         };
       }
-      case "anime-platform":
-        return null;
-      default:
-        return null;
+        case "anime-platform":
+          return null;
+        case "animeflv":
+          return null;
+        default:
+          return null;
     }
   } catch (error) {
     console.warn("Anime links unavailable:", error);
@@ -437,12 +483,13 @@ export async function connectRemoteAnimeProviderPlaceholder() {
     return {
       success: false,
       message:
-        "Falta EXPO_PUBLIC_ANIME_WEBSITE_API_URL o EXPO_PUBLIC_ANIME_PLATFORM_API_URL",
+        "Falta EXPO_PUBLIC_ANIME_WEBSITE_API_URL, EXPO_PUBLIC_ANIMEFLV_API_URL o EXPO_PUBLIC_ANIME_PLATFORM_API_URL",
     };
   }
 
   const connected = [
     ANIME_WEBSITE_BASE_URL ? "anime-website" : null,
+    ANIMEFLV_BASE_URL ? "animeflv" : null,
     ANIME_PLATFORM_BASE_URL ? "anime-platform" : null,
   ]
     .filter(Boolean)

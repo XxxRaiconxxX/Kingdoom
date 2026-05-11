@@ -19,7 +19,8 @@ import {
 function providerIsRemote() {
   return Boolean(
     import.meta.env.VITE_ANIME_WEBSITE_API_URL ||
-      import.meta.env.VITE_ANIME_PLATFORM_API_URL
+      import.meta.env.VITE_ANIME_PLATFORM_API_URL ||
+      import.meta.env.VITE_ANIMEFLV_API_URL
   );
 }
 

@@ -243,6 +243,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       body.restriction?.trim() || "Debe poder resolverse por rol en WhatsApp.",
     combatStyle: body.combatStyle ?? "optional",
     theme: body.theme?.trim() || "intriga, riesgo y recompensa",
+    includeDebug,
   };
 
   try {

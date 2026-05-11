@@ -177,6 +177,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     foundAt: body.foundAt?.trim() || "Bosques, ruinas o territorios sin mapa",
     rarity: normalizeRarity(body.rarity),
     tone: body.tone?.trim() || "fantasia oscura medieval",
+    includeDebug,
   };
 
   try {

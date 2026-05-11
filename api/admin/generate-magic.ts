@@ -142,6 +142,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     scientificAngle:
       body.scientificAngle?.trim() ||
       "explica el estilo como si tuviera una base fisica, ritual o metafisica coherente",
+    includeDebug,
   };
 
   try {

@@ -30,6 +30,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 11/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `api/admin/_serverAiProviders.ts`
+*   **Resumen de Tareas:** Se endurecio el helper compartido de proveedores IA para que compile correctamente bajo la revision aislada de Vercel.
+*   **Cambios Clave:**
+    *   Se declaro un tipo minimo de `process.env` dentro del modulo.
+    *   Se tiparon los `map(...)` que procesan keys y origenes configurables para evitar inferencias `any`.
+*   **Notas/Advertencias:** El problema no estaba en la logica de fallback entre proveedores, sino en el entorno de tipado del runtime serverless.
+
+### [Fecha: 11/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/extract-pdf-text.ts`
 *   **Resumen de Tareas:** Se corrigio el tipado aislado del extractor PDF para que compile correctamente en Vercel aunque el `tsconfig` principal no incluya la carpeta `api`.
 *   **Cambios Clave:**

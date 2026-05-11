@@ -298,13 +298,15 @@ export function TavernScratch() {
                         -
                       </button>
                       <input
-                        type="number"
+                        type="text" inputMode="numeric"
                         min={1}
                         max={maxBuyQuantity || 1}
-                        value={quantity}
-                        onChange={(event) =>
-                          handleQuantityChange(parseInt(event.target.value, 10) || 1)
-                        }
+                        value={quantity === 0 ? "" : quantity}
+                        onChange={(event) => {
+                          const val = event.target.value;
+                          const num = parseInt(val, 10);
+                          handleQuantityChange(isNaN(num) ? 0 : num);
+                        }}
                         className="w-16 rounded-xl border border-stone-700 bg-stone-900 px-2 py-2 text-center font-bold text-amber-300 outline-none"
                       />
                       <button

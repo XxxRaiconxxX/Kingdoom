@@ -209,13 +209,13 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
                        <span className="font-bold text-amber-300">{player?.gold} de oro</span>
                      </div>
                      <input
-                       type="number"
+                       type="text" inputMode="numeric"
                        required
                        min="1"
                        max={player?.gold ?? 0}
                        value={goldAmount}
                        onChange={(e) => {
-                         setGoldAmount(e.target.value);
+                         const val = e.target.value; if (val === "" || /^\d+$/.test(val)) { setGoldAmount(val); }
                          if (feedback) setFeedback(null);
                        }}
                        className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-lg font-bold text-amber-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-center"
@@ -284,7 +284,7 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
                                  Cantidad a enviar:
                                </label>
                                <input
-                                 type="number"
+                                 type="text" inputMode="numeric"
                                  required
                                  min="1"
                                  max={selectedItem.quantity}

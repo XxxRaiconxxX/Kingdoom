@@ -171,11 +171,18 @@ export function TavernGame() {
             <form onSubmit={startRound} className="mt-4 flex gap-3">
               <input
                 name="betAmount"
-                type="number"
-                required
-                min={1}
-                max={balance}
-                defaultValue={bet > 0 ? bet : ""}
+                value={bet === 0 ? "" : bet}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") {
+                    setBet(0);
+                    return;
+                  }
+                  const num = parseInt(val, 10);
+                  if (!isNaN(num)) {
+                    setBet(Math.min(balance, num));
+                  }
+                }}
                 className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-lg font-bold text-stone-100 placeholder-stone-600 outline-none transition focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/40"
                 placeholder="Oro a apostar"
               />

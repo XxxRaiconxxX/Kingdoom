@@ -438,14 +438,20 @@ setUpdating(false);
                     {/* Input de apuesta */}
                     <div className="flex items-center gap-3 mb-4">
                         <input 
-                            type="number"
-                            value={bet}
+                            type="text"
+                            inputMode="numeric"
+                            value={bet === 0 ? "" : bet}
                             onChange={(e) => {
-  const raw = e.target.value;
-  if (raw === "" || raw === "-") return;
-  const parsed = parseInt(raw);
-  if (!isNaN(parsed)) setBet(Math.min(player.gold, Math.max(0, parsed)));
-}}
+                              const raw = e.target.value;
+                              if (raw === "") {
+                                setBet(0);
+                                return;
+                              }
+                              const parsed = parseInt(raw, 10);
+                              if (!isNaN(parsed)) {
+                                setBet(Math.min(player.gold, parsed));
+                              }
+                            }}
 
                             disabled={status === "rising" || status === "starting"}
                             className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 text-lg font-black text-stone-100 focus:outline-none focus:border-amber-500/50 transition"
@@ -478,11 +484,21 @@ setUpdating(false);
                       </label>
                       <div className="relative">
                         <input
-                          type="number"
+                          type="text" inputMode="numeric"
                           step="0.1"
                           min="0"
                           value={autoCashOut === 0 ? "" : autoCashOut}
-                          onChange={(e) => setAutoCashOut(parseFloat(e.target.value) || 0)}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "") {
+                              setAutoCashOut(0);
+                              return;
+                            }
+                            const parsed = parseFloat(val);
+                            if (!isNaN(parsed)) {
+                              setAutoCashOut(parsed);
+                            }
+                          }}
                           disabled={status === "rising" || status === "starting"}
                           placeholder="Ej: 1.50  (0 = desactivado)"
                           className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 pr-8 text-base font-black text-amber-400 placeholder:text-stone-600 placeholder:font-normal focus:outline-none focus:border-amber-500/50 transition"

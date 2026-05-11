@@ -361,17 +361,17 @@ const purchaseResult = await purchaseMarketItemSecure({
                     required
                     min={1}
                     max={maxPurchaseQuantity}
-                    type="number"
-                    value={formValues.quantity}
-                    onChange={(event) =>
+                    type="text"
+                    inputMode="numeric"
+                    value={formValues.quantity === 0 ? "" : formValues.quantity}
+                    onChange={(event) => {
+                      const val = event.target.value;
+                      const num = parseInt(val, 10);
                       setFormValues((current) => ({
                         ...current,
-                        quantity: Math.min(
-                          maxPurchaseQuantity,
-                          Math.max(1, Number(event.target.value || 1))
-                        ),
-                      }))
-                    }
+                        quantity: isNaN(num) ? 0 : Math.min(maxPurchaseQuantity, num),
+                      }));
+                    }}
                     className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
                   />
                 </label>

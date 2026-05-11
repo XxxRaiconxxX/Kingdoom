@@ -759,13 +759,23 @@ export function TavernPenalty() {
               </div>
             </div>
             <input
-              type="number"
-              min={1}
-              max={maxAllowedBet}
-              value={bet}
-              onChange={(event) => setBet(Number(event.target.value))}
+              type="text"
+              inputMode="numeric"
+              value={bet === 0 ? "" : bet}
+              onChange={(event) => {
+                const val = event.target.value;
+                if (val === "") {
+                  setBet(0);
+                  return;
+                }
+                const num = parseInt(val, 10);
+                if (!isNaN(num)) {
+                  setBet(Math.min(maxAllowedBet, num));
+                }
+              }}
               disabled={phase !== "betting"}
               className="w-full rounded-2xl border border-stone-700 bg-black px-4 py-3 text-lg font-black text-stone-100 outline-none transition focus:border-amber-400/60 disabled:opacity-60"
+              placeholder="100"
             />
             <div className="mt-2 grid grid-cols-3 gap-2">
               {[100, 500, 1000].map((amount) => (

@@ -520,12 +520,19 @@ export function RealmStockExchange() {
             <PanelTitle icon={<Clock3 className="h-4 w-4" />} label="Prediccion 2h" />
             <div className="mt-3 grid gap-3">
               <input
-                type="number"
-                value={stakeGold}
-                min={REALM_EXCHANGE_MIN_STAKE}
-                max={REALM_EXCHANGE_MAX_STAKE}
+                value={stakeGold === 0 ? "" : stakeGold}
                 disabled={disabled || Boolean(activePrediction) || bankruptcy.isBankrupt}
-                onChange={(event) => setStakeGold(Math.max(0, Number(event.target.value)))}
+                onChange={(event) => {
+                  const val = event.target.value;
+                  if (val === "") {
+                    setStakeGold(0);
+                    return;
+                  }
+                  const num = parseInt(val, 10);
+                  if (!isNaN(num)) {
+                    setStakeGold(Math.min(REALM_EXCHANGE_MAX_STAKE, num));
+                  }
+                }}
                 className="w-full rounded-2xl border border-stone-700 bg-black px-4 py-3 text-sm font-black text-stone-100 outline-none transition focus:border-amber-400/60"
               />
               <div className="grid grid-cols-2 gap-2">
@@ -570,11 +577,18 @@ export function RealmStockExchange() {
             <div className="mt-3 grid gap-2">
               <div className="grid grid-cols-[1fr_auto] gap-2">
                 <input
-                  type="number"
-                  value={tradeLots}
-                  min={1}
-                  disabled={disabled}
-                  onChange={(event) => setTradeLots(Math.max(1, Number(event.target.value)))}
+                  value={tradeLots === 0 ? "" : tradeLots}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (val === "") {
+                      setTradeLots(0);
+                      return;
+                    }
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      setTradeLots(num);
+                    }
+                  }}
                   className="w-full rounded-2xl border border-stone-700 bg-black px-4 py-3 text-sm font-black text-stone-100 outline-none transition focus:border-cyan-400/60"
                 />
                 <div className="rounded-2xl border border-stone-800 bg-stone-950/70 px-3 py-3 text-xs font-black uppercase tracking-[0.12em] text-stone-400">

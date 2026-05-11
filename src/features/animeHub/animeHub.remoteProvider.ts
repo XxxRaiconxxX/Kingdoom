@@ -615,7 +615,8 @@ async function searchTioAnime(query: string) {
   const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, {
     "Authorization": "Bearer kingdoom-secret-key-2026"
   });
-  return asList<any>(data?.results ?? data).map((item) =>
+  const payload = unwrapPayload(data);
+  return asList<any>(payload?.results ?? payload).map((item) =>
     normalizeSummary("tioanime", item)
   );
 }
@@ -626,7 +627,7 @@ async function fetchTioAnimeDetail(reference: SeriesReference) {
   const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=tioanime`, {
     "Authorization": "Bearer kingdoom-secret-key-2026"
   });
-  return normalizeDetail("tioanime", data, reference);
+  return normalizeDetail("tioanime", unwrapPayload(data), reference);
 }
 
 async function fetchTioAnimeLinks(reference: EpisodeReference) {
@@ -635,7 +636,7 @@ async function fetchTioAnimeLinks(reference: EpisodeReference) {
   const data = await fetchJson(`${baseUrl}/api/episode/${encodeURIComponent(reference.id)}?source=tioanime`, {
     "Authorization": "Bearer kingdoom-secret-key-2026"
   });
-  return normalizeLinks(data);
+  return normalizeLinks(unwrapPayload(data));
 }
 
 async function searchAnimePlatform(query: string, genre?: string) {
@@ -666,9 +667,10 @@ async function searchAnimeFlv(query: string) {
   const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, {
     "Authorization": "Bearer kingdoom-secret-key-2026"
   });
-  const finalData = data || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/search?query=${encodeURIComponent(query)}&page=1`, ANIMEFLV_BASE_URL)) : null);
+  const payload = unwrapPayload(data);
+  const finalData = payload || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/search?query=${encodeURIComponent(query)}&page=1`, ANIMEFLV_BASE_URL)) : null);
 
-  return asList<any>(finalData?.data?.media ?? finalData?.media ?? finalData?.data ?? finalData).map((item) =>
+  return asList<any>(finalData?.results ?? finalData?.media ?? finalData?.data ?? finalData).map((item) =>
     normalizeSummary("animeflv", item)
   );
 }
@@ -682,7 +684,8 @@ async function fetchAnimeFlvDetail(reference: SeriesReference) {
   const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=animeflv`, {
     "Authorization": "Bearer kingdoom-secret-key-2026"
   });
-  const finalData = data || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/anime/${encodeURIComponent(reference.id)}`, ANIMEFLV_BASE_URL)) : null);
+  const payload = unwrapPayload(data);
+  const finalData = payload || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/anime/${encodeURIComponent(reference.id)}`, ANIMEFLV_BASE_URL)) : null);
 
   if (!finalData) {
     return normalizeDetail("animeflv", {}, reference);

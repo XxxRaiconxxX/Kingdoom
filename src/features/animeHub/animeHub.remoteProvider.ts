@@ -773,6 +773,7 @@ async function enrichWithJikan(title: string) {
       score: mal.score,
       synopsis: mal.synopsis,
       trailer: mal.trailer?.embed_url,
+      image: mal.images?.webp?.large_image_url || mal.images?.jpg?.large_image_url,
       genres: mal.genres?.map((g: any) => g.name) || [],
       status: mal.status,
       year: mal.year
@@ -868,6 +869,11 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
         if (extra) {
           detail.description = extra.synopsis || detail.description;
           detail.genres = [...new Set([...(detail.genres || []), ...extra.genres])];
+          // Mejora de imagen HD
+          if (extra.image) {
+            detail.bannerImage = extra.image;
+            detail.coverImage = extra.image;
+          }
           // Añadimos metadatos extra que la UI puede usar si existen
           (detail as any).malScore = extra.score;
           (detail as any).trailer = extra.trailer;

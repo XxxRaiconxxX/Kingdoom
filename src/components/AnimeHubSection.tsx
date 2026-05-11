@@ -4,6 +4,7 @@ import {
   Download,
   ExternalLink,
   Film,
+  Layers3,
   PlayCircle,
   Search,
 } from "lucide-react";
@@ -63,6 +64,7 @@ function preserveGeneratedArtwork(
 
 export function AnimeHubSection() {
   const [query, setQuery] = useState("");
+  const [provider, setProvider] = useState("mixed");
   const [results, setResults] = useState<AnimeSeriesSummary[]>([]);
   const [selectedSeries, setSelectedSeries] = useState<AnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>("");
@@ -124,6 +126,7 @@ export function AnimeHubSection() {
       const nextResults = await activeProvider.searchSeries({
         query,
         genre: "",
+        provider,
       });
       const nextSelected = nextResults[0] ? await resolveSeriesDetail(nextResults[0]) : null;
 
@@ -174,33 +177,64 @@ export function AnimeHubSection() {
     }
   }
 
+  const providerFilters = [
+    { value: "mixed", label: "Mixto" },
+    { value: "animeav1", label: "AnimeAV1" },
+    { value: "animeflv", label: "AnimeFLV" },
+    { value: "tioanime", label: "TioAnime" },
+    { value: "jkanime", label: "JKAnime" },
+    { value: "hentaila", label: "HentaiLA" },
+    { value: "monoschinos", label: "MonosChinos" },
+  ];
+
   return (
     <section className="space-y-5">
       <article className="rounded-[1.5rem] border border-stone-800 bg-stone-950/70 p-2.5 shadow-[0_24px_70px_rgba(0,0,0,0.25)]">
         <div className="flex items-center">
           <form
-            className="flex min-w-0 flex-1 items-center gap-2"
+            className="flex min-w-0 flex-1 flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault();
               void handleSearch();
             }}
           >
-            <label className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-stone-800 bg-black/35 px-3 py-3">
-              <Search className="h-4 w-4 text-stone-500" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar serie..."
-                className="min-w-0 flex-1 bg-transparent text-sm text-stone-100 outline-none placeholder:text-stone-600"
-              />
-            </label>
-            <button
-              type="submit"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-amber-300/35 bg-amber-300 text-black transition hover:brightness-110 active:scale-[0.96]"
-              aria-label="Buscar anime"
-            >
-              <Search className="h-4 w-4" />
-            </button>
+            <div className="flex min-w-0 items-center gap-2">
+              <label className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-stone-800 bg-black/35 px-3 py-3">
+                <Search className="h-4 w-4 text-stone-500" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Buscar serie..."
+                  className="min-w-0 flex-1 bg-transparent text-sm text-stone-100 outline-none placeholder:text-stone-600"
+                />
+              </label>
+              <button
+                type="submit"
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-amber-300/35 bg-amber-300 text-black transition hover:brightness-110 active:scale-[0.96]"
+                aria-label="Buscar anime"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-stone-800 bg-black/30 text-stone-400">
+                <Layers3 className="h-4 w-4" />
+              </span>
+              {providerFilters.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => setProvider(item.value)}
+                  className={`shrink-0 rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
+                    provider === item.value
+                      ? "border-cyan-300/45 bg-cyan-300/12 text-cyan-100"
+                      : "border-stone-800 bg-black/25 text-stone-400 hover:border-stone-700 hover:text-stone-200"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </form>
         </div>
         <p className="sr-only" aria-live="polite">
@@ -387,6 +421,13 @@ export function AnimeHubSection() {
                           <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-cyan-100">
                             Listo
                           </span>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-2 rounded-2xl border border-stone-800/80 bg-black/20 px-3 py-2 text-[11px] text-stone-400">
+                        Proveedor activo: <span className="font-black text-stone-200">{selectedSeries.providerLabel}</span>
+                        {provider !== "mixed" ? (
+                          <span className="ml-2 text-cyan-200">filtro: {providerFilters.find((item) => item.value === provider)?.label}</span>
                         ) : null}
                       </div>
 

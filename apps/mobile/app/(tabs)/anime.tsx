@@ -24,6 +24,7 @@ type EpisodeLinks = Awaited<ReturnType<typeof fetchMobileEpisodeLinks>>;
 export default function AnimeScreen() {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState("Todos");
+  const [provider, setProvider] = useState("mixed");
   const [entries, setEntries] = useState<MobileAnimeSeriesDetail[]>([]);
   const [selected, setSelected] = useState<MobileAnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState("");
@@ -37,7 +38,7 @@ export default function AnimeScreen() {
 
     async function load() {
       setLoading(true);
-      const nextEntries = await fetchMobileAnimeShell("", "");
+      const nextEntries = await fetchMobileAnimeShell("", "", "mixed");
       const nextSelected = nextEntries[0]
         ? await fetchMobileAnimeShellDetail(nextEntries[0].id)
         : null;
@@ -64,7 +65,8 @@ export default function AnimeScreen() {
 
     const nextEntries = await fetchMobileAnimeShell(
       query,
-      genre === "Todos" ? "" : genre
+      genre === "Todos" ? "" : genre,
+      provider
     );
     const nextSelected = nextEntries[0]
       ? await fetchMobileAnimeShellDetail(nextEntries[0].id)
@@ -103,6 +105,16 @@ export default function AnimeScreen() {
     await Linking.openURL(url);
   }
 
+  const providerFilters = [
+    { value: "mixed", label: "Mixto" },
+    { value: "animeav1", label: "AnimeAV1" },
+    { value: "animeflv", label: "AnimeFLV" },
+    { value: "tioanime", label: "TioAnime" },
+    { value: "jkanime", label: "JKAnime" },
+    { value: "hentaila", label: "HentaiLA" },
+    { value: "monoschinos", label: "MonosChinos" },
+  ];
+
   return (
     <ScreenShell title="Anime Hub" subtitle="Catalogo y episodios" eyebrow="kingdoom native">
       <RealmCard tone="mythic">
@@ -136,6 +148,18 @@ export default function AnimeScreen() {
                 label={item}
                 active={genre === item}
                 onPress={() => setGenre(item)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+            {providerFilters.map((item) => (
+              <Pill
+                key={item.value}
+                label={item.label}
+                active={provider === item.value}
+                onPress={() => setProvider(item.value)}
               />
             ))}
           </View>
@@ -199,6 +223,12 @@ export default function AnimeScreen() {
           <SectionHeader eyebrow={selected.providerLabel} title={selected.title} />
           <Text style={{ color: MOBILE_THEME.mutedText, lineHeight: 20 }} numberOfLines={5}>
             {selected.synopsis}
+          </Text>
+          <Text style={{ color: MOBILE_THEME.dimText, fontSize: 12 }}>
+            Fuente activa: {selected.providerLabel}
+            {provider !== "mixed"
+              ? ` · filtro ${providerFilters.find((item) => item.value === provider)?.label ?? ""}`
+              : ""}
           </Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
             {selected.genres.slice(0, 5).map((item) => (

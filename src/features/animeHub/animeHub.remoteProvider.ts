@@ -23,6 +23,15 @@ type EpisodeReference = {
   url?: string;
 };
 
+const ANIME1V_PROVIDER_DOMAINS = {
+  animeav1: "animeav1.com",
+  animeflv: "animeflv.net",
+  tioanime: "tioanime.com",
+  jkanime: "jkanime.net",
+  hentaila: "hentaila.com",
+  monoschinos: "monoschinos2.com",
+} as const;
+
 const ANIME1V_BASE_URL = import.meta.env.VITE_ANIME_HUB_API_URL;
 const ANIME1V_API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY;
 const ANIME_WEBSITE_BASE_URL = import.meta.env.VITE_ANIME_WEBSITE_API_URL;
@@ -247,6 +256,40 @@ function providerLabel(source: ProviderSource) {
   }
 }
 
+function anime1vProviderLabel(providerId?: unknown) {
+  switch (String(providerId ?? "").toLowerCase()) {
+    case "animeav1":
+      return "AnimeAV1";
+    case "animeflv":
+      return "AnimeFLV";
+    case "tioanime":
+      return "TioAnime";
+    case "jkanime":
+      return "JKAnime";
+    case "hentaila":
+      return "HentaiLA";
+    case "monoschinos":
+      return "MonosChinos";
+    default:
+      return "anime1v remoto";
+  }
+}
+
+function anime1vDomainFromFilter(filter?: string) {
+  if (!filter) {
+    return undefined;
+  }
+
+  const normalized = filter.trim().toLowerCase();
+  if (!normalized || normalized === "mixed") {
+    return undefined;
+  }
+
+  return ANIME1V_PROVIDER_DOMAINS[
+    normalized as keyof typeof ANIME1V_PROVIDER_DOMAINS
+  ];
+}
+
 function normalizeSummary(
   source: ProviderSource,
   item: any,
@@ -303,7 +346,10 @@ function normalizeSummary(
         "N/A"
     ),
     statusLabel: item?.status ?? item?.statusLabel ?? item?.state ?? "Catalogo",
-    providerLabel: providerLabel(source),
+    providerLabel:
+      source === "anime1v"
+        ? anime1vProviderLabel(item?.source ?? item?.provider)
+        : providerLabel(source),
     score: item?.score ? String(item.score) : item?.rating ? String(item.rating) : undefined,
   };
 }
@@ -419,19 +465,24 @@ function normalizeDetail(
 
 function normalizeLinks(raw: any): AnimeEpisodeLinks {
   const info = unwrapPayload(raw);
+  const flattenVariant = (value: unknown, variant: string) =>
+    asList<any>(value).map((link) => ({
+      server: `${link?.server ?? link?.name ?? "Servidor"} ${variant}`.trim(),
+      url: link?.url ?? link?.link ?? "#",
+      quality: link?.quality,
+    }));
+
   return {
-    stream: asList<any>(info?.servers?.sub ?? info?.servers?.SUB ?? info?.stream).map((link) => ({
-      server: link?.server ?? link?.name ?? "Servidor",
-      url: link?.url ?? link?.link ?? "#",
-      quality: link?.quality,
-    })),
-    download: asList<any>(
-      info?.downloadLinks?.SUB ?? info?.download ?? info?.downloads
-    ).map((link) => ({
-      server: link?.server ?? link?.name ?? "Descarga",
-      url: link?.url ?? link?.link ?? "#",
-      quality: link?.quality,
-    })),
+    stream: [
+      ...flattenVariant(info?.servers?.sub ?? info?.servers?.SUB, "SUB"),
+      ...flattenVariant(info?.servers?.dub ?? info?.servers?.DUB, "DUB"),
+      ...flattenVariant(info?.stream, ""),
+    ],
+    download: [
+      ...flattenVariant(info?.downloadLinks?.SUB, "SUB"),
+      ...flattenVariant(info?.downloadLinks?.DUB, "DUB"),
+      ...flattenVariant(info?.download ?? info?.downloads, ""),
+    ],
   };
 }
 
@@ -444,13 +495,17 @@ async function fetchJson<T = any>(url: string, headers?: Record<string, string>)
   return (await response.json()) as T;
 }
 
-async function searchAnime1v(query: string, genre?: string) {
+async function searchAnime1v(query: string, genre?: string, provider?: string) {
   if (!ANIME1V_BASE_URL) {
     return [];
   }
 
   const data = await fetchJson(
-    buildAnime1vUrl("/api/v1/anime/search", { q: query, genre }),
+    buildAnime1vUrl("/api/v1/anime/search", {
+      q: query,
+      genre,
+      domain: anime1vDomainFromFilter(provider),
+    }),
     requestHeaders(ANIME1V_API_KEY)
   );
   return asList<any>(data?.data?.results ?? data?.results ?? data?.data).map((item) =>
@@ -493,7 +548,10 @@ async function fetchAnime1vLinks(reference: EpisodeReference) {
   }
 
   const data = await fetchJson(
-    buildAnime1vUrl("/api/v1/anime/episode", { url: reference.url }),
+    buildAnime1vUrl("/api/v1/anime/episode", {
+      url: reference.url,
+      includeMega: "true",
+    }),
     requestHeaders(ANIME1V_API_KEY)
   );
   return data ? normalizeLinks(data) : null;
@@ -775,7 +833,7 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     episode:
       "/api/v1/anime/episode | /episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all",
     download: "/api/v1/anime/download",
-    batch: "/api/v1/anime/batch",
+    batch: "/api/v1/anime/batch-download",
   },
   async searchSeries(filters) {
     if (!hasRemoteAnimeProvider()) {
@@ -787,19 +845,23 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
       const collected: AnimeSeriesSummary[] = [];
 
       for (const variant of variants) {
-        if (ANIME_WEBSITE_BASE_URL) {
+        const anime1vOnly = Boolean(anime1vDomainFromFilter(filters.provider));
+
+        if (!anime1vOnly && ANIME_WEBSITE_BASE_URL) {
           collected.push(...(await searchAnimeWebsiteCatalog(variant)));
         }
 
         if (collected.length < 8 && ANIME1V_BASE_URL) {
-          collected.push(...(await searchAnime1v(variant, filters.genre)));
+          collected.push(
+            ...(await searchAnime1v(variant, filters.genre, filters.provider))
+          );
         }
 
-        if (collected.length < 10 && ANIME_WEBSITE_BASE_URL) {
+        if (!anime1vOnly && collected.length < 10 && ANIME_WEBSITE_BASE_URL) {
           collected.push(...(await searchAnimeWebsiteStreaming(variant)));
         }
 
-        if (collected.length < 12 && ANIME_PLATFORM_BASE_URL) {
+        if (!anime1vOnly && collected.length < 12 && ANIME_PLATFORM_BASE_URL) {
           collected.push(...(await searchAnimePlatform(variant, filters.genre)));
         }
 

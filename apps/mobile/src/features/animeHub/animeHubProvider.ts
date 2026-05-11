@@ -19,6 +19,15 @@ type EpisodeReference = {
   url?: string;
 };
 
+const ANIME1V_PROVIDER_DOMAINS = {
+  animeav1: "animeav1.com",
+  animeflv: "animeflv.net",
+  tioanime: "tioanime.com",
+  jkanime: "jkanime.net",
+  hentaila: "hentaila.com",
+  monoschinos: "monoschinos2.com",
+} as const;
+
 const ANIME1V_BASE_URL = process.env.EXPO_PUBLIC_ANIME_HUB_API_URL;
 const ANIME1V_API_KEY = process.env.EXPO_PUBLIC_ANIME_HUB_API_KEY;
 const ANIME_WEBSITE_BASE_URL = process.env.EXPO_PUBLIC_ANIME_WEBSITE_API_URL;
@@ -35,7 +44,7 @@ export const MOBILE_ANIME_ENDPOINTS = {
   episode:
     "/api/v1/anime/episode | /episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all",
   download: "/api/v1/anime/download",
-  batch: "/api/v1/anime/batch",
+  batch: "/api/v1/anime/batch-download",
 } as const;
 
 function hasRemoteProvider() {
@@ -151,6 +160,40 @@ function providerLabel(source: ProviderSource) {
   }
 }
 
+function anime1vProviderLabel(providerId?: unknown) {
+  switch (String(providerId ?? "").toLowerCase()) {
+    case "animeav1":
+      return "AnimeAV1";
+    case "animeflv":
+      return "AnimeFLV";
+    case "tioanime":
+      return "TioAnime";
+    case "jkanime":
+      return "JKAnime";
+    case "hentaila":
+      return "HentaiLA";
+    case "monoschinos":
+      return "MonosChinos";
+    default:
+      return "anime1v remoto";
+  }
+}
+
+function anime1vDomainFromFilter(filter?: string) {
+  if (!filter) {
+    return undefined;
+  }
+
+  const normalized = filter.trim().toLowerCase();
+  if (!normalized || normalized === "mixed") {
+    return undefined;
+  }
+
+  return ANIME1V_PROVIDER_DOMAINS[
+    normalized as keyof typeof ANIME1V_PROVIDER_DOMAINS
+  ];
+}
+
 function normalizeDetail(
   source: ProviderSource,
   item: any,
@@ -186,7 +229,10 @@ function normalizeDetail(
         "N/A"
     ),
     statusLabel: item?.status ?? item?.state ?? "Catalogo",
-    providerLabel: providerLabel(source),
+    providerLabel:
+      source === "anime1v"
+        ? anime1vProviderLabel(item?.source ?? item?.provider)
+        : providerLabel(source),
     score: item?.score ? String(item.score) : item?.rating ? String(item.rating) : undefined,
     releaseWindow: String(item?.season ?? item?.year ?? item?.seasonYear ?? "N/A"),
     episodeCount: Number(item?.totalEpisodes ?? item?.episodeCount ?? episodes.length),
@@ -219,13 +265,17 @@ function getSearchVariants(query: string) {
   return [...new Set([normalized, spacedFromCamel, hyphenated, compact, lower])];
 }
 
-async function searchAnime1v(query: string, genre?: string) {
+async function searchAnime1v(query: string, genre?: string, provider?: string) {
   if (!ANIME1V_BASE_URL) {
     return [];
   }
 
   const data = await fetchJson(
-    buildAnime1vUrl("/api/v1/anime/search", { q: query, genre }),
+    buildAnime1vUrl("/api/v1/anime/search", {
+      q: query,
+      genre,
+      domain: anime1vDomainFromFilter(provider),
+    }),
     headers(ANIME1V_API_KEY)
   );
   const results = asList<any>(data?.data?.results ?? data?.results ?? data?.data);
@@ -458,24 +508,32 @@ async function fetchAnimePlatformDetail(reference: SeriesReference) {
   return null;
 }
 
-export async function fetchMobileAnimeShell(query: string, genre?: string) {
+export async function fetchMobileAnimeShell(
+  query: string,
+  genre?: string,
+  provider?: string
+) {
   if (hasRemoteProvider()) {
     try {
       const variants = getSearchVariants(query);
       const remoteResults: MobileAnimeSeriesDetail[] = [];
 
       for (const variant of variants) {
-        remoteResults.push(...(await searchAnimeWebsiteCatalog(variant)));
+        const anime1vOnly = Boolean(anime1vDomainFromFilter(provider));
 
-        if (remoteResults.length < 8) {
-          remoteResults.push(...(await searchAnime1v(variant, genre)));
+        if (!anime1vOnly) {
+          remoteResults.push(...(await searchAnimeWebsiteCatalog(variant)));
         }
 
-        if (remoteResults.length < 10) {
+        if (remoteResults.length < 8) {
+          remoteResults.push(...(await searchAnime1v(variant, genre, provider)));
+        }
+
+        if (!anime1vOnly && remoteResults.length < 10) {
           remoteResults.push(...(await searchAnimeWebsiteStreaming(variant)));
         }
 
-        if (remoteResults.length < 12) {
+        if (!anime1vOnly && remoteResults.length < 12) {
           remoteResults.push(...(await searchAnimePlatform(variant)));
         }
 
@@ -546,13 +604,36 @@ export async function fetchMobileEpisodeLinks(episodeId: string) {
           return null;
         }
         const data = await fetchJson(
-          buildAnime1vUrl("/api/v1/anime/episode", { url: reference.url }),
+          buildAnime1vUrl("/api/v1/anime/episode", {
+            url: reference.url,
+            includeMega: "true",
+          }),
           headers(ANIME1V_API_KEY)
         );
         const info = unwrap(data);
         return {
-          stream: asList<any>(info?.servers?.sub ?? info?.servers?.SUB ?? info?.stream),
-          download: asList<any>(info?.downloadLinks?.SUB ?? info?.download ?? info?.downloads),
+          stream: [
+            ...asList<any>(info?.servers?.sub ?? info?.servers?.SUB).map((link) => ({
+              ...link,
+              server: `${link?.server ?? link?.name ?? "Servidor"} SUB`.trim(),
+            })),
+            ...asList<any>(info?.servers?.dub ?? info?.servers?.DUB).map((link) => ({
+              ...link,
+              server: `${link?.server ?? link?.name ?? "Servidor"} DUB`.trim(),
+            })),
+            ...asList<any>(info?.stream),
+          ],
+          download: [
+            ...asList<any>(info?.downloadLinks?.SUB).map((link) => ({
+              ...link,
+              server: `${link?.server ?? link?.name ?? "Descarga"} SUB`.trim(),
+            })),
+            ...asList<any>(info?.downloadLinks?.DUB).map((link) => ({
+              ...link,
+              server: `${link?.server ?? link?.name ?? "Descarga"} DUB`.trim(),
+            })),
+            ...asList<any>(info?.download ?? info?.downloads),
+          ],
         };
       }
       case "anime-website": {

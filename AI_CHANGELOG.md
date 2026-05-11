@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 11/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`
+*   **Resumen de Tareas:** Se endurecio el fallback de Anime Hub para evitar que las rutas averiadas de `gogoanime` generen resultados huerfanos o ruido innecesario en consola.
+*   **Cambios Clave:**
+    *   Se elimino la consulta redundante a `/search/anime/consumet/gogoanime` durante la busqueda mixta tanto en web como en movil.
+    *   Si una ficha de `anime-website` no puede resolver su seed de streaming, ahora Kingdoom intenta redirigirla inmediatamente a `anime1v` por titulo en lugar de devolver `null`.
+    *   Cuando tampoco existe rescate disponible, se construye un detalle minimo y estable para que la interfaz no quede sin respuesta.
+*   **Notas/Advertencias:** El deploy `anime-website` sigue respondiendo `500` en las rutas `gogoanime`, y `anime1v` sigue necesitando una API key valida para rescatar episodios reales en produccion.
+
+### [Fecha: 11/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `apps/mobile/app/(tabs)/anime.tsx`
 *   **Resumen de Tareas:** Se amplió Anime Hub para aprovechar mejor las capacidades reales de `anime1v` con filtros por proveedor, enlaces más completos y una experiencia coherente entre web y app.
 *   **Cambios Clave:**

@@ -432,7 +432,21 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
 
   const seed = await resolveAnimeWebsiteSeed(reference);
   if (!seed) {
-    return null;
+    const anime1vSeed = await resolveAnime1vSeed(reference);
+    if (!anime1vSeed) {
+      return normalizeDetail(
+        "anime-website",
+        {},
+        String(reference.id ?? reference.title ?? "anime-website-fallback"),
+        reference.title
+      );
+    }
+
+    const anime1vReference = decodeReference<SeriesReference>(
+      anime1vSeed.id,
+      "anime1v"
+    );
+    return await fetchAnime1vDetail(anime1vReference);
   }
 
   const url = new URL(`${ANIME_WEBSITE_BASE_URL}/media-info/anime/consumet/gogoanime`);
@@ -527,10 +541,6 @@ export async function fetchMobileAnimeShell(
 
         if (remoteResults.length < 8) {
           remoteResults.push(...(await searchAnime1v(variant, genre, provider)));
-        }
-
-        if (!anime1vOnly && remoteResults.length < 10) {
-          remoteResults.push(...(await searchAnimeWebsiteStreaming(variant)));
         }
 
         if (!anime1vOnly && remoteResults.length < 12) {

@@ -658,7 +658,16 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
 
   const seed = await resolveAnimeWebsiteSeed(reference);
   if (!seed) {
-    return null;
+    const anime1vSeed = await resolveAnime1vSeed(reference);
+    if (!anime1vSeed) {
+      return normalizeDetail("anime-website", {}, reference);
+    }
+
+    const anime1vReference = decodeReference<SeriesReference>(
+      anime1vSeed.id,
+      "anime1v"
+    );
+    return await fetchAnime1vDetail(anime1vReference);
   }
 
   const detailUrl = new URL(
@@ -855,10 +864,6 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           collected.push(
             ...(await searchAnime1v(variant, filters.genre, filters.provider))
           );
-        }
-
-        if (!anime1vOnly && collected.length < 10 && ANIME_WEBSITE_BASE_URL) {
-          collected.push(...(await searchAnimeWebsiteStreaming(variant)));
         }
 
         if (!anime1vOnly && collected.length < 12 && ANIME_PLATFORM_BASE_URL) {

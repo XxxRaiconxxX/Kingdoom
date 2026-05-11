@@ -88,6 +88,11 @@ type TextProviderResult = ProviderKeyedSuccess & {
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://xxxraiconxxx.github.io",
   "https://kingdoom.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:8081",
+  "capacitor://localhost",
+  "http://localhost",
 ];
 
 export function getAllowedOrigin(requestOrigin?: string | string[]) {

@@ -63,6 +63,7 @@ function preserveGeneratedArtwork(
 
 export function AnimeHubSection() {
   const [query, setQuery] = useState("");
+  const [selectedProvider, setSelectedProvider] = useState<string>("all");
   const [results, setResults] = useState<AnimeSeriesSummary[]>([]);
   const [selectedSeries, setSelectedSeries] = useState<AnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>("");
@@ -93,7 +94,7 @@ export function AnimeHubSection() {
 
     async function loadInitialState() {
       setIsLoading(true);
-      const nextResults = await activeProvider.searchSeries({ query: "", genre: "" });
+      const nextResults = await activeProvider.searchSeries({ query: "", genre: "", provider: "all" });
       const nextSelected = nextResults[0] ? await resolveSeriesDetail(nextResults[0]) : null;
 
       if (cancelled) {
@@ -124,6 +125,7 @@ export function AnimeHubSection() {
       const nextResults = await activeProvider.searchSeries({
         query,
         genre: "",
+        provider: selectedProvider,
       });
       const nextSelected = nextResults[0] ? await resolveSeriesDetail(nextResults[0]) : null;
 
@@ -195,6 +197,16 @@ export function AnimeHubSection() {
                   className="min-w-0 flex-1 bg-transparent text-sm text-stone-100 outline-none placeholder:text-stone-600"
                 />
               </label>
+              <select
+                value={selectedProvider}
+                onChange={(e) => setSelectedProvider(e.target.value)}
+                className="hidden h-11 rounded-2xl border border-stone-800 bg-black/35 px-3 text-xs text-stone-400 outline-none transition focus:border-amber-300/50 md:block"
+              >
+                <option value="all">Todos</option>
+                <option value="anime-website">Anime Website</option>
+                <option value="anime-platform">Anime Platform</option>
+                <option value="animeflv">AnimeFLV</option>
+              </select>
               <button
                 type="submit"
                 className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-amber-300/35 bg-amber-300 text-black transition hover:brightness-110 active:scale-[0.96]"

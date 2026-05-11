@@ -29,6 +29,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 11/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `api/anime/stream.ts`, `api/anime/download.ts`, `api/admin/_serverAiProviders.ts`, `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `apps/mobile/app/(tabs)/anime.tsx`
+*   **Resumen de Tareas:** Finalización de la integración de AnimeFLV, implementación de filtros por proveedor y optimización de conectividad (CORS/Timeouts).
+*   **Cambios Clave:**
+    *   **Endpoints:** Creación y optimización de proxies en Vercel para streaming y descargas de AnimeFLV con manejo de User-Agent y timeouts.
+    *   **UI Web:** Añadido selector de proveedor (Todos, Anime Website, Anime Platform, AnimeFLV) en la sección de búsqueda de Anime Hub.
+    *   **UI Móvil:** Implementado carrusel de filtros por proveedor en la pestaña de Anime y soporte para la variable `EXPO_PUBLIC_KINGDOOM_API_URL`.
+    *   **Conectividad:** Ampliación de orígenes permitidos en CORS para incluir entornos locales y aplicaciones móviles (Capacitor/localhost).
+    *   **Robustez:** Estandarización de peticiones con el helper `fetchJson` incluyendo timeouts de 8s para evitar bloqueos.
+*   **Notas/Advertencias:** Se requiere Redeploy en Vercel para activar los nuevos endpoints. Los enlaces de descarga ahora aparecen en "Acciones" para episodios de AnimeFLV.
+
 ### [Fecha: 11/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `.env.example`, `apps/mobile/.env.example`
 *   **Resumen de Tareas:** Se agrego soporte opt-in para `animeflv-api` como proveedor adicional de Anime Hub en web y app.

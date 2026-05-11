@@ -17,6 +17,8 @@ type EpisodeReference = {
   source: ProviderSource;
   id?: string;
   url?: string;
+  number?: number;
+  seriesId?: string;
 };
 
 const ANIME_WEBSITE_BASE_URL = process.env.EXPO_PUBLIC_ANIME_WEBSITE_API_URL;
@@ -96,7 +98,8 @@ function decodeReference<T extends SeriesReference | EpisodeReference>(
 function normalizeEpisodes(
   source: ProviderSource,
   value: unknown,
-  fallbackUrl?: string
+  fallbackUrl?: string,
+  seriesId?: string
 ): MobileAnimeEpisode[] {
   return asList<any>(value).map((episode, index) => {
     const number = Number(episode?.number ?? episode?.episode ?? index + 1);
@@ -109,6 +112,8 @@ function normalizeEpisodes(
         source,
         id: episodeId ? String(episodeId) : undefined,
         url: episodeUrl ? String(episodeUrl) : fallbackUrl,
+        number,
+        seriesId,
       }),
       number,
       title: episode?.title ?? `Episodio ${number}`,
@@ -138,7 +143,7 @@ function normalizeDetail(
   fallbackTitle?: string
 ): MobileAnimeSeriesDetail {
   const genres = normalizeGenres(item?.genres ?? item?.genre);
-  const episodes = normalizeEpisodes(source, item?.episodes, item?.url);
+  const episodes = normalizeEpisodes(source, item?.episodes, item?.url, fallbackId);
   const synopsis = item?.description ?? item?.synopsis ?? "Sin sinopsis disponible.";
   const title = item?.title ?? item?.name ?? fallbackTitle ?? "Titulo no disponible";
   const rawUrl = item?.url ?? item?.link ?? item?.href;
@@ -176,13 +181,23 @@ function normalizeDetail(
   };
 }
 
-async function fetchJson<T = any>(url: string, extraHeaders?: Record<string, string>) {
-  const response = await fetch(url, { headers: extraHeaders });
-  if (!response.ok) {
+async function fetchJson<T = any>(url: string, extraHeaders?: Record<string, string>, timeout = 8000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, { headers: extraHeaders, signal: controller.signal });
+    clearTimeout(id);
+    if (!response.ok) {
+      console.warn(`Mobile Fetch error: ${response.status} for ${url}`);
+      return null;
+    }
+    return (await response.json()) as T;
+  } catch (error) {
+    clearTimeout(id);
+    console.warn(`Mobile Fetch exception for ${url}:`, error);
     return null;
   }
-
-  return (await response.json()) as T;
 }
 
 function getSearchVariants(query: string) {
@@ -373,20 +388,22 @@ async function fetchAnimeFlvDetail(reference: SeriesReference) {
   return normalizeDetail("animeflv", data?.data ?? data, reference.id, reference.title);
 }
 
-export async function fetchMobileAnimeShell(query: string, genre?: string) {
+export async function fetchMobileAnimeShell(query: string, genre?: string, provider?: string) {
   if (hasRemoteProvider()) {
     try {
       const variants = getSearchVariants(query);
       const remoteResults: MobileAnimeSeriesDetail[] = [];
 
       for (const variant of variants) {
-        remoteResults.push(...(await searchAnimeWebsiteCatalog(variant)));
+        if (!provider || provider === "all" || provider === "anime-website") {
+          remoteResults.push(...(await searchAnimeWebsiteCatalog(variant)));
+        }
 
-        if (remoteResults.length < 12) {
+        if (remoteResults.length < 12 && (!provider || provider === "all" || provider === "anime-platform")) {
           remoteResults.push(...(await searchAnimePlatform(variant)));
         }
 
-        if (remoteResults.length < 12) {
+        if (remoteResults.length < 12 && (!provider || provider === "all" || provider === "animeflv")) {
           remoteResults.push(...(await searchAnimeFlv(variant)));
         }
 
@@ -467,8 +484,33 @@ export async function fetchMobileEpisodeLinks(episodeId: string) {
       }
         case "anime-platform":
           return null;
-        case "animeflv":
-          return null;
+        case "animeflv": {
+          const seriesSlug = reference.seriesId;
+          const episodeNumber = reference.number || 1;
+          if (!seriesSlug) return null;
+
+          // Usamos los endpoints de Vercel
+          const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
+          const streamUrl = new URL(`${apiBase}/api/anime/stream`);
+          streamUrl.searchParams.set("provider", "animeflv");
+          streamUrl.searchParams.set("id", seriesSlug);
+          streamUrl.searchParams.set("number", String(episodeNumber));
+
+          const downloadUrl = new URL(`${apiBase}/api/anime/download`);
+          downloadUrl.searchParams.set("provider", "animeflv");
+          downloadUrl.searchParams.set("id", seriesSlug);
+          downloadUrl.searchParams.set("number", String(episodeNumber));
+
+          const [streamData, downloadData] = await Promise.all([
+            fetchJson(streamUrl.toString()),
+            fetchJson(downloadUrl.toString()),
+          ]);
+
+          return {
+            stream: asList<any>(streamData?.servers),
+            download: asList<any>(downloadData?.downloads),
+          };
+        }
         default:
           return null;
     }

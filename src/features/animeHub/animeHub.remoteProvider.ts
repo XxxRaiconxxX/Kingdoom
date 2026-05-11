@@ -21,6 +21,8 @@ type EpisodeReference = {
   source: ProviderSource;
   id?: string;
   url?: string;
+  number?: number;
+  seriesId?: string; // El slug de la serie para AnimeFLV
 };
 
 const ANIME_WEBSITE_BASE_URL = import.meta.env.VITE_ANIME_WEBSITE_API_URL;
@@ -61,6 +63,25 @@ function requestHeaders(apiKey?: string) {
     "x-api-key": apiKey,
     Authorization: `Bearer ${apiKey}`,
   };
+}
+
+async function fetchJson<T = any>(url: string, headers?: HeadersInit, timeout = 8000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, { headers, signal: controller.signal });
+    clearTimeout(id);
+    if (!response.ok) {
+      console.warn(`Fetch error: ${response.status} for ${url}`);
+      return null;
+    }
+    return (await response.json()) as T;
+  } catch (error) {
+    clearTimeout(id);
+    console.error(`Fetch exception for ${url}:`, error);
+    return null;
+  }
 }
 
 function asList<T = unknown>(value: unknown): T[] {
@@ -344,7 +365,8 @@ function getSearchVariants(query: string) {
 function normalizeEpisodes(
   source: ProviderSource,
   value: unknown,
-  fallbackUrl?: string
+  fallbackUrl?: string,
+  seriesId?: string
 ): AnimeEpisodeSummary[] {
   return asList<any>(value).map((episode, index) => {
     const number = Number(episode?.number ?? episode?.episode ?? index + 1);
@@ -357,6 +379,8 @@ function normalizeEpisodes(
         source,
         id: episodeId ? String(episodeId) : undefined,
         url: episodeUrl ? String(episodeUrl) : fallbackUrl,
+        number,
+        seriesId,
       }),
       number,
       title: episode?.title ?? `Episodio ${number}`,
@@ -373,7 +397,7 @@ function normalizeDetail(
 ): AnimeSeriesDetail {
   const item = unwrapPayload(raw);
   const summary = normalizeSummary(source, item, fallbackRef);
-  const episodes = normalizeEpisodes(source, item?.episodes, fallbackRef.url);
+  const episodes = normalizeEpisodes(source, item?.episodes, fallbackRef.url, fallbackRef.id);
   const synopsis = summary.synopsis;
 
   return {
@@ -563,6 +587,49 @@ async function fetchAnimeWebsiteLinks(reference: EpisodeReference) {
   return { stream, download };
 }
 
+async function fetchAnimeFlvLinks(reference: EpisodeReference) {
+  const seriesSlug = reference.seriesId;
+  const episodeNumber = reference.number || 1;
+
+  if (!seriesSlug) {
+    return null;
+  }
+
+  // Usamos los nuevos endpoints de Vercel como proxy/resuelto
+  const streamUrl = new URL("/api/anime/stream", window.location.origin);
+  streamUrl.searchParams.set("provider", "animeflv");
+  streamUrl.searchParams.set("id", seriesSlug);
+  streamUrl.searchParams.set("number", String(episodeNumber));
+
+  const downloadUrl = new URL("/api/anime/download", window.location.origin);
+  downloadUrl.searchParams.set("provider", "animeflv");
+  downloadUrl.searchParams.set("id", seriesSlug);
+  downloadUrl.searchParams.set("number", String(episodeNumber));
+
+  try {
+    const [streamData, downloadData] = await Promise.all([
+      fetchJson(streamUrl.toString()),
+      fetchJson(downloadUrl.toString()),
+    ]);
+
+    return {
+      stream: asList<any>(streamData?.servers).map((s) => ({
+        server: s.server,
+        url: s.url,
+        quality: s.quality,
+      })),
+      download: asList<any>(downloadData?.downloads).map((d) => ({
+        server: d.server,
+        url: d.url,
+        quality: d.quality,
+      })),
+    };
+  } catch (error) {
+    console.error("Error fetching AnimeFLV links:", error);
+    return null;
+  }
+}
+
 async function searchAnimePlatform(query: string, genre?: string) {
   if (!ANIME_PLATFORM_BASE_URL) {
     return [];
@@ -677,19 +744,20 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     }
 
     try {
-      const variants = getSearchVariants(filters.query);
+      const { query, genre, provider } = filters;
+      const variants = getSearchVariants(query);
       const collected: AnimeSeriesSummary[] = [];
 
       for (const variant of variants) {
-        if (ANIME_WEBSITE_BASE_URL) {
+        if (ANIME_WEBSITE_BASE_URL && (!provider || provider === "all" || provider === "anime-website")) {
           collected.push(...(await searchAnimeWebsiteCatalog(variant)));
         }
 
-        if (collected.length < 12 && ANIME_PLATFORM_BASE_URL) {
-          collected.push(...(await searchAnimePlatform(variant, filters.genre)));
+        if (collected.length < 12 && ANIME_PLATFORM_BASE_URL && (!provider || provider === "all" || provider === "anime-platform")) {
+          collected.push(...(await searchAnimePlatform(variant, genre)));
         }
 
-        if (collected.length < 12 && ANIMEFLV_BASE_URL) {
+        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "animeflv")) {
           collected.push(...(await searchAnimeFlv(variant)));
         }
 
@@ -741,7 +809,7 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
         case "anime-platform":
           return null;
         case "animeflv":
-          return null;
+          return await fetchAnimeFlvLinks(reference);
         default:
           return null;
       }

@@ -24,6 +24,7 @@ type EpisodeLinks = Awaited<ReturnType<typeof fetchMobileEpisodeLinks>>;
 export default function AnimeScreen() {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState("Todos");
+  const [selectedProvider, setSelectedProvider] = useState("all");
   const [entries, setEntries] = useState<MobileAnimeSeriesDetail[]>([]);
   const [selected, setSelected] = useState<MobileAnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState("");
@@ -39,7 +40,7 @@ export default function AnimeScreen() {
 
     async function load() {
       setLoading(true);
-      const nextEntries = await fetchMobileAnimeShell("", "");
+      const nextEntries = await fetchMobileAnimeShell("", "", "all");
       const nextSelected = nextEntries[0]
         ? await fetchMobileAnimeShellDetail(nextEntries[0].id)
         : null;
@@ -66,7 +67,8 @@ export default function AnimeScreen() {
 
     const nextEntries = await fetchMobileAnimeShell(
       query,
-      genre === "Todos" ? "" : genre
+      genre === "Todos" ? "" : genre,
+      selectedProvider
     );
     const nextSelected = nextEntries[0]
       ? await fetchMobileAnimeShellDetail(nextEntries[0].id)
@@ -140,6 +142,30 @@ export default function AnimeScreen() {
                 onPress={() => setGenre(item)}
               />
             ))}
+          </View>
+        </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
+          <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+            <Pill
+              label="Todos los orígenes"
+              active={selectedProvider === "all"}
+              onPress={() => setSelectedProvider("all")}
+            />
+            <Pill
+              label="Anime Website"
+              active={selectedProvider === "anime-website"}
+              onPress={() => setSelectedProvider("anime-website")}
+            />
+            <Pill
+              label="Anime Platform"
+              active={selectedProvider === "anime-platform"}
+              onPress={() => setSelectedProvider("anime-platform")}
+            />
+            <Pill
+              label="AnimeFLV"
+              active={selectedProvider === "animeflv"}
+              onPress={() => setSelectedProvider("animeflv")}
+            />
           </View>
         </ScrollView>
         <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>{feedback}</Text>

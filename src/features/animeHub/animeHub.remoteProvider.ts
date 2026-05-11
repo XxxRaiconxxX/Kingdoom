@@ -438,14 +438,6 @@ function normalizeLinks(raw: any): AnimeEpisodeLinks {
   };
 }
 
-async function fetchJson<T = any>(url: string, headers?: Record<string, string>) {
-  const response = await fetch(url, { headers });
-  if (!response.ok) {
-    return null;
-  }
-
-  return (await response.json()) as T;
-}
 
 async function searchAnimeWebsiteCatalog(query: string) {
   if (!ANIME_WEBSITE_BASE_URL) {

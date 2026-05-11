@@ -440,34 +440,31 @@ function normalizeLinks(raw: any): AnimeEpisodeLinks {
 
 
 async function searchAnimeWebsiteCatalog(query: string) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return [];
-  }
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
+  proxyUrl.searchParams.set("provider", "anime-website");
+  proxyUrl.searchParams.set("action", "search");
+  proxyUrl.searchParams.set("query", query);
 
-  const url = new URL(endpoint("/search/media/anime-database", ANIME_WEBSITE_BASE_URL));
-  url.searchParams.set("title", query);
-  url.searchParams.set("limit", "12");
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/search/media/anime-database?title=${encodeURIComponent(query)}&limit=12`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
 
-  const data = await fetchJson(url.toString(), requestHeaders(ANIME_WEBSITE_API_KEY));
-  return asList<any>(data?.results ?? data?.data?.results ?? data?.data ?? data).map((item) =>
+  return asList<any>(finalData?.results ?? finalData?.data?.results ?? finalData?.data ?? finalData).map((item) =>
     normalizeSummary("anime-website", item)
   );
 }
 
 async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return null;
-  }
-
   const candidates = [reference.id, reference.title].filter(Boolean) as string[];
   for (const query of candidates) {
-    const url = new URL(
-      endpoint("/search/anime/consumet/gogoanime", ANIME_WEBSITE_BASE_URL)
-    );
-    url.searchParams.set("query", query);
+    const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
+    proxyUrl.searchParams.set("provider", "anime-website");
+    proxyUrl.searchParams.set("action", "search");
+    proxyUrl.searchParams.set("query", query);
 
-    const data = await fetchJson(url.toString(), requestHeaders(ANIME_WEBSITE_API_KEY));
-    const results = asList<any>(data?.results ?? data?.data?.results ?? data?.data ?? data);
+    const data = await fetchJson(proxyUrl.toString());
+    const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/search/anime/consumet/gogoanime?query=${encodeURIComponent(query)}`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
+
+    const results = asList<any>(finalData?.results ?? finalData?.data?.results ?? finalData?.data ?? finalData);
     const bestMatch =
       results.find((item) => {
         const itemTitle = String(item?.title ?? item?.name ?? "").toLowerCase().trim();
@@ -485,43 +482,35 @@ async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
 }
 
 async function fetchAnimeWebsiteEpisodes(seriesId: string) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return [];
-  }
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
+  proxyUrl.searchParams.set("provider", "anime-website");
+  proxyUrl.searchParams.set("action", "episodes");
+  proxyUrl.searchParams.set("id", seriesId);
 
-  const url = new URL(endpoint("/episodes/consumet/gogoanime/all", ANIME_WEBSITE_BASE_URL));
-  url.searchParams.set("id", seriesId);
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/episodes/consumet/gogoanime/all?id=${encodeURIComponent(seriesId)}`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
 
-  const data = await fetchJson(url.toString(), requestHeaders(ANIME_WEBSITE_API_KEY));
   return normalizeEpisodes(
     "anime-website",
-    data?.episodes ?? data?.data?.episodes ?? data?.data ?? data
+    finalData?.episodes ?? finalData?.data?.episodes ?? finalData?.data ?? finalData
   );
 }
 
 async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return null;
-  }
-
   const seed = await resolveAnimeWebsiteSeed(reference);
   if (!seed) {
     return normalizeDetail("anime-website", {}, reference);
   }
 
-  const detailUrl = new URL(
-    endpoint("/media-info/anime/consumet/gogoanime", ANIME_WEBSITE_BASE_URL)
-  );
-  detailUrl.searchParams.set(
-    "query",
-    String(seed?.id ?? seed?.title ?? reference.title ?? "")
-  );
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
+  proxyUrl.searchParams.set("provider", "anime-website");
+  proxyUrl.searchParams.set("action", "detail");
+  proxyUrl.searchParams.set("id", String(seed?.id ?? seed?.title ?? reference.title ?? ""));
 
-  const detailData = await fetchJson(
-    detailUrl.toString(),
-    requestHeaders(ANIME_WEBSITE_API_KEY)
-  );
-  if (!detailData) {
+  const detailData = await fetchJson(proxyUrl.toString());
+  const finalDetailData = detailData || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/media-info/anime/consumet/gogoanime?query=${encodeURIComponent(String(seed?.id ?? seed?.title ?? reference.title ?? ""))}`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
+
+  if (!finalDetailData) {
     return normalizeDetail("anime-website", seed, {
       ...reference,
       id: String(seed?.id ?? reference.id ?? ""),
@@ -530,7 +519,7 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
     });
   }
 
-  const detail = normalizeDetail("anime-website", detailData, {
+  const detail = normalizeDetail("anime-website", finalDetailData, {
     ...reference,
     id: String(seed?.id ?? reference.id ?? ""),
     title: String(seed?.title ?? reference.title ?? ""),
@@ -550,21 +539,23 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
 }
 
 async function fetchAnimeWebsiteLinks(reference: EpisodeReference) {
-  if (!ANIME_WEBSITE_BASE_URL || !reference.id) {
+  if (!reference.id) {
     return null;
   }
 
-  const url = new URL(
-    endpoint("/episodes/consumet/gogoanime/episode", ANIME_WEBSITE_BASE_URL)
-  );
-  url.searchParams.set("id", reference.id);
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
+  proxyUrl.searchParams.set("provider", "anime-website");
+  proxyUrl.searchParams.set("action", "links");
+  proxyUrl.searchParams.set("id", reference.id);
 
-  const data = await fetchJson(url.toString(), requestHeaders(ANIME_WEBSITE_API_KEY));
-  if (!data) {
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/episodes/consumet/gogoanime/episode?id=${encodeURIComponent(reference.id)}`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
+
+  if (!finalData) {
     return null;
   }
 
-  const info = unwrapPayload(data);
+  const info = unwrapPayload(finalData);
   const stream = asList<any>(info?.sources ?? info?.streams ?? info?.stream).map((entry) => ({
     server: entry?.server ?? entry?.quality ?? "Servidor",
     url: entry?.url ?? entry?.link ?? "#",

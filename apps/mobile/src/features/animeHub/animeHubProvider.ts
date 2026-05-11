@@ -215,16 +215,16 @@ function getSearchVariants(query: string) {
 }
 
 async function searchAnimeWebsiteCatalog(query: string) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return [];
-  }
+  const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
+  const proxyUrl = new URL(`${apiBase}/api/anime/proxy`);
+  proxyUrl.searchParams.set("provider", "anime-website");
+  proxyUrl.searchParams.set("action", "search");
+  proxyUrl.searchParams.set("query", query);
 
-  const url = new URL(`${ANIME_WEBSITE_BASE_URL}/search/media/anime-database`);
-  url.searchParams.set("title", query);
-  url.searchParams.set("limit", "12");
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(ANIME_WEBSITE_BASE_URL, "/search/media/anime-database?title=" + encodeURIComponent(query) + "&limit=12"), headers(ANIME_WEBSITE_API_KEY)) : null);
 
-  const data = await fetchJson(url.toString(), headers(ANIME_WEBSITE_API_KEY));
-  const results = asList<any>(data?.results ?? data?.data?.results ?? data?.data ?? data);
+  const results = asList<any>(finalData?.results ?? finalData?.data?.results ?? finalData?.data ?? finalData);
   return results.map((item) =>
     normalizeDetail("anime-website", item, item?.id ?? item?.anilistId ?? query, item?.title)
   );
@@ -275,16 +275,18 @@ function dedupeEntries(entries: MobileAnimeSeriesDetail[]) {
 }
 
 async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return null;
-  }
-
   const candidates = [reference.id, reference.title].filter(Boolean) as string[];
   for (const query of candidates) {
-    const url = new URL(`${ANIME_WEBSITE_BASE_URL}/search/anime/consumet/gogoanime`);
-    url.searchParams.set("query", query);
-    const data = await fetchJson(url.toString(), headers(ANIME_WEBSITE_API_KEY));
-    const results = asList<any>(data?.results ?? data?.data?.results ?? data?.data ?? data);
+    const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
+    const proxyUrl = new URL(`${apiBase}/api/anime/proxy`);
+    proxyUrl.searchParams.set("provider", "anime-website");
+    proxyUrl.searchParams.set("action", "search");
+    proxyUrl.searchParams.set("query", query);
+
+    const data = await fetchJson(proxyUrl.toString());
+    const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(ANIME_WEBSITE_BASE_URL, "/search/anime/consumet/gogoanime?query=" + encodeURIComponent(query)), headers(ANIME_WEBSITE_API_KEY)) : null);
+
+    const results = asList<any>(finalData?.results ?? finalData?.data?.results ?? finalData?.data ?? finalData);
     const best =
       results.find((item) => {
         const itemTitle = String(item?.title ?? "").toLowerCase().trim();
@@ -302,24 +304,22 @@ async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
 }
 
 async function fetchAnimeWebsiteEpisodes(seriesId: string) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return [];
-  }
+  const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
+  const proxyUrl = new URL(`${apiBase}/api/anime/proxy`);
+  proxyUrl.searchParams.set("provider", "anime-website");
+  proxyUrl.searchParams.set("action", "episodes");
+  proxyUrl.searchParams.set("id", seriesId);
 
-  const url = new URL(`${ANIME_WEBSITE_BASE_URL}/episodes/consumet/gogoanime/all`);
-  url.searchParams.set("id", seriesId);
-  const data = await fetchJson(url.toString(), headers(ANIME_WEBSITE_API_KEY));
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(ANIME_WEBSITE_BASE_URL, "/episodes/consumet/gogoanime/all?id=" + encodeURIComponent(seriesId)), headers(ANIME_WEBSITE_API_KEY)) : null);
+
   return normalizeEpisodes(
     "anime-website",
-    data?.episodes ?? data?.data?.episodes ?? data?.data ?? data
+    finalData?.episodes ?? finalData?.data?.episodes ?? finalData?.data ?? finalData
   );
 }
 
 async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
-  if (!ANIME_WEBSITE_BASE_URL) {
-    return null;
-  }
-
   const seed = await resolveAnimeWebsiteSeed(reference);
   if (!seed) {
     return normalizeDetail(
@@ -330,13 +330,18 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
     );
   }
 
-  const url = new URL(`${ANIME_WEBSITE_BASE_URL}/media-info/anime/consumet/gogoanime`);
-  url.searchParams.set("query", String(seed?.id ?? seed?.title ?? reference.title ?? ""));
+  const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
+  const proxyUrl = new URL(`${apiBase}/api/anime/proxy`);
+  proxyUrl.searchParams.set("provider", "anime-website");
+  proxyUrl.searchParams.set("action", "detail");
+  proxyUrl.searchParams.set("id", String(seed?.id ?? seed?.title ?? reference.title ?? ""));
 
-  const data = await fetchJson(url.toString(), headers(ANIME_WEBSITE_API_KEY));
+  const data = await fetchJson(proxyUrl.toString());
+  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(ANIME_WEBSITE_BASE_URL, "/media-info/anime/consumet/gogoanime?query=" + encodeURIComponent(String(seed?.id ?? seed?.title ?? reference.title ?? ""))), headers(ANIME_WEBSITE_API_KEY)) : null);
+
   const detail = normalizeDetail(
     "anime-website",
-    unwrap(data ?? seed),
+    unwrap(finalData ?? seed),
     String(seed?.id ?? reference.id ?? reference.title ?? ""),
     seed?.title ?? reference.title
   );
@@ -476,13 +481,17 @@ export async function fetchMobileEpisodeLinks(episodeId: string) {
 
     switch (reference.source) {
       case "anime-website": {
-        if (!ANIME_WEBSITE_BASE_URL || !reference.id) {
-          return null;
-        }
-        const url = new URL(`${ANIME_WEBSITE_BASE_URL}/episodes/consumet/gogoanime/episode`);
-        url.searchParams.set("id", reference.id);
-        const data = await fetchJson(url.toString(), headers(ANIME_WEBSITE_API_KEY));
-        const info = unwrap(data);
+        const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
+        const proxyUrl = new URL(`${apiBase}/api/anime/proxy`);
+        proxyUrl.searchParams.set("provider", "anime-website");
+        proxyUrl.searchParams.set("action", "links");
+        proxyUrl.searchParams.set("id", reference.id || "");
+
+        const data = await fetchJson(proxyUrl.toString());
+        const finalData = data || (ANIME_WEBSITE_BASE_URL && reference.id ? await fetchJson(endpoint(ANIME_WEBSITE_BASE_URL, "/episodes/consumet/gogoanime/episode?id=" + encodeURIComponent(reference.id)), headers(ANIME_WEBSITE_API_KEY)) : null);
+
+        if (!finalData) return null;
+        const info = unwrap(finalData);
         return {
           stream: asList<any>(info?.sources ?? info?.streams ?? info?.stream),
           download: asList<any>(info?.downloads ?? info?.download),

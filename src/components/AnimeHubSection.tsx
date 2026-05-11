@@ -63,7 +63,7 @@ function preserveGeneratedArtwork(
 
 export function AnimeHubSection() {
   const [query, setQuery] = useState("");
-  const [selectedProvider, setSelectedProvider] = useState<string>("all");
+  const [selectedProvider, setSelectedProvider] = useState<string>("animeflv");
   const [results, setResults] = useState<AnimeSeriesSummary[]>([]);
   const [selectedSeries, setSelectedSeries] = useState<AnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>("");
@@ -94,7 +94,7 @@ export function AnimeHubSection() {
 
     async function loadInitialState() {
       setIsLoading(true);
-      const nextResults = await activeProvider.searchSeries({ query: "", genre: "", provider: "all" });
+      const nextResults = await activeProvider.searchSeries({ query: "", genre: "", provider: "animeflv" });
       const nextSelected = nextResults[0] ? await resolveSeriesDetail(nextResults[0]) : null;
 
       if (cancelled) {

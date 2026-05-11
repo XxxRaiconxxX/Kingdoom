@@ -76,6 +76,55 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       return res.status(200).json(data);
     }
 
+    if (provider === "anime-website") {
+      const baseUrl =
+        process.env.ANIME_WEBSITE_API_URL ||
+        process.env.VITE_ANIME_WEBSITE_API_URL ||
+        "https://consumet-api-fawn.vercel.app";
+      
+      const apiKey = process.env.ANIME_WEBSITE_API_KEY || "";
+      const headers: Record<string, string> = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json"
+      };
+      if (apiKey) headers["x-api-key"] = apiKey;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      let targetUrl = "";
+
+      switch (action) {
+        case "search":
+          if (!query) return res.status(400).json({ message: "Falta parametro: query." });
+          targetUrl = `${baseUrl}/search/anime/consumet/gogoanime?query=${encodeURIComponent(query)}`;
+          break;
+        case "detail":
+          if (!id) return res.status(400).json({ message: "Falta parametro: id." });
+          targetUrl = `${baseUrl}/media-info/anime/consumet/gogoanime?query=${encodeURIComponent(id)}`;
+          break;
+        case "episodes":
+          if (!id) return res.status(400).json({ message: "Falta parametro: id." });
+          targetUrl = `${baseUrl}/episodes/consumet/gogoanime/all?id=${encodeURIComponent(id)}`;
+          break;
+        case "links":
+          if (!id) return res.status(400).json({ message: "Falta parametro: id." });
+          targetUrl = `${baseUrl}/episodes/consumet/gogoanime/episode?id=${encodeURIComponent(id)}`;
+          break;
+        default:
+          return res.status(400).json({ message: "Accion no soportada para Anime Website." });
+      }
+
+      const response = await fetch(targetUrl, { headers, signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        return res.status(response.status).json({ message: `Error al consultar Anime Website (${action}).` });
+      }
+      
+      const data = await response.json();
+      return res.status(200).json(data);
+    }
+
     return res.status(400).json({ message: "Proveedor no soportado por el proxy." });
   } catch (error) {
     return res.status(500).json({ 

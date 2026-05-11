@@ -587,37 +587,38 @@ async function fetchAnimeFlvLinks(reference: EpisodeReference) {
     return null;
   }
 
-  // Usamos los nuevos endpoints de Vercel como proxy/resuelto
-  const streamUrl = new URL("/api/anime/stream", window.location.origin);
-  streamUrl.searchParams.set("provider", "animeflv");
-  streamUrl.searchParams.set("id", seriesSlug);
-  streamUrl.searchParams.set("number", String(episodeNumber));
-
-  const downloadUrl = new URL("/api/anime/download", window.location.origin);
-  downloadUrl.searchParams.set("provider", "animeflv");
-  downloadUrl.searchParams.set("id", seriesSlug);
-  downloadUrl.searchParams.set("number", String(episodeNumber));
-
   try {
+    const apiBase = window.location.origin;
+    
+    // Función auxiliar para construir la URL del proxy
+    const getProxyUrl = (action: string) => {
+      const u = new URL("/api/anime/proxy", apiBase);
+      u.searchParams.set("provider", "animeflv");
+      u.searchParams.set("action", action);
+      u.searchParams.set("id", seriesSlug);
+      u.searchParams.set("episode", String(episodeNumber));
+      u.searchParams.set("server", "mega"); // Servidor por defecto para stream
+      return u.toString();
+    };
+
     const [streamData, downloadData] = await Promise.all([
-      fetchJson(streamUrl.toString()),
-      fetchJson(downloadUrl.toString()),
+      fetchJson(getProxyUrl("stream")),
+      fetchJson(getProxyUrl("download"))
     ]);
 
-    return {
-      stream: asList<any>(streamData?.servers).map((s) => ({
-        server: s.server,
-        url: s.url,
-        quality: s.quality,
-      })),
-      download: asList<any>(downloadData?.downloads).map((d) => ({
-        server: d.server,
-        url: d.url,
-        quality: d.quality,
-      })),
-    };
+    const stream = asList<any>(streamData).map((entry) => ({
+      server: entry?.server ?? "Servidor",
+      url: entry?.code ?? entry?.url ?? "#",
+    }));
+
+    const download = asList<any>(downloadData).map((entry) => ({
+      server: entry?.server ?? "Descarga",
+      url: entry?.url ?? "#",
+    }));
+
+    return { stream, download };
   } catch (error) {
-    console.error("Error fetching AnimeFLV links:", error);
+    console.error("Error fetching AnimeFLV links via proxy:", error);
     return null;
   }
 }
@@ -641,8 +642,9 @@ async function searchAnimePlatform(query: string, genre?: string) {
 }
 
 async function searchAnimeFlv(query: string) {
-  const proxyUrl = new URL("/api/anime/search", window.location.origin);
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
   proxyUrl.searchParams.set("provider", "animeflv");
+  proxyUrl.searchParams.set("action", "search");
   proxyUrl.searchParams.set("query", query);
 
   const data = await fetchJson(proxyUrl.toString());
@@ -658,8 +660,9 @@ async function fetchAnimeFlvDetail(reference: SeriesReference) {
     return null;
   }
 
-  const proxyUrl = new URL("/api/anime/detail", window.location.origin);
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
   proxyUrl.searchParams.set("provider", "animeflv");
+  proxyUrl.searchParams.set("action", "detail");
   proxyUrl.searchParams.set("id", reference.id);
 
   const data = await fetchJson(proxyUrl.toString());

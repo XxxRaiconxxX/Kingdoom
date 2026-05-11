@@ -248,8 +248,9 @@ async function searchAnimePlatform(query: string) {
 
 async function searchAnimeFlv(query: string) {
   const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
-  const proxyUrl = new URL(`${apiBase}/api/anime/search`);
+  const proxyUrl = new URL(`${apiBase}/api/anime/proxy`);
   proxyUrl.searchParams.set("provider", "animeflv");
+  proxyUrl.searchParams.set("action", "search");
   proxyUrl.searchParams.set("query", query);
 
   const data = await fetchJson(proxyUrl.toString());
@@ -378,8 +379,9 @@ async function fetchAnimeFlvDetail(reference: SeriesReference) {
   }
 
   const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
-  const proxyUrl = new URL(`${apiBase}/api/anime/detail`);
+  const proxyUrl = new URL(`${apiBase}/api/anime/proxy`);
   proxyUrl.searchParams.set("provider", "animeflv");
+  proxyUrl.searchParams.set("action", "detail");
   proxyUrl.searchParams.set("id", reference.id);
 
   const data = await fetchJson(proxyUrl.toString());
@@ -493,26 +495,26 @@ export async function fetchMobileEpisodeLinks(episodeId: string) {
           const episodeNumber = reference.number || 1;
           if (!seriesSlug) return null;
 
-          // Usamos los endpoints de Vercel
           const apiBase = process.env.EXPO_PUBLIC_KINGDOOM_API_URL || "https://kingdoom.vercel.app";
-          const streamUrl = new URL(`${apiBase}/api/anime/stream`);
-          streamUrl.searchParams.set("provider", "animeflv");
-          streamUrl.searchParams.set("id", seriesSlug);
-          streamUrl.searchParams.set("number", String(episodeNumber));
-
-          const downloadUrl = new URL(`${apiBase}/api/anime/download`);
-          downloadUrl.searchParams.set("provider", "animeflv");
-          downloadUrl.searchParams.set("id", seriesSlug);
-          downloadUrl.searchParams.set("number", String(episodeNumber));
+          
+          const buildProxyUrl = (action: string) => {
+            const u = new URL(`${apiBase}/api/anime/proxy`);
+            u.searchParams.set("provider", "animeflv");
+            u.searchParams.set("action", action);
+            u.searchParams.set("id", seriesSlug);
+            u.searchParams.set("episode", String(episodeNumber));
+            u.searchParams.set("server", "mega");
+            return u.toString();
+          };
 
           const [streamData, downloadData] = await Promise.all([
-            fetchJson(streamUrl.toString()),
-            fetchJson(downloadUrl.toString()),
+            fetchJson(buildProxyUrl("stream")),
+            fetchJson(buildProxyUrl("download"))
           ]);
 
           return {
-            stream: asList<any>(streamData?.servers),
-            download: asList<any>(downloadData?.downloads),
+            stream: asList<any>(streamData),
+            download: asList<any>(downloadData),
           };
         }
         default:

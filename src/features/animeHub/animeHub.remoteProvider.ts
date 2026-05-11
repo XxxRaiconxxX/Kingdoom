@@ -66,6 +66,17 @@ function requestHeaders(apiKey?: string) {
 }
 
 async function fetchJson<T = any>(url: string, headers?: HeadersInit, timeout = 8000) {
+  // Mejora 2: Caché de Sesión
+  const cacheKey = `anime_cache_${url}`;
+  const cached = sessionStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      return JSON.parse(cached) as T;
+    } catch (e) {
+      sessionStorage.removeItem(cacheKey);
+    }
+  }
+
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
@@ -76,7 +87,14 @@ async function fetchJson<T = any>(url: string, headers?: HeadersInit, timeout = 
       console.warn(`Fetch error: ${response.status} for ${url}`);
       return null;
     }
-    return (await response.json()) as T;
+    const result = await response.json();
+    
+    // Guardar en caché si es exitoso
+    if (result) {
+      sessionStorage.setItem(cacheKey, JSON.stringify(result));
+    }
+    
+    return result as T;
   } catch (error) {
     clearTimeout(id);
     console.error(`Fetch exception for ${url}:`, error);
@@ -743,6 +761,27 @@ function sortByCoverage(items: AnimeSeriesSummary[]) {
   });
 }
 
+// Mejora 4: Enriquecimiento con Jikan (MAL)
+async function enrichWithJikan(title: string) {
+  try {
+    const query = title.split("(")[0].trim();
+    const data = await fetchJson(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=1`, undefined, 5000);
+    const mal = data?.data?.[0];
+    if (!mal) return null;
+
+    return {
+      score: mal.score,
+      synopsis: mal.synopsis,
+      trailer: mal.trailer?.embed_url,
+      genres: mal.genres?.map((g: any) => g.name) || [],
+      status: mal.status,
+      year: mal.year
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
 export const remoteAnimeHubProvider: AnimeHubProvider = {
   id: "anime-multi-remote",
   label: "anime remoto",
@@ -781,6 +820,13 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           collected.push(...(await searchTioAnime(variant)));
         }
 
+        // Mejora 3: Smart Fallback si el proveedor específico falló
+        if (collected.length === 0 && provider && provider !== "all") {
+          console.log(`Smart Fallback: No results in ${provider}, trying other sources...`);
+          if (provider === "tioanime") collected.push(...(await searchAnimeFlv(variant)));
+          else if (provider === "animeflv") collected.push(...(await searchTioAnime(variant)));
+        }
+
         if (collected.length >= 12) {
           break;
         }
@@ -800,18 +846,35 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     try {
       const reference = decodeReference<SeriesReference>(seriesId, "anime-website");
 
+      let detail: AnimeDetail | null = null;
       switch (reference.source) {
         case "anime-website":
-          return await fetchAnimeWebsiteDetail(reference);
+          detail = await fetchAnimeWebsiteDetail(reference);
+          break;
         case "anime-platform":
-          return await fetchAnimePlatformDetail(reference);
+          detail = await fetchAnimePlatformDetail(reference);
+          break;
         case "animeflv":
-          return await fetchAnimeFlvDetail(reference);
+          detail = await fetchAnimeFlvDetail(reference);
+          break;
         case "tioanime":
-          return await fetchTioAnimeDetail(reference);
-        default:
-          return null;
+          detail = await fetchTioAnimeDetail(reference);
+          break;
       }
+
+      // Mejora 4: Enriquecimiento
+      if (detail && detail.title) {
+        const extra = await enrichWithJikan(detail.title);
+        if (extra) {
+          detail.description = extra.synopsis || detail.description;
+          detail.genres = [...new Set([...(detail.genres || []), ...extra.genres])];
+          // Añadimos metadatos extra que la UI puede usar si existen
+          (detail as any).malScore = extra.score;
+          (detail as any).trailer = extra.trailer;
+        }
+      }
+
+      return detail;
     } catch (error) {
       console.error("AnimeHub Remote Detail Error:", error);
       return null;

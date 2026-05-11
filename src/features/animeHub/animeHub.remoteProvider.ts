@@ -6,7 +6,7 @@ import type {
   AnimeSeriesSummary,
 } from "./animeHub.types";
 
-type ProviderSource = "anime-website" | "anime-platform" | "animeflv";
+type ProviderSource = "anime-website" | "anime-platform" | "animeflv" | "monoschinos";
 
 type SeriesReference = {
   source: ProviderSource;
@@ -244,6 +244,8 @@ function providerLabel(source: ProviderSource) {
       return "anime api";
     case "animeflv":
       return "animeflv";
+    case "monoschinos":
+      return "monoschinos";
     default:
       return "anime remoto";
   }
@@ -259,7 +261,9 @@ function normalizeSummary(
       ? ANIME_WEBSITE_BASE_URL
       : source === "anime-platform"
         ? ANIME_PLATFORM_BASE_URL
-        : ANIMEFLV_BASE_URL;
+        : source === "monoschinos"
+          ? ANIMEFLV_BASE_URL // Comparten el mismo base en .env por ahora o se puede añadir otro
+          : ANIMEFLV_BASE_URL;
   const coverImage = pickImage(baseUrl, item);
   const title = item?.title ?? item?.name ?? fallbackRef?.title ?? "Titulo no disponible";
   const rawUrl = item?.url ?? item?.link ?? item?.href ?? fallbackRef?.url;
@@ -614,6 +618,40 @@ async function fetchAnimeFlvLinks(reference: EpisodeReference) {
   }
 }
 
+async function searchMonosChinos(query: string) {
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
+  proxyUrl.searchParams.set("provider", "monoschinos");
+  proxyUrl.searchParams.set("action", "search");
+  proxyUrl.searchParams.set("query", query);
+
+  const data = await fetchJson(proxyUrl.toString());
+  return asList<any>(data?.results ?? data).map((item) =>
+    normalizeSummary("monoschinos", item)
+  );
+}
+
+async function fetchMonosChinosDetail(reference: SeriesReference) {
+  if (!reference.id) return null;
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
+  proxyUrl.searchParams.set("provider", "monoschinos");
+  proxyUrl.searchParams.set("action", "detail");
+  proxyUrl.searchParams.set("id", reference.id);
+
+  const data = await fetchJson(proxyUrl.toString());
+  return normalizeDetail("monoschinos", data, reference);
+}
+
+async function fetchMonosChinosLinks(reference: EpisodeReference) {
+  if (!reference.id) return null;
+  const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
+  proxyUrl.searchParams.set("provider", "monoschinos");
+  proxyUrl.searchParams.set("action", "links");
+  proxyUrl.searchParams.set("id", reference.id);
+
+  const data = await fetchJson(proxyUrl.toString());
+  return normalizeLinks(data);
+}
+
 async function searchAnimePlatform(query: string, genre?: string) {
   if (!ANIME_PLATFORM_BASE_URL) {
     return [];
@@ -749,6 +787,10 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           collected.push(...(await searchAnimeFlv(variant)));
         }
 
+        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "monoschinos")) {
+          collected.push(...(await searchMonosChinos(variant)));
+        }
+
         if (collected.length >= 12) {
           break;
         }
@@ -775,6 +817,8 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           return await fetchAnimePlatformDetail(reference);
         case "animeflv":
           return await fetchAnimeFlvDetail(reference);
+        case "monoschinos":
+          return await fetchMonosChinosDetail(reference);
         default:
           return null;
       }
@@ -798,6 +842,8 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           return null;
         case "animeflv":
           return await fetchAnimeFlvLinks(reference);
+        case "monoschinos":
+          return await fetchMonosChinosLinks(reference);
         default:
           return null;
       }

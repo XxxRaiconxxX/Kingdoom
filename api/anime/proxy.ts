@@ -20,112 +20,83 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(204).end();
   }
 
-  const { action, provider, id, query, server, episode } = req.query as any;
+  const { action, provider, id, query, episode } = req.query as any;
 
   if (!action || !provider) {
     return res.status(400).json({ message: "Faltan parametros: action y provider son obligatorios." });
   }
 
+  // Mapear provider interno a source de la nueva API
+  const source = provider === "animeflv" ? "animeflv" : 
+                 provider === "monoschinos" ? "monoschinos" : 
+                 "gogoanime";
+  const baseUrl = process.env.VITE_ANIME_HUB_API_URL || "https://scraping-web-anime-api.vercel.app";
+
   try {
-    if (provider === "animeflv") {
-      const baseUrl =
-        process.env.ANIMEFLV_API_URL ||
-        process.env.VITE_ANIMEFLV_API_URL ||
-        "https://animeflv.ahmedrangel.com/api";
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-      let targetUrl = "";
+    let targetUrl = "";
 
-      switch (action) {
-        case "search":
-          if (!query) return res.status(400).json({ message: "Falta parametro: query." });
-          targetUrl = `${baseUrl}/search?query=${encodeURIComponent(query)}&page=1`;
-          break;
-        case "detail":
-          if (!id) return res.status(400).json({ message: "Falta parametro: id." });
-          targetUrl = `${baseUrl}/anime/${id}`;
-          break;
-        case "stream":
-          if (!id || !server || !episode) return res.status(400).json({ message: "Faltan parametros para stream." });
-          targetUrl = `${baseUrl}/video/${id}/${server}/${episode}`;
-          break;
-        case "download":
-          if (!id || !episode) return res.status(400).json({ message: "Faltan parametros para download." });
-          targetUrl = `${baseUrl}/download/${id}/${episode}`;
-          break;
-        default:
-          return res.status(400).json({ message: "Accion no soportada." });
-      }
-
-      const response = await fetch(targetUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Accept": "application/json"
-        },
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        return res.status(response.status).json({ message: `Error al consultar AnimeFLV (${action}).` });
-      }
-      
-      const data = await response.json();
-      return res.status(200).json(data);
+    switch (action) {
+      case "search":
+        if (!query) return res.status(400).json({ message: "Falta parametro: query." });
+        targetUrl = `${baseUrl}/api/search?q=${encodeURIComponent(query)}&source=${source}`;
+        break;
+      case "detail":
+        if (!id) return res.status(400).json({ message: "Falta parametro: id." });
+        targetUrl = `${baseUrl}/api/anime/${encodeURIComponent(id)}?source=${source}`;
+        break;
+      case "episodes":
+      case "links":
+      case "stream":
+      case "download":
+        if (!id) return res.status(400).json({ message: "Falta parametro: id." });
+        targetUrl = `${baseUrl}/api/episode/${encodeURIComponent(id)}?source=${source}`;
+        break;
+      default:
+        return res.status(400).json({ message: "Accion no soportada." });
     }
 
-    if (provider === "anime-website") {
-      const baseUrl =
-        process.env.ANIME_WEBSITE_API_URL ||
-        process.env.VITE_ANIME_WEBSITE_API_URL ||
-        "https://consumet-api-fawn.vercel.app";
-      
-      const apiKey = process.env.ANIME_WEBSITE_API_KEY || "";
-      const headers: Record<string, string> = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json"
-      };
-      if (apiKey) headers["x-api-key"] = apiKey;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-      let targetUrl = "";
-
-      switch (action) {
-        case "search":
-          if (!query) return res.status(400).json({ message: "Falta parametro: query." });
-          targetUrl = `${baseUrl}/search/anime/consumet/gogoanime?query=${encodeURIComponent(query)}`;
-          break;
-        case "detail":
-          if (!id) return res.status(400).json({ message: "Falta parametro: id." });
-          targetUrl = `${baseUrl}/media-info/anime/consumet/gogoanime?query=${encodeURIComponent(id)}`;
-          break;
-        case "episodes":
-          if (!id) return res.status(400).json({ message: "Falta parametro: id." });
-          targetUrl = `${baseUrl}/episodes/consumet/gogoanime/all?id=${encodeURIComponent(id)}`;
-          break;
-        case "links":
-          if (!id) return res.status(400).json({ message: "Falta parametro: id." });
-          targetUrl = `${baseUrl}/episodes/consumet/gogoanime/episode?id=${encodeURIComponent(id)}`;
-          break;
-        default:
-          return res.status(400).json({ message: "Accion no soportada para Anime Website." });
-      }
-
-      const response = await fetch(targetUrl, { headers, signal: controller.signal });
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        return res.status(response.status).json({ message: `Error al consultar Anime Website (${action}).` });
-      }
-      
-      const data = await response.json();
-      return res.status(200).json(data);
+    const response = await fetch(targetUrl, {
+      headers: {
+        "Accept": "application/json",
+        "User-Agent": "Kingdoom-Proxy/1.0",
+        "Authorization": `Bearer ${process.env.VITE_ANIME_HUB_API_KEY || ""}`
+      },
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      return res.status(response.status).json({ message: `Error en la API de Scraping (${action}).` });
     }
+    
+    const json = await response.json();
+    
+    // Si la API devolvió éxito, devolvemos el contenido de 'data' para mantener compatibilidad
+    if (json.success) {
+      let result = json.data;
 
-    return res.status(400).json({ message: "Proveedor no soportado por el proxy." });
+      // Adaptación específica para enlaces (links/stream)
+      if (action === "links" || action === "stream" || action === "download") {
+        const servers = result.servers || [];
+        result = {
+          stream: servers.map((s: any) => ({
+            server: s.name || "Servidor",
+            url: s.link || "#",
+            quality: "HD"
+          })),
+          download: [] // La nueva API por ahora no separa descargas de stream
+        };
+      }
+
+      return res.status(200).json(result);
+    }
+    
+    return res.status(500).json({ message: json.message || "Error desconocido en la API." });
+
   } catch (error) {
     return res.status(500).json({ 
       message: "Error interno al procesar peticion de anime.",

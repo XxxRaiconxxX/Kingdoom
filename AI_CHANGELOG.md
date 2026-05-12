@@ -31,14 +31,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 12/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `api/anime/proxy.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Resolución de problemas de visualización de enlaces y rediseño de la interfaz de reproducción/descarga para mayor compacidad.
+*   **Resumen de Tareas:** Resolución de problemas de visualización de enlaces y rediseño de la interfaz de reproducción/descarga para mayor compacidad y estética minimalista.
 *   **Cambios Clave:**
-    *   **UI Compacta (AnimeHubSection):** Rediseño de las secciones "VER" y "DESCARGAR" para mostrar un solo servidor activo con un selector (dropdown) dinámico, optimizando el espacio vertical.
+    *   **UI Minimalista (AnimeHubSection):** Sustitución del selector de servidores por un componente ultra-compacto con icono de flecha (`ChevronDown`), optimizando el espacio en la consola de acciones.
     *   **Normalización de Enlaces:** Se actualizó `normalizeLinks` para soportar arrays directos de `servers` y `downloads` que devuelven los scrapers actuales.
-    *   **Corrección de Mapeo (AnimeFLV):** Se corrigió `fetchAnimeFlvLinks` para procesar correctamente el payload envuelto de la API (`unwrapPayload`).
+    *   **Corrección de Mapeo (AnimeFLV):** Se corrigió `fetchAnimeFlvLinks` para procesar correctamente el payload envuelto de la API.
     *   **Seguridad:** Migración total de API Keys hardcodeadas a la constante `ANIME_HUB_API_KEY`.
     *   **Proxy API:** Actualización de `api/anime/proxy.ts` para mejorar la compatibilidad del mapeo de fuentes y enlaces.
-*   **Notas/Advertencias:** La nueva interfaz es especialmente útil en dispositivos móviles. Los enlaces de TioAnime y AnimeFLV ahora se muestran correctamente.
+*   **Notas/Advertencias:** La interfaz ahora es más limpia y evita solapamientos en resoluciones bajas o móviles.
 
 ### [Fecha: 11/05/2026] - [Autor: Antigravity & Jarvis]
 *   **Archivos Modificados:** `api/anime/stream.ts`, `api/anime/download.ts`, `api/admin/_serverAiProviders.ts`, `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `apps/mobile/app/(tabs)/anime.tsx`, `.env.example`

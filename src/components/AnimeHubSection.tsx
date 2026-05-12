@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
+  ChevronDown,
   Download,
   ExternalLink,
   Film,
@@ -419,17 +420,23 @@ export function AnimeHubSection() {
                               <p className="text-[10px] font-black uppercase tracking-[0.2em]">Ver</p>
                             </div>
                             {selectedEpisodeLinks && selectedEpisodeLinks.stream.length > 1 && (
-                              <select
-                                value={selectedStreamIndex}
-                                onChange={(e) => setSelectedStreamIndex(Number(e.target.value))}
-                                className="rounded-lg border border-cyan-400/20 bg-black/40 px-2 py-0.5 text-[10px] font-bold text-cyan-200 outline-none transition focus:border-cyan-400/50"
-                              >
-                                {selectedEpisodeLinks.stream.map((link, i) => (
-                                  <option key={i} value={i}>
-                                    Opción {i + 1}: {link.server}
-                                  </option>
-                                ))}
-                              </select>
+                              <div className="relative">
+                                <button className="flex items-center gap-1 rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 text-[10px] font-black text-cyan-200 transition hover:bg-cyan-400/20">
+                                  <span>{selectedStreamIndex + 1}</span>
+                                  <ChevronDown className="h-3 w-3" />
+                                </button>
+                                <select
+                                  value={selectedStreamIndex}
+                                  onChange={(e) => setSelectedStreamIndex(Number(e.target.value))}
+                                  className="absolute inset-0 cursor-pointer opacity-0"
+                                >
+                                  {selectedEpisodeLinks.stream.map((link, i) => (
+                                    <option key={i} value={i}>
+                                      Opción {i + 1}: {link.server}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
                             )}
                           </div>
                           
@@ -439,7 +446,7 @@ export function AnimeHubSection() {
                                 href={selectedEpisodeLinks.stream[selectedStreamIndex]?.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-between gap-3 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3.5 text-sm font-black text-cyan-50 transition hover:bg-cyan-400/20 active:scale-[0.98] shadow-[0_4px_12px_rgba(34,211,238,0.1)]"
+                                className="flex items-center justify-between gap-3 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3.5 text-sm font-black text-cyan-50 transition hover:bg-cyan-400/20 active:scale-[0.98] shadow-[0_4px_12px_rgba(34,211,238,0.12)]"
                               >
                                 <div className="flex flex-col">
                                   <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400/70">Servidor</span>
@@ -462,17 +469,23 @@ export function AnimeHubSection() {
                               <p className="text-[10px] font-black uppercase tracking-[0.2em]">Descargar</p>
                             </div>
                             {selectedEpisodeLinks && selectedEpisodeLinks.download.length > 1 && (
-                              <select
-                                value={selectedDownloadIndex}
-                                onChange={(e) => setSelectedDownloadIndex(Number(e.target.value))}
-                                className="rounded-lg border border-amber-400/20 bg-black/40 px-2 py-0.5 text-[10px] font-bold text-amber-200 outline-none transition focus:border-amber-400/50"
-                              >
-                                {selectedEpisodeLinks.download.map((link, i) => (
-                                  <option key={i} value={i}>
-                                    {link.server} {link.quality ? `(${link.quality})` : ""}
-                                  </option>
-                                ))}
-                              </select>
+                              <div className="relative">
+                                <button className="flex items-center gap-1 rounded-lg border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[10px] font-black text-amber-200 transition hover:bg-amber-400/20">
+                                  <span>{selectedDownloadIndex + 1}</span>
+                                  <ChevronDown className="h-3 w-3" />
+                                </button>
+                                <select
+                                  value={selectedDownloadIndex}
+                                  onChange={(e) => setSelectedDownloadIndex(Number(e.target.value))}
+                                  className="absolute inset-0 cursor-pointer opacity-0"
+                                >
+                                  {selectedEpisodeLinks.download.map((link, i) => (
+                                    <option key={i} value={i}>
+                                      Opción {i + 1}: {link.server}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
                             )}
                           </div>
                           
@@ -482,7 +495,7 @@ export function AnimeHubSection() {
                                 href={selectedEpisodeLinks.download[selectedDownloadIndex]?.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-between gap-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3.5 text-sm font-black text-amber-50 transition hover:bg-amber-400/20 active:scale-[0.98] shadow-[0_4px_12px_rgba(251,191,36,0.1)]"
+                                className="flex items-center justify-between gap-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3.5 text-sm font-black text-amber-50 transition hover:bg-amber-400/20 active:scale-[0.98] shadow-[0_4px_12px_rgba(251,191,36,0.12)]"
                               >
                                 <div className="flex flex-col">
                                   <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/70">Opción de descarga</span>

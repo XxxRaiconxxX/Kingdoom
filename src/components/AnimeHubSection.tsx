@@ -68,6 +68,8 @@ export function AnimeHubSection() {
   const [selectedSeries, setSelectedSeries] = useState<AnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>("");
   const [selectedEpisodeLinks, setSelectedEpisodeLinks] = useState<AnimeEpisodeLinks | null>(null);
+  const [selectedStreamIndex, setSelectedStreamIndex] = useState(0);
+  const [selectedDownloadIndex, setSelectedDownloadIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isEpisodeLoading, setIsEpisodeLoading] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -168,6 +170,8 @@ export function AnimeHubSection() {
     try {
       const links = await activeProvider.getEpisodeLinks(episodeId);
       setSelectedEpisodeLinks(links);
+      setSelectedStreamIndex(0);
+      setSelectedDownloadIndex(0);
       setFeedback(links ? "Enlaces listos." : "Sin enlaces disponibles.");
     } catch {
       setFeedback("No se pudieron cargar los enlaces.");
@@ -409,60 +413,91 @@ export function AnimeHubSection() {
 
                       <div className="mt-4 grid gap-3 lg:grid-cols-2 min-[2000px]:grid-cols-1">
                         <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-3">
-                          <div className="flex items-center gap-2 text-cyan-200">
-                            <PlayCircle className="h-4 w-4" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">Ver</p>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 text-cyan-200">
+                              <PlayCircle className="h-4 w-4" />
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em]">Ver</p>
+                            </div>
+                            {selectedEpisodeLinks && selectedEpisodeLinks.stream.length > 1 && (
+                              <select
+                                value={selectedStreamIndex}
+                                onChange={(e) => setSelectedStreamIndex(Number(e.target.value))}
+                                className="rounded-lg border border-cyan-400/20 bg-black/40 px-2 py-0.5 text-[10px] font-bold text-cyan-200 outline-none transition focus:border-cyan-400/50"
+                              >
+                                {selectedEpisodeLinks.stream.map((link, i) => (
+                                  <option key={i} value={i}>
+                                    Opción {i + 1}: {link.server}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                           </div>
-                          <div className="mt-3 grid gap-2">
-                            {(selectedEpisodeLinks?.stream ?? []).map((link) => (
+                          
+                          <div className="mt-3">
+                            {selectedEpisodeLinks && selectedEpisodeLinks.stream.length > 0 ? (
                               <a
-                                key={link.url}
-                                href={link.url}
+                                href={selectedEpisodeLinks.stream[selectedStreamIndex]?.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-between gap-3 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-3 text-sm font-black text-cyan-50 transition hover:bg-cyan-400/20 active:scale-[0.98]"
+                                className="flex items-center justify-between gap-3 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3.5 text-sm font-black text-cyan-50 transition hover:bg-cyan-400/20 active:scale-[0.98] shadow-[0_4px_12px_rgba(34,211,238,0.1)]"
                               >
-                                <span className="truncate">{link.server}</span>
-                                <ExternalLink className="h-4 w-4 shrink-0" />
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400/70">Servidor</span>
+                                  <span className="truncate text-base">{selectedEpisodeLinks.stream[selectedStreamIndex]?.server}</span>
+                                </div>
+                                <ExternalLink className="h-5 w-5 shrink-0 text-cyan-300" />
                               </a>
-                            ))}
-                            {selectedEpisodeLinks && selectedEpisodeLinks.stream.length === 0 ? (
-                              <p className="text-sm text-stone-500">Sin servidores.</p>
-                            ) : null}
-                            {!selectedEpisodeLinks ? (
-                              <p className="text-sm text-stone-500">Elige un episodio.</p>
-                            ) : null}
+                            ) : selectedEpisodeLinks ? (
+                              <p className="py-2 text-sm text-stone-500">Sin servidores.</p>
+                            ) : (
+                              <p className="py-2 text-sm text-stone-500">Elige un episodio.</p>
+                            )}
                           </div>
                         </div>
 
                         <div className="rounded-2xl border border-amber-400/15 bg-amber-400/5 p-3">
-                          <div className="flex items-center gap-2 text-amber-200">
-                            <Download className="h-4 w-4" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">
-                              Descargar
-                            </p>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 text-amber-200">
+                              <Download className="h-4 w-4" />
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em]">Descargar</p>
+                            </div>
+                            {selectedEpisodeLinks && selectedEpisodeLinks.download.length > 1 && (
+                              <select
+                                value={selectedDownloadIndex}
+                                onChange={(e) => setSelectedDownloadIndex(Number(e.target.value))}
+                                className="rounded-lg border border-amber-400/20 bg-black/40 px-2 py-0.5 text-[10px] font-bold text-amber-200 outline-none transition focus:border-amber-400/50"
+                              >
+                                {selectedEpisodeLinks.download.map((link, i) => (
+                                  <option key={i} value={i}>
+                                    {link.server} {link.quality ? `(${link.quality})` : ""}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                           </div>
-                          <div className="mt-3 grid gap-2">
-                            {(selectedEpisodeLinks?.download ?? []).map((link) => (
+                          
+                          <div className="mt-3">
+                            {selectedEpisodeLinks && selectedEpisodeLinks.download.length > 0 ? (
                               <a
-                                key={link.url}
-                                href={link.url}
+                                href={selectedEpisodeLinks.download[selectedDownloadIndex]?.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-between gap-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-3 text-sm font-black text-amber-50 transition hover:bg-amber-400/20 active:scale-[0.98]"
+                                className="flex items-center justify-between gap-3 rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3.5 text-sm font-black text-amber-50 transition hover:bg-amber-400/20 active:scale-[0.98] shadow-[0_4px_12px_rgba(251,191,36,0.1)]"
                               >
-                                <span className="truncate">
-                                  {link.server} {link.quality ? `(${link.quality})` : ""}
-                                </span>
-                                <Download className="h-4 w-4 shrink-0" />
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/70">Opción de descarga</span>
+                                  <span className="truncate text-base">
+                                    {selectedEpisodeLinks.download[selectedDownloadIndex]?.server} 
+                                    {selectedEpisodeLinks.download[selectedDownloadIndex]?.quality ? ` (${selectedEpisodeLinks.download[selectedDownloadIndex]?.quality})` : ""}
+                                  </span>
+                                </div>
+                                <Download className="h-5 w-5 shrink-0 text-amber-300" />
                               </a>
-                            ))}
-                            {selectedEpisodeLinks && selectedEpisodeLinks.download.length === 0 ? (
-                              <p className="text-sm text-stone-500">Sin descargas.</p>
-                            ) : null}
-                            {!selectedEpisodeLinks ? (
-                              <p className="text-sm text-stone-500">Apareceran aqui.</p>
-                            ) : null}
+                            ) : selectedEpisodeLinks ? (
+                              <p className="py-2 text-sm text-stone-500">Sin descargas.</p>
+                            ) : (
+                              <p className="py-2 text-sm text-stone-500">Apareceran aqui.</p>
+                            )}
                           </div>
                         </div>
                       </div>

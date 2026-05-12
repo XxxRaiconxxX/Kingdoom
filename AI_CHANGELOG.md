@@ -30,14 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 12/05/2026] - [Autor: Antigravity]
-*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `api/anime/proxy.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Resolución del problema de visualización de servidores de streaming y descarga en Anime Hub para AnimeFLV y TioAnime.
+*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `api/anime/proxy.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Resolución de problemas de visualización de enlaces y rediseño de la interfaz de reproducción/descarga para mayor compacidad.
 *   **Cambios Clave:**
+    *   **UI Compacta (AnimeHubSection):** Rediseño de las secciones "VER" y "DESCARGAR" para mostrar un solo servidor activo con un selector (dropdown) dinámico, optimizando el espacio vertical.
     *   **Normalización de Enlaces:** Se actualizó `normalizeLinks` para soportar arrays directos de `servers` y `downloads` que devuelven los scrapers actuales.
-    *   **Corrección de Mapeo (AnimeFLV):** Se corrigió `fetchAnimeFlvLinks` para procesar correctamente el payload envuelto de la API (`unwrapPayload`), evitando que los enlaces quedaran como `undefined`.
-    *   **Seguridad:** Migración total de API Keys hardcodeadas a la constante `ANIME_HUB_API_KEY` (alimentada por variables de entorno) en todas las peticiones remotas.
+    *   **Corrección de Mapeo (AnimeFLV):** Se corrigió `fetchAnimeFlvLinks` para procesar correctamente el payload envuelto de la API (`unwrapPayload`).
+    *   **Seguridad:** Migración total de API Keys hardcodeadas a la constante `ANIME_HUB_API_KEY`.
     *   **Proxy API:** Actualización de `api/anime/proxy.ts` para mejorar la compatibilidad del mapeo de fuentes y enlaces.
-*   **Notas/Advertencias:** Los enlaces de TioAnime y AnimeFLV ahora se muestran correctamente bajo la pestaña "VER". Se recomienda verificar que las variables de entorno estén correctamente configuradas en el entorno de producción.
+*   **Notas/Advertencias:** La nueva interfaz es especialmente útil en dispositivos móviles. Los enlaces de TioAnime y AnimeFLV ahora se muestran correctamente.
 
 ### [Fecha: 11/05/2026] - [Autor: Antigravity & Jarvis]
 *   **Archivos Modificados:** `api/anime/stream.ts`, `api/anime/download.ts`, `api/admin/_serverAiProviders.ts`, `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `apps/mobile/app/(tabs)/anime.tsx`, `.env.example`

@@ -1,5 +1,6 @@
 import type { KnowledgeDocument } from "../types";
 import type { AiDebugInfo } from "./aiDebug";
+import type { ArchivistActionDraft, ArchivistStructuredAnswer } from "../features/archivist/archivist.types";
 
 export type ArchivistMode = "canon" | "deep" | "mechanics" | "narrator" | "staff";
 
@@ -8,6 +9,10 @@ type ArchivistAskResult =
       status: "ready";
       answer: string;
       sources: Array<{ title: string; type: string; category: string }>;
+      intent: ArchivistStructuredAnswer["intent"];
+      followUpQuestion?: string;
+      notes?: string[];
+      actionDraft?: ArchivistActionDraft | null;
       debug?: AiDebugInfo | null;
     }
   | { status: "error"; message: string; debug?: AiDebugInfo | null };
@@ -44,6 +49,8 @@ export async function askArchivistAi(input: {
   mode?: ArchivistMode;
   topicMemory?: string[];
   includeDebug?: boolean;
+  runtimeSummary?: string;
+  allowActions?: boolean;
 }): Promise<ArchivistAskResult> {
   const response = await fetch(getArchivistEndpoint(), {
     method: "POST",
@@ -62,6 +69,8 @@ export async function askArchivistAi(input: {
         content: document.content,
       })),
       includeDebug: input.includeDebug ?? false,
+      runtimeSummary: input.runtimeSummary ?? "",
+      allowActions: input.allowActions ?? false,
     }),
   });
 
@@ -81,6 +90,23 @@ export async function askArchivistAi(input: {
     status: "ready",
     answer: payload?.answer ?? "",
     sources: Array.isArray(payload?.sources) ? payload.sources : [],
+    intent:
+      payload?.intent === "admin_action" ||
+      payload?.intent === "clarify" ||
+      payload?.intent === "recommendation"
+        ? payload.intent
+        : "answer",
+    followUpQuestion:
+      typeof payload?.followUpQuestion === "string"
+        ? payload.followUpQuestion
+        : undefined,
+    notes: Array.isArray(payload?.notes)
+      ? payload.notes.map((entry: unknown) => String(entry)).slice(0, 4)
+      : [],
+    actionDraft:
+      payload?.actionDraft && typeof payload.actionDraft === "object"
+        ? (payload.actionDraft as ArchivistActionDraft)
+        : null,
     debug: payload?.debug ?? null,
   };
 }

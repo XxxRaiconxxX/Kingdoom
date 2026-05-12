@@ -848,7 +848,7 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     try {
       const reference = decodeReference<SeriesReference>(seriesId, "anime-website");
 
-      let detail: AnimeDetail | null = null;
+      let detail: AnimeSeriesDetail | null = null;
       switch (reference.source) {
         case "anime-website":
           detail = await fetchAnimeWebsiteDetail(reference);
@@ -868,7 +868,7 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
       if (detail && detail.title) {
         const extra = await enrichWithJikan(detail.title);
         if (extra) {
-          detail.description = extra.synopsis || detail.description;
+          detail.synopsis = extra.synopsis || detail.synopsis;
           detail.genres = [...new Set([...(detail.genres || []), ...extra.genres])];
           // Mejora de imagen HD
           if (extra.image) {

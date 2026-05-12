@@ -91,6 +91,9 @@ export function buildArchivistPrompt(input: {
   documents: ArchivistPromptDocument[];
   mode: ArchivistMode;
   topicMemory?: string[];
+  runtimeSummary?: string;
+  allowActions?: boolean;
+  availableActions?: string[];
 }) {
   const topicMemory = (input.topicMemory ?? [])
     .map((topic) => topic.trim())
@@ -129,6 +132,9 @@ Reglas:
 - Cita nombres de fuentes cuando ayuden a ubicar la respuesta.
 - No uses markdown complejo.
 - Si haces una inferencia, marcala como inferencia.
+- Si se entrega contexto vivo del reino, puedes usarlo para responder sobre mercado, eventos, misiones y estado actual.
+- Si el usuario pide una accion administrativa y allowActions es true, no ejecutes nada: prepara un borrador de accion y pide confirmacion.
+- Si el usuario no es admin o allowActions es false, nunca propongas accion ejecutable.
 
 Memoria tematica activa:
 ${
@@ -139,11 +145,43 @@ ${
 
 Regla de memoria: la memoria tematica orienta continuidad y busqueda, pero no es canon por si sola.
 
+Contexto vivo del reino:
+${input.runtimeSummary?.trim() || "No disponible."}
+
+Acciones admin permitidas:
+${
+  input.allowActions && input.availableActions?.length
+    ? input.availableActions.map((entry) => `- ${entry}`).join("\n")
+    : "No disponibles en esta conversacion."
+}
+
 Pregunta del usuario:
 ${input.question}
 
 Base documental:
 ${context}
+
+Responde SOLO con JSON valido, sin markdown ni texto fuera del JSON:
+{
+  "answer": "respuesta final en espanol",
+  "intent": "answer|admin_action|clarify|recommendation",
+  "followUpQuestion": "si hace falta una aclaracion, o vacio",
+  "notes": ["nota opcional corta"],
+  "actionDraft": {
+    "kind": "una accion permitida o null",
+    "label": "nombre corto visible",
+    "confirmationPrompt": "pregunta breve para confirmar con si/no",
+    "payload": {
+      "campo": "valor"
+    }
+  }
+}
+
+Reglas del JSON:
+- Si no hay accion, usa "actionDraft": null.
+- Si faltan datos criticos para una accion, usa intent "clarify" o "answer" y explica que falta.
+- No inventes IDs si no existen. Si necesitas identificar por nombre, deja el nombre en payload.
+- answer siempre debe venir relleno.
 `.trim();
 }
 

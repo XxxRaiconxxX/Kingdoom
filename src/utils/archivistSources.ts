@@ -16,12 +16,14 @@ import type {
   FloraEntry,
   GrimoireCategory,
   KnowledgeDocument,
+  MarketItem,
   RealmEvent,
   RealmMission,
 } from "../types";
 import { fetchRealmEvents } from "./events";
 import { fetchGrimoireContent } from "./grimoireContent";
 import { fetchKnowledgeDocuments, slugifyKnowledgeId } from "./knowledge";
+import { fetchMarketItems } from "./market";
 import { fetchPublicRealmMissions } from "./missions";
 
 function cleanText(value: string) {
@@ -330,6 +332,38 @@ function buildMissionDocuments(missions: RealmMission[]): KnowledgeDocument[] {
   );
 }
 
+function buildMarketDocuments(items: MarketItem[]): KnowledgeDocument[] {
+  return items.map((item) =>
+    createCanonDocument({
+      id: `canon-market-${item.id}`,
+      title: item.name,
+      type: "other",
+      category: `Mercado ${item.category}`,
+      tags: [
+        item.name,
+        item.category,
+        item.rarity,
+        item.stockStatus,
+        "mercado",
+        "item",
+      ].filter(Boolean),
+      source: "Mercado del reino",
+      summary: cleanText(item.description).slice(0, 240),
+      content: joinLines([
+        `Nombre: ${item.name}`,
+        `Categoria: ${item.category}`,
+        `Rareza: ${item.rarity}`,
+        `Precio: ${item.price} oro`,
+        `Estado: ${item.stockStatus}`,
+        item.stockLimit ? `Limite: ${item.stockLimit}` : "",
+        item.stockSold ? `Vendidos: ${item.stockSold}` : "",
+        item.ability ? `Habilidad: ${item.ability}` : "",
+        `Descripcion: ${item.description}`,
+      ]),
+    })
+  );
+}
+
 function dedupeDocuments(documents: KnowledgeDocument[]) {
   const map = new Map<string, KnowledgeDocument>();
 
@@ -343,12 +377,13 @@ function dedupeDocuments(documents: KnowledgeDocument[]) {
 }
 
 export async function fetchArchivistKnowledgeDocuments() {
-  const [manualResult, grimoireResult, eventsResult, missionsResult] =
+  const [manualResult, grimoireResult, eventsResult, missionsResult, marketResult] =
     await Promise.allSettled([
       fetchKnowledgeDocuments(),
       fetchGrimoireContent(),
       fetchRealmEvents(),
       fetchPublicRealmMissions(),
+      fetchMarketItems(),
     ]);
 
   const manualDocuments =
@@ -375,6 +410,11 @@ export async function fetchArchivistKnowledgeDocuments() {
       ? buildMissionDocuments(missionsResult.value.missions)
       : [];
 
+  const marketDocuments =
+    marketResult.status === "fulfilled"
+      ? buildMarketDocuments(marketResult.value.items)
+      : [];
+
   const documents = dedupeDocuments([
     ...manualDocuments,
     ...grimoireDocuments,
@@ -382,6 +422,7 @@ export async function fetchArchivistKnowledgeDocuments() {
     ...buildWorldDocuments(),
     ...eventDocuments,
     ...missionDocuments,
+    ...marketDocuments,
   ]);
 
   return {

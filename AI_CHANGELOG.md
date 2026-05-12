@@ -29,6 +29,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 12/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/ArchivistSection.tsx`, `src/features/archivist/archivistLive.ts`, `src/features/archivist/archivistActions.ts`, `src/features/archivist/archivist.types.ts`, `src/utils/archivistSources.ts`, `src/utils/archivistAi.ts`, `api/admin/_aiPrompts.ts`, `api/admin/ask-archivist.ts`, `docs/superpowers/specs/2026-05-12-archivista-vivo-design.md`, `docs/superpowers/plans/2026-05-12-archivista-vivo.md`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Reconstrucción del Archivista hacia un formato de chat puro con contexto vivo del reino, tarjetas compactas y preparación/ejecución de acciones admin por confirmación conversacional.
+*   **Cambios Clave:**
+    *   **Chat puro:** Se eliminó la estructura anterior con panel lateral y controles de memoria visibles para concentrar toda la experiencia en una sola interfaz conversacional.
+    *   **Contexto vivo:** El Archivista ahora resume mercado, misiones, eventos, grimorio, biblioteca y, en modo admin, también jugadores cargados.
+    *   **Tarjetas compactas:** Las respuestas pueden adjuntar tarjetas breves de mercado, eventos, misiones, magias, bestiario, flora y documentos sin romper la versión móvil.
+    *   **Modo admin real:** Se integró el borrador y la ejecución de acciones del reino tras confirmación `si/no` en el chat para oro, misiones, eventos, mercado, magia, bestiario, flora y documentos.
+    *   **Cache y contexto:** Se ajustó el endpoint para separar respuestas públicas/admin y considerar el resumen vivo del reino al generar la respuesta IA.
+*   **Notas/Advertencias:** El Archivista sigue dependiendo de las APIs/configuraciones IA ya existentes. Conviene validar flujo público y flujo admin tras cada redeploy porque ahora la capa operativa ya no es solo informativa.
+
 ### [Fecha: 12/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `api/anime/proxy.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Resolución de problemas de visualización de enlaces y rediseño de la interfaz de reproducción/descarga para mayor compacidad y estética minimalista.

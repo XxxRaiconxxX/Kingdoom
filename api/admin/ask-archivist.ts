@@ -7,7 +7,7 @@ import {
   ensureAiProvider,
   missingAiProviderMessage,
   readAiServerConfig,
-  runAiText,
+  runAiJson,
 } from "./_aiOrchestrator.js";
 import {
   buildArchivistPrompt,
@@ -24,7 +24,37 @@ import {
 type ArchivistResponsePayload = {
   answer: string;
   sources: Array<{ title: string; type: string; category: string }>;
+  intent: "answer" | "admin_action" | "clarify" | "recommendation";
+  followUpQuestion?: string;
+  notes?: string[];
+  actionDraft?: {
+    kind: string;
+    label: string;
+    confirmationPrompt: string;
+    payload: Record<string, unknown>;
+  } | null;
 };
+
+const ARCHIVIST_ACTIONS = [
+  "create_player",
+  "set_player_gold",
+  "add_player_gold",
+  "subtract_player_gold",
+  "upsert_mission",
+  "delete_mission",
+  "upsert_event",
+  "delete_event",
+  "upsert_market_item",
+  "delete_market_item",
+  "upsert_magic",
+  "delete_magic",
+  "upsert_bestiary",
+  "delete_bestiary",
+  "upsert_flora",
+  "delete_flora",
+  "upsert_document",
+  "delete_document",
+] as const;
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   setCorsHeaders(req, res);
@@ -51,6 +81,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     documents?: ArchivistPromptDocument[];
     topicMemory?: string[];
     includeDebug?: boolean;
+    runtimeSummary?: string;
+    allowActions?: boolean;
   };
   const question = body.question?.trim() ?? "";
   const documents = Array.isArray(body.documents) ? body.documents : [];
@@ -62,6 +94,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         .slice(0, 8)
     : [];
   const includeDebug = body.includeDebug === true;
+  const runtimeSummary = body.runtimeSummary?.trim() ?? "";
+  const allowActions = body.allowActions === true;
 
   if (!question) {
     return res.status(400).json({ message: "La pregunta esta vacia." });
@@ -78,6 +112,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       "archivist",
       mode,
       question.toLowerCase(),
+      runtimeSummary,
+      allowActions ? "admin" : "public",
       topicMemory,
       documents.map((document) => [
         document.title,
@@ -92,20 +128,65 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       return res.status(200).json(cached);
     }
 
-    const result = await runAiText({
-      prompt: buildArchivistPrompt({ question, documents, mode, topicMemory }),
+    const result = await runAiJson<Partial<ArchivistResponsePayload>>({
+      prompt: buildArchivistPrompt({
+        question,
+        documents,
+        mode,
+        topicMemory,
+        runtimeSummary,
+        allowActions,
+        availableActions: allowActions ? [...ARCHIVIST_ACTIONS] : [],
+      }),
       temperature: mode === "mechanics" ? 0.28 : 0.35,
       topP: mode === "mechanics" ? 0.78 : 0.85,
       config: aiConfig,
     });
 
     const payload: ArchivistResponsePayload = {
-      answer: result.text,
+      answer:
+        typeof result.data?.answer === "string" && result.data.answer.trim()
+          ? result.data.answer.trim()
+          : "No tengo datos suficientes para responder con precision.",
       sources: documents.map((document) => ({
         title: document.title,
         type: document.type,
         category: document.category,
       })),
+      intent:
+        result.data?.intent === "admin_action" ||
+        result.data?.intent === "clarify" ||
+        result.data?.intent === "recommendation"
+          ? result.data.intent
+          : "answer",
+      followUpQuestion:
+        typeof result.data?.followUpQuestion === "string" &&
+        result.data.followUpQuestion.trim()
+          ? result.data.followUpQuestion.trim()
+          : undefined,
+      notes: Array.isArray(result.data?.notes)
+        ? result.data.notes
+            .map((entry) => String(entry).trim())
+            .filter(Boolean)
+            .slice(0, 4)
+        : [],
+      actionDraft:
+        result.data?.actionDraft &&
+        typeof result.data.actionDraft === "object" &&
+        typeof result.data.actionDraft.kind === "string" &&
+        typeof result.data.actionDraft.label === "string" &&
+        typeof result.data.actionDraft.confirmationPrompt === "string"
+          ? {
+              kind: result.data.actionDraft.kind,
+              label: result.data.actionDraft.label,
+              confirmationPrompt: result.data.actionDraft.confirmationPrompt,
+              payload:
+                result.data.actionDraft.payload &&
+                typeof result.data.actionDraft.payload === "object"
+                  ? (result.data.actionDraft.payload as Record<string, unknown>)
+                  : {},
+            }
+          : null,
     };
 
     setCachedAiResponse(cacheKey, payload, 10 * 60 * 1000);

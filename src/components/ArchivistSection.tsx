@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   Bot,
   CheckCircle2,
+  ImagePlus,
   Loader2,
   RefreshCw,
   Send,
@@ -37,6 +38,11 @@ type ChatMessage = {
   sources?: Array<{ title: string; type: string; category: string }>;
   actionDraft?: ArchivistActionDraft | null;
   tone?: "default" | "success" | "warning";
+};
+
+type AttachedImage = {
+  name: string;
+  dataUrl: string;
 };
 
 const QUICK_PROMPTS = [
@@ -106,6 +112,60 @@ function getActionCardQuery(action: ArchivistActionDraft) {
     .join(" ");
 }
 
+function shouldShowActionCards(action?: ArchivistActionDraft | null) {
+  if (!action) return false;
+  if (action.kind.includes("player_gold") || action.kind === "delete_mission" || action.kind === "delete_event") {
+    return true;
+  }
+
+  const payload = action.payload ?? {};
+  const isUpdate =
+    typeof payload.id === "string" && payload.id.trim().length > 0;
+  const label = normalizeDecision(action.label);
+
+  return isUpdate && !label.includes("crear");
+}
+
+function readImageAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function actionSupportsImage(action: ArchivistActionDraft) {
+  return (
+    action.kind.includes("market") ||
+    action.kind.includes("bestiary") ||
+    action.kind.includes("flora") ||
+    action.kind.includes("event")
+  );
+}
+
+function attachImageToAction(
+  action: ArchivistActionDraft | null | undefined,
+  image: AttachedImage | null
+) {
+  if (!action || !image || !actionSupportsImage(action)) {
+    return action ?? null;
+  }
+
+  return {
+    ...action,
+    payload: {
+      ...action.payload,
+      imageUrl:
+        typeof action.payload.imageUrl === "string" &&
+        action.payload.imageUrl.trim() &&
+        action.payload.imageUrl !== "__ARCHIVIST_ATTACHED_IMAGE__"
+          ? action.payload.imageUrl
+          : image.dataUrl,
+    },
+  };
+}
+
 function extractTopicMemory(messages: ChatMessage[]) {
   return messages
     .filter((message) => message.role === "user")
@@ -170,6 +230,7 @@ export function ArchivistSection() {
   const [isAsking, setIsAsking] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingAction, setPendingAction] = useState<ArchivistActionDraft | null>(null);
+  const [attachedImage, setAttachedImage] = useState<AttachedImage | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -243,6 +304,20 @@ export function ArchivistSection() {
     ];
   }, [isAdmin]);
 
+  async function handleAttachImage(file?: File) {
+    if (!file) return;
+
+    try {
+      setAttachedImage({
+        name: file.name,
+        dataUrl: await readImageAsDataUrl(file),
+      });
+      setFeedback("Imagen adjunta al siguiente borrador compatible.");
+    } catch {
+      setFeedback("No pude leer esa imagen. Intenta con otro archivo.");
+    }
+  }
+
   async function handleConfirmAction(userInput: string) {
     if (!pendingAction || !liveState) {
       return;
@@ -291,7 +366,7 @@ export function ArchivistSection() {
         ? await loadArchivistBootstrap({ silent: true })
         : null;
     const actionCards =
-      execution.status === "success" && refreshed
+      execution.status === "success" && refreshed && shouldShowActionCards(pendingAction)
         ? pickArchivistCards(refreshed.liveState.context, getActionCardQuery(pendingAction), {
             includeAdminData: isAdmin,
             kinds: getActionCardKinds(pendingAction),
@@ -321,7 +396,11 @@ export function ArchivistSection() {
       return;
     }
 
-    if (pendingAction && isAdmin) {
+    if (
+      pendingAction &&
+      isAdmin &&
+      (isPositiveDecision(cleanQuestion) || isNegativeDecision(cleanQuestion))
+    ) {
       await handleConfirmAction(cleanQuestion);
       return;
     }
@@ -338,7 +417,17 @@ export function ArchivistSection() {
     };
 
     const nextMessages = [...messages, userMessage];
-    const topicMemory = extractTopicMemory(nextMessages);
+    const pendingActionContext = pendingAction
+      ? `Borrador pendiente para ajustar, no ejecutar aun: ${JSON.stringify(pendingAction)}`
+      : "";
+    const imageContext = attachedImage
+      ? `El usuario adjunto una imagen llamada ${attachedImage.name}. Si preparas una accion compatible con imagen, usa imageUrl="__ARCHIVIST_ATTACHED_IMAGE__" en el payload.`
+      : "";
+    const topicMemory = [
+      ...extractTopicMemory(nextMessages),
+      pendingActionContext,
+      imageContext,
+    ].filter(Boolean);
     const contextDocuments = pickKnowledgeFragments(
       documents,
       [cleanQuestion, ...topicMemory, runtimeSummary].join(" "),
@@ -357,7 +446,7 @@ export function ArchivistSection() {
 
     const mode: ArchivistMode = isAdmin ? "staff" : "canon";
     const result = await askArchivistAi({
-      question: cleanQuestion,
+      question: [cleanQuestion, pendingActionContext, imageContext].filter(Boolean).join("\n"),
       contextDocuments,
       mode,
       topicMemory,
@@ -372,22 +461,32 @@ export function ArchivistSection() {
       return;
     }
 
-    if (isAdmin && result.intent === "admin_action" && result.actionDraft) {
-      setPendingAction(result.actionDraft);
+    const actionDraft = attachImageToAction(result.actionDraft, attachedImage);
+    const shouldClearAttachedImage = Boolean(actionDraft && attachedImage && actionSupportsImage(actionDraft));
+
+    if (isAdmin && result.intent === "admin_action" && actionDraft) {
+      setPendingAction(actionDraft);
+      if (shouldClearAttachedImage) {
+        setAttachedImage(null);
+      }
+    } else if (result.intent === "clarify" && pendingAction) {
+      setPendingAction(pendingAction);
     } else {
       setPendingAction(null);
     }
 
     const cards =
       result.intent === "admin_action"
-        ? result.actionDraft
-          ? pickArchivistCards(liveState.context, getActionCardQuery(result.actionDraft), {
+        ? actionDraft && shouldShowActionCards(actionDraft)
+          ? pickArchivistCards(liveState.context, getActionCardQuery(actionDraft), {
               includeAdminData: isAdmin,
-              kinds: getActionCardKinds(result.actionDraft),
+              kinds: getActionCardKinds(actionDraft),
               limit: 2,
               strict: true,
             })
           : []
+        : result.intent === "clarify"
+          ? []
         : pickArchivistCards(liveState.context, cleanQuestion, {
             includeAdminData: isAdmin,
             limit: 4,
@@ -401,8 +500,11 @@ export function ArchivistSection() {
         text: result.answer,
         cards,
         notes: result.notes,
-        sources: result.sources,
-        actionDraft: isAdmin ? result.actionDraft ?? null : null,
+        sources:
+          result.intent === "answer" || result.intent === "recommendation"
+            ? result.sources
+            : [],
+        actionDraft: isAdmin ? actionDraft ?? null : null,
         tone:
           result.intent === "clarify"
             ? "warning"
@@ -588,7 +690,7 @@ export function ArchivistSection() {
                       </p>
                     </div>
                     <span className="rounded-full border border-amber-300/20 bg-black/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-100">
-                      Responde si / no
+                      Si / no o ajusta
                     </span>
                   </div>
                   <p className="mt-2 text-xs leading-5 text-amber-100/80">
@@ -609,7 +711,7 @@ export function ArchivistSection() {
                   }}
                   placeholder={
                     pendingAction
-                      ? "Escribe si para ejecutar o no para cancelar..."
+                      ? "Si, no, o agrega un dato para ajustar el borrador..."
                       : isAdmin
                         ? "Consulta el reino o pide una accion de staff..."
                         : "Pregunta por lore, mercado, eventos, misiones o magia..."
@@ -624,6 +726,20 @@ export function ArchivistSection() {
                 >
                   <Send className="h-4.5 w-4.5" />
                 </button>
+                {isAdmin ? (
+                  <label className="kd-touch inline-flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-[1.25rem] border border-stone-700 bg-stone-950/80 text-stone-300 transition hover:border-amber-300/35 hover:text-amber-100">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={(event) => {
+                        void handleAttachImage(event.target.files?.[0]);
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                    <ImagePlus className="h-4.5 w-4.5" />
+                  </label>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => void loadArchivistBootstrap({ silent: true })}
@@ -640,6 +756,21 @@ export function ArchivistSection() {
                 <p className="mt-3 rounded-[1rem] border border-stone-800 bg-stone-950/45 px-3 py-2 text-xs leading-5 text-stone-400">
                   {feedback}
                 </p>
+              ) : null}
+
+              {attachedImage ? (
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-[1rem] border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+                  <span className="min-w-0 truncate">
+                    Imagen lista: {attachedImage.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setAttachedImage(null)}
+                    className="shrink-0 font-bold uppercase tracking-[0.14em] text-amber-200"
+                  >
+                    Quitar
+                  </button>
+                </div>
               ) : null}
 
               <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">

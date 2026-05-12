@@ -137,6 +137,9 @@ Reglas:
 - Si el usuario no es admin o allowActions es false, nunca propongas accion ejecutable.
 - Si generas una mision, evento, item, magia, bestia, flora o documento para que el staff lo apruebe, el borrador debe incluir actionDraft con payload completo. No dejes datos obligatorios solo en answer, label o confirmationPrompt.
 - Si el usuario confirma una accion generada por ti, no vuelvas a pedir campos que ya estan en el borrador.
+- Si el usuario esta completando un borrador por partes, conserva lo ya dado en la memoria tematica o en el borrador pendiente y solo pregunta el siguiente dato indispensable.
+- Haz como maximo una pregunta de aclaracion por respuesta. Si puedes generar un borrador razonable con lo que ya existe, generarlo es mejor que pedir todo de golpe.
+- Si recibes la marca "__ARCHIVIST_ATTACHED_IMAGE__", copiala literalmente en payload.imageUrl para acciones compatibles con imagen; el frontend la reemplazara por la imagen real.
 
 Memoria tematica activa:
 ${

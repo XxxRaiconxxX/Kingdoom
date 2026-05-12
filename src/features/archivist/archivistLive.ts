@@ -14,9 +14,72 @@ import { fetchKnowledgeDocuments } from "../../utils/knowledge";
 import { fetchAdminRealmMissions, fetchPublicRealmMissions } from "../../utils/missions";
 import type {
   ArchivistCard,
+  ArchivistCardKind,
   ArchivistLiveContext,
   ArchivistLiveState,
 } from "./archivist.types";
+
+const CARD_STOPWORDS = new Set([
+  "accion",
+  "admin",
+  "ahora",
+  "algo",
+  "ante",
+  "aqui",
+  "cada",
+  "como",
+  "con",
+  "crear",
+  "cuando",
+  "dar",
+  "dame",
+  "del",
+  "desde",
+  "dice",
+  "dime",
+  "esa",
+  "ese",
+  "esta",
+  "este",
+  "esto",
+  "genera",
+  "generar",
+  "hay",
+  "las",
+  "los",
+  "mas",
+  "me",
+  "mision",
+  "misiones",
+  "necesito",
+  "no",
+  "oro",
+  "para",
+  "parece",
+  "pasame",
+  "pasamela",
+  "puede",
+  "puedes",
+  "que",
+  "reino",
+  "si",
+  "sistema",
+  "subimos",
+  "una",
+  "uno",
+  "usuario",
+]);
+
+const CARD_KIND_KEYWORDS: Record<ArchivistCardKind, string[]> = {
+  market: ["arma", "armadura", "comprar", "espada", "item", "mercado", "objeto", "pocion", "tienda"],
+  event: ["agenda", "evento", "eventos"],
+  mission: ["contrato", "mision", "misiones"],
+  magic: ["grimorio", "hechizo", "magia", "magias", "runa"],
+  bestiary: ["bestia", "bestiario", "criatura"],
+  flora: ["flora", "hierba", "planta"],
+  document: ["archivo", "canon", "historia", "lore"],
+  player: ["jugador", "oro", "usuario"],
+};
 
 function normalizeText(value: string) {
   return value
@@ -32,7 +95,7 @@ function tokenize(value: string) {
   return normalizeText(value)
     .split(" ")
     .map((token) => token.trim())
-    .filter((token) => token.length > 1);
+    .filter((token) => token.length > 1 && !CARD_STOPWORDS.has(token));
 }
 
 function scoreMatch(tokens: string[], values: Array<string | number | undefined>) {
@@ -299,10 +362,24 @@ export function buildArchivistRuntimeSummary(
 export function pickArchivistCards(
   context: ArchivistLiveContext,
   query: string,
-  options?: { includeAdminData?: boolean; limit?: number }
+  options?: {
+    includeAdminData?: boolean;
+    limit?: number;
+    kinds?: ArchivistCardKind[];
+    minScore?: number;
+    strict?: boolean;
+  }
 ) {
   const tokens = tokenize(query);
   const limit = options?.limit ?? 4;
+  const allowedKinds = options?.kinds ? new Set(options.kinds) : null;
+  const rawTokens = tokenizeForIntent(query);
+  const inferredKinds = allowedKinds ?? inferCardKinds(rawTokens);
+  const minScore = options?.minScore ?? (options?.strict || inferredKinds ? 4 : 3);
+
+  if (tokens.length === 0 && !inferredKinds) {
+    return [];
+  }
 
   const pool: Array<{ score: number; card: ArchivistCard }> = [
     ...context.marketItems.map((item) => ({
@@ -314,7 +391,7 @@ export function pickArchivistCards(
           item.category,
           item.rarity,
           item.price,
-        ]) + (tokens.some((token) => ["arma", "mercado", "comprar", "item"].includes(token)) ? 2 : 0),
+        ]) + categoryBoost("market", rawTokens),
       card: toMarketCard(item),
     })),
     ...context.events.map((entry) => ({
@@ -325,7 +402,7 @@ export function pickArchivistCards(
           entry.status,
           entry.rewards,
           entry.requirements,
-        ]) + (tokens.some((token) => ["evento", "eventos", "agenda"].includes(token)) ? 2 : 0),
+        ]) + categoryBoost("event", rawTokens),
       card: toEventCard(entry),
     })),
     ...context.missions.map((entry) => ({
@@ -336,13 +413,13 @@ export function pickArchivistCards(
           entry.type,
           entry.difficulty,
           entry.status,
-        ]) + (tokens.some((token) => ["mision", "misiones", "contrato"].includes(token)) ? 2 : 0),
+        ]) + categoryBoost("mission", rawTokens),
       card: toMissionCard(entry),
     })),
     ...flattenMagicStyles(context.grimoireCategories).map((entry) => ({
-      score:
-        scoreMatch(tokens, [entry.title, entry.description, entry.categoryTitle]) +
-        (tokens.some((token) => ["magia", "hechizo", "grimorio"].includes(token)) ? 2 : 0),
+        score:
+          scoreMatch(tokens, [entry.title, entry.description, entry.categoryTitle]) +
+        categoryBoost("magic", rawTokens),
       card: toMagicCard(entry),
     })),
     ...context.bestiary.map((entry) => ({
@@ -353,7 +430,7 @@ export function pickArchivistCards(
           entry.category,
           entry.type,
           entry.threatLevel,
-        ]) + (tokens.some((token) => ["bestia", "bestiario", "criatura"].includes(token)) ? 2 : 0),
+        ]) + categoryBoost("bestiary", rawTokens),
       card: toBestiaryCard(entry),
     })),
     ...context.flora.map((entry) => ({
@@ -364,7 +441,7 @@ export function pickArchivistCards(
           entry.category,
           entry.type,
           entry.properties,
-        ]) + (tokens.some((token) => ["flora", "planta", "hierba"].includes(token)) ? 2 : 0),
+        ]) + categoryBoost("flora", rawTokens),
       card: toFloraCard(entry),
     })),
     ...context.documents.map((entry) => ({
@@ -375,15 +452,35 @@ export function pickArchivistCards(
       ? context.players.map((entry) => ({
           score:
             scoreMatch(tokens, [entry.username, entry.gold]) +
-            (tokens.some((token) => ["jugador", "usuario", "oro"].includes(token)) ? 1 : 0),
+            categoryBoost("player", rawTokens),
           card: toPlayerCard(entry),
         }))
       : []),
   ];
 
   return pool
-    .filter((entry) => entry.score > 0)
+    .filter((entry) => entry.score >= minScore)
+    .filter((entry) => !inferredKinds || inferredKinds.has(entry.card.kind))
     .sort((left, right) => right.score - left.score)
     .slice(0, limit)
     .map((entry) => entry.card);
+}
+
+function tokenizeForIntent(value: string) {
+  return normalizeText(value)
+    .split(" ")
+    .map((token) => token.trim())
+    .filter((token) => token.length > 1);
+}
+
+function inferCardKinds(tokens: string[]) {
+  const kinds = (Object.keys(CARD_KIND_KEYWORDS) as ArchivistCardKind[]).filter((kind) =>
+    CARD_KIND_KEYWORDS[kind].some((keyword) => tokens.includes(keyword))
+  );
+
+  return kinds.length > 0 ? new Set(kinds) : null;
+}
+
+function categoryBoost(kind: ArchivistCardKind, tokens: string[]) {
+  return CARD_KIND_KEYWORDS[kind].some((keyword) => tokens.includes(keyword)) ? 1 : 0;
 }

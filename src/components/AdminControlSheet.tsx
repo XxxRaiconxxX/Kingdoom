@@ -447,7 +447,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setEventStartDate(event.startDate);
     setEventEndDate(event.endDate);
     setEventStatus(event.status);
-    setEventFactions(event.factions.join(", "));
+    setEventFactions(Array.isArray(event.factions) ? event.factions.join(", ") : "");
     setEventRewards(event.rewards);
     setEventRequirements(event.requirements);
     setEventParticipationRewardGold(event.participationRewardGold ?? 0);

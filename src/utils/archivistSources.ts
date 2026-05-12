@@ -287,25 +287,29 @@ function buildWorldDocuments(): KnowledgeDocument[] {
 
 function buildEventDocuments(events: RealmEvent[]): KnowledgeDocument[] {
   return events.map((event) =>
-    createCanonDocument({
-      id: `canon-event-${event.id ?? slugifyKnowledgeId(event.title)}`,
-      title: event.title,
-      type: "event",
-      category: event.status,
-      tags: [event.title, event.status, ...event.factions, "evento"],
-      source: "Eventos publicados",
-      summary: event.description,
-      content: joinLines([
-        event.description,
-        event.longDescription,
-        `Inicio: ${event.startDate}`,
-        `Cierre: ${event.endDate}`,
-        `Estado: ${event.status}`,
-        `Facciones: ${event.factions.join(", ")}`,
-        `Recompensas: ${event.rewards}`,
-        `Requisitos: ${event.requirements}`,
-      ]),
-    })
+    {
+      const factions = Array.isArray(event.factions) ? event.factions : [];
+
+      return createCanonDocument({
+        id: `canon-event-${event.id ?? slugifyKnowledgeId(event.title)}`,
+        title: event.title,
+        type: "event",
+        category: event.status,
+        tags: [event.title, event.status, ...factions, "evento"],
+        source: "Eventos publicados",
+        summary: event.description,
+        content: joinLines([
+          event.description,
+          event.longDescription,
+          `Inicio: ${event.startDate}`,
+          `Cierre: ${event.endDate}`,
+          `Estado: ${event.status}`,
+          `Facciones: ${factions.join(", ") || "Sin facciones definidas"}`,
+          `Recompensas: ${event.rewards}`,
+          `Requisitos: ${event.requirements}`,
+        ]),
+      });
+    }
   );
 }
 

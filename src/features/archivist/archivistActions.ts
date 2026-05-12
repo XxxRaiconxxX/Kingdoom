@@ -77,6 +77,38 @@ function ensureString(value: unknown, fallback = "") {
   return typeof value === "string" ? value.trim() : fallback;
 }
 
+function firstString(...values: unknown[]) {
+  for (const value of values) {
+    const clean = ensureString(value);
+    if (clean) return clean;
+  }
+
+  return "";
+}
+
+function payloadString(
+  payload: Record<string, unknown>,
+  keys: string[],
+  fallback = ""
+) {
+  return firstString(...keys.map((key) => payload[key]), fallback);
+}
+
+function payloadNumber(
+  payload: Record<string, unknown>,
+  keys: string[],
+  fallback = 0
+) {
+  for (const key of keys) {
+    const value = payload[key];
+    if (value !== undefined && value !== null && value !== "") {
+      return toNumber(value, fallback);
+    }
+  }
+
+  return fallback;
+}
+
 function ensureArray(value: unknown) {
   if (Array.isArray(value)) {
     return value.map((entry) => String(entry).trim()).filter(Boolean);
@@ -88,6 +120,73 @@ function ensureArray(value: unknown) {
       .filter(Boolean);
   }
   return [] as string[];
+}
+
+function inferTitleFromDraft(draft: ArchivistActionDraft, noun: string) {
+  const candidates = [
+    draft.label,
+    draft.confirmationPrompt,
+    ensureString(draft.payload.title),
+    ensureString(draft.payload.name),
+  ].filter(Boolean);
+
+  const nounPattern = noun === "mision" ? "misi[oó]n" : noun;
+
+  for (const candidate of candidates) {
+    const direct = candidate.match(new RegExp(`${nounPattern}\\s*[:\\-]\\s*["“”']?([^"“”'?]+)`, "i"));
+    if (direct?.[1]?.trim()) return direct[1].trim();
+
+    const quoted = candidate.match(new RegExp(`${nounPattern}\\s+["“”']([^"“”']+)["“”']`, "i"));
+    if (quoted?.[1]?.trim()) return quoted[1].trim();
+  }
+
+  return "";
+}
+
+function normalizeMissionDifficulty(value: unknown, fallback: RealmMission["difficulty"]) {
+  const normalized = normalizeText(value || fallback);
+  if (["facil", "easy", "baja"].includes(normalized)) return "easy";
+  if (["media", "medio", "medium", "normal"].includes(normalized)) return "medium";
+  if (["dificil", "hard", "alta"].includes(normalized)) return "hard";
+  if (["elite", "epica", "legendaria"].includes(normalized)) return "elite";
+  return fallback;
+}
+
+function normalizeMissionType(value: unknown, fallback: RealmMission["type"]) {
+  const normalized = normalizeText(value || fallback);
+  if (["caceria", "hunt", "caza"].includes(normalized)) return "hunt";
+  if (["escolta", "escort"].includes(normalized)) return "escort";
+  if (["investigacion", "investigation", "misterio"].includes(normalized)) return "investigation";
+  if (["evento", "event"].includes(normalized)) return "event";
+  if (["historia", "story", "narrativa"].includes(normalized)) return "story";
+  return fallback;
+}
+
+function normalizeMissionStatus(value: unknown, fallback: RealmMission["status"]) {
+  const normalized = normalizeText(value || fallback);
+  if (["available", "disponible", "abierta", "open"].includes(normalized)) return "available";
+  if (["in-progress", "progreso", "curso", "activa"].includes(normalized)) return "in-progress";
+  if (["closed", "cerrada", "finalizada"].includes(normalized)) return "closed";
+  return fallback;
+}
+
+function normalizeEventStatus(value: unknown, fallback: RealmEvent["status"]) {
+  const normalized = normalizeText(value || fallback);
+  if (["active", "activo", "activa"].includes(normalized)) return "active";
+  if (["finished", "finalizado", "cerrado", "cerrada"].includes(normalized)) return "finished";
+  return "in-production";
+}
+
+function normalizeDateText(value: unknown, fallback = "") {
+  const clean = ensureString(value, fallback);
+  if (!clean) return "";
+
+  const timestamp = Date.parse(clean);
+  if (Number.isFinite(timestamp)) {
+    return new Date(timestamp).toISOString().slice(0, 10);
+  }
+
+  return clean.slice(0, 80);
 }
 
 function flattenMagicStyles(context: ArchivistLiveContext) {
@@ -108,8 +207,8 @@ async function executePlayerAction(
 
   if (draft.kind === "create_player") {
     const result = await createPlayerAccount({
-      username: ensureString(payload.username || payload.playerName),
-      gold: Math.max(0, Math.floor(toNumber(payload.gold, 0))),
+      username: payloadString(payload, ["username", "playerName", "usuario", "jugador", "name"]),
+      gold: Math.max(0, Math.floor(payloadNumber(payload, ["gold", "oro", "amount", "cantidad"], 0))),
       isAdmin: toBoolean(payload.isAdmin, false),
     });
 
@@ -119,7 +218,10 @@ async function executePlayerAction(
     };
   }
 
-  const player = findPlayer(context.players, payload.playerId || payload.username || payload.playerName);
+  const player = findPlayer(
+    context.players,
+    payloadString(payload, ["playerId", "username", "playerName", "usuario", "jugador", "target", "name"])
+  );
   if (!player) {
     return {
       status: "error",
@@ -127,7 +229,7 @@ async function executePlayerAction(
     };
   }
 
-  const amount = Math.max(0, Math.floor(toNumber(payload.amount ?? payload.gold, 0)));
+  const amount = Math.max(0, Math.floor(payloadNumber(payload, ["amount", "gold", "oro", "cantidad"], 0)));
   const nextGold =
     draft.kind === "set_player_gold"
       ? amount
@@ -153,7 +255,11 @@ async function executeMissionAction(
   context: ArchivistLiveContext
 ): Promise<ExecutionResult> {
   const payload = draft.payload;
-  const current = findByName(context.missions, payload.id || payload.title);
+  const title = firstString(
+    payloadString(payload, ["title", "missionTitle", "titulo", "nombre", "name"]),
+    inferTitleFromDraft(draft, "mision")
+  );
+  const current = findByName(context.missions, payload.id || title);
 
   if (draft.kind === "delete_mission") {
     if (!current?.id) {
@@ -165,17 +271,24 @@ async function executeMissionAction(
 
   const result = await upsertRealmMission({
     id: current?.id,
-    title: ensureString(payload.title, current?.title ?? ""),
-    description: ensureString(payload.description, current?.description ?? ""),
-    instructions: ensureString(
-      payload.instructions,
+    title: firstString(title, current?.title),
+    description: payloadString(payload, ["description", "summary", "descripcion", "resumen"], current?.description ?? ""),
+    instructions: payloadString(
+      payload,
+      ["instructions", "instruction", "instrucciones", "objective", "objetivo", "conditions", "condiciones"],
       current?.instructions ?? "Resolver por rol en WhatsApp. Un admin valida el cierre."
     ),
-    rewardGold: Math.max(0, Math.floor(toNumber(payload.rewardGold, current?.rewardGold ?? 0))),
-    maxParticipants: Math.max(1, Math.floor(toNumber(payload.maxParticipants, current?.maxParticipants ?? 1))),
-    difficulty: (ensureString(payload.difficulty, current?.difficulty ?? "easy") as RealmMission["difficulty"]),
-    type: (ensureString(payload.type, current?.type ?? "story") as RealmMission["type"]),
-    status: (ensureString(payload.status, current?.status ?? "available") as RealmMission["status"]),
+    rewardGold: Math.max(
+      0,
+      Math.floor(payloadNumber(payload, ["rewardGold", "reward_gold", "recompensaOro", "reward", "gold", "oro"], current?.rewardGold ?? 0))
+    ),
+    maxParticipants: Math.max(
+      1,
+      Math.floor(payloadNumber(payload, ["maxParticipants", "max_participants", "participantesMaximos", "participants"], current?.maxParticipants ?? 1))
+    ),
+    difficulty: normalizeMissionDifficulty(payload.difficulty ?? payload.categoria, current?.difficulty ?? "easy"),
+    type: normalizeMissionType(payload.type ?? payload.tipo, current?.type ?? "story"),
+    status: normalizeMissionStatus(payload.status ?? payload.estado, current?.status ?? "available"),
     visible: toBoolean(payload.visible, current?.visible ?? true),
   });
 
@@ -187,7 +300,11 @@ async function executeEventAction(
   context: ArchivistLiveContext
 ): Promise<ExecutionResult> {
   const payload = draft.payload;
-  const current = findByName(context.events, payload.id || payload.title);
+  const title = firstString(
+    payloadString(payload, ["title", "eventTitle", "titulo", "nombre", "name"]),
+    inferTitleFromDraft(draft, "evento")
+  );
+  const current = findByName(context.events, payload.id || title);
 
   if (draft.kind === "delete_event") {
     if (!current?.id) {
@@ -199,24 +316,27 @@ async function executeEventAction(
 
   const result = await upsertRealmEvent({
     id: current?.id,
-    title: ensureString(payload.title, current?.title ?? ""),
-    description: ensureString(payload.description, current?.description ?? ""),
-    longDescription: ensureString(
-      payload.longDescription,
-      current?.longDescription ?? ensureString(payload.description, current?.description ?? "")
+    title: firstString(title, current?.title),
+    description: payloadString(payload, ["description", "summary", "descripcion", "resumen"], current?.description ?? ""),
+    longDescription: payloadString(
+      payload,
+      ["longDescription", "long_description", "descripcionLarga", "cronica", "details"],
+      current?.longDescription ?? payloadString(payload, ["description", "summary", "descripcion", "resumen"], current?.description ?? "")
     ),
-    imageUrl: ensureString(payload.imageUrl, current?.imageUrl ?? ""),
-    startDate: ensureString(payload.startDate, current?.startDate ?? ""),
-    endDate: ensureString(payload.endDate, current?.endDate ?? ""),
-    status: (ensureString(payload.status, current?.status ?? "in-production") as RealmEvent["status"]),
-    factions: ensureArray(payload.factions).length > 0 ? ensureArray(payload.factions) : current?.factions ?? [],
-    rewards: ensureString(payload.rewards, current?.rewards ?? ""),
-    requirements: ensureString(payload.requirements, current?.requirements ?? ""),
+    imageUrl: payloadString(payload, ["imageUrl", "image_url", "imagen", "image"], current?.imageUrl ?? ""),
+    startDate: normalizeDateText(payloadString(payload, ["startDate", "start_date", "inicio", "fechaInicio"], current?.startDate ?? "")),
+    endDate: normalizeDateText(payloadString(payload, ["endDate", "end_date", "cierre", "fechaCierre", "final"], current?.endDate ?? "")),
+    status: normalizeEventStatus(payload.status ?? payload.estado, current?.status ?? "in-production"),
+    factions: ensureArray(payload.factions ?? payload.facciones).length > 0
+      ? ensureArray(payload.factions ?? payload.facciones)
+      : current?.factions ?? [],
+    rewards: payloadString(payload, ["rewards", "reward", "recompensas", "recompensa"], current?.rewards ?? ""),
+    requirements: payloadString(payload, ["requirements", "requirement", "requisitos", "condiciones"], current?.requirements ?? ""),
     participationRewardGold: Math.max(
       0,
-      Math.floor(toNumber(payload.participationRewardGold, current?.participationRewardGold ?? 0))
+      Math.floor(payloadNumber(payload, ["participationRewardGold", "participation_reward_gold", "rewardGold", "recompensaOro", "oro"], current?.participationRewardGold ?? 0))
     ),
-    maxParticipants: Math.max(0, Math.floor(toNumber(payload.maxParticipants, current?.maxParticipants ?? 0))),
+    maxParticipants: Math.max(0, Math.floor(payloadNumber(payload, ["maxParticipants", "max_participants", "participantesMaximos", "participants"], current?.maxParticipants ?? 0))),
   });
 
   return { status: result.status === "saved" ? "success" : "error", message: result.message };

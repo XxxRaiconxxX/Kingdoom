@@ -135,6 +135,8 @@ Reglas:
 - Si se entrega contexto vivo del reino, puedes usarlo para responder sobre mercado, eventos, misiones y estado actual.
 - Si el usuario pide una accion administrativa y allowActions es true, no ejecutes nada: prepara un borrador de accion y pide confirmacion.
 - Si el usuario no es admin o allowActions es false, nunca propongas accion ejecutable.
+- Si generas una mision, evento, item, magia, bestia, flora o documento para que el staff lo apruebe, el borrador debe incluir actionDraft con payload completo. No dejes datos obligatorios solo en answer, label o confirmationPrompt.
+- Si el usuario confirma una accion generada por ti, no vuelvas a pedir campos que ya estan en el borrador.
 
 Memoria tematica activa:
 ${
@@ -181,6 +183,10 @@ Reglas del JSON:
 - Si no hay accion, usa "actionDraft": null.
 - Si faltan datos criticos para una accion, usa intent "clarify" o "answer" y explica que falta.
 - No inventes IDs si no existen. Si necesitas identificar por nombre, deja el nombre en payload.
+- Para add_player_gold, subtract_player_gold o set_player_gold usa payload canonico: {"username":"nombre exacto","amount":1000}. No uses solo texto narrativo.
+- Para upsert_mission usa payload canonico: {"title":"...","description":"...","instructions":"...","rewardGold":0,"maxParticipants":1,"difficulty":"easy|medium|hard|elite","type":"story|hunt|escort|investigation|event","status":"available|in-progress|closed","visible":true}.
+- Para upsert_event usa payload canonico: {"title":"...","description":"...","longDescription":"...","startDate":"texto o fecha","endDate":"texto o fecha","status":"in-production|active|finished","factions":[],"rewards":"...","requirements":"...","participationRewardGold":0,"maxParticipants":0,"imageUrl":""}.
+- Para upsert_market_item usa payload canonico: {"name":"...","description":"...","ability":"...","price":0,"rarity":"common|rare|epic|legendary|mythic","category":"potions|armor|swords|others","stockStatus":"available|limited|sold-out","stockLimit":0,"stockSold":0,"imageUrl":""}.
 - answer siempre debe venir relleno.
 `.trim();
 }

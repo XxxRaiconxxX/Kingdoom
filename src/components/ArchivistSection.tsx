@@ -24,6 +24,7 @@ import { executeArchivistAction } from "../features/archivist/archivistActions";
 import type {
   ArchivistActionDraft,
   ArchivistCard,
+  ArchivistCardKind,
   ArchivistLiveState,
 } from "../features/archivist/archivist.types";
 
@@ -72,6 +73,37 @@ function isPositiveDecision(value: string) {
 function isNegativeDecision(value: string) {
   const normalized = normalizeDecision(value);
   return normalized === "no" || normalized === "cancelar";
+}
+
+function getActionCardKinds(action?: ArchivistActionDraft | null): ArchivistCardKind[] | undefined {
+  if (!action) return undefined;
+
+  if (action.kind.includes("player")) return ["player"];
+  if (action.kind.includes("mission")) return ["mission"];
+  if (action.kind.includes("event")) return ["event"];
+  if (action.kind.includes("market")) return ["market"];
+  if (action.kind.includes("magic")) return ["magic"];
+  if (action.kind.includes("bestiary")) return ["bestiary"];
+  if (action.kind.includes("flora")) return ["flora"];
+  if (action.kind.includes("document")) return ["document"];
+
+  return undefined;
+}
+
+function getActionCardQuery(action: ArchivistActionDraft) {
+  const payload = action.payload ?? {};
+  return [
+    action.label,
+    payload.title,
+    payload.name,
+    payload.username,
+    payload.playerName,
+    payload.usuario,
+    payload.jugador,
+  ]
+    .map((entry) => (typeof entry === "string" ? entry : ""))
+    .filter(Boolean)
+    .join(" ");
 }
 
 function extractTopicMemory(messages: ChatMessage[]) {
@@ -260,11 +292,12 @@ export function ArchivistSection() {
         : null;
     const actionCards =
       execution.status === "success" && refreshed
-        ? pickArchivistCards(
-            refreshed.liveState.context,
-            `${pendingAction.label} ${Object.values(pendingAction.payload).join(" ")}`,
-            { includeAdminData: isAdmin, limit: 3 }
-          )
+        ? pickArchivistCards(refreshed.liveState.context, getActionCardQuery(pendingAction), {
+            includeAdminData: isAdmin,
+            kinds: getActionCardKinds(pendingAction),
+            limit: 2,
+            strict: true,
+          })
         : [];
 
     setPendingAction(null);
@@ -339,16 +372,26 @@ export function ArchivistSection() {
       return;
     }
 
-    const cards = pickArchivistCards(liveState.context, cleanQuestion, {
-      includeAdminData: isAdmin,
-      limit: 4,
-    });
-
     if (isAdmin && result.intent === "admin_action" && result.actionDraft) {
       setPendingAction(result.actionDraft);
     } else {
       setPendingAction(null);
     }
+
+    const cards =
+      result.intent === "admin_action"
+        ? result.actionDraft
+          ? pickArchivistCards(liveState.context, getActionCardQuery(result.actionDraft), {
+              includeAdminData: isAdmin,
+              kinds: getActionCardKinds(result.actionDraft),
+              limit: 2,
+              strict: true,
+            })
+          : []
+        : pickArchivistCards(liveState.context, cleanQuestion, {
+            includeAdminData: isAdmin,
+            limit: 4,
+          });
 
     setMessages((current) => [
       ...current,

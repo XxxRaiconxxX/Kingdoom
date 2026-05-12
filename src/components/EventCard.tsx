@@ -53,7 +53,8 @@ export function EventCard({
 }: EventCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const statusStyle = eventStatusStyles[event.status];
+  const statusStyle = eventStatusStyles[event.status] ?? eventStatusStyles["in-production"];
+  const factions = Array.isArray(event.factions) ? event.factions : [];
   const maxParticipants = Math.max(0, event.maxParticipants ?? 0);
   const isFull =
     maxParticipants > 0 &&
@@ -67,7 +68,7 @@ export function EventCard({
   return (
     <article className="kd-glass kd-hover-lift overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/80">
       <div className="relative aspect-[16/10] bg-stone-950 lg:aspect-[16/9]">
-        {!imageFailed ? (
+        {!imageFailed && event.imageUrl ? (
           <img
             src={event.imageUrl}
             alt={event.title}
@@ -180,7 +181,7 @@ export function EventCard({
         {expanded ? (
           <div className="grid gap-3 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4 lg:grid-cols-2">
             <DetailRow label="Cronica" value={event.longDescription} />
-            <DetailRow label="Facciones" value={event.factions.join(" - ")} />
+            <DetailRow label="Facciones" value={factions.length > 0 ? factions.join(" - ") : "Sin facciones definidas."} />
             <DetailRow label="Requisitos" value={event.requirements} />
             <DetailRow
               label="Recompensas"

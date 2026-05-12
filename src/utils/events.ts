@@ -89,24 +89,34 @@ export function isSupabaseEventId(value?: string) {
 }
 
 function mapRealmEventRow(row: RealmEventRow): RealmEvent {
+  const status: EventStatus =
+    row.status === "active" || row.status === "finished" || row.status === "in-production"
+      ? row.status
+      : "in-production";
+
   return {
     id: row.id,
-    title: row.title,
-    description: row.description,
-    longDescription: row.long_description,
-    imageUrl: row.image_url,
-    startDate: row.start_date,
-    endDate: row.end_date,
-    status: row.status,
-    factions: row.factions ?? [],
-    rewards: row.rewards,
-    requirements: row.requirements,
+    title: row.title?.trim() || "Evento sin titulo",
+    description: row.description?.trim() || "Sin descripcion disponible.",
+    longDescription: row.long_description?.trim() || row.description?.trim() || "Sin cronica disponible.",
+    imageUrl: row.image_url?.trim() || "",
+    startDate: row.start_date?.trim() || "Sin inicio definido",
+    endDate: row.end_date?.trim() || "Sin cierre definido",
+    status,
+    factions: Array.isArray(row.factions) ? row.factions : [],
+    rewards: row.rewards?.trim() || "Sin recompensa definida",
+    requirements: row.requirements?.trim() || "Sin requisitos definidos",
     participationRewardGold: Math.max(0, row.participation_reward_gold ?? 0),
     maxParticipants: Math.max(0, row.max_participants ?? 0),
   };
 }
 
 function buildRealmEventPayload(input: AdminRealmEventInput) {
+  const status: EventStatus =
+    input.status === "active" || input.status === "finished" || input.status === "in-production"
+      ? input.status
+      : "in-production";
+
   return {
     title: input.title.trim(),
     description: input.description.trim(),
@@ -114,8 +124,8 @@ function buildRealmEventPayload(input: AdminRealmEventInput) {
     image_url: input.imageUrl.trim(),
     start_date: input.startDate.trim(),
     end_date: input.endDate.trim(),
-    status: input.status,
-    factions: input.factions.map((entry) => entry.trim()).filter(Boolean),
+    status,
+    factions: Array.isArray(input.factions) ? input.factions.map((entry) => entry.trim()).filter(Boolean) : [],
     rewards: input.rewards.trim(),
     requirements: input.requirements.trim(),
     participation_reward_gold: Math.max(0, Math.floor(input.participationRewardGold ?? 0)),

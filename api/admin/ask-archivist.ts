@@ -56,6 +56,10 @@ const ARCHIVIST_ACTIONS = [
   "delete_document",
 ] as const;
 
+function isArchivistAction(value: string): value is (typeof ARCHIVIST_ACTIONS)[number] {
+  return ARCHIVIST_ACTIONS.includes(value as (typeof ARCHIVIST_ACTIONS)[number]);
+}
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   setCorsHeaders(req, res);
 
@@ -174,6 +178,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         result.data?.actionDraft &&
         typeof result.data.actionDraft === "object" &&
         typeof result.data.actionDraft.kind === "string" &&
+        isArchivistAction(result.data.actionDraft.kind) &&
         typeof result.data.actionDraft.label === "string" &&
         typeof result.data.actionDraft.confirmationPrompt === "string"
           ? {

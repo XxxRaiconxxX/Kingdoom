@@ -378,7 +378,6 @@ export function ArchivistSection() {
             <SectionHeader
               eyebrow="Archivo vivo"
               title="Archivista de Argentis"
-              description="Consulta el reino en tiempo real y, si eres admin, confirma acciones reales con un si o no."
             />
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-200">

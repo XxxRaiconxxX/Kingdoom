@@ -41,9 +41,10 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Notas/Advertencias:** El Archivista sigue dependiendo de las APIs/configuraciones IA ya existentes. Conviene validar flujo público y flujo admin tras cada redeploy porque ahora la capa operativa ya no es solo informativa.
 
 ### [Fecha: 12/05/2026] - [Autor: Antigravity]
-*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `api/anime/proxy.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Resolución de problemas de visualización de enlaces y rediseño de la interfaz de reproducción/descarga para mayor compacidad y estética minimalista.
+*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `src/components/ArchivistSection.tsx`, `api/anime/proxy.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Resolución de problemas de visualización de enlaces, rediseño de la interfaz de reproducción/descarga para mayor compacidad y limpieza de la sección del Archivista.
 *   **Cambios Clave:**
+    *   **Limpieza de Interfaz (ArchivistSection):** Eliminación de la descripción redundante en la cabecera del Archivista ("Consulta el reino..."), siguiendo el rediseño hacia un formato de chat puro.
     *   **UI Minimalista (AnimeHubSection):** Sustitución del selector de servidores por un componente ultra-compacto con icono de flecha (`ChevronDown`), optimizando el espacio en la consola de acciones.
     *   **Normalización de Enlaces:** Se actualizó `normalizeLinks` para soportar arrays directos de `servers` y `downloads` que devuelven los scrapers actuales.
     *   **Corrección de Mapeo (AnimeFLV):** Se corrigió `fetchAnimeFlvLinks` para procesar correctamente el payload envuelto de la API.

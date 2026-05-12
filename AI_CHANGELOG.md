@@ -29,6 +29,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 12/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `api/anime/proxy.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Resolución del problema de visualización de servidores de streaming y descarga en Anime Hub para AnimeFLV y TioAnime.
+*   **Cambios Clave:**
+    *   **Normalización de Enlaces:** Se actualizó `normalizeLinks` para soportar arrays directos de `servers` y `downloads` que devuelven los scrapers actuales.
+    *   **Corrección de Mapeo (AnimeFLV):** Se corrigió `fetchAnimeFlvLinks` para procesar correctamente el payload envuelto de la API (`unwrapPayload`), evitando que los enlaces quedaran como `undefined`.
+    *   **Seguridad:** Migración total de API Keys hardcodeadas a la constante `ANIME_HUB_API_KEY` (alimentada por variables de entorno) en todas las peticiones remotas.
+    *   **Proxy API:** Actualización de `api/anime/proxy.ts` para mejorar la compatibilidad del mapeo de fuentes y enlaces.
+*   **Notas/Advertencias:** Los enlaces de TioAnime y AnimeFLV ahora se muestran correctamente bajo la pestaña "VER". Se recomienda verificar que las variables de entorno estén correctamente configuradas en el entorno de producción.
+
 ### [Fecha: 11/05/2026] - [Autor: Antigravity & Jarvis]
 *   **Archivos Modificados:** `api/anime/stream.ts`, `api/anime/download.ts`, `api/admin/_serverAiProviders.ts`, `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `apps/mobile/app/(tabs)/anime.tsx`, `.env.example`
 *   **Resumen de Tareas:** Finalización de la integración de AnimeFLV, implementación de filtros por proveedor y optimización de conectividad (CORS/Timeouts).

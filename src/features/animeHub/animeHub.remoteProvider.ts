@@ -30,6 +30,7 @@ const ANIME_WEBSITE_API_KEY = import.meta.env.VITE_ANIME_WEBSITE_API_KEY;
 const ANIME_PLATFORM_BASE_URL = import.meta.env.VITE_ANIME_PLATFORM_API_URL;
 const ANIME_PLATFORM_API_KEY = import.meta.env.VITE_ANIME_PLATFORM_API_KEY;
 const ANIMEFLV_BASE_URL = import.meta.env.VITE_ANIMEFLV_API_URL;
+const ANIME_HUB_API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY || "kingdoom-secret-key-2026";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=80";
@@ -446,16 +447,20 @@ function normalizeLinks(raw: any): AnimeEpisodeLinks {
       quality: link?.quality,
     }));
 
+  // Detectar si servers o downloads son arrays directos (común en scrapers simples como AnimeFLV/TioAnime)
+  const directServers = Array.isArray(info?.servers) ? info.servers : undefined;
+  const directDownloads = Array.isArray(info?.downloads ?? info?.download) ? (info.downloads ?? info.download) : undefined;
+
   return {
     stream: [
       ...flattenVariant(info?.servers?.sub ?? info?.servers?.SUB, "SUB"),
       ...flattenVariant(info?.servers?.dub ?? info?.servers?.DUB, "DUB"),
-      ...flattenVariant(info?.stream, ""),
+      ...flattenVariant(info?.stream ?? directServers ?? info?.sources, ""),
     ],
     download: [
       ...flattenVariant(info?.downloadLinks?.SUB, "SUB"),
       ...flattenVariant(info?.downloadLinks?.DUB, "DUB"),
-      ...flattenVariant(info?.download ?? info?.downloads, ""),
+      ...flattenVariant(info?.download ?? info?.downloads ?? directDownloads, ""),
     ],
   };
 }
@@ -605,18 +610,13 @@ async function fetchAnimeFlvLinks(reference: EpisodeReference) {
     const targetUrl = `${baseUrl}/api/episode/${seriesSlug}-${episodeNumber}?source=animeflv`;
     
     const data = await fetchJson(targetUrl, {
-      "Authorization": "Bearer kingdoom-secret-key-2026"
+      "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
     });
 
     if (!data) return null;
 
-    const servers = (data as any).servers || [];
-    const stream = asList<any>(servers).map((entry) => ({
-      server: entry?.name ?? entry?.server ?? "Servidor",
-      url: entry?.link ?? entry?.url ?? "#",
-    }));
-
-    return { stream, download: [] };
+    // Normalización estándar que ahora maneja la estructura de la API correctamente
+    return normalizeLinks(data);
   } catch (error) {
     console.error("Error fetching AnimeFLV links via proxy:", error);
     return null;
@@ -631,7 +631,7 @@ async function searchTioAnime(query: string) {
   });
   
   const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, {
-    "Authorization": "Bearer kingdoom-secret-key-2026"
+    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
   });
   const payload = unwrapPayload(data);
   return asList<any>(payload?.results ?? payload).map((item) =>
@@ -643,7 +643,7 @@ async function fetchTioAnimeDetail(reference: SeriesReference) {
   if (!reference.id) return null;
   const baseUrl = "https://scraping-web-anime-api.vercel.app";
   const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=tioanime`, {
-    "Authorization": "Bearer kingdoom-secret-key-2026"
+    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
   });
   return normalizeDetail("tioanime", unwrapPayload(data), reference);
 }
@@ -652,9 +652,10 @@ async function fetchTioAnimeLinks(reference: EpisodeReference) {
   if (!reference.id) return null;
   const baseUrl = "https://scraping-web-anime-api.vercel.app";
   const data = await fetchJson(`${baseUrl}/api/episode/${encodeURIComponent(reference.id)}?source=tioanime`, {
-    "Authorization": "Bearer kingdoom-secret-key-2026"
+    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
   });
-  return normalizeLinks(unwrapPayload(data));
+  // normalizeLinks ya maneja el unwrap interno
+  return normalizeLinks(data);
 }
 
 async function searchAnimePlatform(query: string, genre?: string) {
@@ -683,7 +684,7 @@ async function searchAnimeFlv(query: string) {
   });
   
   const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, {
-    "Authorization": "Bearer kingdoom-secret-key-2026"
+    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
   });
   const payload = unwrapPayload(data);
   const finalData = payload || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/search?query=${encodeURIComponent(query)}&page=1`, ANIMEFLV_BASE_URL)) : null);
@@ -700,7 +701,7 @@ async function fetchAnimeFlvDetail(reference: SeriesReference) {
 
   const baseUrl = "https://scraping-web-anime-api.vercel.app";
   const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=animeflv`, {
-    "Authorization": "Bearer kingdoom-secret-key-2026"
+    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
   });
   const payload = unwrapPayload(data);
   const finalData = payload || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/anime/${encodeURIComponent(reference.id)}`, ANIMEFLV_BASE_URL)) : null);

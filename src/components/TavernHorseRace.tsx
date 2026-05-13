@@ -56,6 +56,7 @@ function drawRaceTrack(
   const trackLeft = 30;
   const trackRight = CANVAS_WIDTH - 58;
   const finishX = trackRight;
+  const winningHorse = winnerId ? horses.find((horse) => horse.id === winnerId) ?? null : null;
 
   ctx.fillStyle = "rgba(0,0,0,0.18)";
   ctx.fillRect(0, trackTop - 8, CANVAS_WIDTH, laneHeight * horses.length + 24);
@@ -107,6 +108,21 @@ function drawRaceTrack(
   ctx.font = "700 11px sans-serif";
   ctx.fillStyle = "rgba(226,232,240,0.75)";
   ctx.fillText("Offline hoy - preparado para salas compartidas", 44, 68);
+
+  if (winningHorse) {
+    ctx.fillStyle = "rgba(12,10,9,0.84)";
+    ctx.fillRect(600, 30, 246, 62);
+    ctx.strokeStyle = "#facc15";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(600, 30, 246, 62);
+    ctx.fillStyle = "#facc15";
+    ctx.font = "900 12px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("FOTO DE LLEGADA", 616, 52);
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "900 18px serif";
+    ctx.fillText(`#${winningHorse.number} ${winningHorse.name}`, 616, 76);
+  }
 }
 
 function drawBackground(ctx: CanvasRenderingContext2D, elapsedMs: number) {
@@ -260,7 +276,7 @@ export function TavernHorseRace() {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
-    const frame = lastResult ? getFrameAt(lastResult, lastResult.durationMs) : null;
+    const frame = lastResult ? getFrameAt(lastResult, lastResult.finishTimeMs) : null;
     drawRaceTrack(ctx, horses, frame, selectedHorseId, lastResult?.winnerId ?? null, 0);
   }, [horses, lastResult, selectedHorseId]);
 
@@ -385,7 +401,7 @@ export function TavernHorseRace() {
         drawRaceTrack(
           ctx,
           currentRace.horses,
-          getFrameAt(currentRace, currentRace.durationMs),
+          getFrameAt(currentRace, currentRace.finishTimeMs),
           selectedHorse.id,
           currentRace.winnerId,
           elapsed

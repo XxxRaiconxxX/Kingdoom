@@ -27,6 +27,7 @@ export type HorseRaceResult = {
   frames: HorseRaceFrame[];
   placements: HorseId[];
   winnerId: HorseId;
+  finishTimeMs: number;
   durationMs: number;
 };
 
@@ -96,22 +97,32 @@ export function simulateHorseRace(
 
   for (let time = 0; time <= HORSE_RACE_DURATION_MS; time += HORSE_RACE_FRAME_MS) {
     const racePhase = time / HORSE_RACE_DURATION_MS;
+    const crossingCandidates: Array<{ id: HorseId; crossingTime: number; rawPosition: number }> = [];
 
     for (const horse of horses) {
+      const previousPosition = positions[horse.id] ?? 0;
       const opening = racePhase < 0.18 ? horse.burst * 0.005 : 0;
       const fatigue = Math.max(0.58, 1 - racePhase * (1.08 - horse.stamina) * 0.58);
       const sprint = racePhase > 0.74 ? horse.burst * 0.008 : 0;
       const chaos = (random() - 0.5) * 0.009 * horse.stability;
       const stumble = laneEvents[horse.id] < 0.09 && racePhase > 0.38 && racePhase < 0.48 ? -0.008 : 0;
       const stride = horse.baseSpeed * 0.0064 * fatigue + opening + sprint + chaos + stumble;
+      const safeStride = Math.max(0.004, stride);
+      const rawPosition = previousPosition + safeStride;
 
-      positions[horse.id] = clamp(positions[horse.id] + Math.max(0.004, stride), 0, 1);
+      positions[horse.id] = clamp(rawPosition, 0, 1);
       staminaState[horse.id] = clamp(fatigue, 0, 1);
 
-      if (positions[horse.id] >= 1 && finishedAt === HORSE_RACE_DURATION_MS) {
-        winnerId = horse.id;
-        finishedAt = time;
+      if (previousPosition < 1 && rawPosition >= 1 && finishedAt === HORSE_RACE_DURATION_MS) {
+        const crossingTime = time - HORSE_RACE_FRAME_MS + ((1 - previousPosition) / safeStride) * HORSE_RACE_FRAME_MS;
+        crossingCandidates.push({ id: horse.id, crossingTime, rawPosition });
       }
+    }
+
+    if (crossingCandidates.length > 0 && finishedAt === HORSE_RACE_DURATION_MS) {
+      crossingCandidates.sort((a, b) => a.crossingTime - b.crossingTime || b.rawPosition - a.rawPosition);
+      winnerId = crossingCandidates[0]?.id ?? winnerId;
+      finishedAt = time;
     }
 
     frames.push({
@@ -129,13 +140,15 @@ export function simulateHorseRace(
     .slice()
     .sort((a, b) => (positions[b.id] ?? 0) - (positions[a.id] ?? 0))
     .map((horse) => horse.id);
+  const orderedPlacements = [winnerId, ...placements.filter((id) => id !== winnerId)];
 
   return {
     raceId: `local-${Date.now()}-${Math.floor(random() * 99999)}`,
     horses,
     frames,
-    placements,
-    winnerId: placements[0] ?? winnerId,
+    placements: orderedPlacements,
+    winnerId,
+    finishTimeMs: finishedAt,
     durationMs: frames[frames.length - 1]?.time ?? HORSE_RACE_DURATION_MS,
   };
 }

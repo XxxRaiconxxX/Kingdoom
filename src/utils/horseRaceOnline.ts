@@ -145,6 +145,7 @@ export async function fetchPublicHorseRaceSessions(): Promise<
   const { data, error } = await supabase
     .from("horse_race_sessions")
     .select("*")
+    .neq("status", "finished")
     .order("created_at", { ascending: false })
     .limit(8);
 

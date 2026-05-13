@@ -282,7 +282,7 @@ export function TavernHorseRace() {
 
   const balance = player?.gold ?? 0;
   const selectedSession = useMemo(
-    () => onlineSessions.find((session) => session.id === selectedSessionId) ?? onlineSessions[0] ?? null,
+    () => onlineSessions.find((session) => session.id === selectedSessionId) ?? null,
     [onlineSessions, selectedSessionId]
   );
   const activeHorses = raceMode === "online" && selectedSession ? selectedSession.horses : horses;
@@ -331,8 +331,9 @@ export function TavernHorseRace() {
       const sessions = sessionsResult.data;
       const nextSelected =
         sessions.find((session) => session.id === preferredSessionId) ??
-        sessions.find((session) => session.status !== "finished") ??
-        sessions[0] ??
+        sessions.find((session) => session.status === "betting") ??
+        sessions.find((session) => session.status === "running") ??
+        sessions.find((session) => session.status === "closed") ??
         null;
 
       setOnlineSessions(sessions);
@@ -340,7 +341,7 @@ export function TavernHorseRace() {
 
       if (!nextSelected) {
         setOnlineBets([]);
-        setOnlineFeedback("No hay salas online activas. Un admin puede crear una desde este panel.");
+        setOnlineFeedback("No hay salas online activas. Crea una nueva sala para abrir apuestas.");
         setOnlineLoading(false);
         return;
       }
@@ -499,6 +500,8 @@ export function TavernHorseRace() {
     if (!player) return;
 
     setOnlineLoading(true);
+    autoStartRef.current = null;
+    autoSettleRef.current = null;
     const nextHorses = createHorseField();
     const result = await createPublicHorseRaceSession({
       playerId: player.id,
@@ -823,7 +826,7 @@ export function TavernHorseRace() {
             <div className="mt-4 rounded-2xl border border-cyan-500/15 bg-cyan-500/5 p-3">
               <label className="text-[10px] font-black uppercase tracking-[0.16em] text-cyan-200">Sala publica</label>
               <select
-                value={selectedSession?.id ?? ""}
+                value={selectedSessionId}
                 onChange={(event) => {
                   setSelectedSessionId(event.target.value);
                   void refreshOnlineState(event.target.value);

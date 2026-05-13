@@ -401,6 +401,8 @@ begin
 end;
 $$;
 
+drop function if exists public.settle_public_horse_race(uuid, uuid);
+
 create or replace function public.settle_public_horse_race(
   p_player_id uuid,
   p_session_id uuid

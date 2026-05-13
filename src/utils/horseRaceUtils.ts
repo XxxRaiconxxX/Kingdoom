@@ -154,7 +154,7 @@ export function simulateHorseRace(
 }
 
 export function getFrameAt(result: HorseRaceResult, elapsedMs: number): HorseRaceFrame {
-  const safeElapsed = clamp(elapsedMs, 0, result.durationMs);
+  const safeElapsed = Number.isFinite(elapsedMs) ? clamp(elapsedMs, 0, result.durationMs) : 0;
   const index = Math.min(result.frames.length - 1, Math.floor(safeElapsed / HORSE_RACE_FRAME_MS));
   return result.frames[index] ?? result.frames[0];
 }

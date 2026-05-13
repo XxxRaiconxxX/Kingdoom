@@ -11,6 +11,7 @@ import {
 import {
   createHorseField,
   getFrameAt,
+  HORSE_RACE_LANES,
   simulateHorseRace,
   type HorseProfile,
   type HorseRaceFrame,
@@ -22,6 +23,7 @@ import {
   fetchPublicHorseRaceBets,
   fetchPublicHorseRaceSessions,
   placePublicHorseRaceBet,
+  maybeStartPublicHorseRace,
   settlePublicHorseRace,
   startPublicHorseRace,
   subscribeToPublicHorseRace,
@@ -35,6 +37,7 @@ type RaceMode = "offline" | "online";
 const CANVAS_WIDTH = 900;
 const CANVAS_HEIGHT = 500;
 const BET_PRESETS = [500, 2500, 10000];
+const ONLINE_TARGET_BETS = [2, 3, 4, 5, 6];
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -87,8 +90,10 @@ function drawRaceTrack(
     ctx.lineTo(CANVAS_WIDTH - 30, y + laneHeight - 4);
     ctx.stroke();
 
-    const progress = frame?.positions[horse.id] ?? 0;
-    const speedBob = Math.sin(elapsedMs / 80 + index * 1.7) * 4;
+    const rawProgress = frame?.positions[horse.id] ?? 0;
+    const progress = Number.isFinite(rawProgress) ? clamp(rawProgress, 0, 1) : 0;
+    const safeElapsed = Number.isFinite(elapsedMs) ? elapsedMs : 0;
+    const speedBob = Math.sin(safeElapsed / 80 + index * 1.7) * 4;
     const x = trackLeft + progress * (trackRight - trackLeft);
     const selected = selectedHorseId === horse.id;
     const winner = winnerId === horse.id;
@@ -98,7 +103,7 @@ function drawRaceTrack(
       ctx.fillRect(28, y, CANVAS_WIDTH - 56, laneHeight - 4);
     }
 
-    drawPixelHorse(ctx, x, y + 33 + speedBob, horse, selected, winner, elapsedMs);
+    drawPixelHorse(ctx, x, y + 33 + speedBob, horse, selected, winner, safeElapsed);
     drawNumberBadge(ctx, 40, y + 15, horse.number, horse.accent);
   });
 
@@ -253,6 +258,8 @@ export function TavernHorseRace() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const raceRef = useRef<HorseRaceResult | null>(null);
+  const autoStartRef = useRef<string | null>(null);
+  const autoSettleRef = useRef<string | null>(null);
   const startTimeRef = useRef(0);
   const dateKey = useMemo(() => buildScratchDateKey(), []);
 
@@ -271,6 +278,7 @@ export function TavernHorseRace() {
   const [onlineSessions, setOnlineSessions] = useState<PublicHorseRaceSession[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const [onlineBets, setOnlineBets] = useState<PublicHorseRaceBet[]>([]);
+  const [targetBets, setTargetBets] = useState(2);
 
   const balance = player?.gold ?? 0;
   const selectedSession = useMemo(
@@ -289,6 +297,7 @@ export function TavernHorseRace() {
     () => onlineBets.reduce((total, entry) => total + entry.betAmount, 0),
     [onlineBets]
   );
+  const onlineTarget = clamp(Math.floor(selectedSession?.targetBets ?? targetBets), 2, HORSE_RACE_LANES);
   const safeBet = clamp(Math.floor(Number.isFinite(bet) ? bet : 0), 1, Math.max(1, balance));
   const remainingDailyNet = Math.max(0, MAX_DAILY_HORSE_RACE_WIN_LIMIT - dailyNetWins);
   const limitReached = dailyNetWins >= MAX_DAILY_HORSE_RACE_WIN_LIMIT;
@@ -300,6 +309,7 @@ export function TavernHorseRace() {
       selectedSession.status === "betting" &&
       !playerOnlineBet &&
       !onlineLoading &&
+      onlineBets.length < onlineTarget &&
       safeBet <= balance
   );
 
@@ -406,11 +416,18 @@ export function TavernHorseRace() {
       return;
     }
 
-    const startedAt = selectedSession.startedAt ? new Date(selectedSession.startedAt).getTime() : Date.now();
+    const serverStartedAt = selectedSession.startedAt ? Date.parse(selectedSession.startedAt) : Number.NaN;
+    const serverElapsed = Date.now() - serverStartedAt;
+    const useServerClock =
+      Number.isFinite(serverElapsed) &&
+      serverElapsed > -2000 &&
+      serverElapsed < selectedSession.result.durationMs + 120000;
+    const localStartedAt = performance.now();
     const result = selectedSession.result;
 
     const animateOnlineRace = () => {
-      const elapsed = Date.now() - startedAt;
+      const rawElapsed = useServerClock ? Date.now() - serverStartedAt : performance.now() - localStartedAt;
+      const elapsed = Number.isFinite(rawElapsed) ? clamp(rawElapsed, 0, result.durationMs) : 0;
       const frame = getFrameAt(result, elapsed);
       drawRaceTrack(ctx, result.horses, frame, selectedHorseId, null, elapsed);
 
@@ -423,6 +440,10 @@ export function TavernHorseRace() {
           result.winnerId,
           elapsed
         );
+        if (selectedSession.id !== autoSettleRef.current && player) {
+          autoSettleRef.current = selectedSession.id;
+          void settleOnlineRace(selectedSession.id);
+        }
         return;
       }
 
@@ -437,6 +458,16 @@ export function TavernHorseRace() {
       }
     };
   }, [raceMode, selectedHorseId, selectedSession?.id, selectedSession?.result, selectedSession?.startedAt, selectedSession?.status]);
+
+  useEffect(() => {
+    if (raceMode !== "online" || !selectedSession || selectedSession.status !== "betting") {
+      return;
+    }
+
+    if (onlineBets.length >= Math.max(2, selectedSession.targetBets)) {
+      void maybeStartOnlineRace(selectedSession, onlineBets);
+    }
+  }, [onlineBets, raceMode, selectedSession]);
 
   function handleBetInput(value: string) {
     const parsed = Number.parseInt(value.replace(/[^0-9]/g, ""), 10);
@@ -465,14 +496,15 @@ export function TavernHorseRace() {
   }
 
   async function createOnlineSession() {
-    if (!player || !isAdmin) return;
+    if (!player) return;
 
     setOnlineLoading(true);
     const nextHorses = createHorseField();
     const result = await createPublicHorseRaceSession({
-      adminPlayerId: player.id,
+      playerId: player.id,
       title: `Carrera publica ${new Date().toLocaleTimeString("es-PY", { hour: "2-digit", minute: "2-digit" })}`,
       horses: nextHorses,
+      targetBets,
     });
 
     setOnlineLoading(false);
@@ -514,17 +546,37 @@ export function TavernHorseRace() {
     await refreshOnlineState(selectedSession.id);
   }
 
-  async function settleOnlineRace() {
-    if (!player || !selectedSession || !isAdmin) return;
+  async function maybeStartOnlineRace(session = selectedSession, bets = onlineBets) {
+    if (!player || !session || session.status !== "betting") return;
+    if (bets.length < Math.max(2, session.targetBets)) return;
+    if (autoStartRef.current === session.id) return;
+
+    autoStartRef.current = session.id;
+    const resultSnapshot = simulateHorseRace(session.horses);
+    const result = await maybeStartPublicHorseRace({
+      playerId: player.id,
+      sessionId: session.id,
+      result: resultSnapshot,
+    });
+
+    setOnlineFeedback(result.message ?? "");
+    if (result.status !== "success") {
+      autoStartRef.current = null;
+    }
+    await refreshOnlineState(session.id);
+  }
+
+  async function settleOnlineRace(sessionId = selectedSession?.id) {
+    if (!player || !sessionId) return;
 
     setOnlineLoading(true);
     const result = await settlePublicHorseRace({
-      adminPlayerId: player.id,
-      sessionId: selectedSession.id,
+      playerId: player.id,
+      sessionId,
     });
     setOnlineLoading(false);
     setOnlineFeedback(result.message ?? "");
-    await refreshOnlineState(selectedSession.id);
+    await refreshOnlineState(sessionId);
     await refreshPlayer();
   }
 
@@ -545,6 +597,13 @@ export function TavernHorseRace() {
     setOnlineFeedback(result.message ?? "");
     await refreshOnlineState(selectedSession.id);
     await refreshPlayer();
+
+    if (result.status === "success") {
+      const nextBets = await fetchPublicHorseRaceBets(selectedSession.id);
+      if (nextBets.status === "success") {
+        await maybeStartOnlineRace(selectedSession, nextBets.data);
+      }
+    }
   }
 
   const finishRace = useCallback(
@@ -746,7 +805,7 @@ export function TavernHorseRace() {
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Apuestas</p>
               <p className="mt-1 text-xs leading-5 text-stone-500">
-                {raceMode === "online" ? "Sala compartida con pagos revisados por admin." : "Cada cartel genera caballos y cuotas nuevas."}
+                {raceMode === "online" ? "La sala inicia sola cuando se completa el cupo." : "Cada cartel genera caballos y cuotas nuevas."}
               </p>
             </div>
             <button
@@ -781,7 +840,29 @@ export function TavernHorseRace() {
               </select>
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <RaceStat label="Apuestas" value={String(onlineBets.length)} />
-                <RaceStat label="Pozo" value={formatGold(onlinePot)} />
+                <RaceStat label="Cupo" value={`${onlineBets.length}/${onlineTarget}`} />
+              </div>
+              <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+                <select
+                  value={targetBets}
+                  onChange={(event) => setTargetBets(clamp(Number(event.target.value), 2, HORSE_RACE_LANES))}
+                  disabled={onlineLoading}
+                  className="rounded-xl border border-stone-700 bg-black px-3 py-2 text-xs font-black text-stone-100 outline-none focus:border-cyan-300/50"
+                >
+                  {ONLINE_TARGET_BETS.map((target) => (
+                    <option key={target} value={target}>
+                      {target} jugadores
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => void createOnlineSession()}
+                  disabled={onlineLoading}
+                  className="rounded-xl border border-cyan-300/25 bg-cyan-400/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-cyan-100 transition hover:border-cyan-200/60 disabled:opacity-50"
+                >
+                  Crear
+                </button>
               </div>
             </div>
           ) : null}
@@ -921,9 +1002,6 @@ export function TavernHorseRace() {
                 Control admin
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <AdminRaceButton onClick={() => void createOnlineSession()} disabled={onlineLoading}>
-                  Crear sala
-                </AdminRaceButton>
                 <AdminRaceButton
                   onClick={() => void closeOnlineBets()}
                   disabled={onlineLoading || !selectedSession || selectedSession.status !== "betting"}
@@ -932,7 +1010,7 @@ export function TavernHorseRace() {
                 </AdminRaceButton>
                 <AdminRaceButton
                   onClick={() => void startOnlineRace()}
-                  disabled={onlineLoading || !selectedSession || !["betting", "closed"].includes(selectedSession.status)}
+                  disabled={onlineLoading || !selectedSession || onlineBets.length < 2 || !["betting", "closed"].includes(selectedSession.status)}
                 >
                   Iniciar
                 </AdminRaceButton>

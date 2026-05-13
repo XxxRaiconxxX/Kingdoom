@@ -5,12 +5,22 @@ create table if not exists public.horse_race_sessions (
   horses jsonb not null default '[]'::jsonb,
   result jsonb,
   winner_id text,
+  target_bets integer not null default 2 check (target_bets between 2 and 6),
   created_by uuid references public.players(id) on delete set null,
   started_at timestamptz,
   finished_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.horse_race_sessions
+  add column if not exists target_bets integer not null default 2;
+
+alter table public.horse_race_sessions
+  drop constraint if exists horse_race_sessions_target_bets_check;
+
+alter table public.horse_race_sessions
+  add constraint horse_race_sessions_target_bets_check check (target_bets between 2 and 6);
 
 create table if not exists public.horse_race_bets (
   id uuid primary key default gen_random_uuid(),
@@ -111,10 +121,14 @@ as $$
   );
 $$;
 
+drop function if exists public.create_public_horse_race_session(uuid, text, jsonb);
+drop function if exists public.create_public_horse_race_session(uuid, text, jsonb, integer);
+
 create or replace function public.create_public_horse_race_session(
-  p_admin_player_id uuid,
+  p_creator_player_id uuid,
   p_title text,
-  p_horses jsonb
+  p_horses jsonb,
+  p_target_bets integer default 2
 )
 returns jsonb
 language plpgsql
@@ -124,16 +138,22 @@ as $$
 declare
   v_session public.horse_race_sessions%rowtype;
 begin
-  if not public.is_horse_race_admin(p_admin_player_id) then
-    raise exception 'Solo un admin puede crear carreras publicas.' using errcode = '42501';
+  if not exists (select 1 from public.players where id = p_creator_player_id) then
+    raise exception 'Jugador no encontrado para crear sala.' using errcode = '22023';
   end if;
 
   if jsonb_typeof(p_horses) <> 'array' or jsonb_array_length(p_horses) < 2 then
     raise exception 'La carrera necesita caballos validos.' using errcode = '22023';
   end if;
 
-  insert into public.horse_race_sessions (title, status, horses, created_by)
-  values (coalesce(nullif(trim(p_title), ''), 'Carrera publica'), 'betting', p_horses, p_admin_player_id)
+  insert into public.horse_race_sessions (title, status, horses, target_bets, created_by)
+  values (
+    coalesce(nullif(trim(p_title), ''), 'Carrera publica'),
+    'betting',
+    p_horses,
+    greatest(2, least(6, coalesce(p_target_bets, 2))),
+    p_creator_player_id
+  )
   returning * into v_session;
 
   return to_jsonb(v_session);
@@ -187,6 +207,7 @@ declare
   v_session public.horse_race_sessions%rowtype;
   v_player public.players%rowtype;
   v_bet public.horse_race_bets%rowtype;
+  v_bet_count integer;
 begin
   if p_bet_amount is null or p_bet_amount < 1 then
     raise exception 'La apuesta debe ser mayor a 0.' using errcode = '22023';
@@ -200,6 +221,15 @@ begin
 
   if v_session.id is null or v_session.status <> 'betting' then
     raise exception 'La sala no acepta apuestas ahora mismo.' using errcode = '22023';
+  end if;
+
+  select count(*)
+  into v_bet_count
+  from public.horse_race_bets
+  where session_id = p_session_id;
+
+  if v_bet_count >= v_session.target_bets then
+    raise exception 'La sala ya completo su cupo de apuestas.' using errcode = '22023';
   end if;
 
   select *
@@ -268,6 +298,14 @@ begin
     raise exception 'La carrera necesita un ganador.' using errcode = '22023';
   end if;
 
+  if (
+    select count(*)
+    from public.horse_race_bets
+    where session_id = p_session_id
+  ) < 2 then
+    raise exception 'La carrera online necesita al menos 2 apuestas.' using errcode = '22023';
+  end if;
+
   update public.horse_race_sessions
   set
     status = 'running',
@@ -296,8 +334,75 @@ begin
 end;
 $$;
 
+create or replace function public.maybe_start_public_horse_race(
+  p_player_id uuid,
+  p_session_id uuid,
+  p_result jsonb,
+  p_winner_id text,
+  p_placements jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_session public.horse_race_sessions%rowtype;
+  v_bet_count integer;
+begin
+  if not exists (select 1 from public.players where id = p_player_id) then
+    raise exception 'Jugador no encontrado.' using errcode = '22023';
+  end if;
+
+  if p_winner_id is null or trim(p_winner_id) = '' then
+    raise exception 'La carrera necesita un ganador.' using errcode = '22023';
+  end if;
+
+  select *
+  into v_session
+  from public.horse_race_sessions
+  where id = p_session_id
+  for update;
+
+  if v_session.id is null or v_session.status <> 'betting' then
+    raise exception 'La sala no esta abierta para auto-inicio.' using errcode = '22023';
+  end if;
+
+  select count(*)
+  into v_bet_count
+  from public.horse_race_bets
+  where session_id = p_session_id;
+
+  if v_bet_count < greatest(2, v_session.target_bets) then
+    raise exception 'La sala aun no completo el minimo de apuestas.' using errcode = '22023';
+  end if;
+
+  update public.horse_race_sessions
+  set
+    status = 'running',
+    result = p_result,
+    winner_id = p_winner_id,
+    started_at = now(),
+    updated_at = now()
+  where id = p_session_id
+    and status = 'betting'
+  returning * into v_session;
+
+  insert into public.horse_race_results (session_id, winner_id, placements, result)
+  values (p_session_id, p_winner_id, coalesce(p_placements, '[]'::jsonb), p_result)
+  on conflict (session_id) do update
+  set
+    winner_id = excluded.winner_id,
+    placements = excluded.placements,
+    result = excluded.result,
+    updated_at = now();
+
+  return to_jsonb(v_session);
+end;
+$$;
+
 create or replace function public.settle_public_horse_race(
-  p_admin_player_id uuid,
+  p_player_id uuid,
   p_session_id uuid
 )
 returns jsonb
@@ -311,8 +416,8 @@ declare
   v_bet public.horse_race_bets%rowtype;
   v_payout integer;
 begin
-  if not public.is_horse_race_admin(p_admin_player_id) then
-    raise exception 'Solo un admin puede liquidar carreras publicas.' using errcode = '42501';
+  if not exists (select 1 from public.players where id = p_player_id) then
+    raise exception 'Jugador no encontrado.' using errcode = '22023';
   end if;
 
   select *
@@ -373,8 +478,9 @@ begin
 end;
 $$;
 
-grant execute on function public.create_public_horse_race_session(uuid, text, jsonb) to anon, authenticated;
+grant execute on function public.create_public_horse_race_session(uuid, text, jsonb, integer) to anon, authenticated;
 grant execute on function public.close_public_horse_race_bets(uuid, uuid) to anon, authenticated;
 grant execute on function public.place_public_horse_race_bet(uuid, uuid, text, text, integer, numeric) to anon, authenticated;
 grant execute on function public.start_public_horse_race(uuid, uuid, jsonb, text, jsonb) to anon, authenticated;
+grant execute on function public.maybe_start_public_horse_race(uuid, uuid, jsonb, text, jsonb) to anon, authenticated;
 grant execute on function public.settle_public_horse_race(uuid, uuid) to anon, authenticated;

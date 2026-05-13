@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 13/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `AGENTS.md`, `RTK.md`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Instalacion y configuracion local de RTK y reglas agenticas para Kingdoom.
+*   **Cambios Clave:**
+    *   **RTK activo:** Se agrego `RTK.md` y referencia local para usar `rtk` como proxy compacto de comandos.
+    *   **AGENTS.md adaptado:** Se incorporaron reglas utiles de `agents-md` sobre disciplina de contexto, comandos acotados y validacion proporcional.
+    *   **Compatibilidad Kingdoom:** Las reglas nuevas quedan subordinadas al protocolo del proyecto, incluyendo validacion obligatoria para cambios funcionales/UI.
+*   **Notas/Advertencias:** RTK fue instalado como herramienta local de usuario en `C:\Users\e_grado\.local\bin`; no se agregaron dependencias npm.
+
+### [Fecha: 13/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernHorseRace.tsx`, `src/utils/horseRaceOnline.ts`, `supabase_horse_race_online.sql`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Correccion de seleccion inicial en salas online de Carreras del Reino.
 *   **Cambios Clave:**

@@ -353,12 +353,12 @@ export function buildArchivistRuntimeSummary(
   ];
 
   if (options?.includeAdminData) {
+    if (richestPlayers.length > 0) {
+      lines.unshift(`Ranking de oro actual (CRITICO PARA STAFF): ${richestPlayers.join(" | ")}`);
+    }
     lines.push(`Jugadores cargados para staff: ${context.players.length}.`);
     if (playerNames.length > 0) {
       lines.push(`Jugadores visibles para staff: ${playerNames.join(" | ")}`);
-    }
-    if (richestPlayers.length > 0) {
-      lines.push(`Ranking de oro actual: ${richestPlayers.join(" | ")}`);
     }
   }
 
@@ -488,5 +488,7 @@ function inferCardKinds(tokens: string[]) {
 }
 
 function categoryBoost(kind: ArchivistCardKind, tokens: string[]) {
+  const isPlayerMatch = kind === "player" && CARD_KIND_KEYWORDS.player.some((keyword) => tokens.includes(keyword));
+  if (isPlayerMatch) return 10;
   return CARD_KIND_KEYWORDS[kind].some((keyword) => tokens.includes(keyword)) ? 2 : 0;
 }

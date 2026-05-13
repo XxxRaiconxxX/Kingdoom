@@ -252,19 +252,10 @@ function buildDraftDetailResponse(action: ArchivistActionDraft) {
 
 function isPlayerGoldQuestion(value: string) {
   const normalized = normalizeDecision(value);
-  const hasPlayerTerm =
-    normalized.includes("jugador") ||
-    normalized.includes("usuario") ||
-    normalized.includes("jugadores") ||
-    normalized.includes("usuarios");
-  const hasWealthTerm =
-    normalized.includes("oro") ||
-    normalized.includes("ricos") ||
-    normalized.includes("riqueza") ||
-    normalized.includes("ranking") ||
-    normalized.includes("caro");
+  const wealthTerms = ["oro", "ricos", "riqueza", "ranking", "caro", "dinero", "saldo"];
+  const playerTerms = ["jugador", "usuario", "jugadores", "usuarios", "quien", "quienes"];
 
-  return hasWealthTerm && (hasPlayerTerm || normalized.includes("ranking") || normalized.includes("ricos"));
+  return wealthTerms.some(t => normalized.includes(t)) || (playerTerms.some(t => normalized.includes(t)) && normalized.includes("oro"));
 }
 
 function extractTopicMemory(messages: ChatMessage[]) {

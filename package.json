@@ -8,6 +8,7 @@
     "static-build": "vite build",
     "build": "vite build",
     "preview": "vite preview",
+    "mcp:memory": "node scripts/kingdoom-memory-mcp.mjs",
     "mobile:start": "npm run start --prefix apps/mobile",
     "mobile:android": "npm run android --prefix apps/mobile",
     "mobile:web": "npm run web --prefix apps/mobile",

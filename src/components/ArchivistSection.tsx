@@ -38,6 +38,7 @@ type ChatMessage = {
   sources?: Array<{ title: string; type: string; category: string }>;
   actionDraft?: ArchivistActionDraft | null;
   tone?: "default" | "success" | "warning";
+  hideSources?: boolean;
 };
 
 type AttachedImage = {
@@ -654,6 +655,7 @@ export function ArchivistSection() {
             ? result.sources
             : [],
         actionDraft: isAdmin ? actionDraft ?? null : null,
+        hideSources: isAdmin && isPlayerGoldQuestion(cleanQuestion),
         tone:
           result.intent === "clarify"
             ? "warning"
@@ -801,7 +803,7 @@ export function ArchivistSection() {
                         </div>
                       ) : null}
 
-                      {message.sources?.length ? (
+                      {message.sources?.length && !message.hideSources ? (
                         <div className="mt-3 flex flex-wrap gap-2">
                           {message.sources.slice(0, 4).map((source) => (
                             <span

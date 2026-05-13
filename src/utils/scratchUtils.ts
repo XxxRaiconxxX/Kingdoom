@@ -70,6 +70,7 @@ export function getDailyScratchConfig(): DailyScratchConfig {
 export const MAX_DAILY_CARDS_WIN_LIMIT = 350000;
 export const MAX_DAILY_PENALTY_WIN_LIMIT = 350000;
 export const MAX_DAILY_SLOTS_WIN_LIMIT = 350000;
+export const MAX_DAILY_PLINKO_WIN_LIMIT = 350000;
 
 export function getPlayerDailyCardsGrossWins(
   playerId: string,
@@ -140,4 +141,28 @@ export function addPlayerDailySlotsNetWins(
 
 function keyForSlots(playerId: string, dateKey: string) {
   return `kingdoom.daily-slots.${playerId}.${dateKey}`;
+}
+
+// -- TavernPlinko daily limit -----------------------------------------------
+export function getPlayerDailyPlinkoNetWins(
+  playerId: string,
+  dateKey: string
+): number {
+  const stored = window.localStorage.getItem(keyForPlinko(playerId, dateKey));
+  return stored ? parseInt(stored, 10) : 0;
+}
+
+export function addPlayerDailyPlinkoNetWins(
+  playerId: string,
+  dateKey: string,
+  amount: number
+): number {
+  const current = getPlayerDailyPlinkoNetWins(playerId, dateKey);
+  const newValue = current + amount;
+  window.localStorage.setItem(keyForPlinko(playerId, dateKey), newValue.toString());
+  return newValue;
+}
+
+function keyForPlinko(playerId: string, dateKey: string) {
+  return `kingdoom.daily-plinko.${playerId}.${dateKey}`;
 }

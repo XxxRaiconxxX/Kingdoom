@@ -33,6 +33,7 @@ type TavernMode =
   | "roulette"
   | "cards"
   | "scratch"
+  | "plinko"
   | "crash"
   | "towerDefense"
   | "penalty"
@@ -94,6 +95,14 @@ const TAVERN_MODES: {
     description: "Compra un rasca y gana y prueba suerte por un premio entre 500 y 1000 de oro.",
     status: "Rapido",
     icon: Ticket,
+  },
+  {
+    id: "plinko",
+    label: "Torre",
+    shortLabel: "Torre",
+    description: "Torre del Mago: deja caer una esfera entre runas, busca cofres extremos y respeta el limite diario de oro.",
+    status: "Azar",
+    icon: Sparkles,
   },
   {
     id: "slots",
@@ -181,6 +190,11 @@ const TavernScratch = lazy(() =>
 const TavernSlots = lazy(() =>
   import("../components/TavernSlots").then((module) => ({
     default: module.TavernSlots,
+  }))
+);
+const TavernPlinko = lazy(() =>
+  import("../components/TavernPlinko").then((module) => ({
+    default: module.TavernPlinko,
   }))
 );
 const TavernCrash = lazy(() =>
@@ -334,6 +348,8 @@ export function MarketSection() {
         return <TavernCards />;
       case "scratch":
         return <TavernScratch />;
+      case "plinko":
+        return <TavernPlinko />;
       case "slots":
         return <TavernSlots />;
       case "crash":

@@ -323,10 +323,14 @@ export function buildArchivistRuntimeSummary(
   const magicTitles = flattenMagicStyles(context.grimoireCategories)
     .slice(0, 10)
     .map((entry) => `${entry.title} [${entry.categoryTitle}]`);
-  const playerNames = context.players.slice(0, 12).map((entry) => entry.username);
-  const richestPlayers = [...context.players]
-    .sort((left, right) => right.gold - left.gold)
-    .slice(0, 8)
+  const playerNames = context.players.slice(0, 50).map((entry) => entry.username);
+  const sortedByGold = [...context.players].sort((left, right) => right.gold - left.gold);
+  const richestPlayers = sortedByGold
+    .slice(0, 15)
+    .map((entry) => `${entry.username}: ${entry.gold.toLocaleString("es-PY")} oro`);
+  const poorestPlayers = sortedByGold
+    .slice(-10)
+    .reverse()
     .map((entry) => `${entry.username}: ${entry.gold.toLocaleString("es-PY")} oro`);
 
   const lines = [
@@ -354,11 +358,14 @@ export function buildArchivistRuntimeSummary(
 
   if (options?.includeAdminData) {
     if (richestPlayers.length > 0) {
-      lines.unshift(`Ranking de oro actual (CRITICO PARA STAFF): ${richestPlayers.join(" | ")}`);
+      lines.unshift(`Ranking de mayores fortunas (Staff): ${richestPlayers.join(" | ")}`);
     }
-    lines.push(`Jugadores cargados para staff: ${context.players.length}.`);
+    if (poorestPlayers.length > 0 && context.players.length > richestPlayers.length) {
+      lines.push(`Ranking de menores fortunas (Staff): ${poorestPlayers.join(" | ")}`);
+    }
+    lines.push(`Total de jugadores en el reino: ${context.players.length}.`);
     if (playerNames.length > 0) {
-      lines.push(`Jugadores visibles para staff: ${playerNames.join(" | ")}`);
+      lines.push(`Lista de jugadores (muestra de 50): ${playerNames.join(" | ")}`);
     }
   }
 

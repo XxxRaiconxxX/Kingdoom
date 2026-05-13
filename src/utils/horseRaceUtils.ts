@@ -52,8 +52,8 @@ const RIDERS = ["#dc2626", "#9333ea", "#f59e0b", "#22c55e", "#38bdf8", "#f472b6"
 const ACCENTS = ["#facc15", "#06b6d4", "#f97316", "#a3e635", "#fb7185", "#c084fc"];
 
 export const HORSE_RACE_LANES = 6;
-export const HORSE_RACE_DURATION_MS = 9200;
-export const HORSE_RACE_FRAME_MS = 90;
+export const HORSE_RACE_DURATION_MS = 16000;
+export const HORSE_RACE_FRAME_MS = 100;
 
 export function createHorseField(random: () => number = Math.random): HorseProfile[] {
   const names = shuffle(HORSE_NAMES, random);
@@ -98,12 +98,12 @@ export function simulateHorseRace(
     const racePhase = time / HORSE_RACE_DURATION_MS;
 
     for (const horse of horses) {
-      const opening = racePhase < 0.18 ? horse.burst * 0.022 : 0;
+      const opening = racePhase < 0.18 ? horse.burst * 0.005 : 0;
       const fatigue = Math.max(0.58, 1 - racePhase * (1.08 - horse.stamina) * 0.58);
-      const sprint = racePhase > 0.74 ? horse.burst * 0.034 : 0;
-      const chaos = (random() - 0.5) * 0.026 * horse.stability;
-      const stumble = laneEvents[horse.id] < 0.09 && racePhase > 0.38 && racePhase < 0.48 ? -0.018 : 0;
-      const stride = horse.baseSpeed * 0.018 * fatigue + opening + sprint + chaos + stumble;
+      const sprint = racePhase > 0.74 ? horse.burst * 0.008 : 0;
+      const chaos = (random() - 0.5) * 0.009 * horse.stability;
+      const stumble = laneEvents[horse.id] < 0.09 && racePhase > 0.38 && racePhase < 0.48 ? -0.008 : 0;
+      const stride = horse.baseSpeed * 0.0064 * fatigue + opening + sprint + chaos + stumble;
 
       positions[horse.id] = clamp(positions[horse.id] + Math.max(0.004, stride), 0, 1);
       staminaState[horse.id] = clamp(fatigue, 0, 1);
@@ -120,7 +120,7 @@ export function simulateHorseRace(
       stamina: { ...staminaState },
     });
 
-    if (finishedAt !== HORSE_RACE_DURATION_MS && time >= finishedAt + 900) {
+    if (finishedAt !== HORSE_RACE_DURATION_MS && time >= finishedAt + 1500) {
       break;
     }
   }

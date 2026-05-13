@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Coins, Flag, RefreshCw, Shuffle, Trophy, Users } from "lucide-react";
+import { Coins, Flag, RefreshCw, Shuffle } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import {
   addPlayerDailyHorseRaceNetWins,
@@ -53,8 +53,8 @@ function drawRaceTrack(
 
   const trackTop = 130;
   const laneHeight = 52;
-  const trackLeft = 58;
-  const trackRight = CANVAS_WIDTH - 92;
+  const trackLeft = 30;
+  const trackRight = CANVAS_WIDTH - 58;
   const finishX = trackRight;
 
   ctx.fillStyle = "rgba(0,0,0,0.18)";
@@ -110,7 +110,7 @@ function drawRaceTrack(
 }
 
 function drawBackground(ctx: CanvasRenderingContext2D, elapsedMs: number) {
-  const drift = (elapsedMs / 40) % 160;
+  const drift = (elapsedMs / 28) % 220;
 
   ctx.fillStyle = "#2dd4bf";
   ctx.fillRect(0, 0, CANVAS_WIDTH, 94);
@@ -125,7 +125,7 @@ function drawBackground(ctx: CanvasRenderingContext2D, elapsedMs: number) {
   ctx.closePath();
   ctx.fill();
 
-  for (let x = -160; x < CANVAS_WIDTH + 160; x += 160) {
+  for (let x = -220; x < CANVAS_WIDTH + 220; x += 220) {
     const px = x - drift;
     ctx.fillStyle = "#14532d";
     ctx.fillRect(px + 35, 80, 14, 42);
@@ -134,6 +134,24 @@ function drawBackground(ctx: CanvasRenderingContext2D, elapsedMs: number) {
     ctx.fillRect(px + 24, 40, 38, 22);
     ctx.fillStyle = "#ef4444";
     ctx.fillRect(px + 78, 94, 46, 10);
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.72)";
+  for (let x = -220; x < CANVAS_WIDTH + 260; x += 110) {
+    const railX = x - drift * 1.8;
+    ctx.fillRect(railX, 118, 70, 4);
+    ctx.fillRect(railX + 6, 100, 5, 34);
+    ctx.fillRect(railX + 64, 100, 5, 34);
+  }
+
+  for (let x = -180; x < CANVAS_WIDTH + 220; x += 95) {
+    const px = x - drift * 2.3;
+    ctx.fillStyle = "#16a34a";
+    ctx.fillRect(px, 426, 42, 22);
+    ctx.fillStyle = "#84cc16";
+    ctx.fillRect(px + 8, 408, 30, 22);
+    ctx.fillStyle = "#ef4444";
+    ctx.fillRect(px + 12, 420, 24, 8);
   }
 
   ctx.fillStyle = "rgba(255,255,255,0.72)";
@@ -518,19 +536,6 @@ export function TavernHorseRace() {
             Nuevo cartel
           </button>
 
-          <div className="mt-4 grid gap-2">
-            <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/5 p-3">
-              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">
-                <Users className="h-4 w-4" />
-                Proxima fase
-              </p>
-              <p className="mt-2 text-xs leading-5 text-stone-400">
-                Salas online con apuestas compartidas y resultado unico por Supabase.
-              </p>
-            </div>
-            <RaceResultPanel result={lastResult} selectedHorseId={selectedHorseId} />
-          </div>
-
           <div className="mt-4">
             <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.14em] text-stone-500">
               <span>Ganancia diaria</span>
@@ -554,25 +559,6 @@ function RaceStat({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-stone-800 bg-stone-950/75 px-3 py-2">
       <p className="text-[9px] font-black uppercase tracking-[0.14em] text-stone-500">{label}</p>
       <p className="mt-1 text-sm font-black text-stone-100">{value}</p>
-    </div>
-  );
-}
-
-function RaceResultPanel({ result, selectedHorseId }: { result: HorseRaceResult | null; selectedHorseId: string | null }) {
-  const winner = result?.horses.find((horse) => horse.id === result.winnerId) ?? null;
-  const placement = result?.placements.findIndex((id) => id === selectedHorseId);
-  const selectedPlace = placement === undefined || placement < 0 ? "--" : `${placement + 1}`;
-
-  return (
-    <div className="rounded-2xl border border-amber-500/15 bg-amber-500/5 p-3">
-      <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-amber-300">
-        <Trophy className="h-4 w-4" />
-        Ultima carrera
-      </p>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <RaceStat label="Ganador" value={winner?.name ?? "--"} />
-        <RaceStat label="Tu lugar" value={selectedPlace} />
-      </div>
     </div>
   );
 }

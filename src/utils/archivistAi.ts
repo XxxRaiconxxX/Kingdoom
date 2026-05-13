@@ -52,27 +52,45 @@ export async function askArchivistAi(input: {
   runtimeSummary?: string;
   allowActions?: boolean;
 }): Promise<ArchivistAskResult> {
-  const response = await fetch(getArchivistEndpoint(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      question: input.question,
-      mode: input.mode ?? "canon",
-      topicMemory: input.topicMemory ?? [],
-      documents: input.contextDocuments.map((document) => ({
-        title: document.title,
-        type: document.type,
-        category: document.category,
-        tags: document.tags,
-        source: document.source,
-        summary: document.summary,
-        content: document.content,
-      })),
-      includeDebug: input.includeDebug ?? false,
-      runtimeSummary: input.runtimeSummary ?? "",
-      allowActions: input.allowActions ?? false,
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 45000);
+  let response: Response;
+
+  try {
+    response = await fetch(getArchivistEndpoint(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        question: input.question,
+        mode: input.mode ?? "canon",
+        topicMemory: input.topicMemory ?? [],
+        documents: input.contextDocuments.map((document) => ({
+          title: document.title,
+          type: document.type,
+          category: document.category,
+          tags: document.tags,
+          source: document.source,
+          summary: document.summary,
+          content: document.content,
+        })),
+        includeDebug: input.includeDebug ?? false,
+        runtimeSummary: input.runtimeSummary ?? "",
+        allowActions: input.allowActions ?? false,
+      }),
+    });
+  } catch (error) {
+    return {
+      status: "error",
+      message:
+        error instanceof DOMException && error.name === "AbortError"
+          ? "El Archivista tardo demasiado en responder. El borrador pendiente sigue intacto."
+          : "No se pudo consultar al Archivista. Revisa la conexion o el endpoint.",
+      debug: null,
+    };
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 
   const payload = await response.json().catch(() => null);
 

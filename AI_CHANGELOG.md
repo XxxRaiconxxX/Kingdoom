@@ -30,6 +30,25 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 13/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/ArchivistSection.tsx`, `src/utils/archivistAi.ts`, `api/admin/_aiPrompts.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Correccion del flujo de borradores pendientes del Archivista.
+*   **Cambios Clave:**
+    *   **Sin carga infinita:** El cliente del Archivista ahora corta consultas demoradas y devuelve el estado de carga aunque el endpoint falle.
+    *   **Borrador conversacional:** Si hay una accion pendiente y el staff pregunta por habilidad, detalles o efectos, el chat responde sobre el mismo borrador sin bloquearse.
+    *   **Items mas completos:** El prompt del Archivista exige que los items de mercado tengan una habilidad jugable y balanceada, no solo descripcion visual.
+*   **Notas/Advertencias:** Se preservo el cambio previo de Antigravity en el placeholder del Archivista.
+
+### [Fecha: 13/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/ArchivistSection.tsx`, `ai-memory/kingdoom-memory.jsonl`, `c:\Users\e_grado\.gemini\antigravity\mcp_config.json`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Limpieza de la interfaz del Archivista y activación del sistema de memoria compartida MCP.
+*   **Cambios Clave:**
+    *   **Limpieza de UI:** Se eliminó el texto redundante "Consulta el reino o pide una accion de staff..." del placeholder del chat del Archivista para usuarios admin, unificando la experiencia visual.
+    *   **Configuración MCP:** Activación del servidor `kingdoom-memory-mcp` para coordinación de memoria operativa y relevos (handoffs) entre Antigravity y Jarvis.
+    *   **Memoria Inicial:** Inicialización de `ai-memory/kingdoom-memory.jsonl` con la directriz de arquitectura compartida.
+*   **Notas/Advertencias:** Validado con `npm run build`. El build generó correctamente el asset `dist/assets/ArchivistSection-CcGlSpgh.js`. Se respeta el protocolo de no tocar la app móvil ni archivos de economía.
+
+
+### [Fecha: 13/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `AGENTS.md`, `RTK.md`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Instalacion y configuracion local de RTK y reglas agenticas para Kingdoom.
 *   **Cambios Clave:**

@@ -137,6 +137,7 @@ Reglas:
 - Si el usuario no es admin o allowActions es false, nunca propongas accion ejecutable.
 - Si generas una mision, evento, item, magia, bestia, flora o documento para que el staff lo apruebe, el borrador debe incluir actionDraft con payload completo. No dejes datos obligatorios solo en answer, label o confirmationPrompt.
 - Si el usuario confirma una accion generada por ti, no vuelvas a pedir campos que ya estan en el borrador.
+- Si hay un "Borrador pendiente para ajustar" y el usuario pide habilidad, precio, rareza, descripcion o cualquier cambio puntual, conserva el payload existente y devuelve el mismo actionDraft actualizado. No reinicies la conversacion.
 - Si el usuario esta completando un borrador por partes, conserva lo ya dado en la memoria tematica o en el borrador pendiente y solo pregunta el siguiente dato indispensable.
 - Haz como maximo una pregunta de aclaracion por respuesta. Si puedes generar un borrador razonable con lo que ya existe, generarlo es mejor que pedir todo de golpe.
 - Si recibes la marca "__ARCHIVIST_ATTACHED_IMAGE__", copiala literalmente en payload.imageUrl para acciones compatibles con imagen; el frontend la reemplazara por la imagen real.
@@ -190,6 +191,7 @@ Reglas del JSON:
 - Para upsert_mission usa payload canonico: {"title":"...","description":"...","instructions":"...","rewardGold":0,"maxParticipants":1,"difficulty":"easy|medium|hard|elite","type":"story|hunt|escort|investigation|event","status":"available|in-progress|closed","visible":true}.
 - Para upsert_event usa payload canonico: {"title":"...","description":"...","longDescription":"...","startDate":"texto o fecha","endDate":"texto o fecha","status":"in-production|active|finished","factions":[],"rewards":"...","requirements":"...","participationRewardGold":0,"maxParticipants":0,"imageUrl":""}.
 - Para upsert_market_item usa payload canonico: {"name":"...","description":"...","ability":"...","price":0,"rarity":"common|rare|epic|legendary|mythic","category":"potions|armor|swords|others","stockStatus":"available|limited|sold-out","stockLimit":0,"stockSold":0,"imageUrl":""}.
+- Para upsert_market_item, "ability" debe describir una habilidad jugable concreta y balanceada. No basta con repetir la descripcion visual del objeto.
 - answer siempre debe venir relleno.
 `.trim();
 }

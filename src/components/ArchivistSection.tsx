@@ -166,6 +166,90 @@ function attachImageToAction(
   };
 }
 
+function payloadText(payload: Record<string, unknown>, key: string) {
+  const value = payload[key];
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function isDraftDetailRequest(value: string) {
+  const normalized = normalizeDecision(value);
+  return [
+    "habilidad",
+    "habilidades",
+    "efecto",
+    "efectos",
+    "detalle",
+    "detalles",
+    "caracteristica",
+    "caracteristicas",
+  ].some((keyword) => normalized.includes(keyword));
+}
+
+function suggestMarketAbility(action: ArchivistActionDraft) {
+  const payload = action.payload ?? {};
+  const name = payloadText(payload, "name") || payloadText(payload, "title") || "este objeto";
+  const category = normalizeDecision(payloadText(payload, "category"));
+  const description = payloadText(payload, "description");
+
+  if (category.includes("armor") || category.includes("armadura")) {
+    return `Guardia de ${name}: reduce el impacto del primer golpe fuerte recibido en una escena y permite resistir mejor empujes, cortes o presion fisica. No anula ataques ni evita dano directo de forma absoluta.`;
+  }
+
+  if (category.includes("potion") || category.includes("pocion")) {
+    return `Dosis concentrada: al consumirse, otorga una ventaja narrativa breve acorde a su descripcion. Su efecto dura una escena corta y no se acumula con otra pocion similar.`;
+  }
+
+  if (category.includes("sword") || description.toLowerCase().includes("hacha") || description.toLowerCase().includes("arma")) {
+    return `Golpe de Ruptura: permite realizar un impacto pesado capaz de quebrar guardias simples o empujar a un enemigo cercano. Requiere preparacion visible y no atraviesa defensas superiores ni provoca derribo automatico.`;
+  }
+
+  return `Propiedad singular: concede una utilidad narrativa moderada relacionada con ${name}, suficiente para crear ventaja situacional sin resolver una escena por si sola.`;
+}
+
+function buildDraftDetailResponse(action: ArchivistActionDraft) {
+  if (action.kind.includes("market")) {
+    const currentAbility = payloadText(action.payload, "ability");
+    if (currentAbility) {
+      return {
+        action,
+        text: `Habilidad actual del borrador:\n${currentAbility}`,
+      };
+    }
+
+    const ability = suggestMarketAbility(action);
+    return {
+      action: {
+        ...action,
+        payload: {
+          ...action.payload,
+          ability,
+        },
+        confirmationPrompt: action.confirmationPrompt.includes("con estas caracteristicas")
+          ? action.confirmationPrompt
+          : `${action.confirmationPrompt} Se agrego una habilidad sugerida al borrador.`,
+      },
+      text: `El borrador aun no tenia habilidad concreta. Le agregue esta propuesta:\n${ability}\n\nSi no le convence, escriba el ajuste antes de confirmar.`,
+    };
+  }
+
+  const payload = action.payload ?? {};
+  const details = [
+    payloadText(payload, "description"),
+    payloadText(payload, "ability"),
+    payloadText(payload, "usage"),
+    payloadText(payload, "requirements"),
+    payloadText(payload, "instructions"),
+  ].filter(Boolean);
+
+  return {
+    action,
+    text:
+      details.length > 0
+        ? `Detalles actuales del borrador:\n${details.join("\n\n")}`
+        : "Ese borrador aun no tiene detalles suficientes. Agregue el dato que quiere conservar y lo incorporo antes de confirmar.",
+  };
+}
+
 function extractTopicMemory(messages: ChatMessage[]) {
   return messages
     .filter((message) => message.role === "user")
@@ -360,11 +444,29 @@ export function ArchivistSection() {
     }
 
     setIsAsking(true);
-    const execution = await executeArchivistAction(pendingAction, liveState.context);
-    const refreshed =
-      execution.status === "success"
-        ? await loadArchivistBootstrap({ silent: true })
-        : null;
+    let execution: Awaited<ReturnType<typeof executeArchivistAction>>;
+    let refreshed: Awaited<ReturnType<typeof loadArchivistBootstrap>> | null = null;
+
+    try {
+      execution = await executeArchivistAction(pendingAction, liveState.context);
+      refreshed =
+        execution.status === "success"
+          ? await loadArchivistBootstrap({ silent: true })
+          : null;
+    } catch {
+      setIsAsking(false);
+      setMessages((current) => [
+        ...current,
+        {
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          text: "No pude ejecutar esa accion. El borrador sigue pendiente para que pueda ajustarlo o cancelarlo.",
+          tone: "warning",
+        },
+      ]);
+      return;
+    }
+
     const actionCards =
       execution.status === "success" && refreshed && shouldShowActionCards(pendingAction)
         ? pickArchivistCards(refreshed.liveState.context, getActionCardQuery(pendingAction), {
@@ -402,6 +504,30 @@ export function ArchivistSection() {
       (isPositiveDecision(cleanQuestion) || isNegativeDecision(cleanQuestion))
     ) {
       await handleConfirmAction(cleanQuestion);
+      return;
+    }
+
+    if (pendingAction && isAdmin && isDraftDetailRequest(cleanQuestion)) {
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: "user",
+        text: cleanQuestion,
+      };
+      const detail = buildDraftDetailResponse(pendingAction);
+
+      setPendingAction(detail.action);
+      setMessages((current) => [
+        ...current,
+        userMessage,
+        {
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          text: detail.text,
+          actionDraft: detail.action,
+          tone: "success",
+        },
+      ]);
+      setQuestion("");
       return;
     }
 
@@ -445,14 +571,22 @@ export function ArchivistSection() {
     setFeedback("");
 
     const mode: ArchivistMode = isAdmin ? "staff" : "canon";
-    const result = await askArchivistAi({
-      question: [cleanQuestion, pendingActionContext, imageContext].filter(Boolean).join("\n"),
-      contextDocuments,
-      mode,
-      topicMemory,
-      runtimeSummary,
-      allowActions: isAdmin,
-    });
+    let result: Awaited<ReturnType<typeof askArchivistAi>>;
+
+    try {
+      result = await askArchivistAi({
+        question: [cleanQuestion, pendingActionContext, imageContext].filter(Boolean).join("\n"),
+        contextDocuments,
+        mode,
+        topicMemory,
+        runtimeSummary,
+        allowActions: isAdmin,
+      });
+    } catch {
+      setIsAsking(false);
+      setFeedback("No se pudo consultar al Archivista. El borrador pendiente sigue intacto.");
+      return;
+    }
 
     setIsAsking(false);
 
@@ -712,9 +846,7 @@ export function ArchivistSection() {
                   placeholder={
                     pendingAction
                       ? "Si, no, o agrega un dato para ajustar el borrador..."
-                      : isAdmin
-                        ? "Consulta el reino o pide una accion de staff..."
-                        : "Pregunta por lore, mercado, eventos, misiones o magia..."
+                      : "Pregunta por lore, mercado, eventos, misiones o magia..."
                   }
                   className="min-w-0 flex-1 rounded-[1.25rem] border border-stone-700 bg-stone-950/85 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-300/45"
                 />

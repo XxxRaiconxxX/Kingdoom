@@ -53,7 +53,6 @@ const CARD_STOPWORDS = new Set([
   "misiones",
   "necesito",
   "no",
-  "oro",
   "para",
   "parece",
   "pasame",
@@ -78,7 +77,7 @@ const CARD_KIND_KEYWORDS: Record<ArchivistCardKind, string[]> = {
   bestiary: ["bestia", "bestiario", "criatura"],
   flora: ["flora", "hierba", "planta"],
   document: ["archivo", "canon", "historia", "lore"],
-  player: ["jugador", "oro", "usuario"],
+  player: ["jugador", "jugadores", "oro", "ranking", "ricos", "riqueza", "usuario", "usuarios"],
 };
 
 function normalizeText(value: string) {
@@ -325,6 +324,10 @@ export function buildArchivistRuntimeSummary(
     .slice(0, 10)
     .map((entry) => `${entry.title} [${entry.categoryTitle}]`);
   const playerNames = context.players.slice(0, 12).map((entry) => entry.username);
+  const richestPlayers = [...context.players]
+    .sort((left, right) => right.gold - left.gold)
+    .slice(0, 8)
+    .map((entry) => `${entry.username}: ${entry.gold.toLocaleString("es-PY")} oro`);
 
   const lines = [
     `Mercado cargado: ${context.marketItems.length} items.`,
@@ -353,6 +356,9 @@ export function buildArchivistRuntimeSummary(
     lines.push(`Jugadores cargados para staff: ${context.players.length}.`);
     if (playerNames.length > 0) {
       lines.push(`Jugadores visibles para staff: ${playerNames.join(" | ")}`);
+    }
+    if (richestPlayers.length > 0) {
+      lines.push(`Ranking de oro actual: ${richestPlayers.join(" | ")}`);
     }
   }
 
@@ -482,5 +488,5 @@ function inferCardKinds(tokens: string[]) {
 }
 
 function categoryBoost(kind: ArchivistCardKind, tokens: string[]) {
-  return CARD_KIND_KEYWORDS[kind].some((keyword) => tokens.includes(keyword)) ? 1 : 0;
+  return CARD_KIND_KEYWORDS[kind].some((keyword) => tokens.includes(keyword)) ? 2 : 0;
 }

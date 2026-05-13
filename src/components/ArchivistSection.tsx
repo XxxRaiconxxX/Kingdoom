@@ -250,6 +250,23 @@ function buildDraftDetailResponse(action: ArchivistActionDraft) {
   };
 }
 
+function isPlayerGoldQuestion(value: string) {
+  const normalized = normalizeDecision(value);
+  const hasPlayerTerm =
+    normalized.includes("jugador") ||
+    normalized.includes("usuario") ||
+    normalized.includes("jugadores") ||
+    normalized.includes("usuarios");
+  const hasWealthTerm =
+    normalized.includes("oro") ||
+    normalized.includes("ricos") ||
+    normalized.includes("riqueza") ||
+    normalized.includes("ranking") ||
+    normalized.includes("caro");
+
+  return hasWealthTerm && (hasPlayerTerm || normalized.includes("ranking") || normalized.includes("ricos"));
+}
+
 function extractTopicMemory(messages: ChatMessage[]) {
   return messages
     .filter((message) => message.role === "user")
@@ -612,15 +629,22 @@ export function ArchivistSection() {
     const cards =
       result.intent === "admin_action"
         ? actionDraft && shouldShowActionCards(actionDraft)
-          ? pickArchivistCards(liveState.context, getActionCardQuery(actionDraft), {
-              includeAdminData: isAdmin,
-              kinds: getActionCardKinds(actionDraft),
-              limit: 2,
-              strict: true,
-            })
-          : []
+        ? pickArchivistCards(liveState.context, getActionCardQuery(actionDraft), {
+            includeAdminData: isAdmin,
+            kinds: getActionCardKinds(actionDraft),
+            limit: 2,
+            strict: true,
+          })
+        : []
         : result.intent === "clarify"
           ? []
+          : isAdmin && isPlayerGoldQuestion(cleanQuestion)
+            ? pickArchivistCards(liveState.context, cleanQuestion, {
+                includeAdminData: true,
+                kinds: ["player"],
+                limit: 4,
+                strict: false,
+              })
         : pickArchivistCards(liveState.context, cleanQuestion, {
             includeAdminData: isAdmin,
             limit: 4,

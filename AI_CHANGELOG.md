@@ -30,6 +30,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 13/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/features/archivist/archivistLive.ts`, `src/components/ArchivistSection.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Correccion de respuestas del Archivista sobre ranking de oro.
+*   **Cambios Clave:**
+    *   **Oro visible para staff:** El contexto vivo del Archivista ahora incluye el ranking de oro actual con cantidades.
+    *   **Tarjetas relevantes:** Las preguntas de staff sobre jugadores/oro priorizan tarjetas de jugadores y evitan recomendaciones de mercado fuera de contexto.
+*   **Notas/Advertencias:** Solo se exponen estos datos cuando el Archivista corre en modo admin.
+
+### [Fecha: 13/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/ArchivistSection.tsx`, `src/utils/archivistAi.ts`, `api/admin/_aiPrompts.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Correccion del flujo de borradores pendientes del Archivista.
 *   **Cambios Clave:**
@@ -39,13 +47,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Notas/Advertencias:** Se preservo el cambio previo de Antigravity en el placeholder del Archivista.
 
 ### [Fecha: 13/05/2026] - [Autor: Antigravity]
-*   **Archivos Modificados:** `src/components/ArchivistSection.tsx`, `ai-memory/kingdoom-memory.jsonl`, `c:\Users\e_grado\.gemini\antigravity\mcp_config.json`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Limpieza de la interfaz del Archivista y activación del sistema de memoria compartida MCP.
+*   **Archivos Modificados:** `src/features/archivist/archivistLive.ts`, `src/components/ArchivistSection.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Finalización del fix para el ranking de oro del Archivista y refuerzo semántico.
 *   **Cambios Clave:**
-    *   **Limpieza de UI:** Se eliminó el texto redundante "Consulta el reino o pide una accion de staff..." del placeholder del chat del Archivista para usuarios admin, unificando la experiencia visual.
-    *   **Configuración MCP:** Activación del servidor `kingdoom-memory-mcp` para coordinación de memoria operativa y relevos (handoffs) entre Antigravity y Jarvis.
-    *   **Memoria Inicial:** Inicialización de `ai-memory/kingdoom-memory.jsonl` con la directriz de arquitectura compartida.
-*   **Notas/Advertencias:** Validado con `npm run build`. El build generó correctamente el asset `dist/assets/ArchivistSection-CcGlSpgh.js`. Se respeta el protocolo de no tocar la app móvil ni archivos de economía.
+    *   **Contexto Admin:** Se verificó la inclusión de `richestPlayers` en el resumen runtime para staff.
+    *   **Refuerzo Semántico:** Se eliminó `oro` de `CARD_STOPWORDS` y se duplicó el `categoryBoost` para asegurar que las tarjetas de jugadores tengan prioridad absoluta en consultas económicas.
+    *   **Detección de Intención:** Se flexibilizó `isPlayerGoldQuestion` para detectar "ranking", "ricos" y "riqueza" sin necesidad de mencionar explícitamente "jugador".
+*   **Notas/Advertencias:** Validado con `npm run build`. El sistema ahora diferencia correctamente entre "comprar oro" (mercado) y "¿quién tiene más oro?" (jugadores).
+
 
 
 ### [Fecha: 13/05/2026] - [Autor: Jarvis]

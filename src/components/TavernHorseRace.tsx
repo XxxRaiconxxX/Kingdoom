@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Coins, Flag, RefreshCw, Shuffle } from "lucide-react";
+import type { ReactNode } from "react";
+import { Coins, Flag, Radio, RefreshCw, Shuffle, Trophy, Users } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import {
   addPlayerDailyHorseRaceNetWins,
@@ -15,8 +16,21 @@ import {
   type HorseRaceFrame,
   type HorseRaceResult,
 } from "../utils/horseRaceUtils";
+import {
+  closePublicHorseRaceBets,
+  createPublicHorseRaceSession,
+  fetchPublicHorseRaceBets,
+  fetchPublicHorseRaceSessions,
+  placePublicHorseRaceBet,
+  settlePublicHorseRace,
+  startPublicHorseRace,
+  subscribeToPublicHorseRace,
+  type PublicHorseRaceBet,
+  type PublicHorseRaceSession,
+} from "../utils/horseRaceOnline";
 
 type RacePhase = "betting" | "running" | "finished";
+type RaceMode = "offline" | "online";
 
 const CANVAS_WIDTH = 900;
 const CANVAS_HEIGHT = 500;
@@ -235,7 +249,7 @@ function drawNumberBadge(ctx: CanvasRenderingContext2D, x: number, y: number, nu
 }
 
 export function TavernHorseRace() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isAdmin, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const raceRef = useRef<HorseRaceResult | null>(null);
@@ -244,25 +258,101 @@ export function TavernHorseRace() {
 
   const [horses, setHorses] = useState(() => createHorseField());
   const [selectedHorseId, setSelectedHorseId] = useState<string | null>(null);
+  const [raceMode, setRaceMode] = useState<RaceMode>("offline");
   const [phase, setPhase] = useState<RacePhase>("betting");
   const [bet, setBet] = useState(2500);
   const [dailyNetWins, setDailyNetWins] = useState(0);
   const [lastResult, setLastResult] = useState<HorseRaceResult | null>(null);
   const [message, setMessage] = useState("Elige caballo, ajusta apuesta y abre las puertas.");
   const [updating, setUpdating] = useState(false);
+  const [onlineLoading, setOnlineLoading] = useState(false);
+  const [onlineFeedback, setOnlineFeedback] = useState("");
+  const [onlineSupported, setOnlineSupported] = useState<boolean | null>(null);
+  const [onlineSessions, setOnlineSessions] = useState<PublicHorseRaceSession[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState("");
+  const [onlineBets, setOnlineBets] = useState<PublicHorseRaceBet[]>([]);
 
   const balance = player?.gold ?? 0;
-  const selectedHorse = horses.find((horse) => horse.id === selectedHorseId) ?? null;
+  const selectedSession = useMemo(
+    () => onlineSessions.find((session) => session.id === selectedSessionId) ?? onlineSessions[0] ?? null,
+    [onlineSessions, selectedSessionId]
+  );
+  const activeHorses = raceMode === "online" && selectedSession ? selectedSession.horses : horses;
+  const activeResult = raceMode === "online" && selectedSession ? selectedSession.result : lastResult;
+  const activeWinnerId = raceMode === "online" && selectedSession ? selectedSession.winnerId : lastResult?.winnerId ?? null;
+  const selectedHorse = activeHorses.find((horse) => horse.id === selectedHorseId) ?? null;
+  const playerOnlineBet = useMemo(
+    () => onlineBets.find((entry) => entry.playerId === player?.id) ?? null,
+    [onlineBets, player?.id]
+  );
+  const onlinePot = useMemo(
+    () => onlineBets.reduce((total, entry) => total + entry.betAmount, 0),
+    [onlineBets]
+  );
   const safeBet = clamp(Math.floor(Number.isFinite(bet) ? bet : 0), 1, Math.max(1, balance));
   const remainingDailyNet = Math.max(0, MAX_DAILY_HORSE_RACE_WIN_LIMIT - dailyNetWins);
   const limitReached = dailyNetWins >= MAX_DAILY_HORSE_RACE_WIN_LIMIT;
   const canRace = Boolean(player && selectedHorse && phase !== "running" && !updating && !limitReached && safeBet <= balance);
+  const canPlaceOnlineBet = Boolean(
+    player &&
+      selectedSession &&
+      selectedHorse &&
+      selectedSession.status === "betting" &&
+      !playerOnlineBet &&
+      !onlineLoading &&
+      safeBet <= balance
+  );
+
+  const refreshOnlineState = useCallback(
+    async (preferredSessionId?: string) => {
+      setOnlineLoading(true);
+      const sessionsResult = await fetchPublicHorseRaceSessions();
+
+      setOnlineSupported(sessionsResult.status !== "unavailable");
+
+      if (sessionsResult.status !== "success") {
+        setOnlineSessions([]);
+        setOnlineBets([]);
+        setOnlineFeedback(sessionsResult.message ?? "No se pudo cargar la sala online.");
+        setOnlineLoading(false);
+        return;
+      }
+
+      const sessions = sessionsResult.data;
+      const nextSelected =
+        sessions.find((session) => session.id === preferredSessionId) ??
+        sessions.find((session) => session.status !== "finished") ??
+        sessions[0] ??
+        null;
+
+      setOnlineSessions(sessions);
+      setSelectedSessionId(nextSelected?.id ?? "");
+
+      if (!nextSelected) {
+        setOnlineBets([]);
+        setOnlineFeedback("No hay salas online activas. Un admin puede crear una desde este panel.");
+        setOnlineLoading(false);
+        return;
+      }
+
+      const betsResult = await fetchPublicHorseRaceBets(nextSelected.id);
+      setOnlineBets(betsResult.data);
+      setOnlineFeedback(betsResult.status === "error" ? betsResult.message ?? "No se pudieron cargar las apuestas." : "");
+      setOnlineLoading(false);
+    },
+    []
+  );
 
   useEffect(() => {
-    if (!selectedHorseId && horses[0]) {
-      setSelectedHorseId(horses[0].id);
+    if (!activeHorses.length) {
+      setSelectedHorseId(null);
+      return;
     }
-  }, [horses, selectedHorseId]);
+
+    if (!selectedHorseId || !activeHorses.some((horse) => horse.id === selectedHorseId)) {
+      setSelectedHorseId(activeHorses[0]?.id ?? null);
+    }
+  }, [activeHorses, selectedHorseId]);
 
   useEffect(() => {
     if (!player) {
@@ -275,10 +365,11 @@ export function TavernHorseRace() {
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
+    if (raceMode === "online" && selectedSession?.status === "running" && selectedSession.result) return;
     if (!ctx) return;
-    const frame = lastResult ? getFrameAt(lastResult, lastResult.finishTimeMs) : null;
-    drawRaceTrack(ctx, horses, frame, selectedHorseId, lastResult?.winnerId ?? null, 0);
-  }, [horses, lastResult, selectedHorseId]);
+    const frame = activeResult ? getFrameAt(activeResult, activeResult.finishTimeMs) : null;
+    drawRaceTrack(ctx, activeHorses, frame, selectedHorseId, activeWinnerId, 0);
+  }, [activeHorses, activeResult, activeWinnerId, raceMode, selectedHorseId, selectedSession?.status]);
 
   useEffect(
     () => () => {
@@ -286,6 +377,66 @@ export function TavernHorseRace() {
     },
     []
   );
+
+  useEffect(() => {
+    if (raceMode !== "online") {
+      return;
+    }
+
+    void refreshOnlineState(selectedSessionId);
+  }, [raceMode, refreshOnlineState, selectedSessionId]);
+
+  useEffect(() => {
+    if (raceMode !== "online") {
+      return;
+    }
+
+    return subscribeToPublicHorseRace(selectedSessionId, () => {
+      void refreshOnlineState(selectedSessionId);
+    });
+  }, [raceMode, refreshOnlineState, selectedSessionId]);
+
+  useEffect(() => {
+    if (raceMode !== "online" || !selectedSession?.result || selectedSession.status !== "running") {
+      return;
+    }
+
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+
+    const startedAt = selectedSession.startedAt ? new Date(selectedSession.startedAt).getTime() : Date.now();
+    const result = selectedSession.result;
+
+    const animateOnlineRace = () => {
+      const elapsed = Date.now() - startedAt;
+      const frame = getFrameAt(result, elapsed);
+      drawRaceTrack(ctx, result.horses, frame, selectedHorseId, null, elapsed);
+
+      if (elapsed >= result.durationMs) {
+        drawRaceTrack(
+          ctx,
+          result.horses,
+          getFrameAt(result, result.finishTimeMs),
+          selectedHorseId,
+          result.winnerId,
+          elapsed
+        );
+        return;
+      }
+
+      animationRef.current = window.requestAnimationFrame(animateOnlineRace);
+    };
+
+    animationRef.current = window.requestAnimationFrame(animateOnlineRace);
+
+    return () => {
+      if (animationRef.current) {
+        window.cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [raceMode, selectedHorseId, selectedSession?.id, selectedSession?.result, selectedSession?.startedAt, selectedSession?.status]);
 
   function handleBetInput(value: string) {
     const parsed = Number.parseInt(value.replace(/[^0-9]/g, ""), 10);
@@ -298,6 +449,9 @@ export function TavernHorseRace() {
     if (fresh) {
       setDailyNetWins(getPlayerDailyHorseRaceNetWins(fresh.id, dateKey));
     }
+    if (raceMode === "online") {
+      await refreshOnlineState(selectedSessionId);
+    }
     setUpdating(false);
   }
 
@@ -308,6 +462,89 @@ export function TavernHorseRace() {
     setSelectedHorseId(nextHorses[0]?.id ?? null);
     setLastResult(null);
     setMessage("Nuevo cartel generado. Las cuotas cambiaron.");
+  }
+
+  async function createOnlineSession() {
+    if (!player || !isAdmin) return;
+
+    setOnlineLoading(true);
+    const nextHorses = createHorseField();
+    const result = await createPublicHorseRaceSession({
+      adminPlayerId: player.id,
+      title: `Carrera publica ${new Date().toLocaleTimeString("es-PY", { hour: "2-digit", minute: "2-digit" })}`,
+      horses: nextHorses,
+    });
+
+    setOnlineLoading(false);
+    setRaceMode("online");
+    setOnlineFeedback(result.message ?? "");
+
+    if (result.status === "success" && result.data) {
+      setSelectedSessionId(result.data.id);
+      setSelectedHorseId(result.data.horses[0]?.id ?? null);
+      await refreshOnlineState(result.data.id);
+    }
+  }
+
+  async function closeOnlineBets() {
+    if (!player || !selectedSession || !isAdmin) return;
+
+    setOnlineLoading(true);
+    const result = await closePublicHorseRaceBets({
+      adminPlayerId: player.id,
+      sessionId: selectedSession.id,
+    });
+    setOnlineLoading(false);
+    setOnlineFeedback(result.message ?? "");
+    await refreshOnlineState(selectedSession.id);
+  }
+
+  async function startOnlineRace() {
+    if (!player || !selectedSession || !isAdmin || selectedSession.horses.length < 2) return;
+
+    setOnlineLoading(true);
+    const resultSnapshot = simulateHorseRace(selectedSession.horses);
+    const result = await startPublicHorseRace({
+      adminPlayerId: player.id,
+      sessionId: selectedSession.id,
+      result: resultSnapshot,
+    });
+    setOnlineLoading(false);
+    setOnlineFeedback(result.message ?? "");
+    await refreshOnlineState(selectedSession.id);
+  }
+
+  async function settleOnlineRace() {
+    if (!player || !selectedSession || !isAdmin) return;
+
+    setOnlineLoading(true);
+    const result = await settlePublicHorseRace({
+      adminPlayerId: player.id,
+      sessionId: selectedSession.id,
+    });
+    setOnlineLoading(false);
+    setOnlineFeedback(result.message ?? "");
+    await refreshOnlineState(selectedSession.id);
+    await refreshPlayer();
+  }
+
+  async function placeOnlineBet() {
+    if (!player || !selectedSession || !selectedHorse || !canPlaceOnlineBet) return;
+
+    setOnlineLoading(true);
+    const result = await placePublicHorseRaceBet({
+      sessionId: selectedSession.id,
+      playerId: player.id,
+      horseId: selectedHorse.id,
+      horseName: selectedHorse.name,
+      betAmount: safeBet,
+      odds: selectedHorse.odds,
+    });
+
+    setOnlineLoading(false);
+    setOnlineFeedback(result.message ?? "");
+    await refreshOnlineState(selectedSession.id);
+    await refreshPlayer();
   }
 
   const finishRace = useCallback(
@@ -424,15 +661,6 @@ export function TavernHorseRace() {
     return <RaceMessage title="Carreras del Reino" description="Conecta tu perfil para apostar en el hipodromo." />;
   }
 
-  if (limitReached) {
-    return (
-      <RaceMessage
-        title="Hipodromo cerrado"
-        description={`Ya ganaste ${formatGold(MAX_DAILY_HORSE_RACE_WIN_LIMIT)} de oro neto hoy en carreras.`}
-      />
-    );
-  }
-
   return (
     <div className="relative overflow-hidden rounded-[2rem] border border-amber-500/20 bg-[#07100d] p-4 shadow-[inset_0_0_60px_rgba(0,0,0,0.78)] md:p-6">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_0%,rgba(34,197,94,0.16),transparent_32%),radial-gradient(circle_at_92%_12%,rgba(251,191,36,0.18),transparent_30%)]" />
@@ -446,9 +674,41 @@ export function TavernHorseRace() {
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">
               <RaceStat label="Oro" value={formatGold(balance)} />
-              <RaceStat label="Hoy" value={formatGold(dailyNetWins)} />
-              <RaceStat label="Modo" value="Offline" />
+              <RaceStat label={raceMode === "online" ? "Pozo" : "Hoy"} value={formatGold(raceMode === "online" ? onlinePot : dailyNetWins)} />
+              <RaceStat label="Modo" value={raceMode === "online" ? "Online" : "Offline"} />
             </div>
+          </div>
+
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setRaceMode("offline")}
+              disabled={phase === "running"}
+              className={`rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
+                raceMode === "offline"
+                  ? "border-amber-300/55 bg-amber-400/15 text-amber-100"
+                  : "border-stone-800 bg-black/25 text-stone-400 hover:border-amber-300/30"
+              }`}
+            >
+              Offline
+            </button>
+            <button
+              type="button"
+              onClick={() => setRaceMode("online")}
+              disabled={phase === "running"}
+              className={`rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
+                raceMode === "online"
+                  ? "border-cyan-300/55 bg-cyan-400/15 text-cyan-100"
+                  : "border-stone-800 bg-black/25 text-stone-400 hover:border-cyan-300/30"
+              }`}
+            >
+              Sala online
+            </button>
+            {raceMode === "online" && selectedSession ? (
+              <span className="rounded-full border border-lime-500/20 bg-lime-500/10 px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-lime-200">
+                {selectedSession.status}
+              </span>
+            ) : null}
           </div>
 
           <div className="overflow-hidden rounded-[1.6rem] border border-lime-400/20 bg-black/45 p-2 shadow-[0_0_38px_rgba(34,197,94,0.08)]">
@@ -461,8 +721,23 @@ export function TavernHorseRace() {
           </div>
 
           <div className="mt-3 rounded-2xl border border-stone-800 bg-stone-950/70 p-3 text-sm text-stone-300">
-            <span className="font-black text-amber-300">{phase === "running" ? "Narrador: " : "Estado: "}</span>
-            {message}
+            <span className="font-black text-amber-300">
+              {raceMode === "online" ? "Sala: " : phase === "running" ? "Narrador: " : "Estado: "}
+            </span>
+            {raceMode === "online"
+              ? onlineFeedback ||
+                (selectedSession
+                  ? selectedSession.status === "betting"
+                    ? "Apuestas abiertas para todos los jugadores."
+                    : selectedSession.status === "running"
+                      ? "Carrera publica en marcha."
+                      : selectedSession.status === "finished"
+                        ? "Carrera finalizada y lista para revisar pagos."
+                        : "Apuestas cerradas. El admin puede iniciar la carrera."
+                  : "No hay sala online seleccionada.")
+              : limitReached
+                ? `Ya ganaste ${formatGold(MAX_DAILY_HORSE_RACE_WIN_LIMIT)} de oro neto hoy en carreras offline.`
+                : message}
           </div>
         </div>
 
@@ -470,7 +745,9 @@ export function TavernHorseRace() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Apuestas</p>
-              <p className="mt-1 text-xs leading-5 text-stone-500">Cada cartel genera caballos y cuotas nuevas.</p>
+              <p className="mt-1 text-xs leading-5 text-stone-500">
+                {raceMode === "online" ? "Sala compartida con pagos revisados por admin." : "Cada cartel genera caballos y cuotas nuevas."}
+              </p>
             </div>
             <button
               type="button"
@@ -483,13 +760,45 @@ export function TavernHorseRace() {
             </button>
           </div>
 
+          {raceMode === "online" ? (
+            <div className="mt-4 rounded-2xl border border-cyan-500/15 bg-cyan-500/5 p-3">
+              <label className="text-[10px] font-black uppercase tracking-[0.16em] text-cyan-200">Sala publica</label>
+              <select
+                value={selectedSession?.id ?? ""}
+                onChange={(event) => {
+                  setSelectedSessionId(event.target.value);
+                  void refreshOnlineState(event.target.value);
+                }}
+                disabled={onlineLoading || onlineSessions.length === 0}
+                className="mt-2 w-full rounded-xl border border-stone-700 bg-black px-3 py-2 text-xs font-black text-stone-100 outline-none focus:border-cyan-300/50"
+              >
+                {onlineSessions.length === 0 ? <option value="">Sin salas</option> : null}
+                {onlineSessions.map((session) => (
+                  <option key={session.id} value={session.id}>
+                    {session.title} - {session.status}
+                  </option>
+                ))}
+              </select>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <RaceStat label="Apuestas" value={String(onlineBets.length)} />
+                <RaceStat label="Pozo" value={formatGold(onlinePot)} />
+              </div>
+            </div>
+          ) : null}
+
+          {raceMode === "online" && onlineSupported === false ? (
+            <div className="mt-4 rounded-2xl border border-rose-500/25 bg-rose-500/10 p-3 text-xs font-bold leading-5 text-rose-200">
+              Ejecuta <span className="font-black">supabase_horse_race_online.sql</span> para activar salas online.
+            </div>
+          ) : null}
+
           <div className="mt-4 grid max-h-[21rem] gap-2 overflow-y-auto pr-1">
-            {horses.map((horse) => (
+            {activeHorses.map((horse) => (
               <button
                 key={horse.id}
                 type="button"
                 onClick={() => setSelectedHorseId(horse.id)}
-                disabled={phase === "running"}
+                disabled={phase === "running" || (raceMode === "online" && selectedSession?.status !== "betting")}
                 className={`rounded-2xl border p-3 text-left transition ${
                   selectedHorseId === horse.id
                     ? "border-lime-300/55 bg-lime-400/10 shadow-[0_0_22px_rgba(132,204,22,0.12)]"
@@ -509,10 +818,19 @@ export function TavernHorseRace() {
             ))}
           </div>
 
+          {raceMode === "online" && playerOnlineBet ? (
+            <div className="mt-3 rounded-2xl border border-lime-400/20 bg-lime-400/10 p-3 text-xs leading-5 text-lime-100">
+              <span className="font-black uppercase tracking-[0.12em] text-lime-300">Tu apuesta</span>
+              <p className="mt-1">
+                {playerOnlineBet.horseName} | {formatGold(playerOnlineBet.betAmount)} oro | x{playerOnlineBet.odds}
+              </p>
+            </div>
+          ) : null}
+
           <input
             value={bet || ""}
             onChange={(event) => handleBetInput(event.target.value)}
-            disabled={phase === "running"}
+            disabled={phase === "running" || (raceMode === "online" && Boolean(playerOnlineBet || selectedSession?.status !== "betting"))}
             inputMode="numeric"
             className="mt-4 w-full rounded-2xl border border-stone-700 bg-black px-4 py-3 text-lg font-black text-stone-100 outline-none transition placeholder:text-stone-600 focus:border-amber-300/50"
             placeholder="2500"
@@ -524,7 +842,7 @@ export function TavernHorseRace() {
                 key={preset}
                 type="button"
                 onClick={() => setBet(preset)}
-                disabled={phase === "running"}
+                disabled={phase === "running" || (raceMode === "online" && Boolean(playerOnlineBet || selectedSession?.status !== "betting"))}
                 className="rounded-xl border border-stone-800 bg-stone-900 px-2 py-2 text-xs font-black text-stone-300 transition hover:border-amber-400/35 hover:text-amber-200 disabled:opacity-50"
               >
                 {formatGold(preset)}
@@ -534,36 +852,105 @@ export function TavernHorseRace() {
 
           <button
             type="button"
-            onClick={() => void startRace()}
-            disabled={!canRace}
+            onClick={() => (raceMode === "online" ? void placeOnlineBet() : void startRace())}
+            disabled={raceMode === "online" ? !canPlaceOnlineBet : !canRace}
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-stone-950 shadow-[0_0_28px_rgba(245,158,11,0.2)] transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-stone-800 disabled:text-stone-500 disabled:shadow-none"
           >
             <Flag className="h-4 w-4" />
-            {phase === "running" ? "Corriendo" : "Iniciar carrera"}
+            {onlineLoading && raceMode === "online"
+              ? "Procesando"
+              : raceMode === "online"
+                ? playerOnlineBet
+                  ? "Apuesta registrada"
+                  : "Apostar online"
+                : phase === "running"
+                  ? "Corriendo"
+                  : "Iniciar carrera"}
           </button>
 
-          <button
-            type="button"
-            onClick={generateNewRace}
-            disabled={phase === "running"}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-stone-700 px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-stone-300 transition hover:border-lime-300/40 hover:text-lime-200 disabled:opacity-50"
-          >
-            <Shuffle className="h-4 w-4" />
-            Nuevo cartel
-          </button>
+          {raceMode === "offline" ? (
+            <button
+              type="button"
+              onClick={generateNewRace}
+              disabled={phase === "running"}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-stone-700 px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-stone-300 transition hover:border-lime-300/40 hover:text-lime-200 disabled:opacity-50"
+            >
+              <Shuffle className="h-4 w-4" />
+              Nuevo cartel
+            </button>
+          ) : null}
 
-          <div className="mt-4">
-            <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.14em] text-stone-500">
-              <span>Ganancia diaria</span>
-              <span>{formatGold(remainingDailyNet)} libres</span>
+          {raceMode === "online" ? (
+            <div className="mt-4 rounded-2xl border border-stone-800 bg-black/35 p-3">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-cyan-200">
+                <Users className="h-3.5 w-3.5" />
+                Apostadores
+              </div>
+              <div className="mt-3 space-y-2">
+                {onlineBets.length === 0 ? (
+                  <p className="text-xs text-stone-500">Aun no hay apuestas registradas.</p>
+                ) : (
+                  onlineBets.slice(0, 5).map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between gap-2 rounded-xl border border-stone-800 bg-stone-950 px-3 py-2 text-xs">
+                      <span className="truncate font-bold text-stone-200">{entry.horseName}</span>
+                      <span className="shrink-0 font-black text-amber-200">{formatGold(entry.betAmount)}</span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-900">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-lime-400 via-amber-300 to-orange-500"
-                style={{ width: `${clamp((dailyNetWins / MAX_DAILY_HORSE_RACE_WIN_LIMIT) * 100, 0, 100)}%` }}
-              />
+          ) : (
+            <div className="mt-4">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.14em] text-stone-500">
+                <span>Ganancia diaria</span>
+                <span>{formatGold(remainingDailyNet)} libres</span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-900">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-lime-400 via-amber-300 to-orange-500"
+                  style={{ width: `${clamp((dailyNetWins / MAX_DAILY_HORSE_RACE_WIN_LIMIT) * 100, 0, 100)}%` }}
+                />
+              </div>
             </div>
-          </div>
+          )}
+
+          {raceMode === "online" && isAdmin ? (
+            <div className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-3">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-amber-200">
+                <Radio className="h-3.5 w-3.5" />
+                Control admin
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <AdminRaceButton onClick={() => void createOnlineSession()} disabled={onlineLoading}>
+                  Crear sala
+                </AdminRaceButton>
+                <AdminRaceButton
+                  onClick={() => void closeOnlineBets()}
+                  disabled={onlineLoading || !selectedSession || selectedSession.status !== "betting"}
+                >
+                  Cerrar
+                </AdminRaceButton>
+                <AdminRaceButton
+                  onClick={() => void startOnlineRace()}
+                  disabled={onlineLoading || !selectedSession || !["betting", "closed"].includes(selectedSession.status)}
+                >
+                  Iniciar
+                </AdminRaceButton>
+                <AdminRaceButton
+                  onClick={() => void settleOnlineRace()}
+                  disabled={onlineLoading || !selectedSession || selectedSession.status !== "running"}
+                >
+                  Liquidar
+                </AdminRaceButton>
+              </div>
+              {selectedSession?.winnerId ? (
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-lime-400/20 bg-lime-400/10 px-3 py-2 text-xs text-lime-100">
+                  <Trophy className="h-4 w-4 text-lime-300" />
+                  Ganador: {selectedSession.horses.find((horse) => horse.id === selectedSession.winnerId)?.name ?? selectedSession.winnerId}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </aside>
       </div>
     </div>
@@ -576,6 +963,27 @@ function RaceStat({ label, value }: { label: string; value: string }) {
       <p className="text-[9px] font-black uppercase tracking-[0.14em] text-stone-500">{label}</p>
       <p className="mt-1 text-sm font-black text-stone-100">{value}</p>
     </div>
+  );
+}
+
+function AdminRaceButton({
+  children,
+  disabled,
+  onClick,
+}: {
+  children: ReactNode;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="rounded-xl border border-amber-300/20 bg-black/35 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-amber-100 transition hover:border-amber-300/50 hover:bg-amber-300/10 disabled:cursor-not-allowed disabled:border-stone-800 disabled:text-stone-600"
+    >
+      {children}
+    </button>
   );
 }
 

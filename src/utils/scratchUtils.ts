@@ -71,6 +71,7 @@ export const MAX_DAILY_CARDS_WIN_LIMIT = 350000;
 export const MAX_DAILY_PENALTY_WIN_LIMIT = 350000;
 export const MAX_DAILY_SLOTS_WIN_LIMIT = 350000;
 export const MAX_DAILY_PLINKO_WIN_LIMIT = 350000;
+export const MAX_DAILY_HORSE_RACE_WIN_LIMIT = 350000;
 
 export function getPlayerDailyCardsGrossWins(
   playerId: string,
@@ -165,4 +166,28 @@ export function addPlayerDailyPlinkoNetWins(
 
 function keyForPlinko(playerId: string, dateKey: string) {
   return `kingdoom.daily-plinko.${playerId}.${dateKey}`;
+}
+
+// -- TavernHorseRace daily limit --------------------------------------------
+export function getPlayerDailyHorseRaceNetWins(
+  playerId: string,
+  dateKey: string
+): number {
+  const stored = window.localStorage.getItem(keyForHorseRace(playerId, dateKey));
+  return stored ? parseInt(stored, 10) : 0;
+}
+
+export function addPlayerDailyHorseRaceNetWins(
+  playerId: string,
+  dateKey: string,
+  amount: number
+): number {
+  const current = getPlayerDailyHorseRaceNetWins(playerId, dateKey);
+  const newValue = current + amount;
+  window.localStorage.setItem(keyForHorseRace(playerId, dateKey), newValue.toString());
+  return newValue;
+}
+
+function keyForHorseRace(playerId: string, dateKey: string) {
+  return `kingdoom.daily-horse-race.${playerId}.${dateKey}`;
 }

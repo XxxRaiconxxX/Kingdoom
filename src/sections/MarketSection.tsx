@@ -7,6 +7,7 @@ import {
   Dices,
   Info,
   Goal,
+  Flag,
   RotateCcw,
   ScrollText,
   Shield,
@@ -34,6 +35,7 @@ type TavernMode =
   | "cards"
   | "scratch"
   | "plinko"
+  | "horseRace"
   | "crash"
   | "towerDefense"
   | "penalty"
@@ -103,6 +105,14 @@ const TAVERN_MODES: {
     description: "Torre del Mago: deja caer una esfera entre runas, busca cofres extremos y respeta el limite diario de oro.",
     status: "Azar",
     icon: Sparkles,
+  },
+  {
+    id: "horseRace",
+    label: "Carreras",
+    shortLabel: "Carr.",
+    description: "Carreras del Reino: caballos aleatorios, cuotas variables y apuestas offline preparadas para salas online.",
+    status: "Azar",
+    icon: Flag,
   },
   {
     id: "slots",
@@ -195,6 +205,11 @@ const TavernSlots = lazy(() =>
 const TavernPlinko = lazy(() =>
   import("../components/TavernPlinko").then((module) => ({
     default: module.TavernPlinko,
+  }))
+);
+const TavernHorseRace = lazy(() =>
+  import("../components/TavernHorseRace").then((module) => ({
+    default: module.TavernHorseRace,
   }))
 );
 const TavernCrash = lazy(() =>
@@ -350,6 +365,8 @@ export function MarketSection() {
         return <TavernScratch />;
       case "plinko":
         return <TavernPlinko />;
+      case "horseRace":
+        return <TavernHorseRace />;
       case "slots":
         return <TavernSlots />;
       case "crash":

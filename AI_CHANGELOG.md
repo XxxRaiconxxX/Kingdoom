@@ -29,6 +29,23 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 18/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/features/archivist/archivistActions.ts`, `src/features/archivist/archivist.types.ts`, `api/admin/ask-archivist.ts`, `api/admin/_aiPrompts.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se añadió la capacidad de dar oro a múltiples jugadores simultáneamente ("add_multiple_players_gold").
+*   **Cambios Clave:**
+    *   **Acción de lista:** Se implementó `add_multiple_players_gold` para procesar una lista de nombres de usuario.
+    *   **Búsqueda flexible:** El motor busca a los jugadores indicados ignorando mayúsculas/minúsculas y buscando coincidencias parciales, igual que en la búsqueda individual.
+    *   **Prompts:** Se actualizó el prompt de IA para utilizar un payload de la forma `{"usernames": ["User A", "User B"], "amount": X}` cuando se le piden varios nombres.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
+### [Fecha: 18/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/features/archivist/archivistActions.ts`, `src/features/archivist/archivist.types.ts`, `api/admin/ask-archivist.ts`, `api/admin/_aiPrompts.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Se añadió la capacidad de dar oro a todos los jugadores ("add_all_players_gold") desde el Archivista.
+*   **Cambios Clave:**
+    *   **Acción global:** Se implementó `add_all_players_gold` en el motor de acciones del Archivista, permitiendo actualizar a todos los jugadores del contexto en una sola solicitud.
+    *   **Prompts:** Se actualizó el prompt de IA para reconocer comandos globales y emitir un payload simple de `{ "amount": X }` sin requerir nombre de usuario.
+*   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
+
 ### [Fecha: 13/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/archivist/archivistLive.ts`, `src/components/ArchivistSection.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Correccion de respuestas del Archivista sobre ranking de oro.

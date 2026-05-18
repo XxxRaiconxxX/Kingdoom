@@ -218,6 +218,48 @@ async function executePlayerAction(
     };
   }
 
+  const amount = Math.max(0, Math.floor(payloadNumber(payload, ["amount", "gold", "oro", "cantidad"], 0)));
+
+  if (draft.kind === "add_all_players_gold") {
+    if (amount <= 0) {
+      return { status: "error", message: "La cantidad a dar debe ser mayor a 0." };
+    }
+    const promises = context.players.map(player => updatePlayerGold(player.id, player.gold + amount));
+    await Promise.all(promises);
+    return {
+      status: "success",
+      message: `Se entregaron ${amount.toLocaleString("es-PY")} de oro a todos los jugadores del reino (${context.players.length} jugadores en total).`,
+    };
+  }
+
+  if (draft.kind === "add_multiple_players_gold") {
+    if (amount <= 0) {
+      return { status: "error", message: "La cantidad a dar debe ser mayor a 0." };
+    }
+    const usernames = payload.usernames;
+    if (!Array.isArray(usernames) || usernames.length === 0) {
+      return { status: "error", message: "Debe proveer una lista de nombres de usuario." };
+    }
+    
+    // Find matching players (case insensitive substring match, same as player fuzzy search)
+    const foundPlayers = context.players.filter(p => 
+      usernames.some(u => p.username.toLowerCase().includes(String(u).toLowerCase()))
+    );
+
+    if (foundPlayers.length === 0) {
+      return { status: "error", message: "No se encontro a ninguno de los jugadores solicitados." };
+    }
+
+    const promises = foundPlayers.map(player => updatePlayerGold(player.id, player.gold + amount));
+    await Promise.all(promises);
+    
+    const names = foundPlayers.map(p => p.username).join(", ");
+    return {
+      status: "success",
+      message: `Se entregaron ${amount.toLocaleString("es-PY")} de oro a ${foundPlayers.length} jugadores (${names}).`,
+    };
+  }
+
   const player = findPlayer(
     context.players,
     payloadString(payload, ["playerId", "username", "playerName", "usuario", "jugador", "target", "name"])
@@ -229,7 +271,6 @@ async function executePlayerAction(
     };
   }
 
-  const amount = Math.max(0, Math.floor(payloadNumber(payload, ["amount", "gold", "oro", "cantidad"], 0)));
   const nextGold =
     draft.kind === "set_player_gold"
       ? amount

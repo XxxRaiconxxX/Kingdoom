@@ -58,10 +58,23 @@ function buildWelcomeMessage(isAdmin: boolean): ChatMessage {
     id: "welcome",
     role: "assistant",
     text: isAdmin
-      ? "Soy el Archivista vivo del reino. Puedo consultar el lore, el mercado, las misiones, los eventos y, si usted lo ordena, preparar acciones reales del panel para confirmarlas por chat."
-      : "Soy el Archivista vivo del reino. Puedo consultar lore, mercado, misiones, eventos, bestiario, flora y documentos publicados, con contexto real del estado actual.",
+      ? "Soy el **Archivista vivo** del reino. Puedo consultar el lore, el mercado, las misiones, los eventos y, si usted lo ordena, preparar acciones reales del panel para confirmarlas por chat."
+      : "Soy el **Archivista vivo** del reino. Puedo consultar lore, mercado, misiones, eventos, bestiario, flora y documentos publicados, con contexto real del estado actual.",
     tone: "default",
   };
+}
+
+function renderMessageText(text: string) {
+  return text.split(/(\*\*.*?\*\*)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-semibold text-cyan-200">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
 }
 
 function normalizeDecision(value: string) {
@@ -394,6 +407,7 @@ export function ArchivistSection() {
       ...QUICK_PROMPTS,
       "Dame un resumen del mercado actual.",
       "Que jugadores tienen mas oro ahora?",
+      "Crea un jugador nuevo llamado Aventurero.",
     ];
   }, [isAdmin]);
 
@@ -736,7 +750,7 @@ export function ArchivistSection() {
                       </div>
 
                       <p className="whitespace-pre-wrap text-sm leading-6">
-                        {message.text}
+                        {renderMessageText(message.text)}
                       </p>
 
                       {message.notes?.length ? (
@@ -821,10 +835,19 @@ export function ArchivistSection() {
               })}
 
               {isAsking ? (
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-200">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Consultando archivo
-                </div>
+                <article className="mr-auto md:max-w-[84%]">
+                  <div className="flex items-center gap-3 rounded-[1.4rem] border border-stone-800 bg-stone-950/60 px-4 py-3 shadow-sm">
+                    <Sparkles className="h-3.5 w-3.5 animate-pulse text-cyan-300" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
+                      Archivista analizando
+                    </span>
+                    <div className="ml-1 flex gap-1">
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-400/50" style={{ animationDelay: "0ms" }} />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-400/50" style={{ animationDelay: "150ms" }} />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-400/50" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
+                </article>
               ) : null}
             </div>
 

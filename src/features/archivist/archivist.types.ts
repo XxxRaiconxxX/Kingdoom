@@ -23,6 +23,8 @@ export type ArchivistActionKind =
   | "create_player"
   | "set_player_gold"
   | "add_player_gold"
+  | "add_all_players_gold"
+  | "add_multiple_players_gold"
   | "subtract_player_gold"
   | "upsert_mission"
   | "delete_mission"

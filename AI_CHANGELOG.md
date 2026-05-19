@@ -29,6 +29,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 19/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `kingdoom-bot/src/handlers/player.js` (en repo secundario)
+*   **Resumen de Tareas:** Migración completa de Kingdoom Bot a Railway y soporte de visualización de QR en alta definición para WhatsApp Web.
+*   **Cambios Clave:**
+    *   **Migración a Railway:** Se adaptó la configuración del bot para desplegarse de manera robusta en Railway.app, superando las limitaciones de RAM (512MB) y disco volátil del plan gratuito de Render.
+    *   **Docker & Volumen Persistente:** Se removió la directiva `VOLUME` en el `Dockerfile` (no soportada nativamente por Railway) y se configuró la persistencia de la sesión mediante un disco montado en `/app/.wwebjs_auth` desde la interfaz de Railway.
+    *   **Servidor Web QR en HD:** Se implementó una página interactiva en `PORT = 8080` (en `src/index.js`) que sirve el código QR generado como imagen PNG en alta definición, facilitando su escaneo e indicando el estado `✅ Bot Conectado` una vez autenticado.
+    *   **Registro de Handoff:** Se registró formalmente el estado y las instrucciones del bot en la memoria compartida (`kingdoom-memory` MCP) para sincronizar el trabajo con Codex.
+*   **Notas/Advertencias:** El bot está activo y online. Solo requiere escanear el QR generado en su dominio público de Railway.
+
 ### [Fecha: 18/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/archivist/archivistActions.ts`, `src/features/archivist/archivist.types.ts`, `api/admin/ask-archivist.ts`, `api/admin/_aiPrompts.ts`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se añadió la capacidad de dar oro a múltiples jugadores simultáneamente ("add_multiple_players_gold").

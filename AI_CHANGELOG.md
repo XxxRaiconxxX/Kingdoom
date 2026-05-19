@@ -39,6 +39,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **Instrucciones de Vinculación en UI:** En caso de que la cuenta web no tenga ningún WhatsApp vinculado (`player.phone` es null), el Panel de Perfil muestra una tarjeta dorada estilizada con instrucciones precisas y el comando exacto para copiar y enviar al bot: `!verificar <id_corto>`.
     *   **Actualización de Modelos y Consultas:** Se incluyó la columna `phone` en todas las consultas y payloads de creación de jugadores de `src/utils/players.ts` para que el estado de vinculación se sincronice en tiempo real con la UI de la SPA.
     *   **Habilitación del Comando en Ruteador:** Se registró `'verificar'` en la lista blanca de comandos del ruteador principal `kingdoom-bot/src/index.js` para asegurar el procesamiento correcto de su prefijo.
+    *   **Soporte de Citado para !add/!remove admin:** Se corrigió una discrepancia UX donde los comandos `!add admin` y `!remove admin` requerían especificar manualmente el número. Ahora soportan plenamente citar (responder a) un mensaje para extraer automáticamente el número del remitente del mensaje citado (Opción A).
 *   **Notas/Advertencias:** Todas las modificaciones son 100% compatibles con la base de datos Supabase existente y la lógica del bot. El compilador TypeScript pasó con éxito (`Exit code: 0`).
 
 ### [Fecha: 19/05/2026] - [Autor: Antigravity]

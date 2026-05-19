@@ -354,6 +354,9 @@ export function PlayerProfilePanel({
                       <p className="truncate text-lg font-black text-stone-100">
                         {player.username}
                       </p>
+                      <p className="mt-0.5 font-mono text-[10px] text-amber-500/80">
+                        ID: {player.id.slice(0, 8)}
+                      </p>
                       <p className="mt-1 text-xs text-stone-400">
                         {activeSheet?.name
                           ? `Activo: ${activeSheet.name}`
@@ -437,6 +440,21 @@ export function PlayerProfilePanel({
                           <p className="truncate text-xl font-black text-stone-100">
                             {player.username}
                           </p>
+                          <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-stone-400">
+                            <span className="font-mono text-amber-500/90 font-bold">{player.id.slice(0, 8)}</span>
+                            <span className="text-stone-600">•</span>
+                            <span className={player.phone ? "text-emerald-400/90 font-medium" : "text-stone-400"}>
+                              WhatsApp: {player.phone ? "Vinculado ✅" : "No vinculado ❌"}
+                            </span>
+                          </div>
+                          {!player.phone && (
+                            <div className="mt-2.5 rounded-xl border border-amber-500/15 bg-amber-500/5 p-2.5 text-[11px] leading-relaxed text-amber-200/90 max-w-[280px]">
+                              <p className="font-medium">🔗 Para vincular tu WhatsApp envía:</p>
+                              <code className="mt-1.5 block select-all rounded border border-stone-800 bg-stone-900 px-2 py-1 text-center font-mono font-bold text-amber-300">
+                                !verificar {player.id.slice(0, 8)}
+                              </code>
+                            </div>
+                          )}
                           <div className="mt-2 flex flex-wrap gap-2">
                             {isAdmin ? (
                               <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300">

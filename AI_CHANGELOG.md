@@ -29,6 +29,18 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 19/05/2026] - [Autor: Antigravity] - [Sesión 2]
+*   **Archivos Modificados:** `src/utils/players.ts`, `src/components/PlayerProfilePanel.tsx`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Implementación del sistema de vinculación segura (`!verificar`) entre perfiles web y WhatsApp y visualización en el Panel de Perfil de la web.
+*   **Cambios Clave:**
+    *   **Comando de Vinculación !verificar:** Se creó la función `verifyAndLinkPlayer` en el backend del bot (`kingdoom-bot/src/supabase.js`) que permite a cualquier usuario vincular su número de WhatsApp con su cuenta web medieval existente ingresando su nombre de usuario (sin distinguir mayúsculas/minúsculas) o el segmento inicial de su ID UUID (ej. `!verificar Zoelfrost` o `!verificar 2354`).
+    *   **Bypass de Jugador no Registrado:** Se ubicó el manejador de `!verificar` en `kingdoom-bot/src/handlers/player.js` arriba del control de seguridad de usuario no registrado, permitiendo que nuevos contactos puedan vincularse de manera fluida sin ser rechazados como viajero desconocido.
+    *   **Visualización de ID en la Web:** Se actualizó `src/components/PlayerProfilePanel.tsx` tanto en la vista colapsada como expandida para mostrar el ID corto (los primeros 8 caracteres del UUID) de manera clara y estética.
+    *   **Instrucciones de Vinculación en UI:** En caso de que la cuenta web no tenga ningún WhatsApp vinculado (`player.phone` es null), el Panel de Perfil muestra una tarjeta dorada estilizada con instrucciones precisas y el comando exacto para copiar y enviar al bot: `!verificar <id_corto>`.
+    *   **Actualización de Modelos y Consultas:** Se incluyó la columna `phone` en todas las consultas y payloads de creación de jugadores de `src/utils/players.ts` para que el estado de vinculación se sincronice en tiempo real con la UI de la SPA.
+    *   **Habilitación del Comando en Ruteador:** Se registró `'verificar'` en la lista blanca de comandos del ruteador principal `kingdoom-bot/src/index.js` para asegurar el procesamiento correcto de su prefijo.
+*   **Notas/Advertencias:** Todas las modificaciones son 100% compatibles con la base de datos Supabase existente y la lógica del bot. El compilador TypeScript pasó con éxito (`Exit code: 0`).
+
 ### [Fecha: 19/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `kingdoom-bot/src/handlers/player.js` (en repo secundario)
 *   **Resumen de Tareas:** Migración completa de Kingdoom Bot a Railway y soporte de visualización de QR en alta definición para WhatsApp Web.

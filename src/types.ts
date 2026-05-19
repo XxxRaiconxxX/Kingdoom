@@ -17,6 +17,7 @@ export type PlayerAccount = {
   gold: number;
   isAdmin?: boolean;
   authUserId?: string | null;
+  phone?: string | null;
 };
 
 export type NavItem = {

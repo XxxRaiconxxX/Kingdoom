@@ -7,6 +7,7 @@ type PlayerRow = {
   gold: number;
   is_admin?: boolean | null;
   auth_user_id?: string | null;
+  phone?: string | null;
 };
 
 let supportsAuthUserId: boolean | null = null;
@@ -18,6 +19,7 @@ function mapPlayerRow(row: PlayerRow): PlayerAccount {
     gold: row.gold,
     isAdmin: Boolean(row.is_admin),
     authUserId: row.auth_user_id ?? null,
+    phone: row.phone ?? null,
   };
 }
 
@@ -50,12 +52,12 @@ export async function fetchPlayerByUsername(
   const { data, error } = supportsAuthLink
     ? await supabase
         .from("players")
-        .select("id, username, gold, is_admin, auth_user_id")
+        .select("id, username, gold, is_admin, auth_user_id, phone")
         .ilike("username", normalizedUsername)
         .single()
     : await supabase
         .from("players")
-        .select("id, username, gold, is_admin")
+        .select("id, username, gold, is_admin, phone")
         .ilike("username", normalizedUsername)
         .single();
 
@@ -83,7 +85,7 @@ export async function fetchPlayerByAuthUserId(
 
   const { data, error } = await supabase
     .from("players")
-    .select("id, username, gold, is_admin, auth_user_id")
+    .select("id, username, gold, is_admin, auth_user_id, phone")
     .eq("auth_user_id", normalizedAuthUserId)
     .maybeSingle();
 
@@ -111,11 +113,11 @@ export async function fetchAllPlayers(): Promise<PlayerAccount[]> {
   const { data, error } = supportsAuthLink
     ? await supabase
         .from("players")
-        .select("id, username, gold, is_admin, auth_user_id")
+        .select("id, username, gold, is_admin, auth_user_id, phone")
         .order("username", { ascending: true })
     : await supabase
         .from("players")
-        .select("id, username, gold, is_admin")
+        .select("id, username, gold, is_admin, phone")
         .order("username", { ascending: true });
 
   if (error || !data) {
@@ -155,12 +157,12 @@ export async function createPlayerAccount(input: {
     ? await supabase
         .from("players")
         .insert(insertPayload)
-        .select("id, username, gold, is_admin, auth_user_id")
+        .select("id, username, gold, is_admin, auth_user_id, phone")
         .single()
     : await supabase
         .from("players")
         .insert(insertPayload)
-        .select("id, username, gold, is_admin")
+        .select("id, username, gold, is_admin, phone")
         .single();
 
   if (!adminAttempt.error && adminAttempt.data) {
@@ -185,7 +187,7 @@ export async function createPlayerAccount(input: {
       username: normalizedUsername,
       gold: Math.max(0, input.gold),
     })
-    .select("id, username, gold")
+    .select("id, username, gold, phone")
     .single();
 
   if (!fallbackAttempt.error && fallbackAttempt.data) {

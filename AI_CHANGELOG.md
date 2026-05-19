@@ -36,8 +36,9 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **Migración a Railway:** Se adaptó la configuración del bot para desplegarse de manera robusta en Railway.app, superando las limitaciones de RAM (512MB) y disco volátil del plan gratuito de Render.
     *   **Docker & Volumen Persistente:** Se removió la directiva `VOLUME` en el `Dockerfile` (no soportada nativamente por Railway) y se configuró la persistencia de la sesión mediante un disco montado en `/app/.wwebjs_auth` desde la interfaz de Railway.
     *   **Servidor Web QR en HD:** Se implementó una página interactiva en `PORT = 8080` (en `src/index.js`) que sirve el código QR generado como imagen PNG en alta definición, facilitando su escaneo e indicando el estado `✅ Bot Conectado` una vez autenticado.
+    *   **Remoción del comando !daily:** Se removió por completo la funcionalidad de reclamo de recompensas diarias (`!daily`), limpiando sus imports, su lógica interna de base de datos, la función de selección de premios, su mención en el comando `!ayuda` y su registro en la lista de comandos procesados de `index.js`.
     *   **Registro de Handoff:** Se registró formalmente el estado y las instrucciones del bot en la memoria compartida (`kingdoom-memory` MCP) para sincronizar el trabajo con Codex.
-*   **Notas/Advertencias:** El bot está activo y online. Solo requiere escanear el QR generado en su dominio público de Railway.
+*   **Notas/Advertencias:** El bot está activo y online. Solo requiere escanear el QR generado en su dominio público de Railway. El cambio de la remoción del !daily fue committeado y pusheado de inmediato para gatillar el despliegue automático en Railway.
 
 ### [Fecha: 18/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/archivist/archivistActions.ts`, `src/features/archivist/archivist.types.ts`, `api/admin/ask-archivist.ts`, `api/admin/_aiPrompts.ts`, `AI_CHANGELOG.md`

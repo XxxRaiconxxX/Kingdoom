@@ -42,6 +42,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Archivos Modificados:** `kingdoom-bot/src/ai.js`
 *   **Cambios Clave:**
     *   **[CRÍTICO] Fallback de modelo en `!oraculo` (`ai.js`):** Se identificó un error 429 de cuota (`limit: 0` para `gemini-2.0-flash`) en la API Key del usuario. Se modificó el código para que el modelo no esté hardcodeado. Ahora lee la variable `process.env.GEMINI_MODEL` (que puede configurarse en el Space) y por defecto hace fallback a `gemini-1.5-flash`, el cual suele tener cuota activa libre de problemas.
+    *   **[CRÍTICO] Soporte para múltiples claves API con rotación automática (`ai.js`):** El usuario configuró dos llaves API separadas por comas en `GEMINI_API_KEY`. Se rediseñó el manejador para procesar una lista de llaves de manera dinámica. Al invocar el Oráculo, intenta secuencialmente con cada clave. Si una falla (por ejemplo, por límite de cuota o error 429), realiza un log detallado y reintenta con la siguiente clave transparente y automáticamente.
 
 ### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Auditoría Scheduler]
 *   **Archivos Modificados:** `kingdoom-bot/src/scheduler.js`

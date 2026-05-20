@@ -43,7 +43,8 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Cambios Clave:**
     *   **[CRÍTICO] Fallback de modelo en `!oraculo` (`ai.js`):** Se identificó que todos los modelos Gemini 1.0 y 1.5 (incluyendo `gemini-1.5-flash`) fueron desactivados por Google, arrojando error `404 Not Found`. Se migró el modelo por defecto del bot de `gemini-1.5-flash` a **`gemini-2.5-flash`**.
     *   **[CRÍTICO] Soporte para múltiples claves API con rotación automática (`ai.js`):** El usuario configuró dos llaves API separadas por comas en `GEMINI_API_KEY`. Se rediseñó el manejador para procesar una lista de llaves de manera dinámica. Al invocar el Oráculo, intenta secuencialmente con cada clave. Si una falla (por ejemplo, por límite de cuota o error 429), realiza un log detallado y reintenta con la siguiente clave transparente y automáticamente.
-    *   **[MEJORA] Cadena de Fallback de Modelos en caso de 404 (`ai.js`):** Se implementó una lógica de fallback de modelos en bucle. Si el modelo actual (ej: un modelo personalizado configurado en `GEMINI_MODEL`) es deprecado o devuelve `404 Not Found`, el bot intentará automáticamente con `gemini-2.5-flash` y `gemini-3.5-flash` antes de rendirse, garantizando máxima resiliencia ante futuros apagones de modelos de Google.
+    *   **[MEJORA] Cadena de Fallback de Modelos en caso de 404/503 (`ai.js`):** Se implementó una lógica de fallback de modelos en bucle. Si el modelo actual (ej: `gemini-2.5-flash`) devuelve `404 Not Found` o un error temporal de sobrecarga `503 Service Unavailable`, el bot no descartará la clave de inmediato; en su lugar, intentará automáticamente con otros modelos candidatos como **`gemini-3.5-flash`** para asegurar respuestas exitosas durante picos de demanda del servidor de Google.
+
 
 
 ### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Auditoría Scheduler]

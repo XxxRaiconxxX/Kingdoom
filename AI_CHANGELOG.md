@@ -38,11 +38,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **[MENOR] Fix `!grant` — total de oro desactualizado (`admin.js`):** El mensaje de confirmación calculaba el nuevo total de oro como `player.gold + amount` usando el valor cacheado de la consulta inicial. Si hubo transacciones intermedias, el número mostrado podía ser incorrecto. Se agregó un re-fetch del jugador tras la actualización para mostrar el saldo real.
     *   **[BONUS] Formato de oro en `!dados`:** Se aplicó `.toLocaleString('es-PY')` al mostrar el oro del jugador en el mensaje de saldo insuficiente, siendo consistente con el resto del bot.
 
-### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Fix Oráculo Cuota]
+### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Fix Oráculo Cuota y Migración a Gemini 2.5]
 *   **Archivos Modificados:** `kingdoom-bot/src/ai.js`
 *   **Cambios Clave:**
-    *   **[CRÍTICO] Fallback de modelo en `!oraculo` (`ai.js`):** Se identificó un error 429 de cuota (`limit: 0` para `gemini-2.0-flash`) en la API Key del usuario. Se modificó el código para que el modelo no esté hardcodeado. Ahora lee la variable `process.env.GEMINI_MODEL` (que puede configurarse en el Space) y por defecto hace fallback a `gemini-1.5-flash`, el cual suele tener cuota activa libre de problemas.
+    *   **[CRÍTICO] Fallback de modelo en `!oraculo` (`ai.js`):** Se identificó que todos los modelos Gemini 1.0 y 1.5 (incluyendo `gemini-1.5-flash`) fueron desactivados por Google, arrojando error `404 Not Found`. Se migró el modelo por defecto del bot de `gemini-1.5-flash` a **`gemini-2.5-flash`**.
     *   **[CRÍTICO] Soporte para múltiples claves API con rotación automática (`ai.js`):** El usuario configuró dos llaves API separadas por comas en `GEMINI_API_KEY`. Se rediseñó el manejador para procesar una lista de llaves de manera dinámica. Al invocar el Oráculo, intenta secuencialmente con cada clave. Si una falla (por ejemplo, por límite de cuota o error 429), realiza un log detallado y reintenta con la siguiente clave transparente y automáticamente.
+    *   **[MEJORA] Cadena de Fallback de Modelos en caso de 404 (`ai.js`):** Se implementó una lógica de fallback de modelos en bucle. Si el modelo actual (ej: un modelo personalizado configurado en `GEMINI_MODEL`) es deprecado o devuelve `404 Not Found`, el bot intentará automáticamente con `gemini-2.5-flash` y `gemini-3.5-flash` antes de rendirse, garantizando máxima resiliencia ante futuros apagones de modelos de Google.
+
 
 ### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Auditoría Scheduler]
 *   **Archivos Modificados:** `kingdoom-bot/src/scheduler.js`

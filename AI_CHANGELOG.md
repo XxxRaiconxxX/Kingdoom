@@ -29,6 +29,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 20/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/welcome.js`
+*   **Resumen de Tareas:** Corrección del sistema de bienvenida automática del bot de WhatsApp.
+*   **Cambios Clave:**
+    *   **Fix de filtro de grupo en bienvenida:** El handler de bienvenida exigía que `WELCOME_GROUP_ID` o `WELCOME_GROUP_NAME` coincidieran con el grupo para disparar. Si ninguna variable estaba configurada en Railway, la bienvenida nunca se enviaba (retornaba silenciosamente). Ahora, si no hay filtro configurado, la bienvenida se dispara en **cualquier grupo** donde esté el bot.
+    *   **Log de diagnóstico:** Se añadió un `console.log` detallado al detectar `group_join` para verificar en los logs de Railway si el evento se dispara y en qué grupo.
+*   **Notas/Advertencias:** Para limitar la bienvenida a un solo grupo, configurar `WELCOME_GROUP_ID=<id>@g.us` en Railway. Sin esa variable, el bot dará la bienvenida en todos los grupos.
+
 ### [Fecha: 19/05/2026] - [Autor: Antigravity] - [Sesión 2]
 *   **Archivos Modificados:** `src/utils/players.ts`, `src/components/PlayerProfilePanel.tsx`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Implementación del sistema de vinculación segura (`!verificar`) entre perfiles web y WhatsApp y visualización en el Panel de Perfil de la web.

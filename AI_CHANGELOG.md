@@ -38,6 +38,11 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **[MENOR] Fix `!grant` — total de oro desactualizado (`admin.js`):** El mensaje de confirmación calculaba el nuevo total de oro como `player.gold + amount` usando el valor cacheado de la consulta inicial. Si hubo transacciones intermedias, el número mostrado podía ser incorrecto. Se agregó un re-fetch del jugador tras la actualización para mostrar el saldo real.
     *   **[BONUS] Formato de oro en `!dados`:** Se aplicó `.toLocaleString('es-PY')` al mostrar el oro del jugador en el mensaje de saldo insuficiente, siendo consistente con el resto del bot.
 
+### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Auditoría Scheduler]
+*   **Archivos Modificados:** `kingdoom-bot/src/scheduler.js`
+*   **Cambios Clave:**
+    *   **[CRÍTICO] Fix reset semanal `weekly_gold` (`scheduler.js`):** La operación `supabase.from('players').update({ weekly_gold: 0 })` sin ningún filtro es **bloqueada por defecto** por Supabase JS v2 como medida de seguridad contra actualizaciones masivas accidentales. Esto hacía que el ranking semanal se anunciara correctamente cada lunes pero el oro semanal nunca se reseteara, acumulándose indefinidamente. Se corrigió agregando `.gte('weekly_gold', 0)` como filtro de seguridad que coincide con todos los jugadores (el oro nunca es negativo por diseño).
+
 ### [Fecha: 20/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/welcome.js`, `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `kingdoom-bot/README.md`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/handlers/player.js`
 *   **Resumen de Tareas:** Corrección del sistema de bienvenida, comando `!groupid`, fix del mercado, corrección de textos truncados, fix de imports en consultas detalladas y migración del bot a Hugging Face Spaces (16 GB RAM gratis).

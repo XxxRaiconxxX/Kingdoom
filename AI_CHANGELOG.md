@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Auditoría de Comandos]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `kingdoom-bot/src/handlers/admin.js`
+*   **Resumen:** Auditoría estática de todos los handlers del bot. Se detectaron y corrigieron 3 bugs sin necesidad de testeo manual.
+*   **Cambios Clave:**
+    *   **[CRÍTICO] Fix `!dados` — sender incorrecto en grupos (`games.js`):** El comando `!dados` usaba `msg.from` para buscar al jugador en Supabase. En grupos de WhatsApp, `msg.from` devuelve el JID del **grupo** (ej: `12345@g.us`), no el del jugador. Esto hacía que el bot nunca encontrara al jugador y siempre respondiera "No estás registrado". Corregido usando `msg.author || msg.from`, el patrón estándar del resto de los handlers.
+    *   **[MEDIO] Fix `!ban` — falso positivo (`admin.js`):** Cuando un admin ejecutaba `!ban` con un número no registrado en la DB, Supabase actualizaba 0 filas sin lanzar un error, y el bot respondía "baneado" falsamente. Se agregó una verificación previa que consulta al jugador y retorna un error claro si no existe. Además, el mensaje de confirmación ahora muestra el **username** del jugador baneado, no solo el número.
+    *   **[MENOR] Fix `!grant` — total de oro desactualizado (`admin.js`):** El mensaje de confirmación calculaba el nuevo total de oro como `player.gold + amount` usando el valor cacheado de la consulta inicial. Si hubo transacciones intermedias, el número mostrado podía ser incorrecto. Se agregó un re-fetch del jugador tras la actualización para mostrar el saldo real.
+    *   **[BONUS] Formato de oro en `!dados`:** Se aplicó `.toLocaleString('es-PY')` al mostrar el oro del jugador en el mensaje de saldo insuficiente, siendo consistente con el resto del bot.
+
 ### [Fecha: 20/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/welcome.js`, `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `kingdoom-bot/README.md`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/handlers/player.js`
 *   **Resumen de Tareas:** Corrección del sistema de bienvenida, comando `!groupid`, fix del mercado, corrección de textos truncados, fix de imports en consultas detalladas y migración del bot a Hugging Face Spaces (16 GB RAM gratis).

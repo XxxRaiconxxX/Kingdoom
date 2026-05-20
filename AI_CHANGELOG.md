@@ -30,13 +30,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 20/05/2026] - [Autor: Antigravity]
-*   **Archivos Modificados:** `kingdoom-bot/src/handlers/welcome.js`, `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`
-*   **Resumen de Tareas:** Corrección de bienvenida y adición del comando `!groupid`.
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/welcome.js`, `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `kingdoom-bot/README.md`
+*   **Resumen de Tareas:** Corrección del sistema de bienvenida, comando `!groupid` y migración del bot a Hugging Face Spaces (16 GB RAM gratis).
 *   **Cambios Clave:**
-    *   **Fix de filtro de grupo en bienvenida:** Ahora la bienvenida se dispara en cualquier grupo si no hay filtro configurado en Railway.
-    *   **Log de diagnóstico:** Se añade `console.log` para `group_join`.
-    *   **Comando !groupid:** Se crea el comando `!groupid` para administradores que devuelve el ID único (`@g.us`) del grupo en el que se ejecuta.
-*   **Notas/Advertencias:** El comando `!groupid` permite obtener fácilmente el ID exacto del grupo para configurarlo en Railway como `WELCOME_GROUP_ID`.
+    *   **Migración a Hugging Face Spaces:** Se trasladó el bot desde Railway (con créditos agotados) a Hugging Face Spaces basado en Docker, obteniendo **16 GB de RAM y 2 vCPU** de forma completamente gratuita, eliminando crasheos de memoria por Puppeteer/Chromium.
+    *   **Resolución de puertos (7860) y metadatos:** Se agregó `ENV PORT=7860` en el `Dockerfile` y se creó el `README.md` con la cabecera YAML requerida por Hugging Face. Esto solucionó la pantalla infinita de "Preparing Space" permitiendo la comunicación correcta con la interfaz web.
+    *   **Fix de permisos no-root:** Se crearon los directorios del bot y se asignó `chmod -R 777` en el Dockerfile para que el usuario de Hugging Face (`1000`) pueda escribir los datos de autenticación de WhatsApp en la carpeta temporal de persistencia.
+    *   **Fix de filtro de grupo en bienvenida:** Ahora la bienvenida se dispara en cualquier grupo si no hay filtro configurado en las variables de entorno, evitando retornos silenciosos.
+    *   **Log de diagnóstico:** Se añade `console.log` para `group_join` detallando los IDs de grupos.
+    *   **Comando !groupid:** Se creó el comando `!groupid` para administradores que devuelve el JID único del grupo (`@g.us`) donde se ejecuta para poder configurar las variables del bot de bienvenida.
+*   **Notas/Advertencias:** El bot está completamente enlazado, conectado y activo de forma gratuita en su nueva infraestructura de Hugging Face Spaces.
+
 
 ### [Fecha: 19/05/2026] - [Autor: Antigravity] - [Sesión 2]
 *   **Archivos Modificados:** `src/utils/players.ts`, `src/components/PlayerProfilePanel.tsx`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`

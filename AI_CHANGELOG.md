@@ -38,6 +38,11 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **[MENOR] Fix `!grant` — total de oro desactualizado (`admin.js`):** El mensaje de confirmación calculaba el nuevo total de oro como `player.gold + amount` usando el valor cacheado de la consulta inicial. Si hubo transacciones intermedias, el número mostrado podía ser incorrecto. Se agregó un re-fetch del jugador tras la actualización para mostrar el saldo real.
     *   **[BONUS] Formato de oro en `!dados`:** Se aplicó `.toLocaleString('es-PY')` al mostrar el oro del jugador en el mensaje de saldo insuficiente, siendo consistente con el resto del bot.
 
+### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Fix Oráculo Cuota]
+*   **Archivos Modificados:** `kingdoom-bot/src/ai.js`
+*   **Cambios Clave:**
+    *   **[CRÍTICO] Fallback de modelo en `!oraculo` (`ai.js`):** Se identificó un error 429 de cuota (`limit: 0` para `gemini-2.0-flash`) en la API Key del usuario. Se modificó el código para que el modelo no esté hardcodeado. Ahora lee la variable `process.env.GEMINI_MODEL` (que puede configurarse en el Space) y por defecto hace fallback a `gemini-1.5-flash`, el cual suele tener cuota activa libre de problemas.
+
 ### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesión 3 - Auditoría Scheduler]
 *   **Archivos Modificados:** `kingdoom-bot/src/scheduler.js`
 *   **Cambios Clave:**

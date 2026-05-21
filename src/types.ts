@@ -20,6 +20,68 @@ export type PlayerAccount = {
   phone?: string | null;
 };
 
+export type BusinessProposalStatus =
+  | "pending"
+  | "accepted"
+  | "rejected"
+  | "cancelled";
+
+export type BusinessStatus = "active" | "inactive" | "suspended";
+
+export type PlayerBusinessProposal = {
+  id: string;
+  playerId: string;
+  proposedById?: string | null;
+  proposedByName?: string | null;
+  name: string;
+  description: string;
+  businessType: string;
+  icon: string;
+  productionLabel: string;
+  goldPerHour: number;
+  maxStorage: number;
+  hourlyRangeMin: number;
+  hourlyRangeMax: number;
+  baseCost: number;
+  staffFee: number;
+  openingCost: number;
+  notes?: string | null;
+  status: BusinessProposalStatus;
+  createdAt?: string;
+  respondedAt?: string | null;
+};
+
+export type PlayerBusiness = {
+  id: string;
+  playerId: string;
+  proposalId?: string | null;
+  name: string;
+  description: string;
+  businessType: string;
+  icon: string;
+  productionLabel: string;
+  goldPerHour: number;
+  maxStorage: number;
+  hourlyRangeMin: number;
+  hourlyRangeMax: number;
+  baseCost: number;
+  staffFee: number;
+  openingCost: number;
+  status: BusinessStatus;
+  openedAt: string;
+  lastCollectedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type BusinessCollectionLogEntry = {
+  id: string;
+  businessId: string;
+  playerId: string;
+  collectedGold: number;
+  collectedAt: string;
+};
+
 export type NavItem = {
   id: TabId;
   label: string;

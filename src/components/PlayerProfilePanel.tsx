@@ -16,11 +16,25 @@ import {
   Pencil,
   Trash2,
   Search,
+  Store,
   type LucideIcon,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import type { CharacterSheet } from "../types";
+import type {
+  BusinessCollectionLogEntry,
+  CharacterSheet,
+  PlayerBusiness,
+  PlayerBusinessProposal,
+} from "../types";
 import { PlayerNotificationBell } from "./PlayerNotificationBell";
+import {
+  collectBusinessGold,
+  fetchPlayerBusinessCollectionLog,
+  fetchPlayerBusinesses,
+  fetchPlayerBusinessProposals,
+  projectBusinessStorage,
+  respondBusinessProposal,
+} from "../utils/businesses";
 import {
   MAX_PLAYER_CHARACTER_SHEETS,
   getPlayerSheets,
@@ -86,6 +100,7 @@ export function PlayerProfilePanel({
     profileError,
     connectPlayer,
     clearPlayer,
+    refreshPlayer,
     setProfileError,
   } = usePlayerSession();
   const [usernameInput, setUsernameInput] = useState("");
@@ -100,6 +115,13 @@ export function PlayerProfilePanel({
   const [sheetToDelete, setSheetToDelete] = useState<string | null>(null);
   const [sheetFeedback, setSheetFeedback] = useState("");
   const [activeExpeditionSheetId, setActiveExpeditionSheetId] = useState<string | null>(null);
+  const [businessProposals, setBusinessProposals] = useState<
+    PlayerBusinessProposal[]
+  >([]);
+  const [businesses, setBusinesses] = useState<PlayerBusiness[]>([]);
+  const [businessLogs, setBusinessLogs] = useState<BusinessCollectionLogEntry[]>([]);
+  const [businessFeedback, setBusinessFeedback] = useState("");
+  const [isBusinessBusy, setIsBusinessBusy] = useState(false);
 
   const isCollapsed = Boolean(collapsed && player);
 
@@ -117,7 +139,40 @@ export function PlayerProfilePanel({
     } else {
       setPlayerSheets([]);
       setActiveExpeditionSheetId(null);
+      setBusinessProposals([]);
+      setBusinesses([]);
+      setBusinessLogs([]);
     }
+  }, [player]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadBusinesses() {
+      if (!player) {
+        return;
+      }
+
+      const [nextProposals, nextBusinesses, nextLogs] = await Promise.all([
+        fetchPlayerBusinessProposals(player.id),
+        fetchPlayerBusinesses(player.id),
+        fetchPlayerBusinessCollectionLog(player.id),
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      setBusinessProposals(nextProposals);
+      setBusinesses(nextBusinesses);
+      setBusinessLogs(nextLogs);
+    }
+
+    void loadBusinesses();
+
+    return () => {
+      cancelled = true;
+    };
   }, [player]);
 
   async function refreshPlayerSheetsForProfile() {
@@ -278,6 +333,68 @@ export function PlayerProfilePanel({
         : "Se actualizo la ficha activa de Expedicion."
     );
   };
+
+  async function reloadBusinessState() {
+    if (!player) {
+      return;
+    }
+
+    const [nextProposals, nextBusinesses, nextLogs] = await Promise.all([
+      fetchPlayerBusinessProposals(player.id),
+      fetchPlayerBusinesses(player.id),
+      fetchPlayerBusinessCollectionLog(player.id),
+    ]);
+
+    setBusinessProposals(nextProposals);
+    setBusinesses(nextBusinesses);
+    setBusinessLogs(nextLogs);
+  }
+
+  async function handleBusinessProposalAction(
+    proposalId: string,
+    action: "accept" | "reject"
+  ) {
+    if (!player) {
+      return;
+    }
+
+    setIsBusinessBusy(true);
+    setBusinessFeedback("");
+
+    const result = await respondBusinessProposal({
+      proposalId,
+      playerId: player.id,
+      action,
+    });
+
+    setIsBusinessBusy(false);
+    setBusinessFeedback(result.message);
+
+    if (result.status === "success") {
+      await Promise.all([refreshPlayer(), reloadBusinessState()]);
+    }
+  }
+
+  async function handleCollectBusiness(businessId: string) {
+    if (!player) {
+      return;
+    }
+
+    setIsBusinessBusy(true);
+    setBusinessFeedback("");
+
+    const result = await collectBusinessGold({
+      businessId,
+      playerId: player.id,
+    });
+
+    setIsBusinessBusy(false);
+    setBusinessFeedback(result.message);
+
+    if (result.status === "success") {
+      await Promise.all([refreshPlayer(), reloadBusinessState()]);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -547,6 +664,232 @@ export function PlayerProfilePanel({
                   </div>
                 </div>
               </div>
+
+              {businessProposals.length > 0 || businesses.length > 0 ? (
+                <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-5">
+                  <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-2.5 text-cyan-300">
+                        <Store className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold uppercase tracking-wider text-stone-100">
+                          Tus negocios
+                        </h3>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                          Propuestas del staff y produccion pasiva del reino
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                      <span className="rounded-full border border-stone-700 px-3 py-1">
+                        Propuestas {businessProposals.length}
+                      </span>
+                      <span className="rounded-full border border-stone-700 px-3 py-1">
+                        Activos {businesses.length}
+                      </span>
+                    </div>
+                  </div>
+
+                  {businessFeedback ? (
+                    <div className="mb-4 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+                      {businessFeedback}
+                    </div>
+                  ) : null}
+
+                  {businessProposals.length > 0 ? (
+                    <div className="mb-5">
+                      <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-300">
+                        Propuestas pendientes
+                      </p>
+                      <div className="space-y-3">
+                        {businessProposals.map((proposal) => {
+                          const affordable = player.gold >= proposal.openingCost;
+                          return (
+                            <div
+                              key={proposal.id}
+                              className="rounded-[1.4rem] border border-amber-500/18 bg-[linear-gradient(135deg,rgba(36,26,10,0.72),rgba(20,12,7,0.9))] p-4"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <p className="text-[11px] uppercase tracking-[0.18em] text-amber-200/70">
+                                    {proposal.businessType}
+                                  </p>
+                                  <p className="mt-1 text-lg font-black text-stone-100">
+                                    {proposal.icon} {proposal.name}
+                                  </p>
+                                </div>
+                                <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200">
+                                  {proposal.goldPerHour}/h
+                                </span>
+                              </div>
+
+                              <p className="mt-3 text-sm leading-6 text-stone-300">
+                                {proposal.description}
+                              </p>
+
+                              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                                <BusinessMetric
+                                  label="Produce"
+                                  value={proposal.productionLabel}
+                                />
+                                <BusinessMetric
+                                  label="Tope"
+                                  value={`${proposal.maxStorage} oro`}
+                                />
+                                <BusinessMetric
+                                  label="Costo"
+                                  value={`${proposal.openingCost.toLocaleString("es-PY")} oro`}
+                                />
+                              </div>
+
+                              {proposal.notes ? (
+                                <div className="mt-3 rounded-2xl border border-stone-800 bg-black/20 px-4 py-3 text-sm text-stone-300">
+                                  {proposal.notes}
+                                </div>
+                              ) : null}
+
+                              {!affordable ? (
+                                <p className="mt-3 text-sm text-red-300">
+                                  Necesitas{" "}
+                                  {(proposal.openingCost - player.gold).toLocaleString("es-PY")} oro
+                                  más para abrir este negocio.
+                                </p>
+                              ) : null}
+
+                              <div className="mt-4 flex flex-wrap gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void handleBusinessProposalAction(
+                                      proposal.id,
+                                      "accept"
+                                    )
+                                  }
+                                  disabled={isBusinessBusy || !affordable}
+                                  className="rounded-2xl bg-amber-500 px-4 py-2.5 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  Aceptar propuesta
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void handleBusinessProposalAction(
+                                      proposal.id,
+                                      "reject"
+                                    )
+                                  }
+                                  disabled={isBusinessBusy}
+                                  className="rounded-2xl border border-stone-700 px-4 py-2.5 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  Rechazar
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {businesses.length > 0 ? (
+                    <div>
+                      <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+                        Negocios activos
+                      </p>
+                      <div className="space-y-3">
+                        {businesses.map((business) => {
+                          const projection = projectBusinessStorage(business);
+
+                          return (
+                            <div
+                              key={business.id}
+                              className="rounded-[1.4rem] border border-emerald-500/18 bg-[linear-gradient(135deg,rgba(8,33,25,0.65),rgba(12,12,10,0.9))] p-4"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-200/70">
+                                    {business.businessType}
+                                  </p>
+                                  <p className="mt-1 text-lg font-black text-stone-100">
+                                    {business.icon} {business.name}
+                                  </p>
+                                </div>
+                                <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-200">
+                                  {projection.storedGold}/{business.maxStorage}
+                                </span>
+                              </div>
+
+                              <p className="mt-3 text-sm leading-6 text-stone-300">
+                                {business.description}
+                              </p>
+
+                              <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-800">
+                                <div
+                                  className="h-full rounded-full bg-emerald-400 transition-[width]"
+                                  style={{ width: `${projection.fillRatio * 100}%` }}
+                                />
+                              </div>
+
+                              <div className="mt-3 grid gap-2 sm:grid-cols-4">
+                                <BusinessMetric label="Produce" value={`${business.goldPerHour}/h`} />
+                                <BusinessMetric label="Actividad" value={business.productionLabel} />
+                                <BusinessMetric
+                                  label="Estado"
+                                  value={projection.capped ? "Lleno" : "Generando"}
+                                />
+                                <BusinessMetric
+                                  label="Tope"
+                                  value={`${business.maxStorage} oro`}
+                                />
+                              </div>
+
+                              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                                <p className="text-xs text-stone-400">
+                                  {projection.capped
+                                    ? "Tu negocio ya alcanzo el tope y dejo de producir hasta que recolectes."
+                                    : "Sigue generando oro mientras haya espacio de almacenamiento."}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => void handleCollectBusiness(business.id)}
+                                  disabled={isBusinessBusy || projection.storedGold <= 0}
+                                  className="rounded-2xl bg-emerald-500/85 px-4 py-2.5 text-sm font-extrabold text-stone-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  Recolectar {projection.storedGold.toLocaleString("es-PY")} oro
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {businessLogs.length > 0 ? (
+                    <div className="mt-5 rounded-[1.3rem] border border-stone-800 bg-stone-950/35 p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
+                        Historial reciente
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {businessLogs.slice(0, 5).map((entry) => (
+                          <div
+                            key={entry.id}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-stone-800 bg-black/20 px-3 py-2 text-sm"
+                          >
+                            <span className="text-stone-300">
+                              +{entry.collectedGold.toLocaleString("es-PY")} oro
+                            </span>
+                            <span className="text-stone-500">
+                              {new Date(entry.collectedAt).toLocaleString("es-PY")}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
 
               <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-5">
                 <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -961,6 +1304,17 @@ function ProfileMiniButton({
       <Icon className="h-3.5 w-3.5" />
       {label}
     </button>
+  );
+}
+
+function BusinessMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-stone-800 bg-black/20 px-3 py-2.5">
+      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-bold text-stone-100">{value}</p>
+    </div>
   );
 }
 

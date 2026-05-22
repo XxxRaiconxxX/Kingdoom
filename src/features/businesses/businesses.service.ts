@@ -267,3 +267,19 @@ export async function collectBusinessGold(input: {
     remainingGold: row.remaining_gold ?? null,
   };
 }
+
+export async function deleteBusiness(businessId: string) {
+  const { error } = await supabase.from('businesses').delete().eq('id', businessId);
+  if (error) {
+    return { status: 'error' as const, message: error.message };
+  }
+  return { status: 'deleted' as const, message: 'Negocio eliminado correctamente.' };
+}
+
+export async function deleteBusinessProposal(proposalId: string) {
+  const { error } = await supabase.from('business_proposals').delete().eq('id', proposalId);
+  if (error) {
+    return { status: 'error' as const, message: error.message };
+  }
+  return { status: 'deleted' as const, message: 'Propuesta eliminada correctamente.' };
+}

@@ -12,6 +12,7 @@ import {
   Users,
   X,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
@@ -36,6 +37,8 @@ import {
   formatBusinessPaybackHours,
   projectBusinessStorage,
   upsertBusinessProposal,
+  deleteBusiness,
+  deleteBusinessProposal,
 } from "../utils/businesses";
 import {
   deleteMarketItem,
@@ -201,6 +204,8 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [businesses, setBusinesses] = useState<PlayerBusiness[]>([]);
   const [businessFeedback, setBusinessFeedback] = useState("");
   const [isSavingBusinessProposal, setIsSavingBusinessProposal] = useState(false);
+  const [isDeletingBusinessProposal, setIsDeletingBusinessProposal] = useState(false);
+  const [isDeletingBusiness, setIsDeletingBusiness] = useState(false);
   const [businessSearch, setBusinessSearch] = useState("");
   const [businessPlayerId, setBusinessPlayerId] = useState("");
   const [businessProposalId, setBusinessProposalId] = useState("");
@@ -820,6 +825,56 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     if (result.status === "saved") {
       resetBusinessForm();
       await reloadAdminData();
+    }
+  }
+
+  async function handleDeleteBusinessProposal() {
+    if (!businessProposalId) {
+      setBusinessFeedback("Selecciona una propuesta antes de intentar borrarla.");
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `¿Seguro que quieres borrar la propuesta "${businessName}"? Esta accion no se puede deshacer.`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setIsDeletingBusinessProposal(true);
+    setBusinessFeedback("");
+
+    const result = await deleteBusinessProposal(businessProposalId);
+
+    setIsDeletingBusinessProposal(false);
+    setBusinessFeedback(result.message);
+
+    if (result.status === "deleted") {
+      resetBusinessForm();
+      await reloadAdminData();
+    }
+  }
+
+  async function handleDeleteBusiness(id: string, name: string) {
+    const shouldDelete = window.confirm(
+      `¿Seguro que quieres borrar el negocio "${name}" de forma permanente? Esta accion no se puede deshacer y el oro no reclamado se perdera.`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setIsDeletingBusiness(true);
+
+    const result = await deleteBusiness(id);
+
+    setIsDeletingBusiness(false);
+
+    if (result.status === "deleted") {
+      await reloadAdminData();
+    } else {
+      alert(`Error al eliminar negocio: ${result.message}`);
     }
   }
 
@@ -2554,7 +2609,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   <div className="sticky bottom-0 z-10 -mx-1 mt-4 grid gap-3 rounded-[1.3rem] border border-stone-800 bg-stone-950/90 p-2 shadow-2xl shadow-black/40 backdrop-blur sm:flex sm:flex-wrap sm:items-center">
                     <button
                       type="submit"
-                      disabled={isSavingBusinessProposal}
+                      disabled={isSavingBusinessProposal || isDeletingBusinessProposal}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                     >
                       {isSavingBusinessProposal ? (
@@ -2573,14 +2628,26 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       <button
                         type="button"
                         onClick={resetBusinessForm}
+                        disabled={isDeletingBusinessProposal}
                         className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
                       >
                         Cancelar
                       </button>
                     ) : null}
+                    {businessProposalId ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteBusinessProposal()}
+                        disabled={isSavingBusinessProposal || isDeletingBusinessProposal}
+                        className="w-full rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                      >
+                        {isDeletingBusinessProposal ? "Borrando..." : "Borrar"}
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={resetBusinessForm}
+                      disabled={isDeletingBusinessProposal}
                       className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
                     >
                       Limpiar
@@ -2752,9 +2819,20 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                                     {business.icon} {business.name}
                                   </p>
                                 </div>
-                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-200">
-                                  {projection.storedGold}/{business.maxStorage}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-200">
+                                    {projection.storedGold}/{business.maxStorage}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => void handleDeleteBusiness(business.id, business.name)}
+                                    disabled={isDeletingBusiness}
+                                    title="Eliminar negocio"
+                                    className="kd-touch rounded-full border border-red-500/20 bg-red-500/10 p-1.5 text-red-400 transition hover:bg-red-500/20 hover:text-red-300 disabled:opacity-50"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
                               </div>
                               <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-800">
                                 <div

@@ -29,6 +29,23 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 22/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/features/businesses/businesses.service.ts`
+*   **Resumen:** Implementación de la funcionalidad de borrado de negocios y propuestas de negocios desde el panel de control administrativo.
+*   **Cambios Clave:**
+    *   **[Backend] Eliminación de registros:** Se añadieron las funciones `deleteBusiness` y `deleteBusinessProposal` a los servicios de negocios para ejecutar los borrados con su respectivo manejo de estado.
+    *   **[Admin] Botón Borrar Negocio Activo:** Los administradores ahora pueden borrar negocios permanentemente pulsando el ícono de la papelera junto al estado del almacenamiento en la tarjeta del negocio, con un diálogo de confirmación previo.
+    *   **[Admin] Botón Borrar Propuesta:** Se agregó un botón rojo de "Borrar" en el formulario de creación/edición de propuestas, posibilitando la eliminación de propuestas mal formuladas o expiradas, igualmente protegido por confirmación.
+*   **Notas/Advertencias:** Estas acciones no se pueden deshacer y el oro no reclamado en negocios activos se perderá si son eliminados.
+
+### [Fecha: 22/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`
+*   **Resumen:** Optimización de la interfaz de "Tus negocios" para ahorrar espacio y mejorar la experiencia de usuario.
+*   **Cambios Clave:**
+    *   **[UI] Filtrado Automático:** Las propuestas de negocios ahora desaparecen instantáneamente de la lista "Propuestas pendientes" una vez que son respondidas, mostrando solo aquellas en estado "pending".
+    *   **[UI] Sección Colapsable:** Se añadió un botón "Mostrar / Ocultar" en la cabecera. Por defecto, todo el bloque interno de "Negocios activos" y "Propuestas" aparece colapsado, limpiando visualmente el perfil del jugador.
+*   **Notas/Advertencias:** Estos cambios operan exclusivamente a nivel de presentación en la SPA; la lógica de red y base de datos (RPC) permanece intacta.
+
 ### [Fecha: 22/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/supabaseClient.ts`, `src/utils/players.ts`, `src/context/PlayerSessionContext.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/components/AdminControlSheet.tsx`, `src/components/admin/AdminControlPrimitives.tsx`, `src/utils/supabaseErrors.ts`, `supabase_secure_admin_links.sql`
 *   **Resumen:** Correccion estructural del acceso admin protegido por RLS para soportar sesiones seguras de Supabase y multiples perfiles ligados al mismo navegador.

@@ -127,6 +127,7 @@ export function PlayerProfilePanel({
   const [businessLogs, setBusinessLogs] = useState<BusinessCollectionLogEntry[]>([]);
   const [businessFeedback, setBusinessFeedback] = useState("");
   const [isBusinessBusy, setIsBusinessBusy] = useState(false);
+  const [isBusinessesExpanded, setIsBusinessesExpanded] = useState(false);
   const [secureLinkFeedback, setSecureLinkFeedback] = useState("");
 
   const isCollapsed = Boolean(collapsed && player);
@@ -729,7 +730,7 @@ export function PlayerProfilePanel({
                 </div>
               </div>
 
-              {businessProposals.length > 0 || businesses.length > 0 ? (
+              {businessProposals.some(p => p.status === "pending") || businesses.length > 0 ? (
                 <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-5">
                   <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-center gap-3">
@@ -745,29 +746,38 @@ export function PlayerProfilePanel({
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.16em] text-stone-500">
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-stone-500">
                       <span className="rounded-full border border-stone-700 px-3 py-1">
-                        Propuestas {businessProposals.length}
+                        Propuestas {businessProposals.filter(p => p.status === "pending").length}
                       </span>
                       <span className="rounded-full border border-stone-700 px-3 py-1">
                         Activos {businesses.length}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsBusinessesExpanded(!isBusinessesExpanded)}
+                        className="rounded-full border border-stone-700 px-3 py-1 font-bold transition hover:border-stone-500 hover:text-stone-300"
+                      >
+                        {isBusinessesExpanded ? "Ocultar" : "Mostrar"}
+                      </button>
                     </div>
                   </div>
 
-                  {businessFeedback ? (
+                  {isBusinessesExpanded ? (
+                    <>
+                      {businessFeedback ? (
                     <div className="mb-4 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
                       {businessFeedback}
                     </div>
                   ) : null}
 
-                  {businessProposals.length > 0 ? (
+                  {businessProposals.filter(p => p.status === "pending").length > 0 ? (
                     <div className="mb-5">
                       <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-300">
                         Propuestas pendientes
                       </p>
                       <div className="space-y-3">
-                        {businessProposals.map((proposal) => {
+                        {businessProposals.filter(p => p.status === "pending").map((proposal) => {
                           const affordable = player.gold >= proposal.openingCost;
                           return (
                             <div
@@ -951,6 +961,8 @@ export function PlayerProfilePanel({
                         ))}
                       </div>
                     </div>
+                  ) : null}
+                    </>
                   ) : null}
                 </div>
               ) : null}

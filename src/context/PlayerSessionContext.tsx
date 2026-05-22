@@ -196,7 +196,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
 
       if (sessionError) {
         setSecureSessionError(
-          "No se pudo revisar la sesion segura de Supabase en este navegador."
+          `No se pudo revisar la sesion segura de Supabase en este navegador. ${sessionError.message ?? ""}`.trim()
         );
         setIsSecureSessionReady(true);
         return;
@@ -218,7 +218,13 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       if (error || !data.user?.id) {
         setSecureAuthUserId(null);
         setSecureSessionError(
-          "No se pudo iniciar la sesion segura necesaria para las acciones protegidas del staff."
+          [
+            "No se pudo iniciar la sesion segura necesaria para las acciones protegidas del staff.",
+            error?.message ?? "",
+            "Activa Anonymous sign-ins en Supabase Auth > Providers para habilitar la vinculacion segura desde la web.",
+          ]
+            .filter(Boolean)
+            .join(" ")
         );
         setIsSecureSessionReady(true);
         return;

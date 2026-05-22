@@ -260,6 +260,7 @@ export function TavernHorseRace() {
   const raceRef = useRef<HorseRaceResult | null>(null);
   const autoStartRef = useRef<string | null>(null);
   const autoSettleRef = useRef<string | null>(null);
+  const resolvedFinishedSessionRef = useRef<PublicHorseRaceSession | null>(null);
   const startTimeRef = useRef(0);
   const dateKey = useMemo(() => buildScratchDateKey(), []);
 
@@ -277,14 +278,27 @@ export function TavernHorseRace() {
   const [onlineSupported, setOnlineSupported] = useState<boolean | null>(null);
   const [onlineSessions, setOnlineSessions] = useState<PublicHorseRaceSession[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState("");
+  const [resolvedFinishedSession, setResolvedFinishedSession] = useState<PublicHorseRaceSession | null>(null);
   const [onlineBets, setOnlineBets] = useState<PublicHorseRaceBet[]>([]);
   const [targetBets, setTargetBets] = useState(2);
 
+  useEffect(() => {
+    resolvedFinishedSessionRef.current = resolvedFinishedSession;
+  }, [resolvedFinishedSession]);
+
   const balance = player?.gold ?? 0;
-  const selectedSession = useMemo(
-    () => onlineSessions.find((session) => session.id === selectedSessionId) ?? null,
-    [onlineSessions, selectedSessionId]
-  );
+  const selectedSession = useMemo(() => {
+    const liveSession = onlineSessions.find((session) => session.id === selectedSessionId) ?? null;
+    if (liveSession) {
+      return liveSession;
+    }
+
+    if (resolvedFinishedSession?.id === selectedSessionId) {
+      return resolvedFinishedSession;
+    }
+
+    return null;
+  }, [onlineSessions, resolvedFinishedSession, selectedSessionId]);
   const activeHorses = raceMode === "online" && selectedSession ? selectedSession.horses : horses;
   const activeResult = raceMode === "online" && selectedSession ? selectedSession.result : lastResult;
   const activeWinnerId = raceMode === "online" && selectedSession ? selectedSession.winnerId : lastResult?.winnerId ?? null;
@@ -337,11 +351,21 @@ export function TavernHorseRace() {
         null;
 
       setOnlineSessions(sessions);
-      setSelectedSessionId(nextSelected?.id ?? "");
+      setSelectedSessionId(
+        nextSelected?.id ??
+          (resolvedFinishedSessionRef.current?.id === preferredSessionId ? preferredSessionId ?? "" : "")
+      );
+      if (nextSelected?.id === preferredSessionId) {
+        setResolvedFinishedSession(null);
+      }
 
       if (!nextSelected) {
         setOnlineBets([]);
-        setOnlineFeedback("No hay salas online activas. Crea una nueva sala para abrir apuestas.");
+        if (resolvedFinishedSessionRef.current?.id === preferredSessionId) {
+          setOnlineFeedback((current) => current || "La carrera finalizo. Revisa el ganador o crea una nueva sala.");
+        } else {
+          setOnlineFeedback("No hay salas online activas. Crea una nueva sala para abrir apuestas.");
+        }
         setOnlineLoading(false);
         return;
       }
@@ -502,6 +526,7 @@ export function TavernHorseRace() {
     setOnlineLoading(true);
     autoStartRef.current = null;
     autoSettleRef.current = null;
+    setResolvedFinishedSession(null);
     const nextHorses = createHorseField();
     const result = await createPublicHorseRaceSession({
       playerId: player.id,
@@ -578,7 +603,19 @@ export function TavernHorseRace() {
       sessionId,
     });
     setOnlineLoading(false);
-    setOnlineFeedback(result.message ?? "");
+    if (result.status === "success" && result.data) {
+      const settledSession = result.data;
+      setResolvedFinishedSession(settledSession);
+      const winningHorse =
+        settledSession.horses.find((horse) => horse.id === settledSession.winnerId) ?? null;
+      setOnlineFeedback(
+        winningHorse
+          ? `Sala: ${winningHorse.name} cruzo primero. Pagos liquidados.`
+          : result.message ?? "Carrera finalizada. Pagos liquidados."
+      );
+    } else {
+      setOnlineFeedback(result.message ?? "");
+    }
     await refreshOnlineState(sessionId);
     await refreshPlayer();
   }

@@ -29,6 +29,34 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 22/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `src/components/TavernHorseRace.tsx`, `AI_CHANGELOG.md`
+*   **Resumen:** Correccion del cierre visual en carreras online del hipodromo.
+*   **Cambios Clave:**
+    *   **Foto finish retenida:** La carrera online ahora conserva una instantanea local de la sesion recien terminada aunque Supabase ya la marque como `finished` y la quite del listado activo.
+    *   **Ganador visible:** Se mantiene la camara de llegada y el nombre del caballo ganador despues de liquidar la carrera, en vez de resetear el canvas a los puestos iniciales.
+    *   **Feedback correcto:** El mensaje posterior a la liquidacion ahora informa directamente que caballo cruzo primero y deja la carrera visible hasta que se elija o cree otra sala.
+*   **Notas/Advertencias:** La solucion mantiene el filtro que oculta salas `finished` por defecto en la lista publica; solo conserva localmente la ultima carrera terminada del usuario actual para evitar mostrar llegadas antiguas al entrar por primera vez.
+
+### [Fecha: 22/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `Kingdoom-bot/src/handlers/games.js`
+*   **Resumen:** Mejora del Oráculo con Memoria y Contexto de Jugador.
+*   **Cambios Clave:**
+    *   `games.js`: Se implementó un mapa en memoria (`oraculoMemory`) que guarda el historial de los últimos 3 intercambios por cada chat/grupo, dándole al Oráculo memoria a corto plazo.
+    *   El oráculo ahora sabe quién le habla y cuánto oro tiene. El prompt fue ajustado para referirse al jugador por su nombre, y para burlarse o codiciar sus riquezas basándose en su saldo en la base de datos, mejorando drásticamente el rol en vivo.
+    *   **Flexibilidad (Nuevo):** Se eliminó la restricción rígida de "exactamente 2-3 líneas". Ahora se le permite adaptarse: puede dar respuestas de 1-2 líneas si es un simple vaticinio o explayarse hasta 2 párrafos si la pregunta requiere contexto del *lore*. Además, puede interpretar preguntas "Off-Rol" (fuera de personaje) absorbiéndolas de forma poética como si fueran hechicería o idiomas forasteros.
+    *   **Integración de Fichas (Nuevo):** Se añadió `getPlayerSheet` en `supabase.js`. El oráculo ahora extrae la Ficha de Personaje (Rol) del jugador desde Supabase e inyecta su Nombre de personaje, Raza, Origen, Poderes, Arma y Personalidad en el sistema de la IA. Esto permite al oráculo dar profecías hiper-personalizadas basadas en la lore individual de cada guerrero.
+    *   `ai.js`: Se implementó un tercer modelo de respaldo (`gemini-1.5-flash`) en la cascada de fallbacks para mitigar errores `503 Service Unavailable` provocados por la saturación global de los servidores de Google Generative AI en los modelos `2.5` y `3.5`.
+    *   `ai.js`: Se implementó un tercer modelo de respaldo (`gemini-1.5-flash`) en la cascada de fallbacks para mitigar errores `503 Service Unavailable` provocados por la saturación global de los servidores de Google Generative AI en los modelos `2.5` y `3.5`.
+    *   **Prevención de Alucinaciones (Nuevo):** Se le dio la instrucción estricta al Oráculo de negarse a revelar las riquezas o secretos de *otros* jugadores. Si se le pregunta por alguien ajeno, ahora dirá de forma misteriosa que no puede revelar secretos que están bajo la sombra, evitando que la IA invente números falsos para compensar la falta de contexto en memoria.
+    *   **Transferencia de Oro (`!oro`):** Se modificó el comando `!oro` en `player.js`. Ahora, si se usa sin parámetros, muestra el saldo actual. Si se usa como `!oro <monto> <@usuario>`, permite a los jugadores enviarse oro entre sí, descontando de la cuenta del emisor y sumando a la del receptor (con validación de fondos y protección de auto-envío).
+*   **Archivos Modificados:** `Kingdoom-bot/src/supabase.js`, `Kingdoom-bot/src/handlers/games.js`, `Kingdoom-bot/src/handlers/admin.js`, `Kingdoom-bot/src/index.js`
+*   **Resumen:** Arquitectura RAG e integración de Base de Conocimiento entre Kingdoom-sync (Archivista) y Kingdoom-bot.
+*   **Cambios Clave:**
+    *   `supabase.js`: Se añadieron funciones `getKnowledgeDocuments` y `pickKnowledgeContext` para consultar la tabla `knowledge_documents`.
+    *   `!oraculo` (`games.js`): Ahora inyecta dinámicamente hasta 2 documentos relevantes de la base de datos de conocimiento como contexto al prompt de Gemini, compartiendo la misma memoria del Archivista web.
+    *   `!data` (`admin.js` y `index.js`): Se añadió este comando exclusivo de admin para WhatsApp. Permite adjuntar un archivo `.txt` y cargarlo a la tabla Supabase, sincronizando la memoria directamente desde WhatsApp hacia la web.
+
 ### [Fecha: 22/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/features/businesses/businesses.service.ts`
 *   **Resumen:** Implementación de la funcionalidad de borrado de negocios y propuestas de negocios desde el panel de control administrativo.

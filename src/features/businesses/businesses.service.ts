@@ -37,6 +37,23 @@ const BUSINESS_LOGS_SELECT = `
   id, business_id, player_id, collected_gold, collected_at
 `;
 
+function isMissingBusinessRpc(
+  error: { code?: string; message?: string | null; details?: string | null },
+  functionName: string
+) {
+  const message = String(error.message ?? "").toLowerCase();
+  const details = String(error.details ?? "").toLowerCase();
+
+  return (
+    error.code === "42883" ||
+    error.code === "PGRST202" ||
+    message.includes("schema cache") ||
+    details.includes("schema cache") ||
+    message.includes("could not find the function") ||
+    message.includes(functionName)
+  );
+}
+
 export async function fetchBusinessAdminState(): Promise<BusinessAdminState> {
   const [proposalResult, businessResult, logResult] = await Promise.all([
     supabase
@@ -171,15 +188,13 @@ export async function respondBusinessProposal(input: {
   });
 
   if (error) {
-    const missingRpc =
-      error.code === "42883" ||
-      error.message.toLowerCase().includes("respond_business_proposal");
+    const missingRpc = isMissingBusinessRpc(error, "respond_business_proposal");
 
     return {
       status: "error" as const,
       message: missingRpc
-        ? "La respuesta segura de negocios aun no esta activada en Supabase. Ejecuta el SQL de negocios antes de usar esta opcion."
-        : error.message,
+        ? "La respuesta segura de negocios aun no aparece en el schema de Supabase. Ejecuta el SQL de negocios y luego fuerza un `NOTIFY pgrst, 'reload schema';` en el SQL Editor."
+        : `No se pudo responder la propuesta. ${error.message}${error.details ? ` ${error.details}` : ""}`.trim(),
       remainingGold: null,
       proposalStatus: null,
     };
@@ -220,15 +235,13 @@ export async function collectBusinessGold(input: {
   });
 
   if (error) {
-    const missingRpc =
-      error.code === "42883" ||
-      error.message.toLowerCase().includes("collect_business_gold");
+    const missingRpc = isMissingBusinessRpc(error, "collect_business_gold");
 
     return {
       status: "error" as const,
       message: missingRpc
-        ? "La recoleccion segura de negocios aun no esta activada en Supabase. Ejecuta el SQL de negocios antes de cobrar."
-        : error.message,
+        ? "La recoleccion segura de negocios aun no aparece en el schema de Supabase. Ejecuta el SQL de negocios y luego fuerza un `NOTIFY pgrst, 'reload schema';` en el SQL Editor."
+        : `No se pudo recolectar el oro del negocio. ${error.message}${error.details ? ` ${error.details}` : ""}`.trim(),
       collectedGold: 0,
       remainingGold: null,
     };

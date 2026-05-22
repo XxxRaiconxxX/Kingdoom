@@ -342,3 +342,5 @@ $$;
 
 revoke all on function public.collect_business_gold(uuid, uuid) from public;
 grant execute on function public.collect_business_gold(uuid, uuid) to anon, authenticated;
+
+notify pgrst, 'reload schema';

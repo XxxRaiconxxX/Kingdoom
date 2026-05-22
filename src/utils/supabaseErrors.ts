@@ -11,7 +11,7 @@ export function formatAdminPermissionMessage(
     message.includes("not allowed");
 
   if (looksLikePermissionError) {
-    return `${fallback} Conecta un jugador marcado con is_admin = true para usar esta accion.`;
+    return `${fallback} Vincula este perfil admin con la sesion segura de Supabase para usar esta accion.`;
   }
 
   return rawMessage ? `${fallback} ${rawMessage}` : fallback;

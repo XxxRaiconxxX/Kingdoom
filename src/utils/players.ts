@@ -11,6 +11,7 @@ type PlayerRow = {
 };
 
 let supportsAuthUserId: boolean | null = null;
+let supportsPlayerAuthLinks: boolean | null = null;
 
 function mapPlayerRow(row: PlayerRow): PlayerAccount {
   return {
@@ -37,6 +38,22 @@ async function detectAuthUserIdSupport() {
 
   supportsAuthUserId = error.code !== "42703";
   return supportsAuthUserId;
+}
+
+async function detectPlayerAuthLinksSupport() {
+  if (supportsPlayerAuthLinks !== null) {
+    return supportsPlayerAuthLinks;
+  }
+
+  const { error } = await supabase.from("player_auth_links").select("player_id").limit(1);
+
+  if (!error) {
+    supportsPlayerAuthLinks = true;
+    return true;
+  }
+
+  supportsPlayerAuthLinks = error.code !== "42P01";
+  return supportsPlayerAuthLinks;
 }
 
 export async function fetchPlayerByUsername(
@@ -77,9 +94,28 @@ export async function fetchPlayerByAuthUserId(
     return null;
   }
 
-  const supportsAuthLink = await detectAuthUserIdSupport();
+  const supportsAuthLinkTable = await detectPlayerAuthLinksSupport();
 
-  if (!supportsAuthLink) {
+  if (supportsAuthLinkTable) {
+    const { data, error } = await supabase
+      .from("player_auth_links")
+      .select(
+        "player:players(id, username, gold, is_admin, auth_user_id, phone)"
+      )
+      .eq("auth_user_id", normalizedAuthUserId)
+      .limit(1)
+      .maybeSingle();
+
+    const linkedPlayer = (data as { player?: PlayerRow | null } | null)?.player;
+
+    if (!error && linkedPlayer) {
+      return mapPlayerRow(linkedPlayer);
+    }
+  }
+
+  const supportsAuthLinkColumn = await detectAuthUserIdSupport();
+
+  if (!supportsAuthLinkColumn) {
     return null;
   }
 
@@ -94,6 +130,50 @@ export async function fetchPlayerByAuthUserId(
   }
 
   return mapPlayerRow(data as PlayerRow);
+}
+
+export async function isPlayerLinkedToAuthUser(
+  playerId: string,
+  authUserId: string
+): Promise<boolean> {
+  const normalizedPlayerId = playerId.trim();
+  const normalizedAuthUserId = authUserId.trim();
+
+  if (!normalizedPlayerId || !normalizedAuthUserId) {
+    return false;
+  }
+
+  const supportsAuthLinkTable = await detectPlayerAuthLinksSupport();
+
+  if (supportsAuthLinkTable) {
+    const { data, error } = await supabase
+      .from("player_auth_links")
+      .select("player_id")
+      .eq("player_id", normalizedPlayerId)
+      .eq("auth_user_id", normalizedAuthUserId)
+      .limit(1)
+      .maybeSingle();
+
+    if (!error && data) {
+      return true;
+    }
+  }
+
+  const supportsAuthLinkColumn = await detectAuthUserIdSupport();
+
+  if (!supportsAuthLinkColumn) {
+    return false;
+  }
+
+  const { data, error } = await supabase
+    .from("players")
+    .select("id")
+    .eq("id", normalizedPlayerId)
+    .eq("auth_user_id", normalizedAuthUserId)
+    .limit(1)
+    .maybeSingle();
+
+  return !error && Boolean(data);
 }
 
 export async function updatePlayerGold(
@@ -225,37 +305,6 @@ export async function linkPlayerToAuthUser(playerId: string, authUserId: string)
     };
   }
 
-  const supportsAuthLink = await detectAuthUserIdSupport();
-
-  if (!supportsAuthLink) {
-    return {
-      status: "unavailable" as const,
-      message:
-        "La columna auth_user_id aun no existe en players. Crea esa columna antes de vincular cuentas seguras.",
-    };
-  }
-
-  const { data: claimedByAnother, error: claimError } = await supabase
-    .from("players")
-    .select("id, username")
-    .eq("auth_user_id", normalizedAuthUserId)
-    .neq("id", normalizedPlayerId)
-    .maybeSingle();
-
-  if (claimError) {
-    return {
-      status: "error" as const,
-      message: "No se pudo comprobar si la cuenta segura ya estaba vinculada.",
-    };
-  }
-
-  if (claimedByAnother) {
-    return {
-      status: "claimed" as const,
-      message: `La cuenta segura ya esta vinculada a ${claimedByAnother.username}.`,
-    };
-  }
-
   const { data: currentPlayer, error: playerError } = await supabase
     .from("players")
     .select("id, username, auth_user_id")
@@ -266,6 +315,49 @@ export async function linkPlayerToAuthUser(playerId: string, authUserId: string)
     return {
       status: "error" as const,
       message: "No se pudo leer el jugador que quieres vincular.",
+    };
+  }
+
+  const supportsAuthLinkTable = await detectPlayerAuthLinksSupport();
+
+  if (supportsAuthLinkTable) {
+    const alreadyLinked = await isPlayerLinkedToAuthUser(
+      normalizedPlayerId,
+      normalizedAuthUserId
+    );
+
+    if (alreadyLinked) {
+      return {
+        status: "linked" as const,
+        message: "El jugador ya estaba vinculado a esta cuenta segura.",
+      };
+    }
+
+    const { error } = await supabase.from("player_auth_links").insert({
+      player_id: normalizedPlayerId,
+      auth_user_id: normalizedAuthUserId,
+    });
+
+    if (error && error.code !== "23505") {
+      return {
+        status: "error" as const,
+        message: "No se pudo guardar la vinculacion segura del jugador.",
+      };
+    }
+
+    return {
+      status: "linked" as const,
+      message: "Jugador vinculado correctamente con la cuenta segura.",
+    };
+  }
+
+  const supportsAuthLinkColumn = await detectAuthUserIdSupport();
+
+  if (!supportsAuthLinkColumn) {
+    return {
+      status: "unavailable" as const,
+      message:
+        "La vinculacion segura aun no esta activada en Supabase. Ejecuta el SQL de enlaces seguros antes de continuar.",
     };
   }
 

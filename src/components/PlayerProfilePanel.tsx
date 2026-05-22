@@ -96,10 +96,15 @@ export function PlayerProfilePanel({
     player,
     isAdmin,
     isHydrating,
+    isSecureSessionReady,
+    secureSessionError,
+    isPlayerSecureLinked,
+    isLinkingSecureAccount,
     isSubmittingProfile,
     profileError,
     connectPlayer,
     clearPlayer,
+    linkCurrentPlayerToSecureSession,
     refreshPlayer,
     setProfileError,
   } = usePlayerSession();
@@ -122,6 +127,7 @@ export function PlayerProfilePanel({
   const [businessLogs, setBusinessLogs] = useState<BusinessCollectionLogEntry[]>([]);
   const [businessFeedback, setBusinessFeedback] = useState("");
   const [isBusinessBusy, setIsBusinessBusy] = useState(false);
+  const [secureLinkFeedback, setSecureLinkFeedback] = useState("");
 
   const isCollapsed = Boolean(collapsed && player);
 
@@ -143,6 +149,7 @@ export function PlayerProfilePanel({
       setBusinesses([]);
       setBusinessLogs([]);
     }
+    setSecureLinkFeedback("");
   }, [player]);
 
   useEffect(() => {
@@ -563,6 +570,21 @@ export function PlayerProfilePanel({
                             <span className={player.phone ? "text-emerald-400/90 font-medium" : "text-stone-400"}>
                               WhatsApp: {player.phone ? "Vinculado ✅" : "No vinculado ❌"}
                             </span>
+                            <span className="text-stone-600">•</span>
+                            <span
+                              className={
+                                isPlayerSecureLinked
+                                  ? "text-cyan-300/90 font-medium"
+                                  : "text-stone-400"
+                              }
+                            >
+                              Cuenta segura:{" "}
+                              {isPlayerSecureLinked
+                                ? "Activa ✅"
+                                : isSecureSessionReady
+                                  ? "Pendiente"
+                                  : "Preparando"}
+                            </span>
                           </div>
                           <div className="mt-2 flex flex-wrap gap-2">
                             {isAdmin ? (
@@ -625,6 +647,48 @@ export function PlayerProfilePanel({
                         onClick={() => onCollapsedChange?.(!isCollapsed)}
                       />
                     </div>
+                    {isAdmin && !isPlayerSecureLinked ? (
+                      <div className="rounded-[1.25rem] border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-300/80">
+                              Cuenta segura requerida
+                            </p>
+                            <p className="mt-1 leading-6 text-cyan-50/90">
+                              Este perfil admin aun no esta enlazado a la sesión segura de Supabase.
+                              Vincúlala una vez y las acciones del staff quedarán habilitadas en este navegador.
+                            </p>
+                            {secureSessionError ? (
+                              <p className="mt-2 text-xs text-rose-200">{secureSessionError}</p>
+                            ) : null}
+                          </div>
+                          <button
+                            type="button"
+                            disabled={!isSecureSessionReady || isLinkingSecureAccount}
+                            onClick={async () => {
+                              const result = await linkCurrentPlayerToSecureSession();
+                              setSecureLinkFeedback(result.message);
+                            }}
+                            className="inline-flex min-w-[14rem] items-center justify-center gap-2 rounded-2xl border border-cyan-400/25 bg-cyan-400/15 px-4 py-3 text-sm font-extrabold text-cyan-50 transition hover:border-cyan-300/45 hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isLinkingSecureAccount ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Vinculando...
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck className="h-4 w-4" />
+                                Vincular cuenta segura
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        {secureLinkFeedback ? (
+                          <p className="mt-3 text-xs text-cyan-100/90">{secureLinkFeedback}</p>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 

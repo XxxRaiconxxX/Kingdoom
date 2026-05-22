@@ -10,8 +10,11 @@ import type { ReactNode } from "react";
 import type { PlayerAccount } from "../types";
 import {
   fetchPlayerByUsername,
+  isPlayerLinkedToAuthUser,
+  linkPlayerToAuthUser,
   updatePlayerGold,
 } from "../utils/players";
+import { supabase } from "../utils/supabaseClient";
 
 const PLAYER_STORAGE_KEY = "kingdoom.active-player";
 
@@ -19,12 +22,21 @@ type PlayerSessionContextValue = {
   player: PlayerAccount | null;
   isAdmin: boolean;
   isHydrating: boolean;
+  isSecureSessionReady: boolean;
+  secureAuthUserId: string | null;
+  secureSessionError: string;
+  isPlayerSecureLinked: boolean;
+  isLinkingSecureAccount: boolean;
   isSubmittingProfile: boolean;
   profileError: string;
   inventoryRefreshToken: number;
   connectPlayer: (username: string) => Promise<PlayerAccount | null>;
   clearPlayer: () => void;
   refreshPlayer: () => Promise<PlayerAccount | null>;
+  linkCurrentPlayerToSecureSession: () => Promise<{
+    status: "success" | "warning" | "error";
+    message: string;
+  }>;
   setPlayerGold: (nextGold: number) => Promise<PlayerAccount | null>;
   notifyInventoryChanged: () => void;
   setProfileError: (message: string) => void;
@@ -35,6 +47,11 @@ const PlayerSessionContext = createContext<PlayerSessionContextValue | null>(nul
 export function PlayerSessionProvider({ children }: { children: ReactNode }) {
   const [player, setPlayer] = useState<PlayerAccount | null>(null);
   const [isHydrating, setIsHydrating] = useState(true);
+  const [isSecureSessionReady, setIsSecureSessionReady] = useState(false);
+  const [secureAuthUserId, setSecureAuthUserId] = useState<string | null>(null);
+  const [secureSessionError, setSecureSessionError] = useState("");
+  const [isPlayerSecureLinked, setIsPlayerSecureLinked] = useState(false);
+  const [isLinkingSecureAccount, setIsLinkingSecureAccount] = useState(false);
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [inventoryRefreshToken, setInventoryRefreshToken] = useState(0);
@@ -80,6 +97,48 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const linkCurrentPlayerToSecureSession = useCallback(async () => {
+    if (!player) {
+      return {
+        status: "error" as const,
+        message: "Conecta primero un jugador antes de vincular la cuenta segura.",
+      };
+    }
+
+    if (!secureAuthUserId) {
+      return {
+        status: "error" as const,
+        message:
+          secureSessionError ||
+          "La sesion segura de Supabase aun no esta disponible en este navegador.",
+      };
+    }
+
+    setIsLinkingSecureAccount(true);
+    const result = await linkPlayerToAuthUser(player.id, secureAuthUserId);
+    setIsLinkingSecureAccount(false);
+
+    if (result.status === "linked") {
+      const refreshed = await fetchPlayerByUsername(player.username);
+      if (refreshed) {
+        setPlayer(refreshed);
+      }
+      setIsPlayerSecureLinked(true);
+      return {
+        status: "success" as const,
+        message: result.message,
+      };
+    }
+
+    return {
+      status:
+        result.status === "claimed" || result.status === "unavailable"
+          ? ("warning" as const)
+          : ("error" as const),
+      message: result.message,
+    };
+  }, [player, secureAuthUserId, secureSessionError]);
+
   const refreshPlayer = useCallback(async () => {
     if (!player) {
       return null;
@@ -123,6 +182,78 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
+    let isMounted = true;
+
+    async function bootstrapSecureSession() {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (sessionError) {
+        setSecureSessionError(
+          "No se pudo revisar la sesion segura de Supabase en este navegador."
+        );
+        setIsSecureSessionReady(true);
+        return;
+      }
+
+      if (session?.user?.id) {
+        setSecureAuthUserId(session.user.id);
+        setSecureSessionError("");
+        setIsSecureSessionReady(true);
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInAnonymously();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (error || !data.user?.id) {
+        setSecureAuthUserId(null);
+        setSecureSessionError(
+          "No se pudo iniciar la sesion segura necesaria para las acciones protegidas del staff."
+        );
+        setIsSecureSessionReady(true);
+        return;
+      }
+
+      setSecureAuthUserId(data.user.id);
+      setSecureSessionError("");
+      setIsSecureSessionReady(true);
+    }
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) {
+        return;
+      }
+
+      setSecureAuthUserId(session?.user?.id ?? null);
+      setSecureSessionError(
+        session?.user?.id
+          ? ""
+          : "La sesion segura de Supabase se desconecto en este navegador."
+      );
+      setIsSecureSessionReady(true);
+    });
+
+    void bootstrapSecureSession();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     let isCancelled = false;
 
     async function hydrateStoredPlayer() {
@@ -156,6 +287,29 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    async function resolveSecureLinkState() {
+      if (!player || !secureAuthUserId) {
+        setIsPlayerSecureLinked(false);
+        return;
+      }
+
+      const linked = await isPlayerLinkedToAuthUser(player.id, secureAuthUserId);
+
+      if (!cancelled) {
+        setIsPlayerSecureLinked(linked);
+      }
+    }
+
+    void resolveSecureLinkState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [player, secureAuthUserId]);
+
+  useEffect(() => {
     if (!player) {
       return;
     }
@@ -181,12 +335,18 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       player,
       isAdmin: Boolean(player?.isAdmin),
       isHydrating,
+      isSecureSessionReady,
+      secureAuthUserId,
+      secureSessionError,
+      isPlayerSecureLinked,
+      isLinkingSecureAccount,
       isSubmittingProfile,
       profileError,
       inventoryRefreshToken,
       connectPlayer,
       clearPlayer,
       refreshPlayer,
+      linkCurrentPlayerToSecureSession,
       setPlayerGold,
       notifyInventoryChanged,
       setProfileError,
@@ -196,11 +356,17 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       connectPlayer,
       inventoryRefreshToken,
       isHydrating,
+      isLinkingSecureAccount,
+      isPlayerSecureLinked,
+      isSecureSessionReady,
       player,
       isSubmittingProfile,
       notifyInventoryChanged,
       profileError,
       refreshPlayer,
+      linkCurrentPlayerToSecureSession,
+      secureAuthUserId,
+      secureSessionError,
       setPlayerGold,
     ]
   );

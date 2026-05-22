@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Store } from "lucide-react";
 import type { MarketCategoryId, MarketItem, Rarity, StockStatus } from "../../types";
 import type { AiDebugInfo } from "../../utils/aiDebug";
@@ -55,14 +56,28 @@ export function AdminModeButton({
 export function AdminInfoCard({
   title,
   message,
+  action,
+  tone = "default",
 }: {
   title: string;
   message: string;
+  action?: ReactNode;
+  tone?: "default" | "warning";
 }) {
+  const toneClass =
+    tone === "warning"
+      ? "border-amber-500/25 bg-amber-500/8"
+      : "border-stone-800 bg-stone-900/60";
+
   return (
-    <div className="kd-glass rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-5">
-      <p className="text-sm font-bold text-stone-100">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-stone-400">{message}</p>
+    <div className={`kd-glass rounded-[1.5rem] border p-5 ${toneClass}`}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-stone-100">{title}</p>
+          <p className="mt-2 text-sm leading-6 text-stone-400">{message}</p>
+        </div>
+        {action ? <div className="sm:flex-shrink-0">{action}</div> : null}
+      </div>
     </div>
   );
 }

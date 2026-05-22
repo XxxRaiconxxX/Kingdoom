@@ -125,7 +125,15 @@ function readImageAsDataUrl(file: File) {
 
 export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const adminRevealRef = useRef<HTMLDivElement | null>(null);
-  const { player, refreshPlayer } = usePlayerSession();
+  const {
+    player,
+    refreshPlayer,
+    isSecureSessionReady,
+    secureSessionError,
+    isPlayerSecureLinked,
+    isLinkingSecureAccount,
+    linkCurrentPlayerToSecureSession,
+  } = usePlayerSession();
   const [activeTab, setActiveTab] = useState<AdminTab>("players");
   const [players, setPlayers] = useState<PlayerAccount[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(
@@ -219,6 +227,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     description: string;
     sourceUrl: string;
   } | null>(null);
+  const [adminSecurityFeedback, setAdminSecurityFeedback] = useState("");
   const [marketAiTheme, setMarketAiTheme] = useState("");
   const [marketAiFeedback, setMarketAiFeedback] = useState("");
   const [isGeneratingMarketItemAi, setIsGeneratingMarketItemAi] = useState(false);
@@ -1191,6 +1200,35 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           ref={adminRevealRef}
           className="kd-admin-content flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 md:px-6"
         >
+          {player?.isAdmin && !isPlayerSecureLinked ? (
+            <div data-gsap-admin className="mb-4">
+              <AdminInfoCard
+                title="Sesion segura pendiente"
+                message={
+                  secureSessionError ||
+                  "Este perfil admin todavia no esta enlazado a la sesion segura de Supabase. Vinculalo una vez para desbloquear guardado de mercado, eventos, negocios y futuras acciones protegidas."
+                }
+                tone="warning"
+                action={
+                  <button
+                    type="button"
+                    disabled={!isSecureSessionReady || isLinkingSecureAccount}
+                    onClick={async () => {
+                      const result = await linkCurrentPlayerToSecureSession();
+                      setAdminSecurityFeedback(result.message);
+                    }}
+                    className="inline-flex items-center justify-center rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-amber-200 transition hover:border-amber-300/40 hover:bg-amber-400/16 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isLinkingSecureAccount ? "Vinculando..." : "Vincular ahora"}
+                  </button>
+                }
+              />
+              {adminSecurityFeedback ? (
+                <p className="mt-2 px-1 text-xs text-amber-100/80">{adminSecurityFeedback}</p>
+              ) : null}
+            </div>
+          ) : null}
+
           {status === "loading" ? (
             <div data-gsap-admin>
               <AdminInfoCard

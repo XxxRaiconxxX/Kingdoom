@@ -423,7 +423,9 @@ export function PlayerProfilePanel({
           const urlParams = new URL(connectedPlayer.avatar_gif_url).searchParams;
           const parsedDuration = parseInt(urlParams.get("duration") || "0", 10);
           if (parsedDuration > 0) {
-            durationMs = parsedDuration;
+            // Añadimos 1500ms extra para dar tiempo a que cargue la imagen
+            // y hacer una leve pausa final
+            durationMs = parsedDuration + 1500;
           }
         } catch (e) {
           // Ignorar error y usar fallback 3000ms

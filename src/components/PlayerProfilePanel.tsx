@@ -129,6 +129,8 @@ export function PlayerProfilePanel({
   const [isBusinessBusy, setIsBusinessBusy] = useState(false);
   const [isBusinessesExpanded, setIsBusinessesExpanded] = useState(false);
   const [secureLinkFeedback, setSecureLinkFeedback] = useState("");
+  const [isPlayingAvatarGif, setIsPlayingAvatarGif] = useState(false);
+  const [connectedGifUrl, setConnectedGifUrl] = useState<string | null>(null);
 
   const isCollapsed = Boolean(collapsed && player);
 
@@ -410,6 +412,13 @@ export function PlayerProfilePanel({
 
     if (connectedPlayer) {
       setUsernameInput("");
+      if (connectedPlayer.avatar_gif_url) {
+        setIsPlayingAvatarGif(true);
+        setConnectedGifUrl(connectedPlayer.avatar_gif_url);
+        setTimeout(() => {
+          setIsPlayingAvatarGif(false);
+        }, 3000);
+      }
     }
   }
 
@@ -463,6 +472,25 @@ export function PlayerProfilePanel({
             <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
             Restaurando tu sesion guardada...
           </div>
+        ) : isPlayingAvatarGif && connectedGifUrl ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            className="flex flex-col items-center justify-center space-y-4 rounded-[2rem] border border-amber-500/20 bg-stone-950 p-6 shadow-2xl md:p-10"
+          >
+            <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-3xl border-2 border-amber-500/30">
+              <img
+                src={connectedGifUrl}
+                alt="Despertando..."
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-0 right-0 text-center text-[10px] font-black uppercase tracking-[0.25em] text-amber-400 sm:text-xs">
+                Despertando jugador...
+              </div>
+            </div>
+          </motion.div>
         ) : player ? (
           isCollapsed ? (
             <div className="space-y-3">

@@ -31,6 +31,7 @@ import {
   createPlayerAccount,
   fetchAllPlayers,
   updatePlayerGold,
+  uploadPlayerAvatarGif,
 } from "../utils/players";
 import {
   fetchBusinessAdminState,
@@ -158,6 +159,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [isDeletingEvent, setIsDeletingEvent] = useState(false);
   const [isClaimingEventPlayer, setIsClaimingEventPlayer] = useState(false);
   const [isLoadingEventParticipants, setIsLoadingEventParticipants] = useState(false);
+  const [avatarPlayerId, setAvatarPlayerId] = useState("");
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarFeedback, setAvatarFeedback] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [isRewardingEventParticipantId, setIsRewardingEventParticipantId] = useState("");
   const [eventParticipants, setEventParticipants] = useState<RealmEventParticipant[]>([]);
   const [eventPendingRewards, setEventPendingRewards] = useState<EventRewardNotification[]>([]);
@@ -536,6 +542,50 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
     if (player?.id === selectedGoldPlayer.id) {
       await refreshPlayer();
+    }
+  }
+
+  const selectedAvatarPlayer = useMemo(
+    () => players.find((p) => p.id === avatarPlayerId) || null,
+    [players, avatarPlayerId]
+  );
+
+  function handleAvatarFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreviewUrl(URL.createObjectURL(file));
+      setAvatarFeedback("");
+    }
+  }
+
+  async function handleUploadAvatarGif(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!selectedAvatarPlayer) {
+      setAvatarFeedback("Selecciona un jugador para subirle el avatar.");
+      return;
+    }
+
+    if (!avatarFile) {
+      setAvatarFeedback("Selecciona un archivo GIF primero.");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    setAvatarFeedback("");
+
+    const result = await uploadPlayerAvatarGif(selectedAvatarPlayer.id, avatarFile);
+
+    setIsUploadingAvatar(false);
+    setAvatarFeedback(result.message);
+
+    if (result.status === "saved") {
+      setAvatarFile(null);
+      await reloadAdminData();
+      if (player?.id === selectedAvatarPlayer.id) {
+        await refreshPlayer();
+      }
     }
   }
 
@@ -1536,6 +1586,116 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     itemLabel="jugadores"
                   />
                 </div>
+              </section>
+
+              <section
+                data-gsap-admin
+                className="col-span-1 rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5 xl:col-span-2"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <ImagePlus className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Personalizacion
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Avatar GIF
+                    </h4>
+                  </div>
+                </div>
+
+                <form className="mt-5 grid gap-6 md:grid-cols-2" onSubmit={handleUploadAvatarGif}>
+                  <div className="space-y-4">
+                    <label className="block space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">
+                        Selecciona un jugador
+                      </span>
+                      <select
+                        value={avatarPlayerId}
+                        onChange={(event) => {
+                          setAvatarPlayerId(event.target.value);
+                          setAvatarFeedback("");
+                        }}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="">Buscar jugador...</option>
+                        {filteredPlayers.map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            {entry.username}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="block space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">
+                        Archivo GIF
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/gif"
+                        onChange={handleAvatarFileChange}
+                        className="block w-full text-sm text-stone-400 file:mr-4 file:rounded-xl file:border-0 file:bg-stone-800 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-stone-200 hover:file:bg-stone-700"
+                      />
+                    </label>
+
+                    <button
+                      type="submit"
+                      disabled={isUploadingAvatar || !avatarFile || !avatarPlayerId}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isUploadingAvatar ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Subiendo...
+                        </>
+                      ) : (
+                        <>
+                          <ImagePlus className="h-4 w-4" />
+                          Subir Avatar
+                        </>
+                      )}
+                    </button>
+
+                    {avatarFeedback ? (
+                      <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+                        {avatarFeedback}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <div className="flex flex-col items-center justify-center rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
+                    <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
+                      Vista previa
+                    </p>
+                    {avatarPreviewUrl ? (
+                      <div className="relative aspect-square w-full max-w-[200px] overflow-hidden rounded-2xl border-2 border-stone-700">
+                        <img
+                          src={avatarPreviewUrl}
+                          alt="Avatar preview"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : selectedAvatarPlayer?.avatar_gif_url ? (
+                      <div className="relative aspect-square w-full max-w-[200px] overflow-hidden rounded-2xl border-2 border-amber-500/30">
+                        <img
+                          src={selectedAvatarPlayer.avatar_gif_url}
+                          alt="Avatar actual"
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 py-1 text-center text-[10px] uppercase text-white backdrop-blur-sm">
+                          Actual
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex aspect-square w-full max-w-[200px] items-center justify-center rounded-2xl border-2 border-dashed border-stone-700 bg-stone-900 text-stone-600">
+                        <ImagePlus className="h-8 w-8 opacity-50" />
+                      </div>
+                    )}
+                  </div>
+                </form>
               </section>
             </div>
           ) : null}

@@ -8,6 +8,7 @@ type PlayerRow = {
   is_admin?: boolean | null;
   auth_user_id?: string | null;
   phone?: string | null;
+  avatar_gif_url?: string | null;
 };
 
 let supportsAuthUserId: boolean | null = null;
@@ -21,6 +22,7 @@ function mapPlayerRow(row: PlayerRow): PlayerAccount {
     isAdmin: Boolean(row.is_admin),
     authUserId: row.auth_user_id ?? null,
     phone: row.phone ?? null,
+    avatar_gif_url: row.avatar_gif_url ?? null,
   };
 }
 
@@ -69,12 +71,12 @@ export async function fetchPlayerByUsername(
   const { data, error } = supportsAuthLink
     ? await supabase
         .from("players")
-        .select("id, username, gold, is_admin, auth_user_id, phone")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url")
         .ilike("username", normalizedUsername)
         .single()
     : await supabase
         .from("players")
-        .select("id, username, gold, is_admin, phone")
+        .select("id, username, gold, is_admin, phone, avatar_gif_url")
         .ilike("username", normalizedUsername)
         .single();
 
@@ -100,7 +102,7 @@ export async function fetchPlayerByAuthUserId(
     const { data, error } = await supabase
       .from("player_auth_links")
       .select(
-        "player:players(id, username, gold, is_admin, auth_user_id, phone)"
+        "player:players(id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url)"
       )
       .eq("auth_user_id", normalizedAuthUserId)
       .limit(1)
@@ -121,7 +123,7 @@ export async function fetchPlayerByAuthUserId(
 
   const { data, error } = await supabase
     .from("players")
-    .select("id, username, gold, is_admin, auth_user_id, phone")
+    .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url")
     .eq("auth_user_id", normalizedAuthUserId)
     .maybeSingle();
 
@@ -193,11 +195,11 @@ export async function fetchAllPlayers(): Promise<PlayerAccount[]> {
   const { data, error } = supportsAuthLink
     ? await supabase
         .from("players")
-        .select("id, username, gold, is_admin, auth_user_id, phone")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url")
         .order("username", { ascending: true })
     : await supabase
         .from("players")
-        .select("id, username, gold, is_admin, phone")
+        .select("id, username, gold, is_admin, phone, avatar_gif_url")
         .order("username", { ascending: true });
 
   if (error || !data) {
@@ -237,12 +239,12 @@ export async function createPlayerAccount(input: {
     ? await supabase
         .from("players")
         .insert(insertPayload)
-        .select("id, username, gold, is_admin, auth_user_id, phone")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url")
         .single()
     : await supabase
         .from("players")
         .insert(insertPayload)
-        .select("id, username, gold, is_admin, phone")
+        .select("id, username, gold, is_admin, phone, avatar_gif_url")
         .single();
 
   if (!adminAttempt.error && adminAttempt.data) {
@@ -267,7 +269,7 @@ export async function createPlayerAccount(input: {
       username: normalizedUsername,
       gold: Math.max(0, input.gold),
     })
-    .select("id, username, gold, phone")
+    .select("id, username, gold, phone, avatar_gif_url")
     .single();
 
   if (!fallbackAttempt.error && fallbackAttempt.data) {
@@ -386,5 +388,48 @@ export async function linkPlayerToAuthUser(playerId: string, authUserId: string)
   return {
     status: "linked" as const,
     message: "Jugador vinculado correctamente con la cuenta segura.",
+  };
+}
+
+export async function uploadPlayerAvatarGif(
+  playerId: string,
+  file: File
+) {
+  const path = `${playerId}.gif`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(path, file, {
+      upsert: true,
+      contentType: "image/gif",
+    });
+
+  if (uploadError) {
+    return {
+      status: "error" as const,
+      message: `Error al subir el GIF: ${uploadError.message}`,
+    };
+  }
+
+  const { data: urlData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(path);
+
+  const { error: updateError } = await supabase
+    .from("players")
+    .update({ avatar_gif_url: urlData.publicUrl })
+    .eq("id", playerId);
+
+  if (updateError) {
+    return {
+      status: "error" as const,
+      message: `Error al guardar la URL en la base de datos: ${updateError.message}`,
+    };
+  }
+
+  return {
+    status: "saved" as const,
+    message: "Avatar GIF actualizado correctamente.",
+    url: urlData.publicUrl,
   };
 }

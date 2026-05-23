@@ -18,6 +18,7 @@ export type PlayerAccount = {
   isAdmin?: boolean;
   authUserId?: string | null;
   phone?: string | null;
+  avatar_gif_url?: string | null;
 };
 
 export type BusinessProposalStatus =

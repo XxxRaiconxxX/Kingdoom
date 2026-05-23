@@ -1,7 +1,8 @@
+import React, { memo } from "react";
 import { Crown, Skull } from "lucide-react";
 import type { RankingPlayer } from "../types";
 
-export function RankingCard({
+export const RankingCard = memo(function RankingCard({
   player,
   index,
 }: {

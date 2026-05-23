@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { 
   Flame, 
@@ -168,7 +168,26 @@ export function TavernCrash() {
     }
   };
 
-  const updateMultiplier = (time: number) => {
+  const handleCashOut = useCallback(async (exactMultiplier?: number | React.MouseEvent) => {
+    if (statusRef.current !== "rising" || updatingRef.current || !playerRef.current) return;
+
+    const m = typeof exactMultiplier === "number" ? exactMultiplier : multiplierRef.current;
+    const winAmount = Math.floor(betRef.current * m);
+    
+    setUpdating(true);
+    const freshPlayer = await refreshPlayer();
+    const goldBase = freshPlayer?.gold ?? playerRef.current.gold;
+    const success = await setPlayerGoldRef.current(goldBase + winAmount);
+    
+    if (success) {
+      setLastWin(winAmount);
+      setStatus("cashed_out");
+      // The updateMultiplier loop continues because statusRef.current is not "crashed"
+    }
+    setUpdating(false);
+  }, [refreshPlayer]);
+
+  const updateMultiplier = useCallback((time: number) => {
     if (!startTimeRef.current) {
       startTimeRef.current = time;
     }
@@ -213,7 +232,7 @@ export function TavernCrash() {
 
     // Schedule next frame unless crashed
     requestRef.current = requestAnimationFrame(updateMultiplier);
-  };
+  }, [handleCashOut]);
 
   const handleStart = async () => {
     if (!player || bet <= 0 || bet > player.gold || updating) return;
@@ -254,24 +273,7 @@ setUpdating(false);
     }, 1200);
   };
 
-  const handleCashOut = async (exactMultiplier?: number | React.MouseEvent) => {
-    if (statusRef.current !== "rising" || updatingRef.current || !playerRef.current) return;
 
-    const m = typeof exactMultiplier === "number" ? exactMultiplier : multiplierRef.current;
-    const winAmount = Math.floor(betRef.current * m);
-    
-    setUpdating(true);
-    const freshPlayer = await refreshPlayer();
-    const goldBase = freshPlayer?.gold ?? playerRef.current.gold;
-    const success = await setPlayerGoldRef.current(goldBase + winAmount);
-    
-    if (success) {
-      setLastWin(winAmount);
-      setStatus("cashed_out");
-      // The updateMultiplier loop continues because statusRef.current is not "crashed"
-    }
-    setUpdating(false);
-  };
 
   // Resize Effect (Static relative to game state)
   useEffect(() => {

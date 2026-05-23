@@ -165,17 +165,23 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       }
 
       const safeGold = Math.max(0, nextGold);
+      const previousGold = player.gold;
+      
+      // Update local state optimistically
+      const nextPlayer = { ...player, gold: safeGold };
+      setPlayer(nextPlayer);
+
       const updated = await updatePlayerGold(player.id, safeGold);
 
       if (!updated) {
+        // Rollback state on error
+        setPlayer({ ...player, gold: previousGold });
         setProfileError(
           "No se pudo actualizar el oro del jugador. Intenta refrescar el perfil."
         );
         return null;
       }
 
-      const nextPlayer = { ...player, gold: safeGold };
-      setPlayer(nextPlayer);
       return nextPlayer;
     },
     [player]

@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import { Crown } from "lucide-react";
 import type { RankingPlayer } from "../types";
 
@@ -34,7 +35,7 @@ const podiumStyles: Record<1 | 2 | 3, PodiumSlot> = {
   },
 };
 
-export function WeeklyRankingPodium({
+export const WeeklyRankingPodium = memo(function WeeklyRankingPodium({
   players,
 }: {
   players: RankingPlayer[];

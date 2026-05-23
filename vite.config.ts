@@ -29,6 +29,15 @@ export default defineConfig({
           if (id.includes("src/sections/RankingSection")) return "RankingSection";
           if (id.includes("src/components/LibrarySection")) return "LibrarySection";
           if (id.includes("src/components/GrimoireSection")) return "GrimoireSection";
+
+          // Minigames manual chunks
+          if (id.includes("TavernCrash")) return "TavernCrash";
+          if (id.includes("TavernSlots")) return "TavernSlots";
+          if (id.includes("TavernTowerDefense")) return "TavernTowerDefense";
+          if (id.includes("TavernPlinko")) return "TavernPlinko";
+          if (id.includes("TavernRoulette")) return "TavernRoulette";
+          if (id.includes("TavernHorseRace")) return "TavernHorseRace";
+          if (id.includes("TavernScratch")) return "TavernScratch";
         },
       },
     },

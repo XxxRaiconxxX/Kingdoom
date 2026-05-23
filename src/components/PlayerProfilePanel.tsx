@@ -132,6 +132,32 @@ export function PlayerProfilePanel({
   const [secureLinkFeedback, setSecureLinkFeedback] = useState("");
   const [isPlayingAvatarGif, setIsPlayingAvatarGif] = useState(false);
   const [connectedGifUrl, setConnectedGifUrl] = useState<string | null>(null);
+  const [isMinimumHydrationTimeMet, setIsMinimumHydrationTimeMet] = useState(false);
+
+  useEffect(() => {
+    const cachedGif = window.localStorage.getItem("kingdoom.active-player-gif");
+    let durationMs = 0;
+    if (cachedGif) {
+      try {
+        const urlParams = new URL(cachedGif).searchParams;
+        const parsedDuration = parseInt(urlParams.get("duration") || "0", 10);
+        if (parsedDuration > 0) {
+          durationMs = parsedDuration + 1500;
+        }
+      } catch (e) {
+        durationMs = 3000;
+      }
+    }
+    
+    if (durationMs > 0) {
+      const timer = setTimeout(() => {
+        setIsMinimumHydrationTimeMet(true);
+      }, durationMs);
+      return () => clearTimeout(timer);
+    } else {
+      setIsMinimumHydrationTimeMet(true);
+    }
+  }, []);
 
   const isCollapsed = Boolean(collapsed && player);
 
@@ -483,7 +509,7 @@ export function PlayerProfilePanel({
       </div>
 
       <div className="mt-5">
-        {isHydrating ? (
+        {(isHydrating || (!isMinimumHydrationTimeMet && window.localStorage.getItem("kingdoom.active-player-gif"))) ? (
           (() => {
             const cachedGif = window.localStorage.getItem("kingdoom.active-player-gif");
             if (cachedGif) {

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import {
   Backpack,
   Coins,

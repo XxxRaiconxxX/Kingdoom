@@ -230,7 +230,7 @@ export function AdminMissionManager() {
       description,
       instructions,
       rewardGold,
-      maxParticipants,
+      maxParticipants: Math.max(1, maxParticipants),
       difficulty,
       type,
       status,
@@ -654,7 +654,7 @@ export function AdminMissionManager() {
             <NumericInput
               label="Cupos maximos"
               value={maxParticipants}
-              onChange={(value) => setMaxParticipants(Math.max(1, value))}
+              onChange={setMaxParticipants}
             />
           </div>
 

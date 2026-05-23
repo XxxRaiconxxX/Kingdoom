@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import { getGifDuration } from "./gifUtils";
 import type { PlayerAccount } from "../types";
 
 type PlayerRow = {
@@ -411,13 +412,16 @@ export async function uploadPlayerAvatarGif(
     };
   }
 
+  const durationMs = await getGifDuration(file);
   const { data: urlData } = supabase.storage
     .from("avatars")
     .getPublicUrl(path);
 
+  const finalUrl = `${urlData.publicUrl}?duration=${durationMs}&t=${Date.now()}`;
+
   const { error: updateError } = await supabase
     .from("players")
-    .update({ avatar_gif_url: urlData.publicUrl })
+    .update({ avatar_gif_url: finalUrl })
     .eq("id", playerId);
 
   if (updateError) {

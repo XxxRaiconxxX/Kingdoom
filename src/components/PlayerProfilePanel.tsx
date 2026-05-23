@@ -415,9 +415,22 @@ export function PlayerProfilePanel({
       if (connectedPlayer.avatar_gif_url) {
         setIsPlayingAvatarGif(true);
         setConnectedGifUrl(connectedPlayer.avatar_gif_url);
+        
+        // Extraer la duración si está presente en la URL (ej: ?duration=4500)
+        let durationMs = 3000;
+        try {
+          const urlParams = new URL(connectedPlayer.avatar_gif_url).searchParams;
+          const parsedDuration = parseInt(urlParams.get("duration") || "0", 10);
+          if (parsedDuration > 0) {
+            durationMs = parsedDuration;
+          }
+        } catch (e) {
+          // Ignorar error y usar fallback 3000ms
+        }
+
         setTimeout(() => {
           setIsPlayingAvatarGif(false);
-        }, 3000);
+        }, durationMs);
       }
     }
   }

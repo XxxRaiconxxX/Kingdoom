@@ -61,6 +61,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     setProfileError("");
     setInventoryRefreshToken(0);
     window.localStorage.removeItem(PLAYER_STORAGE_KEY);
+    window.localStorage.removeItem("kingdoom.active-player-gif");
   }, []);
 
   const notifyInventoryChanged = useCallback(() => {
@@ -92,6 +93,11 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
 
       setPlayer(foundPlayer);
       window.localStorage.setItem(PLAYER_STORAGE_KEY, foundPlayer.username);
+      if (foundPlayer.avatar_gif_url) {
+        window.localStorage.setItem("kingdoom.active-player-gif", foundPlayer.avatar_gif_url);
+      } else {
+        window.localStorage.removeItem("kingdoom.active-player-gif");
+      }
       return foundPlayer;
     },
     []
@@ -155,6 +161,11 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     }
 
     setPlayer(freshPlayer);
+    if (freshPlayer.avatar_gif_url) {
+      window.localStorage.setItem("kingdoom.active-player-gif", freshPlayer.avatar_gif_url);
+    } else {
+      window.localStorage.removeItem("kingdoom.active-player-gif");
+    }
     return freshPlayer;
   }, [clearPlayer, player]);
 
@@ -284,6 +295,11 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
 
       if (storedPlayer) {
         setPlayer(storedPlayer);
+        if (storedPlayer.avatar_gif_url) {
+          window.localStorage.setItem("kingdoom.active-player-gif", storedPlayer.avatar_gif_url);
+        } else {
+          window.localStorage.removeItem("kingdoom.active-player-gif");
+        }
         setIsHydrating(false);
         return;
       }

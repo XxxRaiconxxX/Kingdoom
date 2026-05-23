@@ -484,10 +484,40 @@ export function PlayerProfilePanel({
 
       <div className="mt-5">
         {isHydrating ? (
-          <div className="flex items-center gap-3 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 px-4 py-4 text-sm text-stone-300">
-            <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
-            Restaurando tu sesion guardada...
-          </div>
+          (() => {
+            const cachedGif = window.localStorage.getItem("kingdoom.active-player-gif");
+            if (cachedGif) {
+              return (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  className="flex flex-col items-center justify-center space-y-4 rounded-[2rem] border border-amber-500/20 bg-stone-950 p-6 shadow-2xl md:p-10"
+                >
+                  <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-3xl border-2 border-amber-500/30">
+                    <img
+                      src={cachedGif}
+                      alt="Restaurando avatar..."
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-transparent opacity-80" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-400">
+                      Despertando jugador...
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            }
+            return (
+              <div className="flex items-center gap-3 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 px-4 py-4 text-sm text-stone-300">
+                <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
+                Restaurando tu sesion guardada...
+              </div>
+            );
+          })()
         ) : isPlayingAvatarGif && connectedGifUrl ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}

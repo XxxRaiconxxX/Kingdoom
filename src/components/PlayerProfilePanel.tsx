@@ -142,7 +142,7 @@ export function PlayerProfilePanel({
         const urlParams = new URL(cachedGif).searchParams;
         const parsedDuration = parseInt(urlParams.get("duration") || "0", 10);
         if (parsedDuration > 0) {
-          durationMs = parsedDuration + 1500;
+          durationMs = parsedDuration + 3000;
         }
       } catch (e) {
         durationMs = 3000;
@@ -449,9 +449,9 @@ export function PlayerProfilePanel({
           const urlParams = new URL(connectedPlayer.avatar_gif_url).searchParams;
           const parsedDuration = parseInt(urlParams.get("duration") || "0", 10);
           if (parsedDuration > 0) {
-            // Añadimos 1500ms extra para dar tiempo a que cargue la imagen
+            // Añadimos 3000ms extra para dar tiempo a que cargue la imagen
             // y hacer una leve pausa final
-            durationMs = parsedDuration + 1500;
+            durationMs = parsedDuration + 3000;
           }
         } catch (e) {
           // Ignorar error y usar fallback 3000ms

@@ -28,7 +28,8 @@ export function TavernCrash() {
   const [history, setHistory] = useState<number[]>([]);
   const [updating, setUpdating] = useState(false);
   const [lastWin, setLastWin] = useState(0);
-  const [autoCashOut, setAutoCashOut] = useState<number>(0);
+  const [autoCashOutStr, setAutoCashOutStr] = useState<string>("");
+  const autoCashOut = parseFloat(autoCashOutStr) || 0;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>();
@@ -489,17 +490,11 @@ setUpdating(false);
                           type="text" inputMode="numeric"
                           step="0.1"
                           min="0"
-                          value={autoCashOut === 0 ? "" : autoCashOut}
+                          value={autoCashOutStr}
                           onChange={(e) => {
-                            const val = e.target.value;
-                            if (val === "") {
-                              setAutoCashOut(0);
-                              return;
-                            }
-                            const parsed = parseFloat(val);
-                            if (!isNaN(parsed)) {
-                              setAutoCashOut(parsed);
-                            }
+                            const val = e.target.value.replace(/[^0-9.]/g, '');
+                            if ((val.match(/\./g) || []).length > 1) return;
+                            setAutoCashOutStr(val);
                           }}
                           disabled={status === "rising" || status === "starting"}
                           placeholder="Ej: 1.50  (0 = desactivado)"

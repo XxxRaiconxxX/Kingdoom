@@ -30,6 +30,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`
+*   **Resumen:** Mejora del comando !purga para reportar y etiquetar a los usuarios pendientes.
+*   **Cambios Clave:**
+    *   **[Admin] Reporte de días restantes:** El comando `!purga` ahora enumera a todos los usuarios pendientes que aún no han superado el límite de 5 días, mencionándolos mediante etiqueta (`@usuario`) y mostrando cuántos días les quedan para ser eliminados ("X días para eliminación"). Esto funciona en adición a la expulsión automática de aquellos que ya hayan cumplido el plazo.
+
+### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`, `mcp_config.json`
 *   **Resumen:** Reforzamiento de reglas de protocolo e integración local del MCP Kingdoom-memory.
 *   **Cambios Clave:**

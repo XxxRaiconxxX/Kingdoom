@@ -8,7 +8,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Instrucciones para Inteligencias Artificiales (Antigravity y Jarvis)
 
 1. **Leer antes de actuar:** Cada vez que inicies sesion o recibas una tarea compleja, revisa rapidamente la seccion `Historial de Cambios` para saber que se modifico recientemente.
-2. **Registrar despues de actuar:** **SIEMPRE** que se finalice un cambio importante, un nuevo componente o una refactorizacion, el asistente responsable debe aniadir una nueva entrada al `Historial de Cambios`.
+2. **Registrar despues de actuar:** **SIEMPRE** que se finalice CUALQUIER cambio (incluso mínimo), el asistente responsable debe añadir una nueva entrada al `Historial de Cambios` y a la memoria MCP (`kingdoom-memory.jsonl`), y asegurarse de subir ambos a Git (`git add`, `git commit`, `git push`).
 3. **Formato estricto:** Usa el formato de plantilla de la seccion de historial. Las entradas mas recientes van **arriba**.
 4. **Claridad ante todo:** Deja notas claras. Si un componente quedo a medias o tiene un error conocido, marcalo bajo "Notas/Advertencias".
 
@@ -28,6 +28,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+
+### [Fecha: 25/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`, `mcp_config.json`
+*   **Resumen:** Reforzamiento de reglas de protocolo e integración local del MCP Kingdoom-memory.
+*   **Cambios Clave:**
+    *   **[Core Rule] Registro Obligatorio:** Se actualizó la regla de Inteligencias Artificiales del changelog para exigir que **cualquier** cambio, por mínimo que sea, deba documentarse en el historial y en la memoria MCP, y subirse obligatoriamente a Git de inmediato.
+    *   **[Core Rule] Sincronización:** Se inyectaron directrices principales (`core-rule`) en la memoria MCP exigiendo sincronización obligatoria inicial (`git pull`) y publicación obligatoria final (`git push`) en cada sesión.
+    *   **[Sistema] Servidor MCP:** Se configuró exitosamente el servidor local MCP en `mcp_config.json` para tener acceso nativo a la memoria compartida de la IA.
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/scheduler.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/activeProfileStore.js`

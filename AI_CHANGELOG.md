@@ -30,6 +30,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/player.js`
+*   **Resumen:** Actualización del comando `!ayuda`.
+*   **Cambios Clave:**
+    *   **[Admin/Soberano] Menú de Ayuda:** Se añadieron los comandos administrativos faltantes (`!actividad`, `!grupoactual` y `!groupid`) a la lista desplegada por el comando `!ayuda`.
+
+### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/supabase.js`
 *   **Resumen:** Creación del comando de reporte `!actividad` (o `!inactivos`).
 *   **Cambios Clave:**

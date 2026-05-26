@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 26/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/auditLog.js`, `kingdoom-bot/src/adminStore.js`
+*   **Resumen:** Corrección de rutas absolutas para garantizar persistencia local y remota del bot.
+*   **Cambios Clave:**
+    *   **[Admin] Rutas dinámicas:** Se implementaron rutas dinámicas (usando `__dirname` y `path.join`) para `admin_audit_log.json` y `admins.json`. Esto corrige el fallo silencioso donde el comando `!bitacora` no mostraba información al correr en Windows y asegura compatibilidad nativa tanto local como en el contenedor de Hugging Face.
+
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/player.js`
 *   **Resumen:** Actualización del comando `!ayuda`.

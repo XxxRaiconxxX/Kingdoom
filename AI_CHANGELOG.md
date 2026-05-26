@@ -30,6 +30,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/supabase.js`
+*   **Resumen:** Creación del comando de reporte `!actividad` (o `!inactivos`).
+*   **Cambios Clave:**
+    *   **[Admin] Reporte de Inactividad:** Se añadió el comando `!actividad` exclusivo para administradores, el cual extrae a todos los usuarios ordenados por su última fecha de conexión y los formatea visualmente en columnas monospaciadas para rápida lectura en WhatsApp.
+
+### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `Kingdoom-sync/supabase_purge_inactive.sql`, `Kingdoom-sync/src/utils/players.ts`, `Kingdoom-sync/src/context/PlayerSessionContext.tsx`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/index.js`
 *   **Resumen:** Sistema de purga automática por 15 días de inactividad (Web y WhatsApp).
 *   **Cambios Clave:**

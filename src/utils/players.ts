@@ -191,6 +191,15 @@ export async function updatePlayerGold(
   return !error;
 }
 
+export async function touchPlayerActivity(playerId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("players")
+    .update({ last_active_at: new Date().toISOString() })
+    .eq("id", playerId);
+  
+  return !error;
+}
+
 export async function fetchAllPlayers(): Promise<PlayerAccount[]> {
   const supportsAuthLink = await detectAuthUserIdSupport();
   const { data, error } = supportsAuthLink

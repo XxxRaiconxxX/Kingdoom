@@ -30,6 +30,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `Kingdoom-sync/supabase_purge_inactive.sql`, `Kingdoom-sync/src/utils/players.ts`, `Kingdoom-sync/src/context/PlayerSessionContext.tsx`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/index.js`
+*   **Resumen:** Sistema de purga automática por 15 días de inactividad (Web y WhatsApp).
+*   **Cambios Clave:**
+    *   **[Base de Datos] SQL Cron:** Nuevo script para añadir la columna `last_active_at` y crear un cron diario (`pg_cron`) que purgue perfiles inactivos.
+    *   **[Web] Rastreo de Actividad:** Se ha integrado `touchPlayerActivity` al iniciar o recuperar sesión en la web para evitar purgas erróneas.
+    *   **[Bot] Intercepción de Mensajes:** Todo comando procesado por el bot en WhatsApp actualizará la actividad del usuario en tiempo real.
+
+### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`
 *   **Resumen:** Mejora del comando !purga para reportar y etiquetar a los usuarios pendientes.
 *   **Cambios Clave:**

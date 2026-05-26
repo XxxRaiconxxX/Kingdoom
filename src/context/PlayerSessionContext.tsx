@@ -13,6 +13,7 @@ import {
   isPlayerLinkedToAuthUser,
   linkPlayerToAuthUser,
   updatePlayerGold,
+  touchPlayerActivity,
 } from "../utils/players";
 import { supabase } from "../utils/supabaseClient";
 
@@ -92,6 +93,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       }
 
       setPlayer(foundPlayer);
+      void touchPlayerActivity(foundPlayer.id);
       window.localStorage.setItem(PLAYER_STORAGE_KEY, foundPlayer.username);
       if (foundPlayer.avatar_gif_url) {
         window.localStorage.setItem("kingdoom.active-player-gif", foundPlayer.avatar_gif_url);
@@ -161,6 +163,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     }
 
     setPlayer(freshPlayer);
+    void touchPlayerActivity(freshPlayer.id);
     if (freshPlayer.avatar_gif_url) {
       window.localStorage.setItem("kingdoom.active-player-gif", freshPlayer.avatar_gif_url);
     } else {

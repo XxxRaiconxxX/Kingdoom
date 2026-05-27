@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 27/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/ai.js`
+*   **Resumen:** Optimización del motor del Game Master para rol narrativo orgánico sin límites rígidos y agnóstico al lore.
+*   **Cambios Clave:**
+    *   **Prompt Dinámico y Agnóstico:** Se refactorizó `buildGMPrompt` en `gmTracker.js` para eliminar referencias estáticas (como "Shadow Garden"). Ahora el GM adopta la personalidad y el lore definidos exclusivamente en las instrucciones de la misión desde la base de datos.
+    *   **Eliminación de Límites y Formato Natural:** Se removió la restricción de 350 palabras y el uso de listas numeradas (1., 2., 3...). El bot ahora usa prosa fluida y bloques de código Markdown para exponer mecánicas RPG (cooldowns, niveles, daño) imitando el estilo de rol avanzado humano.
+    *   **Expansión de Tokens:** Se incrementó `maxOutputTokens` de 1024 a 2048 en `ai.js` para prevenir que respuestas narrativas extensas se corten prematuramente.
+    *   **Fidelidad Táctica:** El sistema ahora está instruido para priorizar el respeto estricto a las estadísticas reales (niveles, HP, etc.) de los NPCs creados en el panel de control.
+
 ### [Fecha: 26/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/auditLog.js`, `kingdoom-bot/src/adminStore.js`
 *   **Resumen:** Corrección de rutas absolutas para garantizar persistencia local y remota del bot.

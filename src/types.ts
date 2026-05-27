@@ -228,6 +228,15 @@ export type GmNpcRole =
   | "skirmisher"
   | "controller";
 
+export type GmMissionMode =
+  | "combate"
+  | "jefe"
+  | "investigacion"
+  | "recoleccion"
+  | "escolta"
+  | "social"
+  | "exploracion";
+
 export type GmNpcStats = {
   level?: number;
   hp?: number;
@@ -254,7 +263,18 @@ export type GmMissionNpc = {
   behaviorNotes?: string;
 };
 
+export type GmMissionEscalation = {
+  puedeUsarNpcHostil: boolean;
+  puedeEscalarACombate: boolean;
+};
+
 export type RealmMissionGmConfig = {
+  modoMision: GmMissionMode;
+  objetivosJugadores: string[];
+  objetivosGM: string[];
+  condicionesVictoria: string[];
+  condicionesDerrota: string[];
+  escalada: GmMissionEscalation;
   npcs: GmMissionNpc[];
 };
 

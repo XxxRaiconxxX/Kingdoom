@@ -17,6 +17,7 @@ import {
 import type {
   GmMissionNpc,
   GmNpcMagicSummary,
+  GmMissionMode,
   GmNpcRole,
   MissionDifficulty,
   MissionReviewNotification,
@@ -75,6 +76,75 @@ const NPC_ROLE_OPTIONS: Array<{ id: GmNpcRole; label: string }> = [
   { id: "controller", label: "Controller" },
 ];
 
+const GM_MODE_OPTIONS: Array<{
+  id: GmMissionMode;
+  label: string;
+  hint: string;
+}> = [
+  {
+    id: "combate",
+    label: "Combate",
+    hint: "El GM puede atacar con NPCs y buscar la victoria enemiga de forma justa.",
+  },
+  {
+    id: "jefe",
+    label: "Jefe",
+    hint: "Combate de alta presion con boss, fases y resolucion mas dura.",
+  },
+  {
+    id: "investigacion",
+    label: "Investigacion",
+    hint: "El GM guia, deja pistas y complica la lectura de la verdad.",
+  },
+  {
+    id: "recoleccion",
+    label: "Recoleccion",
+    hint: "La presion viene del entorno, tiempo, recursos o competencia.",
+  },
+  {
+    id: "escolta",
+    label: "Escolta",
+    hint: "El GM presiona el trayecto, la carga y la integridad del convoy.",
+  },
+  {
+    id: "social",
+    label: "Social",
+    hint: "Prima la tension verbal, reputacion, negociacion y lectura del otro.",
+  },
+  {
+    id: "exploracion",
+    label: "Exploracion",
+    hint: "Se priorizan descubrimiento, ruta, ambiente y peligros del lugar.",
+  },
+];
+
+function linesToText(lines: string[]) {
+  return lines.join("\n");
+}
+
+function textToLines(value: string) {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function getDefaultGmModeFromMissionType(nextType: MissionType): GmMissionMode {
+  switch (nextType) {
+    case "hunt":
+      return "combate";
+    case "escort":
+      return "escolta";
+    case "investigation":
+      return "investigacion";
+    case "event":
+      return "social";
+    case "story":
+    default:
+      return "exploracion";
+  }
+}
+
 function createEmptyNpc(): GmMissionNpc {
   return {
     id: crypto.randomUUID(),
@@ -131,6 +201,13 @@ export function AdminMissionManager() {
   const [visible, setVisible] = useState(true);
   const [isGeneratingAiMission, setIsGeneratingAiMission] = useState(false);
   const [aiDebug, setAiDebug] = useState<AiDebugInfo | null>(null);
+  const [gmMissionMode, setGmMissionMode] = useState<GmMissionMode>("exploracion");
+  const [gmPlayerObjectivesText, setGmPlayerObjectivesText] = useState("");
+  const [gmObjectivesText, setGmObjectivesText] = useState("");
+  const [gmVictoryText, setGmVictoryText] = useState("");
+  const [gmFailureText, setGmFailureText] = useState("");
+  const [gmCanUseHostileNpcs, setGmCanUseHostileNpcs] = useState(false);
+  const [gmCanEscalateToCombat, setGmCanEscalateToCombat] = useState(false);
   const [gmNpcs, setGmNpcs] = useState<GmMissionNpc[]>([]);
   const [magicOptions, setMagicOptions] = useState<GmMagicOption[]>([]);
   const [pendingMagicByNpcId, setPendingMagicByNpcId] = useState<
@@ -253,6 +330,13 @@ export function AdminMissionManager() {
     setMaxParticipants(1);
     setDifficulty("easy");
     setType("story");
+    setGmMissionMode("exploracion");
+    setGmPlayerObjectivesText("");
+    setGmObjectivesText("");
+    setGmVictoryText("");
+    setGmFailureText("");
+    setGmCanUseHostileNpcs(false);
+    setGmCanEscalateToCombat(false);
     setStatus("available");
     setVisible(true);
     setGmNpcs([]);
@@ -273,6 +357,19 @@ export function AdminMissionManager() {
     setMaxParticipants(mission.maxParticipants);
     setDifficulty(mission.difficulty);
     setType(mission.type);
+    setGmMissionMode(mission.gmConfig?.modoMision ?? "exploracion");
+    setGmPlayerObjectivesText(
+      linesToText(mission.gmConfig?.objetivosJugadores ?? [])
+    );
+    setGmObjectivesText(linesToText(mission.gmConfig?.objetivosGM ?? []));
+    setGmVictoryText(linesToText(mission.gmConfig?.condicionesVictoria ?? []));
+    setGmFailureText(linesToText(mission.gmConfig?.condicionesDerrota ?? []));
+    setGmCanUseHostileNpcs(
+      mission.gmConfig?.escalada?.puedeUsarNpcHostil ?? false
+    );
+    setGmCanEscalateToCombat(
+      mission.gmConfig?.escalada?.puedeEscalarACombate ?? false
+    );
     setStatus(mission.status);
     setVisible(mission.visible);
     setGmNpcs(mission.gmConfig?.npcs ?? []);
@@ -299,7 +396,18 @@ export function AdminMissionManager() {
       title,
       description,
       instructions,
-      gmConfig: { npcs: normalizeGmNpcsForSave(gmNpcs) },
+      gmConfig: {
+        modoMision: gmMissionMode,
+        objetivosJugadores: textToLines(gmPlayerObjectivesText),
+        objetivosGM: textToLines(gmObjectivesText),
+        condicionesVictoria: textToLines(gmVictoryText),
+        condicionesDerrota: textToLines(gmFailureText),
+        escalada: {
+          puedeUsarNpcHostil: gmCanUseHostileNpcs,
+          puedeEscalarACombate: gmCanEscalateToCombat,
+        },
+        npcs: normalizeGmNpcsForSave(gmNpcs),
+      },
       rewardGold,
       maxParticipants: Math.max(1, maxParticipants),
       difficulty,
@@ -388,6 +496,13 @@ export function AdminMissionManager() {
     setTitle(result.mission.title);
     setDescription(result.mission.description);
     setInstructions(result.mission.instructions);
+    setGmMissionMode(getDefaultGmModeFromMissionType(result.mission.type));
+    setGmPlayerObjectivesText("");
+    setGmObjectivesText("");
+    setGmVictoryText("");
+    setGmFailureText("");
+    setGmCanUseHostileNpcs(false);
+    setGmCanEscalateToCombat(false);
     setGmNpcs([]);
     setPendingMagicByNpcId({});
     setRewardGold(result.mission.rewardGold);
@@ -731,6 +846,112 @@ export function AdminMissionManager() {
             onChange={setInstructions}
             placeholder="Como se valida por WhatsApp"
           />
+
+          <div className="rounded-[1.4rem] border border-cyan-500/20 bg-cyan-500/8 p-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-cyan-300/80">
+                Modo del GM
+              </p>
+              <h5 className="mt-1 text-sm font-black text-stone-100">
+                Conducta, objetivos y resolucion
+              </h5>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-400">
+                Aqui defines cuando el GM puede atacar, si solo debe guiar, y
+                que condiciones vuelven obvia una victoria o derrota dentro de
+                la narrativa.
+              </p>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <label className="space-y-2">
+                <span className="text-sm font-semibold text-stone-200">
+                  Modo de mision
+                </span>
+                <select
+                  value={gmMissionMode}
+                  onChange={(event) =>
+                    setGmMissionMode(event.target.value as GmMissionMode)
+                  }
+                  className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-cyan-400/40"
+                >
+                  {GM_MODE_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs leading-5 text-stone-500">
+                  {GM_MODE_OPTIONS.find((option) => option.id === gmMissionMode)
+                    ?.hint ?? ""}
+                </p>
+              </label>
+
+              <div className="grid gap-3 rounded-2xl border border-stone-800 bg-stone-950/45 p-4 md:grid-cols-2">
+                <label className="flex items-start gap-3 text-sm text-stone-200">
+                  <input
+                    type="checkbox"
+                    checked={gmCanUseHostileNpcs}
+                    onChange={(event) =>
+                      setGmCanUseHostileNpcs(event.target.checked)
+                    }
+                    className="mt-1 h-4 w-4 rounded border-stone-600 bg-stone-900 text-cyan-300"
+                  />
+                  <span>
+                    Puede usar NPCs hostiles
+                  </span>
+                </label>
+                <label className="flex items-start gap-3 text-sm text-stone-200">
+                  <input
+                    type="checkbox"
+                    checked={gmCanEscalateToCombat}
+                    onChange={(event) =>
+                      setGmCanEscalateToCombat(event.target.checked)
+                    }
+                    className="mt-1 h-4 w-4 rounded border-stone-600 bg-stone-900 text-cyan-300"
+                  />
+                  <span>
+                    Puede escalar a combate
+                  </span>
+                </label>
+                <p className="text-xs leading-5 text-stone-500 md:col-span-2">
+                  Si ambas casillas estan apagadas, el GM debe presionar con
+                  ambiente, pistas, tiempo, desgaste o tension social, no con
+                  atacantes inventados.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <LabeledTextArea
+                label="Objetivos de los jugadores"
+                value={gmPlayerObjectivesText}
+                onChange={setGmPlayerObjectivesText}
+                placeholder={"Una linea por objetivo.\nProteger la reliquia\nSalir del bosque con 3 muestras"}
+                rows={4}
+              />
+              <LabeledTextArea
+                label="Objetivos del GM"
+                value={gmObjectivesText}
+                onChange={setGmObjectivesText}
+                placeholder={"Una linea por objetivo.\nRobar la carga\nSeparar al grupo\nAgotar sus recursos"}
+                rows={4}
+              />
+              <LabeledTextArea
+                label="Condiciones de victoria"
+                value={gmVictoryText}
+                onChange={setGmVictoryText}
+                placeholder={"Una linea por condicion.\nLa carga queda asegurada\nEl objetivo es escoltado hasta la salida"}
+                rows={4}
+              />
+              <LabeledTextArea
+                label="Condiciones de derrota"
+                value={gmFailureText}
+                onChange={setGmFailureText}
+                placeholder={"Una linea por condicion.\nLa reliquia es robada\nEl grupo abandona la mision\nEl convoy colapsa"}
+                rows={4}
+              />
+            </div>
+          </div>
 
           <div className="rounded-[1.4rem] border border-violet-500/20 bg-violet-500/8 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">

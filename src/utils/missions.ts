@@ -1,6 +1,7 @@
 import { FALLBACK_MISSIONS } from "../data/missions";
 import type {
   GmMissionNpc,
+  GmMissionMode,
   RealmMissionGmConfig,
   MissionDifficulty,
   RealmMissionClaimStatus,
@@ -103,6 +104,7 @@ const UUID_PATTERN =
 const MISSION_EVIDENCE_BUCKET = "mission-evidence";
 const GM_CONFIG_START = "[GM_CONFIG]";
 const GM_CONFIG_END = "[/GM_CONFIG]";
+const DEFAULT_GM_MODE: GmMissionMode = "exploracion";
 
 export function isSupabaseMissionId(value?: string) {
   return Boolean(value && UUID_PATTERN.test(value.trim()));
@@ -187,6 +189,73 @@ function normalizeGmNpcs(value: unknown): GmMissionNpc[] {
     .filter(Boolean) as GmMissionNpc[];
 }
 
+function normalizeStringList(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => String(entry ?? "").trim())
+    .filter(Boolean);
+}
+
+function normalizeMissionMode(value: unknown): GmMissionMode {
+  const normalized = String(value ?? "").trim() as GmMissionMode;
+  const validModes: GmMissionMode[] = [
+    "combate",
+    "jefe",
+    "investigacion",
+    "recoleccion",
+    "escolta",
+    "social",
+    "exploracion",
+  ];
+
+  return validModes.includes(normalized) ? normalized : DEFAULT_GM_MODE;
+}
+
+function normalizeGmConfig(value: unknown): RealmMissionGmConfig | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  const npcs = normalizeGmNpcs(record.npcs);
+  const objetivosJugadores = normalizeStringList(record.objetivosJugadores);
+  const objetivosGM = normalizeStringList(record.objetivosGM);
+  const condicionesVictoria = normalizeStringList(record.condicionesVictoria);
+  const condicionesDerrota = normalizeStringList(record.condicionesDerrota);
+  const escaladaRecord =
+    record.escalada && typeof record.escalada === "object"
+      ? (record.escalada as Record<string, unknown>)
+      : {};
+
+  const normalizedConfig: RealmMissionGmConfig = {
+    modoMision: normalizeMissionMode(record.modoMision),
+    objetivosJugadores,
+    objetivosGM,
+    condicionesVictoria,
+    condicionesDerrota,
+    escalada: {
+      puedeUsarNpcHostil: escaladaRecord.puedeUsarNpcHostil === true,
+      puedeEscalarACombate: escaladaRecord.puedeEscalarACombate === true,
+    },
+    npcs,
+  };
+
+  const hasStructuredData =
+    npcs.length > 0 ||
+    objetivosJugadores.length > 0 ||
+    objetivosGM.length > 0 ||
+    condicionesVictoria.length > 0 ||
+    condicionesDerrota.length > 0 ||
+    normalizedConfig.modoMision !== DEFAULT_GM_MODE ||
+    normalizedConfig.escalada.puedeUsarNpcHostil ||
+    normalizedConfig.escalada.puedeEscalarACombate;
+
+  return hasStructuredData ? normalizedConfig : undefined;
+}
+
 export function decodeMissionInstructions(value: string): {
   instructions: string;
   gmConfig?: RealmMissionGmConfig;
@@ -209,11 +278,11 @@ export function decodeMissionInstructions(value: string): {
   }
 
   try {
-    const parsed = JSON.parse(encodedConfig) as { npcs?: unknown };
-    const npcs = normalizeGmNpcs(parsed.npcs);
+    const parsed = JSON.parse(encodedConfig);
+    const gmConfig = normalizeGmConfig(parsed);
     return {
       instructions: baseInstructions.trim(),
-      gmConfig: npcs.length > 0 ? { npcs } : undefined,
+      gmConfig,
     };
   } catch {
     return { instructions: raw.trim() };
@@ -225,13 +294,13 @@ export function encodeMissionInstructions(
   gmConfig?: RealmMissionGmConfig
 ) {
   const baseInstructions = instructions.trim();
-  const npcs = normalizeGmNpcs(gmConfig?.npcs ?? []);
+  const normalizedConfig = normalizeGmConfig(gmConfig);
 
-  if (npcs.length === 0) {
+  if (!normalizedConfig) {
     return baseInstructions;
   }
 
-  const payload = JSON.stringify({ npcs }, null, 2);
+  const payload = JSON.stringify(normalizedConfig, null, 2);
   return `${baseInstructions}\n\n${GM_CONFIG_START}\n${payload}\n${GM_CONFIG_END}`;
 }
 

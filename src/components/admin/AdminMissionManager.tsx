@@ -848,6 +848,9 @@ export function AdminMissionManager() {
                     <p className="truncate text-sm font-bold text-stone-100">
                       {mission.title}
                     </p>
+                    <span className="text-xs text-gray-500 font-mono">
+                      ID: {mission.id.substring(0, 6).toUpperCase()}
+                    </span>
                     <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
                       {getMissionTypeLabel(mission.type)} -{" "}
                       {getMissionDifficultyLabel(mission.difficulty)}

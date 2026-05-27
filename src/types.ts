@@ -209,6 +209,7 @@ export type RealmMission = {
   title: string;
   description: string;
   instructions: string;
+  gmConfig?: RealmMissionGmConfig;
   rewardGold: number;
   maxParticipants: number;
   difficulty: MissionDifficulty;
@@ -217,6 +218,44 @@ export type RealmMission = {
   visible: boolean;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type GmNpcRole =
+  | "boss"
+  | "elite"
+  | "support"
+  | "summoner"
+  | "skirmisher"
+  | "controller";
+
+export type GmNpcStats = {
+  level?: number;
+  hp?: number;
+  attack?: number;
+  defense?: number;
+  speed?: number;
+};
+
+export type GmNpcMagicSummary = {
+  id: string;
+  title: string;
+  categoryId: string;
+  categoryTitle: string;
+  description: string;
+  abilityNames: string[];
+};
+
+export type GmMissionNpc = {
+  id: string;
+  name: string;
+  role: GmNpcRole;
+  stats: GmNpcStats;
+  allowedMagic: GmNpcMagicSummary[];
+  behaviorNotes?: string;
+};
+
+export type RealmMissionGmConfig = {
+  npcs: GmMissionNpc[];
 };
 
 export type RealmMissionClaimStatus = "claimed" | "completed" | "rewarded";

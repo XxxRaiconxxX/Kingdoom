@@ -1,5 +1,7 @@
 import { FALLBACK_MISSIONS } from "../data/missions";
 import type {
+  GmMissionNpc,
+  RealmMissionGmConfig,
   MissionDifficulty,
   RealmMissionClaimStatus,
   MissionStatus,
@@ -87,6 +89,7 @@ export type AdminRealmMissionInput = {
   title: string;
   description: string;
   instructions: string;
+  gmConfig?: RealmMissionGmConfig;
   rewardGold: number;
   maxParticipants: number;
   difficulty: MissionDifficulty;
@@ -98,17 +101,148 @@ export type AdminRealmMissionInput = {
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MISSION_EVIDENCE_BUCKET = "mission-evidence";
+const GM_CONFIG_START = "[GM_CONFIG]";
+const GM_CONFIG_END = "[/GM_CONFIG]";
 
 export function isSupabaseMissionId(value?: string) {
   return Boolean(value && UUID_PATTERN.test(value.trim()));
 }
 
+function normalizeNpcStats(value: unknown) {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+
+  const record = value as Record<string, unknown>;
+  const readNumber = (key: string) => {
+    const raw = record[key];
+    return typeof raw === "number" && Number.isFinite(raw) ? raw : undefined;
+  };
+
+  return {
+    level: readNumber("level"),
+    hp: readNumber("hp"),
+    attack: readNumber("attack"),
+    defense: readNumber("defense"),
+    speed: readNumber("speed"),
+  };
+}
+
+function normalizeGmNpcs(value: unknown): GmMissionNpc[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return null;
+      }
+
+      const record = entry as Record<string, unknown>;
+      const name = String(record.name ?? "").trim();
+      if (!name) {
+        return null;
+      }
+
+      const allowedMagic = Array.isArray(record.allowedMagic)
+        ? record.allowedMagic
+            .map((magic) => {
+              if (!magic || typeof magic !== "object") {
+                return null;
+              }
+
+              const magicRecord = magic as Record<string, unknown>;
+              const title = String(magicRecord.title ?? "").trim();
+              const id = String(magicRecord.id ?? "").trim();
+              if (!title || !id) {
+                return null;
+              }
+
+              return {
+                id,
+                title,
+                categoryId: String(magicRecord.categoryId ?? "").trim(),
+                categoryTitle: String(magicRecord.categoryTitle ?? "").trim(),
+                description: String(magicRecord.description ?? "").trim(),
+                abilityNames: Array.isArray(magicRecord.abilityNames)
+                  ? magicRecord.abilityNames
+                      .map((ability) => String(ability ?? "").trim())
+                      .filter(Boolean)
+                  : [],
+              };
+            })
+            .filter(Boolean)
+        : [];
+
+      return {
+        id: String(record.id ?? crypto.randomUUID()).trim() || crypto.randomUUID(),
+        name,
+        role: String(record.role ?? "elite").trim() as GmMissionNpc["role"],
+        stats: normalizeNpcStats(record.stats),
+        allowedMagic,
+        behaviorNotes: String(record.behaviorNotes ?? "").trim(),
+      } satisfies GmMissionNpc;
+    })
+    .filter(Boolean) as GmMissionNpc[];
+}
+
+export function decodeMissionInstructions(value: string): {
+  instructions: string;
+  gmConfig?: RealmMissionGmConfig;
+} {
+  const raw = String(value ?? "");
+  const startIndex = raw.indexOf(GM_CONFIG_START);
+  const endIndex = raw.indexOf(GM_CONFIG_END);
+
+  if (startIndex < 0 || endIndex < 0 || endIndex <= startIndex) {
+    return { instructions: raw.trim() };
+  }
+
+  const baseInstructions = raw.slice(0, startIndex).trimEnd();
+  const encodedConfig = raw
+    .slice(startIndex + GM_CONFIG_START.length, endIndex)
+    .trim();
+
+  if (!encodedConfig) {
+    return { instructions: baseInstructions.trim() };
+  }
+
+  try {
+    const parsed = JSON.parse(encodedConfig) as { npcs?: unknown };
+    const npcs = normalizeGmNpcs(parsed.npcs);
+    return {
+      instructions: baseInstructions.trim(),
+      gmConfig: npcs.length > 0 ? { npcs } : undefined,
+    };
+  } catch {
+    return { instructions: raw.trim() };
+  }
+}
+
+export function encodeMissionInstructions(
+  instructions: string,
+  gmConfig?: RealmMissionGmConfig
+) {
+  const baseInstructions = instructions.trim();
+  const npcs = normalizeGmNpcs(gmConfig?.npcs ?? []);
+
+  if (npcs.length === 0) {
+    return baseInstructions;
+  }
+
+  const payload = JSON.stringify({ npcs }, null, 2);
+  return `${baseInstructions}\n\n${GM_CONFIG_START}\n${payload}\n${GM_CONFIG_END}`;
+}
+
 function mapRealmMissionRow(row: RealmMissionRow): RealmMission {
+  const decoded = decodeMissionInstructions(row.instructions);
   return {
     id: row.id,
     title: row.title,
     description: row.description,
-    instructions: row.instructions,
+    instructions: decoded.instructions,
+    gmConfig: decoded.gmConfig,
     rewardGold: row.reward_gold,
     maxParticipants: Math.max(1, row.max_participants ?? 1),
     difficulty: row.difficulty,
@@ -124,7 +258,7 @@ function buildRealmMissionPayload(input: AdminRealmMissionInput) {
   return {
     title: input.title.trim(),
     description: input.description.trim(),
-    instructions: input.instructions.trim(),
+    instructions: encodeMissionInstructions(input.instructions, input.gmConfig),
     reward_gold: Math.max(0, Math.floor(input.rewardGold)),
     max_participants: Math.max(1, Math.floor(input.maxParticipants)),
     difficulty: input.difficulty,

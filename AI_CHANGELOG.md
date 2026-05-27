@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 27/05/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/components/admin/AdminMissionManager.tsx`, `src/utils/missions.ts`, `src/types.ts`, `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Puente canónico entre misiones del panel admin y el Game Master para restringir magias de NPCs al grimorio oficial.
+*   **Cambios Clave:**
+    *   **[Admin] NPCs tácticos canónicos:** El editor de misiones ahora permite definir NPCs del encounter con rol, stats, notas tácticas y una lista explícita de magias permitidas tomadas del grimorio administrado.
+    *   **[Compatibilidad] Config embebida sin migración:** La configuración del GM se serializa dentro de `instructions` usando bloques `[GM_CONFIG]...[/GM_CONFIG]`, evitando cambios de esquema en Supabase y manteniendo compatibilidad con las misiones existentes.
+    *   **[GM-bot] Magia restringida por payload:** El bot parsea esa configuración embebida y la inyecta en `DATOS_DE_MISION` como bloque canónico de NPCs y magias permitidas, junto con una regla explícita para no inventar hechizos fuera de la lista.
+*   **Notas/Advertencias:** `npx tsc --noEmit` sigue fallando por errores previos y ajenos en `src/components/RankingCard.tsx` y `src/components/WeeklyRankingPodium.tsx`. La validación de estos cambios se hizo con chequeo sintáctico del bot y revisión focalizada del flujo admin -> misión -> GM.
+
+### [Fecha: 27/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/ai.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Restauracion del prompt Human-First del Game Master y confirmacion de salida larga en Gemini.
 *   **Cambios Clave:**

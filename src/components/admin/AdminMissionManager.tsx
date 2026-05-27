@@ -1,16 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BellRing,
   Coins,
+  Flame,
   ExternalLink,
   Flag,
   ImageIcon,
   Loader2,
   ScrollText,
+  Sparkles,
+  Swords,
+  Trash2,
   UserPlus,
 } from "lucide-react";
 import type {
+  GmMissionNpc,
+  GmNpcMagicSummary,
+  GmNpcRole,
   MissionDifficulty,
   MissionReviewNotification,
   MissionStatus,
@@ -36,6 +43,7 @@ import {
 } from "../../utils/missions";
 import { generateMissionWithAi } from "../../utils/missionAi";
 import { fetchAllPlayers, updatePlayerGold } from "../../utils/players";
+import { fetchAdminMagicStyles } from "../../utils/grimoireContent";
 import {
   ADMIN_LIST_PREVIEW_COUNT,
   AdminAiDebugCard,
@@ -49,6 +57,45 @@ import {
 import type { AiDebugInfo } from "../../utils/aiDebug";
 
 type MissionListFilter = "all" | MissionStatus;
+type GmMagicOption = {
+  id: string;
+  title: string;
+  categoryId: string;
+  categoryTitle: string;
+  description: string;
+  abilityNames: string[];
+};
+
+const NPC_ROLE_OPTIONS: Array<{ id: GmNpcRole; label: string }> = [
+  { id: "boss", label: "Boss" },
+  { id: "elite", label: "Elite" },
+  { id: "support", label: "Support" },
+  { id: "summoner", label: "Summoner" },
+  { id: "skirmisher", label: "Skirmisher" },
+  { id: "controller", label: "Controller" },
+];
+
+function createEmptyNpc(): GmMissionNpc {
+  return {
+    id: crypto.randomUUID(),
+    name: "",
+    role: "elite",
+    stats: {},
+    allowedMagic: [],
+    behaviorNotes: "",
+  };
+}
+
+function normalizeGmNpcsForSave(npcs: GmMissionNpc[]) {
+  return npcs
+    .map((npc) => ({
+      ...npc,
+      name: npc.name.trim(),
+      behaviorNotes: npc.behaviorNotes?.trim() || "",
+      allowedMagic: npc.allowedMagic.filter((magic) => magic.id && magic.title),
+    }))
+    .filter((npc) => npc.name);
+}
 
 export function AdminMissionManager() {
   const [missions, setMissions] = useState<RealmMission[]>([]);
@@ -84,6 +131,11 @@ export function AdminMissionManager() {
   const [visible, setVisible] = useState(true);
   const [isGeneratingAiMission, setIsGeneratingAiMission] = useState(false);
   const [aiDebug, setAiDebug] = useState<AiDebugInfo | null>(null);
+  const [gmNpcs, setGmNpcs] = useState<GmMissionNpc[]>([]);
+  const [magicOptions, setMagicOptions] = useState<GmMagicOption[]>([]);
+  const [pendingMagicByNpcId, setPendingMagicByNpcId] = useState<
+    Record<string, string>
+  >({});
   const [aiZone, setAiZone] = useState("");
   const [aiFaction, setAiFaction] = useState("");
   const [aiTone, setAiTone] = useState("fantasia oscura politica");
@@ -112,14 +164,28 @@ export function AdminMissionManager() {
   );
   async function loadBaseData() {
     setIsLoading(true);
-    const [missionsResult, playersResult, pendingResult] = await Promise.all([
+    const [missionsResult, playersResult, pendingResult, magicResult] = await Promise.all([
       fetchAdminRealmMissions(),
       fetchAllPlayers(),
       fetchPendingMissionReviews(),
+      fetchAdminMagicStyles(),
     ]);
     setMissions(missionsResult.missions);
     setPlayers(playersResult);
     setPendingReviews(pendingResult.notifications);
+    setMagicOptions(
+      magicResult.styles.map((style) => ({
+        id: style.id,
+        title: style.title,
+        categoryId: style.categoryId,
+        categoryTitle: style.categoryTitle,
+        description: style.description,
+        abilityNames: Object.values(style.levels)
+          .flat()
+          .map((ability) => ability.name.trim())
+          .filter(Boolean),
+      }))
+    );
     setFeedback(missionsResult.message);
     setIsLoading(false);
   }
@@ -189,6 +255,8 @@ export function AdminMissionManager() {
     setType("story");
     setStatus("available");
     setVisible(true);
+    setGmNpcs([]);
+    setPendingMagicByNpcId({});
     setClaimPlayerId("");
     setClaims([]);
     setFeedback("");
@@ -207,6 +275,8 @@ export function AdminMissionManager() {
     setType(mission.type);
     setStatus(mission.status);
     setVisible(mission.visible);
+    setGmNpcs(mission.gmConfig?.npcs ?? []);
+    setPendingMagicByNpcId({});
     setClaimPlayerId("");
     setFeedback("");
     setHighlightedClaimId("");
@@ -229,6 +299,7 @@ export function AdminMissionManager() {
       title,
       description,
       instructions,
+      gmConfig: { npcs: normalizeGmNpcsForSave(gmNpcs) },
       rewardGold,
       maxParticipants: Math.max(1, maxParticipants),
       difficulty,
@@ -317,6 +388,8 @@ export function AdminMissionManager() {
     setTitle(result.mission.title);
     setDescription(result.mission.description);
     setInstructions(result.mission.instructions);
+    setGmNpcs([]);
+    setPendingMagicByNpcId({});
     setRewardGold(result.mission.rewardGold);
     setMaxParticipants(Math.max(1, result.mission.maxParticipants));
     setDifficulty(result.mission.difficulty);
@@ -459,6 +532,68 @@ export function AdminMissionManager() {
     setHighlightedClaimId(notification.claimId);
   }
 
+  function updateNpc(npcId: string, updater: (npc: GmMissionNpc) => GmMissionNpc) {
+    setGmNpcs((current) =>
+      current.map((npc) => (npc.id === npcId ? updater(npc) : npc))
+    );
+  }
+
+  function addNpc() {
+    const nextNpc = createEmptyNpc();
+    setGmNpcs((current) => [...current, nextNpc]);
+    setPendingMagicByNpcId((current) => ({ ...current, [nextNpc.id]: "" }));
+  }
+
+  function removeNpc(npcId: string) {
+    setGmNpcs((current) => current.filter((npc) => npc.id !== npcId));
+    setPendingMagicByNpcId((current) => {
+      const next = { ...current };
+      delete next[npcId];
+      return next;
+    });
+  }
+
+  function addMagicToNpc(npcId: string) {
+    const selectedMagicId = pendingMagicByNpcId[npcId];
+    if (!selectedMagicId) {
+      return;
+    }
+
+    const selectedMagic = magicOptions.find((entry) => entry.id === selectedMagicId);
+    if (!selectedMagic) {
+      return;
+    }
+
+    updateNpc(npcId, (npc) => {
+      if (npc.allowedMagic.some((entry) => entry.id === selectedMagic.id)) {
+        return npc;
+      }
+
+      const nextMagic: GmNpcMagicSummary = {
+        id: selectedMagic.id,
+        title: selectedMagic.title,
+        categoryId: selectedMagic.categoryId,
+        categoryTitle: selectedMagic.categoryTitle,
+        description: selectedMagic.description,
+        abilityNames: selectedMagic.abilityNames,
+      };
+
+      return {
+        ...npc,
+        allowedMagic: [...npc.allowedMagic, nextMagic],
+      };
+    });
+
+    setPendingMagicByNpcId((current) => ({ ...current, [npcId]: "" }));
+  }
+
+  function removeMagicFromNpc(npcId: string, magicId: string) {
+    updateNpc(npcId, (npc) => ({
+      ...npc,
+      allowedMagic: npc.allowedMagic.filter((entry) => entry.id !== magicId),
+    }));
+  }
+
   if (isLoading) {
     return (
       <AdminInfoCard
@@ -596,6 +731,247 @@ export function AdminMissionManager() {
             onChange={setInstructions}
             placeholder="Como se valida por WhatsApp"
           />
+
+          <div className="rounded-[1.4rem] border border-violet-500/20 bg-violet-500/8 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-violet-300/80">
+                  Canon del GM
+                </p>
+                <h5 className="mt-1 text-sm font-black text-stone-100">
+                  NPCs y magias permitidas
+                </h5>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-400">
+                  Estas referencias se incrustan en la mision para que el GM-bot
+                  use solo magias del grimorio en los NPCs seleccionados.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addNpc}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-violet-400/30 bg-violet-500/12 px-4 py-3 text-sm font-extrabold text-violet-100 transition hover:bg-violet-500/18"
+              >
+                <Sparkles className="h-4 w-4" />
+                Agregar NPC
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              {gmNpcs.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-stone-700 bg-stone-950/35 px-4 py-4 text-sm text-stone-400">
+                  Sin NPCs tacticos todavia. Si no agregas ninguno, el GM seguira
+                  funcionando solo con ambientacion e instrucciones libres.
+                </div>
+              ) : null}
+
+              {gmNpcs.map((npc, index) => (
+                <div
+                  key={npc.id}
+                  className="rounded-[1.3rem] border border-stone-800 bg-stone-950/45 p-4"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-2xl bg-violet-500/10 p-2 text-violet-200">
+                        <Swords className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-stone-100">
+                          NPC {index + 1}
+                        </p>
+                        <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
+                          Ficha canonica para encounter
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeNpc(npc.id)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-rose-500/25 bg-rose-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-rose-200 transition hover:bg-rose-500/16"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Borrar
+                    </button>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <LabeledInput
+                      label="Nombre del NPC"
+                      value={npc.name}
+                      onChange={(value) =>
+                        updateNpc(npc.id, (current) => ({ ...current, name: value }))
+                      }
+                      placeholder="Lyra, Capitan Vael, Ent de Combate..."
+                    />
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">
+                        Rol tactico
+                      </span>
+                      <select
+                        value={npc.role}
+                        onChange={(event) =>
+                          updateNpc(npc.id, (current) => ({
+                            ...current,
+                            role: event.target.value as GmNpcRole,
+                          }))
+                        }
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-violet-400/40"
+                      >
+                        {NPC_ROLE_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-5">
+                    <NumericInput
+                      label="Lv"
+                      value={npc.stats.level ?? 0}
+                      onChange={(value) =>
+                        updateNpc(npc.id, (current) => ({
+                          ...current,
+                          stats: { ...current.stats, level: value || undefined },
+                        }))
+                      }
+                    />
+                    <NumericInput
+                      label="HP"
+                      value={npc.stats.hp ?? 0}
+                      onChange={(value) =>
+                        updateNpc(npc.id, (current) => ({
+                          ...current,
+                          stats: { ...current.stats, hp: value || undefined },
+                        }))
+                      }
+                    />
+                    <NumericInput
+                      label="ATK"
+                      value={npc.stats.attack ?? 0}
+                      onChange={(value) =>
+                        updateNpc(npc.id, (current) => ({
+                          ...current,
+                          stats: { ...current.stats, attack: value || undefined },
+                        }))
+                      }
+                    />
+                    <NumericInput
+                      label="DEF"
+                      value={npc.stats.defense ?? 0}
+                      onChange={(value) =>
+                        updateNpc(npc.id, (current) => ({
+                          ...current,
+                          stats: { ...current.stats, defense: value || undefined },
+                        }))
+                      }
+                    />
+                    <NumericInput
+                      label="SPD"
+                      value={npc.stats.speed ?? 0}
+                      onChange={(value) =>
+                        updateNpc(npc.id, (current) => ({
+                          ...current,
+                          stats: { ...current.stats, speed: value || undefined },
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-stone-800 bg-stone-950/45 p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-stone-100">
+                      <Flame className="h-4 w-4 text-violet-200" />
+                      Magias permitidas del grimorio
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {npc.allowedMagic.length === 0 ? (
+                        <span className="text-sm text-stone-500">
+                          Sin magias asignadas. El GM no deberia inventarle una escuela nueva.
+                        </span>
+                      ) : null}
+                      {npc.allowedMagic.map((magic) => (
+                        <div
+                          key={magic.id}
+                          className="rounded-2xl border border-violet-500/20 bg-violet-500/10 px-3 py-2"
+                        >
+                          <div className="flex items-start gap-2">
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-violet-100">
+                                {magic.title}
+                              </p>
+                              <p className="text-xs uppercase tracking-[0.14em] text-violet-200/70">
+                                {magic.categoryTitle}
+                              </p>
+                              {magic.abilityNames.length > 0 ? (
+                                <p className="mt-1 text-xs leading-5 text-stone-400">
+                                  {magic.abilityNames.slice(0, 4).join(", ")}
+                                </p>
+                              ) : null}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeMagicFromNpc(npc.id, magic.id)}
+                              className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-200"
+                            >
+                              Quitar
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+                      <label className="space-y-2">
+                        <span className="text-sm font-semibold text-stone-200">
+                          Vincular magia canonica
+                        </span>
+                        <select
+                          value={pendingMagicByNpcId[npc.id] ?? ""}
+                          onChange={(event) =>
+                            setPendingMagicByNpcId((current) => ({
+                              ...current,
+                              [npc.id]: event.target.value,
+                            }))
+                          }
+                          className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-violet-400/40"
+                        >
+                          <option value="">Selecciona una magia del grimorio</option>
+                          {magicOptions.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.categoryTitle} - {option.title}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => addMagicToNpc(npc.id)}
+                        className="self-end rounded-2xl border border-violet-400/30 bg-violet-500/12 px-4 py-3 text-sm font-extrabold text-violet-100 transition hover:bg-violet-500/18"
+                      >
+                        Agregar magia
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <LabeledTextArea
+                      label="Comportamiento / notas tacticas"
+                      value={npc.behaviorNotes ?? ""}
+                      onChange={(value) =>
+                        updateNpc(npc.id, (current) => ({
+                          ...current,
+                          behaviorNotes: value,
+                        }))
+                      }
+                      placeholder="Prefiere hostigar desde retaguardia, protege al boss, usa control antes que dano..."
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2">
@@ -906,7 +1282,7 @@ export function AdminMissionManager() {
                 </p>
               </div>
               <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-amber-200">
-                Premio {selectedMission.rewardGold} · Cupos {claims.length}/
+                Premio {selectedMission.rewardGold} - Cupos {claims.length}/
                 {selectedMission.maxParticipants}
               </span>
             </div>
@@ -1101,3 +1477,4 @@ export function AdminMissionManager() {
     </div>
   );
 }
+

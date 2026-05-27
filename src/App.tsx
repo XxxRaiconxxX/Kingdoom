@@ -965,9 +965,16 @@ function MissionCard({
     <article className="kd-hover-lift rounded-[1.6rem] border border-emerald-500/15 bg-stone-950/45 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300/80">
-            {missionTypeLabels[mission.type]}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300/80">
+              {missionTypeLabels[mission.type]}
+            </p>
+            {mission.id ? (
+              <span className="text-xs text-gray-500 font-mono">
+                ID: {mission.id.substring(0, 6).toUpperCase()}
+              </span>
+            ) : null}
+          </div>
           <h3 className="mt-2 text-lg font-black leading-tight text-stone-100">
             {mission.title}
           </h3>

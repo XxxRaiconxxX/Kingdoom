@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import {
   BellRing,
@@ -496,14 +496,27 @@ export function AdminMissionManager() {
     setTitle(result.mission.title);
     setDescription(result.mission.description);
     setInstructions(result.mission.instructions);
-    setGmMissionMode(getDefaultGmModeFromMissionType(result.mission.type));
-    setGmPlayerObjectivesText("");
-    setGmObjectivesText("");
-    setGmVictoryText("");
-    setGmFailureText("");
-    setGmCanUseHostileNpcs(false);
-    setGmCanEscalateToCombat(false);
-    setGmNpcs([]);
+    setGmMissionMode(
+      result.mission.gmConfig?.modoMision ??
+        getDefaultGmModeFromMissionType(result.mission.type)
+    );
+    setGmPlayerObjectivesText(
+      linesToText(result.mission.gmConfig?.objetivosJugadores ?? [])
+    );
+    setGmObjectivesText(linesToText(result.mission.gmConfig?.objetivosGM ?? []));
+    setGmVictoryText(
+      linesToText(result.mission.gmConfig?.condicionesVictoria ?? [])
+    );
+    setGmFailureText(
+      linesToText(result.mission.gmConfig?.condicionesDerrota ?? [])
+    );
+    setGmCanUseHostileNpcs(
+      result.mission.gmConfig?.escalada?.puedeUsarNpcHostil ?? false
+    );
+    setGmCanEscalateToCombat(
+      result.mission.gmConfig?.escalada?.puedeEscalarACombate ?? false
+    );
+    setGmNpcs(result.mission.gmConfig?.npcs ?? []);
     setPendingMagicByNpcId({});
     setRewardGold(result.mission.rewardGold);
     setMaxParticipants(Math.max(1, result.mission.maxParticipants));

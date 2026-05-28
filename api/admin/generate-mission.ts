@@ -13,6 +13,14 @@ import {
 type CombatStyle = "yes" | "no" | "optional";
 type MissionType = "story" | "hunt" | "escort" | "investigation" | "event";
 type MissionDifficulty = "easy" | "medium" | "hard" | "elite";
+type GmMissionMode =
+  | "combate"
+  | "jefe"
+  | "investigacion"
+  | "recoleccion"
+  | "escolta"
+  | "social"
+  | "exploracion";
 
 type MissionAiRequest = {
   type?: MissionType;
@@ -34,6 +42,22 @@ type MissionAiPayload = {
     title: string;
     description: string;
     instructions: string;
+    gmConfig?: {
+      modoMision: GmMissionMode;
+      objetivosJugadores: string[];
+      objetivosGM: string[];
+      condicionesVictoria: string[];
+      condicionesDerrota: string[];
+      escalada: {
+        puedeUsarNpcHostil: boolean;
+        puedeEscalarACombate: boolean;
+      };
+      npcs: Array<{
+        id?: string;
+        name?: string;
+        role?: string;
+      }>;
+    };
     rewardGold: number;
     maxParticipants: number;
     difficulty: MissionDifficulty;
@@ -110,6 +134,71 @@ function getFallbackReward(difficulty: MissionDifficulty) {
   }
 }
 
+function getDefaultGmMode(type: MissionType, combatStyle: CombatStyle): GmMissionMode {
+  switch (type) {
+    case "hunt":
+      return combatStyle === "yes" ? "jefe" : "combate";
+    case "escort":
+      return "escolta";
+    case "investigation":
+      return "investigacion";
+    case "event":
+      return combatStyle === "no" ? "social" : "exploracion";
+    case "story":
+    default:
+      return combatStyle === "yes" ? "combate" : "exploracion";
+  }
+}
+
+function normalizeStringList(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => String(entry ?? "").trim())
+    .filter(Boolean)
+    .slice(0, 6);
+}
+
+function normalizeGmMode(value: unknown, defaults: Required<MissionAiRequest>): GmMissionMode {
+  const normalized = String(value ?? "").trim() as GmMissionMode;
+  const validModes: GmMissionMode[] = [
+    "combate",
+    "jefe",
+    "investigacion",
+    "recoleccion",
+    "escolta",
+    "social",
+    "exploracion",
+  ];
+
+  return validModes.includes(normalized)
+    ? normalized
+    : getDefaultGmMode(defaults.type, defaults.combatStyle);
+}
+
+function buildDefaultEscalation(mode: GmMissionMode, combatStyle: CombatStyle) {
+  if (mode === "combate" || mode === "jefe") {
+    return {
+      puedeUsarNpcHostil: true,
+      puedeEscalarACombate: true,
+    };
+  }
+
+  if (mode === "escolta") {
+    return {
+      puedeUsarNpcHostil: combatStyle === "yes",
+      puedeEscalarACombate: combatStyle !== "no",
+    };
+  }
+
+  return {
+    puedeUsarNpcHostil: false,
+    puedeEscalarACombate: combatStyle === "yes" || combatStyle === "optional",
+  };
+}
+
 function getPrompt(input: Required<MissionAiRequest>) {
   return `
 Actua como diseñador senior de misiones para Kingdoom.
@@ -140,6 +229,8 @@ REGLAS
 - El titulo debe ser memorable, oscuro y util.
 - description debe ser inmersiva, clara y visible al jugador.
 - instructions debe servir al staff para entender como se valida en WhatsApp.
+- gmConfig debe ayudar al Game Master a actuar segun el tipo de mision.
+- NPCs y magias se cargaran despues manualmente por staff, asi que puedes dejar npcs vacio o con sugerencias minimas. No inventes grimorios completos ni listas largas de hechizos aqui.
 - No uses texto vacio ni relleno.
 - No metas mecanicas inexistentes.
 - Ajusta recompensa, cupo y tono a la dificultad.
@@ -155,6 +246,18 @@ Usa exactamente esta estructura:
     "title": "string",
     "description": "string",
     "instructions": "string",
+    "gmConfig": {
+      "modoMision": "combate|jefe|investigacion|recoleccion|escolta|social|exploracion",
+      "objetivosJugadores": ["string"],
+      "objetivosGM": ["string"],
+      "condicionesVictoria": ["string"],
+      "condicionesDerrota": ["string"],
+      "escalada": {
+        "puedeUsarNpcHostil": true,
+        "puedeEscalarACombate": true
+      },
+      "npcs": []
+    },
     "rewardGold": 0,
     "maxParticipants": 1,
     "difficulty": "easy|medium|hard|elite",
@@ -179,6 +282,8 @@ function normalizeMissionPayload(
   defaults: Required<MissionAiRequest>
 ): MissionAiPayload {
   const mission = payload.mission;
+  const gmMode = normalizeGmMode(mission?.gmConfig?.modoMision, defaults);
+  const defaultEscalation = buildDefaultEscalation(gmMode, defaults.combatStyle);
 
   return {
     mission: {
@@ -189,6 +294,28 @@ function normalizeMissionPayload(
       instructions:
         mission?.instructions?.trim() ||
         "Resolver por rol en WhatsApp. Un admin valida el cierre.",
+      gmConfig: {
+        modoMision: gmMode,
+        objetivosJugadores: normalizeStringList(
+          mission?.gmConfig?.objetivosJugadores
+        ),
+        objetivosGM: normalizeStringList(mission?.gmConfig?.objetivosGM),
+        condicionesVictoria: normalizeStringList(
+          mission?.gmConfig?.condicionesVictoria
+        ),
+        condicionesDerrota: normalizeStringList(
+          mission?.gmConfig?.condicionesDerrota
+        ),
+        escalada: {
+          puedeUsarNpcHostil:
+            mission?.gmConfig?.escalada?.puedeUsarNpcHostil ??
+            defaultEscalation.puedeUsarNpcHostil,
+          puedeEscalarACombate:
+            mission?.gmConfig?.escalada?.puedeEscalarACombate ??
+            defaultEscalation.puedeEscalarACombate,
+        },
+        npcs: [],
+      },
       rewardGold: clampReward(mission?.rewardGold, defaults.rewardGold),
       maxParticipants: clampParticipants(
         mission?.maxParticipants,

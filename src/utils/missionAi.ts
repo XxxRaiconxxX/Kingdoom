@@ -1,4 +1,9 @@
-import type { MissionDifficulty, MissionType, RealmMission } from "../types";
+import type {
+  MissionDifficulty,
+  MissionType,
+  RealmMission,
+  RealmMissionGmConfig,
+} from "../types";
 import type { AiDebugInfo } from "./aiDebug";
 
 export type MissionAiRequest = {
@@ -22,6 +27,7 @@ export type MissionAiResponse = {
     | "title"
     | "description"
     | "instructions"
+    | "gmConfig"
     | "rewardGold"
     | "maxParticipants"
     | "difficulty"
@@ -89,7 +95,10 @@ export async function generateMissionWithAi(input: MissionAiRequest) {
   return {
     status: "ready" as const,
     message: "Mision generada por IA. Revisa el texto y guardala si te convence.",
-    mission: payload.mission,
+    mission: {
+      ...payload.mission,
+      gmConfig: (payload.mission.gmConfig as RealmMissionGmConfig | undefined) ?? undefined,
+    },
     publicBrief: payload.publicBrief ?? null,
     promptSummary: payload.promptSummary ?? "",
     debug: payload.debug ?? null,

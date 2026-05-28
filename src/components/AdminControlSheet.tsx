@@ -1186,20 +1186,19 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       await reloadAdminData();
     }
   }
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[80] bg-black/70 px-2 py-2 backdrop-blur-md sm:px-4 sm:py-4 md:px-6 md:py-6"
+      className="fixed inset-0 z-[80] bg-black/70 px-0 py-0 backdrop-blur-md sm:px-4 sm:py-4 md:px-6 md:py-6"
     >
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 18 }}
         transition={{ duration: 0.22, ease: "easeOut" }}
-        className="kd-glass kd-admin-shell mx-auto flex h-full max-h-[calc(100dvh-1rem)] w-full min-w-0 max-w-6xl flex-col overflow-hidden rounded-[1.35rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/50 sm:rounded-[2rem]"
+        className="kd-glass kd-admin-shell mx-auto flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-6xl flex-col overflow-hidden rounded-none border-x-0 border-y-0 border-stone-800 bg-stone-950 shadow-2xl shadow-black/50 sm:h-full sm:max-h-[calc(100dvh-1rem)] sm:rounded-[2rem] sm:border-x sm:border-y"
       >
         <div className="flex items-start justify-between gap-3 border-b border-amber-500/10 px-4 py-4 sm:gap-4 sm:px-5 md:px-6">
           <div className="min-w-0">
@@ -1347,7 +1346,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -1532,7 +1531,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -1719,7 +1718,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -1882,7 +1881,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -2182,7 +2181,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -2527,7 +2526,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -2621,7 +2620,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -2824,7 +2823,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5"
+                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-emerald-500/10 p-3 text-emerald-300">

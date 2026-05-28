@@ -469,7 +469,7 @@ export function PlayerProfilePanel({
   );
 
   return (
-    <section className="kd-glass relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 shadow-2xl shadow-black/20 md:p-6">
+    <section className="kd-glass relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-4 sm:p-5 shadow-2xl shadow-black/20 md:p-6">
       <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.18),transparent_62%)] blur-2xl" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
       {player || showAnimeShortcut ? (
@@ -651,8 +651,8 @@ export function PlayerProfilePanel({
           ) : (
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
-                <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.96),rgba(12,10,9,0.82))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)]">
-                  <div className="flex flex-col gap-5">
+                <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.96),rgba(12,10,9,0.82))] p-4 sm:p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)]">
+                  <div className="flex flex-col gap-4 sm:gap-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="rounded-[1.15rem] border border-amber-500/20 bg-amber-500/10 p-3 text-amber-400">
@@ -793,7 +793,7 @@ export function PlayerProfilePanel({
                   </div>
                 </div>
 
-                <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(180deg,rgba(31,24,18,0.94),rgba(12,10,9,0.82))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
+                <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(180deg,rgba(31,24,18,0.94),rgba(12,10,9,0.82))] p-4 sm:p-5 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
                   <div className="flex items-center gap-3">
                     <div className="rounded-[1.15rem] border border-amber-500/20 bg-amber-500/10 p-3 text-amber-400">
                       <WalletCards className="h-5 w-5" />
@@ -831,7 +831,7 @@ export function PlayerProfilePanel({
               </div>
 
               {businessProposals.some(p => p.status === "pending") || businesses.length > 0 ? (
-                <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-5">
+                <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-4 sm:p-5">
                   <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-center gap-3">
                       <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-2.5 text-cyan-300">
@@ -1067,7 +1067,7 @@ export function PlayerProfilePanel({
                 </div>
               ) : null}
 
-              <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-5">
+              <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-4 sm:p-5">
                 <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                   <div className="flex items-center gap-3">
                     <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-emerald-400">
@@ -1201,7 +1201,7 @@ export function PlayerProfilePanel({
           )
         ) : (
           <div className="grid gap-4 md:grid-cols-[1.15fr_0.85fr]">
-            <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.96),rgba(12,10,9,0.82))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)]">
+            <div className="rounded-[1.75rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.96),rgba(12,10,9,0.82))] p-4 sm:p-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)]">
               <div className="mb-4 flex items-center gap-3">
                 <div className="rounded-[1.15rem] border border-amber-500/20 bg-amber-500/10 p-3 text-amber-400">
                   <Coins className="h-5 w-5" />
@@ -1265,7 +1265,7 @@ export function PlayerProfilePanel({
               </form>
             </div>
 
-            <div className="rounded-[1.75rem] border border-purple-500/15 bg-[linear-gradient(180deg,rgba(30,22,35,0.92),rgba(12,10,9,0.82))] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
+            <div className="rounded-[1.75rem] border border-purple-500/15 bg-[linear-gradient(180deg,rgba(30,22,35,0.92),rgba(12,10,9,0.82))] p-4 sm:p-5 shadow-[0_18px_48px_rgba(0,0,0,0.18)]">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-purple-300/80">
                 Registro publico
               </p>

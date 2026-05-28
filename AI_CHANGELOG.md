@@ -29,6 +29,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+
 ### [Fecha: 27/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Endurecimiento del arranque de WhatsApp Web con reintentos y mejor diagnostico de timeouts de red.
@@ -104,6 +105,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Resumen:** Corrección de rutas absolutas para garantizar persistencia local y remota del bot.
 *   **Cambios Clave:**
     *   **[Admin] Rutas dinámicas:** Se implementaron rutas dinámicas (usando `__dirname` y `path.join`) para `admin_audit_log.json` y `admins.json`. Esto corrige el fallo silencioso donde el comando `!bitacora` no mostraba información al correr en Windows y asegura compatibilidad nativa tanto local como en el contenedor de Hugging Face.
+
+### [Fecha: 27/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/components/admin/AdminControlPrimitives.tsx`, `src/components/PlayerProfilePanel.tsx`
+*   **Resumen:** Revisión integral de UX/UI Mobile-First para compactar y optimizar espacio en pantallas pequeñas.
+*   **Cambios Clave:**
+    *   **[UI Admin] Modal Full-screen:** `AdminControlSheet` ahora ocupa el 100% de la pantalla en dispositivos móviles sin bordes redondeados, maximizando el espacio útil, mientras que en desktop mantiene su diseño de panel flotante (`md:h-[92vh] md:rounded-[2rem]`).
+    *   **[UI Admin] Formularios y Primitivas Compactas:** Se redujo el padding excesivo (`p-5` a `p-4 sm:p-5`) y los gaps en los inputs, tarjetas informativas y previas del mercado dentro de `AdminControlPrimitives.tsx`, requiriendo menos scroll vertical para administrar el reino desde el celular.
+    *   **[UI Perfil] Optimización de Layout:** `PlayerProfilePanel` ajustó la separación de sus bloques (`gap-5` a `gap-4 sm:gap-5`) y compactó los paddings generales de sus secciones internas para eliminar espacios vacíos innecesarios sin perder jerarquía visual.
+*   **Notas/Advertencias:** Ningún cambio de lógica de Supabase ni del bot. Exclusivo de Frontend UI.
+
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/player.js`

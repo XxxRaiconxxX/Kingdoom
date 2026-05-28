@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+
+### [Fecha: 28/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/TavernPlinko.tsx`
+*   **Resumen:** Corrección visual y lógica del cálculo de apuestas en Esfera de las Runas.
+*   **Cambios Clave:**
+    *   **[Minijuegos] Corrección cálculo de total:** El costo total de la jugada ahora calcula `apuestaPorEsfera * cantidad`, mostrándose explícitamente y utilizándose correctamente para la deducción de oro y los cálculos de RTP/premio.
+    *   **[UI] Claridad de Etiquetas:** Actualizadas etiquetas "Multiplicador" a "Lanzamiento" y "Apuesta unitaria" a "Apuesta por esfera" para evitar confusión. Se muestra de manera clara el costo total real de la jugada.
+    *   **[UX] Estado del Botón:** Actualizados los mensajes en el botón de lanzar (Oro insuficiente, límite alcanzado, apuesta inválida) para informar dinámicamente y con base al oro que requiere la apuesta total.
+*   **Notas/Advertencias:** Validado localmente con `npx tsc --noEmit` y `npm run build` sin errores en este componente.
 ### [Fecha: 28/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/admin/AdminMissionManager.tsx`, `src/utils/missions.ts`
 *   **Resumen:** Funcionalidad para eliminar participantes de misiones desde el panel de admin.

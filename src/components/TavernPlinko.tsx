@@ -266,9 +266,14 @@ export function TavernPlinko() {
   const balance = player?.gold ?? 0;
   const remainingDailyNet = Math.max(0, MAX_DAILY_PLINKO_WIN_LIMIT - dailyNetWins);
   const limitReached = dailyNetWins >= MAX_DAILY_PLINKO_WIN_LIMIT;
-  const safeBet = clamp(Math.floor(Number.isFinite(bet) ? bet : 0), 1, Math.max(1, balance));
-  const totalStake = safeBet * quantity;
-  const canDrop = Boolean(player && phase !== "dropping" && !updating && !limitReached && totalStake <= balance);
+  
+  const parsedBet = Math.floor(Number.isFinite(bet) ? Math.max(0, bet) : 0);
+  const totalStake = parsedBet * quantity;
+  const hasEnoughGold = totalStake > 0 && totalStake <= balance;
+  
+  const canDrop = Boolean(
+    player && phase !== "dropping" && !updating && !limitReached && hasEnoughGold
+  );
 
   useEffect(() => {
     if (!player) {
@@ -311,18 +316,18 @@ export function TavernPlinko() {
     setMessage(`Las runas superiores abren la caida para ${quantity} esfera(s)...`);
     const freshPlayer = await refreshPlayer();
     const currentGold = freshPlayer?.gold ?? player.gold;
-    const finalStake = clamp(safeBet, 1, currentGold) * quantity;
+    const finalStake = parsedBet * quantity;
 
-    if (finalStake > currentGold) {
+    if (finalStake > currentGold || finalStake <= 0) {
       setUpdating(false);
-      setMessage("No tienes oro suficiente para esa apuesta total.");
+      setMessage("No tienes oro suficiente para esa apuesta total o es invalida.");
       return;
     }
 
     const paths = Array.from({ length: quantity }, () => computePlinkoPath());
     let totalRawPrize = 0;
     paths.forEach((p) => {
-      totalRawPrize += Math.floor(safeBet * getPlinkoMultiplier(p.slot));
+      totalRawPrize += Math.floor(parsedBet * getPlinkoMultiplier(p.slot));
     });
 
     const rawNet = totalRawPrize - finalStake;
@@ -498,8 +503,8 @@ export function TavernPlinko() {
         <aside className="relative rounded-[1.6rem] border border-stone-800 bg-stone-950/75 p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Multiplicador</p>
-              <p className="mt-1 text-[10px] text-stone-500 font-bold">Riesgo arcade</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Lanzamiento</p>
+              <p className="mt-1 text-[10px] text-stone-500 font-bold">Rafaga de esferas</p>
             </div>
             <button
               type="button"
@@ -515,6 +520,7 @@ export function TavernPlinko() {
           <div className="mt-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">Cantidad</p>
+              <p className="mt-1 text-[10px] font-bold text-stone-500">Esferas a lanzar</p>
             </div>
             <div className="flex gap-1.5">
               {[1, 3, 5, 10].map((q) => (
@@ -537,9 +543,9 @@ export function TavernPlinko() {
 
           <div className="mt-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Apuesta unitaria</p>
-              <p className="mt-1 text-[10px] font-bold text-stone-500">
-                Total: {(safeBet * quantity).toLocaleString("es-PY")} oro
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Apuesta por esfera</p>
+              <p className="mt-1 text-[11px] font-black text-amber-500/90">
+                Costo total: {totalStake.toLocaleString("es-PY")} oro
               </p>
             </div>
           </div>
@@ -574,7 +580,17 @@ export function TavernPlinko() {
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-stone-950 shadow-[0_0_28px_rgba(245,158,11,0.2)] transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-stone-800 disabled:text-stone-500 disabled:shadow-none"
           >
             <Wand2 className="h-4 w-4" />
-            {phase === "dropping" ? "Cayendo..." : "Lanzar esferas"}
+            {phase === "dropping"
+              ? "Cayendo..."
+              : updating
+                ? "Procesando..."
+                : limitReached
+                  ? "Limite diario alcanzado"
+                  : !hasEnoughGold && parsedBet > 0
+                    ? "Oro insuficiente"
+                    : parsedBet <= 0
+                      ? "Apuesta invalida"
+                      : "Lanzar esferas"}
           </button>
 
           <div className="mt-4 grid gap-2">

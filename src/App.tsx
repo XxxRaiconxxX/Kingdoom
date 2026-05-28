@@ -387,6 +387,14 @@ function HomeSection({
     setPlayerMissionClaims(claimsResult.claimsByMissionId);
   }
 
+  async function refreshMissionsData() {
+    const { fetchPublicRealmMissions } = await loadMissionUtils();
+    const result = await fetchPublicRealmMissions();
+    startTransition(() => {
+      setMissions(result.missions);
+    });
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -538,6 +546,7 @@ function HomeSection({
 
     if (result.status === "claimed" || result.status === "exists") {
       await refreshCurrentPlayerMissionClaims();
+      await refreshMissionsData();
     }
   }
 
@@ -1001,7 +1010,7 @@ function MissionCard({
           {missionStatusLabels[mission.status]}
         </span>
         <span className="rounded-full border border-stone-700 bg-stone-950/70 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-300">
-          Cupos {mission.maxParticipants}
+          Cupos {Math.max(0, mission.maxParticipants - (mission.activeClaims || 0))}
         </span>
         {claim ? (
           <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-200">

@@ -218,6 +218,7 @@ export type RealmMission = {
   visible: boolean;
   createdAt?: string;
   updatedAt?: string;
+  activeClaims?: number;
 };
 
 export type GmNpcRole =

@@ -1346,7 +1346,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -1531,7 +1531,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -1718,7 +1718,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -1881,7 +1881,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -2181,7 +2181,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -2526,7 +2526,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -2620,7 +2620,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
             <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
@@ -2823,7 +2823,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
               <section
                 data-gsap-admin
-                className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-emerald-500/10 p-3 text-emerald-300">

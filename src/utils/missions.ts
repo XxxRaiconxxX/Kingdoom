@@ -27,6 +27,7 @@ type RealmMissionRow = {
   visible: boolean;
   created_at?: string;
   updated_at?: string;
+  realm_mission_claims?: Array<{ count: number }> | { count: number } | null;
 };
 
 type MissionClaimPlayerRow = {
@@ -174,7 +175,7 @@ function normalizeGmNpcs(value: unknown): GmMissionNpc[] {
                   : [],
               };
             })
-            .filter(Boolean)
+            .filter(Boolean) as import("../types").GmNpcMagicSummary[]
         : [];
 
       return {
@@ -306,6 +307,14 @@ export function encodeMissionInstructions(
 
 function mapRealmMissionRow(row: RealmMissionRow): RealmMission {
   const decoded = decodeMissionInstructions(row.instructions);
+  
+  let activeClaims = 0;
+  if (Array.isArray(row.realm_mission_claims)) {
+    activeClaims = row.realm_mission_claims[0]?.count ?? 0;
+  } else if (row.realm_mission_claims && typeof row.realm_mission_claims === "object") {
+    activeClaims = row.realm_mission_claims.count ?? 0;
+  }
+
   return {
     id: row.id,
     title: row.title,
@@ -320,6 +329,7 @@ function mapRealmMissionRow(row: RealmMissionRow): RealmMission {
     visible: row.visible,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    activeClaims,
   };
 }
 
@@ -432,7 +442,7 @@ export async function fetchPublicRealmMissions(): Promise<RealmMissionsState> {
   const { data, error } = await supabase
     .from("realm_missions")
     .select(
-      "id, title, description, instructions, reward_gold, max_participants, difficulty, type, status, visible, created_at, updated_at"
+      "id, title, description, instructions, reward_gold, max_participants, difficulty, type, status, visible, created_at, updated_at, realm_mission_claims(count)"
     )
     .eq("visible", true)
     .neq("status", "closed")
@@ -457,7 +467,7 @@ export async function fetchAdminRealmMissions(): Promise<RealmMissionsState> {
   const { data, error } = await supabase
     .from("realm_missions")
     .select(
-      "id, title, description, instructions, reward_gold, max_participants, difficulty, type, status, visible, created_at, updated_at"
+      "id, title, description, instructions, reward_gold, max_participants, difficulty, type, status, visible, created_at, updated_at, realm_mission_claims(count)"
     )
     .order("created_at", { ascending: false });
 
@@ -871,6 +881,16 @@ export async function claimRealmMission(missionId: string, playerId: string) {
   });
 
   if (!error) {
+    if (
+      currentParticipants + 1 >= maxParticipants &&
+      missionState.status === "available"
+    ) {
+      await supabase
+        .from("realm_missions")
+        .update({ status: "in-progress" })
+        .eq("id", normalizedMissionId);
+    }
+
     return {
       status: "claimed" as const,
       message: "Postulacion enviada. Cuando termines, entrega la evidencia.",

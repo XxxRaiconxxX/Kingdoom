@@ -563,6 +563,7 @@ export function AdminMissionManager() {
       setClaimPlayerId("");
       await loadClaimsForMission(missionId);
       await refreshPendingReviews();
+      await loadBaseData();
     }
   }
 
@@ -1459,14 +1460,14 @@ export function AdminMissionManager() {
                       {mission.title}
                     </p>
                     <span className="text-xs text-gray-500 font-mono">
-                      ID: {mission.id.substring(0, 6).toUpperCase()}
+                      ID: {mission.id?.substring(0, 6).toUpperCase()}
                     </span>
                     <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
                       {getMissionTypeLabel(mission.type)} -{" "}
                       {getMissionDifficultyLabel(mission.difficulty)}
                     </p>
                     <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-stone-500">
-                      Cupos maximos: {mission.maxParticipants}
+                      Cupos: {Math.max(0, mission.maxParticipants - (mission.activeClaims || 0))} restantes
                     </p>
                   </div>
                   <div className="shrink-0 text-right">

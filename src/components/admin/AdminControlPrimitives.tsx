@@ -71,7 +71,7 @@ export function AdminInfoCard({
 
   return (
     <div className={`kd-glass rounded-[1.5rem] border p-4 sm:p-5 ${toneClass}`}>
-      <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-bold text-stone-100">{title}</p>
           <p className="mt-2 text-sm leading-6 text-stone-400">{message}</p>
@@ -192,14 +192,14 @@ export function LabeledInput({
   placeholder: string;
 }) {
   return (
-    <label className="space-y-2">
+    <label className="flex flex-col space-y-1.5">
       <span className="text-sm font-semibold text-stone-200">{label}</span>
       <input
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-3 py-2.5 sm:px-4 sm:py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
+        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-2.5 sm:py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>
   );
@@ -219,14 +219,14 @@ export function LabeledTextArea({
   rows?: number;
 }) {
   return (
-    <label className="space-y-2">
+    <label className="flex flex-col space-y-1.5">
       <span className="text-sm font-semibold text-stone-200">{label}</span>
       <textarea
         value={value}
         rows={rows}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-3 py-2.5 sm:px-4 sm:py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
+        className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-2.5 sm:py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>
   );

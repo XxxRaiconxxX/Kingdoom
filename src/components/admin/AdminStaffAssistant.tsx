@@ -232,7 +232,7 @@ export default function AdminStaffAssistant() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[0.98fr_1.02fr]">
-      <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-cyan-500/10 p-3 text-cyan-200">
             <Sparkles className="h-5 w-5" />
@@ -429,7 +429,7 @@ export default function AdminStaffAssistant() {
         ) : null}
       </section>
 
-      <section className="rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
             <ClipboardCheck className="h-5 w-5" />

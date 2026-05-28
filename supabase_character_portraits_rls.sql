@@ -1,5 +1,4 @@
--- Habilitar RLS si no está habilitado
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
 
 -- Asegurarnos de que el bucket exista y sea público
 INSERT INTO storage.buckets (id, name, public)

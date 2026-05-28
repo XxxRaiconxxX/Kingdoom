@@ -507,7 +507,7 @@ export function AdminMagicManager() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5">
         <AdminManagerHeader
           icon={<Sparkles className="h-5 w-5" />}
           eyebrow="Editor del grimorio"
@@ -816,7 +816,7 @@ export function AdminMagicManager() {
         </form>
       </section>
 
-      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5">
         <AdminManagerHeader
           icon={<BookOpen className="h-5 w-5" />}
           eyebrow="Estilos actuales"
@@ -1060,7 +1060,7 @@ export function AdminBestiaryManager() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5">
         <AdminManagerHeader
           icon={<PawPrint className="h-5 w-5" />}
           eyebrow="Editor del bestiario"
@@ -1211,7 +1211,7 @@ export function AdminBestiaryManager() {
         </form>
       </section>
 
-      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5">
         <AdminManagerHeader
           icon={<PawPrint className="h-5 w-5" />}
           eyebrow="Catalogo de criaturas"
@@ -1403,7 +1403,7 @@ export function AdminFloraManager() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5">
         <AdminManagerHeader
           icon={<Flower2 className="h-5 w-5" />}
           eyebrow="Editor de flora"
@@ -1519,7 +1519,7 @@ export function AdminFloraManager() {
         </form>
       </section>
 
-      <section className="kd-glass rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-5">
+      <section className="kd-glass rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5">
         <AdminManagerHeader
           icon={<Flower2 className="h-5 w-5" />}
           eyebrow="Catalogo de naturaleza"

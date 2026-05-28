@@ -138,4 +138,4 @@ export const WeeklyRankingPodium = memo(function WeeklyRankingPodium({
       </div>
     </div>
   );
-}
+});

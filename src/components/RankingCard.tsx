@@ -54,7 +54,7 @@ export const RankingCard = memo(function RankingCard({
       </div>
     </div>
   );
-}
+});
 
 function RankingMetric({
   label,
@@ -72,3 +72,4 @@ function RankingMetric({
     </div>
   );
 }
+

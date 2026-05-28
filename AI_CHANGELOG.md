@@ -30,6 +30,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 28/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/admin/AdminMissionManager.tsx`, `src/utils/missions.ts`
+*   **Resumen:** Funcionalidad para eliminar participantes de misiones desde el panel de admin.
+*   **Cambios Clave:**
+    *   **[Admin] Botón Eliminar:** Nuevo botón de "Eliminar" en la tarjeta de participante (`AdminMissionManager.tsx`) con prompt de confirmación de seguridad.
+    *   **[Backend] Borrado y Recálculo:** La función `deleteMissionClaim` (`missions.ts`) borra el reclamo, elimina las pruebas del Storage (`MISSION_EVIDENCE_BUCKET`) y devuelve el estado de la misión a `available` automáticamente si se libera un cupo en una misión `in-progress`.
+*   **Notas/Advertencias:** Listo para producción, confirmado con `git push`. Las validaciones de TS fallan por errores previos ajenos al área afectada.
+
+### [Fecha: 28/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/components/admin/AdminControlPrimitives.tsx`, `DATABASE_SCHEMA.md`, `patch.cjs` (eliminado), `test-supabase.ts` (eliminado)
 *   **Resumen:** Sincronización en tiempo real de misiones en UI, resolución de conflictos y limpieza de repositorio.
 *   **Cambios Clave:**

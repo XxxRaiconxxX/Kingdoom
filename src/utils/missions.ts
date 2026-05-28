@@ -913,6 +913,82 @@ export async function claimRealmMission(missionId: string, playerId: string) {
   };
 }
 
+export async function deleteMissionClaim(claimId: string) {
+  const normalizedClaimId = claimId.trim();
+
+  if (!normalizedClaimId) {
+    return {
+      status: "error" as const,
+      message: "Selecciona una toma de mision valida.",
+    };
+  }
+
+  const { data: claimData, error: claimFetchError } = await supabase
+    .from("realm_mission_claims")
+    .select("mission_id, proof_image_path")
+    .eq("id", normalizedClaimId)
+    .maybeSingle();
+
+  if (claimFetchError || !claimData) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo leer la informacion del participante.",
+        claimFetchError?.message ?? "Toma no encontrada"
+      ),
+    };
+  }
+
+  const proofImagePath = claimData?.proof_image_path?.trim() ?? "";
+
+  if (proofImagePath) {
+    await supabase.storage
+      .from(MISSION_EVIDENCE_BUCKET)
+      .remove([proofImagePath]);
+  }
+
+  const { error: deleteError } = await supabase
+    .from("realm_mission_claims")
+    .delete()
+    .eq("id", normalizedClaimId);
+
+  if (deleteError) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo eliminar al participante.",
+        deleteError.message
+      ),
+    };
+  }
+
+  // Recalculate slots to see if we need to set mission back to available
+  const { data: missionData } = await supabase
+    .from("realm_missions")
+    .select("id, status, max_participants")
+    .eq("id", claimData.mission_id)
+    .maybeSingle();
+
+  if (missionData && missionData.status === "in-progress") {
+    const { count, error: countError } = await supabase
+      .from("realm_mission_claims")
+      .select("id", { count: "exact", head: true })
+      .eq("mission_id", claimData.mission_id);
+
+    if (!countError && count !== null && count < (missionData.max_participants ?? 1)) {
+      await supabase
+        .from("realm_missions")
+        .update({ status: "available" })
+        .eq("id", claimData.mission_id);
+    }
+  }
+
+  return {
+    status: "deleted" as const,
+    message: "Participante eliminado exitosamente.",
+  };
+}
+
 export async function updateMissionClaimStatus(
   claimId: string,
   status: RealmMissionClaimStatus

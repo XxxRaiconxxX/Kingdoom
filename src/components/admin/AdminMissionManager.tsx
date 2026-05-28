@@ -41,6 +41,7 @@ import {
   markMissionRewardDelivered,
   updateMissionClaimStatus,
   upsertRealmMission,
+  deleteMissionClaim,
 } from "../../utils/missions";
 import { generateMissionWithAi } from "../../utils/missionAi";
 import { fetchAllPlayers, updatePlayerGold } from "../../utils/players";
@@ -178,6 +179,7 @@ export function AdminMissionManager() {
   const [isLoadingClaims, setIsLoadingClaims] = useState(false);
   const [isClaimingPlayer, setIsClaimingPlayer] = useState(false);
   const [isRewardingClaimId, setIsRewardingClaimId] = useState("");
+  const [isDeletingClaimId, setIsDeletingClaimId] = useState("");
   const [highlightedClaimId, setHighlightedClaimId] = useState("");
   const [pendingReviews, setPendingReviews] = useState<
     MissionReviewNotification[]
@@ -581,6 +583,34 @@ export function AdminMissionManager() {
     if (result.status === "saved") {
       await loadClaimsForMission(claim.missionId);
       await refreshPendingReviews();
+    }
+  }
+
+  async function handleDeleteClaim(claim: RealmMissionClaim) {
+    if (!selectedMission) {
+      setFeedback("Selecciona la mision antes de eliminar a un participante.");
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `Seguro que quieres eliminar a ${claim.playerName} de esta mision?`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setIsDeletingClaimId(claim.id);
+    setFeedback("");
+
+    const result = await deleteMissionClaim(claim.id);
+
+    setIsDeletingClaimId("");
+    setFeedback(result.message);
+
+    if (result.status === "deleted") {
+      await loadClaimsForMission(claim.missionId);
+      await loadBaseData();
     }
   }
 
@@ -1698,6 +1728,24 @@ export function AdminMissionManager() {
                           <>
                             <Coins className="h-3.5 w-3.5" />
                             {claim.rewardDelivered ? "Pagada" : "Entregar"}
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteClaim(claim)}
+                        disabled={isDeletingClaimId === claim.id}
+                        className="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-rose-300 transition hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-55"
+                      >
+                        {isDeletingClaimId === claim.id ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Eliminando...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Eliminar
                           </>
                         )}
                       </button>

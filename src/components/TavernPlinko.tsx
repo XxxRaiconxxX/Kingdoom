@@ -20,6 +20,7 @@ import {
 type PlinkoPhase = "betting" | "dropping" | "resolved";
 
 type BallFrame = {
+  id: number;
   x: number;
   y: number;
   row: number;
@@ -90,7 +91,7 @@ function buildAnimationPoints(path: PlinkoPath) {
   return points;
 }
 
-function drawRuneBoard(ctx: CanvasRenderingContext2D, frame: BallFrame | null, resolvedSlot: number | null) {
+function drawRuneBoard(ctx: CanvasRenderingContext2D, frames: BallFrame[], resolvedSlots: Record<number, number>) {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   ctx.imageSmoothingEnabled = false;
 
@@ -130,11 +131,13 @@ function drawRuneBoard(ctx: CanvasRenderingContext2D, frame: BallFrame | null, r
   ctx.fillStyle = "rgba(226, 232, 240, 0.55)";
   ctx.fillText("8 FILAS DE RUNAS · 9 COFRES · RIESGO CONTROLADO", CANVAS_WIDTH / 2, 76);
 
+  const activeRows = new Set(frames.map((f) => f.row));
+
   for (let row = 0; row < PLINKO_ROWS; row++) {
     for (let col = 0; col <= row; col++) {
       const x = rowX(row, col);
       const y = PEG_START_Y + row * PEG_GAP_Y;
-      const pulse = frame?.row === row ? 1 : 0;
+      const pulse = activeRows.has(row) ? 1 : 0;
 
       ctx.save();
       ctx.translate(x, y);
@@ -153,10 +156,12 @@ function drawRuneBoard(ctx: CanvasRenderingContext2D, frame: BallFrame | null, r
   }
 
   const slotWidth = (CANVAS_WIDTH - 76) / PLINKO_SLOTS;
+  const activeFramesInSlot = new Set(frames.map((f) => f.slot).filter((s) => s !== undefined));
+
   for (let slot = 0; slot < PLINKO_SLOTS; slot++) {
     const x = 38 + slot * slotWidth;
     const color = SLOT_COLORS[slot];
-    const active = slot === resolvedSlot || slot === frame?.slot;
+    const active = (resolvedSlots[slot] ?? 0) > 0 || activeFramesInSlot.has(slot);
     const chestGlow = active ? 0.34 : 0.1;
 
     ctx.fillStyle = `${color}${active ? "4d" : "22"}`;
@@ -173,9 +178,20 @@ function drawRuneBoard(ctx: CanvasRenderingContext2D, frame: BallFrame | null, r
     ctx.font = "900 14px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(`${PLINKO_MULTIPLIERS[slot]}x`, x + slotWidth / 2, SLOT_Y + 38);
+
+    const count = resolvedSlots[slot] ?? 0;
+    if (count > 0) {
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(x + slotWidth - 14, SLOT_Y + 14, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#000";
+      ctx.font = "800 11px sans-serif";
+      ctx.fillText(`${count}`, x + slotWidth - 14, SLOT_Y + 18);
+    }
   }
 
-  if (frame) {
+  frames.forEach((frame) => {
     frame.trail.forEach((point) => {
       ctx.beginPath();
       ctx.arc(point.x, point.y, 10, 0, Math.PI * 2);
@@ -199,7 +215,7 @@ function drawRuneBoard(ctx: CanvasRenderingContext2D, frame: BallFrame | null, r
     ctx.strokeStyle = "#f97316";
     ctx.lineWidth = 3;
     ctx.stroke();
-  }
+  });
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
@@ -232,21 +248,27 @@ export function TavernPlinko() {
   const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
+  const trailsRef = useRef<Record<number, Array<{ x: number; y: number; alpha: number }>>>({});
+  
   const dateKey = useMemo(() => buildScratchDateKey(), []);
   const [phase, setPhase] = useState<PlinkoPhase>("betting");
   const [bet, setBet] = useState(1000);
+  const [quantity, setQuantity] = useState(1);
   const [dailyNetWins, setDailyNetWins] = useState(0);
-  const [lastSlot, setLastSlot] = useState<number | null>(null);
-  const [lastMultiplier, setLastMultiplier] = useState<number | null>(null);
-  const [lastPrize, setLastPrize] = useState(0);
-  const [message, setMessage] = useState("Elige apuesta y deja caer la esfera.");
+  
+  const [lastSlots, setLastSlots] = useState<Record<number, number> | null>(null);
+  const [lastTotalPrize, setLastTotalPrize] = useState<number | null>(null);
+  const [lastTotalBet, setLastTotalBet] = useState<number | null>(null);
+  
+  const [message, setMessage] = useState("Elige apuesta, cantidad y deja caer las esferas.");
   const [updating, setUpdating] = useState(false);
 
   const balance = player?.gold ?? 0;
   const remainingDailyNet = Math.max(0, MAX_DAILY_PLINKO_WIN_LIMIT - dailyNetWins);
   const limitReached = dailyNetWins >= MAX_DAILY_PLINKO_WIN_LIMIT;
   const safeBet = clamp(Math.floor(Number.isFinite(bet) ? bet : 0), 1, Math.max(1, balance));
-  const canDrop = Boolean(player && phase !== "dropping" && !updating && !limitReached && safeBet <= balance);
+  const totalStake = safeBet * quantity;
+  const canDrop = Boolean(player && phase !== "dropping" && !updating && !limitReached && totalStake <= balance);
 
   useEffect(() => {
     if (!player) {
@@ -260,8 +282,8 @@ export function TavernPlinko() {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
-    drawRuneBoard(ctx, null, lastSlot);
-  }, [lastSlot]);
+    drawRuneBoard(ctx, [], lastSlots ?? {});
+  }, [lastSlots]);
 
   useEffect(
     () => () => {
@@ -282,121 +304,138 @@ export function TavernPlinko() {
     setUpdating(false);
   }
 
-  const finishRound = useCallback(
-    async (path: PlinkoPath, stake: number) => {
-      if (!player) return;
-
-      const multiplier = getPlinkoMultiplier(path.slot);
-      const rawPrize = Math.floor(stake * multiplier);
-      const rawNet = rawPrize - stake;
-      const cappedNet = rawNet > 0 ? Math.min(rawNet, remainingDailyNet) : rawNet;
-      const finalPrize = rawNet > 0 ? stake + cappedNet : rawPrize;
-      const freshPlayer = await refreshPlayer();
-      const goldBase = freshPlayer?.gold ?? Math.max(0, player.gold - stake);
-      const updated = await setPlayerGold(goldBase + finalPrize);
-
-      setLastSlot(path.slot);
-      setLastMultiplier(multiplier);
-      setLastPrize(finalPrize);
-      setPhase("resolved");
-      setUpdating(false);
-
-      if (!updated) {
-        setMessage("La torre resolvio la caida, pero no pudo actualizar el oro.");
-        return;
-      }
-
-      if (cappedNet > 0) {
-        setDailyNetWins(saveDailyResult(player.id, dateKey, cappedNet));
-      }
-
-      if (rawNet > cappedNet && rawNet > 0) {
-        setMessage(`Tope diario aplicado. Cobras ${finalPrize.toLocaleString("es-PY")} oro.`);
-        return;
-      }
-
-      setMessage(
-        finalPrize > stake
-          ? `La esfera eligio el cofre ${path.slot + 1}: +${(finalPrize - stake).toLocaleString("es-PY")} oro neto.`
-          : finalPrize === stake
-            ? "La torre devolvio tu apuesta. Ni gloria ni tragedia."
-            : `La esfera cayo en ${multiplier}x. Pierdes ${(stake - finalPrize).toLocaleString("es-PY")} oro.`
-      );
-    },
-    [dateKey, player, refreshPlayer, remainingDailyNet, setPlayerGold]
-  );
-
   async function dropBall() {
     if (!player || !canDrop) return;
 
     setUpdating(true);
-    setMessage("La runa superior abre la caida...");
+    setMessage(`Las runas superiores abren la caida para ${quantity} esfera(s)...`);
     const freshPlayer = await refreshPlayer();
     const currentGold = freshPlayer?.gold ?? player.gold;
-    const stake = clamp(safeBet, 1, currentGold);
+    const finalStake = clamp(safeBet, 1, currentGold) * quantity;
 
-    if (stake > currentGold) {
+    if (finalStake > currentGold) {
       setUpdating(false);
-      setMessage("No tienes oro suficiente para esa apuesta.");
+      setMessage("No tienes oro suficiente para esa apuesta total.");
       return;
     }
 
-    const debited = await setPlayerGold(currentGold - stake);
-    if (!debited) {
+    const paths = Array.from({ length: quantity }, () => computePlinkoPath());
+    let totalRawPrize = 0;
+    paths.forEach((p) => {
+      totalRawPrize += Math.floor(safeBet * getPlinkoMultiplier(p.slot));
+    });
+
+    const rawNet = totalRawPrize - finalStake;
+    const cappedNet = rawNet > 0 ? Math.min(rawNet, remainingDailyNet) : rawNet;
+    const finalPrize = rawNet > 0 ? finalStake + cappedNet : totalRawPrize;
+    const finalGold = currentGold - finalStake + finalPrize;
+
+    const updated = await setPlayerGold(finalGold);
+    if (!updated) {
       setUpdating(false);
-      setMessage("No se pudo descontar la apuesta. Intenta refrescar tu perfil.");
+      setMessage("No se pudo procesar la apuesta. Intenta refrescar tu perfil.");
       return;
     }
 
-    const path = computePlinkoPath();
-    const points = buildAnimationPoints(path);
+    if (cappedNet > 0) {
+      setDailyNetWins(saveDailyResult(player.id, dateKey, cappedNet));
+    }
+
+    const pointsArray = paths.map((p) => buildAnimationPoints(p));
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) {
-      await finishRound(path, stake);
+      setPhase("resolved");
+      setLastSlots({});
+      setUpdating(false);
       return;
     }
 
     setPhase("dropping");
-    setLastSlot(null);
-    setLastMultiplier(null);
-    setLastPrize(0);
+    setLastSlots({});
+    setLastTotalPrize(null);
+    setLastTotalBet(null);
+    trailsRef.current = {};
 
-    const trail: Array<{ x: number; y: number; alpha: number }> = [];
     const startedAt = performance.now();
-    const totalMs = (points.length - 1) * FRAME_MS;
+    const staggerMs = 150;
 
     const animate = (now: number) => {
       const elapsed = now - startedAt;
-      const segment = clamp(Math.floor(elapsed / FRAME_MS), 0, points.length - 2);
-      const local = clamp((elapsed - segment * FRAME_MS) / FRAME_MS, 0, 1);
-      const eased = easeInOut(local);
-      const from = points[segment];
-      const to = points[segment + 1];
-      const wobble = Math.sin(local * Math.PI) * (segment % 2 === 0 ? 10 : -10);
-      const x = from.x + (to.x - from.x) * eased + wobble * 0.2;
-      const y = from.y + (to.y - from.y) * eased + Math.sin(local * Math.PI) * 10;
+      let allFinished = true;
+      const frames: BallFrame[] = [];
+      const currentResolved: Record<number, number> = {};
 
-      trail.unshift({ x, y, alpha: 0.22 });
-      trail.splice(7);
-      trail.forEach((point, index) => {
-        point.alpha = Math.max(0.03, 0.22 - index * 0.028);
-      });
+      paths.forEach((path, i) => {
+        const ballStart = i * staggerMs;
+        const ballElapsed = elapsed - ballStart;
+        const points = pointsArray[i];
+        const totalMs = (points.length - 1) * FRAME_MS;
 
-      drawRuneBoard(
-        ctx,
-        {
+        if (ballElapsed < 0) {
+          allFinished = false;
+          return;
+        }
+
+        if (ballElapsed >= totalMs) {
+          currentResolved[path.slot] = (currentResolved[path.slot] || 0) + 1;
+          return;
+        }
+
+        allFinished = false;
+
+        const segment = clamp(Math.floor(ballElapsed / FRAME_MS), 0, points.length - 2);
+        const local = clamp((ballElapsed - segment * FRAME_MS) / FRAME_MS, 0, 1);
+        const eased = easeInOut(local);
+        const from = points[segment];
+        const to = points[segment + 1];
+
+        const uniqueOffset = Math.sin(i * 13.37) * 4;
+        const wobble = Math.sin(local * Math.PI) * ((segment % 2 === 0 ? 10 : -10) + uniqueOffset);
+        const x = from.x + (to.x - from.x) * eased + wobble * 0.2;
+        const y = from.y + (to.y - from.y) * eased + Math.sin(local * Math.PI) * (10 + uniqueOffset * 0.5);
+
+        let trail = trailsRef.current[i];
+        if (!trail) {
+          trail = [];
+          trailsRef.current[i] = trail;
+        }
+
+        trail.unshift({ x, y, alpha: 0.22 });
+        trail.splice(7);
+        trail.forEach((point, index) => {
+          point.alpha = Math.max(0.03, 0.22 - index * 0.028);
+        });
+
+        frames.push({
+          id: i,
           x,
           y,
           row: points[segment + 1]?.row ?? -1,
-          slot: elapsed > totalMs - FRAME_MS ? path.slot : undefined,
+          slot: ballElapsed > totalMs - FRAME_MS ? path.slot : undefined,
           trail,
-        },
-        null
-      );
+        });
+      });
 
-      if (elapsed >= totalMs) {
-        drawRuneBoard(ctx, { x: slotX(path.slot), y: SLOT_Y + SLOT_HEIGHT / 2, row: PLINKO_ROWS, slot: path.slot, trail }, path.slot);
-        void finishRound(path, stake);
+      drawRuneBoard(ctx, frames, currentResolved);
+
+      if (allFinished) {
+        setPhase("resolved");
+        setUpdating(false);
+        setLastSlots(currentResolved);
+        setLastTotalPrize(finalPrize);
+        setLastTotalBet(finalStake);
+
+        if (cappedNet > 0 && rawNet > cappedNet) {
+          setMessage(`Tope diario aplicado. Cobras ${finalPrize.toLocaleString("es-PY")} oro neto en total.`);
+        } else {
+          setMessage(
+            finalPrize > finalStake
+              ? `¡Victoria! Recuperas apuesta y ganas ${(finalPrize - finalStake).toLocaleString("es-PY")} oro neto.`
+              : finalPrize === finalStake
+                ? "Ni gloria ni tragedia. Recuperaste tu inversion."
+                : `Perdida de ${(finalStake - finalPrize).toLocaleString("es-PY")} oro. La torre reclama su peaje.`
+          );
+        }
         return;
       }
 
@@ -432,7 +471,7 @@ export function TavernPlinko() {
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan-300">Torre del mago</p>
-              <h3 className="mt-1 font-serif text-2xl font-black text-stone-100">Esfera de las runas</h3>
+              <h3 className="mt-1 font-serif text-2xl font-black text-stone-100">Esferas de las runas</h3>
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">
               <StatChip label="Oro" value={balance.toLocaleString("es-PY")} />
@@ -459,8 +498,8 @@ export function TavernPlinko() {
         <aside className="relative rounded-[1.6rem] border border-stone-800 bg-stone-950/75 p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Apuesta</p>
-              <p className="mt-1 text-xs text-stone-500">El centro cae mas. Los extremos pagan la leyenda.</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Multiplicador</p>
+              <p className="mt-1 text-[10px] text-stone-500 font-bold">Riesgo arcade</p>
             </div>
             <button
               type="button"
@@ -473,12 +512,44 @@ export function TavernPlinko() {
             </button>
           </div>
 
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">Cantidad</p>
+            </div>
+            <div className="flex gap-1.5">
+              {[1, 3, 5, 10].map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => setQuantity(q)}
+                  disabled={phase === "dropping"}
+                  className={`rounded-xl border px-3 py-1 text-xs font-black transition disabled:opacity-50 ${
+                    quantity === q
+                      ? "border-cyan-400 bg-cyan-500/20 text-cyan-200"
+                      : "border-stone-800 bg-stone-900 text-stone-500 hover:border-cyan-400/35 hover:text-cyan-200"
+                  }`}
+                >
+                  {q}x
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Apuesta unitaria</p>
+              <p className="mt-1 text-[10px] font-bold text-stone-500">
+                Total: {(safeBet * quantity).toLocaleString("es-PY")} oro
+              </p>
+            </div>
+          </div>
+
           <input
             value={bet || ""}
             onChange={(event) => updateBetInput(event.target.value)}
             disabled={phase === "dropping"}
             inputMode="numeric"
-            className="mt-4 w-full rounded-2xl border border-stone-700 bg-black px-4 py-3 text-lg font-black text-stone-100 outline-none transition placeholder:text-stone-600 focus:border-amber-300/50"
+            className="mt-3 w-full rounded-2xl border border-stone-700 bg-black px-4 py-3 text-lg font-black text-stone-100 outline-none transition placeholder:text-stone-600 focus:border-amber-300/50"
             placeholder="1000"
           />
 
@@ -503,11 +574,11 @@ export function TavernPlinko() {
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-stone-950 shadow-[0_0_28px_rgba(245,158,11,0.2)] transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-stone-800 disabled:text-stone-500 disabled:shadow-none"
           >
             <Wand2 className="h-4 w-4" />
-            {phase === "dropping" ? "Cayendo" : "Lanzar esfera"}
+            {phase === "dropping" ? "Cayendo..." : "Lanzar esferas"}
           </button>
 
           <div className="mt-4 grid gap-2">
-            <ResultPanel slot={lastSlot} multiplier={lastMultiplier} prize={lastPrize} />
+            <ResultPanel slots={lastSlots} totalBet={lastTotalBet} totalPrize={lastTotalPrize} />
             <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/5 p-3">
               <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">
                 <Sparkles className="h-4 w-4" />
@@ -553,18 +624,39 @@ function StatChip({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ResultPanel({ slot, multiplier, prize }: { slot: number | null; multiplier: number | null; prize: number }) {
+function ResultPanel({ 
+  slots, 
+  totalBet, 
+  totalPrize 
+}: { 
+  slots: Record<number, number> | null; 
+  totalBet: number | null; 
+  totalPrize: number | null;
+}) {
+  if (!slots || totalBet === null || totalPrize === null) return null;
+
+  const totalOrbs = Object.values(slots).reduce((a, b) => a + b, 0);
+
   return (
     <div className="rounded-2xl border border-amber-500/15 bg-amber-500/5 p-3">
       <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-amber-300">
         <Gem className="h-4 w-4" />
-        Ultima caida
+        Resumen de ráfaga
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <StatChip label="Cofre" value={slot === null ? "--" : String(slot + 1)} />
-        <StatChip label="Multi" value={multiplier === null ? "--" : `${multiplier}x`} />
-        <StatChip label="Premio" value={prize ? prize.toLocaleString("es-PY") : "0"} />
+        <StatChip label="Esferas" value={`${totalOrbs}`} />
+        <StatChip label="Inversion" value={totalBet.toLocaleString("es-PY")} />
+        <StatChip label="Retorno" value={totalPrize.toLocaleString("es-PY")} />
       </div>
+      {Object.keys(slots).length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {Object.entries(slots).map(([slot, count]) => (
+            <span key={slot} className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-200">
+               {PLINKO_MULTIPLIERS[parseInt(slot)]}x ({count})
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

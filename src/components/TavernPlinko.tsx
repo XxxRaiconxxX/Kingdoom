@@ -535,7 +535,7 @@ export function TavernPlinko() {
                       : "border-stone-800 bg-stone-900 text-stone-500 hover:border-cyan-400/35 hover:text-cyan-200"
                   }`}
                 >
-                  {q}x
+                  {q}
                 </button>
               ))}
             </div>
@@ -543,10 +543,8 @@ export function TavernPlinko() {
 
           <div className="mt-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Apuesta por esfera</p>
-              <p className="mt-1 text-[11px] font-black text-amber-500/90">
-                Costo total: {totalStake.toLocaleString("es-PY")} oro
-              </p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Apuesta unitaria</p>
+              <p className="mt-1 text-[10px] font-bold text-stone-500">Oro invertido por cada esfera</p>
             </div>
           </div>
 
@@ -573,6 +571,28 @@ export function TavernPlinko() {
             ))}
           </div>
 
+          <div className="mt-4 rounded-xl border border-stone-800 bg-stone-900/50 p-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-stone-400 font-bold">Total a descontar:</span>
+              <span className={`font-black ${hasEnoughGold ? "text-amber-400" : "text-red-400"}`}>
+                {totalStake.toLocaleString("es-PY")} oro
+              </span>
+            </div>
+            <p className="mt-1 text-right text-[11px] text-stone-500">
+              ({quantity} {quantity === 1 ? "esfera" : "esferas"} × {parsedBet.toLocaleString("es-PY")})
+            </p>
+            {!hasEnoughGold && parsedBet > 0 && (
+              <p className="mt-2 text-right text-[11px] font-black uppercase tracking-widest text-red-400">
+                Saldo insuficiente
+              </p>
+            )}
+            {limitReached && (
+              <p className="mt-2 text-right text-[11px] font-black uppercase tracking-widest text-stone-500">
+                Límite diario
+              </p>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={() => void dropBall()}
@@ -585,11 +605,11 @@ export function TavernPlinko() {
               : updating
                 ? "Procesando..."
                 : limitReached
-                  ? "Limite diario alcanzado"
+                  ? "Límite diario alcanzado"
                   : !hasEnoughGold && parsedBet > 0
                     ? "Oro insuficiente"
                     : parsedBet <= 0
-                      ? "Apuesta invalida"
+                      ? "Apuesta inválida"
                       : "Lanzar esferas"}
           </button>
 

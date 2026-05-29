@@ -108,7 +108,13 @@ export default function AnimeScreen() {
   }
 
   return (
-    <ScreenShell title="Anime Hub" subtitle="Catalogo y episodios" eyebrow="kingdoom native">
+    <ScreenShell
+      title="Anime Hub"
+      subtitle="Catalogo y episodios"
+      eyebrow="kingdoom native"
+      onRefresh={() => void handleSearch()}
+      refreshing={loading}
+    >
       <RealmCard tone="mythic">
         <SectionHeader
           eyebrow="buscar"

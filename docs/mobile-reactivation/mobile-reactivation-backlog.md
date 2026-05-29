@@ -21,13 +21,13 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
 - [ ] revisar cambios de Antigravity 1 y 2 antes de merge
 
 ### Antigravity 1
-- [ ] pulir `home`
-- [ ] pulir `library`
-- [ ] pulir `market`
-- [ ] pulir `profile`
-- [ ] revisar `grimoire`, `archivist` y `anime` para consistencia visual y feedback
-- [ ] asegurar estados vacios, error, loading y refresh en todos los tabs principales
-- [ ] dejar los 4 flujos base listos para beta interna:
+- [x] pulir `home`
+- [x] pulir `library`
+- [x] pulir `market`
+- [x] pulir `profile`
+- [x] revisar `grimoire`, `archivist` y `anime` para consistencia visual y feedback
+- [x] asegurar estados vacios, error, loading y refresh en todos los tabs principales
+- [x] dejar los 4 flujos base listos para beta interna:
   - sesion
   - misiones/eventos
   - compra

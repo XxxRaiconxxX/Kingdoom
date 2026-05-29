@@ -11,6 +11,16 @@ import {
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { DetailSheet } from "@/src/components/DetailSheet";
+import {
+  EmptyState,
+  MetricTile,
+  Pill,
+  PrimaryAction,
+  RealmCard,
+  SearchInput,
+  SectionHeader,
+  StaggerItem,
+} from "@/src/components/KingdoomUI";
 import { ScreenShell } from "@/src/components/ScreenShell";
 import {
   fetchPlayerEventParticipationsNative,
@@ -240,518 +250,259 @@ export default function ProfileScreen() {
       }}
       refreshing={isRefreshing}
     >
-      <View
-        style={{
-          borderRadius: 14,
-          borderWidth: 1,
-          borderColor: MOBILE_THEME.border,
-          backgroundColor: MOBILE_THEME.surfaceSoft,
-          padding: 14,
-          gap: 8,
-        }}
-      >
-        <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12, fontWeight: "800" }}>
-          JUGADOR
-        </Text>
-        <Text style={{ color: MOBILE_THEME.text, fontSize: 18, fontWeight: "800" }}>
-          {player ? player.username : "Sin sesion activa"}
-        </Text>
-        <Text style={{ color: MOBILE_THEME.gold, fontSize: 15, fontWeight: "700" }}>
-          Oro: {player?.gold ?? 0}
-        </Text>
-
-        <Pressable
-          onPress={disconnect}
-          style={{
-            marginTop: 8,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            paddingVertical: 11,
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>Cerrar sesion</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => void refreshGold()}
-          style={{
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.gold,
-            paddingVertical: 11,
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "700" }}>Refrescar oro</Text>
-        </Pressable>
-      </View>
+      <StaggerItem index={0}>
+        <RealmCard tone={player ? "gold" : "default"}>
+          <SectionHeader eyebrow="Jugador" title={player ? player.username : "Sin sesion activa"} />
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <MetricTile label="ORO" value={player?.gold ?? 0} icon="account-balance-wallet" />
+          </View>
+          {player ? (
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
+              <View style={{ flex: 1 }}>
+                <PrimaryAction label="Salir" icon="logout" variant="ghost" onPress={disconnect} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <PrimaryAction label="Refrescar" icon="refresh" variant="gold" onPress={() => void refreshGold()} />
+              </View>
+            </View>
+          ) : null}
+        </RealmCard>
+      </StaggerItem>
 
       {player ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-            gap: 8,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 16 }}>
-            Resumen de actividad
-          </Text>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <View
-              style={{
-                flex: 1,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                backgroundColor: MOBILE_THEME.bg,
-                padding: 10,
-                gap: 3,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>COMPRAS 7 DIAS</Text>
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
-                {profileMetrics.buys7d}
-              </Text>
-              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>
-                -{profileMetrics.spent7d} oro
-              </Text>
+        <StaggerItem index={1}>
+          <RealmCard tone="teal">
+            <SectionHeader eyebrow="Metricas" title="Resumen de actividad" />
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <MetricTile label="COMPRAS 7D" value={profileMetrics.buys7d} icon="shopping-cart" />
+              <MetricTile label="COMPRAS 30D" value={profileMetrics.buys30d} icon="shopping-cart" />
             </View>
-            <View
-              style={{
-                flex: 1,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                backgroundColor: MOBILE_THEME.bg,
-                padding: 10,
-                gap: 3,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>COMPRAS 30 DIAS</Text>
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
-                {profileMetrics.buys30d}
-              </Text>
-              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>
-                -{profileMetrics.spent30d} oro
-              </Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <MetricTile label="OBJETOS UNICOS" value={profileMetrics.uniqueItems} icon="category" />
+              <MetricTile label="UNIDADES" value={profileMetrics.totalUnits} icon="inventory-2" />
             </View>
-          </View>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <View
-              style={{
-                flex: 1,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                backgroundColor: MOBILE_THEME.bg,
-                padding: 10,
-                gap: 3,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>OBJETOS UNICOS</Text>
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
-                {profileMetrics.uniqueItems}
-              </Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <MetricTile label="MISIONES" value={profileMetrics.activeMissions} icon="flag" />
+              <MetricTile label="EVENTOS" value={profileMetrics.activeEvents} icon="event" />
             </View>
-            <View
-              style={{
-                flex: 1,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                backgroundColor: MOBILE_THEME.bg,
-                padding: 10,
-                gap: 3,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>UNIDADES TOTALES</Text>
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
-                {profileMetrics.totalUnits}
-              </Text>
-            </View>
-          </View>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <View
-              style={{
-                flex: 1,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                backgroundColor: MOBILE_THEME.bg,
-                padding: 10,
-                gap: 3,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>MISIONES</Text>
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
-                {profileMetrics.activeMissions}
-              </Text>
-              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>
-                {profileMetrics.pendingMissionReviews} en revision
-              </Text>
-            </View>
-            <View
-              style={{
-                flex: 1,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                backgroundColor: MOBILE_THEME.bg,
-                padding: 10,
-                gap: 3,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>EVENTOS</Text>
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 18 }}>
-                {profileMetrics.activeEvents}
-              </Text>
-              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12 }}>participando</Text>
-            </View>
-          </View>
-        </View>
+          </RealmCard>
+        </StaggerItem>
       ) : null}
 
       {player ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-            gap: 10,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 16 }}>
-            Actividad del rol
-          </Text>
-          {missionsQuery.isLoading || eventsQuery.isLoading ? <ActivityIndicator color={MOBILE_THEME.gold} /> : null}
-          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "800", fontSize: 12 }}>MISIONES TOMADAS</Text>
-          {playerMissionCards.map(({ mission, claim }) => (
-            <View
-              key={mission.id}
-              style={{
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                padding: 10,
-                backgroundColor: MOBILE_THEME.bg,
-                gap: 4,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800" }}>{mission.title}</Text>
-              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
-                {claim ? getMissionClaimStatusLabel(claim.status) : "-"} | {mission.rewardGold} oro
-              </Text>
-              {claim?.proofText ? (
-                <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }} numberOfLines={2}>
-                  {claim.proofText}
-                </Text>
-              ) : null}
-            </View>
-          ))}
-          {playerMissionCards.length === 0 ? (
-            <Text style={{ color: MOBILE_THEME.mutedText }}>Sin misiones tomadas.</Text>
-          ) : null}
-          <Text style={{ color: MOBILE_THEME.gold, fontWeight: "800", fontSize: 12, marginTop: 4 }}>EVENTOS</Text>
-          {playerEventCards.map(({ event, participation }) => (
-            <View
-              key={event.id}
-              style={{
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                padding: 10,
-                backgroundColor: MOBILE_THEME.bg,
-                gap: 4,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "800" }}>{event.title}</Text>
-              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
-                {participation ? getEventParticipationStatusLabel(participation.status) : "-"} | {event.participationRewardGold} oro
-              </Text>
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-                {event.startDate} / {event.endDate}
-              </Text>
-            </View>
-          ))}
-          {playerEventCards.length === 0 ? (
-            <Text style={{ color: MOBILE_THEME.mutedText }}>Sin eventos tomados.</Text>
-          ) : null}
-        </View>
-      ) : null}
-
-      {player ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-            gap: 8,
-          }}
-        >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 16 }}>
-              Movimientos de compra
-            </Text>
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              <Pressable
-                onPress={() => void handleShareHistory()}
-                disabled={playerPurchaseEntries.length === 0}
+        <StaggerItem index={2}>
+          <RealmCard>
+            <SectionHeader eyebrow="Progreso" title="Actividad del rol" />
+            {missionsQuery.isLoading || eventsQuery.isLoading ? <ActivityIndicator color={MOBILE_THEME.gold} /> : null}
+            <Text style={{ color: MOBILE_THEME.gold, fontWeight: "800", fontSize: 12, marginTop: 4 }}>MISIONES TOMADAS</Text>
+            {playerMissionCards.map(({ mission, claim }) => (
+              <View
+                key={mission.id}
                 style={{
                   borderRadius: 10,
                   borderWidth: 1,
                   borderColor: MOBILE_THEME.border,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                  opacity: playerPurchaseEntries.length === 0 ? 0.5 : 1,
+                  padding: 10,
+                  backgroundColor: MOBILE_THEME.bg,
+                  gap: 4,
                 }}
               >
-                <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12, fontWeight: "700" }}>
-                  Compartir
+                <Text style={{ color: MOBILE_THEME.text, fontWeight: "800" }}>{mission.title}</Text>
+                <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
+                  {claim ? getMissionClaimStatusLabel(claim.status) : "-"} | {mission.rewardGold} oro
                 </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => clearPlayerEntries(player.id)}
-                style={{
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: MOBILE_THEME.border,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                }}
-              >
-                <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12, fontWeight: "700" }}>
-                  Limpiar
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-          <TextInput
-            value={historySearch}
-            onChangeText={setHistorySearch}
-            autoCapitalize="none"
-            placeholder="Buscar por item o referencia"
-            placeholderTextColor={MOBILE_THEME.mutedText}
-            style={{
-              borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              borderRadius: 10,
-              paddingHorizontal: 11,
-              paddingVertical: 9,
-              color: MOBILE_THEME.text,
-              backgroundColor: MOBILE_THEME.bg,
-              fontSize: 13,
-            }}
-          />
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            {(["7d", "30d", "all"] as HistoryWindow[]).map((chip) => {
-              const active = historyWindow === chip;
-              const label = chip === "7d" ? "7 dias" : chip === "30d" ? "30 dias" : "Todo";
-              return (
-                <Pressable
-                  key={chip}
-                  onPress={() => setHistoryWindow(chip)}
-                  style={{
-                    borderRadius: 999,
-                    borderWidth: 1,
-                    borderColor: active ? MOBILE_THEME.gold : MOBILE_THEME.border,
-                    paddingHorizontal: 10,
-                    paddingVertical: 6,
-                    backgroundColor: active ? "rgba(212,166,74,0.12)" : MOBILE_THEME.bg,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: active ? MOBILE_THEME.gold : MOBILE_THEME.mutedText,
-                      fontSize: 12,
-                      fontWeight: "700",
-                    }}
-                  >
-                    {label}
+                {claim?.proofText ? (
+                  <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }} numberOfLines={2}>
+                    {claim.proofText}
                   </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          {playerPurchaseEntries.map((entry) => (
-            <View
-              key={entry.id}
-              style={{
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                padding: 10,
-                backgroundColor: MOBILE_THEME.bg,
-                gap: 3,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>
-                {entry.itemName} x{entry.quantity}
-              </Text>
-              <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
-                -{entry.totalPrice} oro | Saldo: {entry.remainingGold}
-              </Text>
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>
-                Ref: {entry.orderRef}
-              </Text>
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>
-                {new Date(entry.purchasedAt).toLocaleString()}
-              </Text>
-            </View>
-          ))}
-          {playerPurchaseEntries.length === 0 ? (
-            <Text style={{ color: MOBILE_THEME.mutedText }}>Sin movimientos registrados.</Text>
-          ) : null}
-        </View>
+                ) : null}
+              </View>
+            ))}
+            {playerMissionCards.length === 0 ? (
+              <EmptyState title="Sin misiones" message="No tienes misiones activas." />
+            ) : null}
+            <Text style={{ color: MOBILE_THEME.gold, fontWeight: "800", fontSize: 12, marginTop: 8 }}>EVENTOS</Text>
+            {playerEventCards.map(({ event, participation }) => (
+              <View
+                key={event.id}
+                style={{
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: MOBILE_THEME.border,
+                  padding: 10,
+                  backgroundColor: MOBILE_THEME.bg,
+                  gap: 4,
+                }}
+              >
+                <Text style={{ color: MOBILE_THEME.text, fontWeight: "800" }}>{event.title}</Text>
+                <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
+                  {participation ? getEventParticipationStatusLabel(participation.status) : "-"} | {event.participationRewardGold} oro
+                </Text>
+                <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
+                  {event.startDate} / {event.endDate}
+                </Text>
+              </View>
+            ))}
+            {playerEventCards.length === 0 ? (
+              <EmptyState title="Sin eventos" message="No estas participando en eventos." />
+            ) : null}
+          </RealmCard>
+        </StaggerItem>
       ) : null}
 
       {player ? (
-        <View
-          style={{
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: MOBILE_THEME.border,
-            backgroundColor: MOBILE_THEME.surfaceSoft,
-            padding: 14,
-            gap: 8,
-          }}
-        >
-          <Text style={{ color: MOBILE_THEME.text, fontWeight: "800", fontSize: 16 }}>
-            Inventario
-          </Text>
-          <TextInput
-            value={inventorySearch}
-            onChangeText={setInventorySearch}
-            autoCapitalize="none"
-            placeholder="Buscar objeto o ID"
-            placeholderTextColor={MOBILE_THEME.mutedText}
-            style={{
-              borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              borderRadius: 10,
-              paddingHorizontal: 11,
-              paddingVertical: 9,
-              color: MOBILE_THEME.text,
-              backgroundColor: MOBILE_THEME.bg,
-              fontSize: 13,
-            }}
-          />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              {(
-                [
-                  { id: "all", label: "Todo" },
-                  { id: "armors", label: "Armaduras" },
-                  { id: "swords", label: "Espadas" },
-                  { id: "others", label: "Otros" },
-                ] as Array<{ id: InventoryFilter; label: string }>
-              ).map((chip) => {
-                const active = inventoryFilter === chip.id;
-                return (
-                  <Pressable
-                    key={chip.id}
-                    onPress={() => setInventoryFilter(chip.id)}
-                    style={{
-                      borderRadius: 999,
-                      borderWidth: 1,
-                      borderColor: active ? MOBILE_THEME.gold : MOBILE_THEME.border,
-                      paddingHorizontal: 10,
-                      paddingVertical: 6,
-                      backgroundColor: active ? "rgba(212,166,74,0.12)" : MOBILE_THEME.bg,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: active ? MOBILE_THEME.gold : MOBILE_THEME.mutedText,
-                        fontSize: 12,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {chip.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+        <StaggerItem index={3}>
+          <RealmCard>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <SectionHeader eyebrow="Historial" title="Movimientos" />
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <PrimaryAction
+                  label="Compartir"
+                  icon="share"
+                  variant="ghost"
+                  disabled={playerPurchaseEntries.length === 0}
+                  onPress={() => void handleShareHistory()}
+                />
+                <PrimaryAction
+                  label="Limpiar"
+                  icon="delete"
+                  variant="danger"
+                  onPress={() => clearPlayerEntries(player.id)}
+                />
+              </View>
             </View>
-          </ScrollView>
-          {inventoryQuery.isLoading ? <ActivityIndicator color={MOBILE_THEME.gold} /> : null}
-          {inventoryQuery.data?.errorMessage ? (
-            <View
-              style={{
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                padding: 10,
-                backgroundColor: MOBILE_THEME.bg,
-                gap: 8,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.danger }}>{inventoryQuery.data.errorMessage}</Text>
-              <Pressable
-                onPress={() => {
-                  void inventoryQuery.refetch();
-                }}
+            <SearchInput
+              value={historySearch}
+              onChangeText={setHistorySearch}
+              placeholder="Buscar por item o referencia"
+            />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                {(["7d", "30d", "all"] as HistoryWindow[]).map((chip) => {
+                  const active = historyWindow === chip;
+                  const label = chip === "7d" ? "7 dias" : chip === "30d" ? "30 dias" : "Todo";
+                  return (
+                    <Pill
+                      key={chip}
+                      label={label}
+                      active={active}
+                      onPress={() => setHistoryWindow(chip)}
+                    />
+                  );
+                })}
+              </View>
+            </ScrollView>
+            {playerPurchaseEntries.map((entry) => (
+              <View
+                key={entry.id}
                 style={{
-                  borderRadius: 8,
+                  borderRadius: 10,
                   borderWidth: 1,
                   borderColor: MOBILE_THEME.border,
-                  paddingVertical: 8,
-                  alignItems: "center",
+                  padding: 10,
+                  backgroundColor: MOBILE_THEME.bg,
+                  gap: 3,
                 }}
               >
-                <Text style={{ color: MOBILE_THEME.text, fontWeight: "700", fontSize: 12 }}>
-                  Reintentar inventario
+                <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>
+                  {entry.itemName} x{entry.quantity}
                 </Text>
-              </Pressable>
-            </View>
-          ) : null}
-          {filteredInventoryItems.map((item) => (
-            <View
-              key={item.id}
-              style={{
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: MOBILE_THEME.border,
-                padding: 10,
-                backgroundColor: MOBILE_THEME.bg,
-                gap: 4,
-              }}
-            >
-              <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>
-                {item.itemName} x{item.quantity}
-              </Text>
-              <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
-                {item.itemCategory} | {item.itemRarity}
-              </Text>
-              <Pressable
-                onPress={() => setSelectedInventoryItem(item)}
+                <Text style={{ color: MOBILE_THEME.gold, fontSize: 12, fontWeight: "700" }}>
+                  -{entry.totalPrice} oro | Saldo: {entry.remainingGold}
+                </Text>
+                <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>
+                  Ref: {entry.orderRef}
+                </Text>
+                <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 11 }}>
+                  {new Date(entry.purchasedAt).toLocaleString()}
+                </Text>
+              </View>
+            ))}
+            {playerPurchaseEntries.length === 0 ? (
+              <EmptyState title="Sin movimientos" message="No se encontraron compras en este periodo." />
+            ) : null}
+          </RealmCard>
+        </StaggerItem>
+      ) : null}
+
+      {player ? (
+        <StaggerItem index={4}>
+          <RealmCard>
+            <SectionHeader eyebrow="Coleccion" title="Inventario" />
+            <SearchInput
+              value={inventorySearch}
+              onChangeText={setInventorySearch}
+              placeholder="Buscar objeto o ID"
+            />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                {(
+                  [
+                    { id: "all", label: "Todo" },
+                    { id: "armors", label: "Armaduras" },
+                    { id: "swords", label: "Espadas" },
+                    { id: "others", label: "Otros" },
+                  ] as Array<{ id: InventoryFilter; label: string }>
+                ).map((chip) => {
+                  const active = inventoryFilter === chip.id;
+                  return (
+                    <Pill
+                      key={chip.id}
+                      label={chip.label}
+                      active={active}
+                      onPress={() => setInventoryFilter(chip.id)}
+                    />
+                  );
+                })}
+              </View>
+            </ScrollView>
+            {inventoryQuery.isLoading ? <ActivityIndicator color={MOBILE_THEME.gold} /> : null}
+            {inventoryQuery.data?.errorMessage ? (
+              <RealmCard tone="danger">
+                <Text style={{ color: MOBILE_THEME.danger, fontWeight: "800", textAlign: "center", marginBottom: 8 }}>
+                  {inventoryQuery.data.errorMessage}
+                </Text>
+                <PrimaryAction
+                  label="Reintentar inventario"
+                  icon="refresh"
+                  variant="danger"
+                  onPress={() => void inventoryQuery.refetch()}
+                />
+              </RealmCard>
+            ) : null}
+            {filteredInventoryItems.map((item) => (
+              <View
+                key={item.id}
                 style={{
-                  marginTop: 4,
-                  borderRadius: 8,
+                  borderRadius: 10,
                   borderWidth: 1,
                   borderColor: MOBILE_THEME.border,
-                  paddingVertical: 7,
-                  alignItems: "center",
+                  padding: 10,
+                  backgroundColor: MOBILE_THEME.bg,
+                  gap: 4,
                 }}
               >
-                <Text style={{ color: MOBILE_THEME.text, fontSize: 12, fontWeight: "700" }}>
-                  Ver detalle
+                <Text style={{ color: MOBILE_THEME.text, fontWeight: "700" }}>
+                  {item.itemName} x{item.quantity}
                 </Text>
-              </Pressable>
-            </View>
-          ))}
-          {!inventoryQuery.isLoading && filteredInventoryItems.length === 0 ? (
-            <Text style={{ color: MOBILE_THEME.mutedText }}>Sin objetos registrados.</Text>
-          ) : null}
-        </View>
+                <Text style={{ color: MOBILE_THEME.mutedText, fontSize: 12 }}>
+                  {item.itemCategory} | {item.itemRarity}
+                </Text>
+                <View style={{ marginTop: 4 }}>
+                  <PrimaryAction
+                    label="Ver detalle"
+                    icon="visibility"
+                    variant="ghost"
+                    onPress={() => setSelectedInventoryItem(item)}
+                  />
+                </View>
+              </View>
+            ))}
+            {!inventoryQuery.isLoading && filteredInventoryItems.length === 0 ? (
+              <EmptyState title="Sin objetos" message="No tienes objetos en esta categoria." />
+            ) : null}
+          </RealmCard>
+        </StaggerItem>
       ) : null}
 
       <DetailSheet

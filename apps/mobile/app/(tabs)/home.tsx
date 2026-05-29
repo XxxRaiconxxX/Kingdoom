@@ -81,13 +81,18 @@ function PulseCard({ label, title, subtitle }: { label: string; title: string; s
 export default function HomeScreen() {
   const router = useRouter();
   const [usernameInput, setUsernameInput] = useState("");
-  const { player, isLoading, errorMessage, connectByUsername, clearError } = useSessionStore();
+  const { player, isLoading, errorMessage, connectByUsername, clearError, refreshGold } = useSessionStore();
   const eventsQuery = useQuery({ queryKey: ["realm-events", "home"], queryFn: fetchRealmEventsNative });
   const missionsQuery = useQuery({ queryKey: ["realm-missions", "home"], queryFn: fetchMissionsNative });
   const activeEvents = (eventsQuery.data?.events ?? []).filter((event) => event.status !== "finished");
   const openMissions = (missionsQuery.data?.missions ?? []).filter((mission) => mission.status !== "closed");
   const featuredEvent: RealmEvent | undefined = activeEvents[0];
   const featuredMission: RealmMission | undefined = openMissions[0];
+
+  const isRefreshing =
+    eventsQuery.isRefetching ||
+    missionsQuery.isRefetching ||
+    isLoading;
 
   async function handleConnect() {
     clearError();
@@ -98,6 +103,14 @@ export default function HomeScreen() {
     <ScreenShell
       title="Kingdoom"
       subtitle="Perfil, oro y pulso del reino"
+      onRefresh={() => {
+        if (player) {
+          void refreshGold();
+        }
+        void eventsQuery.refetch();
+        void missionsQuery.refetch();
+      }}
+      refreshing={isRefreshing}
       rightSlot={
         player ? (
           <View

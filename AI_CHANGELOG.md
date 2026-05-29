@@ -2873,3 +2873,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 - Refinado el comando '!perfil' para separar y clasificar inteligentemente los IDs de WhatsApp y los números de teléfono reales.
 - Añadidos comandos faltantes al menú de ayuda (!ayuda) con restricción por roles.
 
+
+
+---
+### [Fecha: 29/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** apps/mobile/app/(tabs)/profile.tsx, apps/mobile/app/(tabs)/anime.tsx, docs/mobile-reactivation/mobile-reactivation-backlog.md
+*   **Resumen de Tareas:** Finalizacion de pulido visual y funcional ('Beta Interna') en la aplicacion movil para alcanzar paridad en la experiencia de usuario.
+*   **Cambios Clave:**
+    *   Migracion del perfil de jugador a KingdoomUI (RealmCard, StaggerItem, MetricTile, EmptyState).
+    *   Integracion robusta de pull-to-refresh en todos los tabs (ej. anime.tsx) mediante ScreenShell.
+    *   Garantia de estados consistentes (carga, error, vacio) en todos los modulos.
+*   **Notas/Advertencias:** Validacion de tipos ejecutada correctamente (npx tsc --noEmit exitoso). Flujos base listos.

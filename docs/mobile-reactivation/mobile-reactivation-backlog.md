@@ -51,7 +51,7 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
 - [x] ajustar ergonomia real de uso en Android
 
 ### Antigravity 2
-- [ ] segundo minijuego movil si el primero quedo estable (evaluando prioridad)
+- [x] segundo minijuego movil si el primero quedo estable (TavernScratchNative implementado)
 - [x] evaluar notificaciones o features economicas adicionales (PlayerNotificationBellNative implementado)
 
 ## Orden recomendado de ejecucion

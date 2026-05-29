@@ -6,6 +6,7 @@ import { DetailSheet } from "@/src/components/DetailSheet";
 import { RealmStockExchangeNative } from "@/src/components/RealmStockExchangeNative";
 import { TavernSlotsNative } from "@/src/components/TavernSlotsNative";
 import { TavernHorseRaceNative } from "@/src/components/TavernHorseRaceNative";
+import { TavernScratchNative } from "@/src/components/TavernScratchNative";
 import {
   EmptyState,
   ErrorPanel,
@@ -336,6 +337,10 @@ export default function MarketScreen() {
         <TavernHorseRaceNative />
       </StaggerItem>
 
+      <StaggerItem index={7}>
+        <TavernScratchNative />
+      </StaggerItem>
+
       {filteredItems.map((item, index) => {
         const stockLimit = Math.max(0, Math.floor(item.stockLimit ?? 0));
         const stockSold = Math.max(0, Math.floor(item.stockSold ?? 0));
@@ -349,7 +354,7 @@ export default function MarketScreen() {
         const disabled = !player || isSoldOut || pending || notEnoughGold;
 
         return (
-          <StaggerItem key={item.id} index={index + 7}>
+          <StaggerItem key={item.id} index={index + 8}>
             <RealmCard tone={item.rarity === "mythic" ? "mythic" : item.featured ? "gold" : "default"}>
               <View style={{ flexDirection: "row", gap: 12 }}>
                 <ItemThumb item={item} />

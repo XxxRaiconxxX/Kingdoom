@@ -29,6 +29,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 30/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `apps/mobile/src/components/TavernScratchNative.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
+*   **Resumen:** Integración de "TavernScratchNative" y cierre definitivo de la Fase 3 de reactivación mobile.
+*   **Cambios Clave:**
+    *   **[Mobile - Minijuego]:** Se integró exitosamente el segundo minijuego nativo, "Rasca y Gana" (`TavernScratchNative.tsx`). Mantiene paridad con la lógica web, empleando configuración de probabilidades, límites diarios y costos generados dinámicamente vía `getDailyScratchConfig`.
+    *   **[Mobile - Economía Segura]:** La transacción de oro utiliza exclusivamente `sessionStore.addGold`, el cual está respaldado por el RPC seguro de Supabase `increment_gold`, evitando cualquier condición de carrera.
+    *   **[Mobile - Persistencia Local]:** Se implementó `AsyncStorage` para manejar el límite de ganancias diarias de forma eficiente y segura a nivel de dispositivo.
+    *   **[Mobile - Integración UI]:** El minijuego se renderiza de forma fluida y elegante en la tab del mercado, empleando la arquitectura `KingdoomUI` y `StaggerItem` existente.
+    *   **[Backlog] Cierre Fase 3:** Con la implementación de este segundo minijuego y las notificaciones previamente aprobadas, la Fase 3 de reactivación mobile se considera cumplida.
+*   **Notas/Advertencias:** Validado localmente con `npm run mobile:typecheck` sin errores nuevos atribuibles a esta funcionalidad.
 ### [Fecha: 29/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/src/components/PlayerNotificationBellNative.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
 *   **Resumen:** Cierre de revision de Fase 3 mobile sobre notificaciones y ergonomia compacta.

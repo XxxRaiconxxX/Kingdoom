@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DetailSheet } from "@/src/components/DetailSheet";
 import { RealmStockExchangeNative } from "@/src/components/RealmStockExchangeNative";
 import { TavernSlotsNative } from "@/src/components/TavernSlotsNative";
+import { TavernHorseRaceNative } from "@/src/components/TavernHorseRaceNative";
 import {
   EmptyState,
   ErrorPanel,
@@ -331,6 +332,10 @@ export default function MarketScreen() {
         <TavernSlotsNative />
       </StaggerItem>
 
+      <StaggerItem index={6}>
+        <TavernHorseRaceNative />
+      </StaggerItem>
+
       {filteredItems.map((item, index) => {
         const stockLimit = Math.max(0, Math.floor(item.stockLimit ?? 0));
         const stockSold = Math.max(0, Math.floor(item.stockSold ?? 0));
@@ -344,7 +349,7 @@ export default function MarketScreen() {
         const disabled = !player || isSoldOut || pending || notEnoughGold;
 
         return (
-          <StaggerItem key={item.id} index={index + 6}>
+          <StaggerItem key={item.id} index={index + 7}>
             <RealmCard tone={item.rarity === "mythic" ? "mythic" : item.featured ? "gold" : "default"}>
               <View style={{ flexDirection: "row", gap: 12 }}>
                 <ItemThumb item={item} />

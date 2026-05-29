@@ -16,9 +16,9 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
 
 ### Jarvis
 - [ ] revisar y cerrar alineacion de tipos entre `src/types.ts` y `apps/mobile/src/features/shared/types.ts`
-- [ ] decidir si el primer minijuego extra en mobile sera `Plinko` o `Horse Race`
-- [ ] validar que toda economia movil use RPC/flujo ya aprobado
-- [ ] revisar cambios de Antigravity 1 y 2 antes de merge
+- [x] decidir si el primer minijuego extra en mobile sera `Plinko` o `Horse Race`
+- [x] validar que toda economia movil use RPC/flujo ya aprobado
+- [x] revisar cambios de Antigravity 1 y 2 antes de merge
 
 ### Antigravity 1
 - [x] pulir `home`
@@ -38,7 +38,7 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
 - [ ] revisar integracion de oro y sincronizacion de saldo en mobile
 - [ ] auditar `missionsService` y `eventsService`
 - [ ] revisar consistencia entre historial de compras, inventario y saldo
-- [ ] sumar un minijuego prioritario ademas de `TavernSlotsNative`
+- [x] sumar un minijuego prioritario ademas de `TavernSlotsNative`
 
 ## Fase 3 - Expansión selectiva
 
@@ -59,7 +59,7 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
 1. Alinear contratos minimos
 2. Cerrar UX de `home`, `library`, `market`, `profile`
 3. Estabilizar economia movil y exchange
-4. Añadir primer minijuego prioritario
+4. Añadir primer minijuego prioritario (`Horse Race`)
 5. Recién despues expandir archivista, anime u otros extras
 
 ## Criterios de aceptacion

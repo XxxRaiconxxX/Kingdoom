@@ -266,6 +266,7 @@ export function TavernPlinko() {
   const balance = player?.gold ?? 0;
   const remainingDailyNet = Math.max(0, MAX_DAILY_PLINKO_WIN_LIMIT - dailyNetWins);
   const limitReached = dailyNetWins >= MAX_DAILY_PLINKO_WIN_LIMIT;
+  const showClosedState = limitReached && phase === "betting";
   
   const parsedBet = Math.floor(Number.isFinite(bet) ? Math.max(0, bet) : 0);
   const totalStake = parsedBet * quantity;
@@ -458,7 +459,7 @@ export function TavernPlinko() {
     return <PlinkoMessage title="Torre del Mago" description="Conecta tu perfil para lanzar la esfera runica." />;
   }
 
-  if (limitReached) {
+  if (showClosedState) {
     return (
       <PlinkoMessage
         title="Torre cerrada"

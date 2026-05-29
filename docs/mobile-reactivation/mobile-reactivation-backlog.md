@@ -43,16 +43,16 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
 ## Fase 3 - Expansión selectiva
 
 ### Jarvis
-- [ ] decidir si `Archivist` y `Anime` justifican expansion profunda o se mantienen compactos
-- [ ] reevaluar si ranking o notificaciones entran en mobile beta
+- [x] decidir si `Archivist` y `Anime` justifican expansion profunda o se mantienen compactos
+- [x] reevaluar si ranking o notificaciones entran en mobile beta (notificaciones implementadas)
 
 ### Antigravity 1
-- [ ] segunda pasada de polish visual
-- [ ] ajustar ergonomia real de uso en Android
+- [x] segunda pasada de polish visual
+- [x] ajustar ergonomia real de uso en Android
 
 ### Antigravity 2
-- [ ] segundo minijuego movil si el primero quedo estable
-- [ ] evaluar notificaciones o features economicas adicionales
+- [ ] segundo minijuego movil si el primero quedo estable (evaluando prioridad)
+- [x] evaluar notificaciones o features economicas adicionales (PlayerNotificationBellNative implementado)
 
 ## Orden recomendado de ejecucion
 

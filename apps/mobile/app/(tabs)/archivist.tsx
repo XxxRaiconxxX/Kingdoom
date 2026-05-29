@@ -291,13 +291,14 @@ export default function ArchivistScreen() {
                 backgroundColor: "rgba(5,5,4,0.76)",
                 color: MOBILE_THEME.text,
                 paddingHorizontal: 12,
-                paddingVertical: 11,
+                minHeight: 46,
               }}
             />
             <Pressable
               onPress={addTopicMemory}
               style={({ pressed }) => ({
                 width: 46,
+                height: 46,
                 borderRadius: 14,
                 alignItems: "center",
                 justifyContent: "center",

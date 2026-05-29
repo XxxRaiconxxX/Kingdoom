@@ -380,7 +380,7 @@ export default function LibraryScreen() {
                   <Pressable
                     onPress={() => setSelectedEvent(entry)}
                     style={{
-                      minHeight: 42,
+                      minHeight: 46,
                       borderRadius: 13,
                       borderWidth: 1,
                       borderColor: MOBILE_THEME.border,
@@ -419,7 +419,7 @@ export default function LibraryScreen() {
                       setEvidenceText(claim?.proofText ?? "");
                     }}
                     style={{
-                      minHeight: 42,
+                      minHeight: 46,
                       borderRadius: 13,
                       borderWidth: 1,
                       borderColor: MOBILE_THEME.border,

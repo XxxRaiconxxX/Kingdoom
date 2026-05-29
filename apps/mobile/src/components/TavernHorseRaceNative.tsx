@@ -281,8 +281,9 @@ export function TavernHorseRaceNative() {
                       key={horse.id}
                       onPress={() => setSelectedHorseId(horse.id)}
                       style={{
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
+                        paddingHorizontal: 14,
+                        minHeight: 46,
+                        justifyContent: "center",
                         borderRadius: 10,
                         borderWidth: 1,
                         borderColor: isSelected ? MOBILE_THEME.gold : MOBILE_THEME.border,
@@ -360,7 +361,7 @@ export function TavernHorseRaceNative() {
                   onPress={() => setBet(clamp(preset, 1, Math.max(1, balance)))}
                   style={({ pressed }) => ({
                     flex: 1,
-                    minHeight: 38,
+                    minHeight: 46,
                     borderRadius: 12,
                     borderWidth: 1,
                     borderColor: MOBILE_THEME.border,
@@ -378,7 +379,7 @@ export function TavernHorseRaceNative() {
                 onPress={() => setBet(Math.max(1, balance))}
                 style={({ pressed }) => ({
                   flex: 1,
-                  minHeight: 38,
+                  minHeight: 46,
                   borderRadius: 12,
                   borderWidth: 1,
                   borderColor: "rgba(240,179,47,0.35)",

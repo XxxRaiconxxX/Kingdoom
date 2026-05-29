@@ -360,7 +360,7 @@ export function TavernSlotsNative() {
               disabled={phase === "spinning"}
               style={({ pressed }) => ({
                 flex: 1,
-                minHeight: 38,
+                minHeight: 46,
                 borderRadius: 12,
                 borderWidth: 1,
                 borderColor: MOBILE_THEME.border,
@@ -378,7 +378,7 @@ export function TavernSlotsNative() {
             disabled={phase === "spinning"}
             style={({ pressed }) => ({
               flex: 1,
-              minHeight: 38,
+              minHeight: 46,
               borderRadius: 12,
               borderWidth: 1,
               borderColor: "rgba(240,179,47,0.35)",

@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { MaterialIcons } from "@expo/vector-icons";
 import { DetailSheet } from "@/src/components/DetailSheet";
 import {
   EmptyState,
@@ -22,6 +23,7 @@ import {
   StaggerItem,
 } from "@/src/components/KingdoomUI";
 import { ScreenShell } from "@/src/components/ScreenShell";
+import { PlayerNotificationBellNative } from "@/src/components/PlayerNotificationBellNative";
 import {
   fetchPlayerEventParticipationsNative,
   fetchRealmEventsNative,
@@ -249,6 +251,29 @@ export default function ProfileScreen() {
         void playerEventQuery.refetch();
       }}
       refreshing={isRefreshing}
+      rightSlot={
+        player ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <PlayerNotificationBellNative playerId={player.id} />
+            <View
+              style={{
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                backgroundColor: "rgba(17,16,13,0.86)",
+                padding: 10,
+                alignItems: "center",
+                minWidth: 70,
+              }}
+            >
+              <MaterialIcons name="account-circle" size={22} color={MOBILE_THEME.gold} />
+              <Text style={{ color: MOBILE_THEME.text, fontSize: 11, fontWeight: "900", marginTop: 4 }} numberOfLines={1}>
+                {player.username}
+              </Text>
+            </View>
+          </View>
+        ) : null
+      }
     >
       <StaggerItem index={0}>
         <RealmCard tone={player ? "gold" : "default"}>

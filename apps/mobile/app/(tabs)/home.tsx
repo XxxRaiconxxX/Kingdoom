@@ -13,6 +13,7 @@ import {
   StaggerItem,
 } from "@/src/components/KingdoomUI";
 import { ScreenShell } from "@/src/components/ScreenShell";
+import { PlayerNotificationBellNative } from "@/src/components/PlayerNotificationBellNative";
 import { fetchRealmEventsNative } from "@/src/features/events/eventsService";
 import { fetchMissionsNative } from "@/src/features/missions/missionsService";
 import type { RealmEvent, RealmMission } from "@/src/features/shared/types";
@@ -113,21 +114,24 @@ export default function HomeScreen() {
       refreshing={isRefreshing}
       rightSlot={
         player ? (
-          <View
-            style={{
-              borderRadius: 16,
-              borderWidth: 1,
-              borderColor: MOBILE_THEME.border,
-              backgroundColor: "rgba(17,16,13,0.86)",
-              padding: 10,
-              alignItems: "center",
-              minWidth: 70,
-            }}
-          >
-            <MaterialIcons name="account-circle" size={22} color={MOBILE_THEME.gold} />
-            <Text style={{ color: MOBILE_THEME.text, fontSize: 11, fontWeight: "900", marginTop: 4 }} numberOfLines={1}>
-              {player.username}
-            </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <PlayerNotificationBellNative playerId={player.id} />
+            <View
+              style={{
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: MOBILE_THEME.border,
+                backgroundColor: "rgba(17,16,13,0.86)",
+                padding: 10,
+                alignItems: "center",
+                minWidth: 70,
+              }}
+            >
+              <MaterialIcons name="account-circle" size={22} color={MOBILE_THEME.gold} />
+              <Text style={{ color: MOBILE_THEME.text, fontSize: 11, fontWeight: "900", marginTop: 4 }} numberOfLines={1}>
+                {player.username}
+              </Text>
+            </View>
           </View>
         ) : null
       }

@@ -123,8 +123,8 @@ export default function AnimeScreen() {
             <Pressable
               onPress={() => void handleSearch()}
               style={({ pressed }) => ({
-                width: 42,
-                height: 42,
+                width: 46,
+                height: 46,
                 borderRadius: 14,
                 alignItems: "center",
                 justifyContent: "center",
@@ -250,6 +250,7 @@ export default function AnimeScreen() {
                       : "rgba(4,4,3,0.46)",
                   paddingHorizontal: 12,
                   paddingVertical: 11,
+                  minHeight: 48,
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",

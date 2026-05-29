@@ -29,6 +29,33 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 29/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/src/components/PlayerNotificationBellNative.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
+*   **Resumen:** Cierre de revision de Fase 3 mobile sobre notificaciones y ergonomia compacta.
+*   **Cambios Clave:**
+    *   **[Mobile - QA] Limpieza de UI:** Se reescribio `PlayerNotificationBellNative.tsx` para eliminar un problema de encoding visible en los separadores del modal de notificaciones y dejar el componente en ASCII limpio.
+    *   **[Backlog] Estado aceptado:** Se marcaron como cerradas la decision de mantener `Archivist` y `Anime` como modulos compactos, junto con la segunda pasada de polish visual y ergonomia Android.
+    *   **[Jarvis] Aceptacion parcial de Fase 3:** Se acepta el bloque de notificaciones y el polish ergonomico como avance valido de Fase 3, dejando todavia pendiente la decision/implementacion del segundo minijuego movil.
+*   **Notas/Advertencias:** Revalidado con `npm run mobile:typecheck`, `npx tsc --noEmit` y `npm run build`. El siguiente frente real de Fase 3 sigue siendo decidir si entra un segundo minijuego movil o si conviene cerrar la fase con el estado actual.
+
+### [Fecha: 29/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `apps/mobile/src/features/notifications/notificationsService.ts`, `apps/mobile/src/components/PlayerNotificationBellNative.tsx`, `apps/mobile/app/(tabs)/home.tsx`, `apps/mobile/app/(tabs)/profile.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
+*   **Resumen:** Implementación de Notificaciones Mobile (Fase 3).
+*   **Cambios Clave:**
+    *   **[Mobile - Notificaciones]:** Se implementó el servicio de notificaciones nativo (`notificationsService.ts`) que interactúa con Supabase para la app mobile, manteniendo paridad con la estructura de datos web.
+    *   **[Mobile - Componente UI]:** Se creó `PlayerNotificationBellNative.tsx` utilizando `TanStack Query` para polling cada 15 segundos y `react-native-reanimated` para animaciones fluidas del modal bottom-sheet. Se garantizó el tamaño de 46x46 en los elementos clickeables (incluyendo botón de cerrar modal).
+    *   **[Mobile - Integración]:** Se inyectó la campana de notificaciones en el `rightSlot` de las pantallas principales `home.tsx` y `profile.tsx` para brindar máxima visibilidad sobre transacciones y recompensas sin afectar la ergonomía ni requerir tabs adicionales.
+    *   **[Backlog] Actualización:** Tareas de notificación/features económicas adicionales marcadas como evaluadas e implementadas.
+*   **Notas/Advertencias:** Validado con `npm run mobile:typecheck` limpio. La economía móvil sigue intacta ya que la campana es solo un observador de estado.
+
+### [Fecha: 29/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/anime.tsx`, `apps/mobile/src/components/RealmStockExchangeNative.tsx`, `apps/mobile/app/(tabs)/archivist.tsx`, `apps/mobile/src/components/TavernHorseRaceNative.tsx`, `apps/mobile/src/components/TavernSlotsNative.tsx`, `AI_CHANGELOG.md`
+*   **Resumen:** Segunda pasada de polish visual/ergonómico para la reactivación mobile (Fase 3). 
+*   **Cambios Clave:**
+    *   **[Mobile - UI/Ergonomía]:** Se estandarizaron los touch targets a un mínimo de 46px en componentes interactivos clave de toda la app (botones, tabs, pills y search inputs) para cumplir con las guías de accesibilidad en Android. Esto incluyó ajustes en Archivist, Anime, Exchange, HorseRace y Slots, solucionando los problemas de fat-finger.
+    *   **[Arquitectura - Decisión]:** Se evaluó si `Archivist` y `Anime` justifican una expansión profunda. Se decide mantenerlos como módulos compactos. `Archivist` sirve como referencia rápida y `Anime` como un hub de enlaces ligeros. Añadirles una navegación profunda y dependencias pesadas impactaría negativamente el rendimiento de React Native y la filosofía "compact-mode" que guía el resurgimiento móvil.
+*   **Notas/Advertencias:** Todos los cambios pasaron `npm run mobile:typecheck` y no se inyectó lógica económica nueva.
+
 ### [Fecha: 29/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `apps/mobile/src/features/session/sessionStore.ts`, `apps/mobile/src/components/TavernSlotsNative.tsx`, `apps/mobile/src/components/TavernHorseRaceNative.tsx`, `apps/mobile/src/components/RealmStockExchangeNative.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
 *   **Resumen:** Cierre definitivo de Fase 2 (Antigravity 2) de reactivación mobile: sincronización atómica de economía y estabilización del Stock Exchange.

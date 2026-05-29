@@ -449,6 +449,8 @@ export function RealmStockExchangeNative() {
                 borderColor: active ? asset.accent : MOBILE_THEME.border,
                 backgroundColor: active || pressed ? `${asset.accent}22` : "rgba(5,5,4,0.56)",
                 padding: 10,
+                minHeight: 46,
+                justifyContent: "center",
               })}
             >
               <Text style={{ color: active ? asset.accent : MOBILE_THEME.mutedText, fontSize: 10, fontWeight: "900" }}>

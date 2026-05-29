@@ -138,8 +138,8 @@ export default function LibraryScreen() {
 
   const events = eventsQuery.data?.events ?? [];
   const missions = missionsQuery.data?.missions ?? [];
-  const eventIds = useMemo(() => events.map((event) => event.id), [events]);
-  const missionIds = useMemo(() => missions.map((mission) => mission.id), [missions]);
+  const eventIds = useMemo(() => events.map((event) => event.id).filter((id): id is string => Boolean(id)), [events]);
+  const missionIds = useMemo(() => missions.map((mission) => mission.id).filter((id): id is string => Boolean(id)), [missions]);
 
   const eventParticipantsQuery = useQuery({
     queryKey: ["realm-event-participants", eventIds],
@@ -184,13 +184,13 @@ export default function LibraryScreen() {
     });
   }, [missions, search]);
 
-  const selectedMissionClaim = selectedMission
+  const selectedMissionClaim = selectedMission && selectedMission.id
     ? playerMissionQuery.data?.claimsByMissionId[selectedMission.id] ?? null
     : null;
-  const selectedEventParticipation = selectedEvent
+  const selectedEventParticipation = selectedEvent && selectedEvent.id
     ? playerEventQuery.data?.participationsByEventId[selectedEvent.id] ?? null
     : null;
-  const selectedEventParticipants = selectedEvent
+  const selectedEventParticipants = selectedEvent && selectedEvent.id
     ? eventParticipantsQuery.data?.participantsByEventId[selectedEvent.id] ?? []
     : [];
   const isRefreshing =
@@ -216,6 +216,7 @@ export default function LibraryScreen() {
       return;
     }
 
+    if (!mission.id) return;
     setBusyActionId(`mission:${mission.id}`);
     const result = await claimRealmMissionNative(mission.id, player.id);
     setBusyActionId("");
@@ -246,6 +247,7 @@ export default function LibraryScreen() {
       return;
     }
 
+    if (!event.id) return;
     setBusyActionId(`event:${event.id}`);
     const result = await joinRealmEventNative(event.id, player.id);
     setBusyActionId("");
@@ -259,6 +261,7 @@ export default function LibraryScreen() {
       return;
     }
 
+    if (!event.id) return;
     setBusyActionId(`event:${event.id}`);
     const result = await leaveRealmEventNative(event.id, player.id);
     setBusyActionId("");
@@ -340,9 +343,11 @@ export default function LibraryScreen() {
 
       {mode === "events"
         ? filteredEvents.map((entry, index) => {
-            const participants = eventParticipantsQuery.data?.participantsByEventId[entry.id] ?? [];
-            const participation = playerEventQuery.data?.participationsByEventId[entry.id] ?? null;
-            const capacity = entry.maxParticipants > 0 ? `${participants.length}/${entry.maxParticipants}` : participants.length;
+            const eventId = entry.id || "";
+            const participants = eventParticipantsQuery.data?.participantsByEventId[eventId] ?? [];
+            const participation = playerEventQuery.data?.participationsByEventId[eventId] ?? null;
+            const maxParticipants = entry.maxParticipants ?? 0;
+            const capacity = maxParticipants > 0 ? `${participants.length}/${maxParticipants}` : participants.length;
 
             return (
               <StaggerItem key={entry.id} index={index + 2}>
@@ -370,7 +375,7 @@ export default function LibraryScreen() {
                   </Text>
                   <View style={{ flexDirection: "row", gap: 10 }}>
                     <MetricTile label="PARTICIPAN" value={capacity} icon="groups" />
-                    <MetricTile label="PREMIO" value={entry.participationRewardGold} icon="paid" />
+                    <MetricTile label="PREMIO" value={entry.participationRewardGold ?? 0} icon="paid" />
                   </View>
                   <Pressable
                     onPress={() => setSelectedEvent(entry)}
@@ -390,7 +395,8 @@ export default function LibraryScreen() {
             );
           })
         : filteredMissions.map((mission, index) => {
-            const claim = playerMissionQuery.data?.claimsByMissionId[mission.id] ?? null;
+            const missionId = mission.id || "";
+            const claim = playerMissionQuery.data?.claimsByMissionId[missionId] ?? null;
 
             return (
               <StaggerItem key={mission.id} index={index + 2}>

@@ -15,7 +15,7 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
 ## Fase 2 - Paridad operativa minima
 
 ### Jarvis
-- [ ] revisar y cerrar alineacion de tipos entre `src/types.ts` y `apps/mobile/src/features/shared/types.ts`
+- [x] revisar y cerrar alineacion de tipos entre `src/types.ts` y `apps/mobile/src/features/shared/types.ts`
 - [x] decidir si el primer minijuego extra en mobile sera `Plinko` o `Horse Race`
 - [x] validar que toda economia movil use RPC/flujo ya aprobado
 - [x] revisar cambios de Antigravity 1 y 2 antes de merge
@@ -36,7 +36,7 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
 ### Antigravity 2
 - [ ] estabilizar `RealmStockExchangeNative`
 - [ ] revisar integracion de oro y sincronizacion de saldo en mobile
-- [ ] auditar `missionsService` y `eventsService`
+- [x] auditar `missionsService` y `eventsService`
 - [ ] revisar consistencia entre historial de compras, inventario y saldo
 - [x] sumar un minijuego prioritario ademas de `TavernSlotsNative`
 

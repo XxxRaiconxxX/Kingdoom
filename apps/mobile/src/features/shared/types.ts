@@ -38,7 +38,7 @@ export type MarketItem = {
 };
 
 export type RealmEvent = {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   longDescription: string;
@@ -49,8 +49,8 @@ export type RealmEvent = {
   factions: string[];
   rewards: string;
   requirements: string;
-  participationRewardGold: number;
-  maxParticipants: number;
+  participationRewardGold?: number;
+  maxParticipants?: number;
 };
 
 export type RealmEventParticipant = {
@@ -60,7 +60,7 @@ export type RealmEventParticipant = {
   playerName: string;
   status: RealmEventParticipationStatus;
   rewardDelivered: boolean;
-  rewardDeliveredAt: string | null;
+  rewardDeliveredAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -146,28 +146,81 @@ export type KnowledgeDocument = {
   updatedAt?: string;
 };
 
-export type RealmMission = {
+export type GmNpcRole = "boss" | "elite" | "support" | "summoner" | "skirmisher" | "controller";
+export type GmMissionMode = "combate" | "jefe" | "investigacion" | "recoleccion" | "escolta" | "social" | "exploracion";
+
+export type GmNpcStats = {
+  level?: number;
+  hp?: number;
+  attack?: number;
+  defense?: number;
+  speed?: number;
+};
+
+export type GmNpcMagicSummary = {
   id: string;
+  title: string;
+  categoryId: string;
+  categoryTitle: string;
+  description: string;
+  abilityNames: string[];
+};
+
+export type GmMissionNpc = {
+  id: string;
+  name: string;
+  role: GmNpcRole;
+  stats: GmNpcStats;
+  allowedMagic: GmNpcMagicSummary[];
+  behaviorNotes?: string;
+};
+
+export type GmMissionEscalation = {
+  puedeUsarNpcHostil: boolean;
+  puedeEscalarACombate: boolean;
+};
+
+export type RealmMissionGmConfig = {
+  modoMision: GmMissionMode;
+  objetivosJugadores: string[];
+  objetivosGM: string[];
+  condicionesVictoria: string[];
+  condicionesDerrota: string[];
+  escalada: GmMissionEscalation;
+  npcs: GmMissionNpc[];
+};
+
+export type RealmMission = {
+  id?: string;
   title: string;
   description: string;
   instructions: string;
+  gmConfig?: RealmMissionGmConfig;
   rewardGold: number;
   maxParticipants: number;
   difficulty: MissionDifficulty;
   type: MissionType;
   status: MissionStatus;
   visible: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  activeClaims?: number;
 };
 
 export type RealmMissionClaim = {
   id: string;
   missionId: string;
   playerId: string;
+  playerName: string;
+  playerGold: number;
   status: RealmMissionClaimStatus;
   rewardDelivered: boolean;
   proofText: string;
-  submittedAt: string | null;
-  rewardDeliveredAt: string | null;
+  proofLink: string;
+  proofImageUrl: string;
+  proofImagePath: string;
+  submittedAt?: string | null;
+  rewardDeliveredAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };

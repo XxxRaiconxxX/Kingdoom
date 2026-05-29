@@ -105,11 +105,11 @@ export default function ProfileScreen() {
     enabled: Boolean(player?.id),
   });
   const missionIds = useMemo(
-    () => (missionsQuery.data?.missions ?? []).map((mission) => mission.id),
+    () => (missionsQuery.data?.missions ?? []).map((m) => m.id).filter((id): id is string => Boolean(id)),
     [missionsQuery.data?.missions]
   );
   const eventIds = useMemo(
-    () => (eventsQuery.data?.events ?? []).map((event) => event.id),
+    () => (eventsQuery.data?.events ?? []).map((e) => e.id).filter((id): id is string => Boolean(id)),
     [eventsQuery.data?.events]
   );
   const playerMissionQuery = useQuery({
@@ -188,7 +188,7 @@ export default function ProfileScreen() {
   const playerMissionCards = useMemo(() => {
     const claimsByMissionId = playerMissionQuery.data?.claimsByMissionId ?? {};
     return (missionsQuery.data?.missions ?? [])
-      .map((mission) => ({ mission, claim: claimsByMissionId[mission.id] }))
+      .map((mission) => ({ mission, claim: mission.id ? claimsByMissionId[mission.id] : null }))
       .filter((entry) => Boolean(entry.claim))
       .slice(0, 4);
   }, [missionsQuery.data?.missions, playerMissionQuery.data?.claimsByMissionId]);
@@ -196,7 +196,7 @@ export default function ProfileScreen() {
   const playerEventCards = useMemo(() => {
     const participationsByEventId = playerEventQuery.data?.participationsByEventId ?? {};
     return (eventsQuery.data?.events ?? [])
-      .map((event) => ({ event, participation: participationsByEventId[event.id] }))
+      .map((event) => ({ event, participation: event.id ? participationsByEventId[event.id] : null }))
       .filter((entry) => Boolean(entry.participation))
       .slice(0, 4);
   }, [eventsQuery.data?.events, playerEventQuery.data?.participationsByEventId]);

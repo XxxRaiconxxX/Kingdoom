@@ -28,10 +28,14 @@ type RealmMissionClaimRow = {
   status: RealmMissionClaimStatus;
   reward_delivered: boolean;
   proof_text?: string | null;
+  proof_link?: string | null;
+  proof_image_url?: string | null;
+  proof_image_path?: string | null;
   submitted_at?: string | null;
   reward_delivered_at?: string | null;
   created_at?: string;
   updated_at?: string;
+  players?: { username?: string | null; gold?: number | null } | Array<{ username?: string | null; gold?: number | null }> | null;
 };
 
 type MissionMetaRow = {
@@ -45,6 +49,16 @@ const UUID_PATTERN =
 
 function isSupabaseMissionId(value?: string) {
   return Boolean(value && UUID_PATTERN.test(value.trim()));
+}
+
+function getClaimPlayer(
+  row: RealmMissionClaimRow
+): { username?: string | null; gold?: number | null } | null {
+  if (Array.isArray(row.players)) {
+    return row.players[0] ?? null;
+  }
+
+  return row.players ?? null;
 }
 
 function mapMission(row: RealmMissionRow): RealmMission {
@@ -63,13 +77,20 @@ function mapMission(row: RealmMissionRow): RealmMission {
 }
 
 function mapMissionClaim(row: RealmMissionClaimRow): RealmMissionClaim {
+  const player = getClaimPlayer(row);
+
   return {
     id: row.id,
     missionId: row.mission_id,
     playerId: row.player_id,
+    playerName: player?.username?.trim() || "Jugador",
+    playerGold: Math.max(0, Number(player?.gold ?? 0)),
     status: row.status,
     rewardDelivered: row.reward_delivered,
     proofText: row.proof_text?.trim() ?? "",
+    proofLink: row.proof_link?.trim() ?? "",
+    proofImageUrl: row.proof_image_url?.trim() ?? "",
+    proofImagePath: row.proof_image_path?.trim() ?? "",
     submittedAt: row.submitted_at ?? null,
     rewardDeliveredAt: row.reward_delivered_at ?? null,
     createdAt: row.created_at,
@@ -129,7 +150,7 @@ export async function fetchPlayerMissionClaimsNative(
   const { data, error } = await supabase
     .from("realm_mission_claims")
     .select(
-      "id, mission_id, player_id, status, reward_delivered, proof_text, submitted_at, reward_delivered_at, created_at, updated_at"
+      "id, mission_id, player_id, status, reward_delivered, proof_text, proof_link, proof_image_url, proof_image_path, submitted_at, reward_delivered_at, created_at, updated_at, players(username, gold)"
     )
     .eq("player_id", normalizedPlayerId)
     .in("mission_id", normalizedMissionIds);

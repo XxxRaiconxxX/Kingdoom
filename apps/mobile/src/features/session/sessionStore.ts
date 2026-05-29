@@ -15,7 +15,7 @@ type SessionState = {
   errorMessage: string;
   connectByUsername: (username: string) => Promise<void>;
   refreshGold: () => Promise<void>;
-  updateGold: (nextGold: number) => Promise<boolean>;
+  addGold: (amount: number) => Promise<boolean>;
   disconnect: () => void;
   clearError: () => void;
 };
@@ -135,34 +135,28 @@ export const useSessionStore = create<SessionState>()(
           },
         });
       },
-      updateGold: async (nextGold: number) => {
+      addGold: async (amount: number) => {
         const currentPlayer = get().player;
-        if (!currentPlayer) {
-          return false;
+        if (!currentPlayer || amount === 0) {
+          return true;
         }
         if (!supabase) {
           set({ errorMessage: supabaseConfigError });
           return false;
         }
 
-        const safeGold = Math.max(0, Math.floor(nextGold));
-        const { error } = await supabase
-          .from("players")
-          .update({ gold: safeGold })
-          .eq("id", currentPlayer.id);
+        const safeAmount = Math.floor(amount);
+        const { error } = await supabase.rpc("increment_gold", {
+          player_id: currentPlayer.id,
+          amount: safeAmount,
+        });
 
         if (error) {
-          set({ errorMessage: "No se pudo actualizar el oro del jugador." });
+          set({ errorMessage: "No se pudo sincronizar el oro del jugador." });
           return false;
         }
 
-        set({
-          player: {
-            ...currentPlayer,
-            gold: safeGold,
-          },
-          errorMessage: "",
-        });
+        await get().refreshGold();
         return true;
       },
       disconnect: () => set({ player: null, errorMessage: "" }),

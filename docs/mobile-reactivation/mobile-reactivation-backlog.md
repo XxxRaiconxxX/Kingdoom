@@ -34,10 +34,10 @@ Este backlog arranca con la Fase 1 ya cerrada por Jarvis.
   - inventario/perfil
 
 ### Antigravity 2
-- [ ] estabilizar `RealmStockExchangeNative`
-- [ ] revisar integracion de oro y sincronizacion de saldo en mobile
+- [x] estabilizar `RealmStockExchangeNative`
+- [x] revisar integracion de oro y sincronizacion de saldo en mobile
 - [x] auditar `missionsService` y `eventsService`
-- [ ] revisar consistencia entre historial de compras, inventario y saldo
+- [x] revisar consistencia entre historial de compras, inventario y saldo
 - [x] sumar un minijuego prioritario ademas de `TavernSlotsNative`
 
 ## Fase 3 - Expansión selectiva

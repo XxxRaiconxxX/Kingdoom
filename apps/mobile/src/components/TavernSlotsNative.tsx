@@ -122,7 +122,7 @@ async function setDailyWins(playerId: string, key: string, amount: number) {
 }
 
 export function TavernSlotsNative() {
-  const { player, updateGold, refreshGold } = useSessionStore();
+  const { player, addGold, refreshGold } = useSessionStore();
   const day = useMemo(() => dateKey(), []);
   const timerRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
   const pulse = useSharedValue(0);
@@ -226,8 +226,8 @@ export function TavernSlotsNative() {
       const rawNetWin = Math.max(0, rawPayout - lockedBet);
       const cappedNetWin = Math.min(rawNetWin, remainingDaily);
       const finalPayout = outcome.multiplier > 0 ? lockedBet + cappedNetWin : 0;
-      const nextGold = balance - lockedBet + finalPayout;
-      const saved = await updateGold(nextGold);
+      const amount = finalPayout - lockedBet;
+      const saved = await addGold(amount);
 
       if (!saved) {
         setMessage("No se pudo guardar el oro. Refresca e intenta otra vez.");

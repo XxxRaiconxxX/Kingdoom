@@ -209,7 +209,7 @@ function PredictionCard({ prediction, now }: { prediction: RealmExchangePredicti
 }
 
 export function RealmStockExchangeNative() {
-  const { player, refreshGold, updateGold } = useSessionStore();
+  const { player, refreshGold, addGold } = useSessionStore();
   const [selectedAssetId, setSelectedAssetId] = useState(REALM_EXCHANGE_ASSETS[0].id);
   const [exchangeState, setExchangeState] = useState<RealmExchangePlayerState>(createEmptyExchangeState);
   const [stakeInput, setStakeInput] = useState("500");
@@ -390,7 +390,8 @@ export function RealmStockExchangeNative() {
       }
     }
 
-    const updated = await updateGold(result.nextGold);
+    const amount = result.nextGold - currentPlayer.gold;
+    const updated = await addGold(amount);
 
     if (!updated) {
       setFeedback({ type: "error", message: "No se pudo actualizar el oro." });

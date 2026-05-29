@@ -38,7 +38,7 @@ async function setDailyWins(playerId: string, key: string, amount: number) {
 }
 
 export function TavernHorseRaceNative() {
-  const { player, updateGold, refreshGold } = useSessionStore();
+  const { player, addGold, refreshGold } = useSessionStore();
   const day = useMemo(() => dateKey(), []);
   const timerRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -142,8 +142,8 @@ export function TavernHorseRaceNative() {
     const cappedNetWin = Math.min(rawNetWin, remainingDaily);
     const finalPayout = won ? lockedBet + cappedNetWin : 0;
 
-    const nextGold = balance - lockedBet + finalPayout;
-    const saved = await updateGold(nextGold);
+    const amount = finalPayout - lockedBet;
+    const saved = await addGold(amount);
 
     if (!saved) {
       setMessage("Error sincronizando oro. Refresca e intenta de nuevo.");

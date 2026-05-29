@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 29/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `apps/mobile/src/features/session/sessionStore.ts`, `apps/mobile/src/components/TavernSlotsNative.tsx`, `apps/mobile/src/components/TavernHorseRaceNative.tsx`, `apps/mobile/src/components/RealmStockExchangeNative.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
+*   **Resumen:** Cierre definitivo de Fase 2 (Antigravity 2) de reactivación mobile: sincronización atómica de economía y estabilización del Stock Exchange.
+*   **Cambios Clave:**
+    *   **[Mobile - Economía] QA Funcional Completo y Sincronización atómica:** Se auditó funcionalmente el ciclo de compra en el mercado móvil (se descuenta una sola vez, se refresca el saldo, se actualiza el inventario). Se refactorizaron `TavernSlotsNative`, `TavernHorseRaceNative` y `RealmStockExchangeNative` para utilizar `addGold` (basado en el RPC `increment_gold` de Supabase) en lugar del método inseguro `updateGold`, previniendo race conditions y asegurando la consistencia entre saldo visible e historial. Además, se documentó el SQL del RPC `increment_gold` (`supabase_increment_gold.sql`) en el repositorio para evitar desincronizaciones futuras. Fase 2 completada y validada con \`npm run mobile:typecheck\` y \`npm run build\`.
+    *   **[Mobile - Mercado] Estabilización:** Se verificó la paridad operativa del `RealmStockExchangeNative` con la web, confirmando que las operaciones respetan el bloqueo transaccional (`applyOperation`) y propagan correctamente los deltas de oro.
+    *   **[Backlog] Actualización:** Se marcaron como completadas las tareas restantes del sprint de Antigravity 2 en `mobile-reactivation-backlog.md`.
+*   **Notas/Advertencias:** Validado con lectura de código y `npm run mobile:typecheck` exitoso. La arquitectura financiera móvil ya no sobrescribe el oro total, operando exclusivamente mediante incrementos/decrementos validados en Supabase.
+
 ### [Fecha: 29/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/src/features/missions/missionsService.ts`, `AI_CHANGELOG.md`
 *   **Resumen:** Correccion de paridad real en claims de misiones mobile tras la pasada de Antigravity.

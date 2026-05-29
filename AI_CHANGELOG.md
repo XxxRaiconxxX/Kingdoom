@@ -29,6 +29,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 29/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/TavernPlinko.tsx`, `AI_CHANGELOG.md`
+*   **Resumen:** Ampliación de la cantidad máxima de esferas a lanzar en la Torre del Mago.
+*   **Cambios Clave:**
+    *   **[Minijuegos - Torre del Mago]:** Se ajustaron los botones de selección de cantidad de esferas, cambiando las opciones de `[1, 3, 5, 10]` a `[1, 5, 10, 20]`.
+*   **Notas/Advertencias:** Actualización rápida de UI para escalar las apuestas.
+
 ### [Fecha: 29/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Correccion de inconsistencia entre `!purga` y `!pendientes` en el bot de WhatsApp.

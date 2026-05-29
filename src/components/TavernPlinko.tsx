@@ -523,7 +523,7 @@ export function TavernPlinko() {
               <p className="mt-1 text-[10px] font-bold text-stone-500">Esferas a lanzar</p>
             </div>
             <div className="flex gap-1.5">
-              {[1, 3, 5, 10].map((q) => (
+              {[1, 5, 10, 20].map((q) => (
                 <button
                   key={q}
                   type="button"

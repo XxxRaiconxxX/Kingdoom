@@ -47,6 +47,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **[UI] Claridad de Etiquetas:** Actualizadas etiquetas "Multiplicador" a "Lanzamiento" y "Apuesta unitaria" a "Apuesta por esfera" para evitar confusión. Se muestra de manera clara el costo total real de la jugada.
     *   **[UX] Estado del Botón:** Actualizados los mensajes en el botón de lanzar (Oro insuficiente, límite alcanzado, apuesta inválida) para informar dinámicamente y con base al oro que requiere la apuesta total.
 *   **Notas/Advertencias:** Validado localmente con `npx tsc --noEmit` y `npm run build` sin errores en este componente.
+### [Fecha: 29/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`
+*   **Resumen:** Reducción del plazo de inactividad para purga de 5 a 3 días.
+*   **Cambios Clave:**
+    *   **[Admin] Comando !purga:** Se actualizó la constante `THREE_DAYS_MS` y la lógica de cálculo de tiempo para que el bot advierta y expulse a los usuarios sin ficha o inactivos luego de 3 días en lugar de 5.
+    *   **[Admin] Notificaciones de UI:** Se ajustaron los textos enviados por WhatsApp al ejecutar la purga para que reporten correctamente el límite de 3 días.
+*   **Notas/Advertencias:** Los cambios se hicieron en el repositorio del bot y se empujaron a `origin/main`.
+
 ### [Fecha: 28/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/admin/AdminMissionManager.tsx`, `src/utils/missions.ts`
 *   **Resumen:** Funcionalidad para eliminar participantes de misiones desde el panel de admin.

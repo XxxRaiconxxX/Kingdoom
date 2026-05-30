@@ -29,6 +29,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 30/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `.gemini/antigravity/mcp_config.json` (Local IDE Config)
+*   **Resumen:** Configuración e integración del servidor MCP de Vercel.
+*   **Cambios Clave:**
+    *   **[Tooling - MCP]:** Se agregó exitosamente el servidor MCP de Vercel (`https://mcp.vercel.com`) al entorno de Google IDE (Antigravity).
+    *   **[Tooling - Auth]:** Se configuró el Bearer Token de Vercel para permitir a los agentes realizar consultas de despliegues, logs de proyectos y administrar el entorno web alojado en Vercel sin salir del IDE.
+
 ### [Fecha: 30/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/src/components/TavernScratchNative.tsx`, `apps/mobile/src/utils/scratchUtils.ts`, `AI_CHANGELOG.md`
 *   **Resumen:** Fix de empaquetado Android para EAS tras detectar un import cruzado desde la web en `TavernScratchNative`.

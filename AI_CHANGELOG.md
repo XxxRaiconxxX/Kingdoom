@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 30/05/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `apps/mobile/src/components/TavernScratchNative.tsx`, `apps/mobile/src/utils/scratchUtils.ts`, `AI_CHANGELOG.md`
+*   **Resumen:** Fix de empaquetado Android para EAS tras detectar un import cruzado desde la web en `TavernScratchNative`.
+*   **Cambios Clave:**
+    *   **[Mobile - Build Fix]:** Se reemplazo el import de `../../../../src/utils/scratchUtils` por un util nativo local en `apps/mobile/src/utils/scratchUtils.ts` para que Expo/Metro pueda resolver el modulo dentro del workspace mobile.
+    *   **[Mobile - Paridad]:** El nuevo util replica la configuracion diaria de Scratch (`getDailyScratchConfig`, costos, chances y limite maximo) sin depender de archivos del frente web.
+    *   **[EAS - Diagnostico]:** Se reprodujo localmente el fallo de bundle que estaba rompiendo la solicitud de APK en EAS y se valido el fix con export Android exitoso antes de relanzar el build remoto.
+*   **Notas/Advertencias:** `npm run mobile:typecheck`, `npx expo export --platform android` y `npm run build` quedaron limpios tras el fix. El build remoto anterior `4a3d3025-f211-45cb-9c72-dbb1edec997a` fallo por este import fuera del arbol mobile.
+
+### [Fecha: 30/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `docs/mobile-reactivation/README.md`, `docs/mobile-reactivation/mobile-v1-parity-matrix.md`, `docs/mobile-reactivation/mobile-qa-manual-checklist.md`, `docs/mobile-reactivation/mobile-post-reactivation-backlog.md`, `AI_CHANGELOG.md`
 *   **Resumen:** Cierre documental del post-plan mobile tras completar las Fases 1-3.
 *   **Cambios Clave:**

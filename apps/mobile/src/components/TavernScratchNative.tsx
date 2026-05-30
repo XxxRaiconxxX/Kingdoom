@@ -13,7 +13,7 @@ import {
   NORMAL_MIN_PRIZE,
   VIP_JACKPOT_CHANCE,
   VIP_JACKPOT_PRIZE,
-} from "../../../../src/utils/scratchUtils";
+} from "@/src/utils/scratchUtils";
 
 function randomPrize() {
   return Math.floor(Math.random() * (NORMAL_MAX_PRIZE - NORMAL_MIN_PRIZE + 1)) + NORMAL_MIN_PRIZE;

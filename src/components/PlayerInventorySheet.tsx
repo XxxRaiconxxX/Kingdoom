@@ -269,10 +269,9 @@ function InventoryCard({ item }: { item: InventoryEntry }) {
     <article className="overflow-hidden rounded-[1.5rem] border border-stone-800 bg-stone-900/70">
       <div className="relative aspect-[4/3] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950">
         {!imageFailed && item.itemImageUrl ? (
-          <img
+          <img loading="lazy" decoding="async" 
             src={item.itemImageUrl}
             alt={item.itemName}
-            loading="lazy"
             referrerPolicy="no-referrer"
             onError={() => setImageFailed(true)}
             className="h-full w-full"

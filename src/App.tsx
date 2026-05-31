@@ -1113,11 +1113,9 @@ function MissionCard({
             </p>
           ) : null}
           {proofImagePreview ? (
-            <img
+            <img loading="lazy" decoding="async" 
               src={proofImagePreview}
               alt="Vista previa de evidencia"
-              loading="lazy"
-              decoding="async"
               className="h-20 w-20 rounded-lg border border-cyan-500/30 object-cover"
             />
           ) : null}

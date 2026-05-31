@@ -1671,7 +1671,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     </p>
                     {avatarPreviewUrl ? (
                       <div className="relative aspect-square w-full max-w-[200px] overflow-hidden rounded-2xl border-2 border-stone-700">
-                        <img
+                        <img loading="lazy" decoding="async"  
                           src={avatarPreviewUrl}
                           alt="Avatar preview"
                           className="h-full w-full object-cover"
@@ -1679,7 +1679,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                       </div>
                     ) : selectedAvatarPlayer?.avatar_gif_url ? (
                       <div className="relative aspect-square w-full max-w-[200px] overflow-hidden rounded-2xl border-2 border-amber-500/30">
-                        <img
+                        <img loading="lazy" decoding="async"  
                           src={selectedAvatarPlayer.avatar_gif_url}
                           alt="Avatar actual"
                           className="h-full w-full object-cover"
@@ -2350,7 +2350,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
                     {marketPinterestPreview ? (
                       <div className="mt-3 flex gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/45 p-3">
-                        <img
+                        <img loading="lazy" decoding="async"  
                           src={marketPinterestPreview.imageUrl}
                           alt={marketPinterestPreview.title || "Referencia de Pinterest"}
                           className="h-20 w-20 shrink-0 rounded-2xl border border-stone-800 bg-stone-900 object-cover"

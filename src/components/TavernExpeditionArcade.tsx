@@ -891,11 +891,10 @@ export function TavernExpeditionArcade() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               {activeSheet.portraitUrl ? (
-                <img
+                <img loading="lazy" decoding="async" 
                   src={activeSheet.portraitUrl}
                   alt={activeSheet.name || "Ficha PvE"}
                   className="h-12 w-12 rounded-2xl border border-amber-400/25 object-cover"
-                  loading="lazy"
                 />
               ) : (
                 <div className="rounded-xl bg-amber-500/10 p-3 text-amber-300">

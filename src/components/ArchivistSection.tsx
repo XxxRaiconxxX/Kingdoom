@@ -775,11 +775,10 @@ export function ArchivistSection() {
                             >
                               <div className="flex items-start gap-3">
                                 {card.imageUrl ? (
-                                  <img
+                                  <img loading="lazy" decoding="async" 
                                     src={card.imageUrl}
                                     alt={card.title}
                                     className="h-14 w-14 rounded-2xl border border-black/20 object-cover"
-                                    loading="lazy"
                                   />
                                 ) : null}
                                 <div className="min-w-0 flex-1">

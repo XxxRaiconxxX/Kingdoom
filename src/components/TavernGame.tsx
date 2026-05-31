@@ -259,11 +259,9 @@ export function TavernGame() {
                     className={`relative flex aspect-square flex-col items-center justify-center rounded-2xl border-2 p-3 transition-all duration-500 ${chestClass}`}
                   >
                     {phase === "playing" ? (
-                      <img
+                      <img loading="lazy" decoding="async" 
                         src={cofreCerrado}
                         alt="Cofre cerrado"
-                        loading="lazy"
-                        decoding="async"
                         className="h-16 w-16 object-contain md:h-20 md:w-20"
                         style={{ imageRendering: "pixelated" }}
                       />
@@ -278,11 +276,9 @@ export function TavernGame() {
                         }}
                         className="flex flex-col items-center"
                       >
-                        <img
+                        <img loading="lazy" decoding="async" 
                           src={getChestImage(index)}
                           alt={result === "x0" ? "Cofre vacio" : "Cofre con oro"}
-                          loading="lazy"
-                          decoding="async"
                           className="h-16 w-16 object-contain md:h-20 md:w-20"
                           style={{ imageRendering: "pixelated" }}
                         />

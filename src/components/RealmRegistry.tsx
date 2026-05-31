@@ -210,11 +210,9 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
                     <div className="flex gap-3">
                       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-stone-800 bg-stone-950">
                         {sheet.portraitUrl ? (
-                          <img
+                          <img loading="lazy" decoding="async" 
                             src={sheet.portraitUrl}
                             alt={sheet.name || "Retrato del personaje"}
-                            loading="lazy"
-                            decoding="async"
                             className="h-full w-full object-cover"
                           />
                         ) : (

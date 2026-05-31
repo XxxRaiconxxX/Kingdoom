@@ -286,7 +286,7 @@ export function MarketAdminPreview({ item }: { item: MarketItem }) {
       <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-stone-800 bg-stone-900 text-stone-600">
           {item.imageUrl ? (
-            <img
+            <img loading="lazy" decoding="async" 
               src={item.imageUrl}
               alt={item.name}
               className="h-full w-full"
@@ -294,7 +294,6 @@ export function MarketAdminPreview({ item }: { item: MarketItem }) {
                 objectFit: item.imageFit ?? "contain",
                 objectPosition: item.imagePosition ?? "center",
               }}
-              loading="lazy"
             />
           ) : (
             <Store className="h-5 w-5" />

@@ -69,11 +69,9 @@ export function EventCard({
     <article className="kd-glass kd-hover-lift overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/80">
       <div className="relative aspect-[16/10] bg-stone-950 lg:aspect-[16/9]">
         {!imageFailed && event.imageUrl ? (
-          <img
+          <img loading="lazy" decoding="async" 
             src={event.imageUrl}
             alt={event.title}
-            loading="lazy"
-            decoding="async"
             width={640}
             height={400}
             referrerPolicy="no-referrer"

@@ -351,11 +351,9 @@ function FloraView({
             >
               <div className="relative h-52 border-b border-stone-800 bg-stone-950">
                 {entry.imageUrl ? (
-                  <img
+                  <img loading="lazy" decoding="async" 
                     src={entry.imageUrl}
                     alt={entry.name}
-                    loading="lazy"
-                    decoding="async"
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -498,11 +496,9 @@ function BestiaryView({
             >
               <div className="relative h-52 border-b border-stone-800 bg-stone-950">
                 {entry.imageUrl ? (
-                  <img
+                  <img loading="lazy" decoding="async" 
                     src={entry.imageUrl}
                     alt={entry.name}
-                    loading="lazy"
-                    decoding="async"
                     className="h-full w-full object-cover"
                   />
                 ) : (

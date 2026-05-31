@@ -223,11 +223,9 @@ const purchaseResult = await purchaseMarketItemSecure({
           <div className="mb-5 overflow-hidden rounded-[1.6rem] border border-stone-800 bg-stone-900/80">
             <div className="aspect-[16/10] bg-stone-950">
               {item.imageUrl ? (
-                <img
+                <img loading="lazy" decoding="async" 
                   src={item.imageUrl}
                   alt={item.name}
-                  loading="lazy"
-                  decoding="async"
                   className="h-full w-full object-cover"
                   style={{
                     objectFit: item.imageFit ?? "cover",

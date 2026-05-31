@@ -1673,11 +1673,9 @@ export function AdminMissionManager() {
                           </a>
                         ) : null}
                         {claim.proofImageUrl ? (
-                          <img
+                          <img loading="lazy" decoding="async" 
                             src={claim.proofImageUrl}
                             alt={`Evidencia de ${claim.playerName}`}
-                            loading="lazy"
-                            decoding="async"
                             className="mt-1 h-20 w-20 rounded-lg border border-cyan-500/25 object-cover"
                           />
                         ) : null}

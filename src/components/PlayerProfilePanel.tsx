@@ -481,12 +481,10 @@ export function PlayerProfilePanel({
               className="group inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-rose-400/35 bg-white/95 p-1.5 shadow-[0_14px_34px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:border-rose-300/70 hover:shadow-[0_18px_38px_rgba(127,29,29,0.4)]"
               title="Abrir portal anime"
             >
-              <img
+              <img loading="lazy" decoding="async" 
                 src={`${import.meta.env.BASE_URL}icons/anime-torii.png`}
                 alt="Portal anime"
                 className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.04]"
-                loading="lazy"
-                decoding="async"
               />
             </button>
           ) : null}
@@ -521,7 +519,7 @@ export function PlayerProfilePanel({
                   className="flex flex-col items-center justify-center space-y-4 rounded-[2rem] border border-amber-500/20 bg-stone-950 p-6 shadow-2xl md:p-10"
                 >
                   <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-3xl border-2 border-amber-500/30">
-                    <img
+                    <img loading="lazy" decoding="async"  
                       src={cachedGif}
                       alt="Restaurando avatar..."
                       className="h-full w-full object-cover"
@@ -552,7 +550,7 @@ export function PlayerProfilePanel({
             className="flex flex-col items-center justify-center space-y-4 rounded-[2rem] border border-amber-500/20 bg-stone-950 p-6 shadow-2xl md:p-10"
           >
             <div className="relative aspect-square w-full max-w-[280px] overflow-hidden rounded-3xl border-2 border-amber-500/30">
-              <img
+              <img loading="lazy" decoding="async"  
                 src={connectedGifUrl}
                 alt="Despertando..."
                 className="h-full w-full object-cover"
@@ -1117,11 +1115,9 @@ export function PlayerProfilePanel({
                         <div className="flex items-start gap-3">
                           <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-stone-800 bg-stone-950">
                             {sheet.portraitUrl ? (
-                              <img
+                              <img loading="lazy" decoding="async" 
                                 src={sheet.portraitUrl}
                                 alt={`Retrato de ${sheet.name || "personaje"}`}
-                                loading="lazy"
-                                decoding="async"
                                 width={64}
                                 height={64}
                                 className="h-full w-full object-cover"

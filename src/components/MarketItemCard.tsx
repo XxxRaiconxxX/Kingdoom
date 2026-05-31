@@ -142,11 +142,9 @@ export function MarketItemCard({
       {!hideImage ? (
         <div className="relative aspect-[5/4] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950 md:aspect-[4/5]">
           {!imageFailed ? (
-            <img
+            <img loading="lazy" decoding="async" 
               src={item.imageUrl}
               alt={item.name}
-              loading="lazy"
-              decoding="async"
               width={500}
               height={400}
               referrerPolicy="no-referrer"

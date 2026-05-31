@@ -281,11 +281,9 @@ function WorldSubSection() {
           type="button"
           className="mt-5 w-full overflow-hidden rounded-[1.6rem] border border-stone-800 bg-stone-950/40 text-left shadow-inner shadow-black/20"
         >
-          <img
+          <img loading="lazy" decoding="async" 
             src={mapInfo.src}
             alt={mapInfo.alt}
-            loading="lazy"
-            decoding="async"
             className="h-auto w-full object-cover"
           />
           <div className="flex items-center justify-end gap-4 border-t border-stone-800 px-4 py-3">
@@ -386,11 +384,9 @@ function WorldSubSection() {
               </div>
 
               <div className="max-h-[78vh] overflow-auto bg-black/20">
-                <img
+                <img loading="lazy" decoding="async" 
                   src={mapInfo.src}
                   alt={mapInfo.alt}
-                  loading="lazy"
-                  decoding="async"
                   className="block h-auto w-full select-none object-contain"
                   draggable={false}
                 />

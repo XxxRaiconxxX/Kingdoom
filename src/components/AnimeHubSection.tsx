@@ -255,11 +255,10 @@ export function AnimeHubSection() {
                       : "border-stone-800 bg-black/25 hover:border-stone-700"
                   }`}
                 >
-                  <img
+                  <img loading="lazy" decoding="async" 
                     src={item.coverImage}
                     alt={item.title}
                     className="h-32 w-full rounded-xl object-cover"
-                    loading="lazy"
                   />
                   <div className="min-w-0 py-1">
                     <h3 className="line-clamp-2 text-base font-black text-stone-100">
@@ -298,7 +297,7 @@ export function AnimeHubSection() {
             {selectedSeries ? (
               <>
                 <div className="relative min-h-[18rem] overflow-hidden">
-                  <img
+                  <img loading="lazy" decoding="async"  
                     src={selectedSeries.bannerImage || selectedSeries.coverImage}
                     alt={selectedSeries.title}
                     className="absolute inset-0 h-full w-full object-cover"

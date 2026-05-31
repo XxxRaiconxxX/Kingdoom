@@ -575,7 +575,7 @@ function ScratchArtwork({
   const content = (
     <div className="mx-auto w-full max-w-[320px] rounded-[1.6rem] border border-stone-800 bg-stone-950/70 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.25)] md:max-w-[360px] md:p-4">
       <div className="relative overflow-hidden rounded-[1.2rem] border border-stone-800/80 bg-stone-950">
-        <img
+        <img loading="lazy" decoding="async" 
           src={artwork}
           alt={
             mode === "pristine"
@@ -584,8 +584,6 @@ function ScratchArtwork({
                 ? "Ticket premiado de rasca y gana"
                 : "Ticket perdedor de rasca y gana"
           }
-          loading="lazy"
-          decoding="async"
           className="block h-auto w-full object-contain"
           style={{ imageRendering: "pixelated" }}
         />

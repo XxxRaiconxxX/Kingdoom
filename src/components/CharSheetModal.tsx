@@ -158,11 +158,9 @@ export const CharSheetModal: React.FC<CharSheetModalProps> = ({ isOpen, onClose,
                     </h3>
                     <div className="overflow-hidden rounded-xl border border-stone-800/50 bg-stone-900/40">
                       {character.portraitUrl ? (
-                        <img
+                        <img loading="lazy" decoding="async" 
                           src={character.portraitUrl}
                           alt={`Retrato de ${character.name || 'personaje'}`}
-                          loading="lazy"
-                          decoding="async"
                           className="h-72 w-full object-cover"
                         />
                       ) : (

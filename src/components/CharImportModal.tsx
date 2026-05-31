@@ -343,11 +343,9 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({
 
                       {portraitPreviewUrl ? (
                         <div className="mt-3 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950/80">
-                          <img
+                          <img loading="lazy" decoding="async" 
                             src={portraitPreviewUrl}
                             alt={`Retrato de ${parsedData.name || "personaje"}`}
-                            loading="lazy"
-                            decoding="async"
                             className="h-48 w-full object-cover"
                           />
                         </div>

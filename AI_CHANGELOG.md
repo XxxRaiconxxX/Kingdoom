@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 31/05/2026] - [Autor: ui_ux_designer (Subagente) / Antigravity]
+*   **Archivos Modificados:** Más de 20 componentes React en `Kingdoom-sync/src` (ej. `AnimeHubSection.tsx`, `MarketItemCard.tsx`, etc.)
+*   **Resumen:** Optimización masiva de carga de imágenes en el frontend web.
+*   **Cambios Clave:**
+    *   **[Web] Performance:** Se inyectaron los atributos `loading="lazy"` y `decoding="async"` en todas las etiquetas `<img />` del proyecto para evitar cuellos de botella en la renderización y mejorar el tiempo de carga en listas pesadas como el mercado, el inventario y el anime hub.
+
 ### [Fecha: 30/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/tracker.js`
 *   **Resumen:** Fix del error de guardado del tracker provocado por restricciones de Supabase.

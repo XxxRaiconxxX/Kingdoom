@@ -1170,7 +1170,7 @@ export function AdminBestiaryManager() {
 
           {imageUrl ? (
             <div className="overflow-hidden rounded-[1.4rem] border border-stone-800 bg-stone-950/45">
-              <img src={imageUrl} alt={name || "Preview de bestia"} loading="lazy" decoding="async" className="h-48 w-full object-cover" />
+              <img loading="lazy" decoding="async"  src={imageUrl} alt={name || "Preview de bestia"} className="h-48 w-full object-cover" />
             </div>
           ) : null}
 
@@ -1231,7 +1231,7 @@ export function AdminBestiaryManager() {
               >
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-stone-800 bg-stone-900">
                   {entry.imageUrl ? (
-                    <img src={entry.imageUrl} alt={entry.name} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async"  src={entry.imageUrl} alt={entry.name} className="h-full w-full object-cover" />
                   ) : null}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -1478,7 +1478,7 @@ export function AdminFloraManager() {
 
           {imageUrl ? (
             <div className="overflow-hidden rounded-[1.4rem] border border-stone-800 bg-stone-950/45">
-              <img src={imageUrl} alt={name || "Preview de flora"} loading="lazy" decoding="async" className="h-48 w-full object-cover" />
+              <img loading="lazy" decoding="async"  src={imageUrl} alt={name || "Preview de flora"} className="h-48 w-full object-cover" />
             </div>
           ) : null}
 
@@ -1539,7 +1539,7 @@ export function AdminFloraManager() {
               >
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-stone-800 bg-stone-900">
                   {entry.imageUrl ? (
-                    <img src={entry.imageUrl} alt={entry.name} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                    <img loading="lazy" decoding="async"  src={entry.imageUrl} alt={entry.name} className="h-full w-full object-cover" />
                   ) : null}
                 </div>
                 <div className="min-w-0 flex-1">

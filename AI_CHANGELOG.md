@@ -30,6 +30,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 30/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/tracker.js`
+*   **Resumen:** Fix del error de guardado del tracker provocado por restricciones de Supabase.
+*   **Cambios Clave:**
+    *   **[Bot] Base de Datos:** Se corrigió una violación de la restricción `knowledge_documents_type_check`. El `type` del tracker se cambió de `tracker` a `other`, y se añadió el campo obligatorio `title`.
+
+### [Fecha: 30/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `.gemini/antigravity/mcp_config.json` (Local IDE Config)
 *   **Resumen:** Configuración e integración del servidor MCP de Vercel.
 *   **Cambios Clave:**

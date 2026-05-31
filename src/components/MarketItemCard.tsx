@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Coins, PackageCheck, ShieldAlert } from "lucide-react";
 import type { MarketItem, Rarity, StockStatus } from "../types";
+import { getOptimizedImageUrl } from "../utils/imageUtils";
 
 const rarityStyles: Record<
   Rarity,
@@ -143,7 +144,7 @@ export function MarketItemCard({
         <div className="relative aspect-[5/4] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950 md:aspect-[4/5]">
           {!imageFailed ? (
             <img loading="lazy" decoding="async" 
-              src={item.imageUrl}
+              src={getOptimizedImageUrl(item.imageUrl, 400)}
               alt={item.name}
               width={500}
               height={400}

@@ -16,41 +16,38 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionHeader } from "./SectionHeader";
 import type { BestiaryEntry, FloraEntry, GrimoireCategory, MagicStyle, AbilityLevel } from "../types";
+import { getOptimizedImageUrl } from "../utils/imageUtils";
 import { fetchGrimoireContent } from "../utils/grimoireContent";
+import useSWR from "swr";
 
 type GrimoireMode = "magic" | "bestiary" | "flora";
 
 export function GrimoireSection() {
-  const [grimoireData, setGrimoireData] = useState<GrimoireCategory[]>([]);
-  const [bestiaryData, setBestiaryData] = useState<BestiaryEntry[]>([]);
-  const [floraData, setFloraData] = useState<FloraEntry[]>([]);
+  const { data, isLoading } = useSWR(
+    "grimoire-content",
+    fetchGrimoireContent,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 1000 * 60 * 5, // Cache for 5 minutes
+    }
+  );
+
+  const grimoireData = data?.categories || [];
+  const bestiaryData = data?.bestiary || [];
+  const floraData = data?.flora || [];
+
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [mode, setMode] = useState<GrimoireMode>("magic");
 
   const isSearching = searchQuery.trim().length > 0;
 
+  // Initialize selected category when data is first loaded
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadGrimoireData() {
-      const result = await fetchGrimoireContent();
-      if (cancelled) {
-        return;
-      }
-
-      setGrimoireData(result.categories);
-      setBestiaryData(result.bestiary);
-      setFloraData(result.flora);
-      setSelectedCategoryId((current) => current || result.categories[0]?.id || "");
+    if (grimoireData.length > 0 && !selectedCategoryId) {
+      setSelectedCategoryId(grimoireData[0].id);
     }
-
-    void loadGrimoireData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }, [grimoireData, selectedCategoryId]);
 
   const displayStyles = useMemo(() => {
     if (grimoireData.length === 0) {
@@ -352,7 +349,7 @@ function FloraView({
               <div className="relative h-52 border-b border-stone-800 bg-stone-950">
                 {entry.imageUrl ? (
                   <img loading="lazy" decoding="async" 
-                    src={entry.imageUrl}
+                    src={getOptimizedImageUrl(entry.imageUrl, 400)}
                     alt={entry.name}
                     className="h-full w-full object-cover"
                   />
@@ -497,7 +494,7 @@ function BestiaryView({
               <div className="relative h-52 border-b border-stone-800 bg-stone-950">
                 {entry.imageUrl ? (
                   <img loading="lazy" decoding="async" 
-                    src={entry.imageUrl}
+                    src={getOptimizedImageUrl(entry.imageUrl, 400)}
                     alt={entry.name}
                     className="h-full w-full object-cover"
                   />

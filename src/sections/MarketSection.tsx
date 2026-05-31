@@ -24,6 +24,7 @@ import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
 import { getMarketRotationState } from "../features/market/market.rotation";
 import { fetchMarketItems } from "../utils/market";
 import { isNativeApp } from "../utils/platform";
+import useSWR from "swr";
 import type { LucideIcon } from "lucide-react";
 import type { MarketCategory, MarketCategoryId, MarketItem, Rarity } from "../types";
 
@@ -250,7 +251,16 @@ export function MarketSection() {
   const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
   const [rarityFilter, setRarityFilter] = useState<Rarity | "all">("all");
   const [priceSort, setPriceSort] = useState<PriceSort>("featured");
-  const [marketItems, setMarketItems] = useState<MarketItem[]>(MARKET_ITEMS);
+  const { data: marketItemsResult } = useSWR(
+    "market-items",
+    fetchMarketItems,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 1000 * 60 * 5, // Cache for 5 minutes
+    }
+  );
+  
+  const marketItems = marketItemsResult?.items || MARKET_ITEMS;
   const [marketRotationNow, setMarketRotationNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -268,26 +278,6 @@ export function MarketSection() {
       setTavernMode(storedMode);
     }
   }, [nativeApp]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadMarketItems() {
-      const result = await fetchMarketItems();
-
-      if (cancelled) {
-        return;
-      }
-
-      setMarketItems(result.items);
-    }
-
-    void loadMarketItems();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => {

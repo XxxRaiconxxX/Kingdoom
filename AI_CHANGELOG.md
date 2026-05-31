@@ -228,6 +228,20 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **[Semi-manual] NPCs y magias:** La IA deja `npcs` vacio a proposito para que staff complete manualmente la ficha canonica y las magias del grimorio sin perder control editorial.
 *   **Notas/Advertencias:** `npm run build` paso bien. `npx tsc --noEmit` sigue fallando por errores previos y ajenos en `src/components/RankingCard.tsx` y `src/components/WeeklyRankingPodium.tsx`.
 
+### [Fecha: 30/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Reducción del tiempo de gracia del comando `!purga` a petición del administrador.
+*   **Cambios Clave:**
+    *   **[Bot] Reglas de Purga:** Se modificó la duración permitida de un jugador sin ficha de 5 días a 3 días. Los textos de advertencia del menú de comandos también fueron actualizados a 3 días.
+
+### [Fecha: 30/05/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/tracker.js`, `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Solución al reseteo del comando `!purga` provocado por reinicios del servidor en Hugging Face.
+*   **Cambios Clave:**
+    *   **[Bot] Persistencia en Supabase:** Se reescribió `tracker.js` para que ya no guarde `pending_tracker.json` en el sistema de archivos local, ya que Hugging Face Spaces es efímero y borraba el progreso.
+    *   **[Bot] Documento Oculto:** El estado del tracker ahora se serializa y se guarda directamente en la tabla `knowledge_documents` bajo el ID `bot-pending-tracker` con visibilidad falsa, aprovechando la base de datos sin requerir migraciones SQL nuevas.
+    *   **[Bot] Funciones Asíncronas:** Se modificó `admin.js` para usar `await` en las llamadas del tracker, permitiendo consultas remotas.
+
 ### [Fecha: 27/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Endurecimiento del arranque de WhatsApp Web con reintentos y mejor diagnostico de timeouts de red.

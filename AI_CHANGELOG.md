@@ -30,6 +30,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 01/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Correccion de identidad del soberano en el prompt del Oraculo.
+*   **Cambios Clave:**
+    *   **[Bot - Oraculo] Soberano actual:** El prompt deja de tratar a `E.XE` como nombre principal del rey y pasa a reconocer a `Nothing` como el soberano real.
+    *   **[Bot - Compatibilidad narrativa]:** `E.XE` queda interpretado solo como alias antiguo o forma vieja de referirse al mismo soberano, evitando respuestas desalineadas con el usuario real.
+*   **Notas/Advertencias:** Validado con `node --check src/handlers/games.js` en `kingdoom-bot`. Ajuste de identidad narrativa; no cambia economia ni logica de juego.
+
+### [Fecha: 01/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Blindaje del arranque de WhatsApp en Hugging Face contra `auth timeout` y rechazos no controlados.
 *   **Cambios Clave:**

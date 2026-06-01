@@ -29,6 +29,18 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 01/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `docs/agents/KingdoomArchitect.md`, `docs/agents/KingdoomFrontend.md`, `docs/agents/KingdoomBackend.md`, `docs/agents/KingdoomMinigames.md`, `docs/agents/KingdoomLoreKeeper.md`, `docs/agents/KingdoomDevOps.md`, `docs/agents/KingdoomDesigner.md`
+*   **Resumen:** Creación de directrices exhaustivas de agentes (Personas) para el Reino.
+*   **Cambios Clave:**
+    *   **[Docs - Agentes]:** Se crearon 7 nuevos perfiles de contexto en `docs/agents/` cubriendo todas las áreas posibles del proyecto (`Kingdoom-sync` y `Kingdoom-bot`): Architect, Frontend, Backend, Minigames, LoreKeeper, DevOps, y Designer.
+
+### [Fecha: 01/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `docs/agents/KingdoomAuditor.md`, `docs/agents/KingdoomDebugger.md`, `docs/agents/KingdoomReviewer.md`, `docs/agents/KingdoomBotMaster.md`
+*   **Resumen:** Creación de directrices de agentes especializados (Personas) para el Reino.
+*   **Cambios Clave:**
+    *   **[Docs - Agentes]:** Se crearon 4 perfiles de contexto estandarizados dentro de `docs/agents/` que detallan las reglas, responsabilidades y prioridades para que cualquier agente de la arquitectura (Jarvis, Antigravity 2, etc.) asuma roles dedicados: Auditor de Economía/Seguridad, Depurador UI/Estado, Revisor de Calidad/Reglas y BotMaster de WhatsApp.
+
 ### [Fecha: 31/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `GrimoireSection.tsx`, `MarketSection.tsx`, `imageUtils.ts` (Nuevo), `package.json`
 *   **Resumen:** Implementación de Optimización Extrema (SWR Caché y Transformación de Imágenes).
@@ -47,7 +59,6 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Resumen:** Fix del error de guardado del tracker provocado por restricciones de Supabase.
 *   **Cambios Clave:**
     *   **[Bot] Base de Datos:** Se corrigió una violación de la restricción `knowledge_documents_type_check`. El `type` del tracker se cambió de `tracker` a `other`, y se añadió el campo obligatorio `title`.
-
 ### [Fecha: 30/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `.gemini/antigravity/mcp_config.json` (Local IDE Config)
 *   **Resumen:** Configuración e integración del servidor MCP de Vercel.

@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 01/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Blindaje del arranque de WhatsApp en Hugging Face contra `auth timeout` y rechazos no controlados.
+*   **Cambios Clave:**
+    *   **[Bot - Estabilidad] Timeout configurable:** El cliente de WhatsApp ahora usa `WHATSAPP_AUTH_TIMEOUT_MS` (default `300000`) en lugar de un timeout fijo de `120000`, dando mas margen a sesiones lentas en contenedor.
+    *   **[Bot - Resiliencia] Rechazos globales:** Se agregaron manejadores de `process.on('unhandledRejection')` y `process.on('uncaughtException')` para registrar `auth timeout` y otros errores asincronos sin tumbar el proceso por un rechazo no capturado.
+    *   **[Bot - Scheduler] Guardia de doble inicio:** `startScheduler(client)` ahora solo corre una vez por ciclo de conexion y se libera al desconectarse, evitando duplicados si hay reconexion.
+*   **Notas/Advertencias:** Validado con `node --check src/index.js` en `kingdoom-bot`. El bot deberia sobrevivir a un timeout de autenticacion, pero si la sesion de WhatsApp expira o la red del contenedor sigue inestable, aun hara falta reautenticar QR o revisar conectividad a `web.whatsapp.com`.
+
+### [Fecha: 01/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Ajuste de reglas del minijuego `!dados` en WhatsApp.
 *   **Cambios Clave:**

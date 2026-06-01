@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 01/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `AI_CHANGELOG.md`
+*   **Resumen:** Confirmacion operativa del setup de la forja automatica de mercado por WhatsApp para relevo con Antigravity 2.
+*   **Cambios Clave:**
+    *   **[Deploy - Vercel]:** Ya quedaron configuradas las variables `WHATSAPP_ASSISTANT_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `WHATSAPP_ASSISTANT_STAFF_NUMBERS` en el backend de `Kingdoom-sync`.
+    *   **[Deploy - Hugging Face Bot]:** Ya quedaron configuradas `WHATSAPP_ASSISTANT_SECRET`, `STAFF_NUMBERS` y `KINGDOOM_ASSISTANT_API_URL` en `kingdoom-bot`.
+    *   **[Supabase - SQL]:** El archivo `supabase_assistant_admin_actions.sql` ya fue ejecutado en SQL Editor, por lo que la tabla de auditoria/borradores del asistente administrativo deberia existir en el proyecto real.
+*   **Notas/Advertencias:** A partir de este punto el siguiente paso operativo es probar `!forjaritem ...`, luego iterar ajustes (`sube el precio`, `hazlo epico`, etc.) y confirmar/cancelar para validar el flujo completo end-to-end.
+
+### [Fecha: 01/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/_assistantSecurity.ts`, `api/admin/_marketAssistant.ts`, `api/admin/_supabaseAdmin.ts`, `api/admin/_visualReference.ts`, `api/admin/assistant/market/draft.ts`, `api/admin/assistant/market/revise.ts`, `api/admin/assistant/market/confirm.ts`, `supabase_assistant_admin_actions.sql`, `kingdoom-bot/src/adminStore.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/handlers/marketForge.js`, `kingdoom-bot/src/marketForgeApi.js`, `kingdoom-bot/src/marketForgeStore.js`, `AI_CHANGELOG.md`
 *   **Resumen:** MVP de forja automática de ítems de mercado por WhatsApp con borrador IA, ajustes conversacionales, confirmación explícita y auditoría en Supabase.
 *   **Cambios Clave:**
@@ -3064,3 +3073,5 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   Integracion robusta de pull-to-refresh en todos los tabs (ej. anime.tsx) mediante ScreenShell.
     *   Garantia de estados consistentes (carga, error, vacio) en todos los modulos.
 *   **Notas/Advertencias:** Validacion de tipos ejecutada correctamente (npx tsc --noEmit exitoso). Flujos base listos.
+
+

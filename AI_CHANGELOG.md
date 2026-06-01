@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 01/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Correccion del parser de `!registrar` para evitar altas corruptas cuando el admin no cita realmente el mensaje del jugador.
+*   **Cambios Clave:**
+    *   **[Bot - Registro] Validacion de modo manual:** `!registrar` ahora exige que el primer argumento del modo manual parezca un telefono real (minimo 8 digitos) antes de tratarlo como celular.
+    *   **[Bot - UX defensiva]:** Si el staff escribe `!registrar <nombre> [oro]` sin responder/citar el mensaje del jugador, el bot cancela el alta y devuelve una guia clara en vez de registrar basura.
+    *   **[Diagnostico] Caso Johandarfox1:** Se verifico que el intento mostrado no creo `Johandarfox1` en `public.players`; el bot genero por error una fila con `username = "2500"` y `phone = "1,573219843017"` porque tomo el nombre como celular al entrar por la rama manual.
+*   **Notas/Advertencias:** La web funciona correctamente: consulta `public.players` por `username` con `ilike`. El caso requiere limpieza manual de la fila rota en Supabase antes de volver a registrar al jugador correctamente.
+
 ### [Fecha: 01/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `docs/agents/KingdoomArchitect.md`, `docs/agents/KingdoomFrontend.md`, `docs/agents/KingdoomBackend.md`, `docs/agents/KingdoomMinigames.md`, `docs/agents/KingdoomLoreKeeper.md`, `docs/agents/KingdoomDevOps.md`, `docs/agents/KingdoomDesigner.md`
 *   **Resumen:** Creación de directrices exhaustivas de agentes (Personas) para el Reino.

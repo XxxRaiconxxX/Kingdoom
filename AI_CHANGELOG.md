@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 01/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Ajuste de reglas del minijuego `!dados` en WhatsApp.
+*   **Cambios Clave:**
+    *   **[Bot - Dados] Victoria mas accesible:** La tirada ahora gana con suma `>= 7` en vez de `>= 8`.
+    *   **[Bot - Dados] Mas intentos entre semana:** El limite diario base sube de `3` a `4` usos; el fin de semana se mantiene en `5`.
+    *   **[Bot - Dados] Tope por ronda:** Se agrega una apuesta maxima de `100.000` oro por ronda y un maximo ampliado de `500.000` los fines de semana.
+*   **Notas/Advertencias:** Validado con `node --check src/handlers/games.js` en `kingdoom-bot`. Cambio de economia puntual solicitado por el usuario; no modifica otros minijuegos ni RPCs.
+
+### [Fecha: 01/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Correccion del parser de `!registrar` para evitar altas corruptas cuando el admin no cita realmente el mensaje del jugador.
 *   **Cambios Clave:**

@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 02/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/src/handlers/player.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Integración del minijuego !21 (Blackjack) por WhatsApp y protección contra interferencias.
+*   **Cambios Clave:**
+    *   **[Bot - Blackjack]:** Se registró el comando `!21` en `index.js`, redirigiendo al handler de Blackjack para iniciar partidas.
+    *   **[Bot - Intercepción de Respuestas]:** Se implementó un interceptor estricto al inicio de la recepción de mensajes. Si un mensaje cita a uno de los mensajes de partidas de Blackjack activas, solo se procesa el comando (`pedir` o `plantarse`) si proviene exactamente del jugador que inició la partida (`sender === session.playerPhone`). Cualquier otro mensaje es ignorado completamente para evitar interferencias en grupos.
+    *   **[Bot - Menú de Ayuda]:** Se añadió la descripción del comando `!21 <monto>` al compendio de comandos del aventurero (`!ayuda`).
+*   **Notas/Advertencias:** La validación de sintaxis de los archivos modificados ha sido completada con éxito.
+
 ### [Fecha: 02/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/assistant/market/_confirm.ts`, `AI_CHANGELOG.md`
 *   **Resumen:** Reparacion del crash aislado al confirmar items forjados por WhatsApp.
@@ -3106,5 +3115,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   Integracion robusta de pull-to-refresh en todos los tabs (ej. anime.tsx) mediante ScreenShell.
     *   Garantia de estados consistentes (carga, error, vacio) en todos los modulos.
 *   **Notas/Advertencias:** Validacion de tipos ejecutada correctamente (npx tsc --noEmit exitoso). Flujos base listos.
+
+---
+### [Fecha: 02/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/handlers/player.js` (en kingdoom-bot), `src/index.js` (en kingdoom-bot), `src/supabase.js` (en kingdoom-bot), `src/handlers/blackjack.js` (Nuevo en kingdoom-bot), `AI_CHANGELOG.md` (en Kingdoom-sync)
+*   **Resumen de Tareas:** Implementación del minijuego de Blackjack (`!21`) para el bot de WhatsApp con control de sesión estricto mediante respuestas.
+*   **Cambios Clave:**
+    *   Creación de `src/handlers/blackjack.js` con la lógica de Blackjack (apuestas, límites diarios de 3 usos entre semana y 5 los fines de semana, crupier que planta en 17).
+    *   La sesión del juego está anclada a la respuesta directa al mensaje del bot para evitar interferencias en grupos.
+    *   Integración con Supabase para descontar la apuesta antes de jugar y registrar/verificar el uso diario.
+    *   Modificación de `src/index.js` para interceptar respuestas a mensajes activos y ejecutar el comando `!21`.
+*   **Notas/Advertencias:** Se validaron las sintaxis con `node --check` antes de proceder al commit y push.
 
 

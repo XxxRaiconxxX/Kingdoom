@@ -6,10 +6,60 @@ import {
 import { createSupabaseAdminClient } from "../../_supabaseAdmin.js";
 import { requireAssistantSecret, verifyAssistantActor } from "../../_assistantSecurity.js";
 import type { AssistantMarketDraft } from "../../_marketAssistant.js";
-import {
-  slugifyMarketItem,
-  buildMarketItemPayload,
-} from "../../../../src/features/market/market.adapter";
+
+function slugifyMarketItem(name: string, category: AssistantMarketDraft["category"]) {
+  const prefixMap: Record<AssistantMarketDraft["category"], string> = {
+    potions: "potion",
+    armors: "armor",
+    swords: "sword",
+    others: "other",
+  };
+
+  const prefix = prefixMap[category] ?? "item";
+  const slug = String(name || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+
+  return `${prefix}-${slug}`;
+}
+
+function buildMarketItemPayload(input: {
+  id: string;
+  name: string;
+  description: string;
+  ability: string;
+  price: number;
+  rarity: AssistantMarketDraft["rarity"];
+  imageUrl: string;
+  imageFit: AssistantMarketDraft["imageFit"];
+  imagePosition: string;
+  category: AssistantMarketDraft["category"];
+  stockStatus: AssistantMarketDraft["stockStatus"];
+  stockLimit: number;
+  stockSold: number;
+  featured: boolean;
+}) {
+  return {
+    id: input.id,
+    name: input.name.trim(),
+    description: input.description.trim(),
+    ability: input.ability.trim() || null,
+    price: input.price,
+    rarity: input.rarity,
+    image_url: input.imageUrl.trim(),
+    image_fit: input.imageFit || null,
+    image_position: input.imagePosition.trim() || null,
+    category: input.category,
+    stock_status: input.stockStatus,
+    stock_limit: Math.max(0, Math.floor(input.stockLimit || 0)),
+    stock_sold: Math.max(0, Math.floor(input.stockSold || 0)),
+    featured: input.featured,
+  };
+}
 
 type ConfirmRequestBody = {
   draftId?: string;

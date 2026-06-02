@@ -79,9 +79,11 @@ export async function verifyAssistantActor(input: {
     throw error;
   }
 
-  const adminAllowlist = parsePhoneAllowlist(
-    process.env.WHATSAPP_ASSISTANT_ADMIN_NUMBERS || process.env.ADMIN_NUMBER
-  );
+  const adminAllowlist = new Set([
+    ...parsePhoneAllowlist(process.env.WHATSAPP_ASSISTANT_ADMIN_NUMBERS),
+    ...parsePhoneAllowlist(process.env.ADMIN_NUMBER),
+    ...parsePhoneAllowlist(process.env.OWNER_NUMBER),
+  ]);
   const staffAllowlist = parsePhoneAllowlist(process.env.WHATSAPP_ASSISTANT_STAFF_NUMBERS);
 
   const { data: players, error } = await input.supabase
@@ -105,15 +107,7 @@ export async function verifyAssistantActor(input: {
   const isAdmin = dbAdmin || adminAllowlist.has(phone);
   const isStaff = isAdmin || staffAllowlist.has(phone);
 
-  if (input.requestedByRole === "admin" && !isAdmin) {
-    const error = new Error(
-      "El actor no figura como admin en la lista segura ni en la base del reino."
-    );
-    (error as Error & { statusCode?: number }).statusCode = 403;
-    throw error;
-  }
-
-  if (input.requestedByRole === "staff" && !isStaff) {
+  if (!isStaff) {
     const error = new Error(
       "El actor no figura en la whitelist de staff/admin del asistente."
     );
@@ -121,9 +115,11 @@ export async function verifyAssistantActor(input: {
     throw error;
   }
 
+  const effectiveRole: AssistantActorRole = isAdmin ? "admin" : "staff";
+
   return {
     phone,
-    role: input.requestedByRole,
+    role: effectiveRole,
     matchedPlayer:
       exactPhonePlayers.find((player) => player.is_admin === true) ??
       exactPhonePlayers[0] ??

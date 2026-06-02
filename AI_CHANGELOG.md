@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 02/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `api/admin/_assistantSecurity.ts`, `kingdoom-bot/src/handlers/marketForge.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Correccion del primer bloqueo de la forja automatica por WhatsApp y mejora del diagnostico visible en el bot.
+*   **Cambios Clave:**
+    *   **[Backend - Permisos]:** `verifyAssistantActor()` ya no rompe el flujo si el bot marca al actor como `admin` pero el backend solo lo reconoce por la whitelist de staff. Ahora valida acceso contra el conjunto efectivo `admin + staff`, promueve a `admin` solo cuando corresponde y tambien contempla `OWNER_NUMBER` dentro de la allowlist administrativa.
+    *   **[Bot - Errores Utiles]:** `marketForge.js` ahora captura fallos de `draft`, `revise` y `confirm` y devuelve el mensaje real del backend (`No pude forjar el item: ...`) en lugar de dejar que suba al catch global con el texto generico `El reino esta en llamas...`.
+    *   **[Diagnostico del caso]:** El primer test con `!forjaritem Lanza asincronica https://es.pinterest.com/...` apunta a una discrepancia de rol (`admin` en bot vs `staff` configurado en backend), no a un problema intrinseco con Pinterest. El proximo intento deberia revelar el error exacto si aparece otro bloqueo.
+*   **Notas/Advertencias:** Validado con `node --check` en `kingdoom-bot/src/handlers/marketForge.js` y compilacion dirigida de los endpoints/seguridad del asistente en `Kingdoom-sync`. El `npx tsc --noEmit` global y `npm run build` del repo siguen teniendo la falla preexistente de resolucion `swr` en la web principal, ajena a este fix.
+
 ### [Fecha: 01/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** package.json, src/utils/serverAiProviders.ts
 *   **Resumen:** Fix de tipado TypeScript para desbloquear el despliegue de Vercel.

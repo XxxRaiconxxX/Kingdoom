@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 02/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `api/admin/assistant/market/index.ts`, `kingdoom-bot/src/marketForgeApi.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Aislamiento del crash de la ruta de forja automatica en Vercel y mejora del diagnostico HTTP visible desde WhatsApp.
+*   **Cambios Clave:**
+    *   **[Backend - Routing Perezoso]:** `api/admin/assistant/market/index.ts` ahora importa `_draft`, `_revise` y `_confirm` de forma dinamica segun `action`, en lugar de cargar los tres arboles al iniciar la funcion. Esto evita que un submodulo no necesario tumbe incluso un `GET` o un `draft`.
+    *   **[Bot - Error HTTP Util]:** `marketForgeApi.js` ya no asume JSON a ciegas. Si el backend responde HTML/texto o un `500` vacio, el bot informa el `status` HTTP y un recorte del cuerpo, ayudando a distinguir entre fallo de despliegue, runtime o validacion.
+    *   **[Diagnostico del caso]:** El endpoint publico `https://kingdoom.vercel.app/api/admin/assistant/market` estaba devolviendo `500` incluso para `GET`, cuando deberia responder `405`. Eso indica un crash de carga/importacion en la funcion serverless, no un rechazo del prompt o de Pinterest.
+*   **Notas/Advertencias:** Validado con `node --check` en `kingdoom-bot/src/marketForgeApi.js` y compilacion dirigida del endpoint `api/admin/assistant/market/index.ts`. El `npx tsc --noEmit` global y `npm run build` del repo siguen afectados por la falla preexistente de `swr` en la web principal.
+
+### [Fecha: 02/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/_assistantSecurity.ts`, `kingdoom-bot/src/handlers/marketForge.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Correccion del primer bloqueo de la forja automatica por WhatsApp y mejora del diagnostico visible en el bot.
 *   **Cambios Clave:**

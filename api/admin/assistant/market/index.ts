@@ -4,10 +4,6 @@ import {
   type ApiResponse,
 } from "../../_serverAiProviders.js";
 
-import draftHandler from "./_draft.js";
-import reviseHandler from "./_revise.js";
-import confirmHandler from "./_confirm.js";
-
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   setCorsHeaders(req, res);
 
@@ -23,10 +19,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   const action = body?.action;
 
   if (action === "draft") {
+    const { default: draftHandler } = await import("./_draft.js");
     return draftHandler(req, res);
   } else if (action === "revise") {
+    const { default: reviseHandler } = await import("./_revise.js");
     return reviseHandler(req, res);
   } else if (action === "confirm") {
+    const { default: confirmHandler } = await import("./_confirm.js");
     return confirmHandler(req, res);
   } else {
     return res.status(400).json({ message: "Accion no valida. Debes especificar action: draft, revise o confirm." });

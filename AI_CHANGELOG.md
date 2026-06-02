@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 01/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** package.json, src/utils/serverAiProviders.ts
+*   **Resumen:** Fix de tipado TypeScript para desbloquear el despliegue de Vercel.
+*   **Cambios Clave:**
+    *   **[Deploy - Vercel]:** Se solucionaron los errores de types de Node en serverAiProviders.ts que bloqueaban la generacion de las Serverless Functions de la forja de mercado en Vercel.
+
 ### [Fecha: 01/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `AI_CHANGELOG.md`
 *   **Resumen:** Confirmacion operativa del setup de la forja automatica de mercado por WhatsApp para relevo con Antigravity 2.

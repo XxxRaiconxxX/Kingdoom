@@ -58,7 +58,7 @@ export function getAllowedOrigin(requestOrigin?: string | string[]) {
     : requestOrigin;
   const configuredOrigins = process.env.MISSION_AI_ALLOWED_ORIGINS
     ?.split(",")
-    .map((value) => value.trim())
+    .map((value: string) => value.trim())
     .filter(Boolean);
   const origins = configuredOrigins?.length
     ? configuredOrigins
@@ -87,7 +87,7 @@ export function readGeminiConfig(): GeminiConfig {
     apiKeys: [
       ...(process.env.GEMINI_API_KEYS ?? "")
         .split(/[\n,]/g)
-        .map((value) => value.trim())
+        .map((value: string) => value.trim())
         .filter(Boolean),
       ...(process.env.GEMINI_API_KEY?.trim()
         ? [process.env.GEMINI_API_KEY.trim()]
@@ -102,7 +102,7 @@ export function readGroqConfig(): GroqConfig {
     apiKeys: [
       ...(process.env.GROQ_API_KEYS ?? "")
         .split(/[\n,]/g)
-        .map((value) => value.trim())
+        .map((value: string) => value.trim())
         .filter(Boolean),
       ...(process.env.GROQ_API_KEY?.trim()
         ? [process.env.GROQ_API_KEY.trim()]

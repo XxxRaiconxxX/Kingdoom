@@ -1,4 +1,4 @@
-﻿# AI Collaboration Log & Project Context
+# AI Collaboration Log & Project Context
 
 Este archivo sirve como puente de comunicacion y registro de actividad entre los asistentes de IA (**Antigravity** y **Jarvis**) y el desarrollador (**e_grado**).
 Su proposito es mantener un historial claro de los cambios en el proyecto **Kingdoom-sync** para evitar conflictos y asegurar que todos estemos en la misma pagina.
@@ -28,6 +28,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 02/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/blackjack.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md` (en Kingdoom-sync)
+*   **Resumen:** Implementación de la modalidad multijugador PvP para el Blackjack (`!21`) por WhatsApp con control de turnos, timeout de 5 minutos y división proporcional del pozo de apuestas.
+*   **Cambios Clave:**
+    *   **[Bot - Blackjack PvP]:** Se expandió `blackjack.js` para dar soporte a partidas multijugador PvP (2+ jugadores) cuando se etiqueta a otros usuarios.
+    *   **[Bot - Primera Ronda con 1 Carta]:** Se modificó la distribución de cartas iniciales para entregar exactamente 1 carta por jugador en la primera ronda del modo multijugador PvP.
+    *   **[Bot - Interceptor Multijugador]:** Se actualizó `index.js` para autorizar a cualquiera de los participantes del grupo a interactuar con el tablero enviando sus comandos de juego (`pedir` o `plantarse`).
+    *   **[Bot - Autoplantado por Timeout]:** Se programó un temporizador de 5 minutos que fuerza la acción de "plantarse" para los participantes inactivos de la ronda.
+    *   **[Bot - Garantía de Ganancias y Empates]:** En caso de empate, el pozo se distribuye equitativamente. Se implementaron multiplicadores garantizados mínimos del sistema (`2.5x` para 21 natural, `2x` para victoria regular) por encima de la porción correspondiente del pozo si esta es menor.
+*   **Notas/Advertencias:** Validado localmente con un script de prueba de cálculo de puntuaciones y verificación sintáctica de Node.js.
+
 ### [Fecha: 02/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** kingdoom-bot/src/handlers/blackjack.js, AI_CHANGELOG.md
 *   **Resumen:** Revision tecnica del azar en !21 y ajuste del limite diario base del Blackjack en WhatsApp.

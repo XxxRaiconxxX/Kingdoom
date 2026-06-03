@@ -29,6 +29,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 ### [Fecha: 03/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/treasure.js`, `kingdoom-bot/src/scheduler.js`, `kingdoom-bot/src/supabase.js`, `supabase_bot_treasure_events.sql`, `AI_CHANGELOG.md`
+*   **Resumen:** Migracion de `Tesoro Errante del Reino` desde estado en memoria a persistencia real en Supabase.
+*   **Cambios Clave:**
+    *   **[Bot - Persistencia de Tesoro]:** `treasure.js` ya no depende del estado local como fuente de verdad. Ahora crea eventos persistidos, reclama recompensas por RPC y rehidrata tesoros abiertos al reiniciar el bot.
+    *   **[Bot - Scheduler/Rehidratacion]:** `scheduler.js` invoca una rehidratacion de eventos `open` desde Supabase antes de reprogramar los tesoros del dia, para no perder cofres en curso tras reinicios.
+    *   **[Supabase - SQL Versionado]:** Se agrego `supabase_bot_treasure_events.sql` con las tablas `bot_treasure_events`, `bot_treasure_claims` y la RPC `claim_bot_treasure_reward`, que asegura un solo claim por jugador y actualiza el oro dentro de la misma transaccion.
+    *   **[Bot - Seguridad Economica]:** La concurrencia de multiples replies se mueve a la capa SQL via `FOR UPDATE` sobre el evento y `UNIQUE(event_id, player_id)`, reduciendo el riesgo de doble cobro o cierre inconsistente.
+*   **Notas/Advertencias:** Hay que ejecutar `supabase_bot_treasure_events.sql` en Supabase antes de que el bot pueda usar la version persistente del Tesoro Errante.
+
+### [Fecha: 03/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/treasure.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/scheduler.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Cierre del MVP de `Tesoro Errante del Reino` para WhatsApp con disparo automatico, reply directo obligatorio y reparto controlado de oro en el grupo principal.
 *   **Cambios Clave:**

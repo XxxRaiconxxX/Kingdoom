@@ -29,6 +29,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 ### [Fecha: 03/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/blackjack.js`
+*   **Resumen:** Implementación del flujo de "aceptar" y "negar" para el modo multijugador PvP del Blackjack (!21) en WhatsApp.
+*   **Cambios Clave:**
+    *   **[Bot - Blackjack PvP Accept/Deny]:** Se agregó el estado "pending" a las sesiones de multijugador para esperar la respuesta de los invitados ("aceptar" o "negar").
+    *   **[Bot - Timeout Pendiente]:** Si expira el tiempo mientras la sesión está pendiente, automáticamente se declina por los inactivos y comienza la partida con los que sí aceptaron.
+
+### [Fecha: 03/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `docs/blackjack-simulation.md` (en Kingdoom-sync), `AI_CHANGELOG.md`
 *   **Resumen:** Creación del documento de simulación detallado para el minijuego de Blackjack (!21) en WhatsApp, cubriendo los flujos Solo y PvP.
 *   **Cambios Clave:**

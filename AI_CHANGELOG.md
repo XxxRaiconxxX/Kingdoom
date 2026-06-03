@@ -28,6 +28,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 03/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/treasure.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/scheduler.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Cierre del MVP de `Tesoro Errante del Reino` para WhatsApp con disparo automatico, reply directo obligatorio y reparto controlado de oro en el grupo principal.
+*   **Cambios Clave:**
+    *   **[Bot - Tesoro Errante]:** Se implemento `treasure.js` como handler dedicado para eventos automaticos del grupo `595971938097-1618930274@g.us`, con mensaje ancla del bot y palabra clave `reclamar`.
+    *   **[Bot - Scheduler Diario]:** `scheduler.js` ahora programa 1 o 2 tesoros aleatorios al dia dentro de la ventana 10:00-22:00 (America/Asuncion), rearmando la agenda al iniciar el bot y en el reset de medianoche.
+    *   **[Bot - Ganadores y Premios]:** Cada evento define aleatoriamente entre 1 y 3 ganadores. Cada ganador recibe su propio premio aleatorio entre 10.000 y 20.000 de oro, con cierre al llenarse los cupos o al expirar los 5 minutos.
+    *   **[Bot - Seguridad Conversacional]:** `index.js` intercepta replies al mensaje del tesoro y descarta mensajes sueltos; solo replies directos al tablero del bot pueden reclamar la recompensa.
+*   **Notas/Advertencias:** El estado del Tesoro Errante vive en memoria para este MVP; si el bot reinicia durante un evento abierto, ese tesoro se pierde y no se recupera automaticamente.
+
 ### [Fecha: 03/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/blackjack.js`
 *   **Resumen:** Implementación del flujo de "aceptar" y "negar" para el modo multijugador PvP del Blackjack (!21) en WhatsApp.

@@ -28,6 +28,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 03/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `docs/blackjack-simulation.md` (en Kingdoom-sync), `AI_CHANGELOG.md`
+*   **Resumen:** Creación del documento de simulación detallado para el minijuego de Blackjack (!21) en WhatsApp, cubriendo los flujos Solo y PvP.
+*   **Cambios Clave:**
+    *   **[Docs - Blackjack Simulation]:** Creación de `blackjack-simulation.md` que detalla el paso a paso, límites diarios de uso, límites de apuesta según fin de semana, mecánica de juego y el cálculo exacto del pozo y las garantías de pago del modo multijugador PvP en WhatsApp.
+
 ### [Fecha: 02/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/blackjack.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md` (en Kingdoom-sync)
 *   **Resumen:** Implementación de la modalidad multijugador PvP para el Blackjack (`!21`) por WhatsApp con control de turnos, timeout de 5 minutos y división proporcional del pozo de apuestas.

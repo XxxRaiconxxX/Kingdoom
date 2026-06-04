@@ -29,6 +29,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 ### [Fecha: 04/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Normalizacion final de textos con encoding roto visibles para usuarios en `kingdoom-bot`.
+*   **Cambios Clave:**
+    *   **[Bot - Registro] Mensajes de ayuda saneados:** Se reescribio el bloque de error de `!registrar` en `admin.js` usando texto ASCII limpio para evitar que los mensajes de ayuda vuelvan a degradarse por codificaciones mixtas.
+    *   **[Bot - Auditoria de encoding] Barrido completo:** Se ejecuto una busqueda amplia sobre `kingdoom-bot` y no quedaron coincidencias activas con los patrones de mojibake que estaban afectando mensajes visibles.
+*   **Notas/Advertencias:** Se opto por ASCII simple en ese bloque concreto para maximizar compatibilidad entre hosts y evitar nuevas corrupciones de caracteres. No se detectaron mas cadenas rotas factibles dentro del repo activo.
+
+### [Fecha: 04/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/.gitignore`, `kingdoom-bot/src/activeProfileStore.js`, `kingdoom-bot/src/marketForgeStore.js`, `kingdoom-bot/check_supabase_market.js`, `kingdoom-bot/src/data/pending_tracker.json`, `supabase_bot_treasure_events.sql`, `AI_CHANGELOG.md`
 *   **Resumen:** Pasada de limpieza de `kingdoom-bot` para quitar residuos, corregir higiene de tooling y sacar datos mutables del arbol `src/`.
 *   **Cambios Clave:**

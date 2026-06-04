@@ -29,6 +29,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 ### [Fecha: 04/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/handlers/player.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Se agregaron los minijuegos rapidos `!cofre` y `!trampa <monto>` al bot de WhatsApp con tracking diario y economia segura basada en `increment_gold`.
+*   **Cambios Clave:**
+    *   **[Bot - Cofre] Nuevo comando casual:** `!cofre` ahora permite abrir cofres 4 veces al dia, con tabla de premios entre vacio, 2k, 5k, 10k, 20k, 35k y 50k sin posibilidad de perdida.
+    *   **[Bot - Trampa] Nuevo riesgo corto:** `!trampa <monto>` se resolvio con tabla probabilistica (perder todo, recuperar, +25%, +50%, +75% o x2) y limites de apuesta de 100k entre semana / 500k en fin de semana.
+    *   **[Bot - Tracking Diario] Reuso de bot_daily_claims:** `supabase.js` ahora expone contadores para `cofre_usage` y `trampa_usage` reutilizando el mismo patron diario ya usado por `!dados` y `!21`.
+    *   **[Bot - Descubribilidad] Router y ayuda actualizados:** `index.js` ya enruta ambos comandos y `!ayuda` los muestra dentro del listado principal del reino.
+*   **Notas/Advertencias:** Se uso un delta neto unico en `!trampa` para reducir el riesgo de inconsistencias entre debito y pago. Queda el riesgo habitual de cualquier flujo en dos pasos si falla el incremento de uso despues de actualizar oro, pero no se introdujo un nuevo camino de doble credito.
+
+### [Fecha: 04/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Normalizacion final de textos con encoding roto visibles para usuarios en `kingdoom-bot`.
 *   **Cambios Clave:**

@@ -28,6 +28,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 03/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/treasure.js`, `Kingdoom-sync/AI_CHANGELOG.md`, `Kingdoom-sync/ai-memory/kingdoom-memory.jsonl`
+*   **Resumen:** Incrementada la frecuencia del evento 'Tesoro Errante del Reino' en WhatsApp.
+*   **Cambios Clave:**
+    *   **[Bot - Tesoro Errante]:** Se modificó la frecuencia de generación de tesoros diarios de 1-2 veces a 2-4 veces en `treasure.js` cambiando `const numEvents = Math.floor(Math.random() * 2) + 1;` por `const numEvents = Math.floor(Math.random() * 3) + 2;`.
+
 ### [Fecha: 03/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/treasure.js`, `kingdoom-bot/src/scheduler.js`, `kingdoom-bot/src/supabase.js`, `supabase_bot_treasure_events.sql`, `AI_CHANGELOG.md`
 *   **Resumen:** Migracion de `Tesoro Errante del Reino` desde estado en memoria a persistencia real en Supabase.

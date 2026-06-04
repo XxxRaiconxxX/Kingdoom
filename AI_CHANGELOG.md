@@ -29,6 +29,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 ### [Fecha: 04/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `AI_CHANGELOG.md`
+*   **Resumen:** Se rebalanceo `!cofre` a una tabla intermedia menos explosiva para bajar la frecuencia de premios altos sin quitarle identidad al comando.
+*   **Cambios Clave:**
+    *   **[Bot - Cofre] Probabilidades ajustadas:** La tabla paso a `22%` vacio, `27%` para `2k`, `22%` para `5k`, `15%` para `10k`, `8%` para `20k`, `4%` para `35k` y `2%` para `50k`.
+    *   **[Bot - Economia] Alta gama reducida:** Los premios de `20k+` ya no suman `20%` por tirada; bajan a `14%`, lo que reduce la sensacion de lluvia de cofres grandes en las primeras 4 aperturas.
+*   **Notas/Advertencias:** Validado con `node --check` sobre `games.js`. No se tocaron `!trampa`, tracking diario ni router del bot.
+
+### [Fecha: 04/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/handlers/player.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Se agregaron los minijuegos rapidos `!cofre` y `!trampa <monto>` al bot de WhatsApp con tracking diario y economia segura basada en `increment_gold`.
 *   **Cambios Clave:**

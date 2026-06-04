@@ -34,7 +34,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $treasure$
 declare
   v_event public.bot_treasure_events%rowtype;
   v_claim_count integer;
@@ -142,7 +142,7 @@ exception
   when unique_violation then
     return jsonb_build_object('status', 'duplicate');
 end;
-$$;
+$treasure$;
 
 grant execute on function public.claim_bot_treasure_reward(text, uuid, text)
   to service_role;

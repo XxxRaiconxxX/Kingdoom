@@ -28,11 +28,22 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 04/06/2026] - [Autor: Jarvis]
+*   **Archivos Modificados:** `kingdoom-bot/.gitignore`, `kingdoom-bot/src/activeProfileStore.js`, `kingdoom-bot/src/marketForgeStore.js`, `kingdoom-bot/check_supabase_market.js`, `kingdoom-bot/src/data/pending_tracker.json`, `supabase_bot_treasure_events.sql`, `AI_CHANGELOG.md`
+*   **Resumen:** Pasada de limpieza de `kingdoom-bot` para quitar residuos, corregir higiene de tooling y sacar datos mutables del arbol `src/`.
+*   **Cambios Clave:**
+    *   **[Bot - Tooling] `.gitignore` corregido:** Se normalizaron los patrones a sintaxis POSIX para que herramientas como `rg` dejen de fallar por barras invertidas malformadas.
+    *   **[Bot - Runtime State] Stores fuera de `src/`:** `activeProfileStore.js` y `marketForgeStore.js` ahora escriben en `.wwebjs_auth/state/` y migran automaticamente cualquier JSON legacy si existe.
+    *   **[Bot - Residuos eliminados]:** Se elimino `check_supabase_market.js`, que contenia un helper manual con credenciales embebidas, y se removio `src/data/pending_tracker.json`, ya obsoleto desde que `!purga` persiste su tracker en Supabase.
+    *   **[Bot - UX] Tesoro Errante verificado:** Se reviso el handler actual del evento para confirmar que la version persistida en Supabase ya venia sin los mensajes rotos detectados en auditorias anteriores.
+    *   **[Supabase - SQL Versionado] Delimitador explicito:** `supabase_bot_treasure_events.sql` queda con delimitador `$treasure$` para evitar errores del SQL Editor al pegar o ejecutar la funcion por bloques.
+*   **Notas/Advertencias:** Validado con `node --check` sobre los archivos JS tocados y una pasada de `rg` para confirmar que `.gitignore` ya no rompe el tooling. Siguen existiendo otros textos con encoding viejo en partes antiguas del bot, pero esta limpieza no abrio una campana masiva de normalizacion de strings.
+
 ### [Fecha: 03/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/treasure.js`, `Kingdoom-sync/AI_CHANGELOG.md`, `Kingdoom-sync/ai-memory/kingdoom-memory.jsonl`
 *   **Resumen:** Incrementada la frecuencia del evento 'Tesoro Errante del Reino' en WhatsApp.
 *   **Cambios Clave:**
-    *   **[Bot - Tesoro Errante]:** Se modificó la frecuencia de generación de tesoros diarios de 1-2 veces a 2-4 veces en `treasure.js` cambiando `const numEvents = Math.floor(Math.random() * 2) + 1;` por `const numEvents = Math.floor(Math.random() * 3) + 2;`.
+    *   **[Bot - Tesoro Errante]:** Se modifico la frecuencia de generacion de tesoros diarios de 1-2 veces a 2-4 veces en `treasure.js`, cambiando `const numEvents = Math.floor(Math.random() * 2) + 1;` por `const numEvents = Math.floor(Math.random() * 3) + 2;`.
 
 ### [Fecha: 03/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/treasure.js`, `kingdoom-bot/src/scheduler.js`, `kingdoom-bot/src/supabase.js`, `supabase_bot_treasure_events.sql`, `AI_CHANGELOG.md`

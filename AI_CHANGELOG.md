@@ -30,6 +30,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 08/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `Kingdoom-sync/AI_CHANGELOG.md`
+*   **Resumen:** Optimización drástica de latencia en la lectura de mensajes del bot y adecuación para despliegue en Hugging Face Spaces.
+*   **Cambios Clave:**
+    *   **[Bot - Optimización de Latencia]:** Se refactorizó el manejador de mensajes en `index.js`. La función `checkIsAdmin`, que ejecutaba una consulta a Supabase por cada mensaje recibido, ahora es *perezosa (lazy)*. Solo consulta la BD si el mensaje contiene un comando de la lista blanca administrativa o si el usuario está interactuando en el `Market Forge`. Esto reduce a cero la latencia de base de datos para tráfico estándar de rol.
+    *   **[Bot - Despliegue en Hugging Face]:** Se confirmó el correcto funcionamiento del servidor HTTP existente en `index.js`, el cual expone el puerto definido por el entorno (`PORT` 7860), asegurando que el *healthcheck* de Hugging Face Spaces apruebe el arranque y mantenga el contenedor vivo (estado *Running*).
+
+### [Fecha: 08/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `Kingdoom-sync/AI_CHANGELOG.md`
 *   **Resumen:** Refactorización y simplificación del tracker del Game Master (GM): eliminación de la integración con Google NotebookLM.
 *   **Cambios Clave:**

@@ -28,6 +28,23 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+
+### [Fecha: 08/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/scripts/notebooklm_provisioner.py`, `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `Kingdoom-sync/AI_CHANGELOG.md`
+*   **Resumen:** Integración completa y automatización del Game Master con Google NotebookLM mediante sincronización dinámica de grimorio y enciclopedia y aprovisionamiento bajo demanda.
+*   **Cambios Clave:**
+    *   **[Bot - Supabase Integración]:** Creación de dos funciones helper robustas en `supabase.js`: `getFormattedGrimoire()` y `getFormattedEncyclopedia()`.
+        - `getFormattedGrimoire()`: Consulta la tabla `grimoire_magic_styles` de Supabase, extrayendo la información estructurada de hechizos, sus niveles, cooldowns, límites de uso, efectos y contramedidas de seguridad ("anti-mano negra"). Genera un documento en formato Markdown riguroso y jerárquico.
+        - `getFormattedEncyclopedia()`: Consulta la tabla `knowledge_documents` de Supabase para compilar las entradas históricas, facciones, reglamentos del sistema de combate, geopolítica y lore general del Reino, formateando todo en un Markdown legible.
+    *   **[Bot - Provisionador Python]:** Actualización de `notebooklm_provisioner.py` para aceptar el payload ampliado con `grimorio_content` y `enciclopedia_content`. Este script normaliza la cookie `NOTEBOOKLM_COOKIES` en formato Playwright, crea el Notebook con el título `[GM] <Nombre de Misión>` y añade secuencialmente cuatro fuentes de texto independientes usando el cliente automatizado de NotebookLM:
+        1. "Reglas Generales del Game Master (GM)" (System Prompt base).
+        2. "Lore e Indicaciones de la Misión - <Nombre>" (Instrucciones específicas).
+        3. "Grimorio Oficial de Magias y Hechizos" (Markdown dinámico desde Supabase).
+        4. "Enciclopedia y Codex del Reino" (Markdown dinámico de lore desde Supabase).
+    *   **[Bot - Aprovisionamiento Justo a Tiempo (On-Demand)]:** Modificación en `gmTracker.js` dentro de `startMissionTracker()`. Al iniciar el rastreo de una misión con el comando `!misionstart`, si la misión no posee un `notebook_id` configurado y existen las cookies de autenticación, el bot genera el NotebookLM en caliente y actualiza el campo `notebook_id` en `realm_missions` mediante Supabase. Esto permite crear misiones nuevas en la interfaz administrativa web de la aplicación y disponer de sus libretas al instante sin reiniciar el servicio.
+    *   **[Bot - Sincronización al Inicio]:** Modificación en `index.js` para ejecutar `autoProvisionMissions()` durante el evento `ready`. Busca todas las misiones en base de datos que carezcan de un `notebook_id` asociado y las aprovisiona en lotes de manera asíncrona, optimizando la consulta a base de datos al recuperar el grimorio y la enciclopedia una sola vez al inicio del bucle.
+*   **Notas/Advertencias:** El flujo depende de que la variable de entorno `NOTEBOOKLM_COOKIES` esté configurada correctamente. La generación en caliente requiere un tiempo extra de aprovisionamiento (~2-5s) durante la primera ejecución de `!misionstart`, tiempo durante el cual el bot procesa el flujo en segundo plano y asocia el ID de forma transparente para el usuario final.
+
 ### [Fecha: 04/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `AI_CHANGELOG.md`
 *   **Resumen:** Se rebalanceo `!cofre` a una tabla intermedia menos explosiva para bajar la frecuencia de premios altos sin quitarle identidad al comando.

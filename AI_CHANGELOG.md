@@ -30,6 +30,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 08/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `Kingdoom-sync/AI_CHANGELOG.md`
+*   **Resumen:** Refactorización y simplificación del tracker del Game Master (GM): eliminación de la integración con Google NotebookLM.
+*   **Cambios Clave:**
+    *   **[Bot - Limpieza de NotebookLM]:** Se eliminaron los subprocesos de Python y las funciones de aprovisionamiento de libretas en caliente. La integración previa resultaba inestable al depender fuertemente de cookies mediante Playwright.
+    *   **[Bot - Motor Gemini Puro]:** La narrativa del GM ahora vuelve a procesarse exclusivamente con el motor base de Gemini (`askKingdoomAI`), asegurando respuestas más estables y sin retrasos de aprovisionamiento.
+    *   **[Bot - Optimización de Arranque]:** Se eliminó el loop de `autoProvisionMissions()` en el evento `ready` de WhatsApp (`index.js`), acelerando el encendido del bot y limpiando logs innecesarios.
+
+### [Fecha: 08/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/scripts/notebooklm_provisioner.py`, `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `Kingdoom-sync/AI_CHANGELOG.md`
 *   **Resumen:** Integración completa y automatización del Game Master con Google NotebookLM mediante sincronización dinámica de grimorio y enciclopedia y aprovisionamiento bajo demanda.
 *   **Cambios Clave:**
@@ -3242,3 +3250,14 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 
 
+
+---
+### [Fecha: 08/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/gmTracker.js`, `src/index.js`, `src/handlers/admin.js` (en kingdoom-bot).
+*   **Resumen de Tareas:** Migracion completada de la logica del Game Master (GM) desde NotebookLM hacia un motor de ejecucion interna en el bot usando la API nativa de Gemini.
+*   **Cambios Clave:**
+    *   Centralizacion de la configuracion, el estado y el prompt maestro del GM en `src/gmTracker.js`.
+    *   Refactorizacion del comando `!misionstart` para delegar el inicio a `startMissionTracker` integrando base de datos y la carga automatica de contexto sin intervencion manual.
+    *   Eliminacion total de la dependencia de NotebookLM para lograr completa autonomia del sistema.
+    *   Validacion de seguridad y anticheat incorporada en el prompt del GM.
+*   **Notas/Advertencias:** Se verifico que la skill `grill-me` no esta instalada en el entorno. El testeo de `!misionstart` local (npm run dev) queda pausado hasta que el usuario permita acceso al workspace externo (kingdoom-bot) o lo agregue al Kingdoom-sync.

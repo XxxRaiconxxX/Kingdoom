@@ -65,6 +65,51 @@ using (
   )
 );
 
+drop policy if exists "Players can view own orders" on public.market_orders;
+drop policy if exists "Service role inserts orders" on public.market_orders;
+
+-- RLS para market_items
+alter table public.market_items enable row level security;
+
+drop policy if exists "Allow all market access" on public.market_items;
+drop policy if exists "Anyone can read market items" on public.market_items;
+create policy "Anyone can read market items"
+on public.market_items
+for select
+to public
+using (true);
+
+drop policy if exists "Admins can modify market items" on public.market_items;
+create policy "Admins can modify market items"
+on public.market_items
+for all
+to authenticated
+using (
+  exists (
+    select 1 from public.players
+    where players.auth_user_id = auth.uid()
+      and players.is_admin = true
+  )
+)
+with check (
+  exists (
+    select 1 from public.players
+    where players.auth_user_id = auth.uid()
+      and players.is_admin = true
+  )
+);
+
+-- ================================================================
+-- FIX 2026-06-08: Todos los jugadores del bot tienen auth_user_id = NULL.
+-- El RPC ahora acepta jugadores vinculados via player_auth_links y auto-vincula
+-- sesiones anonimas nuevas en su primera compra web.
+-- ================================================================
+drop function if exists public.purchase_market_item(uuid, text, integer, text, text);
+drop function if exists public.purchase_market_item(uuid, text, integer);
+
+-- ============================================================
+-- RPC web (5 args): llamado desde PurchaseModal en la SPA web
+-- ============================================================
 create or replace function public.purchase_market_item(
   p_player_id uuid,
   p_item_id text,
@@ -94,10 +139,11 @@ declare
   v_stock_limit integer;
   v_stock_sold integer;
   v_remaining_stock integer;
+  v_is_linked boolean := false;
 begin
   v_auth_user_id := auth.uid();
 
-  if v_auth_user_id is null then
+  if v_auth_user_id is null and auth.role() <> 'service_role' then
     raise exception 'Debes iniciar sesion antes de comprar.' using errcode = '42501';
   end if;
 
@@ -113,15 +159,51 @@ begin
     raise exception 'Falta el identificador del pedido.' using errcode = '22023';
   end if;
 
+  -- Buscar jugador: acepta vinculacion directa, service_role, o via player_auth_links.
   select *
   into v_player
   from public.players
   where id = p_player_id
-    and auth_user_id = v_auth_user_id
+    and (
+      auth_user_id = v_auth_user_id
+      or auth.role() = 'service_role'
+      or exists (
+        select 1
+        from public.player_auth_links pal
+        where pal.player_id = p_player_id
+          and pal.auth_user_id = v_auth_user_id
+      )
+    )
   for update;
 
+  -- Si no se encontro con las condiciones anteriores, permitir sesion anonima nueva
+  -- (jugadores del bot que aun no vincularon su cuenta en la web).
+  if v_player.id is null and auth.role() = 'authenticated' and v_auth_user_id is not null then
+    select *
+    into v_player
+    from public.players
+    where id = p_player_id
+    for update;
+  end if;
+
   if v_player.id is null then
-    raise exception 'Tu cuenta segura aun no esta vinculada a ese jugador del reino.' using errcode = '42501';
+    raise exception 'Jugador no encontrado o no autorizado.' using errcode = '42501';
+  end if;
+
+  -- Auto-vincular la sesion anonima con el jugador si aun no esta vinculada.
+  -- Solo aplica para jugadores del bot (auth_user_id IS NULL en players).
+  if v_auth_user_id is not null and auth.role() <> 'service_role' then
+    select exists(
+      select 1 from public.player_auth_links pal
+      where pal.player_id = v_player.id
+        and pal.auth_user_id = v_auth_user_id
+    ) into v_is_linked;
+
+    if not v_is_linked and v_player.auth_user_id is null then
+      insert into public.player_auth_links (player_id, auth_user_id)
+      values (v_player.id, v_auth_user_id)
+      on conflict do nothing;
+    end if;
   end if;
 
   select *
@@ -264,6 +346,9 @@ begin
 end;
 $$;
 
+-- ================================================================
+-- RPC bot/mobile (3 args): llamado desde purchaseService.ts mobile
+-- ================================================================
 create or replace function public.purchase_market_item(
   p_player_id uuid,
   p_item_id text,
@@ -293,14 +378,28 @@ declare
   v_stock_sold integer;
   v_remaining_stock integer;
 begin
+  if auth.uid() is null and auth.role() <> 'service_role' then
+    return query select false, 'Debes iniciar sesion antes de comprar.', 0, 0, false, v_order_ref;
+    return;
+  end if;
+
   select *
     into v_player
   from public.players
   where id = p_player_id
+    and (
+      auth_user_id = auth.uid()
+      or auth.role() = 'service_role'
+      or exists (
+        select 1 from public.player_auth_links pal
+        where pal.player_id = p_player_id
+          and pal.auth_user_id = auth.uid()
+      )
+    )
   for update;
 
   if not found then
-    return query select false, 'Jugador no encontrado.', 0, 0, false, v_order_ref;
+    return query select false, 'Jugador no encontrado o no autorizado.', 0, 0, false, v_order_ref;
     return;
   end if;
 

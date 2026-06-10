@@ -31,6 +31,7 @@ export async function purchaseMarketItemSecure(input: {
   installments?: number;
 }): Promise<PurchaseMarketItemResult> {
   const { data, error } = await supabase.rpc("purchase_market_item_v2", {
+    p_player_id: input.playerId,
     p_item_id: input.itemId,
     p_quantity: input.quantity,
     p_whatsapp: input.whatsapp.trim(),

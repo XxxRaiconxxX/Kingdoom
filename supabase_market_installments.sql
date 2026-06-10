@@ -44,7 +44,11 @@ using (
 -- 3. Actualizar la función purchase_market_item
 -- Como vamos a cambiar la firma, es mejor usar DROP FUNCTION IF EXISTS o cambiar el nombre.
 -- Vamos a crear purchase_market_item_v2
+drop function if exists public.purchase_market_item_v2(text, integer, text, text, integer);
+drop function if exists public.purchase_market_item_v2(uuid, text, integer, text, text, integer);
+
 create or replace function public.purchase_market_item_v2(
+  p_player_id uuid,
   p_item_id text,
   p_quantity integer,
   p_whatsapp text,
@@ -77,6 +81,7 @@ declare
   v_interest_rate numeric := 0.0;
   v_is_locked boolean := false;
   v_new_inventory_id uuid;
+  v_is_linked boolean := false;
 begin
   v_auth_user_id := auth.uid();
 
@@ -100,14 +105,51 @@ begin
     raise exception 'Las cuotas solo pueden ser 1, 3 o 6.' using errcode = '22023';
   end if;
 
+  -- Buscar jugador: acepta vinculacion directa, service_role, o via player_auth_links.
   select *
   into v_player
   from public.players
-  where auth_user_id = v_auth_user_id
-  limit 1;
+  where id = p_player_id
+    and (
+      auth_user_id = v_auth_user_id
+      or auth.role() = 'service_role'
+      or exists (
+        select 1
+        from public.player_auth_links pal
+        where pal.player_id = p_player_id
+          and pal.auth_user_id = v_auth_user_id
+      )
+    )
+  for update;
+
+  -- Si no se encontro con las condiciones anteriores, permitir sesion anonima nueva
+  -- (jugadores del bot que aun no vincularon su cuenta en la web).
+  if v_player.id is null and auth.role() = 'authenticated' and v_auth_user_id is not null then
+    select *
+    into v_player
+    from public.players
+    where id = p_player_id
+    for update;
+  end if;
 
   if v_player.id is null then
     raise exception 'Tu cuenta segura aun no esta vinculada a un jugador del reino.' using errcode = '42501';
+  end if;
+
+  -- Auto-vincular la sesion anonima con el jugador si aun no esta vinculada.
+  -- Solo aplica para jugadores del bot (auth_user_id IS NULL en players).
+  if v_auth_user_id is not null and auth.role() <> 'service_role' then
+    select exists(
+      select 1 from public.player_auth_links pal
+      where pal.player_id = v_player.id
+        and pal.auth_user_id = v_auth_user_id
+    ) into v_is_linked;
+
+    if not v_is_linked and v_player.auth_user_id is null then
+      insert into public.player_auth_links (player_id, auth_user_id)
+      values (v_player.id, v_auth_user_id)
+      on conflict do nothing;
+    end if;
   end if;
   
   -- Verificar penalización
@@ -128,7 +170,7 @@ begin
   into v_item
   from public.market_items
   where id = trim(p_item_id)
-  limit 1;
+  for update;
 
   if v_item.id is null then
     raise exception 'El item solicitado no existe.' using errcode = 'P0002';
@@ -192,15 +234,6 @@ begin
   );
 
   if v_item.category <> 'potions' then
-    -- Si es a cuotas, queremos guardarlo como un registro distinto para poder bloquearlo, 
-    -- o si ya existe desbloqueado, no mezclarlo. 
-    -- Para simplificar, insertaremos o actualizaremos pero asumiendo que los bloqueados no se apilan igual?
-    -- Sí se pueden apilar si todo está bloqueado, pero es mejor que los a cuotas se manejen bien.
-    -- Vamos a insertar siempre o si ya tiene uno de este tipo actualizar, pero asegurándonos de marcar is_locked.
-    -- NOTA: Si el jugador ya tiene el item desbloqueado y compra otro a cuotas, ¿se bloquea todo el stack? 
-    -- Lo ideal sería registros separados, pero 'player_inventory' usa apilamiento.
-    -- Vamos a dejar que se bloquee el stack completo si hay deuda, es un castigo aceptable por simplicidad.
-    
     select *
     into v_existing_inventory
     from public.player_inventory
@@ -291,5 +324,5 @@ begin
 end;
 $$;
 
-revoke all on function public.purchase_market_item_v2(text, integer, text, text, integer) from public;
-grant execute on function public.purchase_market_item_v2(text, integer, text, text, integer) to authenticated;
+revoke all on function public.purchase_market_item_v2(uuid, text, integer, text, text, integer) from public;
+grant execute on function public.purchase_market_item_v2(uuid, text, integer, text, text, integer) to authenticated;

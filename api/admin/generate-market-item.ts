@@ -150,48 +150,60 @@ function stockLabel(stockStatus: StockStatus) {
 }
 
 function getPrompt(input: NormalizedMarketItemAiRequest) {
-  return `
-Actua como diseÃ±ador senior de items para el mercado de Kingdoom.
+  return \`
+Actua como Maestro de Armas de Aethelgardia y diseñador senior de items para el mercado de Kingdoom.
 
 Debes crear UN item premium de fantasia oscura medieval usando una referencia visual de Pinterest como semilla.
 
-CONTEXTO DEL SISTEMA
+CONTEXTO DEL SISTEMA Y REGLAS DE BALANCE
 - Mundo: fantasia oscura, reino medieval, mercado negro, reliquias, facciones, expediciones y magia peligrosa.
-- El item debe sentirse util, evocador y coherente con el tono del proyecto.
-- El staff lo revisara en un panel admin antes de guardarlo.
-- No escribas explicaciones fuera del JSON.
+- Sistema: d20 + d6, mano blanca (daño fisico sin magia), mano negra (magia o veneno oculto) y tres opciones de defensa activa.
+- El objetivo del diseño es SIEMPRE mantener el conflicto abierto: ninguna habilidad debe cerrar automaticamente un enfrentamiento.
 
 REFERENCIA VISUAL
-- imageUrl: ${input.pinterestReference.imageUrl}
-- title: ${input.pinterestReference.title || "sin titulo util"}
-- description: ${input.pinterestReference.description || "sin descripcion util"}
-- sourceUrl: ${input.pinterestReference.sourceUrl || "sin enlace"}
+- imageUrl: \${input.pinterestReference.imageUrl}
+- title: \${input.pinterestReference.title || "sin titulo util"}
+- description: \${input.pinterestReference.description || "sin descripcion util"}
+- sourceUrl: \${input.pinterestReference.sourceUrl || "sin enlace"}
 
 PISTAS DEL STAFF
-- category preferida: ${input.category} (${categoryLabel(input.category)})
-- rarity preferida: ${input.rarity} (mythic es superior a legendary y debe reservarse para piezas excepcionales)
-- stockStatus preferido: ${input.stockStatus} (${stockLabel(input.stockStatus)})
-- priceTarget: ${input.priceTarget}
-- theme: ${input.theme}
+- category preferida: \${input.category} (\${categoryLabel(input.category)})
+- rarity preferida: \${input.rarity} (mythic es superior a legendary y debe reservarse para piezas excepcionales)
+- stockStatus preferido: \${input.stockStatus} (\${stockLabel(input.stockStatus)})
+- priceTarget: \${input.priceTarget}
+- theme: \${input.theme}
 
-REGLAS
+REGLAS GENERALES DEL ITEM
 - Usa la imagen como inspiracion visual, no copies texto generico de Pinterest.
-- El nombre debe sonar oficial, corto y vendible.
+- El nombre del item debe sonar oficial, corto y vendible.
 - La descripcion debe servir para la tarjeta del mercado: inmersiva, clara y sin relleno.
-- ability es opcional, pero si existe debe sonar util en combate o narrativa, sin romper el balance.
 - Ajusta categoria, rareza y precio con criterio. No inventes categorias fuera del sistema.
-- Evita objetos absurdamente rotos. Deben ser potentes pero razonables para el reino.
 - Si el stockStatus es "sold-out", el item debe sonar muy exclusivo o ya reclamado.
 - Si la referencia parece decorativa, puedes convertirla en reliquia, artefacto, pieza o curiosidad.
-- No uses markdown, comillas triples ni comentarios.
+
+REGLAS DE LA HABILIDAD (campo "ability")
+El campo "ability" en el JSON debe ser una CADENA DE TEXTO (NO un JSON) que siga exactamente esta estructura y formato de texto:
+[Nombre evocador] ([tipo de efecto]):
+Efecto: Describe el efecto mecanico con precision (metros, turnos, porcentaje de daño reducido). Ej: 'ignora armaduras de cuero', 'quema durante 2 turnos'. Prohibido usar lenguaje literario vago como 'daño devastador'.
+CD: Cooldown exacto en turnos. Ejemplo: '2 turnos' o 'Solo una vez por combate.'
+Limite: Una restriccion mecanica que equilibre el poder. Ej: 'No funciona contra objetivos con armadura pesada'.
+Anti-Mano Negra: Explica por que NO puede usarse como golpe oculto. Debe haber una señal perceptible (sonido, luz, calor, etc). Añade el balance de nivel como nota de diseño directa.
+
+REGLAS OBLIGATORIAS PARA LA HABILIDAD:
+1. Nunca escribas habilidades que terminen el combate por si solas (paralisis total, muerte instantanea, etc).
+2. Cada habilidad debe tener al menos una forma de ser contrarrestada o esquivada.
+3. El Efecto debe poder leerse en voz alta en 10 segundos.
+4. No repitas las palabras del nombre del arma dentro del Efecto.
+5. Si el arma es magica, el Anti-Mano Negra debe incluir señal visual o auditiva obligatoria.
+6. Vocabulario: tecnico-medieval. Permitido mezclar terminologia arcana con fisica real. Prohibido novela romantica o epica generica.
 
 FORMATO DE RESPUESTA
-Responde SOLO con un objeto JSON valido con esta estructura exacta:
+Responde SOLO con un objeto JSON valido con esta estructura exacta (sin markdown, sin comillas triples):
 {
   "draft": {
     "name": "string",
     "description": "string",
-    "ability": "string",
+    "ability": "texto con los apartados solicitados",
     "price": 0,
     "rarity": "mythic|legendary|epic|rare|common",
     "category": "potions|armors|swords|others",
@@ -201,7 +213,7 @@ Responde SOLO con un objeto JSON valido con esta estructura exacta:
   },
   "promptSummary": "string"
 }
-`.trim();
+\`.trim();
 }
 
 function normalizePayload(

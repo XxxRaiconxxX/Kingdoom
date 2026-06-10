@@ -7,9 +7,10 @@ set search_path = public
 as $$
   select exists (
     select 1
-    from public.players
-    where auth_user_id = (select auth.uid())
-      and is_admin = true
+    from public.players p
+    left join public.player_auth_links pal on p.id = pal.player_id
+    where (p.auth_user_id = (select auth.uid()) or pal.auth_user_id = (select auth.uid()))
+      and p.is_admin = true
   );
 $$;
 

@@ -3268,3 +3268,8 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Eliminacion total de la dependencia de NotebookLM para lograr completa autonomia del sistema.
     *   Validacion de seguridad y anticheat incorporada en el prompt del GM.
 *   **Notas/Advertencias:** Se verifico que la skill `grill-me` no esta instalada en el entorno. El testeo de `!misionstart` local (npm run dev) queda pausado hasta que el usuario permita acceso al workspace externo (kingdoom-bot) o lo agregue al Kingdoom-sync.
+
+
+## [2026-06-10] - Supabase Cron Installments
+*   **Archivos Modificados:** supabase_cron_installments.sql, supabase_market_installments.sql 
+*   **Resumen:** Implementación de la función RPC process_market_installments para el cobro automático de cuotas con reglas estrictas (1 día de gracia, 5% mora acumulativa diaria, embargo a los 5 días). Bloqueo de compras a crédito limitado a 14 días post-embargo.

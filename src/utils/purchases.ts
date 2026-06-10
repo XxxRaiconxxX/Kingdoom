@@ -28,13 +28,14 @@ export async function purchaseMarketItemSecure(input: {
   quantity: number;
   whatsapp: string;
   orderRef: string;
+  installments?: number;
 }): Promise<PurchaseMarketItemResult> {
-  const { data, error } = await supabase.rpc("purchase_market_item", {
-    p_player_id: input.playerId,
+  const { data, error } = await supabase.rpc("purchase_market_item_v2", {
     p_item_id: input.itemId,
     p_quantity: input.quantity,
     p_whatsapp: input.whatsapp.trim(),
     p_order_ref: input.orderRef,
+    p_installments: input.installments ?? 1,
   });
 
   if (error) {

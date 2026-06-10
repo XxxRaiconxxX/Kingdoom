@@ -253,12 +253,24 @@ async function parseProviderError(response: Response) {
 }
 
 function sanitizeAiText(text: string) {
-  return text
-    .replace(/^```json\s*/i, "")
-    .replace(/^```text\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
+  let cleaned = text.trim();
+  
+  // Try to extract JSON object if the AI included conversational text
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  } else {
+    // Fallback for arrays or malformed responses
+    cleaned = cleaned
+      .replace(/^```json\s*/i, "")
+      .replace(/^```text\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+  }
+  
+  return cleaned;
 }
 
 function extractGeminiText(payload: any) {

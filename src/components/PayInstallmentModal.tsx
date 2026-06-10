@@ -47,7 +47,9 @@ export default function PayInstallmentModal({
   const sheetRef = useRef<HTMLDivElement>(null);
 
   const remaining = plan.totalInstallments - plan.paidInstallments;
-  const canAdvance = remaining > 1;
+  // Solo mostrar "Adelantar cuotas" cuando quedan 3+ cuotas:
+  // con 2 restantes el máximo del stepper es 1 (igual que "Pagar 1 cuota") → inútil
+  const canAdvance = remaining > 2;
 
   const calcAmount = (): number => {
     if (mode === "total") return plan.remainingBalance;

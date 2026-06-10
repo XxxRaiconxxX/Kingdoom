@@ -14,7 +14,9 @@ import {
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { fetchPlayerInventory, fetchPlayerPaymentPlans } from "../utils/inventory";
+import { payMarketInstallment, type PayInstallmentMode } from "../utils/purchases";
 import type { InventoryCategoryId, InventoryEntry, PaymentPlan } from "../types";
+import PayInstallmentModal from "./PayInstallmentModal";
 
 type InventoryFilter = "all" | InventoryCategoryId;
 type ActiveTab = "inventory" | "credits";
@@ -68,6 +70,9 @@ export function PlayerInventorySheet({
 
   // --- Tab state ---
   const [activeTab, setActiveTab] = useState<ActiveTab>("inventory");
+
+  // --- Pay installment modal ---
+  const [payingPlan, setPayingPlan] = useState<PaymentPlan | null>(null);
 
   // ---- Load inventory ----
   useEffect(() => {
@@ -324,7 +329,11 @@ export function PlayerInventorySheet({
 
                   {/* Plan cards */}
                   {plans.map((plan) => (
-                    <PaymentPlanCard key={plan.id} plan={plan} />
+                    <PaymentPlanCard
+                      key={plan.id}
+                      plan={plan}
+                      onPayClick={() => setPayingPlan(plan)}
+                    />
                   ))}
                 </div>
               )}
@@ -332,6 +341,46 @@ export function PlayerInventorySheet({
           )}
         </div>
       </motion.div>
+
+      {/* Pay Installment Modal */}
+      {payingPlan && (
+        <PayInstallmentModal
+          plan={payingPlan}
+          playerGold={player?.gold ?? 0}
+          playerId={playerId ?? ""}
+          onClose={() => setPayingPlan(null)}
+          onPay={async (pid, planId, mode, advCount) => {
+            const res = await payMarketInstallment({
+              playerId: pid,
+              planId,
+              mode: mode as PayInstallmentMode,
+              advanceCount: advCount,
+            });
+            return res;
+          }}
+          onSuccess={async ({ planCompleted, planId, newPlayerGold }) => {
+            setPayingPlan(null);
+            // Refresh plans and inventory
+            if (!playerId) return;
+            const [invResult, plansResult] = await Promise.all([
+              planCompleted ? fetchPlayerInventory(playerId) : Promise.resolve(null),
+              fetchPlayerPaymentPlans(playerId),
+            ]);
+            if (invResult) {
+              if (invResult.status !== "unavailable") {
+                setItems(invResult.items);
+                setInventoryStatus(invResult.items.length === 0 ? "empty" : "ready");
+              }
+            }
+            if (plansResult.status !== "unavailable") {
+              setPlans(plansResult.plans);
+              setPlansStatus(plansResult.plans.length === 0 ? "empty" : "ready");
+            }
+            // Update player gold in local state via re-fetch (gold is in player context)
+            void newPlayerGold; // consumed by modal; context will re-sync on next load
+          }}
+        />
+      )}
     </motion.div>
   );
 }
@@ -528,7 +577,13 @@ function CreditSummaryCard({
   );
 }
 
-function PaymentPlanCard({ plan }: { plan: PaymentPlan }) {
+function PaymentPlanCard({
+  plan,
+  onPayClick,
+}: {
+  plan: PaymentPlan;
+  onPayClick: () => void;
+}) {
   const paidRatio = plan.paidInstallments / plan.totalInstallments;
   const progressPct = Math.round(paidRatio * 100);
   const isDefaulted = plan.status === "defaulted";
@@ -624,6 +679,15 @@ function PaymentPlanCard({ plan }: { plan: PaymentPlan }) {
           ⚠️ Este plan está en mora. Tu crédito está bloqueado por 14 días tras saldar la deuda.
         </p>
       )}
+
+      {/* Pay button */}
+      <button
+        type="button"
+        onClick={onPayClick}
+        className="mt-4 w-full rounded-xl border border-amber-500/30 bg-amber-500/10 py-2.5 text-sm font-bold text-amber-300 transition hover:border-amber-400/60 hover:bg-amber-500/20 hover:text-amber-200 active:scale-95"
+      >
+        💳 Pagar cuota
+      </button>
     </div>
   );
 }

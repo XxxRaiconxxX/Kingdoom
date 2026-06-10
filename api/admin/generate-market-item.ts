@@ -162,8 +162,10 @@ Actua como Maestro de Armas de Aethelgardia y diseñador senior de items para el
 Debes crear UN item premium de fantasia oscura medieval usando una referencia visual de Pinterest como semilla.
 
 CONTEXTO DEL SISTEMA Y REGLAS DE BALANCE
-- Mundo: fantasia oscura, reino medieval, mercado negro, reliquias, facciones, expediciones y magia peligrosa.
-- Sistema: d20 + d6, tiene mano blanca (daño fisico sin magia), mano negra (magia o veneno oculto) y tres opciones de defensa activa.
+- Mundo: rol escrito por chat, tematica anime/fantasia oscura en el continente de Aethelgardia, mercado negro, reliquias y magia.
+- Sistema de Ataque: d20 + stat del usuario (STR para melee, INT para magia, AGI para distancia). Ej: "17 en d20 + 3 de STR = 20 de Ataque al D20".
+- Daño: Se calcula con un d6 para mano blanca (daño fisico sin magia) o mano negra (magia o veneno oculto), con multiplicadores y efectos diversos segun el arma.
+- Sistema de Defensa: 3 opciones activas según stat: STR = Bloquear (mitiga daño o anula), INT = Defender (magia que detiene ataques mágicos o físicos), AGI = Esquivar (evade daño comparando su stat contra el ataque enemigo).
 - El objetivo del diseño es SIEMPRE mantener el conflicto abierto: ninguna habilidad debe cerrar automaticamente un enfrentamiento.
 
 REFERENCIA VISUAL
@@ -191,9 +193,9 @@ REGLAS DE LA HABILIDAD (campo "ability")
 Cuando recibas el nombre y descripcion de un arma, debes generar su habilidad especial con el siguiente esquema JSON para el campo "ability":
 {
   "name": "[Nombre evocador de la habilidad] ([tipo de efecto entre paréntesis]):",
-  "effect": "Describe el efecto mecanico con precision. ¿Que ignora, que atraviesa, que inflige? Ej: 'ignora armaduras de cuero', 'quema durante 2 turnos'. Prohibido usar lenguaje literario vago como 'daño devastador'.",
-  "cooldown": "Cooldown exacto en turnos. Ejemplo: '2 turnos' o 'Solo una vez por combate.'",
-  "limit": "Una restriccion mecanica que equilibre el poder. Ej: 'No funciona contra objetivos con armadura pesada'.",
+  "effect": "Describe el efecto mecanico de forma detallada y precisa. Debes incluir un porcentaje de la stat que afecta (ej: 'añade un 30% extra de tu STR al daño base', 'aumenta el daño del d6 en un 20% de tu INT' o 'reduce el AGI del objetivo al esquivar'). ¿Que ignora, que atraviesa, que inflige? Prohibido usar lenguaje literario vago como 'daño devastador'.",
+  "cooldown": "Frecuencia de uso: puede ser un cooldown exacto en turnos o un porcentaje de activarse. Ejemplo: '2 turnos', '30% de probabilidad de activarse al acertar' o 'Solo una vez por combate.'",
+  "limit": "Una restriccion mecanica que equilibre el poder. Ej: 'No funciona contra habilidades de Bloquear (STR)' o 'Requiere 2 manos'.",
   "antiBlackHand": "Explica por que NO puede usarse como golpe oculto. Debe haber una señal perceptible (sonido, luz, calor, etc). Añade el balance de nivel como nota de diseño directa."
 }
 
@@ -322,6 +324,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {
     const result = await runAiJson<MarketItemAiPayload>({
       prompt: getPrompt(normalizedInput),
+      imageUrl: normalizedInput.pinterestReference.imageUrl,
       temperature: 0.9,
       topP: 0.92,
       config: aiConfig,

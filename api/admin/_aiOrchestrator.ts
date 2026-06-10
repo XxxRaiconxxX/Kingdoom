@@ -43,6 +43,7 @@ export function missingAiProviderMessage() {
 
 export async function runAiText(input: {
   prompt: string;
+  imageUrl?: string;
   temperature: number;
   topP: number;
   config?: AiServerConfig;
@@ -51,6 +52,7 @@ export async function runAiText(input: {
 
   return requestAiTextWithFallback({
     prompt: input.prompt,
+    imageUrl: input.imageUrl,
     gemini: config.gemini,
     groq: config.groq,
     nvidia: config.nvidia,
@@ -62,6 +64,7 @@ export async function runAiText(input: {
 
 export async function runAiJson<T>(input: {
   prompt: string;
+  imageUrl?: string;
   temperature: number;
   topP: number;
   config?: AiServerConfig;
@@ -70,6 +73,7 @@ export async function runAiJson<T>(input: {
 
   return requestAiJsonWithFallback<T>({
     prompt: input.prompt,
+    imageUrl: input.imageUrl,
     gemini: config.gemini,
     groq: config.groq,
     nvidia: config.nvidia,

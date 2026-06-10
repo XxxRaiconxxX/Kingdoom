@@ -30,6 +30,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 10/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `api/admin/generate-market-item.ts`
+*   **Resumen de Tareas:** Mejora del prompt de generación de ítems con IA (Market Forge) para alinear mecánicas y hacer los efectos más descriptivos.
+*   **Cambios Clave:**
+    *   **Contexto del Sistema:** Se actualizó el prompt para incluir las reglas exactas del sistema de Kingdoom: dados (d20 + stat, daño en d6), mecánicas de mano blanca (física) y mano negra (mágica/veneno), y las defensas activas (STR = Bloquear, INT = Defender, AGI = Esquivar).
+    *   **Generación de Habilidad (`ability`):** Se ajustaron las reglas JSON del prompt. Ahora la IA debe obligatoriamente describir el efecto mecánico con porcentajes exactos ligados a stats (ej. 30% del STR) y definir una frecuencia clara de uso (cooldown en turnos o porcentaje de probabilidad de activación).
+*   **Notas/Advertencias:** Validación de build sin errores (`npm run build` exitoso). Las mecánicas deberían estar mucho mejor representadas en el texto autogenerado.
+
+### [Fecha: 10/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/types.ts`, `src/utils/inventory.ts`, `src/components/PlayerInventorySheet.tsx`
 *   **Resumen de Tareas:** Visualización del estado de cuotas e ítems bloqueados en el Inventario del jugador.
 *   **Cambios Clave:**

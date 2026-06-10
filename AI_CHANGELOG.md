@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 10/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/types.ts`, `src/utils/inventory.ts`, `src/components/PlayerInventorySheet.tsx`
+*   **Resumen de Tareas:** Visualización del estado de cuotas e ítems bloqueados en el Inventario del jugador.
+*   **Cambios Clave:**
+    *   **`src/types.ts`**: Se añadió `isLocked?: boolean` a `InventoryEntry` y se creó el nuevo tipo `PaymentPlan` que mapea la tabla `payment_plans` de Supabase.
+    *   **`src/utils/inventory.ts`**: Se añadió `is_locked` al select y al mapeo de `fetchPlayerInventory`. Se creó `fetchPlayerPaymentPlans` que obtiene todos los planes activos/en-mora del jugador.
+    *   **`src/components/PlayerInventorySheet.tsx`**: Reescrito con sistema de pestañas: pestaña "Inventario" (con badge 🔒 "En cuotas" en cada ítem bloqueado) y pestaña "Créditos" que muestra resumen (planes activos, en mora, deuda total) y tarjetas detalladas por plan (cuotas pagadas/total, barra de progreso, saldo restante, próximo pago, días de mora).
+*   **Notas/Advertencias:** `npx tsc --noEmit` → exit 0. Sin errores.
+
+### [Fecha: 10/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/purchases.ts`, `supabase_market_installments.sql`, `ai-memory/kingdoom-memory.jsonl`
 *   **Resumen de Tareas:** Corrección del error "Tu cuenta segura aun no esta vinculada a un jugador del reino." al intentar comprar artículos en el mercado.
 *   **Cambios Clave:**

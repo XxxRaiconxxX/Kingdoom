@@ -126,8 +126,26 @@ export type InventoryEntry = {
   itemImagePosition?: string;
   itemRarity: Rarity;
   quantity: number;
+  isLocked?: boolean;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type PaymentPlan = {
+  id: string;
+  playerId: string;
+  itemId: string;
+  inventoryId: string | null;
+  orderRef: string;
+  totalInstallments: number;
+  paidInstallments: number;
+  installmentAmount: number;
+  remainingBalance: number;
+  nextPaymentDate: string;
+  status: "active" | "completed" | "defaulted";
+  penaltyDays: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type RankingPlayer = {

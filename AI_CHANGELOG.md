@@ -29,6 +29,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 11/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Handoff de la sesión para Antigravity 2. Todo ha sido validado, el bot fue limpiado y optimizado, y la carga inicial de la web fue mejorada.
+*   **Cambios Clave:**
+    *   **[Handoff / Next Steps]:** 
+        1. **Atómica de apuestas:** Priorizar la refactorización de las apuestas del bot (`!dados`, `!trampa`, `!21`) mediante funciones RPC atómicas en Supabase (`place_bet`) para evitar condiciones de carrera y pérdidas de oro inconsistentes.
+        2. **Subastas:** Validar y completar la interfaz de subastas (actualmente están hechas las utilidades y SQL).
+        3. **Monitoreo Bot:** Observar la estabilidad del bot en Hugging Face (sin el flag `--single-process`) para comprobar la mitigación del reinicio.
+*   **Notas/Advertencias:** El repositorio web (`Kingdoom-sync`) compila sin errores (`tsc --noEmit` y `build` exitosos). El bot (`kingdoom-bot`) tiene los cambios de optimización empujados.
+
 ### [Fecha: 11/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `kingdoom-bot/src/ai.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/Dockerfile` (+ borrados: `src/scripts/notebooklm_*.py`, `test_notebooklm.js`)
 *   **Resumen de Tareas:** Hardening del bot tras auditoria: cadena de fallback de Gemini corregida, eliminado `--single-process` de Puppeteer (sospechoso principal del loop de reinicios) y limpieza completa de los restos de NotebookLM.

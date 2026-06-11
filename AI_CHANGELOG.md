@@ -29,6 +29,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 11/06/2026] - [Autor: Claude]
+*   **Archivos Modificados:** `vite.config.ts`, `index.html`, `src/context/PlayerSessionContext.tsx`
+*   **Resumen de Tareas:** Optimizacion de rendimiento web: primer load de JS reducido ~49% (gzip ~294KB -> ~149KB) y eliminacion de re-renders globales del polling de sesion.
+*   **Cambios Clave:**
+    *   **[Bug critico de chunks - preexistente]:** Rollup colocaba modulos eager compartidos DENTRO de chunks lazy: `supabaseClient` caia en `GrimoireSection` (el grimorio completo, UI + 235KB de datos, se descargaba en el primer load), `PlayerSessionContext`/`players.ts` caian en `TavernRoulette`, el `vite/preload-helper` en `MarketSection` y `SectionHeader`/`ExpandableText` en `LibrarySection`. Resultado: ~350KB de JS "lazy" viajaban eager via modulepreload. Fix: nuevo chunk `app-core` que ancla esos modulos compartidos y corta las aristas invertidas. Ahora el preload eager es solo `react + supabase + gsap + app-core + icons + entry`; `framer-motion` (125KB) y todas las secciones quedaron realmente lazy.
+    *   **[manualChunks - regla react corregida]:** `id.includes("react")` se evaluaba antes que `lucide-react` (la regla "icons" estaba muerta) y arrastraba `@gsap/react`, `@vercel/*/react` y `@tanstack/react-virtual` al chunk eager. Ahora el match es estricto (`react|react-dom|scheduler`), `@vercel` tiene chunk propio realmente diferido (como disenaba `main.tsx`), `gsap` chunk propio, y los datos del grimorio (`src/data/grimorio.ts`, 235KB) se separan de la UI en `grimoire-data` para cache independiente.
+    *   **[index.html]:** `preconnect` a Supabase (la app dispara auth + perfil apenas bootea; ahorra DNS+TLS en el primer load, relevante en movil).
+    *   **[PlayerSessionContext - fluidez]:** `refreshPlayer` ahora conserva la MISMA referencia de objeto si el perfil no cambio, con lo que React hace bailout y el polling de 10s ya no re-renderiza todo el arbol de consumidores (evita micro-trabas durante minijuegos/animaciones). Ademas `touchPlayerActivity` (UPDATE a la BD por usuario conectado) se throttlea a 1 vez cada 5 min en vez de cada 10s.
+    *   **[Tooling]:** plugin de diagnostico en `vite.config.ts` activable con `VITE_DEBUG_CHUNKS=1 npm run build` que imprime que modulos componen cada chunk (util para detectar regresiones de chunking).
+*   **Notas/Advertencias:** `tsc --noEmit` 0 errores; `npm run build` OK (revalidado post-merge con el redesign del admin); smoke test con `vite preview` (boot correcto, 0 errores de consola). Si se cambia de proyecto Supabase, actualizar el dominio del `preconnect` en `index.html`. La marca de actividad ahora tiene granularidad de 5 min (antes 10s); si algun reporte de staff necesita mas precision, ajustar `ACTIVITY_TOUCH_INTERVAL_MS` en `PlayerSessionContext.tsx`.
+
 ### [Fecha: 11/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `Kingdoom-sync/src/components/AdminControlSheet.tsx`, `Kingdoom-sync/src/components/admin/AdminControlPrimitives.tsx`, `Kingdoom-sync/src/index.css`
 *   **Resumen:** Rediseño completo y premium del menú de navegación de pestañas del panel de administración y eliminación total del "Generador de Items IA / Pinterest" de la sección Mercado del admin.

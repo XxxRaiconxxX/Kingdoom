@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { ReactNode } from "react";
@@ -18,6 +19,9 @@ import {
 import { supabase } from "../utils/supabaseClient";
 
 const PLAYER_STORAGE_KEY = "kingdoom.active-player";
+// El polling refresca el perfil cada 10s, pero el UPDATE de actividad en la BD
+// solo necesita granularidad de minutos: throttle para reducir escrituras.
+const ACTIVITY_TOUCH_INTERVAL_MS = 5 * 60 * 1000;
 
 type PlayerSessionContextValue = {
   player: PlayerAccount | null;
@@ -56,6 +60,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [inventoryRefreshToken, setInventoryRefreshToken] = useState(0);
+  const lastActivityTouchAtRef = useRef(0);
 
   const clearPlayer = useCallback(() => {
     setPlayer(null);
@@ -93,6 +98,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       }
 
       setPlayer(foundPlayer);
+      lastActivityTouchAtRef.current = Date.now();
       void touchPlayerActivity(foundPlayer.id);
       window.localStorage.setItem(PLAYER_STORAGE_KEY, foundPlayer.username);
       if (foundPlayer.avatar_gif_url) {
@@ -162,14 +168,29 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       return null;
     }
 
-    setPlayer(freshPlayer);
-    void touchPlayerActivity(freshPlayer.id);
+    // Si los datos no cambiaron, conservar la MISMA referencia de objeto:
+    // React hace bailout y evita re-renderizar todo el arbol de consumidores
+    // en cada tick del polling de 10s.
+    const isUnchanged =
+      JSON.stringify(player) === JSON.stringify(freshPlayer);
+    const nextPlayer = isUnchanged ? player : freshPlayer;
+
+    setPlayer(nextPlayer);
+
+    // Throttle: el polling corre cada 10s pero la marca de actividad en la BD
+    // no necesita esa granularidad (es un UPDATE por usuario conectado).
+    const nowMs = Date.now();
+    if (nowMs - lastActivityTouchAtRef.current >= ACTIVITY_TOUCH_INTERVAL_MS) {
+      lastActivityTouchAtRef.current = nowMs;
+      void touchPlayerActivity(freshPlayer.id);
+    }
+
     if (freshPlayer.avatar_gif_url) {
       window.localStorage.setItem("kingdoom.active-player-gif", freshPlayer.avatar_gif_url);
     } else {
       window.localStorage.removeItem("kingdoom.active-player-gif");
     }
-    return freshPlayer;
+    return nextPlayer;
   }, [clearPlayer, player]);
 
   const setPlayerGold = useCallback(

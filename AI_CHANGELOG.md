@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 11/06/2026] - [Autor: Claude]
+*   **Archivos Modificados:** `kingdoom-bot/src/ai.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/Dockerfile` (+ borrados: `src/scripts/notebooklm_*.py`, `test_notebooklm.js`)
+*   **Resumen de Tareas:** Hardening del bot tras auditoria: cadena de fallback de Gemini corregida, eliminado `--single-process` de Puppeteer (sospechoso principal del loop de reinicios) y limpieza completa de los restos de NotebookLM.
+*   **Cambios Clave:**
+    *   **[Bot - IA]:** la cadena de fallback de `askKingdoomAI` incluia `gemini-3.5-flash` (modelo inexistente -> 404 garantizado en cada fallback) y `gemini-1.5-flash` (retirado por Google). Ahora: modelo base -> `gemini-2.5-flash` -> `gemini-2.0-flash`. Menos latencia y mas fiabilidad del GM cuando el modelo primario falla por cuota.
+    *   **[Bot - Estabilidad]:** se quito `--single-process` de los args de Puppeteer. Ese flag es causa conocida de `Protocol error / Target closed / Session closed` con whatsapp-web.js — exactamente los errores que el propio `index.js` detecta para reiniciar el contenedor. Observar si baja la frecuencia de reinicios en HF Spaces.
+    *   **[Bot - Limpieza NotebookLM]:** el Dockerfile instalaba `python3`, `pip` y `notebooklm-py` aunque la integracion se removio el 08/06 (imagen mas pesada sin razon). Eliminados tambien los scripts Python muertos, `test_notebooklm.js`, y las funciones sin callers `getMissionsWithMissingNotebooks`/`updateMissionNotebookId` en `supabase.js` (la columna `notebook_id` sigue en la BD, el bot ya no la usa).
+*   **Notas/Advertencias:** `node --check` OK en los 3 JS editados; sin referencias rotas (grep). Pusheado a GitHub y a Hugging Face (redeploy del Space — el bot se reinicio con la imagen nueva). Pendientes de la auditoria, NO implementados aun: (1) race condition en apuestas `!dados`/`!trampa`/`!21` — la validacion de saldo y el debito no son atomicos, requiere RPC `place_bet` en Supabase; (2) sesiones de blackjack en memoria se pierden ante reinicios con apuesta ya debitada.
+
+### [Fecha: 11/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `src/index.css`
 *   **Resumen de Tareas:** Pulido visual y de experiencia: foco accesible tematico, fin del flash gris en Android, layout sin saltos de scrollbar, titulos balanceados y micro-interaccion en la navegacion.
 *   **Cambios Clave:**

@@ -129,6 +129,11 @@ function mergeMagicRowsWithStatic(rows: MagicStyleRow[]): GrimoireCategory[] {
   const categoryMap = new Map(categories.map((category) => [category.id, category]));
 
   rows.map(mapMagicRow).forEach((style) => {
+    // Eliminar el estilo de todas las categorías para evitar duplicados si cambió de categoría
+    categories.forEach((c) => {
+      c.styles = c.styles.filter((s) => s.id !== style.id);
+    });
+
     let category = categoryMap.get(style.categoryId);
 
     if (!category) {
@@ -147,20 +152,16 @@ function mergeMagicRowsWithStatic(rows: MagicStyleRow[]): GrimoireCategory[] {
       description: style.description,
       levels: style.levels,
     };
-    const existingIndex = category.styles.findIndex((entry) => entry.id === style.id);
-
-    if (existingIndex >= 0) {
-      category.styles[existingIndex] = nextStyle;
-      return;
-    }
 
     category.styles.push(nextStyle);
   });
 
-  return categories.map((category) => ({
-    ...category,
-    styles: category.styles.sort((a, b) => a.title.localeCompare(b.title)),
-  }));
+  return categories
+    .filter((category) => category.styles.length > 0)
+    .map((category) => ({
+      ...category,
+      styles: category.styles.sort((a, b) => a.title.localeCompare(b.title)),
+    }));
 }
 
 function flattenStaticMagicStyles() {

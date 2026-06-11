@@ -20,9 +20,10 @@ export function PurchaseModal({
   onClose: () => void;
 }) {
   const { player, refreshPlayer, notifyInventoryChanged } = usePlayerSession();
-  const [formValues, setFormValues] = useState<PurchaseFormValues>({
+  const [formValues, setFormValues] = useState<PurchaseFormValues & { installments: number }>({
     whatsapp: "",
     quantity: 1,
+    installments: 1,
     gotcha: "",
   });
   const [openedAt] = useState(() => Date.now());
@@ -42,10 +43,11 @@ export function PurchaseModal({
     return () => window.clearInterval(timer);
   }, []);
 
-  const totalPrice = useMemo(
-    () => item.price * Math.max(1, formValues.quantity),
-    [item.price, formValues.quantity]
-  );
+  const baseTotal = item.price * Math.max(1, formValues.quantity);
+  const interestRate = formValues.installments === 3 ? 0.10 : formValues.installments === 6 ? 0.18 : 0;
+  const totalPrice = Math.ceil(baseTotal * (1 + interestRate));
+  const installmentAmount = formValues.installments > 1 ? Math.ceil(totalPrice / formValues.installments) : totalPrice;
+  const paidNow = installmentAmount;
   const remainingDelayMs = Math.max(
     0,
     MIN_PURCHASE_DELAY_MS - (now - openedAt)
@@ -110,10 +112,10 @@ export function PurchaseModal({
       return;
     }
 
-    if (latestPlayer.gold < totalPrice) {
+    if (latestPlayer.gold < paidNow) {
       setSubmitState("error");
       setFeedbackMessage(
-        `No tienes suficiente oro. Necesitas ${totalPrice} de oro y tu perfil solo tiene ${latestPlayer.gold}.`
+        `No tienes suficiente oro. Necesitas ${paidNow} de oro para esta compra y tu perfil solo tiene ${latestPlayer.gold}.`
       );
       return;
     }
@@ -125,6 +127,7 @@ const purchaseResult = await purchaseMarketItemSecure({
   quantity: formValues.quantity,
   whatsapp: formValues.whatsapp,
   orderRef: nextOrderId,
+  installments: formValues.installments,
 });
 
 
@@ -259,7 +262,7 @@ const purchaseResult = await purchaseMarketItemSecure({
                   <PurchaseReadonlyField label="Pedido" value={orderId} />
                   <PurchaseReadonlyField
                     label="Total"
-                    value={`${totalPrice} de oro`}
+                    value={formValues.installments > 1 ? `${totalPrice} (${formValues.installments} cuotas)` : `${totalPrice} de oro`}
                   />
                   {remainingGold !== null ? (
                     <PurchaseReadonlyField
@@ -374,7 +377,74 @@ const purchaseResult = await purchaseMarketItemSecure({
                   />
                 </label>
 
-                <PurchaseReadonlyField label="Total" value={`${totalPrice} de oro`} />
+                <div className="md:col-span-2 space-y-3">
+                  <span className="text-sm font-semibold text-stone-200">
+                    Plan de Pago
+                  </span>
+                  <div className="space-y-5 px-1 py-2">
+                    <div className="relative flex items-center">
+                      {/* Track background */}
+                      <div className="h-2 w-full rounded-full bg-stone-800" />
+                      {/* Active track highlight */}
+                      <div 
+                        className="absolute top-0 h-2 rounded-full bg-gradient-to-r from-amber-600 to-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all duration-300"
+                        style={{ 
+                          width: `${(([1, 3, 6].indexOf(formValues.installments)) / 2) * 100}%` 
+                        }}
+                      />
+                      <input
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="1"
+                        value={[1, 3, 6].indexOf(formValues.installments)}
+                        onChange={(e) => {
+                          const idx = parseInt(e.target.value, 10);
+                          const installmentOptions = [1, 3, 6];
+                          setFormValues(curr => ({ ...curr, installments: installmentOptions[idx] }));
+                        }}
+                        className="absolute inset-x-0 h-4 w-full cursor-pointer appearance-none bg-transparent outline-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-stone-950 [&::-webkit-slider-thumb]:bg-amber-400 [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(245,158,11,0.8)] [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:hover:scale-110"
+                      />
+                    </div>
+                    
+                    <div className="flex justify-between px-1">
+                      {[1, 3, 6].map((cuota) => {
+                        const isSelected = formValues.installments === cuota;
+                        return (
+                          <button
+                            key={cuota}
+                            type="button"
+                            onClick={() => setFormValues(curr => ({ ...curr, installments: cuota }))}
+                            className={`flex flex-col items-center gap-2 transition duration-200 ${
+                              isSelected ? 'text-amber-400 scale-105' : 'text-stone-500 hover:text-stone-300'
+                            }`}
+                          >
+                            <span className="text-xs font-black uppercase tracking-wider">
+                              {cuota === 1 ? 'Al contado' : `${cuota} Cuotas`}
+                            </span>
+                            <div className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                              isSelected ? 'bg-amber-400 scale-125 shadow-[0_0_8px_rgba(245,158,11,0.8)]' : 'bg-stone-700'
+                            }`} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {formValues.installments > 1 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-200/90 leading-relaxed shadow-inner"
+                    >
+                      Este ítem quedará <strong>bloqueado</strong> y no podrá ser transferido hasta cancelar la deuda. <br/>
+                      <span className="text-amber-400 font-semibold">Interés aplicado: {formValues.installments === 3 ? '10%' : '18%'}.</span><br/>
+                      Total con interés: <strong>{totalPrice} de oro</strong>.<br/>
+                      Primera cuota a pagar ahora: <strong>{installmentAmount} de oro</strong>.
+                    </motion.div>
+                  )}
+                </div>
+
+                <PurchaseReadonlyField label="Total (o Primera Cuota)" value={`${paidNow} de oro`} />
                 {remainingStock !== null ? (
                   <PurchaseReadonlyField
                     label="Disponibles"

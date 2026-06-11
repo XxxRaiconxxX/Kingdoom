@@ -33,7 +33,13 @@ type MarketItemAiPayload = {
   draft?: {
     name?: string;
     description?: string;
-    ability?: string;
+    ability?: string | {
+      name?: string;
+      effect?: string;
+      cooldown?: string;
+      limit?: string;
+      antiBlackHand?: string;
+    };
     price?: number;
     rarity?: Rarity;
     category?: MarketCategoryId;
@@ -151,15 +157,16 @@ function stockLabel(stockStatus: StockStatus) {
 
 function getPrompt(input: NormalizedMarketItemAiRequest) {
   return `
-Actua como diseÃ±ador senior de items para el mercado de Kingdoom.
+Actua como Maestro de Armas de Aethelgardia y diseñador senior de items para el mercado de Kingdoom.
 
 Debes crear UN item premium de fantasia oscura medieval usando una referencia visual de Pinterest como semilla.
 
-CONTEXTO DEL SISTEMA
-- Mundo: fantasia oscura, reino medieval, mercado negro, reliquias, facciones, expediciones y magia peligrosa.
-- El item debe sentirse util, evocador y coherente con el tono del proyecto.
-- El staff lo revisara en un panel admin antes de guardarlo.
-- No escribas explicaciones fuera del JSON.
+CONTEXTO DEL SISTEMA Y REGLAS DE BALANCE
+- Mundo: rol escrito por chat, tematica anime/fantasia oscura en el continente de Aethelgardia, mercado negro, reliquias y magia.
+- Sistema de Ataque: d20 + stat del usuario (STR para melee, INT para magia, AGI para distancia). Ej: "17 en d20 + 3 de STR = 20 de Ataque al D20".
+- Daño: Se calcula con un d6 para mano blanca (daño fisico sin magia) o mano negra (magia o veneno oculto), con multiplicadores y efectos diversos segun el arma.
+- Sistema de Defensa: 3 opciones activas según stat: STR = Bloquear (mitiga daño o anula), INT = Defender (magia que detiene ataques mágicos o físicos), AGI = Esquivar (evade daño comparando su stat contra el ataque enemigo).
+- El objetivo del diseño es SIEMPRE mantener el conflicto abierto: ninguna habilidad debe cerrar automaticamente un enfrentamiento.
 
 REFERENCIA VISUAL
 - imageUrl: ${input.pinterestReference.imageUrl}
@@ -174,24 +181,45 @@ PISTAS DEL STAFF
 - priceTarget: ${input.priceTarget}
 - theme: ${input.theme}
 
-REGLAS
+REGLAS GENERALES DEL ITEM
 - Usa la imagen como inspiracion visual, no copies texto generico de Pinterest.
-- El nombre debe sonar oficial, corto y vendible.
+- El nombre del item debe sonar oficial, corto y vendible.
 - La descripcion debe servir para la tarjeta del mercado: inmersiva, clara y sin relleno.
-- ability es opcional, pero si existe debe sonar util en combate o narrativa, sin romper el balance.
 - Ajusta categoria, rareza y precio con criterio. No inventes categorias fuera del sistema.
-- Evita objetos absurdamente rotos. Deben ser potentes pero razonables para el reino.
 - Si el stockStatus es "sold-out", el item debe sonar muy exclusivo o ya reclamado.
 - Si la referencia parece decorativa, puedes convertirla en reliquia, artefacto, pieza o curiosidad.
-- No uses markdown, comillas triples ni comentarios.
+
+REGLAS DE LA HABILIDAD (campo "ability")
+Cuando recibas el nombre y descripcion de un arma, debes generar su habilidad especial con el siguiente esquema JSON para el campo "ability":
+{
+  "name": "[Nombre evocador de la habilidad] ([tipo de efecto entre paréntesis]):",
+  "effect": "Describe el efecto mecanico de forma detallada y precisa. Debes incluir un porcentaje de la stat que afecta (ej: 'añade un 30% extra de tu STR al daño base', 'aumenta el daño del d6 en un 20% de tu INT' o 'reduce el AGI del objetivo al esquivar'). ¿Que ignora, que atraviesa, que inflige? Prohibido usar lenguaje literario vago como 'daño devastador'.",
+  "cooldown": "Frecuencia de uso: puede ser un cooldown exacto en turnos o un porcentaje de activarse. Ejemplo: '2 turnos', '30% de probabilidad de activarse al acertar' o 'Solo una vez por combate.'",
+  "limit": "Una restriccion mecanica que equilibre el poder. Ej: 'No funciona contra habilidades de Bloquear (STR)' o 'Requiere 2 manos'.",
+  "antiBlackHand": "Explica por que NO puede usarse como golpe oculto. Debe haber una señal perceptible (sonido, luz, calor, etc). Añade el balance de nivel como nota de diseño directa."
+}
+
+REGLAS OBLIGATORIAS PARA LA HABILIDAD:
+1. Nunca escribas habilidades que terminen el combate por si solas (paralisis total, muerte instantanea, etc).
+2. Cada habilidad debe tener al menos una forma de ser contrarrestada o esquivada.
+3. El Efecto debe poder leerse en voz alta en 10 segundos.
+4. No repitas las palabras del nombre del arma dentro del Efecto.
+5. Si el arma es magica, el Anti-Mano Negra debe incluir señal visual o auditiva obligatoria.
+6. Vocabulario: tecnico-medieval. Permitido mezclar terminologia arcana con fisica real. Prohibido novela romantica o epica generica.
 
 FORMATO DE RESPUESTA
-Responde SOLO con un objeto JSON valido con esta estructura exacta:
+Responde SOLO con un objeto JSON valido con esta estructura exacta (sin markdown, sin comillas triples):
 {
   "draft": {
     "name": "string",
     "description": "string",
-    "ability": "string",
+    "ability": {
+      "name": "string",
+      "effect": "string",
+      "cooldown": "string",
+      "limit": "string",
+      "antiBlackHand": "string"
+    },
     "price": 0,
     "rarity": "mythic|legendary|epic|rare|common",
     "category": "potions|armors|swords|others",
@@ -215,13 +243,27 @@ function normalizePayload(
     defaultPriceForRarity(normalizedRarity)
   );
 
+  let formattedAbility = "";
+  if (typeof draft.ability === "string") {
+    formattedAbility = draft.ability.trim();
+  } else if (typeof draft.ability === "object" && draft.ability !== null) {
+    const { name, effect, cooldown, limit, antiBlackHand } = draft.ability;
+    const parts = [];
+    if (name) parts.push(name.trim());
+    if (effect) parts.push(`Efecto: ${effect.trim()}`);
+    if (cooldown) parts.push(`CD: ${cooldown.trim()}`);
+    if (limit) parts.push(`Límite: ${limit.trim()}`);
+    if (antiBlackHand) parts.push(`Anti-Mano Negra: ${antiBlackHand.trim()}`);
+    formattedAbility = parts.join("\n");
+  }
+
   return {
     draft: {
       name: draft.name?.trim() || "Reliquia sin nombre",
       description:
         draft.description?.trim() ||
         "Pieza cargada de historia oscura, lista para circular en el mercado del reino.",
-      ability: draft.ability?.trim() || "",
+      ability: formattedAbility,
       price: clampPrice(draft.price, fallbackPrice),
       rarity: normalizedRarity,
       category: normalizeCategory(draft.category ?? defaults.category),
@@ -282,6 +324,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {
     const result = await runAiJson<MarketItemAiPayload>({
       prompt: getPrompt(normalizedInput),
+      imageUrl: normalizedInput.pinterestReference.imageUrl,
       temperature: 0.9,
       topP: 0.92,
       config: aiConfig,

@@ -1,4 +1,4 @@
-import type { InventoryCategoryId, InventoryEntry, MarketItem } from "../types";
+import type { InventoryCategoryId, InventoryEntry, MarketItem, PaymentPlan } from "../types";
 import { supabase } from "./supabaseClient";
 
 // SQL sugerido para Supabase:
@@ -39,6 +39,7 @@ type InventoryRow = {
   item_image_position?: string | null;
   item_rarity: InventoryEntry["itemRarity"];
   quantity: number;
+  is_locked?: boolean | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -64,6 +65,7 @@ function mapInventoryRow(row: InventoryRow): InventoryEntry {
     itemImagePosition: row.item_image_position ?? undefined,
     itemRarity: row.item_rarity,
     quantity: row.quantity,
+    isLocked: row.is_locked ?? false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -107,7 +109,7 @@ export async function fetchPlayerInventory(playerId: string) {
   const { data, error } = await supabase
     .from("player_inventory")
     .select(
-      "id, player_id, item_id, item_name, item_category, item_description, item_ability, item_image_url, item_image_fit, item_image_position, item_rarity, quantity, created_at, updated_at"
+      "id, player_id, item_id, item_name, item_category, item_description, item_ability, item_image_url, item_image_fit, item_image_position, item_rarity, quantity, is_locked, created_at, updated_at"
     )
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
@@ -126,6 +128,45 @@ export async function fetchPlayerInventory(playerId: string) {
     message: "",
     items: (data as InventoryRow[]).map(mapInventoryRow),
   };
+}
+
+export async function fetchPlayerPaymentPlans(playerId: string): Promise<
+  { status: "ready"; plans: PaymentPlan[] } | { status: "unavailable"; message: string }
+> {
+  const { data, error } = await supabase
+    .from("payment_plans")
+    .select(
+      "id, player_id, item_id, inventory_id, order_ref, total_installments, paid_installments, installment_amount, remaining_balance, next_payment_date, status, penalty_days, created_at, updated_at"
+    )
+    .eq("player_id", playerId)
+    .neq("status", "completed")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return {
+      status: "unavailable",
+      message: "No se pudieron cargar los planes de pago.",
+    };
+  }
+
+  const plans: PaymentPlan[] = (data ?? []).map((row) => ({
+    id: row.id as string,
+    playerId: row.player_id as string,
+    itemId: row.item_id as string,
+    inventoryId: row.inventory_id as string | null,
+    orderRef: row.order_ref as string,
+    totalInstallments: row.total_installments as number,
+    paidInstallments: row.paid_installments as number,
+    installmentAmount: row.installment_amount as number,
+    remainingBalance: row.remaining_balance as number,
+    nextPaymentDate: row.next_payment_date as string,
+    status: row.status as PaymentPlan["status"],
+    penaltyDays: row.penalty_days as number,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  }));
+
+  return { status: "ready", plans };
 }
 
 export async function addItemToInventory(

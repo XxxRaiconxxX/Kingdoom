@@ -92,7 +92,13 @@ REGLAS
 - generalData debe venir bien estructurado en varias lineas claras.
 - Usa campos como Tamano, Peso, Esperanza de vida, Habitat, Alimentacion y Comportamiento si aplican.
 - description debe describir presencia, comportamiento, fisico y peligro sin exceso.
-- ability debe resumir la capacidad mas distintiva o temida de la criatura.
+- ability debe ser texto que siga EXACTAMENTE este formato:
+  [Nombre evocador de la habilidad] ([tipo de efecto]):
+  Efecto: Describe el efecto mecanico con precision (metros, turnos, penalizadores). Prohibido usar lenguaje literario vago como 'daño devastador'.
+  CD: Cooldown exacto en turnos. Ejemplo: '2 turnos' o 'Solo una vez por combate.'
+  Limite: Una restriccion mecanica que equilibre el poder. Ej: 'Requiere preparacion visual'.
+  Anti-Mano Negra: Explica por que NO puede usarse de forma oculta. Debe haber una señal perceptible (sonido, olor, luz, rugido, etc).
+  IMPORTANTE: No uses JSON para ability, usa CADENA DE TEXTO. Nunca escribas habilidades que terminen el combate por si solas (paralisis total, muerte instantanea). Cada habilidad debe ser contrarrestada, esquivada o mitigada.
 - domestication debe ser coherente con su naturaleza.
 - usage debe explicar utilidad en el mundo: guerra, montura, recursos, alquimia, forja, rituales o ninguna.
 - imageUrl debe devolverse vacia.

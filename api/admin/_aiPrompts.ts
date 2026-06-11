@@ -193,7 +193,7 @@ Reglas del JSON:
 - Para upsert_mission usa payload canonico: {"title":"...","description":"...","instructions":"...","rewardGold":0,"maxParticipants":1,"difficulty":"easy|medium|hard|elite","type":"story|hunt|escort|investigation|event","status":"available|in-progress|closed","visible":true}.
 - Para upsert_event usa payload canonico: {"title":"...","description":"...","longDescription":"...","startDate":"texto o fecha","endDate":"texto o fecha","status":"in-production|active|finished","factions":[],"rewards":"...","requirements":"...","participationRewardGold":0,"maxParticipants":0,"imageUrl":""}.
 - Para upsert_market_item usa payload canonico: {"name":"...","description":"...","ability":"...","price":0,"rarity":"common|rare|epic|legendary|mythic","category":"potions|armor|swords|others","stockStatus":"available|limited|sold-out","stockLimit":0,"stockSold":0,"imageUrl":""}.
-- Para upsert_market_item, "ability" debe describir una habilidad jugable concreta y balanceada. No basta con repetir la descripcion visual del objeto.
+- Para upsert_market_item, "ability" debe ser una cadena con este formato exacto: "[Nombre] (efecto):\nEfecto: [descripcion mecanica]\nCD: [turnos]\nLimite: [restriccion]\nAnti-Mano Negra: [senal perceptible]". Nunca crear habilidades letales instantaneas ni cerrar el conflicto.
 - answer siempre debe venir relleno.
 `.trim();
 }

@@ -44,6 +44,7 @@ import {
   deleteMissionClaim,
 } from "../../utils/missions";
 import { generateMissionWithAi } from "../../utils/missionAi";
+import { generateMissionGmPrompt } from "../../utils/gmPromptGenerator";
 import { fetchAllPlayers, updatePlayerGold } from "../../utils/players";
 import { fetchAdminMagicStyles } from "../../utils/grimoireContent";
 import {
@@ -1330,14 +1331,29 @@ export function AdminMissionManager() {
               )}
             </button>
             {missionId ? (
-              <button
-                type="button"
-                onClick={resetForm}
-                disabled={isDeleting}
-                className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
-              >
-                Cancelar
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  disabled={isDeleting}
+                  className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedMission) {
+                      const prompt = generateMissionGmPrompt(selectedMission, players, claims);
+                      navigator.clipboard.writeText(prompt);
+                      setFeedback("Prompt de GM copiado al portapapeles.");
+                    }
+                  }}
+                  className="w-full rounded-2xl border border-violet-500/35 bg-violet-500/10 px-4 py-3 text-sm font-bold text-violet-200 transition hover:border-violet-400/50 hover:bg-violet-500/15 hover:text-violet-100 sm:w-auto"
+                >
+                  Copiar Prompt GM
+                </button>
+              </>
             ) : null}
             {missionId ? (
               <button

@@ -252,13 +252,47 @@ async function parseProviderError(response: Response) {
   );
 }
 
+async function fetchImageAsBase64(url: string) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const arrayBuffer = await response.arrayBuffer();
+    const mimeType = response.headers.get("content-type") || "image/jpeg";
+    
+    if (typeof Buffer !== "undefined") {
+      return { mimeType, data: Buffer.from(arrayBuffer).toString("base64") };
+    }
+    
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return { mimeType, data: btoa(binary) };
+  } catch {
+    return null;
+  }
+}
+
 function sanitizeAiText(text: string) {
-  return text
-    .replace(/^```json\s*/i, "")
-    .replace(/^```text\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
+  let cleaned = text.trim();
+  
+  // Try to extract JSON object if the AI included conversational text
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  } else {
+    // Fallback for arrays or malformed responses
+    cleaned = cleaned
+      .replace(/^```json\s*/i, "")
+      .replace(/^```text\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+  }
+  
+  return cleaned;
 }
 
 function extractGeminiText(payload: any) {
@@ -356,6 +390,7 @@ async function requestGeminiText(input: {
   temperature: number;
   topP: number;
   responseMimeType?: "application/json";
+  imageBase64?: { mimeType: string; data: string } | null;
 }): Promise<TextProviderResult> {
   let lastError = "Gemini no respondio correctamente.";
   const attempts: AiAttemptDebug[] = [];
@@ -374,7 +409,19 @@ async function requestGeminiText(input: {
           contents: [
             {
               role: "user",
-              parts: [{ text: input.prompt }],
+              parts: [
+                { text: input.prompt },
+                ...(input.imageBase64
+                  ? [
+                      {
+                        inline_data: {
+                          mime_type: input.imageBase64.mimeType,
+                          data: input.imageBase64.data,
+                        },
+                      },
+                    ]
+                  : []),
+              ],
             },
           ],
           generationConfig: {
@@ -453,6 +500,7 @@ async function requestGeminiText(input: {
 
 async function requestGroqText(input: {
   prompt: string;
+  imageUrl?: string;
   apiKeys: string[];
   primaryModel: string;
   fallbackModel: string;
@@ -478,7 +526,17 @@ async function requestGroqText(input: {
         },
         body: JSON.stringify({
           model,
-          messages: [{ role: "user", content: input.prompt }],
+          messages: [
+            {
+              role: "user",
+              content: input.imageUrl
+                ? [
+                    { type: "text", text: input.prompt },
+                    { type: "image_url", image_url: { url: input.imageUrl } },
+                  ]
+                : input.prompt,
+            },
+          ],
           temperature: input.temperature,
           top_p: input.topP,
         }),
@@ -555,6 +613,7 @@ async function requestGroqText(input: {
 
 async function requestNvidiaText(input: {
   prompt: string;
+  imageUrl?: string;
   apiKeys: string[];
   primaryModel: string;
   fallbackModel: string;
@@ -663,6 +722,7 @@ async function requestNvidiaText(input: {
 
 async function requestOpenRouterText(input: {
   prompt: string;
+  imageUrl?: string;
   apiKeys: string[];
   primaryModel: string;
   fallbackModel: string;
@@ -770,6 +830,7 @@ async function requestOpenRouterText(input: {
 
 export async function requestAiTextWithFallback(input: {
   prompt: string;
+  imageUrl?: string;
   gemini: GeminiConfig;
   groq: GroqConfig;
   nvidia?: NvidiaConfig;
@@ -779,6 +840,7 @@ export async function requestAiTextWithFallback(input: {
 }) {
   const previousAttempts: AiAttemptDebug[] = [];
   let lastFailure: ProviderFailure | null = null;
+  const imageBase64 = input.imageUrl && input.gemini.apiKeys.length ? await fetchImageAsBase64(input.imageUrl) : null;
 
   if (input.gemini.apiKeys.length) {
     try {
@@ -788,6 +850,7 @@ export async function requestAiTextWithFallback(input: {
         model: input.gemini.model,
         temperature: input.temperature,
         topP: input.topP,
+        imageBase64,
       });
 
       return {
@@ -809,6 +872,7 @@ export async function requestAiTextWithFallback(input: {
         fallbackModel: input.groq.fallbackModel,
         temperature: input.temperature,
         topP: input.topP,
+        imageUrl: input.imageUrl,
       });
 
       return {
@@ -830,6 +894,7 @@ export async function requestAiTextWithFallback(input: {
         fallbackModel: input.nvidia.fallbackModel,
         temperature: input.temperature,
         topP: input.topP,
+        imageUrl: input.imageUrl,
       });
 
       return {
@@ -852,6 +917,7 @@ export async function requestAiTextWithFallback(input: {
         tertiaryModel: input.openrouter.tertiaryModel,
         temperature: input.temperature,
         topP: input.topP,
+        imageUrl: input.imageUrl,
       });
 
       return {
@@ -878,6 +944,7 @@ export async function requestAiTextWithFallback(input: {
 
 export async function requestAiJsonWithFallback<T>(input: {
   prompt: string;
+  imageUrl?: string;
   gemini: GeminiConfig;
   groq: GroqConfig;
   nvidia?: NvidiaConfig;
@@ -887,6 +954,8 @@ export async function requestAiJsonWithFallback<T>(input: {
 }) {
   const previousAttempts: AiAttemptDebug[] = [];
   let lastFailure: ProviderFailure | null = null;
+  const imageBase64 = input.imageUrl && input.gemini.apiKeys.length ? await fetchImageAsBase64(input.imageUrl) : null;
+  
   const providers = [
     input.gemini.apiKeys.length
       ? {
@@ -899,6 +968,7 @@ export async function requestAiJsonWithFallback<T>(input: {
               temperature: input.temperature,
               topP: input.topP,
               responseMimeType: "application/json",
+              imageBase64,
             }),
         }
       : null,
@@ -913,6 +983,7 @@ export async function requestAiJsonWithFallback<T>(input: {
               fallbackModel: input.groq.fallbackModel,
               temperature: input.temperature,
               topP: input.topP,
+              imageUrl: input.imageUrl,
             }),
         }
       : null,
@@ -927,6 +998,7 @@ export async function requestAiJsonWithFallback<T>(input: {
               fallbackModel: input.nvidia!.fallbackModel,
               temperature: input.temperature,
               topP: input.topP,
+              imageUrl: input.imageUrl,
             }),
         }
       : null,
@@ -942,6 +1014,7 @@ export async function requestAiJsonWithFallback<T>(input: {
               tertiaryModel: input.openrouter!.tertiaryModel,
               temperature: input.temperature,
               topP: input.topP,
+              imageUrl: input.imageUrl,
             }),
         }
       : null,

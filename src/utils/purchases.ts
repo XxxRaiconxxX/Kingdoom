@@ -28,13 +28,15 @@ export async function purchaseMarketItemSecure(input: {
   quantity: number;
   whatsapp: string;
   orderRef: string;
+  installments?: number;
 }): Promise<PurchaseMarketItemResult> {
-  const { data, error } = await supabase.rpc("purchase_market_item", {
+  const { data, error } = await supabase.rpc("purchase_market_item_v2", {
     p_player_id: input.playerId,
     p_item_id: input.itemId,
     p_quantity: input.quantity,
     p_whatsapp: input.whatsapp.trim(),
     p_order_ref: input.orderRef,
+    p_installments: input.installments ?? 1,
   });
 
   if (error) {
@@ -68,5 +70,66 @@ export async function purchaseMarketItemSecure(input: {
     totalPrice: row.total_price,
     itemName: row.item_name,
     inventorySynced: Boolean(row.inventory_synced),
+  };
+}
+
+// ─── Pay Market Installment ────────────────────────────────────────────────
+
+export type PayInstallmentMode = "one" | "advance" | "total";
+
+export type PayInstallmentResult =
+  | {
+      status: "success";
+      amountPaid: number;
+      newRemainingBalance: number;
+      newPaidInstallments: number;
+      planCompleted: boolean;
+      newPlayerGold: number;
+    }
+  | {
+      status: "error";
+      message: string;
+    };
+
+type PayInstallmentRpcRow = {
+  amount_paid: number;
+  new_remaining_balance: number;
+  new_paid_installments: number;
+  plan_completed: boolean;
+  new_player_gold: number;
+};
+
+export async function payMarketInstallment(input: {
+  playerId: string;
+  planId: string;
+  mode: PayInstallmentMode;
+  advanceCount?: number;
+}): Promise<PayInstallmentResult> {
+  const { data, error } = await supabase.rpc("pay_market_installment", {
+    p_player_id: input.playerId,
+    p_plan_id: input.planId,
+    p_mode: input.mode,
+    p_advance_count: input.advanceCount ?? 1,
+  });
+
+  if (error) {
+    return { status: "error", message: error.message };
+  }
+
+  const row = Array.isArray(data)
+    ? (data[0] as PayInstallmentRpcRow | undefined)
+    : (data as PayInstallmentRpcRow | null);
+
+  if (!row) {
+    return { status: "error", message: "La RPC no devolvió datos." };
+  }
+
+  return {
+    status: "success",
+    amountPaid: row.amount_paid,
+    newRemainingBalance: row.new_remaining_balance,
+    newPaidInstallments: row.new_paid_installments,
+    planCompleted: row.plan_completed,
+    newPlayerGold: row.new_player_gold,
   };
 }

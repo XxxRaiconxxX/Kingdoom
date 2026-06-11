@@ -57,7 +57,9 @@ REGLAS DE BALANCE
 - Lv5: tecnica maestra excepcional, pero nunca gratuita ni imposible de contrarrestar narrativamente.
 - Nada de desintegrar, borrar, invulnerabilidad permanente ni control absoluto sin coste.
 - Cada habilidad debe tener utilidad narrativa o tactica.
-- Anti-Mano Negra debe cortar el abuso claramente.
+- Anti-Mano Negra: Explica por que NO puede usarse de forma oculta o sorpresiva. Debe haber una señal perceptible (luz, aura, sonido).
+- El Efecto debe describir la mecanica con precision (metros, turnos), sin lenguaje vago.
+- Ninguna habilidad cierra un conflicto.
 
 FORMATO OBLIGATORIO
 Debes responder solo con texto siguiendo EXACTAMENTE esta estructura general:

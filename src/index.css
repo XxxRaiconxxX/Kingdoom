@@ -127,8 +127,6 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Sensacion app-like: sin rebote/scroll-chaining del documento */
-    overscroll-behavior-y: contain;
   }
 
   /* Anillo de foco accesible y tematico (sigue el acento de cada seccion).

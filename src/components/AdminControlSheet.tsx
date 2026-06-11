@@ -10,6 +10,7 @@ import {
   Coins,
   FileText,
   Flag,
+  Gavel,
   ImagePlus,
   Leaf,
   ScrollText,
@@ -89,6 +90,7 @@ type AdminTab =
   | "events"
   | "market"
   | "businesses"
+  | "auctions"
   | "staff"
   | "magic"
   | "bestiary"
@@ -121,6 +123,11 @@ const AdminStaffAssistant = lazy(() => import("./admin/AdminStaffAssistant"));
 const AdminKnowledgeManager = lazy(() =>
   import("./admin/AdminKnowledgeManager").then((module) => ({
     default: module.AdminKnowledgeManager,
+  }))
+);
+const AdminAuctionManager = lazy(() =>
+  import("./admin/AdminAuctionManager").then((module) => ({
+    default: module.AdminAuctionManager,
   }))
 );
 
@@ -1168,6 +1175,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 label="Negocios"
                 active={activeTab === "businesses"}
                 onClick={() => setActiveTab("businesses")}
+              />
+              <AdminTabButton
+                icon={<Gavel />}
+                label="Subastas"
+                active={activeTab === "auctions"}
+                onClick={() => setActiveTab("auctions")}
               />
             </div>
 
@@ -2820,6 +2833,21 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
               </section>
+            </div>
+          ) : null}
+
+          {activeTab === "auctions" ? (
+            <div data-gsap-admin>
+              <Suspense
+                fallback={
+                  <AdminInfoCard
+                    title="Cargando subastas"
+                    message="Preparando panel de control de subastas."
+                  />
+                }
+              >
+                <AdminAuctionManager />
+              </Suspense>
             </div>
           ) : null}
 

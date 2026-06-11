@@ -677,3 +677,47 @@ export type CharacterSheet = {
   inventory: string;
   createdAt: string;
 };
+
+// --- AUCTION TYPES ---
+
+export type AuctionStatus = "active" | "completed" | "cancelled";
+
+export type MarketAuction = {
+  id: string;
+  itemId: string | null;
+  itemName: string;
+  itemDescription: string | null;
+  itemCategory: string;
+  itemRarity: Rarity;
+  itemImageUrl: string | null;
+  startPrice: number;
+  minIncrement: number;
+  status: AuctionStatus;
+  createdAt: string;
+  expiresAt: string;
+  closedAt: string | null;
+  highestBid: number;
+  highestBidderId: string | null;
+  whatsappMessageId?: string | null;
+  whatsappChatId?: string | null;
+  createdBy: string | null;
+  // Display helpers (joined or computed)
+  highestBidderUsername?: string | null;
+  hasWithdrawn?: boolean;
+};
+
+export type MarketAuctionBid = {
+  id: string;
+  auctionId: string;
+  playerId: string;
+  amount: number;
+  createdAt: string;
+  playerUsername?: string;
+};
+
+export type MarketAuctionParticipant = {
+  auctionId: string;
+  playerId: string;
+  hasWithdrawn: boolean;
+};
+

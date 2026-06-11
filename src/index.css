@@ -105,6 +105,11 @@
     background-color: #0c0a09;
     color: #d6d3d1;
     scroll-behavior: auto;
+    /* Reserva el espacio del scrollbar: evita el salto horizontal del layout
+       al cambiar entre pestañas cortas (Inicio) y largas (Grimorio) */
+    scrollbar-gutter: stable;
+    /* Quita el flash gris de Android al tocar; el feedback tactil lo da .kd-touch */
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -122,6 +127,26 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Sensacion app-like: sin rebote/scroll-chaining del documento */
+    overscroll-behavior-y: contain;
+  }
+
+  /* Anillo de foco accesible y tematico (sigue el acento de cada seccion).
+     Solo aparece con teclado: el mouse/touch no muestran outline. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--kd-accent-rgb) / 0.75);
+    outline-offset: 2px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Los paneles internos con scroll (modales, admin, listas) no arrastran
+     el scroll de la pagina al llegar al borde */
+  [class*="overflow-y-auto"],
+  [class*="overflow-auto"] {
+    overscroll-behavior: contain;
   }
 
   body::-webkit-scrollbar {
@@ -155,6 +180,13 @@
   h6 {
     font-family: var(--font-serif);
     letter-spacing: 0.02em;
+  }
+
+  /* Titulos multilinea con reparto equilibrado de palabras (mejora movil) */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
   }
 
   ::selection {
@@ -560,6 +592,12 @@
 
 .kd-nav-icon-shell {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Micro-interaccion: el icono activo se eleva apenas, dando profundidad */
+.kd-nav-item[aria-current="page"] .kd-nav-icon-shell {
+  transform: translateY(-1px) scale(1.06);
 }
 
 .kd-section-eyebrow {
@@ -591,6 +629,8 @@
 .kd-stat-card {
   position: relative;
   overflow: hidden;
+  /* Cifras de ancho fijo: los contadores no "bailan" al cambiar de valor */
+  font-variant-numeric: tabular-nums;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.05),
     0 14px 28px rgb(0 0 0 / 0.18);
@@ -734,7 +774,8 @@
   }
 
   .kd-hover-lift,
-  .kd-touch {
+  .kd-touch,
+  .kd-nav-icon-shell {
     transition: none;
   }
 }

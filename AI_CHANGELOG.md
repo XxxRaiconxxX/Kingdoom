@@ -30,6 +30,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 11/06/2026] - [Autor: Claude]
+*   **Archivos Modificados:** `src/index.css`
+*   **Resumen de Tareas:** Pulido visual y de experiencia: foco accesible tematico, fin del flash gris en Android, layout sin saltos de scrollbar, titulos balanceados y micro-interaccion en la navegacion.
+*   **Cambios Clave:**
+    *   **[Accesibilidad/Polish]:** anillo de foco global `:focus-visible` que sigue el color de acento de cada seccion (ambar en Inicio, violeta en Grimorio, etc.); el outline solo aparece navegando con teclado, mouse/touch no lo muestran (`:focus:not(:focus-visible)`).
+    *   **[Movil]:** `-webkit-tap-highlight-color: transparent` (elimina el flash gris de Android al tocar; el feedback tactil lo sigue dando `.kd-touch` con su scale) y `overscroll-behavior-y: contain` en body (sensacion app-like, sin rebote del documento).
+    *   **[Fluidez de layout]:** `scrollbar-gutter: stable` en html — al cambiar entre pestañas cortas (Inicio) y largas (Grimorio) ya no hay salto horizontal por aparicion/desaparicion del scrollbar. Los paneles internos con scroll (modales, admin) usan `overscroll-behavior: contain` para no arrastrar el scroll de la pagina.
+    *   **[Tipografia]:** `text-wrap: balance` en h1-h3 (titulos multilinea reparten palabras equilibradamente, visible en movil: "Reino de / las Sombras") y `font-variant-numeric: tabular-nums` en `.kd-stat-card` (los contadores no "bailan" al cambiar de valor).
+    *   **[Navegacion]:** micro-interaccion en la barra inferior — el icono de la pestaña activa se eleva 1px con scale 1.06 y transicion suave; deshabilitada bajo `prefers-reduced-motion`.
+*   **Notas/Advertencias:** build OK; verificado en vivo con `vite preview` (computed styles confirmados via DevTools y screenshots desktop/movil, 0 errores de consola). Todo es CSS progresivo: navegadores viejos ignoran `text-wrap: balance` y `scrollbar-gutter` sin romper nada.
+
+### [Fecha: 11/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `vite.config.ts`, `index.html`, `src/context/PlayerSessionContext.tsx`
 *   **Resumen de Tareas:** Optimizacion de rendimiento web: primer load de JS reducido ~49% (gzip ~294KB -> ~149KB) y eliminacion de re-renders globales del polling de sesion.
 *   **Cambios Clave:**

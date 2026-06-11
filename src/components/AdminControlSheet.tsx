@@ -2,11 +2,18 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BellRing,
+  BookOpen,
+  Bot,
+  Bug,
+  Building2,
+  Calendar,
   Coins,
   FileText,
   Flag,
   ImagePlus,
+  Leaf,
   ScrollText,
+  Sparkles,
   Store,
   UserPlus,
   Users,
@@ -47,8 +54,7 @@ import {
   slugifyMarketItem,
   upsertMarketItem,
 } from "../utils/market";
-import { generateMarketItemWithAi } from "../utils/marketAi";
-import { fetchPinterestReference } from "../utils/pinterestPicker";
+
 import type {
   EventRewardNotification,
   EventStatus,
@@ -230,20 +236,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [showAllBusinessProposalsList, setShowAllBusinessProposalsList] =
     useState(false);
   const [showAllBusinessesList, setShowAllBusinessesList] = useState(false);
-  const [marketPinterestUrl, setMarketPinterestUrl] = useState("");
-  const [marketPinterestFeedback, setMarketPinterestFeedback] = useState("");
-  const [marketPinterestPreview, setMarketPinterestPreview] = useState<{
-    imageUrl: string;
-    title: string;
-    description: string;
-    sourceUrl: string;
-  } | null>(null);
   const [adminSecurityFeedback, setAdminSecurityFeedback] = useState("");
-  const [marketAiTheme, setMarketAiTheme] = useState("");
-  const [marketAiFeedback, setMarketAiFeedback] = useState("");
-  const [isGeneratingMarketItemAi, setIsGeneratingMarketItemAi] = useState(false);
-  const [isLoadingPinterestReference, setIsLoadingPinterestReference] =
-    useState(false);
   const [showAllPlayersList, setShowAllPlayersList] = useState(false);
   const [showAllEventsList, setShowAllEventsList] = useState(false);
   const [showAllMarketItemsList, setShowAllMarketItemsList] = useState(false);
@@ -776,11 +769,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemStockSold(0);
     setMarketItemFeatured(false);
     setMarketFeedback("");
-    setMarketPinterestUrl("");
-    setMarketPinterestFeedback("");
-    setMarketPinterestPreview(null);
-    setMarketAiTheme("");
-    setMarketAiFeedback("");
   }
 
   function resetBusinessForm() {
@@ -928,88 +916,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     }
   }
 
-  async function handleLoadPinterestReference() {
-    const cleanUrl = marketPinterestUrl.trim();
 
-    if (!cleanUrl) {
-      setMarketPinterestFeedback("Pega primero una URL de Pinterest.");
-      return;
-    }
-
-    setIsLoadingPinterestReference(true);
-    setMarketPinterestFeedback("");
-    setMarketAiFeedback("");
-
-    const result = await fetchPinterestReference(cleanUrl);
-
-    setIsLoadingPinterestReference(false);
-
-    if (result.status === "error") {
-      setMarketPinterestPreview(null);
-      setMarketPinterestFeedback(result.message);
-      return;
-    }
-
-    setMarketPinterestPreview(result.reference);
-    setMarketItemImageUrl(result.reference.imageUrl);
-    setMarketItemImageFit("cover");
-    setMarketItemImagePosition("center");
-    setMarketItemName((current) =>
-      current.trim() ? current : result.reference.title || current
-    );
-    setMarketItemDescription((current) =>
-      current.trim() ? current : result.reference.description || current
-    );
-    setMarketPinterestFeedback(
-      result.reference.title || result.reference.description
-        ? "Referencia cargada. Se aplico la imagen y tambien se aprovecharon los textos utiles del pin."
-        : "Referencia cargada. Se aplico solo la imagen porque Pinterest no devolvio texto util para el item."
-    );
-  }
-
-  async function handleGenerateMarketItemFromPin() {
-    if (!marketPinterestPreview) {
-      setMarketAiFeedback("Primero carga una referencia valida desde Pinterest.");
-      return;
-    }
-
-    setIsGeneratingMarketItemAi(true);
-    setMarketAiFeedback("");
-
-    const result = await generateMarketItemWithAi({
-      pinterestReference: marketPinterestPreview,
-      category: marketItemCategory,
-      rarity: marketItemRarity,
-      stockStatus: marketItemStockStatus,
-      priceTarget: marketItemPrice,
-      theme: marketAiTheme,
-    });
-
-    setIsGeneratingMarketItemAi(false);
-
-    if (result.status === "error" || !result.draft) {
-      setMarketAiFeedback(result.message);
-      return;
-    }
-
-    setMarketItemName(result.draft.name);
-    setMarketItemDescription(result.draft.description);
-    setMarketItemAbility(result.draft.ability);
-    setMarketItemPrice(result.draft.price);
-    setMarketItemRarity(result.draft.rarity);
-    setMarketItemCategory(result.draft.category);
-    setMarketItemStockStatus(result.draft.stockStatus);
-    setMarketItemStockLimit(result.draft.stockStatus === "limited" ? 1 : 0);
-    setMarketItemStockSold(0);
-    setMarketItemImageUrl(marketPinterestPreview.imageUrl);
-    setMarketItemImageFit(result.draft.imageFit || "cover");
-    setMarketItemImagePosition(result.draft.imagePosition || "center");
-    setMarketAiFeedback(
-      result.promptSummary
-        ? `Borrador generado. ${result.promptSummary}`
-        : "Borrador generado desde el pin. Revisa el item antes de guardarlo."
-    );
-  }
 
   async function handleMarketImageUpload(file?: File) {
     if (!file) return;
@@ -1019,7 +926,7 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       setMarketItemImageUrl(await readImageAsDataUrl(file));
       setMarketItemImageFit((current) => current || "cover");
       setMarketItemImagePosition((current) => current.trim() || "center");
-      setMarketPinterestFeedback(
+      setMarketFeedback(
         "Imagen cargada desde galeria. Puedes guardar el item sin depender de una URL externa."
       );
     } catch {
@@ -1045,9 +952,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemStockSold(item.stockSold ?? 0);
     setMarketItemFeatured(item.featured ?? false);
     setMarketFeedback("");
-    setMarketPinterestFeedback("");
-    setMarketPinterestPreview(null);
-    setMarketAiFeedback("");
     setActiveTab("market");
   }
 
@@ -1224,74 +1128,79 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
         <div
           data-gsap-admin
-          className="border-b border-amber-500/10 px-0 py-3 sm:py-4 md:px-6"
+          className="border-b border-amber-500/10 px-4 py-3 sm:px-5 sm:py-4 md:px-6"
         >
-          <div className="flex w-full max-w-full min-w-0 items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:px-5 md:px-0 [&::-webkit-scrollbar]:hidden">
-            <div className="flex-shrink-0">
+          <div className="kd-admin-tabs">
+            {/* ── Gestión ── */}
+            <div className="kd-admin-tab-group">
               <AdminTabButton
+                icon={<Users />}
                 label="Jugadores"
                 active={activeTab === "players"}
                 onClick={() => setActiveTab("players")}
               />
-            </div>
-            <div className="flex-shrink-0">
               <AdminTabButton
+                icon={<Flag />}
                 label="Misiones"
                 active={activeTab === "missions"}
                 onClick={() => setActiveTab("missions")}
               />
-            </div>
-            <div className="flex-shrink-0">
               <AdminTabButton
+                icon={<Calendar />}
                 label="Eventos"
                 active={activeTab === "events"}
                 onClick={() => setActiveTab("events")}
               />
             </div>
-            <div className="flex-shrink-0">
+
+            <div className="kd-admin-tab-divider" />
+
+            {/* ── Economía ── */}
+            <div className="kd-admin-tab-group">
               <AdminTabButton
+                icon={<Store />}
                 label="Mercado"
                 active={activeTab === "market"}
                 onClick={() => setActiveTab("market")}
               />
-            </div>
-            <div className="flex-shrink-0">
               <AdminTabButton
+                icon={<Building2 />}
                 label="Negocios"
                 active={activeTab === "businesses"}
                 onClick={() => setActiveTab("businesses")}
               />
             </div>
-            <div className="flex-shrink-0">
+
+            <div className="kd-admin-tab-divider" />
+
+            {/* ── IA & Lore ── */}
+            <div className="kd-admin-tab-group">
               <AdminTabButton
+                icon={<Bot />}
                 label="Staff IA"
                 active={activeTab === "staff"}
                 onClick={() => setActiveTab("staff")}
               />
-            </div>
-            <div className="flex-shrink-0">
               <AdminTabButton
+                icon={<Sparkles />}
                 label="Magias"
                 active={activeTab === "magic"}
                 onClick={() => setActiveTab("magic")}
               />
-            </div>
-            <div className="flex-shrink-0">
               <AdminTabButton
+                icon={<Bug />}
                 label="Bestiario"
                 active={activeTab === "bestiary"}
                 onClick={() => setActiveTab("bestiary")}
               />
-            </div>
-            <div className="flex-shrink-0">
               <AdminTabButton
+                icon={<Leaf />}
                 label="Flora"
                 active={activeTab === "flora"}
                 onClick={() => setActiveTab("flora")}
               />
-            </div>
-            <div className="flex-shrink-0">
               <AdminTabButton
+                icon={<BookOpen />}
                 label="Archivo IA"
                 active={activeTab === "knowledge"}
                 onClick={() => setActiveTab("knowledge")}
@@ -2306,125 +2215,6 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     />
                   </label>
 
-                  <div className="rounded-[1.35rem] border border-cyan-500/15 bg-cyan-500/6 p-4">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-200">
-                          Referencia visual desde Pinterest
-                        </p>
-                        <p className="mt-1 text-xs leading-5 text-stone-400">
-                          Pega un pin, carga la imagen y si te sirve conviertelo en borrador IA para el mercado.
-                        </p>
-                      </div>
-                      {marketPinterestPreview ? (
-                        <span className="rounded-full border border-cyan-400/20 bg-stone-950/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100">
-                          Lista
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                      <input
-                        type="text"
-                        value={marketPinterestUrl}
-                        onChange={(event) => setMarketPinterestUrl(event.target.value)}
-                        placeholder="https://www.pinterest.com/pin/..."
-                        className="min-w-0 flex-1 rounded-2xl border border-stone-700 bg-stone-950/70 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-cyan-300/35"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => void handleLoadPinterestReference()}
-                        disabled={isLoadingPinterestReference}
-                        className="kd-touch inline-flex min-w-[11rem] items-center justify-center gap-2 rounded-2xl border border-cyan-400/25 bg-cyan-500/12 px-4 py-3 text-sm font-bold text-cyan-100 transition hover:bg-cyan-500/18 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {isLoadingPinterestReference ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Probando...
-                          </>
-                        ) : (
-                          "Probar pin"
-                        )}
-                      </button>
-                    </div>
-
-                    {marketPinterestPreview ? (
-                      <div className="mt-3 flex gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/45 p-3">
-                        <img loading="lazy" decoding="async"  
-                          src={marketPinterestPreview.imageUrl}
-                          alt={marketPinterestPreview.title || "Referencia de Pinterest"}
-                          className="h-20 w-20 shrink-0 rounded-2xl border border-stone-800 bg-stone-900 object-cover"
-                        />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-stone-100">
-                            {marketPinterestPreview.title || "Referencia cargada"}
-                          </p>
-                          {marketPinterestPreview.description ? (
-                            <p className="mt-1 line-clamp-3 text-xs leading-5 text-stone-400">
-                              {marketPinterestPreview.description}
-                            </p>
-                          ) : null}
-                          <a
-                            href={marketPinterestPreview.sourceUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-2 inline-flex text-[11px] font-bold uppercase tracking-[0.14em] text-cyan-200 hover:text-cyan-100"
-                          >
-                            Abrir pin
-                          </a>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {marketPinterestFeedback ? (
-                      <p className="mt-3 rounded-[1rem] border border-stone-800 bg-stone-950/45 px-3 py-2 text-xs leading-5 text-stone-300">
-                        {marketPinterestFeedback}
-                      </p>
-                    ) : null}
-
-                    <div className="mt-4 rounded-[1.2rem] border border-cyan-500/12 bg-stone-950/35 p-3">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-100">
-                            Crear item con IA
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-stone-400">
-                            Usa el pin como semilla visual. La IA completa nombre, descripcion, habilidad y valores del item.
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => void handleGenerateMarketItemFromPin()}
-                          disabled={!marketPinterestPreview || isGeneratingMarketItemAi}
-                          className="kd-touch inline-flex min-w-[12rem] items-center justify-center gap-2 rounded-2xl border border-cyan-400/25 bg-cyan-500/14 px-4 py-3 text-sm font-bold text-cyan-100 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {isGeneratingMarketItemAi ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Generando...
-                            </>
-                          ) : (
-                            "Generar item IA"
-                          )}
-                        </button>
-                      </div>
-
-                      <div className="mt-3">
-                        <LabeledInput
-                          label="Idea del staff (opcional)"
-                          value={marketAiTheme}
-                          onChange={setMarketAiTheme}
-                          placeholder="maldito, noble, necromantico, reliquia roja..."
-                        />
-                      </div>
-
-                      {marketAiFeedback ? (
-                        <p className="mt-3 rounded-[1rem] border border-stone-800 bg-stone-950/45 px-3 py-2 text-xs leading-5 text-stone-300">
-                          {marketAiFeedback}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="space-y-2">

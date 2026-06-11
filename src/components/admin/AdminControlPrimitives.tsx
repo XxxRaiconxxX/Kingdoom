@@ -8,22 +8,25 @@ export const ADMIN_LIST_PREVIEW_COUNT = 4;
 export function AdminTabButton({
   active,
   label,
+  icon,
   onClick,
 }: {
   active: boolean;
   label: string;
+  icon?: ReactNode;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`kd-touch rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] transition ${
+      className={`kd-touch inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] transition ${
         active
-          ? "border-amber-400/40 bg-amber-500/14 text-amber-200 shadow-[inset_0_0_18px_rgba(245,158,11,0.08)]"
+          ? "border-amber-400/40 bg-gradient-to-br from-amber-500/18 to-amber-600/8 text-amber-200 shadow-[inset_0_0_18px_rgba(245,158,11,0.10),0_0_12px_rgba(245,158,11,0.06)]"
           : "border-stone-700 bg-stone-900/70 text-stone-400 hover:border-amber-500/25 hover:text-stone-200"
       }`}
     >
+      {icon ? <span className={`shrink-0 [&>svg]:h-3.5 [&>svg]:w-3.5 ${active ? "text-amber-300" : "text-stone-500"}`}>{icon}</span> : null}
       {label}
     </button>
   );

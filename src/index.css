@@ -360,6 +360,64 @@
   width: min(100%, calc(100dvw - 1rem));
 }
 
+.kd-admin-tabs {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.kd-admin-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.kd-admin-tab-group {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.kd-admin-tab-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(245 158 11 / 0.22),
+    transparent
+  );
+}
+
+@media (max-width: 639px) {
+  .kd-admin-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+    overflow-x: visible;
+  }
+
+  .kd-admin-tab-group {
+    display: contents;
+  }
+
+  .kd-admin-tab-divider {
+    display: none;
+  }
+
+  .kd-admin-tabs button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .kd-admin-content {
   scrollbar-gutter: stable;
 }

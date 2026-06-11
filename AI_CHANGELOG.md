@@ -29,6 +29,23 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 11/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `Kingdoom-sync/src/components/AdminControlSheet.tsx`, `Kingdoom-sync/src/components/admin/AdminControlPrimitives.tsx`, `Kingdoom-sync/src/index.css`
+*   **Resumen:** Rediseño completo y premium del menú de navegación de pestañas del panel de administración y eliminación total del "Generador de Items IA / Pinterest" de la sección Mercado del admin.
+*   **Cambios Clave:**
+    *   **[Admin - Navegación/Tabs]:** Rediseño estético y responsivo de las 10 pestañas del menú de administración.
+        - Se agregaron iconos de Lucide-React semánticos para cada botón de pestaña.
+        - Se estructuraron las pestañas en 3 grupos lógicos diferenciados con separadores visuales (`.kd-admin-tab-divider`): **Gestión** (Jugadores, Misiones, Eventos), **Economía** (Mercado, Negocios) e **IA & Lore** (Staff IA, Magias, Bestiario, Flora, Archivo IA).
+        - Se optimizó el estilo activo/inactivo con gradientes premium, sombras internas y hover interactivo suave.
+        - Se añadió responsividad: en dispositivos móviles (`< 640px`) se despliega en un grid compacto de 2 columnas para una cómoda navegación táctil; en pantallas de escritorio se mantiene la disposición en línea optimizando el espacio horizontal.
+    *   **[Admin - Limpieza de Generador IA]:** Remoción completa del módulo experimental "Generador de Items IA" basado en Pinterest en la pestaña de Mercado.
+        - Se eliminó todo el código JSX que contenía el visualizador de Pinterest y el disparador de IA (inputs de URL de Pinterest, previsualizadores, feedbacks, tema de IA y botones de acción).
+        - Se limpiaron las variables de estado relacionadas (`marketPinterestUrl`, `marketPinterestFeedback`, `marketPinterestPreview`, `marketAiTheme`, `marketAiFeedback`, `isGeneratingMarketItemAi`, `isLoadingPinterestReference`).
+        - Se eliminaron las funciones controladoras (`handleLoadPinterestReference`, `handleGenerateMarketItemFromPin`) y se quitaron sus inicializaciones y dependencias en `resetMarketForm`, `preloadMarketItem` y `handleMarketImageUpload`.
+        - Se eliminaron los imports obsoletos de `marketAi` y `pinterestPicker` en la cabecera.
+    *   **[Admin - Estilos del Sistema]:** Adición en `index.css` de clases CSS `.kd-admin-tabs`, `.kd-admin-tab-group` y `.kd-admin-tab-divider` con transiciones fluidas y gradientes HSL.
+*   **Notas/Advertencias:** Los archivos utilitarios subyacentes (`utils/marketAi.ts` y `utils/pinterestPicker.ts`) se preservaron en el repositorio para no romper posibles dependencias en API routes, pero ya no tienen acoplamiento con la interfaz de usuario. Verificado con `npx tsc --noEmit` y `npm run build` con éxito.
+
 ### [Fecha: 08/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/scripts/notebooklm_provisioner.py`, `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `Kingdoom-sync/AI_CHANGELOG.md`
 *   **Resumen:** Integración completa y automatización del Game Master con Google NotebookLM mediante sincronización dinámica de grimorio y enciclopedia y aprovisionamiento bajo demanda.

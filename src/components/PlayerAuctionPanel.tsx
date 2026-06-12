@@ -253,7 +253,7 @@ export function PlayerAuctionPanel() {
                     </p>
                   </div>
                   <div className="space-y-1 text-right">
-                    <p className="text-[10px] uppercase tracking-wider text-stone-500">Puja Máxima</p>
+                    <p className="text-[10px] uppercase tracking-wider text-stone-500">Puja Acumulada</p>
                     <p className="text-sm font-extrabold text-amber-300">
                       🪙 {(auction.highestBid || auction.startPrice).toLocaleString("es-PY")}
                     </p>

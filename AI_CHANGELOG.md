@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 11/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/src/scheduler.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/handlers/auctions.js` [NEW], `kingdoom-bot/src/handlers/auctionsRealtime.js` [NEW]
+*   **Resumen de Tareas:** Integración completa de la mecánica de Subastas en el Bot de WhatsApp: comandos de jugador, anuncios en tiempo real y resolución automática de expiraciones.
+*   **Cambios Clave:**
+    *   **[Bot - Comandos]:** Se implementaron los comandos públicos `!subastas` (listar subastas activas), `!pujar <item / #lista> <monto>` (realizar pujas atómicas mediante RPC) y `!retirarse <item / #lista>` (bloquear pujas futuras en una subasta).
+    *   **[Bot - Realtime]:** Se añadió `startAuctionsRealtime` para que el bot escuche cambios en Supabase Realtime y publique automáticamente en WhatsApp cuando una subasta se crea, se puja, o se resuelve.
+    *   **[Bot - Scheduler]:** Se configuró una tarea recurrente en el cron del scheduler que comprueba cada minuto si hay subastas expiradas para resolverlas automáticamente llamando a la RPC `resolve_market_auction`.
+*   **Notas/Advertencias:** Los archivos JavaScript modificados pasan el control de sintaxis de Node sin errores.
+
+### [Fecha: 11/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `ai-memory/kingdoom-memory.jsonl`
 *   **Resumen de Tareas:** Handoff de la sesión para Antigravity 2. Todo ha sido validado, el bot fue limpiado y optimizado, y la carga inicial de la web fue mejorada.
 *   **Cambios Clave:**

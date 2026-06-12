@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Store } from "lucide-react";
 import type { MarketCategoryId, MarketItem, Rarity, StockStatus } from "../../types";
@@ -244,14 +245,31 @@ export function NumericInput({
   value: number;
   onChange: (value: number) => void;
 }) {
+  const [localValue, setLocalValue] = useState(value.toString());
+
+  useEffect(() => {
+    if (value !== Number(localValue)) {
+      setLocalValue(value.toString());
+    }
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const cleaned = raw.replace(/\D/g, "");
+    setLocalValue(cleaned);
+    const parsed = parseInt(cleaned, 10);
+    onChange(isNaN(parsed) ? 0 : parsed);
+  };
+
   return (
-    <label className="space-y-2">
+    <label className="space-y-2 block">
       <span className="text-sm font-semibold text-stone-200">{label}</span>
       <input
-        type="number"
-        min="0"
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value) || 0)}
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={localValue}
+        onChange={handleChange}
         className="w-full rounded-2xl border border-stone-700 bg-stone-950/70 px-3 py-2.5 sm:px-4 sm:py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]"
       />
     </label>

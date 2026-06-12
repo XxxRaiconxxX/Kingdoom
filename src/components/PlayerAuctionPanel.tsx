@@ -53,7 +53,7 @@ export function PlayerAuctionPanel() {
   const [auctions, setAuctions] = useState<MarketAuction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [feedbackMap, setFeedbackMap] = useState<Record<string, { text: string; tone: "success" | "error" }>>({});
-  const [bidAmounts, setBidAmounts] = useState<Record<string, number>>({});
+  const [bidAmounts, setBidAmounts] = useState<Record<string, string>>({});
   const [isSubmittingMap, setIsSubmittingMap] = useState<Record<string, boolean>>({});
 
   async function loadAuctions() {
@@ -104,7 +104,8 @@ export function PlayerAuctionPanel() {
     if (!player) return;
 
     const minBid = auction.highestBid > 0 ? auction.highestBid + auction.minIncrement : auction.startPrice;
-    const bidAmount = bidAmounts[auction.id] ?? minBid;
+    const rawVal = bidAmounts[auction.id];
+    const bidAmount = rawVal !== undefined && rawVal !== "" ? parseInt(rawVal, 10) : minBid;
 
     if (bidAmount < minBid) {
       setFeedbackMap((prev) => ({
@@ -209,7 +210,6 @@ export function PlayerAuctionPanel() {
         <div className="grid gap-6 md:grid-cols-2">
           {auctions.map((auction) => {
             const minBid = auction.highestBid > 0 ? auction.highestBid + auction.minIncrement : auction.startPrice;
-            const currentBidInput = bidAmounts[auction.id] ?? minBid;
             const isSubmitting = isSubmittingMap[auction.id] || false;
             const feedback = feedbackMap[auction.id];
             const isHighestBidder = player?.id === auction.highestBidderId;
@@ -296,13 +296,13 @@ export function PlayerAuctionPanel() {
                         <div className="relative flex-1">
                           <Coins className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" />
                           <input
-                            type="number"
-                            value={currentBidInput}
-                            step={auction.minIncrement}
-                            min={minBid}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={bidAmounts[auction.id] !== undefined ? bidAmounts[auction.id] : minBid.toString()}
                             onChange={(e) => {
-                              const val = Math.max(0, parseInt(e.target.value) || 0);
-                              setBidAmounts((prev) => ({ ...prev, [auction.id]: val }));
+                              const cleaned = e.target.value.replace(/\D/g, "");
+                              setBidAmounts((prev) => ({ ...prev, [auction.id]: cleaned }));
                             }}
                             className="w-full rounded-2xl border border-stone-800 bg-stone-950/50 py-2.5 pl-10 pr-4 text-sm font-extrabold text-stone-200 outline-none focus:border-amber-400/40"
                           />

@@ -8,6 +8,7 @@ import {
   Info,
   Goal,
   Flag,
+  Gavel,
   RotateCcw,
   ScrollText,
   Shield,
@@ -233,6 +234,11 @@ const RealmStockExchange = lazy(() =>
     default: module.RealmStockExchange,
   }))
 );
+const PlayerAuctionPanel = lazy(() =>
+  import("../components/PlayerAuctionPanel").then((module) => ({
+    default: module.PlayerAuctionPanel,
+  }))
+);
 const PurchaseModal = lazy(() =>
   import("../components/PurchaseModal").then((module) => ({
     default: module.PurchaseModal,
@@ -441,6 +447,37 @@ export function MarketSection() {
         <div className="mt-5 border-t border-stone-800 pt-5">
           <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la bolsa del reino..." />}>
             <RealmStockExchange />
+          </Suspense>
+        </div>
+      </details>
+
+      <details
+        data-gsap-market
+        className="kd-glass kd-hover-lift group rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6"
+      >
+        <summary className="kd-touch flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+              <Gavel className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-300">
+                Subastas del Reino
+              </p>
+              <h3 className="mt-2 text-xl font-bold text-stone-100">Mercado de Pujas</h3>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center justify-end sm:justify-start">
+            <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-amber-200">
+              Fondo Perdido
+            </span>
+            <ChevronDown className="ml-3 h-5 w-5 text-stone-500 transition group-open:rotate-180 group-open:text-amber-300" />
+          </div>
+        </summary>
+
+        <div className="mt-5 border-t border-stone-800 pt-5">
+          <Suspense fallback={<EmbeddedLoadingCard message="Abriendo las subastas del reino..." />}>
+            <PlayerAuctionPanel />
           </Suspense>
         </div>
       </details>

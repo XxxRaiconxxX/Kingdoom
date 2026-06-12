@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 11/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/sections/MarketSection.tsx`, `src/components/PlayerAuctionPanel.tsx` [NEW]
+*   **Resumen de Tareas:** Creación de la interfaz web de Subastas para jugadores con soporte transaccional y sincronización en tiempo real.
+*   **Cambios Clave:**
+    *   **[Web - Player UI]:** Se diseñó y desarrolló el componente `PlayerAuctionPanel` con un panel de subastas activas, countdowns individuales en vivo, soporte para el envío de pujas y botón de retiro con confirmaciones.
+    *   **[Web - Integración]:** Se incrustó el panel en `MarketSection.tsx` bajo un nuevo bloque `<details>` premium de color ámbar con el icono `Gavel`.
+    *   **[Web - Realtime]:** Se enlazó el componente a Supabase Realtime para recibir actualizaciones automáticas de ofertas y ganadores al instante sin recarga de página.
+*   **Notas/Advertencias:** Validación de build exitosa (`npm run build` completado en 2m 56s).
+
+### [Fecha: 11/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/src/scheduler.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/handlers/auctions.js` [NEW], `kingdoom-bot/src/handlers/auctionsRealtime.js` [NEW]
 *   **Resumen de Tareas:** Integración completa de la mecánica de Subastas en el Bot de WhatsApp: comandos de jugador, anuncios en tiempo real y resolución automática de expiraciones.
 *   **Cambios Clave:**

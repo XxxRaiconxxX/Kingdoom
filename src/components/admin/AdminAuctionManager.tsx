@@ -318,7 +318,7 @@ export function AdminAuctionManager() {
             />
 
             <NumericInput
-              label="Puja Mínima (+)"
+              label="Incremento Mínimo (+)"
               value={minIncrement}
               onChange={setMinIncrement}
             />

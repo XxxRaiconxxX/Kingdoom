@@ -110,7 +110,7 @@ export function PlayerAuctionPanel() {
     if (bidAmount < minBid) {
       setFeedbackMap((prev) => ({
         ...prev,
-        [auction.id]: { text: `La puja mínima es de ${minBid} oro.`, tone: "error" },
+        [auction.id]: { text: `La oferta mínima requerida es de ${minBid.toLocaleString("es-PY")} oro.`, tone: "error" },
       }));
       return;
     }
@@ -327,7 +327,7 @@ export function PlayerAuctionPanel() {
                       {/* Withdraw action link */}
                       <div className="flex justify-between items-center text-[10px]">
                         <span className="text-stone-500 font-semibold">
-                          Puja mín: 🪙 {minBid.toLocaleString("es-PY")}
+                          Oferta mínima: 🪙 {minBid.toLocaleString("es-PY")}
                         </span>
                         <button
                           type="button"

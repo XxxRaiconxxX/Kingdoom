@@ -103,11 +103,19 @@ export function PlayerAuctionPanel() {
   const handleBidSubmit = async (auction: MarketAuction) => {
     if (!player) return;
 
+    const currentPrice = auction.highestBid > 0 ? auction.highestBid : auction.startPrice;
     const minBid = auction.highestBid > 0 ? auction.highestBid + auction.minIncrement : auction.startPrice;
+    const defaultVal = auction.highestBid > 0 ? auction.minIncrement : auction.startPrice;
+    
     const rawVal = bidAmounts[auction.id];
-    const bidAmount = rawVal !== undefined && rawVal !== "" ? parseInt(rawVal, 10) : minBid;
+    const inputAmount = rawVal !== undefined && rawVal !== "" ? parseInt(rawVal, 10) : defaultVal;
 
-    if (bidAmount < minBid) {
+    let targetAmount = inputAmount;
+    if (inputAmount < currentPrice) {
+      targetAmount = currentPrice + inputAmount;
+    }
+
+    if (targetAmount < minBid) {
       setFeedbackMap((prev) => ({
         ...prev,
         [auction.id]: { text: `La oferta mínima requerida es de ${minBid.toLocaleString("es-PY")} oro.`, tone: "error" },
@@ -115,7 +123,7 @@ export function PlayerAuctionPanel() {
       return;
     }
 
-    if (player.gold < bidAmount) {
+    if (player.gold < targetAmount) {
       setFeedbackMap((prev) => ({
         ...prev,
         [auction.id]: { text: "No tienes suficiente oro para esta puja.", tone: "error" },
@@ -129,7 +137,7 @@ export function PlayerAuctionPanel() {
     const result = await placeAuctionBid({
       playerId: player.id,
       auctionId: auction.id,
-      amount: bidAmount,
+      amount: targetAmount,
     });
 
     setIsSubmittingMap((prev) => ({ ...prev, [auction.id]: false }));
@@ -303,7 +311,8 @@ export function PlayerAuctionPanel() {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            value={bidAmounts[auction.id] !== undefined ? bidAmounts[auction.id] : minBid.toString()}
+                            placeholder={auction.highestBid > 0 ? `Ej. ${auction.minIncrement} o ${minBid}` : `Ej. ${auction.startPrice}`}
+                            value={bidAmounts[auction.id] !== undefined ? bidAmounts[auction.id] : (auction.highestBid > 0 ? auction.minIncrement.toString() : auction.startPrice.toString())}
                             onChange={(e) => {
                               const cleaned = e.target.value.replace(/\D/g, "");
                               setBidAmounts((prev) => ({ ...prev, [auction.id]: cleaned }));

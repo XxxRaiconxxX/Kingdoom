@@ -153,7 +153,7 @@ export function PlayerAuctionPanel() {
     if (!player) return;
 
     const confirm = window.confirm(
-      `¿Seguro que deseas retirarte de la subasta de "${auction.itemName}"?\n\n¡ATENCIÓN! Tu oro ofertado previamente no será devuelto y no podrás volver a pujar en este artículo.`
+      `¿Seguro que deseas retirarte de la subasta de "${auction.itemName}"?\n\n¡ATENCIÓN! Ya no podrás volver a pujar en este artículo. Si eres el líder actual, tu puja seguirá activa y bloqueada hasta que ganes o seas superado.`
     );
     if (!confirm) return;
 
@@ -191,13 +191,13 @@ export function PlayerAuctionPanel() {
 
   return (
     <div className="space-y-6">
-      {/* Aviso general de Coste Hundido */}
+      {/* Aviso general de Reglas de Subasta */}
       <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 flex gap-3 items-start">
         <AlertTriangle className="h-5 w-5 text-amber-300 shrink-0 mt-0.5" />
         <div className="text-xs leading-5 text-amber-200">
-          <p className="font-extrabold uppercase tracking-wide">Regla Especial de Pujas: Fondo Perdido</p>
-          <p className="mt-1 opacity-90">
-            Todas las subastas en Vyralis operan bajo el formato de **coste hundido**. Cada vez que realizas una puja, el oro se descuenta **inmediatamente y de forma permanente** de tu personaje. Si otro aventurero supera tu oferta, tu oro **no será reembolsado**. ¡Oferta con sabiduría y coraje!
+          <p className="font-extrabold uppercase tracking-wide">Reglas de Subastas en Vyralis</p>
+          <p className="mt-1 opacity-90 font-medium">
+            El oro de tu puja se bloqueará temporalmente mientras seas el líder. Si otro aventurero supera tu oferta, tu oro te será **reembolsado de inmediato**. Se descuenta una única **comisión del 25% del valor base del ítem** no reembolsable al ingresar a la subasta.
           </p>
         </div>
       </div>

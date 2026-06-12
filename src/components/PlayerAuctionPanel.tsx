@@ -255,16 +255,20 @@ export function PlayerAuctionPanel() {
                   <div className="space-y-1 text-right">
                     <p className="text-[10px] uppercase tracking-wider text-stone-500">Puja Acumulada</p>
                     <p className="text-sm font-extrabold text-amber-300">
-                      🪙 {(auction.highestBid || auction.startPrice).toLocaleString("es-PY")}
+                      🪙 {auction.highestBid.toLocaleString("es-PY")}
                     </p>
                   </div>
                   <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-stone-500">Precio Inicial</p>
+                    <p className="text-xs text-stone-300">🪙 {auction.startPrice.toLocaleString("es-PY")}</p>
+                  </div>
+                  <div className="space-y-1 text-right">
                     <p className="text-[10px] uppercase tracking-wider text-stone-500">Min. Incremento</p>
                     <p className="text-xs text-stone-400">🪙 {auction.minIncrement.toLocaleString("es-PY")}</p>
                   </div>
-                  <div className="space-y-1 text-right">
-                    <p className="text-[10px] uppercase tracking-wider text-stone-500">Tiempo restante</p>
-                    <div className="flex items-center justify-end gap-1 text-xs text-stone-200">
+                  <div className="col-span-2 border-t border-stone-900/60 pt-2 flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-wider text-stone-500">Tiempo restante</span>
+                    <div className="flex items-center gap-1 text-xs text-stone-200">
                       <Clock className="h-3 w-3 text-stone-400" />
                       <AuctionCountdown expiresAt={auction.expiresAt} onExpire={loadAuctions} />
                     </div>

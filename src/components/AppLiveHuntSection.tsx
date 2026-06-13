@@ -269,10 +269,7 @@ export function AppLiveHuntSection() {
         return;
       }
 
-      const activeSheetId = resolveActivePveSheetId(
-        player.id,
-        sheets.map((sheet) => sheet.id)
-      );
+      const activeSheetId = resolveActivePveSheetId(player.id, sheets);
       const nextSheet = sheets.find((sheet) => sheet.id === activeSheetId) ?? null;
       setActiveSheet(nextSheet);
       setActiveProgress(

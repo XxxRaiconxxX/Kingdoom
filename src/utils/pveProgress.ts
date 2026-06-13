@@ -205,13 +205,16 @@ export function setActivePveSheetId(playerId: string, sheetId: string | null) {
   writeActiveSheetStore(store);
 }
 
-export function resolveActivePveSheetId(playerId: string, availableSheetIds: string[]) {
+export function resolveActivePveSheetId(playerId: string, availableSheets: { id: string }[]) {
   const stored = getActivePveSheetId(playerId);
-  if (stored && availableSheetIds.includes(stored)) {
-    return stored;
+  if (stored) {
+    const matched = availableSheets.find((sheet) => sheet.id === stored);
+    if (matched) {
+      return matched.id;
+    }
   }
 
-  const fallback = availableSheetIds[0] ?? null;
+  const fallback = availableSheets[0]?.id ?? null;
   setActivePveSheetId(playerId, fallback);
   return fallback;
 }

@@ -166,10 +166,7 @@ export function PlayerProfilePanel({
       getPlayerSheets(player.id).then((sheets) => {
         setPlayerSheets(sheets);
         setActiveExpeditionSheetId(
-          resolveActivePveSheetId(
-            player.id,
-            sheets.map((sheet) => sheet.id)
-          )
+          resolveActivePveSheetId(player.id, sheets)
         );
       });
     } else {
@@ -219,10 +216,7 @@ export function PlayerProfilePanel({
 
     const sheets = await getPlayerSheets(player.id);
     setPlayerSheets(sheets);
-    const nextActiveSheetId = resolveActivePveSheetId(
-      player.id,
-      sheets.map((sheet) => sheet.id)
-    );
+    const nextActiveSheetId = resolveActivePveSheetId(player.id, sheets);
     setActiveExpeditionSheetId(nextActiveSheetId);
     return sheets;
   }

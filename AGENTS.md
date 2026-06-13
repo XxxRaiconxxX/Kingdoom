@@ -274,8 +274,8 @@ la trazabilidad de un repo con la del otro.
 
 | Repo            | Trazabilidad (changelog + memoria)              | Remotos del push          |
 |-----------------|-------------------------------------------------|---------------------------|
-| `Kingdoom-sync` | `AI_CHANGELOG.md` + `kingdoom-memory.jsonl` de `Kingdoom-sync` | GitHub + Hugging Face |
-| `kingdoom-bot`  | `AI_CHANGELOG.md` + memoria propios de `kingdoom-bot`          | Remotos propios del bot |
+| `Kingdoom-sync` | `AI_CHANGELOG.md` + `kingdoom-memory.jsonl` de `Kingdoom-sync` | GitHub (`origin`) |
+| `kingdoom-bot`  | `AI_CHANGELOG.md` + memoria propios de `kingdoom-bot`          | GitHub + Hugging Face |
 
 ⛔ Si la tarea fue en `kingdoom-bot`, NO se toca el changelog ni la memoria de
    `Kingdoom-sync`, y viceversa. Cada repo lleva su propio historial.

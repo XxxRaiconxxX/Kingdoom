@@ -3400,3 +3400,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se expandieron las reglas de subidas y cierres en la Sección 7, regulando la detección de intención del usuario (7.2), el mapeo de repositorios y destinos de push (7.3) y la secuencia exacta de cierre de tareas (7.4).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+---
+### [Fecha: 13/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `.gitignore`, `AGENTS.md`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Corrección de remotos de la web en AGENTS.md e ignorado de archivos temporales.
+*   **Cambios Clave:**
+    *   Se corrigieron los remotos de `Kingdoom-sync` en la tabla 7.3 de `AGENTS.md` para especificar que va únicamente a GitHub (origin).
+    *   Se agregaron las carpetas y archivos temporales `scratch/`, `temp_diff.txt` y `repomix-output-*.md` al archivo `.gitignore`.
+*   **Notas/Advertencias:** Ninguno detectado.
+

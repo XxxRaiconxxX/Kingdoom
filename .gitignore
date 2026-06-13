@@ -9,3 +9,8 @@ supabase/.temp/
 .superpowers/
 
 .codegraph/
+
+# Temp files and scratch directories
+scratch/
+temp_diff.txt
+repomix-output-*.md

@@ -3,6 +3,22 @@
 
 create extension if not exists pgcrypto;
 
+create table if not exists public.market_items (
+  id text primary key,
+  name text not null,
+  description text not null,
+  ability text,
+  price integer not null check (price >= 0),
+  rarity text not null check (rarity in ('mythic', 'legendary', 'epic', 'rare', 'common')),
+  image_url text not null,
+  image_fit text,
+  image_position text,
+  category text not null,
+  stock_status text not null,
+  featured boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 alter table public.market_items
 add column if not exists stock_limit integer not null default 0 check (stock_limit >= 0),
 add column if not exists stock_sold integer not null default 0 check (stock_sold >= 0);

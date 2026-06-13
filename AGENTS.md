@@ -192,13 +192,39 @@ pasos UNA SOLA VEZ, en orden, sin que el usuario se lo pida:
 4. Informar al usuario con un resumen de una sola línea:
    "Contexto cargado — último relevo: [fecha]. Listo para trabajar."
 
-⛔ No preguntar al usuario si debe hacer esto. Es obligatorio.
+### Cuándo ocurre el bootstrap (CRÍTICO)
+
+El bootstrap es lo PRIMERO de la sesión. Ocurre ANTES de la primera tarea,
+una sola vez, y nunca más.
+
+⛔ PROHIBIDO ejecutar el bootstrap a mitad de una tarea en curso.
+⛔ PROHIBIDO ejecutar el bootstrap DESPUÉS de hacer un cambio, como si fuera
+   el cierre de la tarea. El bootstrap NO es un reporte ni un cierre.
+⛔ PROHIBIDO terminar una tarea con "Contexto cargado... Listo para trabajar."
+   Esa frase pertenece SOLO al arranque de la sesión, jamás al final de un
+   trabajo. Una tarea se cierra con el reporte de la Sección 8, no con el
+   mensaje de bootstrap.
+
+ORDEN CORRECTO de una sesión:
+  1. Bootstrap (estos 4 pasos) → "Listo para trabajar."
+  2. El usuario asigna una tarea.
+  3. El agente ejecuta la tarea completa (Secciones 9, 10, 11).
+  4. El agente cierra con el reporte de la Sección 8.
+  5. Tareas siguientes repiten pasos 2 a 4. El bootstrap NO se repite.
+
+Si el agente ya hizo el bootstrap en esta sesión y se encuentra explorando el
+changelog o la memoria de nuevo, es señal de que está fuera de foco: debe
+detenerse, volver a la tarea asignada y cerrarla.
+
+⛔ No preguntar al usuario si debe hacer el bootstrap. Es obligatorio.
 ⛔ No iniciar ninguna tarea hasta completar estos pasos.
 
-## 7. Protocolo de Verificación de Subidas (Push/Deploy Honesty)
+## 7. Protocolo de Verificación de Subidas y Cierre de Tarea
 
-Antes de informar al usuario que un cambio fue subido a GitHub o desplegado en
-Hugging Face, el agente DEBE:
+### 7.1 Honestidad en las subidas (regla base)
+
+Antes de informar que un cambio fue subido a GitHub o desplegado en Hugging
+Face, el agente DEBE:
 
 1. Ejecutar el comando real (`git push`, `docker push`, etc.) y esperar la
    respuesta del terminal.
@@ -217,6 +243,68 @@ Hugging Face, el agente DEBE:
 Este protocolo existe porque la confiabilidad del agente depende de que el
 usuario pueda creer lo que se le reporta. Un reporte falso, aunque sea
 involuntario, invalida todo el trabajo de la sesión.
+
+### 7.2 Intención de cierre / subida
+
+El usuario rara vez usará una palabra fija. El agente debe reconocer la
+INTENCIÓN de "cerrar y subir la tarea" en cualquier frase que la exprese,
+no solo en una palabra exacta.
+
+Cuentan como orden de subida, entre otras:
+  "subelo", "subí esto", "dale subí", "mandalo", "publicá", "ya commiteá",
+  "guardá los cambios", "que quede en git", "hacé el push", "subí y commiteá",
+  "cerrá la tarea", "dejalo subido", etc.
+
+El criterio es el sentido, no la coincidencia literal: si el usuario está
+pidiendo que el trabajo recién reportado quede commiteado y subido, esa es la
+orden, y el agente ejecuta la secuencia completa de la sección 7.4.
+
+Si la frase es AMBIGUA, el agente hace UNA pregunta corta de confirmación
+antes de subir, nunca asume. Ejemplo:
+"¿Querés que lo suba ahora (commit + push)?"
+
+⛔ Distinguir cierre de continuación: "seguí", "ahora hacé X", "y también..."
+   NO son órdenes de subida; son nuevas tareas.
+
+### 7.3 Mapa de repos y destinos
+
+La secuencia de subida depende del repo donde se hizo el trabajo. El agente
+identifica el repo ANTES de subir y usa los destinos correctos. Nunca mezcla
+la trazabilidad de un repo con la del otro.
+
+| Repo            | Trazabilidad (changelog + memoria)              | Remotos del push          |
+|-----------------|-------------------------------------------------|---------------------------|
+| `Kingdoom-sync` | `AI_CHANGELOG.md` + `kingdoom-memory.jsonl` de `Kingdoom-sync` | GitHub + Hugging Face |
+| `kingdoom-bot`  | `AI_CHANGELOG.md` + memoria propios de `kingdoom-bot`          | Remotos propios del bot |
+
+⛔ Si la tarea fue en `kingdoom-bot`, NO se toca el changelog ni la memoria de
+   `Kingdoom-sync`, y viceversa. Cada repo lleva su propio historial.
+⛔ Si el agente no tiene certeza de cuáles son los remotos de un repo, ejecuta
+   `git -C [ruta] remote -v` y los lee antes de empujar. No inventa destinos.
+
+### 7.4 Secuencia de cierre completa
+
+Ante una orden de subida clara (sección 7.2), el agente ejecuta esta secuencia
+en este orden exacto, sin pedir confirmación adicional, sobre el repo correcto:
+
+1. Actualizar el `AI_CHANGELOG.md` del repo correspondiente con la entrada del
+   cambio, incluyendo los riesgos abiertos declarados en el reporte, y firmar
+   con el nombre del agente.
+2. Actualizar el archivo de memoria del repo correspondiente.
+3. `git add` SOLO de los archivos de la tarea + los dos de trazabilidad.
+   Nunca `git add .` a ciegas.
+4. `git commit` con mensaje claro y firma de agente.
+5. `git push` a TODOS los remotos que correspondan al repo (ver tabla 7.3).
+6. Mostrar la salida REAL de cada push. No reportar éxito sin ver el OK del
+   terminal (regla 7.1).
+7. Reporte final formato Sección 8 con los comandos y sus salidas reales.
+
+⛔ Una orden de subida SIEMPRE incluye changelog + memoria + commit + push.
+   Nunca es solo el push.
+⛔ El changelog y la memoria van en el MISMO commit que el código, para que el
+   historial quede atómico (código + su registro juntos).
+⛔ Si algún paso falla (ej: push rechazado), el agente DETIENE la secuencia,
+   reporta el error exacto, y NO continúa como si hubiera funcionado.
 
 ## 8. Protocolo de Reportes (Report Discipline)
 

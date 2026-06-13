@@ -3380,3 +3380,23 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ## [2026-06-10] - Supabase Cron Installments
 *   **Archivos Modificados:** supabase_cron_installments.sql, supabase_market_installments.sql 
 *   **Resumen:** Implementaci� de la funci� RPC process_market_installments para el cobro autom疸ico de cuotas con reglas estrictas (1 d僘 de gracia, 5% mora acumulativa diaria, embargo a los 5 d僘s). Bloqueo de compras a cr馘ito limitado a 14 d僘s post-embargo.
+
+---
+### [Fecha: 13/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/index.js` (en kingdoom-bot), `AI_CHANGELOG.md` (en Kingdoom-sync), `ai-memory/kingdoom-memory.jsonl` (en Kingdoom-sync)
+*   **Resumen de Tareas:** Cierre de navegadores huerfanos al fallar la inicializacion del bot en reintentos.
+*   **Cambios Clave:**
+    *   Implementacion de la limpieza de `client.pupBrowser` ante excepciones en el metodo `initializeClientWithRetry` de `src/index.js`.
+    *   Esto previene que queden procesos de Chromium huerfanos (zombies) que bloquean la sesion de WhatsApp con el error "browser is already running".
+    *   Se registro el cambio en la memoria del proyecto (jsonl) y se documentaron los riesgos.
+*   **Notas/Advertencias:** Riesgo abierto de bloqueo de IP/numero por parte de WhatsApp al operar en la infraestructura de Hugging Face.
+
+---
+### [Fecha: 13/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `AGENTS.md`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Actualización de protocolos en AGENTS.md (bootstrap, cierre y subidas).
+*   **Cambios Clave:**
+    *   Se integró la subsección "Cuándo ocurre el bootstrap (CRÍTICO)" aclarando las fases y el flujo ordenado de una sesión.
+    *   Se expandieron las reglas de subidas y cierres en la Sección 7, regulando la detección de intención del usuario (7.2), el mapeo de repositorios y destinos de push (7.3) y la secuencia exacta de cierre de tareas (7.4).
+*   **Notas/Advertencias:** Ninguno detectado.
+

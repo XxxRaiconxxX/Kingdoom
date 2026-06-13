@@ -336,7 +336,9 @@ export function PlayerAuctionPanel() {
                       {/* Withdraw action link */}
                       <div className="flex justify-between items-center text-[10px]">
                         <span className="text-stone-500 font-semibold">
-                          Oferta mínima: 🪙 {minBid.toLocaleString("es-PY")}
+                          {auction.highestBid > 0 
+                            ? `Mínimo a sumar: 🪙 ${auction.minIncrement.toLocaleString("es-PY")}` 
+                            : `Puja mínima inicial: 🪙 ${auction.startPrice.toLocaleString("es-PY")}`}
                         </span>
                         <button
                           type="button"

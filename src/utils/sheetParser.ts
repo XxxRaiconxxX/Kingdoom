@@ -72,37 +72,29 @@ export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
     | "weaknesses"
     | "inventory";
 
-  const LABELS: Array<{ key: FieldKey; match: (normalized: string) => boolean }> =
-    [
-      {
-        key: "name",
-        match: (l) =>
-          l.startsWith("nombre completo") ||
-          l.startsWith("nombre completo/apodo") ||
-          l.startsWith("nombre completo/ apodo") ||
-          l === "nombre",
-      },
-      { key: "age", match: (l) => l.startsWith("edad") },
-      { key: "gender", match: (l) => l.startsWith("genero") },
-      { key: "height", match: (l) => l.startsWith("estatura") },
-      { key: "race", match: (l) => l.startsWith("raza") },
-      { key: "powers", match: (l) => l.startsWith("poderes oficiales") },
-      { key: "weapon", match: (l) => l.startsWith("arma principal") },
-      { key: "combatStyle", match: (l) => l.startsWith("estilo de combate") },
-      {
-        key: "birthRealm",
-        match: (l) => l.startsWith("reino donde nacio") || l.startsWith("reino donde naci"),
-      },
-      { key: "socialClass", match: (l) => l.startsWith("clase social") },
-      { key: "nobleTitle", match: (l) => l.startsWith("titulo de nobleza") },
-      { key: "profession", match: (l) => l.startsWith("profesion") },
-      { key: "nonMagicSkills", match: (l) => l.startsWith("habilidades no magicas") },
-      { key: "personality", match: (l) => l.startsWith("personalidad") },
-      { key: "history", match: (l) => l.startsWith("historia") },
-      { key: "extras", match: (l) => l.startsWith("extras") },
-      { key: "weaknesses", match: (l) => l.startsWith("debilidades") },
-      { key: "inventory", match: (l) => l.startsWith("inventario") },
-    ];
+  const PREFIXES: Array<[string, FieldKey]> = [
+    ["nombre completo/apodo", "name"],
+    ["nombre completo/ apodo", "name"],
+    ["nombre completo", "name"],
+    ["edad", "age"],
+    ["genero", "gender"],
+    ["estatura", "height"],
+    ["raza", "race"],
+    ["poderes oficiales", "powers"],
+    ["arma principal", "weapon"],
+    ["estilo de combate", "combatStyle"],
+    ["reino donde nacio", "birthRealm"],
+    ["reino donde naci", "birthRealm"],
+    ["clase social", "socialClass"],
+    ["titulo de nobleza", "nobleTitle"],
+    ["profesion", "profession"],
+    ["habilidades no magicas", "nonMagicSkills"],
+    ["personalidad", "personality"],
+    ["historia", "history"],
+    ["extras", "extras"],
+    ["debilidades", "weaknesses"],
+    ["inventario", "inventory"],
+  ];
 
   const result: Partial<CharacterSheet> = {};
 
@@ -125,10 +117,21 @@ export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
       continue;
     }
 
-    const label = LABELS.find(({ match }) => match(normalizedLine));
-    if (label) {
+    let matchedKey: FieldKey | null = null;
+    if (normalizedLine === "nombre") {
+      matchedKey = "name";
+    } else {
+      for (let i = 0; i < PREFIXES.length; i++) {
+        if (normalizedLine.startsWith(PREFIXES[i][0])) {
+          matchedKey = PREFIXES[i][1];
+          break;
+        }
+      }
+    }
+
+    if (matchedKey) {
       flush();
-      currentKey = label.key;
+      currentKey = matchedKey;
 
       // Inline value after ":" (e.g. "Edad: 200")
       const colonIndex = line.indexOf(":");
@@ -148,9 +151,11 @@ export function parseWhatsAppSheet(rawText: string): Partial<CharacterSheet> {
 
   flush();
 
+  const rawLines = rawText.replace(/\r\n/g, "\n").split("\n");
   const extractStatFromLines = (label: string) => {
     const normalizedLabel = normalizeKey(label);
-    for (const line of rawText.replace(/\r\n/g, "\n").split("\n")) {
+    for (let i = 0; i < rawLines.length; i++) {
+      const line = rawLines[i];
       const trimmed = line.trim();
       if (!trimmed) continue;
       const normalized = normalizeKey(trimmed);

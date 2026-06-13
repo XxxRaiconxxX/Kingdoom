@@ -6,7 +6,11 @@ import type {
   AnimeSeriesSummary,
 } from "./animeHub.types";
 
-type ProviderSource = "anime-website" | "anime-platform" | "animeflv" | "tioanime";
+type ProviderSource =
+  | "anime-website"
+  | "anime-platform"
+  | "animeflv"
+  | "tioanime";
 
 type SeriesReference = {
   source: ProviderSource;
@@ -30,7 +34,8 @@ const ANIME_WEBSITE_API_KEY = import.meta.env.VITE_ANIME_WEBSITE_API_KEY;
 const ANIME_PLATFORM_BASE_URL = import.meta.env.VITE_ANIME_PLATFORM_API_URL;
 const ANIME_PLATFORM_API_KEY = import.meta.env.VITE_ANIME_PLATFORM_API_KEY;
 const ANIMEFLV_BASE_URL = import.meta.env.VITE_ANIMEFLV_API_URL;
-const ANIME_HUB_API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY || "kingdoom-secret-key-2026";
+const ANIME_HUB_API_KEY =
+  import.meta.env.VITE_ANIME_HUB_API_KEY || "kingdoom-secret-key-2026";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=80";
@@ -44,7 +49,9 @@ const PLACEHOLDER_PALETTES = [
 ] as const;
 
 function hasRemoteAnimeProvider() {
-  return Boolean(ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL || ANIMEFLV_BASE_URL);
+  return Boolean(
+    ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL || ANIMEFLV_BASE_URL,
+  );
 }
 
 function endpoint(path: string, baseUrl?: string) {
@@ -66,7 +73,11 @@ function requestHeaders(apiKey?: string) {
   };
 }
 
-async function fetchJson<T = any>(url: string, headers?: HeadersInit, timeout = 8000) {
+async function fetchJson<T = any>(
+  url: string,
+  headers?: HeadersInit,
+  timeout = 8000,
+) {
   // Mejora 2: Caché de Sesión
   const cacheKey = `anime_cache_${url}`;
   const cached = sessionStorage.getItem(cacheKey);
@@ -89,12 +100,12 @@ async function fetchJson<T = any>(url: string, headers?: HeadersInit, timeout = 
       return null;
     }
     const result = await response.json();
-    
+
     // Guardar en caché si es exitoso
     if (result) {
       sessionStorage.setItem(cacheKey, JSON.stringify(result));
     }
-    
+
     return result as T;
   } catch (error) {
     clearTimeout(id);
@@ -116,7 +127,7 @@ function normalizeGenres(value: unknown): string[] {
     .map((genre) =>
       typeof genre === "string"
         ? genre
-        : genre?.name ?? genre?.title ?? genre?.genre
+        : (genre?.name ?? genre?.title ?? genre?.genre),
     )
     .filter(Boolean);
 }
@@ -160,7 +171,8 @@ function escapeSvgText(value: string) {
 
 function makeGeneratedCover(title: string, variant = 0) {
   const seed = hashText(`${title}-${variant}`);
-  const [base, accent, ink] = PLACEHOLDER_PALETTES[seed % PLACEHOLDER_PALETTES.length];
+  const [base, accent, ink] =
+    PLACEHOLDER_PALETTES[seed % PLACEHOLDER_PALETTES.length];
   const initials =
     title
       .split(/\s+/)
@@ -201,13 +213,15 @@ function makeGeneratedCover(title: string, variant = 0) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-function encodeReference<T extends SeriesReference | EpisodeReference>(payload: T) {
+function encodeReference<T extends SeriesReference | EpisodeReference>(
+  payload: T,
+) {
   return `${payload.source}::${encodeURIComponent(JSON.stringify(payload))}`;
 }
 
 function decodeReference<T extends SeriesReference | EpisodeReference>(
   value: string,
-  fallbackSource: ProviderSource
+  fallbackSource: ProviderSource,
 ) {
   const [source, encoded] = value.split("::", 2);
 
@@ -235,12 +249,16 @@ function pickImage(baseUrl: string | undefined, item: any) {
       item?.coverImage,
       item?.thumbnail,
       item?.thumbnailUrl,
-      item?.img
+      item?.img,
     ) ?? FALLBACK_IMAGE
   );
 }
 
-function pickBanner(baseUrl: string | undefined, item: any, coverImage: string) {
+function pickBanner(
+  baseUrl: string | undefined,
+  item: any,
+  coverImage: string,
+) {
   return (
     normalizeAssetUrl(
       baseUrl,
@@ -250,7 +268,7 @@ function pickBanner(baseUrl: string | undefined, item: any, coverImage: string) 
       item?.bannerUrl,
       item?.bannerImage,
       item?.image,
-      item?.imageUrl
+      item?.imageUrl,
     ) ?? coverImage
   );
 }
@@ -273,7 +291,7 @@ function providerLabel(source: ProviderSource) {
 function normalizeSummary(
   source: ProviderSource,
   item: any,
-  fallbackRef?: Partial<SeriesReference>
+  fallbackRef?: Partial<SeriesReference>,
 ): AnimeSeriesSummary {
   const baseUrl =
     source === "anime-website"
@@ -281,10 +299,11 @@ function normalizeSummary(
       : source === "anime-platform"
         ? ANIME_PLATFORM_BASE_URL
         : source === "tioanime"
-          ? ANIMEFLV_BASE_URL 
+          ? ANIMEFLV_BASE_URL
           : ANIMEFLV_BASE_URL;
   const coverImage = pickImage(baseUrl, item);
-  const title = item?.title ?? item?.name ?? fallbackRef?.title ?? "Titulo no disponible";
+  const title =
+    item?.title ?? item?.name ?? fallbackRef?.title ?? "Titulo no disponible";
   const rawUrl = item?.url ?? item?.link ?? item?.href ?? fallbackRef?.url;
   const rawId =
     item?.id ??
@@ -321,11 +340,15 @@ function normalizeSummary(
         item?.releaseYear ??
         item?.seasonYear ??
         item?.releaseDate?.slice?.(0, 4) ??
-        "N/A"
+        "N/A",
     ),
     statusLabel: item?.status ?? item?.statusLabel ?? item?.state ?? "Catalogo",
     providerLabel: providerLabel(source),
-    score: item?.score ? String(item.score) : item?.rating ? String(item.rating) : undefined,
+    score: item?.score
+      ? String(item.score)
+      : item?.rating
+        ? String(item.rating)
+        : undefined,
   };
 }
 
@@ -389,13 +412,17 @@ function normalizeEpisodes(
   source: ProviderSource,
   value: unknown,
   fallbackUrl?: string,
-  seriesId?: string
+  seriesId?: string,
 ): AnimeEpisodeSummary[] {
   return asList<any>(value).map((episode, index) => {
     const number = Number(episode?.number ?? episode?.episode ?? index + 1);
     const episodeUrl = episode?.url ?? episode?.link ?? episode?.href;
     const episodeId =
-      episode?.id ?? episode?._id ?? episode?.episodeId ?? episodeUrl ?? `episode-${number}`;
+      episode?.id ??
+      episode?._id ??
+      episode?.episodeId ??
+      episodeUrl ??
+      `episode-${number}`;
 
     return {
       id: encodeReference<EpisodeReference>({
@@ -416,20 +443,32 @@ function normalizeEpisodes(
 function normalizeDetail(
   source: ProviderSource,
   raw: any,
-  fallbackRef: SeriesReference
+  fallbackRef: SeriesReference,
 ): AnimeSeriesDetail {
   const item = unwrapPayload(raw);
   const summary = normalizeSummary(source, item, fallbackRef);
-  const episodes = normalizeEpisodes(source, item?.episodes, fallbackRef.url, fallbackRef.id);
+  const episodes = normalizeEpisodes(
+    source,
+    item?.episodes,
+    fallbackRef.url,
+    fallbackRef.id,
+  );
   const synopsis = summary.synopsis;
 
   return {
     ...summary,
     episodeCount: Number(
-      item?.totalEpisodes ?? item?.episodeCount ?? item?.episodesCount ?? episodes.length
+      item?.totalEpisodes ??
+        item?.episodeCount ??
+        item?.episodesCount ??
+        episodes.length,
     ),
     releaseWindow: String(
-      item?.season ?? item?.year ?? item?.releaseWindow ?? item?.seasonYear ?? "N/A"
+      item?.season ??
+        item?.year ??
+        item?.releaseWindow ??
+        item?.seasonYear ??
+        "N/A",
     ),
     featuredQuote:
       synopsis.length > 150 ? `${synopsis.slice(0, 150).trim()}...` : synopsis,
@@ -449,7 +488,9 @@ function normalizeLinks(raw: any): AnimeEpisodeLinks {
 
   // Detectar si servers o downloads son arrays directos (común en scrapers simples como AnimeFLV/TioAnime)
   const directServers = Array.isArray(info?.servers) ? info.servers : undefined;
-  const directDownloads = Array.isArray(info?.downloads ?? info?.download) ? (info.downloads ?? info.download) : undefined;
+  const directDownloads = Array.isArray(info?.downloads ?? info?.download)
+    ? (info.downloads ?? info.download)
+    : undefined;
 
   return {
     stream: [
@@ -460,11 +501,13 @@ function normalizeLinks(raw: any): AnimeEpisodeLinks {
     download: [
       ...flattenVariant(info?.downloadLinks?.SUB, "SUB"),
       ...flattenVariant(info?.downloadLinks?.DUB, "DUB"),
-      ...flattenVariant(info?.download ?? info?.downloads ?? directDownloads, ""),
+      ...flattenVariant(
+        info?.download ?? info?.downloads ?? directDownloads,
+        "",
+      ),
     ],
   };
 }
-
 
 async function searchAnimeWebsiteCatalog(query: string) {
   const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
@@ -473,31 +516,78 @@ async function searchAnimeWebsiteCatalog(query: string) {
   proxyUrl.searchParams.set("query", query);
 
   const data = await fetchJson(proxyUrl.toString());
-  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/search/media/anime-database?title=${encodeURIComponent(query)}&limit=12`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
+  const finalData =
+    data ||
+    (ANIME_WEBSITE_BASE_URL
+      ? await fetchJson(
+          endpoint(
+            `/search/media/anime-database?title=${encodeURIComponent(query)}&limit=12`,
+            ANIME_WEBSITE_BASE_URL,
+          ),
+          requestHeaders(ANIME_WEBSITE_API_KEY),
+        )
+      : null);
 
-  return asList<any>(finalData?.results ?? finalData?.data?.results ?? finalData?.data ?? finalData).map((item) =>
-    normalizeSummary("anime-website", item)
-  );
+  return asList<any>(
+    finalData?.results ??
+      finalData?.data?.results ??
+      finalData?.data ??
+      finalData,
+  ).map((item) => normalizeSummary("anime-website", item));
 }
 
 async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
-  const candidates = [reference.id, reference.title].filter(Boolean) as string[];
-  for (const query of candidates) {
+  const candidates = [reference.id, reference.title].filter(
+    Boolean,
+  ) as string[];
+
+  const promises = candidates.map(async (query) => {
     const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
     proxyUrl.searchParams.set("provider", "anime-website");
     proxyUrl.searchParams.set("action", "search");
     proxyUrl.searchParams.set("query", query);
 
     const data = await fetchJson(proxyUrl.toString());
-    const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/search/anime/consumet/gogoanime?query=${encodeURIComponent(query)}`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
+    const finalData =
+      data ||
+      (ANIME_WEBSITE_BASE_URL
+        ? await fetchJson(
+            endpoint(
+              `/search/anime/consumet/gogoanime?query=${encodeURIComponent(query)}`,
+              ANIME_WEBSITE_BASE_URL,
+            ),
+            requestHeaders(ANIME_WEBSITE_API_KEY),
+          )
+        : null);
 
-    const results = asList<any>(finalData?.results ?? finalData?.data?.results ?? finalData?.data ?? finalData);
+    return asList<any>(
+      finalData?.results ??
+        finalData?.data?.results ??
+        finalData?.data ??
+        finalData,
+    );
+  });
+
+  const resultsArray = await Promise.all(promises);
+
+  for (const results of resultsArray) {
     const bestMatch =
       results.find((item) => {
-        const itemTitle = String(item?.title ?? item?.name ?? "").toLowerCase().trim();
-        const refTitle = String(reference.title ?? "").toLowerCase().trim();
-        const refId = String(reference.id ?? "").toLowerCase().trim();
-        return itemTitle === refTitle || String(item?.id ?? "").toLowerCase().trim() === refId;
+        const itemTitle = String(item?.title ?? item?.name ?? "")
+          .toLowerCase()
+          .trim();
+        const refTitle = String(reference.title ?? "")
+          .toLowerCase()
+          .trim();
+        const refId = String(reference.id ?? "")
+          .toLowerCase()
+          .trim();
+        return (
+          itemTitle === refTitle ||
+          String(item?.id ?? "")
+            .toLowerCase()
+            .trim() === refId
+        );
       }) ?? results[0];
 
     if (bestMatch) {
@@ -515,11 +605,24 @@ async function fetchAnimeWebsiteEpisodes(seriesId: string) {
   proxyUrl.searchParams.set("id", seriesId);
 
   const data = await fetchJson(proxyUrl.toString());
-  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/episodes/consumet/gogoanime/all?id=${encodeURIComponent(seriesId)}`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
+  const finalData =
+    data ||
+    (ANIME_WEBSITE_BASE_URL
+      ? await fetchJson(
+          endpoint(
+            `/episodes/consumet/gogoanime/all?id=${encodeURIComponent(seriesId)}`,
+            ANIME_WEBSITE_BASE_URL,
+          ),
+          requestHeaders(ANIME_WEBSITE_API_KEY),
+        )
+      : null);
 
   return normalizeEpisodes(
     "anime-website",
-    finalData?.episodes ?? finalData?.data?.episodes ?? finalData?.data ?? finalData
+    finalData?.episodes ??
+      finalData?.data?.episodes ??
+      finalData?.data ??
+      finalData,
   );
 }
 
@@ -532,10 +635,23 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
   const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
   proxyUrl.searchParams.set("provider", "anime-website");
   proxyUrl.searchParams.set("action", "detail");
-  proxyUrl.searchParams.set("id", String(seed?.id ?? seed?.title ?? reference.title ?? ""));
+  proxyUrl.searchParams.set(
+    "id",
+    String(seed?.id ?? seed?.title ?? reference.title ?? ""),
+  );
 
   const detailData = await fetchJson(proxyUrl.toString());
-  const finalDetailData = detailData || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/media-info/anime/consumet/gogoanime?query=${encodeURIComponent(String(seed?.id ?? seed?.title ?? reference.title ?? ""))}`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
+  const finalDetailData =
+    detailData ||
+    (ANIME_WEBSITE_BASE_URL
+      ? await fetchJson(
+          endpoint(
+            `/media-info/anime/consumet/gogoanime?query=${encodeURIComponent(String(seed?.id ?? seed?.title ?? reference.title ?? ""))}`,
+            ANIME_WEBSITE_BASE_URL,
+          ),
+          requestHeaders(ANIME_WEBSITE_API_KEY),
+        )
+      : null);
 
   if (!finalDetailData) {
     return normalizeDetail("anime-website", seed, {
@@ -557,7 +673,9 @@ async function fetchAnimeWebsiteDetail(reference: SeriesReference) {
     return detail;
   }
 
-  const fallbackEpisodes = await fetchAnimeWebsiteEpisodes(String(seed?.id ?? reference.id ?? ""));
+  const fallbackEpisodes = await fetchAnimeWebsiteEpisodes(
+    String(seed?.id ?? reference.id ?? ""),
+  );
   return {
     ...detail,
     episodes: fallbackEpisodes,
@@ -576,23 +694,37 @@ async function fetchAnimeWebsiteLinks(reference: EpisodeReference) {
   proxyUrl.searchParams.set("id", reference.id);
 
   const data = await fetchJson(proxyUrl.toString());
-  const finalData = data || (ANIME_WEBSITE_BASE_URL ? await fetchJson(endpoint(`/episodes/consumet/gogoanime/episode?id=${encodeURIComponent(reference.id)}`, ANIME_WEBSITE_BASE_URL), requestHeaders(ANIME_WEBSITE_API_KEY)) : null);
+  const finalData =
+    data ||
+    (ANIME_WEBSITE_BASE_URL
+      ? await fetchJson(
+          endpoint(
+            `/episodes/consumet/gogoanime/episode?id=${encodeURIComponent(reference.id)}`,
+            ANIME_WEBSITE_BASE_URL,
+          ),
+          requestHeaders(ANIME_WEBSITE_API_KEY),
+        )
+      : null);
 
   if (!finalData) {
     return null;
   }
 
   const info = unwrapPayload(finalData);
-  const stream = asList<any>(info?.sources ?? info?.streams ?? info?.stream).map((entry) => ({
+  const stream = asList<any>(
+    info?.sources ?? info?.streams ?? info?.stream,
+  ).map((entry) => ({
     server: entry?.server ?? entry?.quality ?? "Servidor",
     url: entry?.url ?? entry?.link ?? "#",
     quality: entry?.quality,
   }));
-  const download = asList<any>(info?.downloads ?? info?.download).map((entry) => ({
-    server: entry?.server ?? entry?.quality ?? "Descarga",
-    url: entry?.url ?? entry?.link ?? "#",
-    quality: entry?.quality,
-  }));
+  const download = asList<any>(info?.downloads ?? info?.download).map(
+    (entry) => ({
+      server: entry?.server ?? entry?.quality ?? "Descarga",
+      url: entry?.url ?? entry?.link ?? "#",
+      quality: entry?.quality,
+    }),
+  );
 
   return { stream, download };
 }
@@ -608,9 +740,9 @@ async function fetchAnimeFlvLinks(reference: EpisodeReference) {
   try {
     const baseUrl = "https://scraping-web-anime-api.vercel.app";
     const targetUrl = `${baseUrl}/api/episode/${seriesSlug}-${episodeNumber}?source=animeflv`;
-    
+
     const data = await fetchJson(targetUrl, {
-      "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
+      Authorization: `Bearer ${ANIME_HUB_API_KEY}`,
     });
 
     if (!data) return null;
@@ -627,33 +759,39 @@ async function searchTioAnime(query: string) {
   const baseUrl = "https://scraping-web-anime-api.vercel.app";
   const params = new URLSearchParams({
     q: query,
-    source: "tioanime"
+    source: "tioanime",
   });
-  
+
   const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, {
-    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
+    Authorization: `Bearer ${ANIME_HUB_API_KEY}`,
   });
   const payload = unwrapPayload(data);
   return asList<any>(payload?.results ?? payload).map((item) =>
-    normalizeSummary("tioanime", item)
+    normalizeSummary("tioanime", item),
   );
 }
 
 async function fetchTioAnimeDetail(reference: SeriesReference) {
   if (!reference.id) return null;
   const baseUrl = "https://scraping-web-anime-api.vercel.app";
-  const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=tioanime`, {
-    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
-  });
+  const data = await fetchJson(
+    `${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=tioanime`,
+    {
+      Authorization: `Bearer ${ANIME_HUB_API_KEY}`,
+    },
+  );
   return normalizeDetail("tioanime", unwrapPayload(data), reference);
 }
 
 async function fetchTioAnimeLinks(reference: EpisodeReference) {
   if (!reference.id) return null;
   const baseUrl = "https://scraping-web-anime-api.vercel.app";
-  const data = await fetchJson(`${baseUrl}/api/episode/${encodeURIComponent(reference.id)}?source=tioanime`, {
-    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
-  });
+  const data = await fetchJson(
+    `${baseUrl}/api/episode/${encodeURIComponent(reference.id)}?source=tioanime`,
+    {
+      Authorization: `Bearer ${ANIME_HUB_API_KEY}`,
+    },
+  );
   // normalizeLinks ya maneja el unwrap interno
   return normalizeLinks(data);
 }
@@ -670,9 +808,12 @@ async function searchAnimePlatform(query: string, genre?: string) {
     url.searchParams.set("genre", genre);
   }
 
-  const data = await fetchJson(url.toString(), requestHeaders(ANIME_PLATFORM_API_KEY));
+  const data = await fetchJson(
+    url.toString(),
+    requestHeaders(ANIME_PLATFORM_API_KEY),
+  );
   return asList<any>(data?.data ?? data?.results ?? data).map((item) =>
-    normalizeSummary("anime-platform", item)
+    normalizeSummary("anime-platform", item),
   );
 }
 
@@ -680,18 +821,27 @@ async function searchAnimeFlv(query: string) {
   const baseUrl = "https://scraping-web-anime-api.vercel.app";
   const params = new URLSearchParams({
     q: query,
-    source: "animeflv"
+    source: "animeflv",
   });
-  
+
   const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, {
-    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
+    Authorization: `Bearer ${ANIME_HUB_API_KEY}`,
   });
   const payload = unwrapPayload(data);
-  const finalData = payload || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/search?query=${encodeURIComponent(query)}&page=1`, ANIMEFLV_BASE_URL)) : null);
+  const finalData =
+    payload ||
+    (ANIMEFLV_BASE_URL
+      ? await fetchJson(
+          endpoint(
+            `/search?query=${encodeURIComponent(query)}&page=1`,
+            ANIMEFLV_BASE_URL,
+          ),
+        )
+      : null);
 
-  return asList<any>(finalData?.results ?? finalData?.media ?? finalData?.data ?? finalData).map((item) =>
-    normalizeSummary("animeflv", item)
-  );
+  return asList<any>(
+    finalData?.results ?? finalData?.media ?? finalData?.data ?? finalData,
+  ).map((item) => normalizeSummary("animeflv", item));
 }
 
 async function fetchAnimeFlvDetail(reference: SeriesReference) {
@@ -700,11 +850,23 @@ async function fetchAnimeFlvDetail(reference: SeriesReference) {
   }
 
   const baseUrl = "https://scraping-web-anime-api.vercel.app";
-  const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=animeflv`, {
-    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
-  });
+  const data = await fetchJson(
+    `${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=animeflv`,
+    {
+      Authorization: `Bearer ${ANIME_HUB_API_KEY}`,
+    },
+  );
   const payload = unwrapPayload(data);
-  const finalData = payload || (ANIMEFLV_BASE_URL ? await fetchJson(endpoint(`/anime/${encodeURIComponent(reference.id)}`, ANIMEFLV_BASE_URL)) : null);
+  const finalData =
+    payload ||
+    (ANIMEFLV_BASE_URL
+      ? await fetchJson(
+          endpoint(
+            `/anime/${encodeURIComponent(reference.id)}`,
+            ANIMEFLV_BASE_URL,
+          ),
+        )
+      : null);
 
   if (!finalData) {
     return normalizeDetail("animeflv", {}, reference);
@@ -718,14 +880,18 @@ async function fetchAnimePlatformDetail(reference: SeriesReference) {
     return null;
   }
 
-  const candidates = [reference.title, reference.id].filter(Boolean) as string[];
+  const candidates = [reference.title, reference.id].filter(
+    Boolean,
+  ) as string[];
   for (const query of candidates) {
     const results = await searchAnimePlatform(query);
     const match =
       results.find(
         (item) =>
           item.title.toLowerCase().trim() ===
-          String(reference.title ?? "").toLowerCase().trim()
+          String(reference.title ?? "")
+            .toLowerCase()
+            .trim(),
       ) ?? results[0];
 
     if (match) {
@@ -766,7 +932,11 @@ function sortByCoverage(items: AnimeSeriesSummary[]) {
 async function enrichWithJikan(title: string) {
   try {
     const query = title.split("(")[0].trim();
-    const data = await fetchJson(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=1`, undefined, 5000);
+    const data = await fetchJson(
+      `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=1`,
+      undefined,
+      5000,
+    );
     const mal = data?.data?.[0];
     if (!mal) return null;
 
@@ -774,10 +944,11 @@ async function enrichWithJikan(title: string) {
       score: mal.score,
       synopsis: mal.synopsis,
       trailer: mal.trailer?.embed_url,
-      image: mal.images?.webp?.large_image_url || mal.images?.jpg?.large_image_url,
+      image:
+        mal.images?.webp?.large_image_url || mal.images?.jpg?.large_image_url,
       genres: mal.genres?.map((g: any) => g.name) || [],
       status: mal.status,
-      year: mal.year
+      year: mal.year,
     };
   } catch (e) {
     return null;
@@ -791,7 +962,8 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
   endpointMap: {
     search: "/search/media/anime-database | /search | /api/v1/anime",
     info: "/media-info/anime/consumet/gogoanime | /anime/{slug}",
-    episode: "/episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all | /anime/{slug}/episode/{number}",
+    episode:
+      "/episodes/consumet/gogoanime/episode | /episodes/consumet/gogoanime/all | /anime/{slug}/episode/{number}",
     download: "Integrado por proveedor remoto",
     batch: "No configurado",
   },
@@ -806,27 +978,46 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
       const collected: AnimeSeriesSummary[] = [];
 
       for (const variant of variants) {
-        if (ANIME_WEBSITE_BASE_URL && (!provider || provider === "all" || provider === "anime-website")) {
+        if (
+          ANIME_WEBSITE_BASE_URL &&
+          (!provider || provider === "all" || provider === "anime-website")
+        ) {
           collected.push(...(await searchAnimeWebsiteCatalog(variant)));
         }
 
-        if (collected.length < 12 && ANIME_PLATFORM_BASE_URL && (!provider || provider === "all" || provider === "anime-platform")) {
+        if (
+          collected.length < 12 &&
+          ANIME_PLATFORM_BASE_URL &&
+          (!provider || provider === "all" || provider === "anime-platform")
+        ) {
           collected.push(...(await searchAnimePlatform(variant, genre)));
         }
 
-        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "animeflv")) {
+        if (
+          collected.length < 12 &&
+          ANIMEFLV_BASE_URL &&
+          (!provider || provider === "all" || provider === "animeflv")
+        ) {
           collected.push(...(await searchAnimeFlv(variant)));
         }
 
-        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "tioanime")) {
+        if (
+          collected.length < 12 &&
+          ANIMEFLV_BASE_URL &&
+          (!provider || provider === "all" || provider === "tioanime")
+        ) {
           collected.push(...(await searchTioAnime(variant)));
         }
 
         // Mejora 3: Smart Fallback si el proveedor específico falló
         if (collected.length === 0 && provider && provider !== "all") {
-          console.log(`Smart Fallback: No results in ${provider}, trying other sources...`);
-          if (provider === "tioanime") collected.push(...(await searchAnimeFlv(variant)));
-          else if (provider === "animeflv") collected.push(...(await searchTioAnime(variant)));
+          console.log(
+            `Smart Fallback: No results in ${provider}, trying other sources...`,
+          );
+          if (provider === "tioanime")
+            collected.push(...(await searchAnimeFlv(variant)));
+          else if (provider === "animeflv")
+            collected.push(...(await searchTioAnime(variant)));
         }
 
         if (collected.length >= 12) {
@@ -846,7 +1037,10 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     }
 
     try {
-      const reference = decodeReference<SeriesReference>(seriesId, "anime-website");
+      const reference = decodeReference<SeriesReference>(
+        seriesId,
+        "anime-website",
+      );
 
       let detail: AnimeSeriesDetail | null = null;
       switch (reference.source) {
@@ -869,7 +1063,9 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
         const extra = await enrichWithJikan(detail.title);
         if (extra) {
           detail.synopsis = extra.synopsis || detail.synopsis;
-          detail.genres = [...new Set([...(detail.genres || []), ...extra.genres])];
+          detail.genres = [
+            ...new Set([...(detail.genres || []), ...extra.genres]),
+          ];
           // Mejora de imagen HD
           if (extra.image) {
             detail.bannerImage = extra.image;
@@ -893,7 +1089,10 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
     }
 
     try {
-      const reference = decodeReference<EpisodeReference>(episodeId, "anime-website");
+      const reference = decodeReference<EpisodeReference>(
+        episodeId,
+        "anime-website",
+      );
 
       switch (reference.source) {
         case "anime-website":

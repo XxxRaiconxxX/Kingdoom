@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 13/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `AGENTS.md`
+*   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.
+*   **Cambios Clave:**
+    *   **[Documentación - Agentes]:** Se reestructuraron las secciones 1 a 5 de `AGENTS.md` para incluir el nuevo Working Directory, la arquitectura del repositorio completa (los nuevos minijuegos, vistas de administración y modales de pago), las reglas de negocio de cuotas e intereses de financiación, las nuevas tablas y RPCs de Supabase y las convenciones premium de diseño de UI/UX. Las secciones 6, 7 y 8 se mantuvieron intactas.
+
 ### [Fecha: 11/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/sections/MarketSection.tsx`, `src/components/PlayerAuctionPanel.tsx` [NEW]
 *   **Resumen de Tareas:** Creación de la interfaz web de Subastas para jugadores con soporte transaccional y sincronización en tiempo real.

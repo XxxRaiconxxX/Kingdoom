@@ -3409,3 +3409,11 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se agregaron las carpetas y archivos temporales `scratch/`, `temp_diff.txt` y `repomix-output-*.md` al archivo `.gitignore`.
 *   **Notas/Advertencias:** Ninguno detectado.
 
+---
+### [Fecha: 13/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `AGENTS.md`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Adición de directrices para agentes asíncronos (Jules) en AGENTS.md.
+*   **Cambios Clave:**
+    *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
+*   **Notas/Advertencias:** Ninguno detectado.
+

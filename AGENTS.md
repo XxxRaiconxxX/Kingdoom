@@ -306,6 +306,23 @@ en este orden exacto, sin pedir confirmación adicional, sobre el repo correcto:
 ⛔ Si algún paso falla (ej: push rechazado), el agente DETIENE la secuencia,
    reporta el error exacto, y NO continúa como si hubiera funcionado.
 
+### 7.5 Nota sobre agentes asíncronos (Jules)
+
+Jules trabaja de forma asíncrona en una VM en la nube (no en la máquina local
+del usuario). Aunque pushea directo a `main` como el resto, aplican estas
+aclaraciones:
+
+- El bootstrap (Sección 6) lo hace al clonar el repo en su VM: lee
+  `AI_CHANGELOG.md`, el último relevo y la memoria ANTES de ejecutar la tarea.
+  No hay sesión interactiva, pero el contexto se carga igual.
+- La verificación de push (Sección 7.1) aplica sin excepción: Jules confirma
+  el resultado real del push leyendo la salida de su entorno, nunca asume.
+- Como Jules corre sin supervisión en vivo, la disciplina de alcance
+  (Sección 14) es CRÍTICA: ejecuta solo la tarea asignada y no toca nada fuera
+  de ella, porque el usuario no está mirando en tiempo real para frenarlo.
+- Firma sus entradas de changelog, memoria y commits como `[Jules]`
+  (Sección 16).
+
 ## 8. Protocolo de Reportes (Report Discipline)
 
 Cada reporte entregado al usuario es un documento cerrado. Una vez entregado,

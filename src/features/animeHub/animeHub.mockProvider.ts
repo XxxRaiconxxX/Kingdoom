@@ -1,7 +1,12 @@
 import { ANIME_HUB_LIBRARY } from "./animeHub.mock";
 import type { AnimeHubProvider, AnimeSearchFilters } from "./animeHub.types";
 
-function matchesFilters(entryTitle: string, synopsis: string, genres: string[], filters: AnimeSearchFilters) {
+function matchesFilters(
+  entryTitle: string,
+  synopsis: string,
+  genres: string[],
+  filters: AnimeSearchFilters,
+) {
   const query = filters.query.trim().toLowerCase();
   const genre = filters.genre?.trim().toLowerCase();
   const year = filters.year?.trim();
@@ -16,6 +21,10 @@ function matchesFilters(entryTitle: string, synopsis: string, genres: string[], 
   return queryOk && genreOk && yearOk;
 }
 
+const animeHubLibraryMap = new Map(
+  ANIME_HUB_LIBRARY.map((entry) => [entry.id, entry]),
+);
+
 export const mockAnimeHubProvider: AnimeHubProvider = {
   id: "anime-shell-mock",
   label: "anime shell",
@@ -29,11 +38,20 @@ export const mockAnimeHubProvider: AnimeHubProvider = {
   },
   async searchSeries(filters) {
     return ANIME_HUB_LIBRARY.filter((entry) =>
-      matchesFilters(entry.title, entry.synopsis, entry.genres, filters)
-    ).map(({ episodes, downloads, featuredQuote, releaseWindow, episodeCount, ...summary }) => summary);
+      matchesFilters(entry.title, entry.synopsis, entry.genres, filters),
+    ).map(
+      ({
+        episodes,
+        downloads,
+        featuredQuote,
+        releaseWindow,
+        episodeCount,
+        ...summary
+      }) => summary,
+    );
   },
   async getSeriesDetail(seriesId) {
-    return ANIME_HUB_LIBRARY.find((entry) => entry.id === seriesId) ?? null;
+    return animeHubLibraryMap.get(seriesId) ?? null;
   },
   async getEpisodeLinks() {
     return {

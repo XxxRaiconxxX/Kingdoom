@@ -52,8 +52,9 @@ export function generateMissionGmPrompt(
   if (claims.length === 0) {
     prompt += `*Aún no hay jugadores registrados en esta misión.*\n\n`;
   } else {
+    const playersMap = new Map(players.map(p => [p.id, p]));
     claims.forEach(claim => {
-      const player = players.find(p => p.id === claim.playerId);
+      const player = playersMap.get(claim.playerId);
       prompt += `- **Nombre del personaje:** ${claim.playerName}\n`;
       if (player) {
         prompt += `- **Estado Inicial (Oro):** ${player.gold} monedas\n`;

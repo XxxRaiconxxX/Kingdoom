@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 13/06/2026] - [Autor: Jules]
+*   **Archivos Modificados:** `android/` (eliminado)
+*   **Resumen de Tareas:** Eliminación del proyecto Capacitor abandonado (`android/`) para limpiar el repositorio.
+*   **Cambios Clave:**
+    *   **[Limpieza]:** Eliminada completamente la carpeta `android/` vía `git rm -r android/`. El proyecto web en Vite permanece intacto sin dependencias de Capacitor.
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

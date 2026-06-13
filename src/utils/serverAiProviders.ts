@@ -370,9 +370,8 @@ async function requestGroqText(input: {
   for (let keyIndex = 0; keyIndex < input.apiKeys.length; keyIndex += 1) {
     const apiKey = input.apiKeys[keyIndex];
 
-    for (let modelIndex = 0; modelIndex < models.length; modelIndex += 1) {
-      const model = models[modelIndex];
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const fetchPromises = models.map((model) =>
+      fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -384,7 +383,15 @@ async function requestGroqText(input: {
           temperature: input.temperature,
           top_p: input.topP,
         }),
-      });
+      })
+    );
+
+    // Esperar a que se resuelvan todas las peticiones concurrentemente
+    const responses = await Promise.all(fetchPromises);
+
+    for (let modelIndex = 0; modelIndex < models.length; modelIndex += 1) {
+      const model = models[modelIndex];
+      const response = responses[modelIndex];
 
       if (response.ok) {
         const payload = await response.json();

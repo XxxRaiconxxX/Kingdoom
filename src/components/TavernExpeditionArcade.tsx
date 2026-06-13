@@ -421,10 +421,7 @@ export function TavernExpeditionArcade() {
       }
 
       setPlayerSheets(sheets);
-      const resolvedSheetId = resolveActivePveSheetId(
-        playerId,
-        sheets.map((sheet) => sheet.id)
-      );
+      const resolvedSheetId = resolveActivePveSheetId(playerId, sheets);
       setActiveSheetId(resolvedSheetId);
 
       if (!resolvedSheetId) {

@@ -3417,3 +3417,11 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+---
+### [Fecha: 14/06/2026] - [Autor: Jules]
+*   **Archivos Modificados:** `package.json`, `vitest.config.ts`, `src/features/realmExchange/realmExchange.storage.test.ts`
+*   **Resumen de Tareas:** Adición de tests unitarios para `createEmptyExchangeState` en `realmExchange.storage.ts`.
+*   **Cambios Clave:**
+    *   Se instaló `vitest` y `jsdom` como dependencias de desarrollo y se configuró el entorno en `vitest.config.ts` y el script de prueba en `package.json`.
+    *   Se añadieron dos tests unitarios en `realmExchange.storage.test.ts` para verificar la inicialización del estado vacío y asegurar que siempre retorna una nueva referencia del objeto para evitar fugas y mutaciones de estado compartidas.
+*   **Notas/Advertencias:** Ninguno detectado.

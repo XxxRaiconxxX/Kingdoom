@@ -5,7 +5,7 @@ import { buildMarketItemPayload, mapMarketItemRow } from "./market.adapter";
 import type { AdminMarketItemInput, MarketItemRow, MarketItemsState } from "./market.types";
 
 const MARKET_ITEMS_SELECT =
-  "id, name, description, ability, price, rarity, image_url, image_fit, image_position, category, stock_status, stock_limit, stock_sold, featured";
+  "id, name, description, ability, price, rarity, image_url, image_fit, image_position, category, stock_status, stock_limit, stock_sold, featured, seller_id, seller_cut_percentage, spawn_chance";
 const MARKET_ITEMS_LEGACY_SELECT =
   "id, name, description, ability, price, rarity, image_url, image_fit, image_position, category, stock_status, featured";
 

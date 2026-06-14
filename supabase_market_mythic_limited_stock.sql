@@ -248,6 +248,12 @@ begin
   set gold = v_next_gold
   where id = v_player.id;
 
+  if v_item.seller_id is not null and coalesce(v_item.seller_cut_percentage, 0) > 0 then
+    update public.players
+    set gold = gold + floor(v_total_price * (v_item.seller_cut_percentage / 100.0))
+    where id = v_item.seller_id;
+  end if;
+
   if v_stock_limit > 0 then
     update public.market_items
     set
@@ -446,6 +452,12 @@ begin
   update public.players
     set gold = gold - v_total
   where id = p_player_id;
+
+  if v_item.seller_id is not null and coalesce(v_item.seller_cut_percentage, 0) > 0 then
+    update public.players
+    set gold = gold + floor(v_total * (v_item.seller_cut_percentage / 100.0))
+    where id = v_item.seller_id;
+  end if;
 
   if v_stock_limit > 0 then
     update public.market_items

@@ -3417,3 +3417,16 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+---
+### [Fecha: 14/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/features/market/market.adapter.ts`, `src/features/market/market.rotation.ts`, `src/features/market/market.service.ts`, `src/features/market/market.types.ts`, `src/types.ts`, `supabase_market_installments.sql`, `supabase_market_mythic_limited_stock.sql`, `supabase_personal_market_migration.sql` (Nuevo), `src/features/market/market.rotation.test.ts` (Nuevo)
+*   **Resumen de Tareas:** Implementación de la mecánica de Mercado Personal para ítems de rol creados por usuarios con comisiones y tasas de aparición.
+*   **Cambios Clave:**
+    *   **Base de Datos:** Se crearon las columnas `seller_id`, `seller_cut_percentage` y `spawn_chance` en la tabla `market_items` mediante `supabase_personal_market_migration.sql`.
+    *   **RPC de Compra:** Se modificaron las funciones RPC de compra de Supabase (`purchase_market_item` y `purchase_market_item_v2`) para realizar transferencias atómicas automáticas de las ganancias correspondientes del vendedor al saldo de oro de su cuenta.
+    *   **Modelos y Adaptadores:** Se actualizaron las interfaces y los mappers para mapear los nuevos campos entre el cliente y Supabase de forma correcta.
+    *   **Lógica de Rotación:** Sincronización determinista del catálogo filtrando ítems mediante la probabilidad configurada en `spawn_chance`.
+    *   **Interfaz de Administración:** Se creó la pestaña "Mercado Personal" en `AdminControlSheet.tsx` que incluye autocompletado/búsqueda de jugadores, campos interactivos (precio, split de comisión, probabilidad de aparición en rotación), previsualizador en tiempo real de oro asignado a cada parte, y listado de ítems personales existentes.
+    *   **Verificación:** Cobertura de tests unitarios agregada en `src/features/market/market.rotation.test.ts` y ejecución limpia de compilación de producción.
+*   **Notas/Advertencias:** Ninguno detectado.
+

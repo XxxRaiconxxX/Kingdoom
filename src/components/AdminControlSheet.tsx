@@ -16,6 +16,7 @@ import {
   ScrollText,
   Sparkles,
   Store,
+  Tag,
   UserPlus,
   Users,
   X,
@@ -89,6 +90,7 @@ type AdminTab =
   | "missions"
   | "events"
   | "market"
+  | "personalMarket"
   | "businesses"
   | "auctions"
   | "staff"
@@ -247,6 +249,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [showAllPlayersList, setShowAllPlayersList] = useState(false);
   const [showAllEventsList, setShowAllEventsList] = useState(false);
   const [showAllMarketItemsList, setShowAllMarketItemsList] = useState(false);
+  const [personalMarketSellerId, setPersonalMarketSellerId] = useState("");
+  const [personalMarketSellerSearch, setPersonalMarketSellerSearch] = useState("");
+  const [personalMarketSellerCut, setPersonalMarketSellerCut] = useState(40);
+  const [personalMarketSpawnChance, setPersonalMarketSpawnChance] = useState(100);
+  const [personalMarketSearch, setPersonalMarketSearch] = useState("");
+  const [showAllPersonalMarketItemsList, setShowAllPersonalMarketItemsList] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -418,6 +426,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       stockLimit: marketItemStockLimit,
       stockSold: marketItemStockSold,
       featured: marketItemFeatured,
+      sellerId: activeTab === "personalMarket" ? personalMarketSellerId : undefined,
+      sellerCutPercentage: activeTab === "personalMarket" ? personalMarketSellerCut : undefined,
+      spawnChance: activeTab === "personalMarket" ? personalMarketSpawnChance / 100.0 : undefined,
     }),
     [
       marketItemAbility,
@@ -434,8 +445,36 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       marketItemStockLimit,
       marketItemStockSold,
       marketItemStockStatus,
+      activeTab,
+      personalMarketSellerId,
+      personalMarketSellerCut,
+      personalMarketSpawnChance,
     ]
   );
+  const filteredSellerPlayers = useMemo(() => {
+    const query = personalMarketSellerSearch.trim().toLowerCase();
+    if (!query) return players;
+    return players.filter((p) => p.username.toLowerCase().includes(query));
+  }, [personalMarketSellerSearch, players]);
+
+  const personalMarketItems = useMemo(() => {
+    return marketItems.filter((item) => item.sellerId != null);
+  }, [marketItems]);
+
+  const filteredPersonalMarketItems = useMemo(() => {
+    const query = personalMarketSearch.trim().toLowerCase();
+    if (!query) return personalMarketItems;
+    return personalMarketItems.filter((item) =>
+      item.name.toLowerCase().includes(query)
+    );
+  }, [personalMarketSearch, personalMarketItems]);
+
+  const visiblePersonalMarketItems = useMemo(() => {
+    return showAllPersonalMarketItemsList
+      ? filteredPersonalMarketItems
+      : filteredPersonalMarketItems.slice(0, ADMIN_LIST_PREVIEW_COUNT);
+  }, [filteredPersonalMarketItems, showAllPersonalMarketItemsList]);
+
   const visiblePlayers = useMemo(
     () =>
       showAllPlayersList
@@ -461,6 +500,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     setShowAllPlayersList(false);
   }, [playerSearch]);
+
+  useEffect(() => {
+    setShowAllPersonalMarketItemsList(false);
+  }, [personalMarketSearch]);
 
   useEffect(() => {
     setShowAllEventsList(false);
@@ -775,6 +818,10 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemStockLimit(0);
     setMarketItemStockSold(0);
     setMarketItemFeatured(false);
+    setPersonalMarketSellerId("");
+    setPersonalMarketSellerSearch("");
+    setPersonalMarketSellerCut(40);
+    setPersonalMarketSpawnChance(100);
     setMarketFeedback("");
   }
 
@@ -958,8 +1005,16 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
     setMarketItemStockLimit(item.stockLimit ?? 0);
     setMarketItemStockSold(item.stockSold ?? 0);
     setMarketItemFeatured(item.featured ?? false);
+    setPersonalMarketSellerId(item.sellerId ?? "");
+    setPersonalMarketSellerSearch("");
+    setPersonalMarketSellerCut(item.sellerCutPercentage ?? 40);
+    setPersonalMarketSpawnChance(item.spawnChance != null ? Math.round(item.spawnChance * 100) : 100);
     setMarketFeedback("");
-    setActiveTab("market");
+    if (item.sellerId) {
+      setActiveTab("personalMarket");
+    } else {
+      setActiveTab("market");
+    }
   }
 
   async function handleSaveMarketItem(event: React.FormEvent<HTMLFormElement>) {
@@ -967,6 +1022,11 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
 
     if (!marketItemName.trim()) {
       setMarketFeedback("El nombre del item es obligatorio.");
+      return;
+    }
+
+    if (activeTab === "personalMarket" && !personalMarketSellerId) {
+      setMarketFeedback("Debes seleccionar un jugador vendedor para el mercado personal.");
       return;
     }
 
@@ -1001,6 +1061,9 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
       stockLimit: cleanStockLimit,
       stockSold: cleanStockSold,
       featured: marketItemFeatured,
+      sellerId: activeTab === "personalMarket" ? personalMarketSellerId : null,
+      sellerCutPercentage: activeTab === "personalMarket" ? personalMarketSellerCut : null,
+      spawnChance: activeTab === "personalMarket" ? personalMarketSpawnChance / 100.0 : null,
     });
 
     setIsSavingMarketItem(false);
@@ -1169,6 +1232,12 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 label="Mercado"
                 active={activeTab === "market"}
                 onClick={() => setActiveTab("market")}
+              />
+              <AdminTabButton
+                icon={<Tag />}
+                label="Mercado Personal"
+                active={activeTab === "personalMarket"}
+                onClick={() => setActiveTab("personalMarket")}
               />
               <AdminTabButton
                 icon={<Building2 />}
@@ -2412,6 +2481,367 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                     totalCount={filteredMarketItems.length}
                     expanded={showAllMarketItemsList}
                     onToggle={() => setShowAllMarketItemsList((current) => !current)}
+                    itemLabel="items"
+                  />
+                </div>
+              </section>
+            </div>
+          ) : null}
+
+          {activeTab === "personalMarket" ? (
+            <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+              <section
+                data-gsap-admin
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <Tag className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Mercado Personal
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Proponer Ítem de Rol
+                    </h4>
+                  </div>
+                </div>
+
+                <form className="mt-5 space-y-4" onSubmit={handleSaveMarketItem}>
+                  <div className="space-y-4 rounded-2xl border border-stone-800 bg-stone-950/45 p-4">
+                    <LabeledInput
+                      label="Buscar jugador vendedor"
+                      value={personalMarketSellerSearch}
+                      onChange={setPersonalMarketSellerSearch}
+                      placeholder="Nombre del personaje..."
+                    />
+                    <label className="block space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Seleccionar vendedor</span>
+                      <select
+                        value={personalMarketSellerId}
+                        onChange={(e) => setPersonalMarketSellerId(e.target.value)}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="">Selecciona un jugador</option>
+                        {filteredSellerPlayers.map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            {entry.username}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <LabeledInput
+                    label="Nombre del item"
+                    value={marketItemName}
+                    onChange={setMarketItemName}
+                    placeholder="Espada de Runas, Poción del Fénix..."
+                  />
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Categoria</span>
+                      <select
+                        value={marketItemCategory}
+                        onChange={(e) => setMarketItemCategory(e.target.value as MarketCategoryId)}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="swords">Espadas</option>
+                        <option value="armors">Armaduras</option>
+                        <option value="potions">Pociones</option>
+                        <option value="others">Otros</option>
+                      </select>
+                    </label>
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Rareza</span>
+                      <select
+                        value={marketItemRarity}
+                        onChange={(e) => setMarketItemRarity(e.target.value as Rarity)}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="common">Común</option>
+                        <option value="rare">Rara</option>
+                        <option value="epic">Épica</option>
+                        <option value="legendary">Legendaria</option>
+                        <option value="mythic">Mítica</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <LabeledTextArea
+                    label="Descripcion"
+                    value={marketItemDescription}
+                    onChange={setMarketItemDescription}
+                    placeholder="Describe el item de rol..."
+                    rows={3}
+                  />
+
+                  <LabeledTextArea
+                    label="Habilidad o efecto (opcional)"
+                    value={marketItemAbility}
+                    onChange={setMarketItemAbility}
+                    placeholder="Efectos de combate o utilidad..."
+                    rows={2}
+                  />
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Stock</span>
+                      <select
+                        value={marketItemStockStatus}
+                        onChange={(e) => setMarketItemStockStatus(e.target.value as StockStatus)}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="available">Ilimitado</option>
+                        <option value="limited">Limitado</option>
+                        <option value="sold-out">Agotado</option>
+                      </select>
+                    </label>
+                    <NumericInput
+                      label="Limite de stock"
+                      value={marketItemStockLimit}
+                      onChange={(value) => {
+                        setMarketItemStockLimit(Math.max(0, Math.floor(value)));
+                        if (value > 0 && marketItemStockStatus !== "limited") {
+                          setMarketItemStockStatus("limited");
+                        }
+                      }}
+                    />
+                    <NumericInput
+                      label="Unidades vendidas"
+                      value={marketItemStockSold}
+                      onChange={(value) => setMarketItemStockSold(Math.max(0, Math.floor(value)))}
+                    />
+                  </div>
+
+                  <LabeledInput
+                    label="URL de imagen"
+                    value={marketItemImageUrl}
+                    onChange={setMarketItemImageUrl}
+                    placeholder="https://... o data URL"
+                  />
+
+                  <label className="kd-touch inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-amber-500/35 bg-amber-500/5 px-4 py-3 text-sm font-bold text-amber-100 transition hover:border-amber-400/45 hover:bg-amber-500/10">
+                    <ImagePlus className="h-4 w-4" />
+                    Cargar imagen desde galeria
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) =>
+                        void handleMarketImageUpload(event.target.files?.[0])
+                      }
+                    />
+                  </label>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="space-y-2">
+                      <span className="text-sm font-semibold text-stone-200">Ajuste de imagen</span>
+                      <select
+                        value={marketItemImageFit}
+                        onChange={(e) => setMarketItemImageFit(e.target.value as "cover" | "contain" | "")}
+                        className="w-full rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-400/40"
+                      >
+                        <option value="contain">Contener (contain)</option>
+                        <option value="cover">Cubrir (cover)</option>
+                        <option value="">Sin ajuste</option>
+                      </select>
+                    </label>
+                    <LabeledInput
+                      label="Posición de imagen"
+                      value={marketItemImagePosition}
+                      onChange={setMarketItemImagePosition}
+                      placeholder="center top"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <NumericInput
+                      label="Precio de venta (Oro)"
+                      value={marketItemPrice}
+                      onChange={setMarketItemPrice}
+                    />
+                    <NumericInput
+                      label="Tasa de aparición opcional (%)"
+                      value={personalMarketSpawnChance}
+                      onChange={(value) => setPersonalMarketSpawnChance(Math.max(0, Math.min(100, Math.floor(value))))}
+                    />
+                  </div>
+
+                  <div className="space-y-3 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-stone-200">Ganancias del Vendedor</span>
+                      <span className="text-sm font-black text-amber-300">{personalMarketSellerCut}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={personalMarketSellerCut}
+                      onChange={(e) => setPersonalMarketSellerCut(Number(e.target.value))}
+                      className="w-full accent-amber-500 cursor-pointer"
+                    />
+                    <div className="grid gap-3 rounded-xl border border-stone-800 bg-stone-900/40 p-3 text-xs md:grid-cols-2">
+                      <div>
+                        <p className="text-stone-500 uppercase tracking-wider">Vendedor ({personalMarketSellerCut}%)</p>
+                        <p className="mt-1 text-sm font-black text-emerald-400">
+                          {Math.floor(marketItemPrice * (personalMarketSellerCut / 100)).toLocaleString("es-PY")} oro
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-stone-500 uppercase tracking-wider">Casa / Mercado ({100 - personalMarketSellerCut}%)</p>
+                        <p className="mt-1 text-sm font-black text-stone-300">
+                          {Math.floor(marketItemPrice * ((100 - personalMarketSellerCut) / 100)).toLocaleString("es-PY")} oro
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <label className="flex items-center justify-between rounded-2xl border border-stone-700 bg-stone-900 px-4 py-3">
+                    <div>
+                      <p className="text-sm font-semibold text-stone-200">Destacado</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={marketItemFeatured}
+                      onChange={(e) => setMarketItemFeatured(e.target.checked)}
+                      className="h-4 w-4 rounded border-stone-600 bg-stone-950 text-amber-400"
+                    />
+                  </label>
+
+                  {marketItemId ? (
+                    <div className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-xs text-stone-400">
+                      ID actual:{" "}
+                      <span className="font-mono text-stone-300">{marketItemId}</span>
+                    </div>
+                  ) : null}
+
+                  <MarketAdminPreview item={marketPreviewItem} />
+
+                  <div className="sticky bottom-0 z-10 -mx-1 mt-4 grid gap-3 rounded-[1.3rem] border border-stone-800 bg-stone-950/90 p-2 shadow-2xl shadow-black/40 backdrop-blur sm:flex sm:flex-wrap sm:items-center">
+                    <button
+                      type="submit"
+                      disabled={isSavingMarketItem || isDeletingMarketItem}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    >
+                      {isSavingMarketItem ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          <Tag className="h-4 w-4" />
+                          {marketItemId ? "Actualizar item" : "Crear item"}
+                        </>
+                      )}
+                    </button>
+                    {marketItemId ? (
+                      <button
+                        type="button"
+                        onClick={resetMarketForm}
+                        disabled={isDeletingMarketItem}
+                        className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
+                      >
+                        Cancelar
+                      </button>
+                    ) : null}
+                    {marketItemId ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteMarketItem()}
+                        disabled={isSavingMarketItem || isDeletingMarketItem}
+                        className="w-full rounded-2xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200 transition hover:border-red-400/50 hover:bg-red-500/15 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                      >
+                        {isDeletingMarketItem ? "Borrando..." : "Borrar"}
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={resetMarketForm}
+                      disabled={isDeletingMarketItem}
+                      className="w-full rounded-2xl border border-stone-700 px-4 py-3 text-sm font-bold text-stone-300 transition hover:border-stone-500 hover:text-stone-100 sm:w-auto"
+                    >
+                      Limpiar
+                    </button>
+                  </div>
+
+                  {marketFeedback ? (
+                    <p className="rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-sm leading-6 text-stone-300">
+                      {marketFeedback}
+                    </p>
+                  ) : null}
+                </form>
+              </section>
+
+              <section
+                data-gsap-admin
+                className="rounded-[1.5rem] sm:rounded-[1.8rem] border border-stone-800 bg-stone-900/70 p-4 sm:p-5"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-300">
+                    <ScrollText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-stone-500">
+                      Lista compacta
+                    </p>
+                    <h4 className="mt-1 text-xl font-black text-stone-100">
+                      Ítems Personales Activos
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3">
+                  <LabeledInput
+                    label="Buscar item"
+                    value={personalMarketSearch}
+                    onChange={setPersonalMarketSearch}
+                    placeholder="Filtra por nombre"
+                  />
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {filteredPersonalMarketItems.length > 0 ? (
+                    visiblePersonalMarketItems.map((item) => {
+                      const seller = players.find((p) => p.id === item.sellerId);
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => preloadMarketItem(item)}
+                          className="flex w-full items-center justify-between rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
+                        >
+                          <div>
+                            <p className="text-sm font-bold text-stone-100">{item.name}</p>
+                            <p className="mt-1 text-xs uppercase tracking-[0.14em] text-stone-500">
+                              Vendedor: <span className="text-amber-400">{seller ? seller.username : "Desconocido"}</span> ({item.sellerCutPercentage ?? 40}%)
+                            </p>
+                            <p className="mt-0.5 text-[10px] uppercase tracking-[0.12em] text-stone-600">
+                              Rotación: {item.spawnChance != null ? `${Math.round(item.spawnChance * 100)}%` : "100%"}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-black text-amber-300">{item.price}</p>
+                            <p className="text-[11px] uppercase tracking-[0.14em] text-stone-500">
+                              oro &middot; {adminStockLabel(item.stockStatus)}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="rounded-[1.2rem] border border-dashed border-stone-700 bg-stone-950/40 px-4 py-4 text-sm leading-6 text-stone-400">
+                      No se encontraron items personales con ese filtro.
+                    </div>
+                  )}
+                  <ExpandableListToggle
+                    shownCount={visiblePersonalMarketItems.length}
+                    totalCount={filteredPersonalMarketItems.length}
+                    expanded={showAllPersonalMarketItemsList}
+                    onToggle={() => setShowAllPersonalMarketItemsList((current) => !current)}
                     itemLabel="items"
                   />
                 </div>

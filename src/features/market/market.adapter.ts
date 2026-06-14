@@ -37,6 +37,9 @@ export function mapMarketItemRow(row: MarketItemRow): MarketItem {
     stockLimit: row.stock_limit ?? undefined,
     stockSold: row.stock_sold ?? undefined,
     featured: row.featured,
+    sellerId: row.seller_id ?? undefined,
+    sellerCutPercentage: row.seller_cut_percentage ?? undefined,
+    spawnChance: row.spawn_chance ?? undefined,
   };
 }
 
@@ -56,5 +59,8 @@ export function buildMarketItemPayload(input: AdminMarketItemInput) {
     stock_limit: Math.max(0, Math.floor(input.stockLimit || 0)),
     stock_sold: Math.max(0, Math.floor(input.stockSold || 0)),
     featured: input.featured,
+    seller_id: input.sellerId || null,
+    seller_cut_percentage: input.sellerCutPercentage != null ? Math.max(0, Math.min(100, Math.floor(input.sellerCutPercentage))) : null,
+    spawn_chance: input.spawnChance != null ? Math.max(0, Math.min(1, input.spawnChance)) : null,
   };
 }

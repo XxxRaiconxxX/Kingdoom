@@ -15,6 +15,9 @@ export type MarketItemRow = {
   stock_limit?: number | null;
   stock_sold?: number | null;
   featured: boolean;
+  seller_id?: string | null;
+  seller_cut_percentage?: number | null;
+  spawn_chance?: number | null;
 };
 
 export type MarketItemsState = {
@@ -38,4 +41,7 @@ export type AdminMarketItemInput = {
   stockLimit: number;
   stockSold: number;
   featured: boolean;
+  sellerId?: string | null;
+  sellerCutPercentage?: number | null;
+  spawnChance?: number | null;
 };

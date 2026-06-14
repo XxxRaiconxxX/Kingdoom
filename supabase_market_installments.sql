@@ -209,6 +209,12 @@ begin
   set gold = v_next_gold
   where id = v_player.id;
 
+  if v_item.seller_id is not null and coalesce(v_item.seller_cut_percentage, 0) > 0 then
+    update public.players
+    set gold = gold + floor(v_base_total * (v_item.seller_cut_percentage / 100.0))
+    where id = v_item.seller_id;
+  end if;
+
   insert into public.market_orders (
     player_id,
     item_id,

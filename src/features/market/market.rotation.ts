@@ -43,7 +43,18 @@ function hasAvailableStock(item: MarketItem) {
 }
 
 function selectRotatedItems(items: MarketItem[], rarity: Rarity, windowId: number, count: number) {
-  const pool = items.filter((item) => item.rarity === rarity && hasAvailableStock(item));
+  const pool = items.filter((item) => {
+    if (item.rarity !== rarity || !hasAvailableStock(item)) {
+      return false;
+    }
+    if (item.spawnChance != null) {
+      const spawnRoll = hashSeed(`${windowId}:${item.id}:spawn`);
+      if (spawnRoll > item.spawnChance) {
+        return false;
+      }
+    }
+    return true;
+  });
 
   return pool
     .slice()

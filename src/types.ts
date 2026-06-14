@@ -111,6 +111,9 @@ export type MarketItem = {
   stockLimit?: number;
   stockSold?: number;
   featured?: boolean;
+  sellerId?: string;
+  sellerCutPercentage?: number;
+  spawnChance?: number;
 };
 
 export type InventoryEntry = {

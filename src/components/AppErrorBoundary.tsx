@@ -22,7 +22,9 @@ export class AppErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("Kingdoom UI crash:", error, info.componentStack);
+    if (import.meta.env.DEV) {
+      console.error("Kingdoom UI crash:", error, info.componentStack);
+    }
   }
 
   render() {

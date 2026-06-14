@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- **🧹 [Code Health] Manejo seguro de console.error**:
+  - Se implementó un wrapper `logError` en `src/utils/logger.ts` que restringe el output de la consola a entornos de desarrollo (`import.meta.env.DEV`).
+  - Se refactorizó `src/utils/characterSheets.ts` para usar `logError` en vez de `console.error`, evitando filtrar detalles de base de datos a producción.
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

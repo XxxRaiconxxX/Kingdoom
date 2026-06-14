@@ -1,6 +1,7 @@
 import type { CharacterSheet } from "../types";
 import { supabase } from "../lib/supabase";
 import { deleteCharacterPortraitByUrl } from "./characterPortraits";
+import { logError } from "./logger";
 
 const STORAGE_KEY = "kingdoom_character_sheets";
 export const MAX_PLAYER_CHARACTER_SHEETS = 2;
@@ -77,7 +78,7 @@ function getLocalSheets(): CharacterSheet[] {
     try {
       return JSON.parse(stored);
     } catch (e) {
-      console.error("Failed to parse character sheets", e);
+      logError("Failed to parse character sheets", e);
       return [];
     }
   }
@@ -105,7 +106,7 @@ function deleteLocalSheet(id: string): void {
 export async function getCharacterSheets(): Promise<CharacterSheet[]> {
   const { data, error } = await supabase.from("character_sheets").select("*");
   if (error) {
-    console.error("Supabase error fetching sheets:", error);
+    logError("Supabase error fetching sheets:", error);
     return getLocalSheets(); // Fallback
   }
   return (data ?? []) as CharacterSheet[];
@@ -122,7 +123,7 @@ export async function saveCharacterSheet(sheet: CharacterSheet): Promise<void> {
 
   const { error } = await supabase.from("character_sheets").upsert(payload);
   if (error) {
-    console.error("Supabase error saving sheet:", error);
+    logError("Supabase error saving sheet:", error);
     saveLocalSheet(sheet); // Fallback
   }
 }
@@ -131,7 +132,7 @@ export async function deleteCharacterSheet(id: string, portraitUrl?: string): Pr
   await deleteCharacterPortraitByUrl(portraitUrl);
   const { error } = await supabase.from("character_sheets").delete().eq("id", id);
   if (error) {
-    console.error("Supabase error deleting sheet:", error);
+    logError("Supabase error deleting sheet:", error);
     deleteLocalSheet(id); // Fallback
   }
 }
@@ -142,7 +143,7 @@ export async function getPlayerSheets(playerId: string): Promise<CharacterSheet[
     .select("*")
     .eq("playerId", playerId);
   if (error) {
-    console.error("Supabase error fetching player sheets:", error);
+    logError("Supabase error fetching player sheets:", error);
     return getLocalSheets().filter((s) => s.playerId === playerId); // Fallback
   }
   return (data ?? []) as CharacterSheet[];

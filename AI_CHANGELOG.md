@@ -28,6 +28,9 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [14/06/2026] - [Autor: Jules]
+- **Mantenimiento**: Corrección del arreglo de dependencias en `useEffect` dentro de `CharImportModal` utilizando `useCallback` y actualizaciones funcionales de estado.
+
 
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`

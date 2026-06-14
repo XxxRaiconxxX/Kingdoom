@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Coins, PackageCheck, ShieldAlert } from "lucide-react";
 import type { MarketItem, Rarity, StockStatus } from "../types";
 import { getOptimizedImageUrl } from "../utils/imageUtils";
@@ -94,7 +94,7 @@ const stockStyles: Record<
   },
 };
 
-export function MarketItemCard({
+export const MarketItemCard = React.memo(function MarketItemCard({
   item,
   onBuy,
   hideImage = false,
@@ -271,4 +271,4 @@ export function MarketItemCard({
       </div>
     </article>
   );
-}
+});

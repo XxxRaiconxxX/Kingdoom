@@ -3417,3 +3417,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 14/06/2024] - [Autor: Jules]
+- **Issue**: Add unit tests for `REALM_EXCHANGE_TRADE_LOT` in `realmExchange.data.ts`.
+- **Changes**:
+  - Installed Vitest, Testing Library, and JSDOM.
+  - Added `vitest.config.ts` configuration.
+  - Updated `package.json` with the `test` script.
+  - Updated `tsconfig.json` adding `vitest/globals` to types.
+  - Created test file `src/features/realmExchange/realmExchange.data.test.ts` encompassing structured tests for all `realmExchange.data.ts` exports, increasing overall unit test coverage.

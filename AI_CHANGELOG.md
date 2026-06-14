@@ -3417,3 +3417,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 14/06/2025] - [Autor: Jules]
+- **Testing:** Added unit tests for `ADMIN_WEEKLY_TEMPLATES` in `src/data/adminTemplates.test.ts` to verify the array is defined, structure is intact, known templates exist, and IDs are unique.
+- **Tools:** Added `vitest` dependency.

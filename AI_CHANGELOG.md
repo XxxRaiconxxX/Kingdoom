@@ -3417,3 +3417,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- Agregados unit tests para el componente `MarketSection`.
+- Añadido setup de testing usando Vitest y Testing Library para React.
+- Agregado el mock de `window.matchMedia` para GSAP en `src/setupTests.ts`.
+- Mocks agregados para hook SWR y la detección de App Nativa (`isNativeApp`).

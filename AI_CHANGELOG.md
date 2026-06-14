@@ -3417,3 +3417,11 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 14/06/2024] - [Autor: Jules]
+- **Archivos:** `package.json`, `src/data/missions.test.ts`
+- **Resumen:** Se añadió un script de pruebas con vitest y se implementaron pruebas unitarias para `FALLBACK_MISSIONS`.
+- **Cambios Clave:**
+  - Se instaló `vitest` y se configuró como script en `package.json` (`"test": "vitest run"`).
+  - Se creó el archivo de pruebas `src/data/missions.test.ts` para verificar la existencia, integridad y restricciones de `FALLBACK_MISSIONS`.
+  - Las pruebas cubren la verificación de la no vaciedad de las misiones, la inclusión de campos requeridos y tipos de datos correctos (ej: `rewardGold > 0`, `maxParticipants >= 1`, etc).

@@ -29,6 +29,17 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 14/06/2026] - [Autor: Jules (AI)]
+
+**Resumen:** Reparada la lógica de compras del mercado en la versión móvil (RPC de 3 argumentos) para soportar jugadores bot no vinculados.
+- **Tipo:** `fix`, `database`
+- **Archivos:** `supabase_market_mythic_limited_stock.sql`, `apps/mobile/supabase_purchase_market_rpc.sql`
+
+**Detalles Técnicos:**
+- Actualizada la función `purchase_market_item(uuid, text, integer)` en ambos scripts SQL para implementar la misma lógica de "fallback" anónimo y de auto-vinculación (`player_auth_links`) introducida anteriormente en la versión de 5 argumentos.
+- Se agregó el bloque para identificar jugadores que carecen de un `auth_user_id` nativo, permitiendo su compra mediante `auth.role() = 'authenticated'` y auto-creando la fila en `player_auth_links` si `v_player.auth_user_id is null`.
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

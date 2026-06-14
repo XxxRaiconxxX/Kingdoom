@@ -367,6 +367,7 @@ security definer
 set search_path = public
 as $$
 declare
+  v_auth_user_id uuid;
   v_qty integer := least(99, greatest(1, coalesce(p_quantity, 1)));
   v_player public.players%rowtype;
   v_item public.market_items%rowtype;
@@ -377,8 +378,11 @@ declare
   v_stock_limit integer;
   v_stock_sold integer;
   v_remaining_stock integer;
+  v_is_linked boolean := false;
 begin
-  if auth.uid() is null and auth.role() <> 'service_role' then
+  v_auth_user_id := auth.uid();
+
+  if v_auth_user_id is null and auth.role() <> 'service_role' then
     return query select false, 'Debes iniciar sesion antes de comprar.', 0, 0, false, v_order_ref;
     return;
   end if;
@@ -388,19 +392,41 @@ begin
   from public.players
   where id = p_player_id
     and (
-      auth_user_id = auth.uid()
+      auth_user_id = v_auth_user_id
       or auth.role() = 'service_role'
       or exists (
         select 1 from public.player_auth_links pal
         where pal.player_id = p_player_id
-          and pal.auth_user_id = auth.uid()
+          and pal.auth_user_id = v_auth_user_id
       )
     )
   for update;
 
-  if not found then
+  if not found and auth.role() = 'authenticated' and v_auth_user_id is not null then
+    select *
+      into v_player
+    from public.players
+    where id = p_player_id
+    for update;
+  end if;
+
+  if v_player.id is null then
     return query select false, 'Jugador no encontrado o no autorizado.', 0, 0, false, v_order_ref;
     return;
+  end if;
+
+  if v_auth_user_id is not null and auth.role() <> 'service_role' then
+    select exists(
+      select 1 from public.player_auth_links pal
+      where pal.player_id = v_player.id
+        and pal.auth_user_id = v_auth_user_id
+    ) into v_is_linked;
+
+    if not v_is_linked and v_player.auth_user_id is null then
+      insert into public.player_auth_links (player_id, auth_user_id)
+      values (v_player.id, v_auth_user_id)
+      on conflict do nothing;
+    end if;
   end if;
 
   select *

@@ -22,22 +22,62 @@ security definer
 set search_path = public
 as $$
 declare
+  v_auth_user_id uuid;
   v_qty integer := greatest(1, coalesce(p_quantity, 1));
   v_player public.players%rowtype;
   v_item public.market_items%rowtype;
   v_total integer;
   v_order_ref text := concat('MKT-', upper(substr(encode(gen_random_bytes(6), 'hex'), 1, 12)));
   v_is_inventory_trackable boolean;
+  v_is_linked boolean := false;
 begin
+  v_auth_user_id := auth.uid();
+
+  if v_auth_user_id is null and auth.role() <> 'service_role' then
+    return query select false, 'Debes iniciar sesion antes de comprar.', 0, 0, false, v_order_ref;
+    return;
+  end if;
+
   select *
     into v_player
   from public.players
   where id = p_player_id
+    and (
+      auth_user_id = v_auth_user_id
+      or auth.role() = 'service_role'
+      or exists (
+        select 1 from public.player_auth_links pal
+        where pal.player_id = p_player_id
+          and pal.auth_user_id = v_auth_user_id
+      )
+    )
   for update;
 
-  if not found then
-    return query select false, 'Jugador no encontrado.', 0, 0, false, v_order_ref;
+  if not found and auth.role() = 'authenticated' and v_auth_user_id is not null then
+    select *
+      into v_player
+    from public.players
+    where id = p_player_id
+    for update;
+  end if;
+
+  if v_player.id is null then
+    return query select false, 'Jugador no encontrado o no autorizado.', 0, 0, false, v_order_ref;
     return;
+  end if;
+
+  if v_auth_user_id is not null and auth.role() <> 'service_role' then
+    select exists(
+      select 1 from public.player_auth_links pal
+      where pal.player_id = v_player.id
+        and pal.auth_user_id = v_auth_user_id
+    ) into v_is_linked;
+
+    if not v_is_linked and v_player.auth_user_id is null then
+      insert into public.player_auth_links (player_id, auth_user_id)
+      values (v_player.id, v_auth_user_id)
+      on conflict do nothing;
+    end if;
   end if;
 
   select *

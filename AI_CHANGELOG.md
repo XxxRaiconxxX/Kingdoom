@@ -3417,3 +3417,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- **Area**: Testing
+- **Accion**: Add unit tests for PlayerSessionProvider
+- **Archivos**: `src/context/__tests__/PlayerSessionContext.test.tsx`, `vitest.config.ts`, `src/setupTests.ts`, `package.json`
+- **Detalles**:
+  - Added vitest, jsdom, and @testing-library/react to devDependencies.
+  - Configured vitest in `vitest.config.ts`.
+  - Created unit tests for `PlayerSessionProvider` covering hydration, authentication states, connecting profiles, empty parameters, resetting profiles, and optimistic gold updates with rollback functionalities.
+  - Used testing mocks for `fetchPlayerByUsername` and `updatePlayerGold` from `utils/players.ts`.

@@ -3417,3 +3417,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- **Testing**: Se implementaron pruebas unitarias para `src/data/world.ts`
+  - Se configuró el entorno de tests usando `vitest` con `jsdom`.
+  - Se crearon pruebas para validar la estructura de las variables exportadas: `WORLD_STATUS`, `DEMOGRAPHIC_BLOCS`, `DIPLOMATIC_TENSIONS` y `COMMON_THREATS`.
+  - Se agregó el script `"test": "vitest run"` en `package.json`.

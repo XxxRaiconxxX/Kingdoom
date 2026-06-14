@@ -3417,3 +3417,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 14/06/2024] - [Autor: Jules]
+- **Testing**: Se implementaron pruebas unitarias con Vitest para `MARKET_CATEGORIES` en `src/data/market.ts`.
+  - Se configuró el entorno `jsdom` y se agregaron las dependencias requeridas.
+  - Se añadió el script de testing `"test": "vitest run"` en `package.json`.
+  - Se probó la correcta inicialización del array, propiedades requeridas, IDs únicos, validación de tipos e iconos de lucide-react asociados.

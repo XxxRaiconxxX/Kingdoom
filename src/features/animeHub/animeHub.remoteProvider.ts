@@ -98,7 +98,7 @@ async function fetchJson<T = any>(url: string, headers?: HeadersInit, timeout = 
     return result as T;
   } catch (error) {
     clearTimeout(id);
-    console.error(`Fetch exception for ${url}:`, error);
+    console.error(`Fetch exception for ${url}:`, error instanceof Error ? error.message : String(error));
     return null;
   }
 }
@@ -618,7 +618,7 @@ async function fetchAnimeFlvLinks(reference: EpisodeReference) {
     // Normalización estándar que ahora maneja la estructura de la API correctamente
     return normalizeLinks(data);
   } catch (error) {
-    console.error("Error fetching AnimeFLV links via proxy:", error);
+    console.error("Error fetching AnimeFLV links via proxy:", error instanceof Error ? error.message : String(error));
     return null;
   }
 }
@@ -836,7 +836,7 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
 
       return withDistinctCovers(sortByCoverage(uniqueById(collected)));
     } catch (error) {
-      console.error("AnimeHub Remote Search Error:", error);
+      console.error("AnimeHub Remote Search Error:", error instanceof Error ? error.message : String(error));
       return [];
     }
   },
@@ -883,7 +883,7 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
 
       return detail;
     } catch (error) {
-      console.error("AnimeHub Remote Detail Error:", error);
+      console.error("AnimeHub Remote Detail Error:", error instanceof Error ? error.message : String(error));
       return null;
     }
   },
@@ -908,7 +908,7 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           return null;
       }
     } catch (error) {
-      console.error("AnimeHub Remote Links Error:", error);
+      console.error("AnimeHub Remote Links Error:", error instanceof Error ? error.message : String(error));
       return null;
     }
   },

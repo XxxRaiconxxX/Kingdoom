@@ -12,7 +12,8 @@
     "mobile:start": "npm run start --prefix apps/mobile",
     "mobile:android": "npm run android --prefix apps/mobile",
     "mobile:web": "npm run web --prefix apps/mobile",
-    "mobile:typecheck": "npm run typecheck --prefix apps/mobile"
+    "mobile:typecheck": "npm run typecheck --prefix apps/mobile",
+    "test": "vitest run"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -33,8 +34,10 @@
     "@types/react": "^18.3.24",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^5.0.2",
+    "jsdom": "^29.1.1",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
-    "vite": "^7.1.4"
+    "vite": "^7.1.4",
+    "vitest": "^4.1.8"
   }
 }

@@ -29,6 +29,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- **Tarea:** Agregar pruebas unitarias para ACTIVE_EVENTS.
+- **Archivos:** `src/data/events.test.ts` (nuevo), `package.json` (actualizado).
+- **Detalles:** Se instaló e integró vitest como dependencia de desarrollo. Se creó el archivo de pruebas unitarias para verificar la estructura, completitud, unicidad y correctitud de tipos de ACTIVE_EVENTS usando el esquema definido por RealmEvent.
+- **Riesgos:** Ninguno detectado. Tests corriendo exitosamente.
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

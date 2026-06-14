@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 14/06/2026] - [Autor: Jules_AI]
+- **Archivista - Rendimiento**: Se optimizó la función de entrega de oro múltiple (`add_multiple_players_gold` y `add_all_players_gold`) para solucionar el problema de múltiples llamadas a la base de datos (N+1 query problem).
+- Se implementó un nuevo RPC en Supabase `add_multiple_players_gold` y su respectivo wrapper en TypeScript en `src/utils/players.ts`.
+- La optimización reduce significativamente la latencia y la carga en el servidor cuando se procesan actualizaciones para decenas o cientos de jugadores.
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

@@ -29,6 +29,10 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- **Optimización**: Se reemplazó el bucle de actualización de oro individual `Promise.all(updatePlayerGold())` por un único llamado RPC masivo `bulk_increment_gold()` en `archivistActions.ts`, reduciendo drásticamente la latencia y la carga de red y base de datos para operaciones que afectan a múltiples jugadores simultáneamente.
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

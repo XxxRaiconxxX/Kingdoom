@@ -179,6 +179,18 @@ export async function isPlayerLinkedToAuthUser(
   return !error && Boolean(data);
 }
 
+export async function bulkIncrementPlayersGold(
+  playerIds: string[],
+  amount: number
+): Promise<boolean> {
+  const { error } = await supabase.rpc("bulk_increment_gold", {
+    p_player_ids: playerIds,
+    p_amount: amount,
+  });
+
+  return !error;
+}
+
 export async function updatePlayerGold(
   playerId: string,
   nextGold: number

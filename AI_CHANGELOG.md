@@ -28,6 +28,8 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 14/06/2026] - [Autor: Jules_AI]
+- **Salud del Código**: Modificado `src/features/animeHub/animeHub.remoteProvider.ts` para que `console.error` registre de forma segura cadenas de error (por ejemplo, `error.message`) en lugar de objetos enteros. Esto mitiga el riesgo de que información sensible contenida dentro de los objetos `Error` (tales como credenciales HTTP / claves API) sea expuesta en los logs de la consola.
 
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`

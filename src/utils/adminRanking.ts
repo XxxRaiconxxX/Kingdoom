@@ -4,34 +4,6 @@ import { supabase } from "./supabaseClient";
 import { getCurrentRankingWindow } from "./weeklyRanking";
 import { fetchAllPlayers } from "./players";
 
-// SQL sugerido para reforzar acceso admin en players:
-//
-// alter table players add column if not exists is_admin boolean not null default false;
-// update players set is_admin = true where username = 'TuAdminReal';
-//
-// SQL sugerido para la tabla de ranking semanal administrable:
-//
-// create table if not exists weekly_activity_rankings (
-//   id uuid primary key default gen_random_uuid(),
-//   player_id uuid references players(id) on delete set null,
-//   display_name text not null,
-//   faction text not null,
-//   status text not null default 'alive',
-//   activity_points integer not null default 0,
-//   missions_completed integer not null default 0,
-//   events_joined integer not null default 0,
-//   streak_days integer not null default 0,
-//   week_starts_at timestamptz not null,
-//   week_ends_at timestamptz not null,
-//   created_at timestamptz default now(),
-//   updated_at timestamptz default now()
-// );
-//
-// alter table weekly_activity_rankings enable row level security;
-//
-// create policy "Allow all weekly ranking access" on weekly_activity_rankings
-//   for all using (true) with check (true);
-
 type WeeklyRankingRow = {
   id: string;
   player_id?: string | null;

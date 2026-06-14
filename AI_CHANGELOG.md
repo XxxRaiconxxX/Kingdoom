@@ -29,6 +29,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 14/06/2026] - [Autor: Jules]
+*   **Archivos Modificados:** `src/components/StatCard.tsx`, `src/components/EventCard.tsx`, `src/components/MarketItemCard.tsx`, `src/components/RealmRegistry.tsx`, `src/utils/appLiveHunts.ts`, `src/utils/characterSheets.ts`, `src/utils/horseRaceOnline.ts`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Optimización de rendimiento de componentes UI y optimización de consultas a la base de datos de Supabase.
+*   **Cambios Clave:**
+    *   **[Rendimiento de UI]:** Se aplicó `React.memo` a los componentes `StatCard`, `EventCard` y `MarketItemCard` para prevenir re-renderizados innecesarios, mejorando la fluidez en listas y grids grandes.
+    *   **[Optimización de Consultas a Base de Datos]:** Se reemplazó el uso ineficiente de `.select("*")` en `RealmRegistry.tsx` y en funciones de utilidad de `appLiveHunts.ts`, `characterSheets.ts`, y `horseRaceOnline.ts` listando explícitamente las columnas necesarias. Esto reduce el payload de red y mejora la latencia y la eficiencia del backend.
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

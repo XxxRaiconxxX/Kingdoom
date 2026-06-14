@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Castle, ChevronDown, Users } from "lucide-react";
 import type { EventStatus, RealmEvent, RealmEventParticipant } from "../types";
 
@@ -40,7 +40,7 @@ type EventCardProps = {
   onLeave?: (event: RealmEvent) => Promise<void>;
 };
 
-export function EventCard({
+export const EventCard = React.memo(function EventCard({
   event,
   participants = [],
   myParticipation,
@@ -210,7 +210,7 @@ export function EventCard({
       </div>
     </article>
   );
-}
+});
 
 function EventMetaBox({ label, value }: { label: string; value: string }) {
   return (

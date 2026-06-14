@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- **Tarea:** Handle console.error securely in animeHub.remoteProvider.ts
+- **Detalles:** Se añadieron condiciones `if (import.meta.env.DEV)` a todas las llamadas `console.error` en `src/features/animeHub/animeHub.remoteProvider.ts` para evitar la filtración de errores y detalles internos en entornos de producción.
+- **Estado:** ✅ Completado
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

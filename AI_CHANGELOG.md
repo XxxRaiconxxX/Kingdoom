@@ -3417,3 +3417,8 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 27/10/2023] - [Autor: Jules]
+- Configured `vitest` in the project.
+- Added comprehensive unit tests for `getMarketRotationState` in `src/features/market/market.rotation.test.ts`.
+- Verified deterministic rotation, sold-out item filtering, and time formatting edge cases.

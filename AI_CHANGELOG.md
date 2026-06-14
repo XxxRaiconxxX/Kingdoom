@@ -28,6 +28,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 14/06/2026] - [Autor: Jules]
+*   **Archivos Modificados:** `src/features/realmExchange/realmExchange.simulation.test.ts`
+*   **Resumen de Tareas:** Agregadas pruebas unitarias para `getAssetTick`.
+*   **Cambios Clave:**
+    *   Creación de archivo de pruebas usando `vitest`.
+    *   Cobertura de varios escenarios de ticks, límites, e intervalos.
+
+
 
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`

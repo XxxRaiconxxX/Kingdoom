@@ -28,6 +28,10 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- **Testing**: Added unit tests for LORE_RULES, REALM_FACTIONS, and FACTION_DOSSIERS in `src/data/lore.test.ts`.
+- **Configuracion**: Added `vitest`, `@testing-library/react`, `@testing-library/dom` and `jsdom` to `devDependencies`. Configured `vitest.config.ts`. Added `test` script to `package.json`.
+
 
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`

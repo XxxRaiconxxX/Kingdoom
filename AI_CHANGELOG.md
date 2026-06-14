@@ -3417,3 +3417,8 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 27/10/2023] - [Autor: Jules]
+- **Testing Improvement**: Added unit tests for `COMMUNITY_APP_DOWNLOAD_FALLBACK_URL` and other constants in `src/data/home.ts`.
+- **Vitest Setup**: Installed and configured `vitest` globally for the frontend project via a new `vitest.config.ts`.
+- **NPM Script**: Added `"test": "vitest run"` script to `package.json`.

@@ -446,3 +446,17 @@ export async function uploadPlayerAvatarGif(
     url: urlData.publicUrl,
   };
 }
+
+export async function addMultiplePlayersGold(
+  playerIds: string[],
+  amount: number
+): Promise<boolean> {
+  if (playerIds.length === 0 || amount <= 0) return false;
+
+  const { error } = await supabase.rpc("add_multiple_players_gold", {
+    p_player_ids: playerIds,
+    p_amount: amount,
+  });
+
+  return !error;
+}

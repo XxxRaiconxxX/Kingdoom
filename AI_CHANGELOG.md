@@ -3417,3 +3417,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+### [Fecha: 14/06/2026] - [Autor: Jules]
+- 🧪 **Testing Improvement**: Añadidas pruebas unitarias para `GRIMOIRE_DATA` en `src/data/grimorio.test.ts`.
+- ⚙️ **Configuración**: Instalado y configurado `vitest` como runner de pruebas y agregado un script `test` en `package.json`.

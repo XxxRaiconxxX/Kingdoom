@@ -1,0 +1,11 @@
+🧪 [Add tests for narrative encounters]
+
+🎯 **What:**
+Added unit tests for the `NARRATIVE_ENCOUNTERS` constant in `src/data/pve.ts`.
+Configured vitest to run tests. Added `npm test` script.
+
+📊 **Coverage:**
+The new unit tests cover structure, type, data bounds and logical relations for `NARRATIVE_ENCOUNTERS`. Check if all IDs are unique, numerical values bounds (`rewardMax` >= `rewardMin` etc) and all types valid.
+
+✨ **Result:**
+Setup unit test framework. Prevents regressions.

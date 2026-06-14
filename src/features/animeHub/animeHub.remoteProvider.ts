@@ -824,7 +824,6 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
 
         // Mejora 3: Smart Fallback si el proveedor específico falló
         if (collected.length === 0 && provider && provider !== "all") {
-          console.log(`Smart Fallback: No results in ${provider}, trying other sources...`);
           if (provider === "tioanime") collected.push(...(await searchAnimeFlv(variant)));
           else if (provider === "animeflv") collected.push(...(await searchTioAnime(variant)));
         }

@@ -3417,3 +3417,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+---
+### [Fecha: 14/06/2026] - [Autor: Jules]
+*   **Archivos Modificados:** `src/features/market/market.adapter.test.ts` (Nuevo), `vitest.config.ts` (Nuevo), `package.json`, `package-lock.json`
+*   **Resumen de Tareas:** Adición de pruebas unitarias para `slugifyMarketItem` y el resto de adaptadores del mercado en `market.adapter.ts`.
+*   **Cambios Clave:**
+    *   Se configuró el framework de pruebas Vite/Vitest (`vitest` y `@vitest/coverage-v8`) para dar soporte de unit testing.
+    *   Se creó `market.adapter.test.ts` que cubre el 100% (14 casos de prueba) de las funciones exportadas: `slugifyMarketItem`, `mapMarketItemRow` y `buildMarketItemPayload`.
+    *   El código fue verificado limpiamente usando `npx tsc --noEmit` y `npm run build`.
+*   **Notas/Advertencias:** Ninguno detectado.

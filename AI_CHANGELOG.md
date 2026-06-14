@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [14/06/2026] - [Autor: Jules]
+- **Archivist:** Se implementaron pruebas unitarias completas para la función `buildArchivistRuntimeSummary` (archivo: `src/features/archivist/tests/archivistLive.test.ts`).
+- **Testing:** Se configuró el entorno básico de Vitest con JSdom. Se ignoraron los reportes de coverage en Git.
+
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

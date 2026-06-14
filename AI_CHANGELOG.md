@@ -29,6 +29,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 14/06/2026] - [Autor: Jules]
+*   **Archivos Modificados:** `.gitignore`, `tmp_*.txt`, `extracted_powers/*`
+*   **Resumen de Tareas:** Mantenimiento de limpieza semanal de repositorio.
+*   **Cambios Clave:**
+    *   **[Limpieza]:** Se des-trackearon y agregaron a `.gitignore` archivos basura de logs o dumps (por ejemplo, `tmp_*.txt` y `extracted_powers/*.txt`).
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

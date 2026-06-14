@@ -1,31 +1,6 @@
 import type { InventoryCategoryId, InventoryEntry, MarketItem, PaymentPlan } from "../types";
 import { supabase } from "./supabaseClient";
 
-// SQL sugerido para Supabase:
-//
-// create table player_inventory (
-//   id uuid primary key default gen_random_uuid(),
-//   player_id uuid not null references players(id) on delete cascade,
-//   item_id text not null,
-//   item_name text not null,
-//   item_category text not null,
-//   item_description text not null,
-//   item_ability text,
-//   item_image_url text not null default '',
-//   item_image_fit text,
-//   item_image_position text,
-//   item_rarity text not null,
-//   quantity integer not null default 1 check (quantity > 0),
-//   created_at timestamptz default now(),
-//   updated_at timestamptz default now(),
-//   unique (player_id, item_id)
-// );
-//
-// alter table player_inventory enable row level security;
-//
-// create policy "Allow all inventory access" on player_inventory
-//   for all using (true) with check (true);
-
 type InventoryRow = {
   id: string;
   player_id: string;

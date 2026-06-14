@@ -3417,3 +3417,11 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+---
+### [Fecha: $(date +'%d/%m/%Y')] - [Autor: Jules]
+*   **Archivos Modificados:** `src/utils/inventory.ts`
+*   **Resumen de Tareas:** Removido bloque de código SQL comentado en `src/utils/inventory.ts` para mejorar la calidad y legibilidad del código.
+*   **Cambios Clave:**
+    *   Se eliminó un comentario largo que contenía SQL sugerido para la tabla de Supabase (player_inventory) en el encabezado del archivo.
+*   **Notas/Advertencias:** Ninguno detectado.

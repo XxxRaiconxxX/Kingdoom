@@ -968,31 +968,30 @@ export function PlayerProfilePanel({
                     </p>
                   </div>
 
-                  <div className="mt-4">
-                    <SeasonRankSpotlight
-                      isLoading={isLoadingMonthlyRank}
-                      isExpanded={isSeasonExpanded}
-                      onToggle={() => setIsSeasonExpanded((current) => !current)}
-                      seasonName={activeSeasonName}
-                      seasonEndsLabel={seasonEndsLabel}
-                      rankName={rankName}
-                      rankTier={rankTier}
-                      rankPoints={rankPoints}
-                      rankProgressPercent={rankProgressPercent}
-                      seasonProgressPercent={seasonProgressPercent}
-                      currentRankFloorPoints={currentRankFloorPoints}
-                      nextRankGoalPoints={nextRankGoalPoints}
-                      nextRankName={nextRankName}
-                      nextRankTier={nextRankTier}
-                      pointsToNextRank={pointsToNextRank}
-                      monthlyRewardedMissions={monthlyRewardedMissions}
-                      monthlyRewardedEvents={monthlyRewardedEvents}
-                      manualSeasonAwards={manualSeasonAwards}
-                      activeSeasonSeedPoints={activeSeasonSeedPoints}
-                    />
-                  </div>
                 </div>
               </div>
+
+              <SeasonRankSpotlight
+                isLoading={isLoadingMonthlyRank}
+                isExpanded={isSeasonExpanded}
+                onToggle={() => setIsSeasonExpanded((current) => !current)}
+                seasonName={activeSeasonName}
+                seasonEndsLabel={seasonEndsLabel}
+                rankName={rankName}
+                rankTier={rankTier}
+                rankPoints={rankPoints}
+                rankProgressPercent={rankProgressPercent}
+                seasonProgressPercent={seasonProgressPercent}
+                currentRankFloorPoints={currentRankFloorPoints}
+                nextRankGoalPoints={nextRankGoalPoints}
+                nextRankName={nextRankName}
+                nextRankTier={nextRankTier}
+                pointsToNextRank={pointsToNextRank}
+                monthlyRewardedMissions={monthlyRewardedMissions}
+                monthlyRewardedEvents={monthlyRewardedEvents}
+                manualSeasonAwards={manualSeasonAwards}
+                activeSeasonSeedPoints={activeSeasonSeedPoints}
+              />
 
               {businessProposals.some(p => p.status === "pending") || businesses.length > 0 ? (
                 <div className="rounded-[1.75rem] border border-stone-800 bg-stone-950/45 p-4 sm:p-5">

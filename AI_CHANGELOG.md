@@ -3547,3 +3547,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   La insignia del rango ahora usa tamano mas pequeno mientras el panel esta plegado.
     *   El bloque de `Siguiente objetivo` se movio al contenido desplegable, dejando solo la informacion esencial visible en estado natural.
 *   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente despues del ajuste.
+
+---
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Reubicacion del frente de temporada para eliminar el vacio vertical del panel de jugador.
+*   **Cambios Clave:**
+    *   Se saco `Frente de temporada` de la columna lateral que compartia altura con `Jugador conectado`.
+    *   El bloque de temporada ahora vive como seccion propia debajo del panel superior del perfil, antes del resto del contenido del jugador.
+    *   Con esto el bloque `Jugador conectado` deja de arrastrar una altura artificial y recupera un layout mas limpio y compacto.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente despues de la reubicacion.

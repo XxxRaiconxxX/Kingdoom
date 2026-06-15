@@ -3442,3 +3442,6 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+### [Fecha: 15/06/2026] - [Autor: Jules]
+- **utils**: Improved `console.error` handling in `src/utils/characterSheets.ts` to securely log error messages instead of raw error objects, preventing potential sensitive data leaks.

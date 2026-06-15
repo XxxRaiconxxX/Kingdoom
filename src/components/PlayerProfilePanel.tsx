@@ -27,8 +27,11 @@ import type {
   CharacterSheet,
   PlayerBusiness,
   PlayerBusinessProposal,
+  RankName,
+  RankTier,
 } from "../types";
 import { PlayerNotificationBell } from "./PlayerNotificationBell";
+import { RankBadge } from "./RankBadge";
 import {
   collectBusinessGold,
   fetchPlayerBusinessCollectionLog,
@@ -52,6 +55,7 @@ import {
   resolveActivePveSheetId,
   setActivePveSheetId,
 } from "../utils/pveProgress";
+import { fetchPlayerMonthlyRankSnapshot } from "../utils/playerRanks";
 
 const CharImportModal = lazy(() =>
   import("./CharImportModal").then((module) => ({
@@ -135,6 +139,22 @@ export function PlayerProfilePanel({
   const [isPlayingAvatarGif, setIsPlayingAvatarGif] = useState(false);
   const [connectedGifUrl, setConnectedGifUrl] = useState<string | null>(null);
   const [isMinimumHydrationTimeMet, setIsMinimumHydrationTimeMet] = useState(false);
+  const [monthlyRankPoints, setMonthlyRankPoints] = useState<number | null>(null);
+  const [monthlyRankName, setMonthlyRankName] = useState<RankName>("siervo");
+  const [monthlyRankTier, setMonthlyRankTier] = useState<RankTier>("III");
+  const [monthlyRewardedMissions, setMonthlyRewardedMissions] = useState(0);
+  const [monthlyRewardedEvents, setMonthlyRewardedEvents] = useState(0);
+  const [manualSeasonAwards, setManualSeasonAwards] = useState(0);
+  const [activeSeasonName, setActiveSeasonName] = useState("Temporada activa");
+  const [activeSeasonSeedPoints, setActiveSeasonSeedPoints] = useState(0);
+  const [isLoadingMonthlyRank, setIsLoadingMonthlyRank] = useState(false);
+  const [activeSeasonEndsAt, setActiveSeasonEndsAt] = useState("");
+  const [currentRankFloorPoints, setCurrentRankFloorPoints] = useState(0);
+  const [nextRankGoalPoints, setNextRankGoalPoints] = useState<number | null>(40);
+  const [nextRankName, setNextRankName] = useState<RankName | null>("siervo");
+  const [nextRankTier, setNextRankTier] = useState<RankTier | null>("II");
+  const [rankProgressPercent, setRankProgressPercent] = useState(0);
+  const [seasonProgressPercent, setSeasonProgressPercent] = useState(0);
 
   useEffect(() => {
     const cachedGif = window.localStorage.getItem("kingdoom.active-player-gif");
@@ -208,6 +228,61 @@ export function PlayerProfilePanel({
     }
 
     void loadBusinesses();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [player]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMonthlyRank() {
+      if (!player) {
+        setMonthlyRankPoints(null);
+        setMonthlyRankName("siervo");
+        setMonthlyRankTier("III");
+        setMonthlyRewardedMissions(0);
+        setMonthlyRewardedEvents(0);
+        setManualSeasonAwards(0);
+        setActiveSeasonName("Temporada activa");
+        setActiveSeasonSeedPoints(0);
+        setActiveSeasonEndsAt("");
+        setCurrentRankFloorPoints(0);
+        setNextRankGoalPoints(40);
+        setNextRankName("siervo");
+        setNextRankTier("II");
+        setRankProgressPercent(0);
+        setSeasonProgressPercent(0);
+        return;
+      }
+
+      setIsLoadingMonthlyRank(true);
+      const snapshot = await fetchPlayerMonthlyRankSnapshot(player.id);
+
+      if (cancelled) {
+        return;
+      }
+
+      setMonthlyRankPoints(snapshot.monthlyPoints);
+      setMonthlyRankName(snapshot.rankName);
+      setMonthlyRankTier(snapshot.rankTier);
+      setMonthlyRewardedMissions(snapshot.completedRewardedMissions);
+      setMonthlyRewardedEvents(snapshot.rewardedEvents);
+      setManualSeasonAwards(snapshot.manualAwardsCount);
+      setActiveSeasonName(snapshot.seasonName);
+      setActiveSeasonSeedPoints(snapshot.seedPoints);
+      setActiveSeasonEndsAt(snapshot.monthEndsAt);
+      setCurrentRankFloorPoints(snapshot.currentRankMinPoints);
+      setNextRankGoalPoints(snapshot.nextRankMinPoints);
+      setNextRankName(snapshot.nextRankName);
+      setNextRankTier(snapshot.nextRankTier);
+      setRankProgressPercent(snapshot.progressWithinRankPercent);
+      setSeasonProgressPercent(snapshot.seasonProgressPercent);
+      setIsLoadingMonthlyRank(false);
+    }
+
+    void loadMonthlyRank();
 
     return () => {
       cancelled = true;
@@ -377,6 +452,19 @@ export function PlayerProfilePanel({
   const [isBuyingSlot, setIsBuyingSlot] = useState(false);
   const currentSlots = player?.maxCharacterSheets ?? 2;
   const maxSlotsLimit = 10;
+  const rankName = monthlyRankName;
+  const rankTier = monthlyRankTier;
+  const rankPoints = monthlyRankPoints;
+  const pointsToNextRank =
+    typeof rankPoints === "number" && typeof nextRankGoalPoints === "number"
+      ? Math.max(0, nextRankGoalPoints - rankPoints)
+      : 0;
+  const seasonEndsLabel = activeSeasonEndsAt
+    ? new Intl.DateTimeFormat("es-PY", {
+        day: "2-digit",
+        month: "short",
+      }).format(new Date(activeSeasonEndsAt))
+    : "Fin por anunciar";
 
   const getNextSlotCost = (slots: number) => {
     return 1000000;
@@ -657,6 +745,15 @@ export function PlayerProfilePanel({
                   />
                 </div>
 
+                <div className="mt-3">
+                  <RankBadge
+                    rank={rankName}
+                    tier={rankTier}
+                    points={rankPoints}
+                    size="sm"
+                  />
+                </div>
+
                 <div className="mt-3 flex flex-wrap gap-2">
                   {isAdmin ? (
                     <ProfileMiniButton
@@ -740,6 +837,14 @@ export function PlayerProfilePanel({
                                 {activeSheet.name}
                               </span>
                             ) : null}
+                          </div>
+                          <div className="mt-3 max-w-xl">
+                            <RankBadge
+                              rank={rankName}
+                              tier={rankTier}
+                              points={rankPoints}
+                              size="sm"
+                            />
                           </div>
                         </div>
                       </div>
@@ -867,6 +972,28 @@ export function PlayerProfilePanel({
                     <p className="mt-1 text-sm font-bold text-stone-100">
                       {activeSheet?.name ?? "Selecciona una ficha"}
                     </p>
+                  </div>
+
+                  <div className="mt-4">
+                    <SeasonRankSpotlight
+                      isLoading={isLoadingMonthlyRank}
+                      seasonName={activeSeasonName}
+                      seasonEndsLabel={seasonEndsLabel}
+                      rankName={rankName}
+                      rankTier={rankTier}
+                      rankPoints={rankPoints}
+                      rankProgressPercent={rankProgressPercent}
+                      seasonProgressPercent={seasonProgressPercent}
+                      currentRankFloorPoints={currentRankFloorPoints}
+                      nextRankGoalPoints={nextRankGoalPoints}
+                      nextRankName={nextRankName}
+                      nextRankTier={nextRankTier}
+                      pointsToNextRank={pointsToNextRank}
+                      monthlyRewardedMissions={monthlyRewardedMissions}
+                      monthlyRewardedEvents={monthlyRewardedEvents}
+                      manualSeasonAwards={manualSeasonAwards}
+                      activeSeasonSeedPoints={activeSeasonSeedPoints}
+                    />
                   </div>
                 </div>
               </div>
@@ -1550,6 +1677,162 @@ function BusinessMetric({ label, value }: { label: string; value: string }) {
         {label}
       </p>
       <p className="mt-1 text-sm font-bold text-stone-100">{value}</p>
+    </div>
+  );
+}
+
+function formatRankLabel(rank: RankName | null) {
+  switch (rank) {
+    case "escudero":
+      return "Escudero";
+    case "caballero":
+      return "Caballero";
+    case "senor":
+      return "Senor";
+    case "senor-oscuro":
+      return "Senor Oscuro";
+    case "siervo":
+    default:
+      return "Siervo";
+  }
+}
+
+function SeasonRankSpotlight({
+  isLoading,
+  seasonName,
+  seasonEndsLabel,
+  rankName,
+  rankTier,
+  rankPoints,
+  rankProgressPercent,
+  seasonProgressPercent,
+  currentRankFloorPoints,
+  nextRankGoalPoints,
+  nextRankName,
+  nextRankTier,
+  pointsToNextRank,
+  monthlyRewardedMissions,
+  monthlyRewardedEvents,
+  manualSeasonAwards,
+  activeSeasonSeedPoints,
+}: {
+  isLoading: boolean;
+  seasonName: string;
+  seasonEndsLabel: string;
+  rankName: RankName;
+  rankTier: RankTier;
+  rankPoints: number | null;
+  rankProgressPercent: number;
+  seasonProgressPercent: number;
+  currentRankFloorPoints: number;
+  nextRankGoalPoints: number | null;
+  nextRankName: RankName | null;
+  nextRankTier: RankTier | null;
+  pointsToNextRank: number;
+  monthlyRewardedMissions: number;
+  monthlyRewardedEvents: number;
+  manualSeasonAwards: number;
+  activeSeasonSeedPoints: number;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-[1.6rem] border border-amber-500/20 bg-[linear-gradient(145deg,rgba(53,37,18,0.96),rgba(18,14,10,0.94))] p-4 shadow-[0_20px_55px_rgba(0,0,0,0.26)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.16),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(56,189,248,0.12),transparent_28%)]" />
+      <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent" />
+
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-300/80">
+              Frente de temporada
+            </p>
+            <h3 className="mt-2 text-lg font-black text-stone-100">
+              {seasonName}
+            </h3>
+            <p className="mt-1 text-xs text-stone-400">
+              Cierre estimado: {seasonEndsLabel}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-right">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+              Avance
+            </p>
+            <p className="mt-1 text-lg font-black text-amber-300">
+              {Math.round(seasonProgressPercent)}%
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <RankBadge
+            rank={rankName}
+            tier={rankTier}
+            points={rankPoints}
+            size="lg"
+            className="bg-[linear-gradient(135deg,rgba(34,26,18,0.95),rgba(10,9,8,0.88))]"
+          />
+        </div>
+
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <ProfileInfoStat label="Misiones" value={String(monthlyRewardedMissions)} />
+          <ProfileInfoStat label="Eventos" value={String(monthlyRewardedEvents)} />
+          <ProfileInfoStat label="Staff" value={String(manualSeasonAwards)} />
+        </div>
+
+        <div className="mt-4 rounded-[1.35rem] border border-white/8 bg-black/20 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
+              Progreso al siguiente escalon
+            </p>
+            <p className="text-xs font-semibold text-stone-300">
+              {rankPoints?.toLocaleString("es-PY") ?? 0} /{" "}
+              {nextRankGoalPoints?.toLocaleString("es-PY") ?? rankPoints?.toLocaleString("es-PY") ?? 0} pts
+            </p>
+          </div>
+          <div className="mt-3 h-3 overflow-hidden rounded-full bg-stone-950/80">
+            <motion.div
+              className="h-full rounded-full bg-[linear-gradient(90deg,rgba(251,191,36,0.95),rgba(56,189,248,0.9),rgba(168,85,247,0.95))] shadow-[0_0_24px_rgba(251,191,36,0.35)]"
+              initial={{ width: 0 }}
+              animate={{ width: `${rankProgressPercent}%` }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+            />
+          </div>
+          <div className="mt-3 flex items-start justify-between gap-3 text-xs">
+            <div>
+              <p className="font-semibold text-stone-200">
+                Base actual: {currentRankFloorPoints.toLocaleString("es-PY")} pts
+              </p>
+              <p className="mt-1 text-stone-500">
+                Puntos semilla heredados: {activeSeasonSeedPoints}
+              </p>
+            </div>
+            <div className="text-right">
+              {nextRankGoalPoints && nextRankName && nextRankTier ? (
+                <>
+                  <p className="font-semibold text-cyan-200">
+                    Siguiente: {formatRankLabel(nextRankName)} {nextRankTier}
+                  </p>
+                  <p className="mt-1 text-stone-500">
+                    Faltan {pointsToNextRank.toLocaleString("es-PY")} pts
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold text-amber-200">Rango maximo actual</p>
+                  <p className="mt-1 text-stone-500">Ya no hay otro escalon sobre ti.</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-4 text-xs leading-5 text-stone-400">
+          {isLoading
+            ? "Leyendo tus recompensas de temporada..."
+            : monthlyRewardedMissions > 0 || monthlyRewardedEvents > 0 || manualSeasonAwards > 0
+              ? `Tu avance ya refleja ${monthlyRewardedMissions} misiones validadas, ${monthlyRewardedEvents} eventos premiados y ${manualSeasonAwards} adjudicaciones manuales del staff.`
+              : "Aun no tienes recompensas validadas en esta temporada. Tu campaña sigue abierta para empezar a escalar desde Siervo III."}
+        </p>
+      </div>
     </div>
   );
 }

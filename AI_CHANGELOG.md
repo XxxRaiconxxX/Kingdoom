@@ -29,6 +29,63 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `supabase_season_rank_seasons.sql`, `src/utils/playerRanks.ts`, `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Preparacion del backend compartido para premios manuales de temporada desde staff/GM y lectura de esos premios en la web.
+*   **Cambios Clave:**
+    *   **[Supabase - Awards]:** Se agrego `season_rank_awards` para registrar puntos manuales de clasificatoria por temporada, con `source_type`, `source_key`, dificultad opcional, `points_awarded`, staff emisor, notas, `external_ref` y `metadata`.
+    *   **[Supabase - RPC Bot Ready]:** Se creo `award_manual_mission_rank_points(...)`, una funcion segura pensada para el futuro comando de WhatsApp `!misioncompleta`, que toma una lista de jugadores, resuelve el puntaje desde `season_rank_point_rules` y registra premios manuales dentro de la temporada activa.
+    *   **[Supabase - Rollover]:** El cierre de temporada ahora tambien contempla los premios manuales en snapshots y seeds de la siguiente temporada.
+    *   **[Frontend - Perfil]:** `playerRanks.ts` y `PlayerProfilePanel` ya suman premios manuales del jugador dentro de la temporada activa, mostrando su conteo en el resumen clasificatorio.
+*   **Notas/Advertencias:** El repo web ya esta listo para reflejar premios manuales, pero el comando de WhatsApp aun falta implementarse en `kingdoom-bot`.
+
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `supabase_season_rank_seasons.sql` [NEW], `src/utils/playerRanks.ts`, `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Backend de temporadas, snapshots y seeds para habilitar cierre automatico con reset de dos rangos y lectura de la temporada activa desde la web.
+*   **Cambios Clave:**
+    *   **[Supabase - Temporadas]:** Se creo `supabase_season_rank_seasons.sql` con las tablas `season_rank_seasons`, `season_rank_player_seeds` y `season_rank_player_snapshots`, mas un bootstrap de `Temporada Inicial` para que el sistema quede usable al correr el SQL.
+    *   **[Supabase - Cierre/Reset]:** Se implemento la funcion `close_and_rollover_active_season_rank(p_force boolean default false)`, que cierra la temporada activa, congela snapshots por jugador, aplica el descenso de 2 rangos (`6` escalones), crea o activa la siguiente temporada e inserta los seeds del siguiente ciclo.
+    *   **[Frontend - Temporada Activa]:** `playerRanks.ts` ahora intenta leer la temporada activa y los seeds del jugador desde Supabase, usando esos datos como ventana y punto de arranque del calculo del perfil en vez de depender unicamente del mes actual.
+    *   **[Perfil - Copy]:** `PlayerProfilePanel` paso a hablar de temporada activa y muestra el nombre de temporada junto con los puntos semilla heredados al iniciar el ciclo.
+*   **Notas/Advertencias:** Falta ejecutar el SQL nuevo en Supabase para activar el cierre/rollover real. El scheduler o bot que dispare la funcion automatica todavia no fue conectado.
+
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `supabase_season_rank_rules.sql` [NEW], `src/utils/playerRanks.ts`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Backend inicial del sistema clasificatorio mediante tablas configurables de puntos y umbrales, con lectura dinamica desde la app.
+*   **Cambios Clave:**
+    *   **[Supabase - Reglas]:** Se agrego `supabase_season_rank_rules.sql`, que crea `season_rank_point_rules` para puntajes por contenido (`easy`, `medium`, `hard`, `elite`, y evento recompensado) y `season_rank_thresholds` para los 15 escalones de la temporada de 10 semanas.
+    *   **[Supabase - Seed Inicial]:** El SQL deja cargados los valores acordados para la primera temporada: misiones `12/28/55/95`, eventos recompensados `50`, y los umbrales desde `Siervo III (0)` hasta `Senor Oscuro I (2400)`.
+    *   **[Frontend - Lectura Dinamica]:** `playerRanks.ts` dejo de depender exclusivamente de hardcodes y ahora intenta leer reglas y thresholds desde Supabase. Si las tablas aun no existen o fallan, conserva fallback local para no romper la UI.
+*   **Notas/Advertencias:** La duracion de temporada de 10 semanas ya esta modelada en los umbrales, pero el calendario/soft reset mensual aun no fue implementado como proceso automatico.
+
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/utils/playerRanks.ts`, `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Extension de la clasificatoria mensual para incluir eventos recompensados como segunda fuente real de puntos.
+*   **Cambios Clave:**
+    *   **[Clasificatoria - Eventos]:** `fetchPlayerMonthlyRankSnapshot` ahora consulta tambien `realm_event_participants` con `status = rewarded` y `reward_delivered = true` dentro del mes actual, evitando contar inscripciones sin validacion final del staff.
+    *   **[Clasificatoria - Balance Inicial]:** Se agrego un peso temporal plano de `50` puntos por evento recompensado, coexistiendo con los puntos por dificultad de misiones (`15/35/70/120`).
+    *   **[Perfil - Feedback]:** `PlayerProfilePanel` paso a informar cuantas misiones y cuantos eventos recompensados del mes estan entrando al calculo de la temporada.
+*   **Notas/Advertencias:** La fuente de puntos ya contempla misiones y eventos, pero aun falta una tabla dedicada para balance fino por tipo de contenido y logros especiales.
+
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/utils/playerRanks.ts` [NEW], `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Conexion inicial del sistema clasificatorio mensual a datos reales de Supabase usando misiones recompensadas del mes actual.
+*   **Cambios Clave:**
+    *   **[Clasificatoria - Logica]:** Se creo `fetchPlayerMonthlyRankSnapshot` para leer `realm_mission_claims` recompensadas (`status = rewarded`, `reward_delivered = true`) dentro del mes actual y convertirlas en puntos de temporada por dificultad.
+    *   **[Clasificatoria - Umbrales]:** Se definio una primera escalera de 15 escalones (`Siervo III` hasta `Senor Oscuro I`) derivada por puntos, con pesos iniciales de misiones `easy=15`, `medium=35`, `hard=70`, `elite=120`.
+    *   **[Perfil - Integracion]:** `PlayerProfilePanel` ahora deja de mostrar una insignia puramente estatica y pasa a renderizar rango, escalon y puntos mensuales reales basados en misiones ya validadas y pagadas por staff.
+*   **Notas/Advertencias:** Esta primera conexion solo contempla misiones recompensadas. Aun faltan eventos, logros especiales y el reset mensual de dos rangos.
+
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `public/img/ranks/siervo.png` [NEW], `public/img/ranks/escudero.png` [NEW], `public/img/ranks/caballero.png` [NEW], `public/img/ranks/senor.png` [NEW], `public/img/ranks/senor-oscuro.png` [NEW], `src/components/RankBadge.tsx` [NEW], `src/components/PlayerProfilePanel.tsx`, `src/types.ts`
+*   **Resumen de Tareas:** Integracion visual inicial del sistema clasificatorio mensual en el perfil del jugador, usando las insignias generadas y dejando un fallback seguro mientras aun no existe la capa real de puntos/rangos en Supabase.
+*   **Cambios Clave:**
+    *   **[Perfil - UI]:** Se creo el componente `RankBadge` para renderizar la insignia, nombre de rango, escalon y puntos mensuales con tamanos `sm`, `md` y `lg`, reutilizable en futuras vistas del sistema clasificatorio.
+    *   **[Perfil - Integracion]:** Se inserto la insignia clasificatoria en las variantes expandida y compacta de `PlayerProfilePanel`, mostrando por defecto `Siervo III` hasta enlazar los datos reales de temporada.
+    *   **[Assets - Arte]:** Se incorporaron al repositorio las cinco insignias base (`Siervo`, `Escudero`, `Caballero`, `Senor`, `Senor Oscuro`) dentro de `public/img/ranks/` para servirlas desde la SPA sin dependencias externas.
+    *   **[Tipos - Preparacion]:** `PlayerAccount` quedo preparado con campos opcionales `rankName`, `rankTier` y `monthlyRankPoints` para conectar despues la logica mensual sin rehacer el contrato visual.
+*   **Notas/Advertencias:** Esta entrega es solo visual. Aun no existe persistencia de puntos mensuales, calculo de ascensos por misiones ni reset de fin de mes.
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.
@@ -3442,3 +3499,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+---
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/utils/playerRanks.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Pulido visual del frente de clasificatoria en el perfil del jugador para volver el frontend mÃ¡s llamativo y legible.
+*   **Cambios Clave:**
+    *   **Perfil Hero:** Se reemplazÃ³ el bloque simple de rango por un `SeasonRankSpotlight` con presencia visual de tarjeta hero, lectura de temporada y resumen de actividad.
+    *   **Progreso Real:** `fetchPlayerMonthlyRankSnapshot` ahora expone piso del rango actual, siguiente meta, progreso porcentual dentro del escalÃ³n y avance temporal de la temporada.
+    *   **UI de Temporada:** Se aÃ±adiÃ³ barra animada de progreso, contador de puntos faltantes al siguiente rango y mÃ©tricas compactas de misiones, eventos y premios manuales.
+    *   **Legibilidad de Rangos:** El frontend ya muestra el siguiente rango con naming presentable en vez de identificadores crudos del sistema.
+*   **Notas/Advertencias:** `npm run build` pasÃ³ correctamente. `npx tsc --noEmit` sigue fallando por una dependencia faltante preexistente en `src/features/market/market.rotation.test.ts` (`vitest` no resuelto), ajena a este cambio visual.

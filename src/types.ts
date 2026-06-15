@@ -10,6 +10,13 @@ export type MissionStatus = "available" | "in-progress" | "closed";
 export type MissionDifficulty = "easy" | "medium" | "hard" | "elite";
 export type MissionType = "story" | "hunt" | "escort" | "investigation" | "event";
 export type StockStatus = "available" | "limited" | "sold-out";
+export type RankName =
+  | "siervo"
+  | "escudero"
+  | "caballero"
+  | "senor"
+  | "senor-oscuro";
+export type RankTier = "I" | "II" | "III";
 
 export type PlayerAccount = {
   id: string;
@@ -20,6 +27,9 @@ export type PlayerAccount = {
   phone?: string | null;
   avatar_gif_url?: string | null;
   maxCharacterSheets?: number;
+  rankName?: RankName;
+  rankTier?: RankTier;
+  monthlyRankPoints?: number;
 };
 
 export type BusinessProposalStatus =

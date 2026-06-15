@@ -29,6 +29,11 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: Jules]
+- Secure console.error usage in `src/features/animeHub/animeHub.remoteProvider.ts` by serializing error objects instead of logging them raw.
+
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

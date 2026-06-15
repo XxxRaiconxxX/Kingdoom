@@ -30,6 +30,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `supabase_season_rank_seasons.sql`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Correccion de la RPC `award_manual_mission_rank_points(...)` tras el primer uso real desde WhatsApp.
+*   **Cambios Clave:**
+    *   **[Supabase - Fix RPC]:** Se agrego la directiva `#variable_conflict use_column` dentro de `award_manual_mission_rank_points(...)`.
+    *   **[Causa Raiz]:** La funcion devuelve una tabla con columna `season_id`, y PL/pgSQL estaba interpretando de forma ambigua ese nombre dentro del `ON CONFLICT (season_id, player_id, source_type, source_key, external_ref)` al ejecutar `!misioncompleta`.
+    *   **[Impacto]:** El fix mantiene intacta la logica anti-duplicado por `external_ref`, pero elimina el choque de nombres que provocaba el error `column reference "season_id" is ambiguous`.
+*   **Notas/Advertencias:** Hace falta volver a ejecutar el `create or replace function public.award_manual_mission_rank_points(...)` en Supabase para que el fix quede aplicado en produccion.
+
+### [Fecha: 15/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `supabase_season_rank_seasons.sql`, `src/utils/playerRanks.ts`, `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
 *   **Resumen de Tareas:** Preparacion del backend compartido para premios manuales de temporada desde staff/GM y lectura de esos premios en la web.
 *   **Cambios Clave:**

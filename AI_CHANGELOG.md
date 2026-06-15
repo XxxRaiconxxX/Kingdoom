@@ -29,6 +29,10 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: Jules]
+- Fix: Replaced predictable PRNG (`Math.random()`) with cryptographically secure `crypto.getRandomValues()` in `src/utils/scratchSecure.ts` for Scratchcard rewards logic.
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

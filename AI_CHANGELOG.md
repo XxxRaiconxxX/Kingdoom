@@ -29,6 +29,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: Claude]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/index.css`
+*   **Resumen de Tareas:** Rediseno visual detallado de la tarjeta "Frente de temporada" (componente `SeasonRankSpotlight`). Commit `d807f06` (codigo) ya pusheado; esta entrada documenta el cambio (se diferio antes para no absorber el WIP de Codex en `AI_CHANGELOG.md`).
+*   **Cambios Clave:**
+    *   **[UI - Tematizacion por rango]:** nuevo mapa `SEASON_ACCENTS` que pinta todo el panel con el color del rango actual (bronce Siervo -> oro Escudero -> cielo Caballero -> violeta Senor -> carmesi Senor Oscuro) en borde, fondo, halo, barra de progreso y tiles, via estilos inline `rgb(${accent} / x)`.
+    *   **[UI - Avance circular]:** el "Avance %" paso de una cajita de texto a un anillo SVG animado (`SeasonRing`), coherente con los gauges del diseno.
+    *   **[UI - Detalle]:** tiles Misiones/Eventos/Staff con iconos tematizados (Swords/Sparkles/Crown); "Siguiente objetivo" con icono Target y chip del color del proximo rango; `tabular-nums` en todas las cifras; eyebrow con Sparkles y "Cierre estimado" con CalendarClock.
+    *   **[CSS - index.css]:** `kd-season-orb` (halo del rango que respira) y `kd-season-bar::after` (barrido de luz en la barra) + marcas de cuartos en la barra. Ambas animaciones se desactivan bajo `prefers-reduced-motion`.
+*   **Notas/Advertencias:** `tsc --noEmit` 0 errores; `npm run build` OK; CSS+JS confirmados en el bundle. Cambio 100% presentacional (mismos props y wiring de datos). No se pudo capturar screenshot logueado (el panel solo renderiza con jugador conectado y no hay credenciales de jugador real en el entorno) — verificacion visual final queda a cargo del usuario en su sesion.
+
 ### [Fecha: 15/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `supabase_season_rank_seasons.sql`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
 *   **Resumen de Tareas:** Correccion de la RPC `award_manual_mission_rank_points(...)` tras el primer uso real desde WhatsApp.

@@ -26,14 +26,8 @@ BEGIN
     RETURN jsonb_build_object('status', 'error', 'message', 'Ya has alcanzado el límite máximo de 10 fichas.');
   END IF;
 
-  -- 3. Calculate cost
-  IF v_current_slots = 2 THEN
-    v_cost := 1000000;
-  ELSIF v_current_slots = 3 THEN
-    v_cost := 2000000;
-  ELSE
-    v_cost := (v_current_slots - 2) * 2000000;
-  END IF;
+  -- 3. Calculate cost (Flat 1,000,000 gold for all slots)
+  v_cost := 1000000;
 
   -- 4. Check player gold
   IF v_player.gold < v_cost THEN

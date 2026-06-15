@@ -379,9 +379,7 @@ export function PlayerProfilePanel({
   const maxSlotsLimit = 10;
 
   const getNextSlotCost = (slots: number) => {
-    if (slots === 2) return 1000000;
-    if (slots === 3) return 2000000;
-    return (slots - 2) * 2000000;
+    return 1000000;
   };
 
   const nextSlotCost = getNextSlotCost(currentSlots);

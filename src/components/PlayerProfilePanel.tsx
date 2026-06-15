@@ -5,6 +5,7 @@ import {
   Backpack,
   Coins,
   Crown,
+  ChevronDown,
   Loader2,
   RefreshCw,
   ShieldCheck,
@@ -155,6 +156,7 @@ export function PlayerProfilePanel({
   const [nextRankTier, setNextRankTier] = useState<RankTier | null>("II");
   const [rankProgressPercent, setRankProgressPercent] = useState(0);
   const [seasonProgressPercent, setSeasonProgressPercent] = useState(0);
+  const [isSeasonExpanded, setIsSeasonExpanded] = useState(false);
 
   useEffect(() => {
     const cachedGif = window.localStorage.getItem("kingdoom.active-player-gif");
@@ -179,6 +181,21 @@ export function PlayerProfilePanel({
     } else {
       setIsMinimumHydrationTimeMet(true);
     }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const syncSeasonPanel = (event?: MediaQueryListEvent) => {
+      setIsSeasonExpanded(event ? event.matches : mediaQuery.matches);
+    };
+
+    syncSeasonPanel();
+    mediaQuery.addEventListener("change", syncSeasonPanel);
+    return () => mediaQuery.removeEventListener("change", syncSeasonPanel);
   }, []);
 
   const isCollapsed = Boolean(collapsed && player);
@@ -838,14 +855,6 @@ export function PlayerProfilePanel({
                               </span>
                             ) : null}
                           </div>
-                          <div className="mt-3 max-w-xl">
-                            <RankBadge
-                              rank={rankName}
-                              tier={rankTier}
-                              points={rankPoints}
-                              size="sm"
-                            />
-                          </div>
                         </div>
                       </div>
                       <button
@@ -977,6 +986,8 @@ export function PlayerProfilePanel({
                   <div className="mt-4">
                     <SeasonRankSpotlight
                       isLoading={isLoadingMonthlyRank}
+                      isExpanded={isSeasonExpanded}
+                      onToggle={() => setIsSeasonExpanded((current) => !current)}
                       seasonName={activeSeasonName}
                       seasonEndsLabel={seasonEndsLabel}
                       rankName={rankName}
@@ -1699,6 +1710,8 @@ function formatRankLabel(rank: RankName | null) {
 
 function SeasonRankSpotlight({
   isLoading,
+  isExpanded,
+  onToggle,
   seasonName,
   seasonEndsLabel,
   rankName,
@@ -1717,6 +1730,8 @@ function SeasonRankSpotlight({
   activeSeasonSeedPoints,
 }: {
   isLoading: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
   seasonName: string;
   seasonEndsLabel: string;
   rankName: RankName;
@@ -1767,71 +1782,135 @@ function SeasonRankSpotlight({
             rank={rankName}
             tier={rankTier}
             points={rankPoints}
-            size="lg"
+            size="md"
             className="bg-[linear-gradient(135deg,rgba(34,26,18,0.95),rgba(10,9,8,0.88))]"
           />
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <ProfileInfoStat label="Misiones" value={String(monthlyRewardedMissions)} />
-          <ProfileInfoStat label="Eventos" value={String(monthlyRewardedEvents)} />
-          <ProfileInfoStat label="Staff" value={String(manualSeasonAwards)} />
-        </div>
-
-        <div className="mt-4 rounded-[1.35rem] border border-white/8 bg-black/20 p-3">
+        <div className="mt-3 rounded-[1.25rem] border border-white/8 bg-black/20 px-3 py-3">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
-              Progreso al siguiente escalon
-            </p>
-            <p className="text-xs font-semibold text-stone-300">
-              {rankPoints?.toLocaleString("es-PY") ?? 0} /{" "}
-              {nextRankGoalPoints?.toLocaleString("es-PY") ?? rankPoints?.toLocaleString("es-PY") ?? 0} pts
-            </p>
-          </div>
-          <div className="mt-3 h-3 overflow-hidden rounded-full bg-stone-950/80">
-            <motion.div
-              className="h-full rounded-full bg-[linear-gradient(90deg,rgba(251,191,36,0.95),rgba(56,189,248,0.9),rgba(168,85,247,0.95))] shadow-[0_0_24px_rgba(251,191,36,0.35)]"
-              initial={{ width: 0 }}
-              animate={{ width: `${rankProgressPercent}%` }}
-              transition={{ duration: 0.9, ease: "easeOut" }}
-            />
-          </div>
-          <div className="mt-3 flex items-start justify-between gap-3 text-xs">
-            <div>
-              <p className="font-semibold text-stone-200">
-                Base actual: {currentRankFloorPoints.toLocaleString("es-PY")} pts
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">
+                Siguiente objetivo
               </p>
-              <p className="mt-1 text-stone-500">
-                Puntos semilla heredados: {activeSeasonSeedPoints}
-              </p>
-            </div>
-            <div className="text-right">
               {nextRankGoalPoints && nextRankName && nextRankTier ? (
-                <>
-                  <p className="font-semibold text-cyan-200">
-                    Siguiente: {formatRankLabel(nextRankName)} {nextRankTier}
-                  </p>
-                  <p className="mt-1 text-stone-500">
-                    Faltan {pointsToNextRank.toLocaleString("es-PY")} pts
-                  </p>
-                </>
+                <p className="mt-1 text-sm font-bold text-cyan-200">
+                  {formatRankLabel(nextRankName)} {nextRankTier}
+                </p>
               ) : (
-                <>
-                  <p className="font-semibold text-amber-200">Rango maximo actual</p>
-                  <p className="mt-1 text-stone-500">Ya no hay otro escalon sobre ti.</p>
-                </>
+                <p className="mt-1 text-sm font-bold text-amber-200">
+                  Rango maximo actual
+                </p>
               )}
             </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+                Restante
+              </p>
+              <p className="mt-1 text-sm font-black text-stone-100">
+                {nextRankGoalPoints && nextRankName && nextRankTier
+                  ? `${pointsToNextRank.toLocaleString("es-PY")} pts`
+                  : "Completado"}
+              </p>
+            </div>
           </div>
         </div>
 
-        <p className="mt-4 text-xs leading-5 text-stone-400">
-          {isLoading
-            ? "Leyendo tus recompensas de temporada..."
-            : monthlyRewardedMissions > 0 || monthlyRewardedEvents > 0 || manualSeasonAwards > 0
-              ? `Tu avance ya refleja ${monthlyRewardedMissions} misiones validadas, ${monthlyRewardedEvents} eventos premiados y ${manualSeasonAwards} adjudicaciones manuales del staff.`
-              : "Aun no tienes recompensas validadas en esta temporada. Tu campaña sigue abierta para empezar a escalar desde Siervo III."}
-        </p>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={isExpanded}
+          className="mt-3 inline-flex w-full items-center justify-between rounded-[1.1rem] border border-white/10 bg-black/25 px-3 py-2.5 text-left text-xs font-semibold text-stone-200 transition hover:border-amber-400/25 hover:bg-black/35"
+        >
+          <span className="uppercase tracking-[0.18em] text-stone-400">
+            {isExpanded ? "Ocultar detalle de temporada" : "Ver detalle de temporada"}
+          </span>
+          <span className="inline-flex items-center gap-2 text-amber-300">
+            {isExpanded ? "Ocultar" : "Desplegar"}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+            />
+          </span>
+        </button>
+
+        {isExpanded ? (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="mt-4 space-y-4"
+          >
+            <div className="grid grid-cols-3 gap-2">
+              <ProfileInfoStat label="Misiones" value={String(monthlyRewardedMissions)} />
+              <ProfileInfoStat label="Eventos" value={String(monthlyRewardedEvents)} />
+              <ProfileInfoStat label="Staff" value={String(manualSeasonAwards)} />
+            </div>
+
+            <div className="rounded-[1.35rem] border border-white/8 bg-black/20 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
+                  Progreso al siguiente escalon
+                </p>
+                <p className="text-xs font-semibold text-stone-300">
+                  {rankPoints?.toLocaleString("es-PY") ?? 0} /{" "}
+                  {nextRankGoalPoints?.toLocaleString("es-PY") ??
+                    rankPoints?.toLocaleString("es-PY") ??
+                    0} pts
+                </p>
+              </div>
+              <div className="mt-3 h-3 overflow-hidden rounded-full bg-stone-950/80">
+                <motion.div
+                  className="h-full rounded-full bg-[linear-gradient(90deg,rgba(251,191,36,0.95),rgba(56,189,248,0.9),rgba(168,85,247,0.95))] shadow-[0_0_24px_rgba(251,191,36,0.35)]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${rankProgressPercent}%` }}
+                  transition={{ duration: 0.9, ease: "easeOut" }}
+                />
+              </div>
+              <div className="mt-3 flex items-start justify-between gap-3 text-xs">
+                <div>
+                  <p className="font-semibold text-stone-200">
+                    Base actual: {currentRankFloorPoints.toLocaleString("es-PY")} pts
+                  </p>
+                  <p className="mt-1 text-stone-500">
+                    Puntos semilla heredados: {activeSeasonSeedPoints}
+                  </p>
+                </div>
+                <div className="text-right">
+                  {nextRankGoalPoints && nextRankName && nextRankTier ? (
+                    <>
+                      <p className="font-semibold text-cyan-200">
+                        Siguiente: {formatRankLabel(nextRankName)} {nextRankTier}
+                      </p>
+                      <p className="mt-1 text-stone-500">
+                        Faltan {pointsToNextRank.toLocaleString("es-PY")} pts
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-semibold text-amber-200">Rango maximo actual</p>
+                      <p className="mt-1 text-stone-500">Ya no hay otro escalon sobre ti.</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs leading-5 text-stone-400">
+              {isLoading
+                ? "Leyendo tus recompensas de temporada..."
+                : monthlyRewardedMissions > 0 ||
+                    monthlyRewardedEvents > 0 ||
+                    manualSeasonAwards > 0
+                  ? `Tu avance ya refleja ${monthlyRewardedMissions} misiones validadas, ${monthlyRewardedEvents} eventos premiados y ${manualSeasonAwards} adjudicaciones manuales del staff.`
+                  : "Aun no tienes recompensas validadas en esta temporada. Tu campana sigue abierta para empezar a escalar desde Siervo III."}
+            </p>
+          </motion.div>
+        ) : (
+          <p className="mt-3 text-xs leading-5 text-stone-400">
+            Mantuvimos la insignia y el objetivo visible, y dejamos el resto del
+            detalle en este desplegable para evitar duplicacion en desktop y mobile.
+          </p>
+        )}
       </div>
     </div>
   );

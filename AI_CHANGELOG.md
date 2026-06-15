@@ -3509,3 +3509,31 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **UI de Temporada:** Se aÃ±adiÃ³ barra animada de progreso, contador de puntos faltantes al siguiente rango y mÃ©tricas compactas de misiones, eventos y premios manuales.
     *   **Legibilidad de Rangos:** El frontend ya muestra el siguiente rango con naming presentable en vez de identificadores crudos del sistema.
 *   **Notas/Advertencias:** `npm run build` pasÃ³ correctamente. `npx tsc --noEmit` sigue fallando por una dependencia faltante preexistente en `src/features/market/market.rotation.test.ts` (`vitest` no resuelto), ajena a este cambio visual.
+---
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/vitest.d.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Correccion del bloqueo de typecheck causado por el test de rotacion del mercado.
+*   **Cambios Clave:**
+    *   Se agrego un shim local de tipos para `vitest` en `src/vitest.d.ts`.
+    *   Con eso `npx tsc --noEmit` vuelve a pasar sin necesidad de agregar dependencias nuevas ni tocar `package-lock.json`.
+*   **Notas/Advertencias:** La solucion actual resuelve el tipado del repo. Si mas adelante se incorporan mas tests de `vitest`, convendra instalar la dependencia de forma formal cuando el proyecto quiera ejecutar esa suite.
+
+---
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Reorganizacion del panel de clasificatoria para evitar la duplicacion visual del rango en perfil.
+*   **Cambios Clave:**
+    *   Se elimino la insignia duplicada del bloque principal del jugador en modo expandido.
+    *   El frente de temporada ahora conserva una sola insignia visible, mas compacta, con un resumen inmediato del siguiente objetivo.
+    *   Los detalles largos de temporada pasaron a un desplegable controlado: en mobile inicia compacto y en escritorio se abre automaticamente para mantener densidad visual sin perder informacion.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente despues del ajuste.
+
+---
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Verificacion UI en vivo del nuevo bloque de clasificatoria en desktop y mobile.
+*   **Cambios Clave:**
+    *   Se levanto la SPA localmente y se reviso el perfil real en ambas resoluciones mediante capturas automatizadas.
+    *   La verificacion visual confirma que la insignia de rango ya no aparece duplicada entre el bloque principal del jugador y el frente de temporada.
+    *   El panel de temporada mantiene una lectura mas compacta en mobile y una lectura mas abierta en escritorio.
+*   **Notas/Advertencias:** La comprobacion visual fue satisfactoria. La automatizacion DOM no produjo selectores suficientemente estables para afirmar el estado conectado via aserciones, pero las capturas renderizadas si mostraron el layout esperado.

@@ -29,6 +29,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: [Jules]]
+- Optimización de rendimiento de componentes React añadiendo `React.memo` a `StatCard`, `EventCard` y `MarketItemCard` para evitar re-renderizados innecesarios.
+- Solucionado cuello de botella de rendimiento de N+1 queries en `archivistActions.ts` al utilizar la nueva función RPC `bulk_increment_gold` en vez de actualizar a cada jugador secuencialmente con `Promise.all`.
+- Se solucionó el antipatrón de Supabase que traía todas las columnas con `.select("*")`, reemplazándolas por columnas explícitas en consultas clave en `RealmRegistry`, `appLiveHunts`, `characterSheets` y `horseRaceOnline` para reducir el payload de red.
+- Se creó y aplicó `supabase_bulk_increment_gold.sql` con validación de seguridad (solo administradores) que respeta el modelo de permisos de `security definer`.
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

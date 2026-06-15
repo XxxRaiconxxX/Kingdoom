@@ -144,7 +144,7 @@ export async function fetchPublicHorseRaceSessions(): Promise<
 
   const { data, error } = await supabase
     .from("horse_race_sessions")
-    .select("*")
+    .select("id, title, status, horses, result, winner_id, target_bets, created_by, started_at, finished_at, created_at, updated_at")
     .neq("status", "finished")
     .order("created_at", { ascending: false })
     .limit(8);
@@ -179,7 +179,7 @@ export async function fetchPublicHorseRaceBets(sessionId: string): Promise<
 
   const { data, error } = await supabase
     .from("horse_race_bets")
-    .select("*")
+    .select("id, session_id, player_id, horse_id, horse_name, bet_amount, odds, payout, status, created_at, updated_at")
     .eq("session_id", sessionId)
     .order("created_at", { ascending: true });
 

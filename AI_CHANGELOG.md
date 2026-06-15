@@ -3442,3 +3442,5 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+### [Fecha: 15/06/2025] - [Autor: Jules]
+- Removed commented-out SQL block in `src/utils/weeklyRanking.ts` for code health improvement.

@@ -2,29 +2,6 @@ import type { RankingPlayer, RankingWindow, WeeklyRankingState } from "../types"
 import { RANKING_PLAYERS } from "../data/ranking";
 import { supabase } from "./supabaseClient";
 
-// SQL sugerido para Supabase:
-//
-// create table weekly_activity_rankings (
-//   id uuid primary key default gen_random_uuid(),
-//   player_id uuid references players(id) on delete set null,
-//   display_name text not null,
-//   faction text not null,
-//   status text not null default 'alive',
-//   activity_points integer not null default 0,
-//   missions_completed integer not null default 0,
-//   events_joined integer not null default 0,
-//   streak_days integer not null default 0,
-//   week_starts_at timestamptz not null,
-//   week_ends_at timestamptz not null,
-//   created_at timestamptz default now(),
-//   updated_at timestamptz default now()
-// );
-//
-// alter table weekly_activity_rankings enable row level security;
-//
-// create policy "Allow all weekly ranking access" on weekly_activity_rankings
-//   for all using (true) with check (true);
-
 type WeeklyRankingRow = {
   id: string;
   player_id?: string | null;

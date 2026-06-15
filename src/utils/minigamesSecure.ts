@@ -124,8 +124,18 @@ async function getActivePlayer() {
   return fetchPlayerByUsername(username);
 }
 
+
+function secureRandom(): number {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    return array[0] / (0xffffffff + 1);
+  }
+  return Math.random();
+}
+
 function getRandomCard() {
-  return Math.floor(Math.random() * 15) + 1;
+  return Math.floor(secureRandom() * 15) + 1;
 }
 
 function getCardsSession(playerId: string): StoredCardsSession {
@@ -163,7 +173,7 @@ function buildCardsResponse(playerId: string, remainingGold: number, session: St
 }
 
 function chooseRouletteMultiplier() {
-  const roll = Math.random();
+  const roll = secureRandom();
   if (roll < 0.34) return 0;
   if (roll < 0.54) return 0.5;
   if (roll < 0.77) return 2;
@@ -187,7 +197,7 @@ function weightedChestResult(streak: number): "x2" | "x1" | "x0" {
   const difficultyLevel = Math.floor(streak / 2);
   const x2Chance = Math.max(0.12, 0.34 - difficultyLevel * 0.06);
   const x1Chance = Math.max(0.22, 0.41 - difficultyLevel * 0.03);
-  const roll = Math.random();
+  const roll = secureRandom();
 
   if (roll < x2Chance) {
     return "x2";
@@ -238,11 +248,11 @@ export function getCrashGrowthMultiplier(elapsedSeconds: number) {
 }
 
 function randomCrashAt() {
-  const roll = Math.random();
-  if (roll < 0.34) return 1.45 + Math.random() * 0.85;
-  if (roll < 0.7) return 2.35 + Math.random() * 1.9;
-  if (roll < 0.93) return 4.4 + Math.random() * 3.8;
-  return 8.5 + Math.random() * 9.5;
+  const roll = secureRandom();
+  if (roll < 0.34) return 1.45 + secureRandom() * 0.85;
+  if (roll < 0.7) return 2.35 + secureRandom() * 1.9;
+  if (roll < 0.93) return 4.4 + secureRandom() * 3.8;
+  return 8.5 + secureRandom() * 9.5;
 }
 
 async function resolveCrashState(playerId: string, playerGold: number) {

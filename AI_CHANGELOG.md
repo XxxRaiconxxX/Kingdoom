@@ -3430,3 +3430,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Verificación:** Cobertura de tests unitarios agregada en `src/features/market/market.rotation.test.ts` y ejecución limpia de compilación de producción.
 *   **Notas/Advertencias:** Ninguno detectado.
 
+
+---
+### [Fecha: 15/06/2026] - [Autor: Jules]
+*   **Archivos Modificados:** `package.json`
+*   **Resumen de Tareas:** Corrección del entorno de pruebas unitarias durante la verificación del build.
+*   **Cambios Clave:**
+    *   Se agregaron las dependencias `vitest`, `@testing-library/react`, `@testing-library/jest-dom` y `jsdom` en las `devDependencies` de `package.json` para resolver el error "Cannot find module 'vitest'".
+    *   Se validó el correcto funcionamiento de los comandos `npx tsc --noEmit`, `npm run build` y la suite de pruebas unitarias `npx vitest run`.
+*   **Notas/Advertencias:** El proyecto compiló y pasó las pruebas limpiamente.

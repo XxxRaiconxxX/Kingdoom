@@ -12,7 +12,7 @@ import {
 import { deleteKnowledgeDocument, slugifyKnowledgeId, upsertKnowledgeDocument } from "../../utils/knowledge";
 import { deleteMarketItem, slugifyMarketItem, upsertMarketItem } from "../../utils/market";
 import { deleteRealmMission, upsertRealmMission } from "../../utils/missions";
-import { createPlayerAccount, updatePlayerGold } from "../../utils/players";
+import { createPlayerAccount, updatePlayerGold, addGoldToMultiplePlayers } from "../../utils/players";
 import type { ArchivistActionDraft, ArchivistLiveContext } from "./archivist.types";
 
 type ExecutionResult = {
@@ -224,8 +224,15 @@ async function executePlayerAction(
     if (amount <= 0) {
       return { status: "error", message: "La cantidad a dar debe ser mayor a 0." };
     }
-    const promises = context.players.map(player => updatePlayerGold(player.id, player.gold + amount));
-    await Promise.all(promises);
+    if (context.players.length === 0) {
+      return { status: "success", message: `Se entregaron ${amount.toLocaleString("es-PY")} de oro a todos los jugadores del reino (0 jugadores en total).` };
+    }
+    const playerIds = context.players.map((player) => player.id);
+    const { success, message } = await addGoldToMultiplePlayers(playerIds, amount);
+
+    if (!success) {
+      return { status: "error", message: `No se pudo entregar el oro: ${message}` };
+    }
     return {
       status: "success",
       message: `Se entregaron ${amount.toLocaleString("es-PY")} de oro a todos los jugadores del reino (${context.players.length} jugadores en total).`,
@@ -250,8 +257,12 @@ async function executePlayerAction(
       return { status: "error", message: "No se encontro a ninguno de los jugadores solicitados." };
     }
 
-    const promises = foundPlayers.map(player => updatePlayerGold(player.id, player.gold + amount));
-    await Promise.all(promises);
+    const playerIds = foundPlayers.map((player) => player.id);
+    const { success, message } = await addGoldToMultiplePlayers(playerIds, amount);
+
+    if (!success) {
+      return { status: "error", message: `No se pudo entregar el oro: ${message}` };
+    }
     
     const names = foundPlayers.map(p => p.username).join(", ");
     return {

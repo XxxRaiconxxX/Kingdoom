@@ -90,7 +90,7 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
         setAllSheets(nextSheets);
         setPlayerNamesById(nextPlayerNamesById);
       } catch (error) {
-        console.error("Error loading registry sheets:", error);
+        console.error("Error loading registry sheets:", error instanceof Error ? error.message : String(error));
         if (!cancelled) {
           setLoadError("No se pudieron cargar las fichas publicas del reino.");
         }

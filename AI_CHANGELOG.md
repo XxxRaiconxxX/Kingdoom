@@ -3442,3 +3442,11 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+---
+### [Fecha: 22/05/2024] - [Autor: Jules]
+*   **Archivos Modificados:** `src/components/RealmRegistry.tsx`
+*   **Resumen de Tareas:** Code health improvement: Secure console.error handling.
+*   **Cambios Clave:**
+    *   Replaced raw error logging with serialized error message in `RealmRegistry.tsx` to prevent sensitive data leaks and improve codebase maintainability.
+*   **Notas/Advertencias:** Verified with local build and tests.

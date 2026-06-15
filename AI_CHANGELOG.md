@@ -3442,3 +3442,8 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+### [Fecha: 15/06/2026] - [Autor: Jules]
+- 🧹 Fix secure logging in character sheets
+  - Created `secureLogError` helper function in `src/utils/characterSheets.ts`.
+  - Replaced all instances of `console.error` with the new helper to securely serialize errors inline, preventing sensitive data leaks.

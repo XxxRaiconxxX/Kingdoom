@@ -3442,3 +3442,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+---
+### [Fecha: 15/06/2026] - [Autor: [Jules]]
+*   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`
+*   **Resumen de Tareas:** Secure console.error logging in AnimeHub Provider to prevent sensitive data leaks.
+*   **Cambios Clave:**
+    *   Updated 5 instances of `console.error` calls that were logging raw error objects.
+    *   Implemented inline error serialization: `error instanceof Error ? error.message : String(error)`.
+    *   This adheres to the AI memory guidelines for secure logging while preserving error visibility.
+*   **Notas/Advertencias:** Verified with `npm run build` and `npx vitest run`. No regressions detected.

@@ -27,6 +27,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ---
 
+### [Fecha: 15/06/2026] - [Autor: [Jules]]
+
+- **Archivos:** `src/features/animeHub/animeHub.remoteProvider.ts`
+- **Cambio:** Se mejoro la salud del codigo (code health) actualizando los `console.error` para que serialicen de manera segura los errores.
+- **Razon:** Prevenir filtracion de datos sensibles y mejorar la mantenibilidad.
+- **Notas:** Validado ejecutando pruebas de Vite y construccion completa sin errores.
+
+
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]

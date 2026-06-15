@@ -3442,3 +3442,6 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+### [Fecha: 15/06/2026] - [Autor: [Jules]]
+- 🧹 Mejoras de salud de código: Se corrigió la filtración de URLs completas en los logs `console.warn` limpiando la query string, y se serializaron inline todos los errores capturados en `console.error` dentro de `src/features/animeHub/animeHub.remoteProvider.ts` siguiendo las pautas de seguridad.

@@ -3442,3 +3442,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+### [Fecha: 15/06/2024] - [Autor: Jules]
+#### Modificaciones de Seguridad - Minijuegos
+*   **Archivos Modificados:**
+    *   `src/utils/minigamesSecure.ts` - Implementación de generador de números aleatorios seguro.
+*   **Resumen:**
+    *   Se reemplazaron todas las llamadas a `Math.random()` con la utilidad `secureRandom()` que hace uso de la API criptográfica `crypto.getRandomValues()` para los minijuegos relacionados a economía (Crash Game, Ruleta, Cartas, Cofres), a fin de evitar que los resultados sean predecibles por jugadores malintencionados.
+*   **Cambios Clave:**
+    *   Implementación de `secureRandom()` en `minigamesSecure.ts`.
+    *   Sustitución de `Math.random()` en funciones: `getRandomCard`, `chooseRouletteMultiplier`, `weightedChestResult`, `randomCrashAt`.

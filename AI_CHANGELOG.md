@@ -28,6 +28,9 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 15/06/2026] - [Autor: [Jules]]
+- **Code Health Improvement**: Refactored `console.error` calls in `src/utils/characterSheets.ts` to securely log error messages instead of raw error objects. This prevents potential data leaks and improves code readability. Supabase error objects were properly handled to log `error.message` directly.
+
 
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`

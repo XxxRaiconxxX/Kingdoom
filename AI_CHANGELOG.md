@@ -3442,3 +3442,8 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+### [Fecha: 15/06/2026] - [Autor: Jules]
+- **Optimización**: Se optimizó la actualización múltiple de oro en `archivistActions.ts` para usar una única llamada RPC a la base de datos en lugar de iterar múltiples actualizaciones.
+- **Archivos Modificados**: `src/features/archivist/archivistActions.ts`, `src/utils/players.ts`.
+- **Nuevos Archivos**: `supabase_increment_players_gold.sql`.

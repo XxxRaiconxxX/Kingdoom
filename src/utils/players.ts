@@ -193,6 +193,22 @@ export async function updatePlayerGold(
   return !error;
 }
 
+export async function bulkUpdatePlayersGold(
+  playerIds: string[],
+  amount: number
+): Promise<boolean> {
+  const { error } = await supabase.rpc("increment_players_gold", {
+    p_player_ids: playerIds,
+    p_amount: amount,
+  });
+
+  if (error) {
+    console.error("Error en bulkUpdatePlayersGold:", error instanceof Error ? error.message : String(error));
+  }
+
+  return !error;
+}
+
 export async function touchPlayerActivity(playerId: string): Promise<boolean> {
   const { error } = await supabase
     .from("players")

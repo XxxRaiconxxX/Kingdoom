@@ -3442,3 +3442,6 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+### [Fecha: 15/06/2026] - [Autor: [Jules]]
+- Refactor: Replaced raw console.error invocations with secure inline serialization (`error instanceof Error ? error.message : String(error)`) in `src/utils/characterPortraits.ts`, `src/utils/characterSheets.ts` and `src/utils/gifUtils.ts` to improve secure error logging and code health.

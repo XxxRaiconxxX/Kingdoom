@@ -76,6 +76,6 @@ export async function deleteCharacterPortraitByUrl(publicUrl?: string) {
     .remove([bucketPath]);
 
   if (error) {
-    console.error("Supabase error deleting portrait:", error);
+    console.error("Supabase error deleting portrait:", error instanceof Error ? error.message : (error && typeof error === 'object' && 'message' in error ? String((error as any).message) : String(error)));
   }
 }

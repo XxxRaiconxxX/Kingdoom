@@ -77,7 +77,7 @@ function getLocalSheets(): CharacterSheet[] {
     try {
       return JSON.parse(stored);
     } catch (e) {
-      console.error("Failed to parse character sheets", e);
+      console.error("Failed to parse character sheets", e instanceof Error ? e.message : (e && typeof e === 'object' && 'message' in e ? String((e as any).message) : String(e)));
       return [];
     }
   }
@@ -105,7 +105,7 @@ function deleteLocalSheet(id: string): void {
 export async function getCharacterSheets(): Promise<CharacterSheet[]> {
   const { data, error } = await supabase.from("character_sheets").select("*");
   if (error) {
-    console.error("Supabase error fetching sheets:", error);
+    console.error("Supabase error fetching sheets:", error instanceof Error ? error.message : (error && typeof error === 'object' && 'message' in error ? String((error as any).message) : String(error)));
     return getLocalSheets(); // Fallback
   }
   return (data ?? []) as CharacterSheet[];
@@ -122,7 +122,7 @@ export async function saveCharacterSheet(sheet: CharacterSheet): Promise<void> {
 
   const { error } = await supabase.from("character_sheets").upsert(payload);
   if (error) {
-    console.error("Supabase error saving sheet:", error);
+    console.error("Supabase error saving sheet:", error instanceof Error ? error.message : (error && typeof error === 'object' && 'message' in error ? String((error as any).message) : String(error)));
     saveLocalSheet(sheet); // Fallback
   }
 }
@@ -131,7 +131,7 @@ export async function deleteCharacterSheet(id: string, portraitUrl?: string): Pr
   await deleteCharacterPortraitByUrl(portraitUrl);
   const { error } = await supabase.from("character_sheets").delete().eq("id", id);
   if (error) {
-    console.error("Supabase error deleting sheet:", error);
+    console.error("Supabase error deleting sheet:", error instanceof Error ? error.message : (error && typeof error === 'object' && 'message' in error ? String((error as any).message) : String(error)));
     deleteLocalSheet(id); // Fallback
   }
 }
@@ -142,7 +142,7 @@ export async function getPlayerSheets(playerId: string): Promise<CharacterSheet[
     .select("*")
     .eq("playerId", playerId);
   if (error) {
-    console.error("Supabase error fetching player sheets:", error);
+    console.error("Supabase error fetching player sheets:", error instanceof Error ? error.message : (error && typeof error === 'object' && 'message' in error ? String((error as any).message) : String(error)));
     return getLocalSheets().filter((s) => s.playerId === playerId); // Fallback
   }
   return (data ?? []) as CharacterSheet[];

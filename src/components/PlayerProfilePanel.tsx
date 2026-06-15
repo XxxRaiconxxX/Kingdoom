@@ -183,21 +183,6 @@ export function PlayerProfilePanel({
     }
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
-    const syncSeasonPanel = (event?: MediaQueryListEvent) => {
-      setIsSeasonExpanded(event ? event.matches : mediaQuery.matches);
-    };
-
-    syncSeasonPanel();
-    mediaQuery.addEventListener("change", syncSeasonPanel);
-    return () => mediaQuery.removeEventListener("change", syncSeasonPanel);
-  }, []);
-
   const isCollapsed = Boolean(collapsed && player);
 
   useEffect(() => {
@@ -1782,38 +1767,9 @@ function SeasonRankSpotlight({
             rank={rankName}
             tier={rankTier}
             points={rankPoints}
-            size="md"
+            size={isExpanded ? "md" : "sm"}
             className="bg-[linear-gradient(135deg,rgba(34,26,18,0.95),rgba(10,9,8,0.88))]"
           />
-        </div>
-
-        <div className="mt-3 rounded-[1.25rem] border border-white/8 bg-black/20 px-3 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">
-                Siguiente objetivo
-              </p>
-              {nextRankGoalPoints && nextRankName && nextRankTier ? (
-                <p className="mt-1 text-sm font-bold text-cyan-200">
-                  {formatRankLabel(nextRankName)} {nextRankTier}
-                </p>
-              ) : (
-                <p className="mt-1 text-sm font-bold text-amber-200">
-                  Rango maximo actual
-                </p>
-              )}
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
-                Restante
-              </p>
-              <p className="mt-1 text-sm font-black text-stone-100">
-                {nextRankGoalPoints && nextRankName && nextRankTier
-                  ? `${pointsToNextRank.toLocaleString("es-PY")} pts`
-                  : "Completado"}
-              </p>
-            </div>
-          </div>
         </div>
 
         <button
@@ -1840,6 +1796,35 @@ function SeasonRankSpotlight({
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="mt-4 space-y-4"
           >
+            <div className="rounded-[1.25rem] border border-white/8 bg-black/20 px-3 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">
+                    Siguiente objetivo
+                  </p>
+                  {nextRankGoalPoints && nextRankName && nextRankTier ? (
+                    <p className="mt-1 text-sm font-bold text-cyan-200">
+                      {formatRankLabel(nextRankName)} {nextRankTier}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm font-bold text-amber-200">
+                      Rango maximo actual
+                    </p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
+                    Restante
+                  </p>
+                  <p className="mt-1 text-sm font-black text-stone-100">
+                    {nextRankGoalPoints && nextRankName && nextRankTier
+                      ? `${pointsToNextRank.toLocaleString("es-PY")} pts`
+                      : "Completado"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-2">
               <ProfileInfoStat label="Misiones" value={String(monthlyRewardedMissions)} />
               <ProfileInfoStat label="Eventos" value={String(monthlyRewardedEvents)} />
@@ -1907,8 +1892,7 @@ function SeasonRankSpotlight({
           </motion.div>
         ) : (
           <p className="mt-3 text-xs leading-5 text-stone-400">
-            Mantuvimos la insignia y el objetivo visible, y dejamos el resto del
-            detalle en este desplegable para evitar duplicacion en desktop y mobile.
+            El resumen detallado de la temporada queda oculto hasta que lo despliegues.
           </p>
         )}
       </div>

@@ -3537,3 +3537,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   La verificacion visual confirma que la insignia de rango ya no aparece duplicada entre el bloque principal del jugador y el frente de temporada.
     *   El panel de temporada mantiene una lectura mas compacta en mobile y una lectura mas abierta en escritorio.
 *   **Notas/Advertencias:** La comprobacion visual fue satisfactoria. La automatizacion DOM no produjo selectores suficientemente estables para afirmar el estado conectado via aserciones, pero las capturas renderizadas si mostraron el layout esperado.
+
+---
+### [Fecha: 15/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Compactacion adicional del frente de temporada para reducir el hueco vertical en escritorio.
+*   **Cambios Clave:**
+    *   Se elimino la autoexpansion inicial del bloque de temporada en desktop para que nazca compacto por defecto.
+    *   La insignia del rango ahora usa tamano mas pequeno mientras el panel esta plegado.
+    *   El bloque de `Siguiente objetivo` se movio al contenido desplegable, dejando solo la informacion esencial visible en estado natural.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente despues del ajuste.

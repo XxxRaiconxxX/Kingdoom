@@ -96,8 +96,15 @@ async function getActivePlayer() {
   return fetchPlayerByUsername(username);
 }
 
+
+function secureRandom(): number {
+  const array = new Uint32Array(1);
+  crypto.getRandomValues(array);
+  return array[0] / (0xffffffff + 1);
+}
+
 function randomPrize() {
-  return Math.floor(Math.random() * (NORMAL_MAX_PRIZE - NORMAL_MIN_PRIZE + 1)) + NORMAL_MIN_PRIZE;
+  return Math.floor(secureRandom() * (NORMAL_MAX_PRIZE - NORMAL_MIN_PRIZE + 1)) + NORMAL_MIN_PRIZE;
 }
 
 export async function fetchScratchDailyState(
@@ -157,11 +164,11 @@ export async function playScratchBatchSecure(
     usedTickets += 1;
 
     let ticketPrize = 0;
-    if (Math.random() < VIP_JACKPOT_CHANCE) {
+    if (secureRandom() < VIP_JACKPOT_CHANCE) {
       ticketPrize = VIP_JACKPOT_PRIZE;
       jackpotWins += 1;
       winningTickets += 1;
-    } else if (Math.random() < config.winChance) {
+    } else if (secureRandom() < config.winChance) {
       ticketPrize = randomPrize();
       winningTickets += 1;
     }
@@ -181,7 +188,7 @@ export async function playScratchBatchSecure(
 
   if (losingTickets > 0) {
     if (safeQuantity > 50) {
-      if (Math.random() < 0.5) {
+      if (secureRandom() < 0.5) {
         refundedGold += losingTickets * config.cost;
       }
     } else {

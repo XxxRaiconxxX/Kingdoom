@@ -3442,3 +3442,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
 
 
+
+### [Fecha: 15/06/2024] - [Autor: Jules]
+- **Mantenimiento:** Se refactorizaron las llamadas a `console.error` en `src/utils/characterSheets.ts` para usar una nueva función de ayuda `secureLogError`. Esto previene la fuga de información sensible al registrar errores y mejora la legibilidad.
+
+### [Fecha: 15/06/2024] - [Autor: Jules]
+- **Bugfix:** Se corrigió la función `secureLogError` en `src/utils/characterSheets.ts` para extraer correctamente la propiedad `message` de los errores de Supabase, los cuales son objetos planos, evitando el registro de `[object Object]`.

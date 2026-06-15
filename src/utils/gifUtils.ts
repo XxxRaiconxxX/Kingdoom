@@ -59,7 +59,7 @@ export async function getGifDuration(file: File): Promise<number> {
         }
         resolve(duration > 0 ? duration : 3000);
       } catch (err) {
-        console.error("Error parsing GIF duration", err);
+        console.error("Error parsing GIF duration:", err instanceof Error ? err.message : String(err));
         resolve(3000);
       }
     };

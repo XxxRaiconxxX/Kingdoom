@@ -29,6 +29,11 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: [Jules]]
+- **What**: Refactored console.error in src/utils/gifUtils.ts to serialize errors securely.
+- **Why**: Prevents potential sensitive data leaks from logging raw error objects.
+- **Result**: Improved code security and maintainability.
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

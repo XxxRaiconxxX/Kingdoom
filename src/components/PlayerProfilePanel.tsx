@@ -6,6 +6,11 @@ import {
   Coins,
   Crown,
   ChevronDown,
+  Sparkles,
+  Swords,
+  Target,
+  CalendarClock,
+  ChevronRight,
   Loader2,
   RefreshCw,
   ShieldCheck,
@@ -1733,32 +1738,50 @@ function SeasonRankSpotlight({
   manualSeasonAwards: number;
   activeSeasonSeedPoints: number;
 }) {
+  const accent = SEASON_ACCENTS[rankName] ?? SEASON_ACCENTS.siervo;
+  const nextAccent =
+    (nextRankName && SEASON_ACCENTS[nextRankName]) || accent;
+  const hasNextRank = Boolean(nextRankGoalPoints && nextRankName && nextRankTier);
+  const accentStyle = { ["--sa" as string]: accent } as React.CSSProperties;
+
   return (
-    <div className="relative overflow-hidden rounded-[1.6rem] border border-amber-500/20 bg-[linear-gradient(145deg,rgba(53,37,18,0.96),rgba(18,14,10,0.94))] p-4 shadow-[0_20px_55px_rgba(0,0,0,0.26)]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.16),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(56,189,248,0.12),transparent_28%)]" />
-      <div className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent" />
+    <div
+      className="kd-season relative overflow-hidden rounded-[1.6rem] border p-4 shadow-[0_20px_55px_rgba(0,0,0,0.3)]"
+      style={{
+        ...accentStyle,
+        borderColor: `rgb(${accent} / 0.3)`,
+        backgroundImage: `linear-gradient(152deg, rgb(${accent} / 0.16), rgba(18,14,10,0.96) 44%, rgba(11,9,8,0.97))`,
+      }}
+    >
+      {/* Halo difuso animado en la esquina con el color del rango */}
+      <div
+        className="kd-season-orb pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full blur-2xl"
+        style={{ background: `radial-gradient(circle, rgb(${accent} / 0.28), transparent 70%)` }}
+      />
+      <div
+        className="pointer-events-none absolute inset-x-5 top-0 h-px"
+        style={{ background: `linear-gradient(90deg, transparent, rgb(${accent} / 0.6), transparent)` }}
+      />
 
       <div className="relative z-10">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-300/80">
+          <div className="min-w-0">
+            <p
+              className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em]"
+              style={{ color: `rgb(${accent})` }}
+            >
+              <Sparkles className="h-3 w-3" />
               Frente de temporada
             </p>
-            <h3 className="mt-2 text-lg font-black text-stone-100">
+            <h3 className="mt-2 truncate text-lg font-black text-stone-100">
               {seasonName}
             </h3>
-            <p className="mt-1 text-xs text-stone-400">
+            <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-stone-400">
+              <CalendarClock className="h-3.5 w-3.5 text-stone-500" />
               Cierre estimado: {seasonEndsLabel}
             </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-right">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
-              Avance
-            </p>
-            <p className="mt-1 text-lg font-black text-amber-300">
-              {Math.round(seasonProgressPercent)}%
-            </p>
-          </div>
+          <SeasonRing percent={seasonProgressPercent} accent={accent} />
         </div>
 
         <div className="mt-4">
@@ -1775,12 +1798,16 @@ function SeasonRankSpotlight({
           type="button"
           onClick={onToggle}
           aria-expanded={isExpanded}
-          className="mt-3 inline-flex w-full items-center justify-between rounded-[1.1rem] border border-white/10 bg-black/25 px-3 py-2.5 text-left text-xs font-semibold text-stone-200 transition hover:border-amber-400/25 hover:bg-black/35"
+          className="kd-touch mt-3 inline-flex w-full items-center justify-between rounded-[1.1rem] border border-white/10 bg-black/25 px-3 py-2.5 text-left text-xs font-semibold text-stone-200 transition hover:bg-black/35"
+          style={{ borderColor: `rgb(${accent} / 0.16)` }}
         >
           <span className="uppercase tracking-[0.18em] text-stone-400">
             {isExpanded ? "Ocultar detalle de temporada" : "Ver detalle de temporada"}
           </span>
-          <span className="inline-flex items-center gap-2 text-amber-300">
+          <span
+            className="inline-flex items-center gap-2"
+            style={{ color: `rgb(${accent})` }}
+          >
             {isExpanded ? "Ocultar" : "Desplegar"}
             <ChevronDown
               className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
@@ -1795,28 +1822,48 @@ function SeasonRankSpotlight({
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="mt-4 space-y-4"
           >
-            <div className="rounded-[1.25rem] border border-white/8 bg-black/20 px-3 py-3">
+            <div
+              className="rounded-[1.25rem] border bg-black/25 px-3 py-3"
+              style={{ borderColor: `rgb(${nextAccent} / 0.22)` }}
+            >
               <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">
-                    Siguiente objetivo
-                  </p>
-                  {nextRankGoalPoints && nextRankName && nextRankTier ? (
-                    <p className="mt-1 text-sm font-bold text-cyan-200">
-                      {formatRankLabel(nextRankName)} {nextRankTier}
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
+                    style={{
+                      background: `rgb(${nextAccent} / 0.14)`,
+                      color: `rgb(${nextAccent})`,
+                    }}
+                  >
+                    <Target className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500">
+                      Siguiente objetivo
                     </p>
-                  ) : (
-                    <p className="mt-1 text-sm font-bold text-amber-200">
-                      Rango maximo actual
-                    </p>
-                  )}
+                    {hasNextRank ? (
+                      <p
+                        className="mt-0.5 truncate text-sm font-bold"
+                        style={{ color: `rgb(${nextAccent})` }}
+                      >
+                        {formatRankLabel(nextRankName as RankName)} {nextRankTier}
+                      </p>
+                    ) : (
+                      <p
+                        className="mt-0.5 text-sm font-bold"
+                        style={{ color: `rgb(${accent})` }}
+                      >
+                        Rango maximo actual
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-500">
                     Restante
                   </p>
-                  <p className="mt-1 text-sm font-black text-stone-100">
-                    {nextRankGoalPoints && nextRankName && nextRankTier
+                  <p className="mt-1 text-sm font-black text-stone-100 [font-variant-numeric:tabular-nums]">
+                    {hasNextRank
                       ? `${pointsToNextRank.toLocaleString("es-PY")} pts`
                       : "Completado"}
                   </p>
@@ -1825,9 +1872,24 @@ function SeasonRankSpotlight({
             </div>
 
             <div className="grid grid-cols-3 gap-2">
-              <ProfileInfoStat label="Misiones" value={String(monthlyRewardedMissions)} />
-              <ProfileInfoStat label="Eventos" value={String(monthlyRewardedEvents)} />
-              <ProfileInfoStat label="Staff" value={String(manualSeasonAwards)} />
+              <SeasonStat
+                icon={Swords}
+                label="Misiones"
+                value={monthlyRewardedMissions}
+                accent={accent}
+              />
+              <SeasonStat
+                icon={Sparkles}
+                label="Eventos"
+                value={monthlyRewardedEvents}
+                accent={accent}
+              />
+              <SeasonStat
+                icon={Crown}
+                label="Staff"
+                value={manualSeasonAwards}
+                accent={accent}
+              />
             </div>
 
             <div className="rounded-[1.35rem] border border-white/8 bg-black/20 p-3">
@@ -1835,43 +1897,59 @@ function SeasonRankSpotlight({
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400">
                   Progreso al siguiente escalon
                 </p>
-                <p className="text-xs font-semibold text-stone-300">
+                <p className="text-xs font-semibold text-stone-300 [font-variant-numeric:tabular-nums]">
                   {rankPoints?.toLocaleString("es-PY") ?? 0} /{" "}
                   {nextRankGoalPoints?.toLocaleString("es-PY") ??
                     rankPoints?.toLocaleString("es-PY") ??
                     0} pts
                 </p>
               </div>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-stone-950/80">
+              <div className="relative mt-3 h-3.5 overflow-hidden rounded-full bg-stone-950/80 ring-1 ring-inset ring-white/5">
                 <motion.div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,rgba(251,191,36,0.95),rgba(56,189,248,0.9),rgba(168,85,247,0.95))] shadow-[0_0_24px_rgba(251,191,36,0.35)]"
+                  className="kd-season-bar relative h-full rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, rgb(${accent} / 0.55), rgb(${accent}) 65%, rgb(${nextAccent}))`,
+                    boxShadow: `0 0 22px rgb(${accent} / 0.4)`,
+                  }}
                   initial={{ width: 0 }}
-                  animate={{ width: `${rankProgressPercent}%` }}
-                  transition={{ duration: 0.9, ease: "easeOut" }}
+                  animate={{ width: `${Math.max(rankProgressPercent, hasNextRank ? 3 : 100)}%` }}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                 />
+                {/* Marcas de cuartos para dar lectura de escala */}
+                <div className="pointer-events-none absolute inset-0 flex justify-between px-[25%]">
+                  <span className="h-full w-px bg-black/40" />
+                  <span className="h-full w-px bg-black/40" />
+                  <span className="h-full w-px bg-black/40" />
+                </div>
               </div>
               <div className="mt-3 flex items-start justify-between gap-3 text-xs">
                 <div>
-                  <p className="font-semibold text-stone-200">
+                  <p className="font-semibold text-stone-200 [font-variant-numeric:tabular-nums]">
                     Base actual: {currentRankFloorPoints.toLocaleString("es-PY")} pts
                   </p>
-                  <p className="mt-1 text-stone-500">
+                  <p className="mt-1 text-stone-500 [font-variant-numeric:tabular-nums]">
                     Puntos semilla heredados: {activeSeasonSeedPoints}
                   </p>
                 </div>
                 <div className="text-right">
-                  {nextRankGoalPoints && nextRankName && nextRankTier ? (
+                  {hasNextRank ? (
                     <>
-                      <p className="font-semibold text-cyan-200">
-                        Siguiente: {formatRankLabel(nextRankName)} {nextRankTier}
+                      <p
+                        className="inline-flex items-center gap-1 font-semibold"
+                        style={{ color: `rgb(${nextAccent})` }}
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                        {formatRankLabel(nextRankName as RankName)} {nextRankTier}
                       </p>
-                      <p className="mt-1 text-stone-500">
+                      <p className="mt-1 text-stone-500 [font-variant-numeric:tabular-nums]">
                         Faltan {pointsToNextRank.toLocaleString("es-PY")} pts
                       </p>
                     </>
                   ) : (
                     <>
-                      <p className="font-semibold text-amber-200">Rango maximo actual</p>
+                      <p className="font-semibold" style={{ color: `rgb(${accent})` }}>
+                        Rango maximo actual
+                      </p>
                       <p className="mt-1 text-stone-500">Ya no hay otro escalon sobre ti.</p>
                     </>
                   )}
@@ -1895,6 +1973,91 @@ function SeasonRankSpotlight({
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+// Color de acento por rango: tematiza todo el frente de temporada.
+// bronce -> oro -> cielo -> violeta -> carmesi (progresion visual del ascenso).
+const SEASON_ACCENTS: Record<RankName, string> = {
+  siervo: "217 180 120",
+  escudero: "251 191 36",
+  caballero: "56 189 248",
+  senor: "168 85 247",
+  "senor-oscuro": "244 63 94",
+};
+
+// Anillo circular animado que muestra el % de avance temporal de la temporada.
+function SeasonRing({ percent, accent }: { percent: number; accent: string }) {
+  const safePercent = Math.max(0, Math.min(100, percent));
+  const radius = 22;
+  const circumference = 2 * Math.PI * radius;
+  const dash = (safePercent / 100) * circumference;
+
+  return (
+    <div className="relative grid h-[4.25rem] w-[4.25rem] shrink-0 place-items-center">
+      <svg viewBox="0 0 56 56" className="h-full w-full -rotate-90">
+        <circle
+          cx="28"
+          cy="28"
+          r={radius}
+          fill="none"
+          stroke="rgb(255 255 255 / 0.08)"
+          strokeWidth="5"
+        />
+        <motion.circle
+          cx="28"
+          cy="28"
+          r={radius}
+          fill="none"
+          stroke={`rgb(${accent})`}
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: circumference - dash }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          style={{ filter: `drop-shadow(0 0 5px rgb(${accent} / 0.55))` }}
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center leading-none">
+        <span className="text-base font-black text-stone-100 [font-variant-numeric:tabular-nums]">
+          {Math.round(safePercent)}%
+        </span>
+        <span className="mt-0.5 text-[8px] font-bold uppercase tracking-[0.16em] text-stone-500">
+          Avance
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Tile de estadistica de temporada con icono tematizado.
+function SeasonStat({
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: number;
+  accent: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/8 bg-black/25 px-2 py-3 text-center">
+      <div
+        className="mx-auto mb-2 grid h-8 w-8 place-items-center rounded-xl"
+        style={{ background: `rgb(${accent} / 0.14)`, color: `rgb(${accent})` }}
+      >
+        <Icon className="h-4 w-4" />
+      </div>
+      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-stone-500">
+        {label}
+      </p>
+      <p className="mt-0.5 text-base font-black text-stone-100 [font-variant-numeric:tabular-nums]">
+        {value}
+      </p>
     </div>
   );
 }

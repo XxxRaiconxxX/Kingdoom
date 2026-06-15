@@ -846,6 +846,57 @@
   }
 }
 
+/* Frente de temporada: halo del rango que respira + barril de luz en la barra */
+@keyframes kd-season-orb-breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate3d(0, 6px, 0) scale(1.08);
+  }
+}
+
+@keyframes kd-season-bar-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+.kd-season-orb {
+  animation: kd-season-orb-breathe 7s ease-in-out infinite;
+}
+
+.kd-season-bar::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.45),
+    transparent
+  );
+  width: 40%;
+  animation: kd-season-bar-sweep 3.2s ease-in-out infinite;
+  animation-delay: 0.9s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kd-season-orb,
+  .kd-season-bar::after {
+    animation: none;
+  }
+}
+
 @layer utilities {
   .market-neon-mythic {
     animation: market-neon-mythic-pulse 2.65s ease-in-out infinite;

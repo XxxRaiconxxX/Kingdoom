@@ -29,6 +29,13 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: Jules]
+*   **Archivos Modificados:** `src/components/TavernExpedition.tsx` (eliminado)
+*   **Resumen de Tareas:** Eliminación de código muerto y limpieza de archivos obsoletos.
+*   **Cambios Clave:**
+    *   **[Limpieza]:** Se eliminó el componente `TavernExpedition.tsx` ya que su funcionalidad fue reemplazada por `TavernExpeditionArcade.tsx` y no estaba siendo importado en ningún otro lugar.
+
+
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
 *   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.

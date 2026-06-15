@@ -3430,3 +3430,15 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Verificación:** Cobertura de tests unitarios agregada en `src/features/market/market.rotation.test.ts` y ejecución limpia de compilación de producción.
 *   **Notas/Advertencias:** Ninguno detectado.
 
+---
+### [Fecha: 15/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/types.ts`, `src/utils/players.ts`, `supabase_character_slots_migration.sql` (Nuevo)
+*   **Resumen de Tareas:** Implementación de la compra de espacios adicionales para fichas de personaje con oro.
+*   **Cambios Clave:**
+    *   **Base de Datos:** Creación de la columna `max_character_sheets` en `players` y de la función RPC transaccional `buy_character_slot` para la deducción atómica de oro e incremento del límite (máximo 10).
+    *   **Cálculo de Costo:** Se definió la progresión de costos: slot 3 cuesta 1M, slot 4 cuesta 2M, y del slot 5 al 10 cuesta `(Slots Actuales - 2) * 2,000,000`.
+    *   **Frontend & Modelos:** Mapeo de la columna y exportación del helper de RPC en `src/utils/players.ts`. Actualización de la interfaz `PlayerAccount`.
+    *   **UI de Perfil:** Reemplazo de los límites hardcodeados de fichas en `PlayerProfilePanel.tsx` por el valor dinámico del jugador. Adición de un botón de compra interactivo y feedback visual premium para la compra de slots.
+*   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
+
+

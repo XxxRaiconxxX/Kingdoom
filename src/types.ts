@@ -19,6 +19,7 @@ export type PlayerAccount = {
   authUserId?: string | null;
   phone?: string | null;
   avatar_gif_url?: string | null;
+  maxCharacterSheets?: number;
 };
 
 export type BusinessProposalStatus =

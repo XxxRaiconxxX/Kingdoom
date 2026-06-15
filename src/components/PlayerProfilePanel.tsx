@@ -8,6 +8,7 @@ import {
   Loader2,
   RefreshCw,
   ShieldCheck,
+  Tag,
   UserRound,
   WalletCards,
   Send,
@@ -42,6 +43,7 @@ import {
   saveCharacterSheet,
   deleteCharacterSheet,
 } from "../utils/characterSheets";
+import { buyCharacterSlot } from "../utils/players";
 import {
   deleteCharacterPortraitByUrl,
   uploadCharacterPortrait,
@@ -245,9 +247,10 @@ export function PlayerProfilePanel({
     if (!player) return;
     const isEditing = Boolean(existingSheet);
 
-    if (!isEditing && playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS) {
+    const maxSheets = player.maxCharacterSheets ?? MAX_PLAYER_CHARACTER_SHEETS;
+    if (!isEditing && playerSheets.length >= maxSheets) {
       setSheetFeedback(
-        `Cada cuenta puede tener hasta ${MAX_PLAYER_CHARACTER_SHEETS} fichas. Elimina una antes de importar otra.`
+        `Cada cuenta puede tener hasta ${maxSheets} fichas. Elimina una o compra más espacios antes de importar otra.`
       );
       return;
     }
@@ -369,6 +372,48 @@ export function PlayerProfilePanel({
         ? `${selected.name || "La ficha"} ahora es tu cazador activo en Expedicion.`
         : "Se actualizo la ficha activa de Expedicion."
     );
+  };
+
+  const [isBuyingSlot, setIsBuyingSlot] = useState(false);
+  const currentSlots = player?.maxCharacterSheets ?? 2;
+  const maxSlotsLimit = 10;
+
+  const getNextSlotCost = (slots: number) => {
+    if (slots === 2) return 1000000;
+    if (slots === 3) return 2000000;
+    return (slots - 2) * 2000000;
+  };
+
+  const nextSlotCost = getNextSlotCost(currentSlots);
+
+  const handleBuySlot = async () => {
+    if (!player) return;
+    if (currentSlots >= maxSlotsLimit) {
+      setSheetFeedback("Ya has alcanzado el límite máximo de 10 fichas.");
+      return;
+    }
+    if (player.gold < nextSlotCost) {
+      setSheetFeedback("No tienes suficiente oro para comprar un espacio adicional.");
+      return;
+    }
+
+    const confirmBuy = window.confirm(
+      `¿Deseas comprar un espacio de ficha adicional por ${nextSlotCost.toLocaleString("es-PY")} de oro?`
+    );
+    if (!confirmBuy) return;
+
+    setIsBuyingSlot(true);
+    setSheetFeedback("");
+
+    const result = await buyCharacterSlot(player.id);
+    setIsBuyingSlot(false);
+
+    if (result.status === "success") {
+      setSheetFeedback(result.message);
+      await refreshPlayer();
+    } else {
+      setSheetFeedback(result.message);
+    }
   };
 
   async function reloadBusinessState() {
@@ -809,7 +854,7 @@ export function PlayerProfilePanel({
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <ProfileInfoStat
                       label="Fichas"
-                      value={`${playerSheets.length}/${MAX_PLAYER_CHARACTER_SHEETS}`}
+                      value={`${playerSheets.length}/${player.maxCharacterSheets ?? MAX_PLAYER_CHARACTER_SHEETS}`}
                     />
                     <ProfileInfoStat
                       label="PvE"
@@ -1076,20 +1121,41 @@ export function PlayerProfilePanel({
                         Mis personajes
                       </h3>
                       <p className="text-[11px] uppercase tracking-[0.16em] text-stone-500">
-                        Maximo {MAX_PLAYER_CHARACTER_SHEETS} fichas por cuenta
+                        Máximo {player?.maxCharacterSheets ?? MAX_PLAYER_CHARACTER_SHEETS} fichas por cuenta
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setIsImportModalOpen(true)}
-                    disabled={playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/14 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/22 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {playerSheets.length >= MAX_PLAYER_CHARACTER_SHEETS
-                      ? "Limite alcanzado"
-                      : "Importar ficha"}
-                  </button>
+                  <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => setIsImportModalOpen(true)}
+                      disabled={playerSheets.length >= currentSlots}
+                      className="inline-flex flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/14 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/22 hover:text-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Plus className="h-4 w-4" />
+                      {playerSheets.length >= currentSlots
+                        ? "Límite alcanzado"
+                        : "Importar ficha"}
+                    </button>
+                    {currentSlots < maxSlotsLimit ? (
+                      <button
+                        onClick={handleBuySlot}
+                        disabled={isBuyingSlot || player.gold < nextSlotCost}
+                        className="inline-flex flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/14 px-4 py-2.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/22 hover:text-amber-200 disabled:cursor-not-allowed disabled:opacity-60"
+                        title={`Desbloquear espacio de ficha por ${nextSlotCost.toLocaleString("es-PY")} de oro`}
+                      >
+                        {isBuyingSlot ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Tag className="h-4 w-4" />
+                        )}
+                        Slot {currentSlots + 1}: {nextSlotCost >= 1000000 ? `${(nextSlotCost / 1000000).toFixed(0)}M` : nextSlotCost.toLocaleString("es-PY")} oro
+                      </button>
+                    ) : (
+                      <span className="inline-flex flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border border-stone-800 bg-stone-900/50 px-4 py-2.5 text-sm font-semibold text-stone-500 select-none">
+                        Límite máximo (10)
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {sheetFeedback ? (

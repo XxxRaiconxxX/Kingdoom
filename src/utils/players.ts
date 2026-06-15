@@ -10,6 +10,7 @@ type PlayerRow = {
   auth_user_id?: string | null;
   phone?: string | null;
   avatar_gif_url?: string | null;
+  max_character_sheets?: number | null;
 };
 
 let supportsAuthUserId: boolean | null = null;
@@ -24,6 +25,7 @@ function mapPlayerRow(row: PlayerRow): PlayerAccount {
     authUserId: row.auth_user_id ?? null,
     phone: row.phone ?? null,
     avatar_gif_url: row.avatar_gif_url ?? null,
+    maxCharacterSheets: row.max_character_sheets ?? 2,
   };
 }
 
@@ -72,12 +74,12 @@ export async function fetchPlayerByUsername(
   const { data, error } = supportsAuthLink
     ? await supabase
         .from("players")
-        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
         .ilike("username", normalizedUsername)
         .single()
     : await supabase
         .from("players")
-        .select("id, username, gold, is_admin, phone, avatar_gif_url")
+        .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
         .ilike("username", normalizedUsername)
         .single();
 
@@ -103,7 +105,7 @@ export async function fetchPlayerByAuthUserId(
     const { data, error } = await supabase
       .from("player_auth_links")
       .select(
-        "player:players(id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url)"
+        "player:players(id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets)"
       )
       .eq("auth_user_id", normalizedAuthUserId)
       .limit(1)
@@ -124,7 +126,7 @@ export async function fetchPlayerByAuthUserId(
 
   const { data, error } = await supabase
     .from("players")
-    .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url")
+    .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
     .eq("auth_user_id", normalizedAuthUserId)
     .maybeSingle();
 
@@ -205,11 +207,11 @@ export async function fetchAllPlayers(): Promise<PlayerAccount[]> {
   const { data, error } = supportsAuthLink
     ? await supabase
         .from("players")
-        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
         .order("username", { ascending: true })
     : await supabase
         .from("players")
-        .select("id, username, gold, is_admin, phone, avatar_gif_url")
+        .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
         .order("username", { ascending: true });
 
   if (error || !data) {
@@ -249,12 +251,12 @@ export async function createPlayerAccount(input: {
     ? await supabase
         .from("players")
         .insert(insertPayload)
-        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
         .single()
     : await supabase
         .from("players")
         .insert(insertPayload)
-        .select("id, username, gold, is_admin, phone, avatar_gif_url")
+        .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
         .single();
 
   if (!adminAttempt.error && adminAttempt.data) {
@@ -279,7 +281,7 @@ export async function createPlayerAccount(input: {
       username: normalizedUsername,
       gold: Math.max(0, input.gold),
     })
-    .select("id, username, gold, phone, avatar_gif_url")
+    .select("id, username, gold, phone, avatar_gif_url, max_character_sheets")
     .single();
 
   if (!fallbackAttempt.error && fallbackAttempt.data) {
@@ -444,5 +446,22 @@ export async function uploadPlayerAvatarGif(
     status: "saved" as const,
     message: "Avatar GIF actualizado correctamente.",
     url: urlData.publicUrl,
+  };
+}
+
+export async function buyCharacterSlot(playerId: string) {
+  const { data, error } = await supabase.rpc("buy_character_slot", { p_player_id: playerId });
+  if (error || !data) {
+    return {
+      status: "error" as const,
+      message: error?.message ?? "No se pudo completar la transaccion en el servidor.",
+    };
+  }
+
+  return data as {
+    status: "success" | "error";
+    message: string;
+    new_gold?: number;
+    new_max_slots?: number;
   };
 }

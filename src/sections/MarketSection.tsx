@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence } from "framer-motion";
 import {
   Box,
@@ -672,17 +673,20 @@ export function MarketSection() {
         ))}
       </div>
 
-      <AnimatePresence>
-        {selectedItem ? (
-          <Suspense fallback={<FullscreenLoadingOverlay message="Preparando el pedido del mercado..." />}>
-            <PurchaseModal
-              item={selectedItem}
-              category={modalCategory}
-              onClose={() => setSelectedItem(null)}
-            />
-          </Suspense>
-        ) : null}
-      </AnimatePresence>
+      {selectedItem
+        ? createPortal(
+            <AnimatePresence>
+              <Suspense fallback={<FullscreenLoadingOverlay message="Preparando el pedido del mercado..." />}>
+                <PurchaseModal
+                  item={selectedItem}
+                  category={modalCategory}
+                  onClose={() => setSelectedItem(null)}
+                />
+              </Suspense>
+            </AnimatePresence>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }

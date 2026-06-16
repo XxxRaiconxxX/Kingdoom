@@ -193,14 +193,14 @@ const purchaseResult = await purchaseMarketItemSecure({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[70] bg-black/70 px-4 py-6 backdrop-blur-sm md:px-6 md:py-10"
+      className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-6 backdrop-blur-sm md:items-center md:px-6 md:py-10"
     >
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 24 }}
         transition={{ duration: 0.22, ease: "easeOut" }}
-        className="mx-auto flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/40 md:max-w-3xl"
+        className="my-auto flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/40 md:max-w-3xl"
       >
         <div className="flex items-start justify-between gap-4 border-b border-stone-800 px-5 py-4">
           <div>

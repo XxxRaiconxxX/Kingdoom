@@ -56,6 +56,22 @@ export function TavernCrash() {
   useEffect(() => { updatingRef.current = updating; }, [updating]);
   useEffect(() => { setPlayerGoldRef.current = setPlayerGold; }, [setPlayerGold]);
 
+  const redrawCanvas = useCallback((nextMultiplier: number, elapsedSeconds: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas || logicalSizeRef.current.width <= 0) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    drawGraph(
+      ctx,
+      logicalSizeRef.current.width,
+      logicalSizeRef.current.height,
+      nextMultiplier,
+      elapsedSeconds,
+    );
+  }, []);
+
   const generateCrashPoint = () => {
     if (Math.random() < 0.03) return 1.00;
     const point = 0.99 / (1 - Math.random());
@@ -213,6 +229,8 @@ export function TavernCrash() {
     if (currentMult >= crashPointRef.current) {
       setMultiplier(crashPointRef.current);
       multiplierRef.current = crashPointRef.current;
+      pointsRef.current.push({ time: elapsedSeconds, multiplier: crashPointRef.current });
+      redrawCanvas(crashPointRef.current, elapsedSeconds);
       setStatus("crashed");
       setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
       return; // Stop animation loop
@@ -245,26 +263,36 @@ export function TavernCrash() {
       return;
     }
 
+    if (requestRef.current) {
+      cancelAnimationFrame(requestRef.current);
+      requestRef.current = undefined;
+    }
+
+    startTimeRef.current = 0;
+    setMultiplier(1.0);
+    multiplierRef.current = 1.0;
+    setLastWin(0);
+    autoCashedRef.current = false;
+    pointsRef.current = [{ time: 0, multiplier: 1.0 }];
+    redrawCanvas(1.0, 0);
+
     const crashPoint = generateCrashPoint();
-crashPointRef.current = crashPoint;
+    crashPointRef.current = crashPoint;
 
-if (crashPoint <= 1.00) {
-  setMultiplier(1.00);
-  setStatus("crashed");
-  setHistory(prev => [1.00, ...prev].slice(0, 10));
-  setLastWin(0);
-  setUpdating(false);
-  return;
-}
+    if (crashPoint <= 1.00) {
+      setMultiplier(1.00);
+      multiplierRef.current = 1.0;
+      pointsRef.current = [{ time: 0, multiplier: 1.0 }];
+      redrawCanvas(1.0, 0);
+      setStatus("crashed");
+      setHistory(prev => [1.00, ...prev].slice(0, 10));
+      setLastWin(0);
+      setUpdating(false);
+      return;
+    }
 
-setMultiplier(1.0);
-multiplierRef.current = 1.0;
-setLastWin(0);
-autoCashedRef.current = false;
-pointsRef.current = [{ time: 0, multiplier: 1.0 }];
-
-setStatus("starting");
-setUpdating(false);
+    setStatus("starting");
+    setUpdating(false);
 
     
     setTimeout(() => {

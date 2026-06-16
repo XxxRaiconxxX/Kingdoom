@@ -37,6 +37,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **[Market - Causa raíz transform/fixed]:** Se envolvió el renderizado de `PurchaseModal` con `createPortal(..., document.body)` para evitar que ancestros con transformaciones CSS (animación `content-fade-in` de `kd-stage` en `index.css`) rompieran la posición fija del modal.
     *   **[Profile - Frente de Temporada]:** Se redujo el tamaño de la etiqueta "Avance" en `SeasonRing` de `8px` a `6.5px` y se disminuyó el espaciado de letras a `0.12em` para evitar desbordes en el círculo de progreso. Se eliminó la etiqueta de ayuda redundante *"El resumen detallado de la temporada queda oculto..."* en estado colapsado.
     *   **[Market - Rotación de la tienda]:** Se cambió la frecuencia de rotación de artículos (`MARKET_ROTATION_WINDOW_MS`) de 5 horas a 2 horas, adaptando además el intervalo en los tests de simulación en `market.rotation.test.ts`.
+### [Fecha: 16/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Correccion de desincronizacion visual en TavernCrash cuando la ronda colapsaba instantaneamente o al reiniciar el canvas.
+*   **Cambios Clave:**
+    *   **[Crash - Canvas Reset]:** Se agrego `redrawCanvas(...)` para forzar repintado del grafico con el estado real de la ronda actual, en vez de dejar visible la curva anterior.
+    *   **[Crash - Nueva Ronda]:** `handleStart()` ahora cancela cualquier `requestAnimationFrame` previo, resetea `pointsRef`, multiplicador y canvas antes de calcular el nuevo `crashPoint`.
+    *   **[Crash - Colapso 1.00x]:** Cuando la ronda explota de forma instantanea, el lienzo se vuelve a pintar en `1.00x`, evitando que el jugador vea una trayectoria vieja por encima del auto-retiro configurado.
+    *   **[Crash - Fin de Ronda]:** Al detectar el colapso normal, la funcion agrega el ultimo punto real al historial del canvas y dibuja la ronda final antes de marcar `crashed`.
+*   **Notas/Advertencias:** `npx tsc --noEmit` paso limpio y `npm run build` tambien. El ajuste corrige la inconsistencia visual reportada; si reaparece una perdida injusta con evidencia nueva, habria que inspeccionar una posible carrera entre auto cashout y crash en el mismo frame.
 
 ### [Fecha: 15/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/index.css`

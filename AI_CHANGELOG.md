@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** `src/components/PurchaseModal.tsx`, `src/sections/MarketSection.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/features/market/market.rotation.ts`, `src/features/market/market.rotation.test.ts`
+*   **Resumen de Tareas:** Corrección de la posición del modal de compra del mercado en móviles, ajustes visuales en el Frente de Temporada, y cambio en el intervalo de rotación del mercado a 2 horas.
+*   **Cambios Clave:**
+    *   **[Market - Modal de compra en móviles]:** Se centró el modal verticalmente en el viewport móvil y se añadió `overflow-y-auto` al contenedor exterior para permitir el scroll del formulario en pantallas pequeñas.
+    *   **[Market - Causa raíz transform/fixed]:** Se envolvió el renderizado de `PurchaseModal` con `createPortal(..., document.body)` para evitar que ancestros con transformaciones CSS (animación `content-fade-in` de `kd-stage` en `index.css`) rompieran la posición fija del modal.
+    *   **[Profile - Frente de Temporada]:** Se redujo el tamaño de la etiqueta "Avance" en `SeasonRing` de `8px` a `6.5px` y se disminuyó el espaciado de letras a `0.12em` para evitar desbordes en el círculo de progreso. Se eliminó la etiqueta de ayuda redundante *"El resumen detallado de la temporada queda oculto..."* en estado colapsado.
+    *   **[Market - Rotación de la tienda]:** Se cambió la frecuencia de rotación de artículos (`MARKET_ROTATION_WINDOW_MS`) de 5 horas a 2 horas, adaptando además el intervalo en los tests de simulación en `market.rotation.test.ts`.
+
 ### [Fecha: 15/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/index.css`
 *   **Resumen de Tareas:** Rediseno visual detallado de la tarjeta "Frente de temporada" (componente `SeasonRankSpotlight`). Commit `d807f06` (codigo) ya pusheado; esta entrada documenta el cambio (se diferio antes para no absorber el WIP de Codex en `AI_CHANGELOG.md`).

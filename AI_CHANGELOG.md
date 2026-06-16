@@ -30,6 +30,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Historial de Cambios (Changelog)
 
 ### [Fecha: 15/06/2026] - [Autor: Claude]
+*   **Archivos Modificados:** `TavernCards.tsx`, `TavernRoulette.tsx`, `TavernScratch.tsx`, `TavernPlinko.tsx`, `TavernHorseRace.tsx`, `TavernPenalty.tsx`, `TavernExpedition.tsx`, `TavernExpeditionArcade.tsx` (todos en `src/components/`)
+*   **Resumen de Tareas:** Pase de pulido visual coherente sobre los 10 minijuegos restantes de la taberna (commits `d77fd03`, `ff13732`, `5ff59eb`). Enfoque seguro y presentacional: NO se reestructuraron los internos bespoke de cada juego ni los canvas (no verificables sin sesion logueada).
+*   **Cambios Clave:**
+    *   **[Cifras tabulares]:** `font-variant-numeric: tabular-nums` + `toLocaleString("es-PY")` en todos los displays de oro/saldo/premio/apuesta (chips StatChip/RaceStat/StatusChip/MiniStat y headers). Las cifras dejan de "bailar" al cambiar y muestran separador de miles.
+    *   **[Headers de saldo]:** Cards y Scratch adoptaron el patron premium (icono `Coins`, hairline ambar superior, borde `amber-500/15`) ya usado en Cofres.
+    *   **[Feedback tactil]:** `kd-touch` agregado a botones planos que no lo tenian — refrescar (Cards, Scratch, Ruleta) y CTA principal (Plinko "Lanzar esferas", Carreras "Apostar/Iniciar"). Se evito `motion.button` para no chocar con framer-motion.
+    *   **[Sin tocar]:** `TavernCrash` (WIP de Codex, ya en `677e04b`) y `TavernTowerDefense`/`TavernSlots`/`TavernPenalty` que ya tenian `kd-touch` completo y oro formateado.
+*   **Notas/Advertencias:** `tsc --noEmit` 0 errores y `npm run build` OK en las 3 tandas. Verificacion: DOM-inspection en `vite preview` (el screenshot se cuelga por la red de Supabase en preview, sin relacion con el cambio). Pendiente para cuando haya sesion logueada: mejoras profundas de los canvas (tableros de Plinko/Carreras/Defensa/Penales) que requieren ojos en vivo.
+
+### [Fecha: 15/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `src/sections/MarketSection.tsx`, `src/components/TavernGame.tsx`
 *   **Resumen de Tareas:** Mejoras visuales en la taberna de minijuegos: selector de modos tematizado por tipo de juego y pulido del shell de Cofres.
 *   **Cambios Clave:**

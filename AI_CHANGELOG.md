@@ -29,6 +29,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 15/06/2026] - [Autor: Claude]
+*   **Archivos Modificados:** `src/sections/MarketSection.tsx`, `src/components/TavernGame.tsx`
+*   **Resumen de Tareas:** Mejoras visuales en la taberna de minijuegos: selector de modos tematizado por tipo de juego y pulido del shell de Cofres.
+*   **Cambios Clave:**
+    *   **[UI - Selector de taberna]:** los chips de estado de cada minijuego ahora tienen color por tipo (nuevo mapa `TAVERN_STATUS_ACCENTS`: PvE=esmeralda, App=cian, Azar=ambar, Riesgo=carmesi, Rapido=violeta), dando lectura de un vistazo. El boton del modo activo se tematiza con ese mismo color (borde, fondo en gradiente, glow y hairline superior) en vez del ambar uniforme anterior. Hover de inactivos mas marcado y `aria-pressed` para accesibilidad.
+    *   **[UI - Cofres (TavernGame)]:** header de saldo con icono `Coins`, `tabular-nums` y separador de miles (`toLocaleString es-PY`), hairline superior ambar y `kd-touch` en el boton de refrescar; linea de info de apuesta tambien con cifras tabulares y miles.
+*   **Notas/Advertencias:** `tsc --noEmit` 0 errores; `npm run build` OK. Verificado en vivo con `vite preview` (inspeccion del DOM: acento esmeralda en boton PvE activo y chip "Azar" ambar confirmados; el screenshot se colgaba por la red de Supabase en preview, sin relacion con el cambio). NO se toco `TavernCrash.tsx` (tenia trabajo en curso de Codex, ya commiteado en `677e04b`). Cambios 100% presentacionales. Quedan los otros 10 minijuegos para pulir en proximas iteraciones si se desea.
+
 ### [Fecha: 15/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/PurchaseModal.tsx`, `src/sections/MarketSection.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/features/market/market.rotation.ts`, `src/features/market/market.rotation.test.ts`
 *   **Resumen de Tareas:** Corrección de la posición del modal de compra del mercado en móviles, ajustes visuales en el Frente de Temporada, y cambio en el intervalo de rotación del mercado a 2 horas.

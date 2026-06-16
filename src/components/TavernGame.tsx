@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { AlertOctagon, RefreshCw, UserRound } from "lucide-react";
+import { AlertOctagon, Coins, RefreshCw, UserRound } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import type { PlayerAccount } from "../types";
 import cofreCerrado from "../assets/cofre-cerrado.png";
@@ -306,8 +306,8 @@ export function TavernGame() {
                   {balance <= 0 ? "Sin oro, espera refuerzo" : "Jugar otra ronda"}
                 </button>
                 <div className="text-center">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-stone-500">
-                    Apuesta: {bet} de oro | Dificultad: fase {difficultyLevel + 1}
+                  <p className="text-xs font-semibold uppercase tracking-widest text-stone-500 [font-variant-numeric:tabular-nums]">
+                    Apuesta: {bet.toLocaleString("es-PY")} de oro | Dificultad: fase {difficultyLevel + 1}
                   </p>
                 </div>
               </motion.div>
@@ -329,7 +329,8 @@ function PlayerBalanceHeader({
   onRefresh: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/50 p-4">
+    <div className="relative flex items-center justify-between overflow-hidden rounded-2xl border border-amber-500/15 bg-stone-950/50 p-4">
+      <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/40 to-transparent" />
       <div className="flex items-center gap-3">
         <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
           <UserRound className="h-5 w-5" />
@@ -338,8 +339,11 @@ function PlayerBalanceHeader({
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
             {player.username}
           </p>
-          <div className="mt-1 flex items-center gap-2">
-            <p className="text-2xl font-black text-amber-300">{player.gold}</p>
+          <div className="mt-1 flex items-center gap-1.5">
+            <Coins className="h-4 w-4 text-amber-400/90" />
+            <p className="text-2xl font-black text-amber-300 [font-variant-numeric:tabular-nums]">
+              {player.gold.toLocaleString("es-PY")}
+            </p>
           </div>
         </div>
       </div>
@@ -348,7 +352,7 @@ function PlayerBalanceHeader({
         type="button"
         onClick={onRefresh}
         disabled={updating}
-        className="rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+        className="kd-touch rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-amber-400/40 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
         title="Actualizar saldo"
       >
         <RefreshCw className={`h-5 w-5 ${updating ? "animate-spin" : ""}`} />

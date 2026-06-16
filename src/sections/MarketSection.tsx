@@ -151,6 +151,20 @@ const TAVERN_MODES: {
   },
 ];
 
+// Color por tipo de juego para los chips de estado del selector de taberna.
+// Da lectura de un vistazo (PvE vs azar vs riesgo) y tematiza el boton activo.
+const TAVERN_STATUS_ACCENTS: Record<string, string> = {
+  PvE: "16 185 129", // esmeralda
+  App: "34 211 238", // cian
+  Azar: "245 158 11", // ambar
+  Riesgo: "244 63 94", // carmesi
+  Rapido: "168 85 247", // violeta
+};
+
+function tavernStatusAccent(status: string): string {
+  return TAVERN_STATUS_ACCENTS[status] ?? "245 158 11";
+}
+
 const MARKET_RARITY_FILTERS: Array<{ id: Rarity | "all"; label: string }> = [
   { id: "all", label: "Todas" },
   { id: "mythic", label: "Mitico" },
@@ -511,21 +525,49 @@ export function MarketSection() {
             {tavernModes.map((mode) => {
               const Icon = mode.icon;
               const active = tavernMode === mode.id;
+              const accent = tavernStatusAccent(mode.status);
 
               return (
                 <button
                   key={mode.id}
                   type="button"
                   onClick={() => selectTavernMode(mode.id)}
-                  className={`kd-touch flex min-w-[4.9rem] max-w-[5.4rem] shrink-0 flex-col items-center gap-1 overflow-hidden rounded-2xl border px-2 py-2 text-center transition sm:min-w-[8.2rem] sm:max-w-none sm:items-start sm:gap-2 sm:px-3 sm:py-3 sm:text-left ${
+                  aria-pressed={active}
+                  style={
                     active
-                      ? "border-amber-400/35 bg-amber-500/12 text-amber-100"
-                      : "border-stone-800 bg-stone-950/55 text-stone-400 hover:border-amber-500/20"
+                      ? {
+                          borderColor: `rgb(${accent} / 0.45)`,
+                          background: `linear-gradient(160deg, rgb(${accent} / 0.18), rgb(${accent} / 0.05))`,
+                          boxShadow: `0 0 0 1px rgb(${accent} / 0.18), 0 10px 26px rgb(${accent} / 0.16)`,
+                        }
+                      : undefined
+                  }
+                  className={`kd-touch relative flex min-w-[4.9rem] max-w-[5.4rem] shrink-0 flex-col items-center gap-1 overflow-hidden rounded-2xl border px-2 py-2 text-center transition sm:min-w-[8.2rem] sm:max-w-none sm:items-start sm:gap-2 sm:px-3 sm:py-3 sm:text-left ${
+                    active
+                      ? "text-stone-100"
+                      : "border-stone-800 bg-stone-950/55 text-stone-400 hover:border-stone-600 hover:bg-stone-900/70 hover:text-stone-200"
                   }`}
                 >
+                  {/* Barra superior de acento del color del juego en el boton activo */}
+                  {active ? (
+                    <span
+                      className="pointer-events-none absolute inset-x-0 top-0 h-0.5"
+                      style={{ background: `linear-gradient(90deg, transparent, rgb(${accent}), transparent)` }}
+                    />
+                  ) : null}
                   <span className="flex w-full items-center justify-center gap-1 sm:justify-between sm:gap-2">
-                    <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300" : "text-stone-500"}`} />
-                    <span className="rounded-full border border-stone-700/70 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] sm:px-2 sm:text-[9px] sm:tracking-[0.12em]">
+                    <Icon
+                      className="h-4 w-4 shrink-0 transition-colors"
+                      style={{ color: active ? `rgb(${accent})` : undefined }}
+                    />
+                    <span
+                      className="rounded-full border px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] sm:px-2 sm:text-[9px] sm:tracking-[0.12em]"
+                      style={{
+                        borderColor: `rgb(${accent} / 0.4)`,
+                        background: `rgb(${accent} / 0.12)`,
+                        color: `rgb(${accent})`,
+                      }}
+                    >
                       {mode.status}
                     </span>
                   </span>

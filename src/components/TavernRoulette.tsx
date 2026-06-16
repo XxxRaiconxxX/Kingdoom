@@ -225,8 +225,8 @@ export function TavernRoulette() {
             </div>
 
             <div className="grid grid-cols-2 gap-2 md:flex md:items-center">
-              <StatusChip label="Saldo" value={`${player.gold}`} accent="amber" />
-              <StatusChip label="Apuesta" value={`${totalBet}`} accent="emerald" />
+              <StatusChip label="Saldo" value={player.gold.toLocaleString("es-PY")} accent="amber" />
+              <StatusChip label="Apuesta" value={totalBet.toLocaleString("es-PY")} accent="emerald" />
               <StatusChip
                 label="Ficha"
                 value={`x${selectedChip}`}
@@ -236,7 +236,7 @@ export function TavernRoulette() {
                 type="button"
                 onClick={handleRefresh}
                 disabled={updating}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-stone-200 transition hover:border-amber-300/30 hover:text-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-stone-200 transition hover:border-amber-300/30 hover:text-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RefreshCw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
                 Refrescar
@@ -752,7 +752,7 @@ function StatusChip({
       <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100/55">
         {label}
       </p>
-      <p className={`mt-1 text-sm font-black ${accentClass}`}>{value}</p>
+      <p className={`mt-1 text-sm font-black [font-variant-numeric:tabular-nums] ${accentClass}`}>{value}</p>
     </div>
   );
 }

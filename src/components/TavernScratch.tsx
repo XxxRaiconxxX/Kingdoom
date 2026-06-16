@@ -207,7 +207,8 @@ export function TavernScratch() {
   return (
     <div className="rounded-[2rem] border border-stone-800 bg-stone-900/80 p-6 shadow-[inset_0_4px_30px_rgba(0,0,0,0.5)] md:p-8">
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/50 p-4 md:px-6">
+        <div className="relative flex items-center justify-between overflow-hidden rounded-2xl border border-amber-500/15 bg-stone-950/50 p-4 md:px-6">
+          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/40 to-transparent" />
           <div className="flex items-center gap-3">
             <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
               <UserRound className="h-5 w-5" />
@@ -216,8 +217,11 @@ export function TavernScratch() {
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
                 {player.username}
               </p>
-              <div className="mt-1 flex items-center gap-2">
-                <p className="text-2xl font-black text-amber-300">{player.gold}</p>
+              <div className="mt-1 flex items-center gap-1.5">
+                <Coins className="h-4 w-4 text-amber-400/90" />
+                <p className="text-2xl font-black text-amber-300 [font-variant-numeric:tabular-nums]">
+                  {player.gold.toLocaleString("es-PY")}
+                </p>
               </div>
             </div>
           </div>
@@ -226,7 +230,7 @@ export function TavernScratch() {
             type="button"
             onClick={handleRefresh}
             disabled={updating}
-            className="rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-stone-500 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className="kd-touch rounded-xl border border-stone-700 p-2 text-stone-400 transition hover:border-amber-400/40 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
             title="Actualizar saldo"
           >
             <RefreshCw className={`h-5 w-5 ${updating ? "animate-spin" : ""}`} />

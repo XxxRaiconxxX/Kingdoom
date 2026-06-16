@@ -228,9 +228,10 @@ function applySession(session: CardsSessionState, overrideBet = true) {
 
   return (
     <div className="flex flex-col items-center justify-center py-4 text-center">
-      <div className="mb-6 flex w-full items-center justify-between rounded-2xl border border-stone-800 bg-stone-900/80 px-4 py-3">
+      <div className="relative mb-6 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-amber-500/15 bg-stone-900/80 px-4 py-3">
+        <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/40 to-transparent" />
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-800 text-stone-300">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-300">
             <UserRound className="h-5 w-5" />
           </div>
           <div className="text-left">
@@ -240,13 +241,16 @@ function applySession(session: CardsSessionState, overrideBet = true) {
         </div>
         <div className="text-right">
           <p className="text-[10px] uppercase tracking-wider text-stone-500">Oro disponible</p>
-          <div className="mt-1 flex items-center gap-2">
-            <p className="font-mono text-lg font-bold text-amber-400">{player.gold}</p>
+          <div className="mt-1 flex items-center gap-1.5">
+            <Coins className="h-4 w-4 text-amber-400/90" />
+            <p className="text-lg font-black text-amber-400 [font-variant-numeric:tabular-nums]">
+              {player.gold.toLocaleString("es-PY")}
+            </p>
             <button
               type="button"
               onClick={handleRefresh}
               disabled={updating}
-              className="rounded-lg p-1 text-stone-500 transition hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-30"
+              className="kd-touch ml-1 rounded-lg p-1 text-stone-500 transition hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-30"
             >
               <RefreshCw className={`h-4 w-4 ${updating ? "animate-spin" : ""}`} />
             </button>

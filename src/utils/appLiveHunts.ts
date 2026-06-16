@@ -235,8 +235,7 @@ export function resolveAppLiveHuntSpecialization(progress: PvePlayerProgress) {
 
 export async function fetchAppLiveHunts(): Promise<AppLiveHuntState> {
   const { data, error } = await supabase
-    .from("app_live_hunts")
-    .select("*")
+    .from("app_live_hunts").select("id, template_id, title, description, enemy_name, host_player_id, host_username, host_sheet_id, host_sheet_name, mutator_id, mutator_title, mutator_summary, status, current_round, max_rounds, enemy_hp, enemy_max_hp, threat, threat_cap, reward_pool, created_at, updated_at")
     .order("created_at", { ascending: false })
     .limit(12);
 
@@ -267,25 +266,21 @@ export async function fetchAppLiveHuntSnapshot(
     { data: rounds, error: roundsError },
     { data: results, error: resultsError },
   ] = await Promise.all([
-    supabase.from("app_live_hunts").select("*").eq("id", huntId).maybeSingle(),
+    supabase.from("app_live_hunts").select("id, template_id, title, description, enemy_name, host_player_id, host_username, host_sheet_id, host_sheet_name, mutator_id, mutator_title, mutator_summary, status, current_round, max_rounds, enemy_hp, enemy_max_hp, threat, threat_cap, reward_pool, created_at, updated_at").eq("id", huntId).maybeSingle(),
     supabase
-      .from("app_live_hunt_members")
-      .select("*")
+      .from("app_live_hunt_members").select("id, hunt_id, player_id, username, sheet_id, sheet_name, sheet_level, sheet_power, specialization, specialization_title, joined_at")
       .eq("hunt_id", huntId)
       .order("joined_at", { ascending: true }),
     supabase
-      .from("app_live_hunt_actions")
-      .select("*")
+      .from("app_live_hunt_actions").select("id, hunt_id, round_number, player_id, player_username, sheet_id, sheet_name, action_type, created_at")
       .eq("hunt_id", huntId)
       .order("created_at", { ascending: true }),
     supabase
-      .from("app_live_hunt_rounds")
-      .select("*")
+      .from("app_live_hunt_rounds").select("id, hunt_id, round_number, summary, enemy_damage, threat_delta, reward_delta, created_at")
       .eq("hunt_id", huntId)
       .order("round_number", { ascending: false }),
     supabase
-      .from("app_live_hunt_results")
-      .select("*")
+      .from("app_live_hunt_results").select("id, hunt_id, player_id, username, sheet_id, sheet_name, gold_reward, participation_score, created_at")
       .eq("hunt_id", huntId)
       .order("gold_reward", { ascending: false }),
   ]);
@@ -344,7 +339,7 @@ export async function createAppLiveHunt(input: {
   const { data, error } = await supabase
     .from("app_live_hunts")
     .insert(huntPayload)
-    .select("*")
+    .select("id, template_id, title, description, enemy_name, host_player_id, host_username, host_sheet_id, host_sheet_name, mutator_id, mutator_title, mutator_summary, status, current_round, max_rounds, enemy_hp, enemy_max_hp, threat, threat_cap, reward_pool, created_at, updated_at")
     .single();
 
   if (error || !data) {

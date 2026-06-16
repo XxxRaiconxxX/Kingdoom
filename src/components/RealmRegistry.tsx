@@ -60,7 +60,7 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
 
       try {
         const [sheetsResponse, playersResponse] = await Promise.all([
-          supabase.from("character_sheets").select("*"),
+          supabase.from("character_sheets").select("id, playerId, playerUsername, portraitUrl, name, race, profession, birthRealm"),
           supabase.from("players").select("id, username"),
         ]);
 

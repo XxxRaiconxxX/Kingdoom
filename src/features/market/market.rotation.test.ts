@@ -42,7 +42,7 @@ describe("market.rotation spawnChance filtering", () => {
   it("should always include items with spawnChance = 1.0 and exclude spawnChance = 0.0", () => {
     // Run across 20 different rotation windows
     for (let i = 0; i < 20; i++) {
-      const now = i * 5 * 60 * 60 * 1000 + 1000; // windowId = i
+      const now = i * 2 * 60 * 60 * 1000 + 1000; // windowId = i
       const state = getMarketRotationState(mockItems, now);
       
       const hasAlways = state.items.some(item => item.id === "item-always");
@@ -58,7 +58,7 @@ describe("market.rotation spawnChance filtering", () => {
     const runs = 100;
     
     for (let i = 0; i < runs; i++) {
-      const now = i * 5 * 60 * 60 * 1000 + 1000;
+      const now = i * 2 * 60 * 60 * 1000 + 1000;
       const state = getMarketRotationState(mockItems, now);
       if (state.items.some(item => item.id === "item-half")) {
         spawnCount++;

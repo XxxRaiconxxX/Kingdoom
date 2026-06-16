@@ -1,6 +1,6 @@
 import type { MarketItem, Rarity } from "../../types";
 
-const MARKET_ROTATION_WINDOW_MS = 5 * 60 * 60 * 1000;
+const MARKET_ROTATION_WINDOW_MS = 2 * 60 * 60 * 1000;
 
 const MARKET_RARITY_ROTATION: Record<Rarity, { probability: number; count: number }> = {
   common: { probability: 1, count: 5 },

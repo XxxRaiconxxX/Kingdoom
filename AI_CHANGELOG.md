@@ -3634,3 +3634,25 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Errores Mas Claros:** `PlayerSessionContext` ahora distingue mejor entre "jugador no encontrado" y fallos reales de conexion con Supabase al conectar, refrescar o restaurar la sesion guardada.
     *   **Sesion Mas Resistente:** Si Supabase no responde durante el hydrate o el refresh, el contexto evita dejar el flujo en un estado ambiguo y muestra mensajes de error concretos en vez de fallar silenciosamente.
 *   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente. El timeout usa `window.setTimeout`, por lo que esta proteccion aplica al cliente web y no altera RPCs ni logica economica del backend.
+
+---
+### [Fecha: 16/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `supabase_query_performance_indexes.sql`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Versionado de una tanda de indices SQL ajustada al reporte real de Query Performance de Supabase.
+*   **Cambios Clave:**
+    *   **Subastas:** Se agrego un indice para `market_auctions(created_at desc)` porque el panel de subastas consulta con orden descendente por creacion y concentra el mayor peso del reporte.
+    *   **Eventos y Documentos:** Se agregaron indices para `realm_events(created_at desc)` y para `knowledge_documents`, incluyendo un indice compuesto `(visible, updated_at desc)` alineado con la lectura publica mas frecuente.
+    *   **Inventario y Ranking:** Se agregaron indices compuestos para `player_inventory(player_id, created_at desc)`, `season_rank_thresholds(is_active, sort_order)` y `season_rank_point_rules(is_active, sort_order)` para cubrir exactamente los patrones `WHERE + ORDER BY` observados.
+    *   **Log de Negocios:** Se versiono un indice global por `business_collection_log(collected_at desc)` para el listado historico ordenado.
+    *   **Exclusiones Deliberadas:** No se agrego un indice nuevo para `season_rank_seasons(status)` porque el repo ya tiene uno compuesto mejor (`status, starts_at desc, ends_at desc`), y se dejo fuera `character_sheets` por bajo volumen real de llamadas.
+*   **Notas/Advertencias:** Esta tanda mejora el SQL versionado del repo, pero debe ejecutarse en Supabase para impactar produccion. No se corrio `npx tsc --noEmit` ni `npm run build` porque no hubo cambios en TypeScript ni frontend; fue una entrega exclusivamente SQL/documental.
+
+---
+### [Fecha: 16/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/utils/characterSheets.ts`, `src/components/RealmRegistry.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Reduccion de sobrelectura en `character_sheets` para el Registro del Reino y flujos de fichas.
+*   **Cambios Clave:**
+    *   **Registro Ligero:** El listado publico del reino deja de pedir `select("*")` sobre todas las fichas y ahora consume un resumen tipado sin `history` ni otros campos pesados.
+    *   **Carga Bajo Demanda:** La ficha completa se consulta por `id` solo cuando el usuario abre una entrada del registro, manteniendo intacta la modal detallada.
+    *   **Orden en SQL:** Se movio el ordenamiento de las fichas al lado de Supabase (`order("name")` para el registro y `order("createdAt")` para los listados completos/por jugador) para evitar trabajo innecesario en frontend.
+*   **Notas/Advertencias:** Este cambio optimiza la sobrelectura desde la SPA, pero el warning original de Query Performance estaba bajo `service_role`; por tanto, si esa entrada vuelve a aparecer, podria existir ademas algun consumidor externo al frontend que siga leyendo `character_sheets` de forma amplia.

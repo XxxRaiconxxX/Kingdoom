@@ -4,9 +4,24 @@ import { deleteCharacterPortraitByUrl } from "./characterPortraits";
 
 const STORAGE_KEY = "kingdoom_character_sheets";
 export const MAX_PLAYER_CHARACTER_SHEETS = 2;
+const CHARACTER_SHEET_REGISTRY_SUMMARY_SELECT = [
+  "id",
+  "playerId",
+  "playerUsername",
+  "portraitUrl",
+  "name",
+  "race",
+  "profession",
+  "birthRealm",
+].join(", ");
 
 let supportsPlayerUsername: boolean | null = null;
 let supportsPortraitUrl: boolean | null = null;
+
+export type CharacterSheetRegistrySummary = Pick<
+  CharacterSheet,
+  "id" | "playerId" | "playerUsername" | "portraitUrl" | "name" | "race" | "profession" | "birthRealm"
+>;
 
 async function detectPlayerUsernameSupport() {
   if (supportsPlayerUsername !== null) {
@@ -103,12 +118,45 @@ function deleteLocalSheet(id: string): void {
 
 // Main Exports (Async to support Supabase)
 export async function getCharacterSheets(): Promise<CharacterSheet[]> {
-  const { data, error } = await supabase.from("character_sheets").select("*");
+  const { data, error } = await supabase
+    .from("character_sheets")
+    .select("*")
+    .order("createdAt", { ascending: false });
   if (error) {
     console.error("Supabase error fetching sheets:", error);
     return getLocalSheets(); // Fallback
   }
   return (data ?? []) as CharacterSheet[];
+}
+
+export async function getCharacterSheetRegistrySummaries(): Promise<CharacterSheetRegistrySummary[]> {
+  const { data, error } = await supabase
+    .from("character_sheets")
+    .select(CHARACTER_SHEET_REGISTRY_SUMMARY_SELECT)
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Supabase error fetching registry summaries:", error);
+    return getLocalSheets()
+      .slice()
+      .sort((a, b) =>
+        String(a.name ?? "").localeCompare(String(b.name ?? ""), "es", {
+          sensitivity: "base",
+        })
+      )
+      .map((sheet) => ({
+        id: sheet.id,
+        playerId: sheet.playerId,
+        playerUsername: sheet.playerUsername,
+        portraitUrl: sheet.portraitUrl,
+        name: sheet.name,
+        race: sheet.race,
+        profession: sheet.profession,
+        birthRealm: sheet.birthRealm,
+      }));
+  }
+
+  return ((data ?? []) as unknown) as CharacterSheetRegistrySummary[];
 }
 
 export async function saveCharacterSheet(sheet: CharacterSheet): Promise<void> {
@@ -140,12 +188,28 @@ export async function getPlayerSheets(playerId: string): Promise<CharacterSheet[
   const { data, error } = await supabase
     .from("character_sheets")
     .select("*")
-    .eq("playerId", playerId);
+    .eq("playerId", playerId)
+    .order("createdAt", { ascending: false });
   if (error) {
     console.error("Supabase error fetching player sheets:", error);
     return getLocalSheets().filter((s) => s.playerId === playerId); // Fallback
   }
   return (data ?? []) as CharacterSheet[];
+}
+
+export async function getCharacterSheetById(id: string): Promise<CharacterSheet | null> {
+  const { data, error } = await supabase
+    .from("character_sheets")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Supabase error fetching full sheet:", error);
+    return getLocalSheets().find((sheet) => sheet.id === id) ?? null;
+  }
+
+  return (data ?? null) as CharacterSheet | null;
 }
 
 function sanitizeSheetForSupabase(

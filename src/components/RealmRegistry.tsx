@@ -4,6 +4,11 @@ import { Loader2, ScrollText, Search, User, Users, X } from "lucide-react";
 import { CharacterSheet } from "../types";
 import { supabase } from "../lib/supabase";
 import { CharSheetModal } from "./CharSheetModal";
+import {
+  getCharacterSheetById,
+  getCharacterSheetRegistrySummaries,
+  type CharacterSheetRegistrySummary,
+} from "../utils/characterSheets";
 
 interface RealmRegistryProps {
   onClose: () => void;
@@ -11,29 +16,31 @@ interface RealmRegistryProps {
 
 export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [allSheets, setAllSheets] = useState<CharacterSheet[]>([]);
+  const [allSheets, setAllSheets] = useState<CharacterSheetRegistrySummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
+  const [selectedSheetId, setSelectedSheetId] = useState<string | null>(null);
+  const [isSheetLoading, setIsSheetLoading] = useState(false);
   const [playerNamesById, setPlayerNamesById] = useState<Record<string, string>>({});
 
-  const getSheetPlayerId = (sheet: CharacterSheet) => {
+  const getSheetPlayerId = (sheet: CharacterSheetRegistrySummary | CharacterSheet) => {
     const raw =
-      (sheet as CharacterSheet & { player_id?: string }).playerId ??
-      (sheet as CharacterSheet & { player_id?: string }).player_id ??
+      (sheet as (CharacterSheetRegistrySummary | CharacterSheet) & { player_id?: string }).playerId ??
+      (sheet as (CharacterSheetRegistrySummary | CharacterSheet) & { player_id?: string }).player_id ??
       "";
     return String(raw).trim();
   };
 
-  const getSheetPlayerUsername = (sheet: CharacterSheet) => {
+  const getSheetPlayerUsername = (sheet: CharacterSheetRegistrySummary | CharacterSheet) => {
     const raw =
-      (sheet as CharacterSheet & { player_username?: string }).playerUsername ??
-      (sheet as CharacterSheet & { player_username?: string }).player_username ??
+      (sheet as (CharacterSheetRegistrySummary | CharacterSheet) & { player_username?: string }).playerUsername ??
+      (sheet as (CharacterSheetRegistrySummary | CharacterSheet) & { player_username?: string }).player_username ??
       "";
     return String(raw).trim();
   };
 
-  const formatPlayerLabel = (sheet: CharacterSheet) => {
+  const formatPlayerLabel = (sheet: CharacterSheetRegistrySummary | CharacterSheet) => {
     const explicitUsername = getSheetPlayerUsername(sheet);
     if (explicitUsername) {
       return explicitUsername;
@@ -60,25 +67,14 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
 
       try {
         const [sheetsResponse, playersResponse] = await Promise.all([
-          supabase.from("character_sheets").select("*"),
+          getCharacterSheetRegistrySummaries(),
           supabase.from("players").select("id, username"),
         ]);
-
-        if (sheetsResponse.error) {
-          throw sheetsResponse.error;
-        }
 
         if (cancelled) {
           return;
         }
 
-        const nextSheets = ((sheetsResponse.data ?? []) as CharacterSheet[])
-          .slice()
-          .sort((a, b) =>
-            String(a.name ?? "").localeCompare(String(b.name ?? ""), "es", {
-              sensitivity: "base",
-            })
-          );
         const nextPlayerNamesById = playersResponse.error
           ? {}
           : Object.fromEntries(
@@ -87,7 +83,7 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
               )
             );
 
-        setAllSheets(nextSheets);
+        setAllSheets(sheetsResponse);
         setPlayerNamesById(nextPlayerNamesById);
       } catch (error) {
         console.error("Error loading registry sheets:", error);
@@ -107,6 +103,45 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!selectedSheetId) {
+      setSelectedSheet(null);
+      setIsSheetLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const sheetId = selectedSheetId;
+
+    async function loadSelectedSheet() {
+      setIsSheetLoading(true);
+
+      try {
+        const fullSheet = await getCharacterSheetById(sheetId);
+        if (cancelled) {
+          return;
+        }
+
+        setSelectedSheet(fullSheet);
+      } catch (error) {
+        console.error("Error loading full registry sheet:", error);
+        if (!cancelled) {
+          setSelectedSheet(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSheetLoading(false);
+        }
+      }
+    }
+
+    void loadSelectedSheet();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedSheetId]);
 
   const visibleSheets = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -205,7 +240,7 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
                     key={sheet.id}
                     type="button"
                     className="group rounded-[1.25rem] border border-stone-800 bg-stone-900/40 p-3 text-left transition-colors hover:border-amber-500/30"
-                    onClick={() => setSelectedSheet(sheet)}
+                    onClick={() => setSelectedSheetId(sheet.id)}
                   >
                     <div className="flex gap-3">
                       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-stone-800 bg-stone-950">
@@ -259,10 +294,23 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
       </motion.div>
 
       <CharSheetModal
-        isOpen={!!selectedSheet}
-        onClose={() => setSelectedSheet(null)}
+        isOpen={!!selectedSheetId}
+        onClose={() => {
+          setSelectedSheetId(null);
+          setSelectedSheet(null);
+        }}
         character={selectedSheet}
       />
+      {isSheetLoading ? (
+        <div className="pointer-events-none fixed inset-0 z-[121] flex items-center justify-center bg-black/35">
+          <div className="rounded-2xl border border-stone-800 bg-stone-950/95 px-5 py-4 text-sm text-stone-200 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+              <span>Cargando ficha completa...</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

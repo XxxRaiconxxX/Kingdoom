@@ -276,7 +276,9 @@ export function TavernExpedition() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
                 Oro disponible
               </p>
-              <p className="text-2xl font-black text-amber-400">{player.gold}</p>
+              <p className="text-2xl font-black text-amber-400 [font-variant-numeric:tabular-nums]">
+                {player.gold.toLocaleString("es-PY")}
+              </p>
             </div>
           </div>
         </div>

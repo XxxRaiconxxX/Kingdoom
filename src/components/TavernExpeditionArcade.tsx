@@ -982,7 +982,7 @@ export function TavernExpeditionArcade() {
             </div>
 
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 lg:min-w-[620px]">
-              <MiniStat icon={Coins} label="Oro" value={player.gold} />
+              <MiniStat icon={Coins} label="Oro" value={player.gold.toLocaleString("es-PY")} />
               <MiniStat icon={Sparkles} label="Lv" value={safeProgress.level} />
               <MiniStat icon={BadgeAlert} label="Poder" value={playerPower} />
               <MiniStat icon={Sparkles} label="Pts" value={safeProgress.availablePoints} />
@@ -1352,7 +1352,7 @@ function MiniStat({
         <Icon className="h-4 w-4" />
         <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">{label}</span>
       </div>
-      <p className="mt-2 text-lg font-black text-stone-100">{value}</p>
+      <p className="mt-2 text-lg font-black text-stone-100 [font-variant-numeric:tabular-nums]">{value}</p>
     </div>
   );
 }

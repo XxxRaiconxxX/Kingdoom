@@ -15,6 +15,57 @@ type PlayerRow = {
 
 let supportsAuthUserId: boolean | null = null;
 let supportsPlayerAuthLinks: boolean | null = null;
+const PLAYER_QUERY_TIMEOUT_MS = 8000;
+
+function isAbortLikeError(error: unknown) {
+  if (error instanceof DOMException) {
+    return error.name === "AbortError";
+  }
+
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const normalizedName = error.name.toLowerCase();
+  const normalizedMessage = error.message.toLowerCase();
+
+  return (
+    normalizedName.includes("abort") ||
+    normalizedMessage.includes("abort") ||
+    normalizedMessage.includes("timed out") ||
+    normalizedMessage.includes("timeout")
+  );
+}
+
+function getPlayersConnectionErrorMessage(error: unknown) {
+  if (isAbortLikeError(error)) {
+    return "La conexion con Supabase demoro demasiado en responder.";
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message.trim();
+  }
+
+  return "No se pudo consultar Supabase en este momento.";
+}
+
+async function runPlayerQueryWithTimeout<T>(
+  createQuery: () => PromiseLike<T> | T
+) {
+  let timeoutId = 0;
+
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new DOMException("Supabase query timed out", "AbortError"));
+    }, PLAYER_QUERY_TIMEOUT_MS);
+  });
+
+  try {
+    return await Promise.race([Promise.resolve(createQuery()), timeoutPromise]);
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
 
 function mapPlayerRow(row: PlayerRow): PlayerAccount {
   return {
@@ -34,7 +85,9 @@ async function detectAuthUserIdSupport() {
     return supportsAuthUserId;
   }
 
-  const { error } = await supabase.from("players").select("auth_user_id").limit(1);
+  const { error } = await runPlayerQueryWithTimeout(() =>
+    supabase.from("players").select("auth_user_id").limit(1)
+  );
 
   if (!error) {
     supportsAuthUserId = true;
@@ -50,7 +103,9 @@ async function detectPlayerAuthLinksSupport() {
     return supportsPlayerAuthLinks;
   }
 
-  const { error } = await supabase.from("player_auth_links").select("player_id").limit(1);
+  const { error } = await runPlayerQueryWithTimeout(() =>
+    supabase.from("player_auth_links").select("player_id").limit(1)
+  );
 
   if (!error) {
     supportsPlayerAuthLinks = true;
@@ -70,24 +125,32 @@ export async function fetchPlayerByUsername(
     return null;
   }
 
-  const supportsAuthLink = await detectAuthUserIdSupport();
-  const { data, error } = supportsAuthLink
-    ? await supabase
-        .from("players")
-        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
-        .ilike("username", normalizedUsername)
-        .single()
-    : await supabase
-        .from("players")
-        .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
-        .ilike("username", normalizedUsername)
-        .single();
+  try {
+    const supportsAuthLink = await detectAuthUserIdSupport();
+    const { data, error } = supportsAuthLink
+      ? await runPlayerQueryWithTimeout(() =>
+          supabase
+            .from("players")
+            .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
+            .ilike("username", normalizedUsername)
+            .single()
+        )
+      : await runPlayerQueryWithTimeout(() =>
+          supabase
+            .from("players")
+            .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
+            .ilike("username", normalizedUsername)
+            .single()
+        );
 
-  if (error || !data) {
-    return null;
+    if (error || !data) {
+      return null;
+    }
+
+    return mapPlayerRow(data as PlayerRow);
+  } catch (error) {
+    throw new Error(getPlayersConnectionErrorMessage(error));
   }
-
-  return mapPlayerRow(data as PlayerRow);
 }
 
 export async function fetchPlayerByAuthUserId(
@@ -99,42 +162,50 @@ export async function fetchPlayerByAuthUserId(
     return null;
   }
 
-  const supportsAuthLinkTable = await detectPlayerAuthLinksSupport();
+  try {
+    const supportsAuthLinkTable = await detectPlayerAuthLinksSupport();
 
-  if (supportsAuthLinkTable) {
-    const { data, error } = await supabase
-      .from("player_auth_links")
-      .select(
-        "player:players(id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets)"
-      )
-      .eq("auth_user_id", normalizedAuthUserId)
-      .limit(1)
-      .maybeSingle();
+    if (supportsAuthLinkTable) {
+      const { data, error } = await runPlayerQueryWithTimeout(() =>
+        supabase
+          .from("player_auth_links")
+          .select(
+            "player:players(id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets)"
+          )
+          .eq("auth_user_id", normalizedAuthUserId)
+          .limit(1)
+          .maybeSingle()
+      );
 
-    const linkedPlayer = (data as { player?: PlayerRow | null } | null)?.player;
+      const linkedPlayer = (data as { player?: PlayerRow | null } | null)?.player;
 
-    if (!error && linkedPlayer) {
-      return mapPlayerRow(linkedPlayer);
+      if (!error && linkedPlayer) {
+        return mapPlayerRow(linkedPlayer);
+      }
     }
+
+    const supportsAuthLinkColumn = await detectAuthUserIdSupport();
+
+    if (!supportsAuthLinkColumn) {
+      return null;
+    }
+
+    const { data, error } = await runPlayerQueryWithTimeout(() =>
+      supabase
+        .from("players")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
+        .eq("auth_user_id", normalizedAuthUserId)
+        .maybeSingle()
+    );
+
+    if (error || !data) {
+      return null;
+    }
+
+    return mapPlayerRow(data as PlayerRow);
+  } catch (error) {
+    throw new Error(getPlayersConnectionErrorMessage(error));
   }
-
-  const supportsAuthLinkColumn = await detectAuthUserIdSupport();
-
-  if (!supportsAuthLinkColumn) {
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from("players")
-    .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
-    .eq("auth_user_id", normalizedAuthUserId)
-    .maybeSingle();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return mapPlayerRow(data as PlayerRow);
 }
 
 export async function isPlayerLinkedToAuthUser(
@@ -148,37 +219,45 @@ export async function isPlayerLinkedToAuthUser(
     return false;
   }
 
-  const supportsAuthLinkTable = await detectPlayerAuthLinksSupport();
+  try {
+    const supportsAuthLinkTable = await detectPlayerAuthLinksSupport();
 
-  if (supportsAuthLinkTable) {
-    const { data, error } = await supabase
-      .from("player_auth_links")
-      .select("player_id")
-      .eq("player_id", normalizedPlayerId)
-      .eq("auth_user_id", normalizedAuthUserId)
-      .limit(1)
-      .maybeSingle();
+    if (supportsAuthLinkTable) {
+      const { data, error } = await runPlayerQueryWithTimeout(() =>
+        supabase
+          .from("player_auth_links")
+          .select("player_id")
+          .eq("player_id", normalizedPlayerId)
+          .eq("auth_user_id", normalizedAuthUserId)
+          .limit(1)
+          .maybeSingle()
+      );
 
-    if (!error && data) {
-      return true;
+      if (!error && data) {
+        return true;
+      }
     }
-  }
 
-  const supportsAuthLinkColumn = await detectAuthUserIdSupport();
+    const supportsAuthLinkColumn = await detectAuthUserIdSupport();
 
-  if (!supportsAuthLinkColumn) {
+    if (!supportsAuthLinkColumn) {
+      return false;
+    }
+
+    const { data, error } = await runPlayerQueryWithTimeout(() =>
+      supabase
+        .from("players")
+        .select("id")
+        .eq("id", normalizedPlayerId)
+        .eq("auth_user_id", normalizedAuthUserId)
+        .limit(1)
+        .maybeSingle()
+    );
+
+    return !error && Boolean(data);
+  } catch {
     return false;
   }
-
-  const { data, error } = await supabase
-    .from("players")
-    .select("id")
-    .eq("id", normalizedPlayerId)
-    .eq("auth_user_id", normalizedAuthUserId)
-    .limit(1)
-    .maybeSingle();
-
-  return !error && Boolean(data);
 }
 
 export async function updatePlayerGold(

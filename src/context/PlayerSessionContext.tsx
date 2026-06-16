@@ -23,6 +23,14 @@ const PLAYER_STORAGE_KEY = "kingdoom.active-player";
 // solo necesita granularidad de minutos: throttle para reducir escrituras.
 const ACTIVITY_TOUCH_INTERVAL_MS = 5 * 60 * 1000;
 
+function getSessionProfileErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message.trim()) {
+    return `${fallback} ${error.message.trim()}`.trim();
+  }
+
+  return fallback;
+}
+
 type PlayerSessionContextValue = {
   player: PlayerAccount | null;
   isAdmin: boolean;
@@ -86,9 +94,21 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       setIsSubmittingProfile(true);
       setProfileError("");
 
-      const foundPlayer = await fetchPlayerByUsername(normalizedUsername);
+      let foundPlayer: PlayerAccount | null = null;
 
-      setIsSubmittingProfile(false);
+      try {
+        foundPlayer = await fetchPlayerByUsername(normalizedUsername);
+      } catch (error) {
+        setProfileError(
+          getSessionProfileErrorMessage(
+            error,
+            "No se pudo conectar con Supabase para cargar tu perfil."
+          )
+        );
+        return null;
+      } finally {
+        setIsSubmittingProfile(false);
+      }
 
       if (!foundPlayer) {
         setProfileError(
@@ -158,7 +178,19 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       return null;
     }
 
-    const freshPlayer = await fetchPlayerByUsername(player.username);
+    let freshPlayer: PlayerAccount | null = null;
+
+    try {
+      freshPlayer = await fetchPlayerByUsername(player.username);
+    } catch (error) {
+      setProfileError(
+        getSessionProfileErrorMessage(
+          error,
+          "No se pudo refrescar tu perfil por un problema de conexion con Supabase."
+        )
+      );
+      return player;
+    }
 
     if (!freshPlayer) {
       clearPlayer();
@@ -311,7 +343,22 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const storedPlayer = await fetchPlayerByUsername(storedUsername);
+      let storedPlayer: PlayerAccount | null = null;
+
+      try {
+        storedPlayer = await fetchPlayerByUsername(storedUsername);
+      } catch (error) {
+        if (!isCancelled) {
+          setProfileError(
+            getSessionProfileErrorMessage(
+              error,
+              "No se pudo restaurar el perfil guardado desde Supabase."
+            )
+          );
+          setIsHydrating(false);
+        }
+        return;
+      }
 
       if (isCancelled) {
         return;

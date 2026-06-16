@@ -3624,3 +3624,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Ranking Estacional:** Se corrigieron las tablas `season_rank_*` para mantener lectura publica pero escritura solo para admin autenticado, evitando que anonimos modifiquen semillas, snapshots, premios o reglas.
     *   **Storage:** Se restringio la escritura en `mission-evidence` y la subida/actualizacion/borrado de retratos a usuarios autenticados en vez de `public`.
 *   **Notas/Advertencias:** Este cambio corrige el SQL del repo, pero algunos warnings del panel pueden seguir apareciendo si la base productiva aun no re-ejecuta estos scripts. El aviso de leaked password protection no se resuelve en SQL: se habilita desde Auth settings de Supabase.
+
+---
+### [Fecha: 16/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/context/PlayerSessionContext.tsx`, `src/utils/players.ts`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Robustecimiento del bootstrap de perfil del jugador ante timeouts y caidas de Supabase.
+*   **Cambios Clave:**
+    *   **Timeouts de Perfil:** Se agrego un timeout local de 8 segundos a las consultas de perfil y deteccion de soporte de columnas/tablas relacionadas con auth.
+    *   **Errores Mas Claros:** `PlayerSessionContext` ahora distingue mejor entre "jugador no encontrado" y fallos reales de conexion con Supabase al conectar, refrescar o restaurar la sesion guardada.
+    *   **Sesion Mas Resistente:** Si Supabase no responde durante el hydrate o el refresh, el contexto evita dejar el flujo en un estado ambiguo y muestra mensajes de error concretos en vez de fallar silenciosamente.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente. El timeout usa `window.setTimeout`, por lo que esta proteccion aplica al cliente web y no altera RPCs ni logica economica del backend.

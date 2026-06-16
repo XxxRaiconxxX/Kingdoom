@@ -35,6 +35,7 @@ using gin (
 create or replace function public.set_knowledge_documents_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = timezone('utc', now());
@@ -62,6 +63,6 @@ drop policy if exists "Admins can manage knowledge documents" on public.knowledg
 create policy "Admins can manage knowledge documents"
 on public.knowledge_documents
 for all
-to public
-using (true)
-with check (true);
+to authenticated
+using ((select public.is_current_user_admin()))
+with check ((select public.is_current_user_admin()));

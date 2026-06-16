@@ -99,57 +99,66 @@ drop policy if exists "Allow public season rank seasons read" on public.season_r
 create policy "Allow public season rank seasons read"
 on public.season_rank_seasons
 for select
+to public
 using (true);
 
 drop policy if exists "Allow season rank seasons write" on public.season_rank_seasons;
 create policy "Allow season rank seasons write"
 on public.season_rank_seasons
 for all
-using (true)
-with check (true);
+to authenticated
+using ((select public.is_current_user_admin()))
+with check ((select public.is_current_user_admin()));
 
 drop policy if exists "Allow public season rank seeds read" on public.season_rank_player_seeds;
 create policy "Allow public season rank seeds read"
 on public.season_rank_player_seeds
 for select
+to public
 using (true);
 
 drop policy if exists "Allow season rank seeds write" on public.season_rank_player_seeds;
 create policy "Allow season rank seeds write"
 on public.season_rank_player_seeds
 for all
-using (true)
-with check (true);
+to authenticated
+using ((select public.is_current_user_admin()))
+with check ((select public.is_current_user_admin()));
 
 drop policy if exists "Allow public season rank snapshots read" on public.season_rank_player_snapshots;
 create policy "Allow public season rank snapshots read"
 on public.season_rank_player_snapshots
 for select
+to public
 using (true);
 
 drop policy if exists "Allow season rank snapshots write" on public.season_rank_player_snapshots;
 create policy "Allow season rank snapshots write"
 on public.season_rank_player_snapshots
 for all
-using (true)
-with check (true);
+to authenticated
+using ((select public.is_current_user_admin()))
+with check ((select public.is_current_user_admin()));
 
 drop policy if exists "Allow public season rank awards read" on public.season_rank_awards;
 create policy "Allow public season rank awards read"
 on public.season_rank_awards
 for select
+to public
 using (true);
 
 drop policy if exists "Allow season rank awards write" on public.season_rank_awards;
 create policy "Allow season rank awards write"
 on public.season_rank_awards
 for all
-using (true)
-with check (true);
+to authenticated
+using ((select public.is_current_user_admin()))
+with check ((select public.is_current_user_admin()));
 
 create or replace function public.set_season_rank_seasons_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -160,6 +169,7 @@ $$;
 create or replace function public.set_season_rank_player_seeds_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -170,6 +180,7 @@ $$;
 create or replace function public.set_season_rank_player_snapshots_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -180,6 +191,7 @@ $$;
 create or replace function public.set_season_rank_awards_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();

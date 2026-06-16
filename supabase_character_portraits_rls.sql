@@ -19,15 +19,15 @@ USING (bucket_id = 'character-portraits');
 
 CREATE POLICY "Permitir subida de retratos"
 ON storage.objects FOR INSERT
-TO public
+TO authenticated
 WITH CHECK (bucket_id = 'character-portraits');
 
 CREATE POLICY "Permitir actualizacion de retratos"
 ON storage.objects FOR UPDATE
-TO public
+TO authenticated
 USING (bucket_id = 'character-portraits');
 
 CREATE POLICY "Permitir borrado de retratos"
 ON storage.objects FOR DELETE
-TO public
+TO authenticated
 USING (bucket_id = 'character-portraits');

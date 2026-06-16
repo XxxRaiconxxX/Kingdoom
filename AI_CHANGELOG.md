@@ -3612,3 +3612,15 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   El bloque de temporada ahora vive como seccion propia debajo del panel superior del perfil, antes del resto del contenido del jugador.
     *   Con esto el bloque `Jugador conectado` deja de arrastrar una altura artificial y recupera un layout mas limpio y compacto.
 *   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente despues de la reubicacion.
+
+---
+### [Fecha: 16/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `supabase_realm_missions.sql`, `supabase_realm_events_participation.sql`, `supabase_grimoire_flora.sql`, `supabase_knowledge_documents.sql`, `supabase_season_rank_rules.sql`, `supabase_season_rank_seasons.sql`, `supabase_cron_installments.sql`, `supabase_character_portraits_rls.sql`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Endurecimiento de RLS y correccion de funciones SQL para limpiar avisos reales del Supabase Security Advisor.
+*   **Cambios Clave:**
+    *   **Search Path:** Se agrego `set search_path = public` a funciones trigger y auxiliares que el advisor marcaba como mutables en misiones, eventos, grimorio, documentos, reglas/ranking estacional y credito de cuotas.
+    *   **Misiones y Eventos:** Se cerraron escrituras publicas en `realm_missions`, `realm_mission_claims` y `realm_event_participants`; ahora las altas/cambios quedan limitados a admin o al propio jugador autenticado vinculado.
+    *   **Contenido Admin:** Las politicas de `grimoire_flora_entries` y `knowledge_documents` dejaron de estar abiertas a `public` y pasan a usar `is_current_user_admin()`.
+    *   **Ranking Estacional:** Se corrigieron las tablas `season_rank_*` para mantener lectura publica pero escritura solo para admin autenticado, evitando que anonimos modifiquen semillas, snapshots, premios o reglas.
+    *   **Storage:** Se restringio la escritura en `mission-evidence` y la subida/actualizacion/borrado de retratos a usuarios autenticados en vez de `public`.
+*   **Notas/Advertencias:** Este cambio corrige el SQL del repo, pero algunos warnings del panel pueden seguir apareciendo si la base productiva aun no re-ejecuta estos scripts. El aviso de leaked password protection no se resuelve en SQL: se habilita desde Auth settings de Supabase.

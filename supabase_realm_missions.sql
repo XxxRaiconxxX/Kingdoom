@@ -56,6 +56,7 @@ drop policy if exists "Mission evidence write" on storage.objects;
 create policy "Mission evidence write"
 on storage.objects
 for all
+to authenticated
 using (bucket_id = 'mission-evidence')
 with check (bucket_id = 'mission-evidence');
 
@@ -79,31 +80,60 @@ drop policy if exists "Allow public realm missions read" on public.realm_mission
 create policy "Allow public realm missions read"
 on public.realm_missions
 for select
+to public
 using (true);
 
 drop policy if exists "Allow realm missions write" on public.realm_missions;
 create policy "Allow realm missions write"
 on public.realm_missions
 for all
-using (true)
-with check (true);
+to authenticated
+using ((select public.is_current_user_admin()))
+with check ((select public.is_current_user_admin()));
 
 drop policy if exists "Allow public mission claims read" on public.realm_mission_claims;
 create policy "Allow public mission claims read"
 on public.realm_mission_claims
 for select
+to public
 using (true);
 
 drop policy if exists "Allow mission claims write" on public.realm_mission_claims;
 create policy "Allow mission claims write"
 on public.realm_mission_claims
 for all
-using (true)
-with check (true);
+to authenticated
+using (
+  (select public.is_current_user_admin())
+  or exists (
+    select 1
+    from public.players p
+    left join public.player_auth_links pal on p.id = pal.player_id
+    where p.id = realm_mission_claims.player_id
+      and (
+        p.auth_user_id = (select auth.uid())
+        or pal.auth_user_id = (select auth.uid())
+      )
+  )
+)
+with check (
+  (select public.is_current_user_admin())
+  or exists (
+    select 1
+    from public.players p
+    left join public.player_auth_links pal on p.id = pal.player_id
+    where p.id = realm_mission_claims.player_id
+      and (
+        p.auth_user_id = (select auth.uid())
+        or pal.auth_user_id = (select auth.uid())
+      )
+  )
+);
 
 create or replace function public.set_realm_missions_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -120,6 +150,7 @@ execute function public.set_realm_missions_updated_at();
 create or replace function public.set_realm_mission_claims_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();

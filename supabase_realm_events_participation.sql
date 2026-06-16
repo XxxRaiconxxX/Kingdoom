@@ -51,18 +51,45 @@ drop policy if exists "Allow public event participants read" on public.realm_eve
 create policy "Allow public event participants read"
 on public.realm_event_participants
 for select
+to public
 using (true);
 
 drop policy if exists "Allow event participants write" on public.realm_event_participants;
 create policy "Allow event participants write"
 on public.realm_event_participants
 for all
-using (true)
-with check (true);
+to authenticated
+using (
+  (select public.is_current_user_admin())
+  or exists (
+    select 1
+    from public.players p
+    left join public.player_auth_links pal on p.id = pal.player_id
+    where p.id = realm_event_participants.player_id
+      and (
+        p.auth_user_id = (select auth.uid())
+        or pal.auth_user_id = (select auth.uid())
+      )
+  )
+)
+with check (
+  (select public.is_current_user_admin())
+  or exists (
+    select 1
+    from public.players p
+    left join public.player_auth_links pal on p.id = pal.player_id
+    where p.id = realm_event_participants.player_id
+      and (
+        p.auth_user_id = (select auth.uid())
+        or pal.auth_user_id = (select auth.uid())
+      )
+  )
+);
 
 create or replace function public.set_realm_event_participants_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -73,6 +100,7 @@ $$;
 create or replace function public.enforce_realm_event_participant_capacity()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_max_participants integer := 0;

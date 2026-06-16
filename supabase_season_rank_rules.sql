@@ -34,31 +34,36 @@ drop policy if exists "Allow public season rank point rules read" on public.seas
 create policy "Allow public season rank point rules read"
 on public.season_rank_point_rules
 for select
+to public
 using (true);
 
 drop policy if exists "Allow season rank point rules write" on public.season_rank_point_rules;
 create policy "Allow season rank point rules write"
 on public.season_rank_point_rules
 for all
-using (true)
-with check (true);
+to authenticated
+using ((select public.is_current_user_admin()))
+with check ((select public.is_current_user_admin()));
 
 drop policy if exists "Allow public season rank thresholds read" on public.season_rank_thresholds;
 create policy "Allow public season rank thresholds read"
 on public.season_rank_thresholds
 for select
+to public
 using (true);
 
 drop policy if exists "Allow season rank thresholds write" on public.season_rank_thresholds;
 create policy "Allow season rank thresholds write"
 on public.season_rank_thresholds
 for all
-using (true)
-with check (true);
+to authenticated
+using ((select public.is_current_user_admin()))
+with check ((select public.is_current_user_admin()));
 
 create or replace function public.set_season_rank_point_rules_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -69,6 +74,7 @@ $$;
 create or replace function public.set_season_rank_thresholds_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();

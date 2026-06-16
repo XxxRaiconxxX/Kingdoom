@@ -217,6 +217,7 @@ create or replace function public.check_player_credit_status(p_player_id uuid)
 returns boolean
 language plpgsql
 security definer
+set search_path = public
 as $$
 declare
   v_is_blocked boolean;

@@ -975,7 +975,7 @@ export function TavernHorseRace() {
             type="button"
             onClick={() => (raceMode === "online" ? void placeOnlineBet() : void startRace())}
             disabled={raceMode === "online" ? !canPlaceOnlineBet : !canRace}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-stone-950 shadow-[0_0_28px_rgba(245,158,11,0.2)] transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-stone-800 disabled:text-stone-500 disabled:shadow-none"
+            className="kd-touch mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black uppercase tracking-[0.12em] text-stone-950 shadow-[0_0_28px_rgba(245,158,11,0.2)] transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-stone-800 disabled:text-stone-500 disabled:shadow-none"
           >
             <Flag className="h-4 w-4" />
             {onlineLoading && raceMode === "online"
@@ -1079,7 +1079,7 @@ function RaceStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-stone-800 bg-stone-950/75 px-3 py-2">
       <p className="text-[9px] font-black uppercase tracking-[0.14em] text-stone-500">{label}</p>
-      <p className="mt-1 text-sm font-black text-stone-100">{value}</p>
+      <p className="mt-1 text-sm font-black text-stone-100 [font-variant-numeric:tabular-nums]">{value}</p>
     </div>
   );
 }

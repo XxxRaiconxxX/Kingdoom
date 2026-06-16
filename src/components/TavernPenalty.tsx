@@ -882,7 +882,7 @@ function StatusChip({ label, value }: { label: string; value: string | number })
   return (
     <div className="rounded-2xl border border-amber-500/15 bg-black/35 px-3 py-2">
       <span className="block text-[9px] text-stone-500">{label}</span>
-      <span className="mt-1 block text-sm text-amber-200">{value}</span>
+      <span className="mt-1 block text-sm text-amber-200 [font-variant-numeric:tabular-nums]">{value}</span>
     </div>
   );
 }

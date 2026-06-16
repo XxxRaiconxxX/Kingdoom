@@ -1815,7 +1815,7 @@ function SeasonRankSpotlight({
           </span>
         </button>
 
-        {isExpanded ? (
+        {isExpanded && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1967,10 +1967,6 @@ function SeasonRankSpotlight({
                   : "Aun no tienes recompensas validadas en esta temporada. Tu campana sigue abierta para empezar a escalar desde Siervo III."}
             </p>
           </motion.div>
-        ) : (
-          <p className="mt-3 text-xs leading-5 text-stone-400">
-            El resumen detallado de la temporada queda oculto hasta que lo despliegues.
-          </p>
         )}
       </div>
     </div>
@@ -2024,7 +2020,7 @@ function SeasonRing({ percent, accent }: { percent: number; accent: string }) {
         <span className="text-base font-black text-stone-100 [font-variant-numeric:tabular-nums]">
           {Math.round(safePercent)}%
         </span>
-        <span className="mt-0.5 text-[8px] font-bold uppercase tracking-[0.16em] text-stone-500">
+        <span className="mt-0.5 text-[6.5px] font-bold uppercase tracking-[0.12em] text-stone-500">
           Avance
         </span>
       </div>

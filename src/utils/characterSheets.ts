@@ -103,7 +103,7 @@ function deleteLocalSheet(id: string): void {
 
 // Main Exports (Async to support Supabase)
 export async function getCharacterSheets(): Promise<CharacterSheet[]> {
-  const { data, error } = await supabase.from("character_sheets").select("*");
+  const { data, error } = await supabase.from("character_sheets").select("id, playerId, playerUsername, portraitUrl, name, age, gender, height, race, powers, stats, weapon, combatStyle, birthRealm, socialClass, nobleTitle, profession, nonMagicSkills, personality, history, extras, weaknesses, inventory, createdAt");
   if (error) {
     console.error("Supabase error fetching sheets:", error);
     return getLocalSheets(); // Fallback
@@ -139,7 +139,7 @@ export async function deleteCharacterSheet(id: string, portraitUrl?: string): Pr
 export async function getPlayerSheets(playerId: string): Promise<CharacterSheet[]> {
   const { data, error } = await supabase
     .from("character_sheets")
-    .select("*")
+    .select("id, playerId, playerUsername, portraitUrl, name, age, gender, height, race, powers, stats, weapon, combatStyle, birthRealm, socialClass, nobleTitle, profession, nonMagicSkills, personality, history, extras, weaknesses, inventory, createdAt")
     .eq("playerId", playerId);
   if (error) {
     console.error("Supabase error fetching player sheets:", error);

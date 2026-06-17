@@ -29,6 +29,14 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 17/06/2026] - [Autor: Claude (Opus 4.8)]
+*   **Archivos Modificados:** `api/admin/analyze-ficha.ts` (NUEVO). Proyecto hermano nuevo: `../kingdoom-fichas/` (APK Capacitor asistente de fichas de rol).
+*   **Resumen de Tareas:** Arranque del proyecto **kingdoom-fichas** (app/APK que ayuda a los nuevos a crear/validar su ficha antes de enviarla al grupo de WhatsApp) + nuevo endpoint de IA en este repo para el análisis "asistente".
+*   **Cambios Clave:**
+    *   **[Nuevo endpoint]:** `api/admin/analyze-ficha.ts` — proxy Gemini (mismo patrón que `generate-magic.ts`: `_aiOrchestrator` + `setCorsHeaders`). Recibe `{ficha, avisosLocales}` y devuelve JSON `{veredicto, resumen, sugerencias[]}`. Juzga lo que las reglas locales NO pueden: coherencia edad↔historia, raza/reino↔lore, calidad de personalidad y debilidades reales. Temperatura 0.5.
+    *   **[App kingdoom-fichas]:** Vite+React+TS+Capacitor (Android). Validador local de reglas duras (stats=12, niveles de poderes=5, raza/reino del catálogo, arma/habilidades sin magia, mínimos de texto escalados por edad). Generador de ficha aleatoria válida. Copiar/Compartir a WhatsApp con el formato exacto de la plantilla. Sync del Grimorio desde la tabla `grimoire_magic_styles` (fusionado sobre bundle de 31 magias iniciales extraídas de `extracted_powers/Poderes/`).
+*   **Notas/Advertencias:** El endpoint `analyze-ficha` está creado pero **PENDIENTE DE DEPLOY a Vercel** (responde 404 hasta entonces; la app ya maneja el error con gracia). **CORS:** añadir a `MISSION_AI_ALLOWED_ORIGINS` los orígenes de la app: `http://localhost:4320` (dev), `https://localhost` y `capacitor://localhost` (APK). Detalle completo del proyecto hermano en `../kingdoom-fichas/HANDOFF.md`. `npm run build` OK en ambos lados.
+
 ### [Fecha: 15/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `TavernCards.tsx`, `TavernRoulette.tsx`, `TavernScratch.tsx`, `TavernPlinko.tsx`, `TavernHorseRace.tsx`, `TavernPenalty.tsx`, `TavernExpedition.tsx`, `TavernExpeditionArcade.tsx` (todos en `src/components/`)
 *   **Resumen de Tareas:** Pase de pulido visual coherente sobre los 10 minijuegos restantes de la taberna (commits `d77fd03`, `ff13732`, `5ff59eb`). Enfoque seguro y presentacional: NO se reestructuraron los internos bespoke de cada juego ni los canvas (no verificables sin sesion logueada).

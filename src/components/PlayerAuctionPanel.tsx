@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Gavel, Clock, Coins, CheckCircle, HelpCircle, AlertTriangle } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { fetchAuctions, placeAuctionBid, withdrawFromAuction } from "../utils/auctions";
@@ -55,13 +55,15 @@ export function PlayerAuctionPanel() {
   const [feedbackMap, setFeedbackMap] = useState<Record<string, { text: string; tone: "success" | "error" }>>({});
   const [bidAmounts, setBidAmounts] = useState<Record<string, string>>({});
   const [isSubmittingMap, setIsSubmittingMap] = useState<Record<string, boolean>>({});
+  const realtimeReloadTimeoutRef = useRef<number | null>(null);
 
   async function loadAuctions() {
-    const result = await fetchAuctions(player?.id);
+    const result = await fetchAuctions(player?.id, {
+      status: "active",
+      includeAdminFields: false,
+    });
     if (result.status === "ready") {
-      // Filter to only active ones for players
-      const activeAuctions = result.auctions.filter((a) => a.status === "active");
-      setAuctions(activeAuctions);
+      setAuctions(result.auctions);
     }
     setIsLoading(false);
   }
@@ -69,33 +71,42 @@ export function PlayerAuctionPanel() {
   useEffect(() => {
     void loadAuctions();
 
+    const scheduleReload = () => {
+      if (realtimeReloadTimeoutRef.current !== null) {
+        window.clearTimeout(realtimeReloadTimeoutRef.current);
+      }
+
+      realtimeReloadTimeoutRef.current = window.setTimeout(() => {
+        realtimeReloadTimeoutRef.current = null;
+        void loadAuctions();
+      }, 250);
+    };
+
     // Subscribe to realtime updates on auctions, bids and participants
     const channel = supabase
       .channel("realtime-player-auctions")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "market_auctions" },
-        () => {
-          void loadAuctions();
-        }
+        scheduleReload
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "market_auction_bids" },
-        () => {
-          void loadAuctions();
-        }
+        scheduleReload
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "market_auction_participants" },
-        () => {
-          void loadAuctions();
-        }
+        scheduleReload
       )
       .subscribe();
 
     return () => {
+      if (realtimeReloadTimeoutRef.current !== null) {
+        window.clearTimeout(realtimeReloadTimeoutRef.current);
+        realtimeReloadTimeoutRef.current = null;
+      }
       void supabase.removeChannel(channel);
     };
   }, [player?.id]);

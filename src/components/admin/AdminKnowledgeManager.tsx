@@ -4,7 +4,8 @@ import { FileText, Loader2, Trash2, UploadCloud } from "lucide-react";
 import type { KnowledgeDocument, KnowledgeDocumentType } from "../../types";
 import {
   deleteKnowledgeDocument,
-  fetchKnowledgeDocuments,
+  fetchKnowledgeDocumentById,
+  fetchKnowledgeDocumentSummaries,
   KNOWLEDGE_DOCUMENT_TYPES,
   parseKnowledgeTags,
   slugifyKnowledgeId,
@@ -26,6 +27,7 @@ export function AdminKnowledgeManager() {
   const [showAllDocuments, setShowAllDocuments] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [loadingDocumentId, setLoadingDocumentId] = useState("");
   const [id, setId] = useState("");
   const [title, setTitle] = useState("");
   const [type, setType] = useState<KnowledgeDocumentType>("lore");
@@ -37,7 +39,7 @@ export function AdminKnowledgeManager() {
   const [visible, setVisible] = useState(true);
 
   async function loadDocuments() {
-    const result = await fetchKnowledgeDocuments({ includeHidden: true });
+    const result = await fetchKnowledgeDocumentSummaries({ includeHidden: true });
     setDocuments(result.documents);
     setFeedback(result.message);
   }
@@ -51,7 +53,7 @@ export function AdminKnowledgeManager() {
     if (!query) return documents;
 
     return documents.filter((document) =>
-      `${document.title} ${document.type} ${document.category} ${document.tags.join(" ")} ${document.source} ${document.summary} ${document.content}`
+      `${document.title} ${document.type} ${document.category} ${document.tags.join(" ")} ${document.source} ${document.summary}`
         .toLowerCase()
         .includes(query)
     );
@@ -82,16 +84,25 @@ export function AdminKnowledgeManager() {
     setFeedback("");
   }
 
-  function preloadDocument(document: KnowledgeDocument) {
-    setId(document.id);
-    setTitle(document.title);
-    setType(document.type);
-    setCategory(document.category);
-    setTagsText(document.tags.join(", "));
-    setSource(document.source);
-    setSummary(document.summary);
-    setContent(document.content);
-    setVisible(document.visible);
+  async function preloadDocument(document: KnowledgeDocument) {
+    setLoadingDocumentId(document.id);
+    const result = await fetchKnowledgeDocumentById(document.id);
+    setLoadingDocumentId("");
+
+    if (result.status !== "ready" || !result.document) {
+      setFeedback(result.message);
+      return;
+    }
+
+    setId(result.document.id);
+    setTitle(result.document.title);
+    setType(result.document.type);
+    setCategory(result.document.category);
+    setTagsText(result.document.tags.join(", "));
+    setSource(result.document.source);
+    setSummary(result.document.summary);
+    setContent(result.document.content);
+    setVisible(result.document.visible);
     setFeedback("");
   }
 
@@ -341,7 +352,7 @@ export function AdminKnowledgeManager() {
               <button
                 key={document.id}
                 type="button"
-                onClick={() => preloadDocument(document)}
+                onClick={() => void preloadDocument(document)}
                 className="kd-touch flex w-full items-start justify-between gap-3 rounded-[1.2rem] border border-stone-800 bg-stone-950/50 px-4 py-3 text-left transition hover:border-amber-500/20 hover:bg-stone-900"
               >
                 <div className="min-w-0">
@@ -361,6 +372,11 @@ export function AdminKnowledgeManager() {
                 >
                   {document.visible ? "Activo" : "Oculto"}
                 </span>
+                {loadingDocumentId === document.id ? (
+                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-300">
+                    Cargando...
+                  </span>
+                ) : null}
               </button>
             ))
           ) : (

@@ -3656,3 +3656,14 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Carga Bajo Demanda:** La ficha completa se consulta por `id` solo cuando el usuario abre una entrada del registro, manteniendo intacta la modal detallada.
     *   **Orden en SQL:** Se movio el ordenamiento de las fichas al lado de Supabase (`order("name")` para el registro y `order("createdAt")` para los listados completos/por jugador) para evitar trabajo innecesario en frontend.
 *   **Notas/Advertencias:** Este cambio optimiza la sobrelectura desde la SPA, pero el warning original de Query Performance estaba bajo `service_role`; por tanto, si esa entrada vuelve a aparecer, podria existir ademas algun consumidor externo al frontend que siga leyendo `character_sheets` de forma amplia.
+
+---
+### [Fecha: 17/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/utils/auctions.ts`, `src/components/PlayerAuctionPanel.tsx`, `src/utils/knowledge.ts`, `src/components/admin/AdminKnowledgeManager.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Nueva pasada de reduccion de egress PostgREST en subastas del jugador y biblioteca IA del admin.
+*   **Cambios Clave:**
+    *   **Subastas del Jugador:** `fetchAuctions` ahora acepta filtros y el panel del jugador pide solo subastas `active`, evitando traer historico completo para luego filtrarlo en cliente.
+    *   **Recargas Realtime Coalescidas:** `PlayerAuctionPanel` deja de disparar una recarga por cada evento inmediato de `market_auctions`, `market_auction_bids` y `market_auction_participants`; ahora agrupa cambios cercanos en una sola lectura.
+    *   **Participaciones Acotadas:** La lectura de `market_auction_participants` del jugador ahora se limita a las subastas efectivamente devueltas por la consulta principal.
+    *   **Biblioteca IA Ligera:** El manager admin de conocimiento ya no trae `content` completo para toda la lista; ahora consume resúmenes livianos y solo carga el documento completo por `id` cuando se va a editar.
+*   **Notas/Advertencias:** Este cambio reduce payload y sobrelectura desde la SPA, pero no elimina por si solo consumidores externos o lecturas del Archivista que sigan necesitando contenido completo.

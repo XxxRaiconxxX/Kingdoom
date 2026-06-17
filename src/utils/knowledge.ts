@@ -16,6 +16,8 @@ type KnowledgeDocumentRow = {
   updated_at?: string;
 };
 
+type KnowledgeDocumentSummaryRow = Omit<KnowledgeDocumentRow, "content">;
+
 export type KnowledgeDocumentInput = Omit<
   KnowledgeDocument,
   "createdAt" | "updatedAt"
@@ -132,6 +134,91 @@ export async function fetchKnowledgeDocuments(options?: {
         .toLowerCase()
         .includes(search)
     ),
+  };
+}
+
+export async function fetchKnowledgeDocumentSummaries(options?: {
+  includeHidden?: boolean;
+}) {
+  let query = supabase
+    .from("knowledge_documents")
+    .select(
+      "id, title, type, category, tags, source, summary, visible, created_at, updated_at"
+    )
+    .order("updated_at", { ascending: false });
+
+  if (!options?.includeHidden) {
+    query = query.eq("visible", true);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo cargar la biblioteca IA.",
+        error.message
+      ),
+      documents: [] as KnowledgeDocument[],
+    };
+  }
+
+  const documents = ((data ?? []) as KnowledgeDocumentSummaryRow[]).map((row) => ({
+    id: row.id,
+    title: row.title,
+    type: row.type,
+    category: row.category ?? "",
+    tags: row.tags ?? [],
+    source: row.source ?? "",
+    content: "",
+    summary: row.summary ?? "",
+    visible: row.visible,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+
+  return {
+    status: "ready" as const,
+    message: "",
+    documents,
+  };
+}
+
+export async function fetchKnowledgeDocumentById(id: string) {
+  const normalizedId = id.trim();
+
+  if (!normalizedId) {
+    return {
+      status: "error" as const,
+      message: "Selecciona un documento valido.",
+      document: null as KnowledgeDocument | null,
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("knowledge_documents")
+    .select(
+      "id, title, type, category, tags, source, content, summary, visible, created_at, updated_at"
+    )
+    .eq("id", normalizedId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return {
+      status: "error" as const,
+      message: formatAdminPermissionMessage(
+        "No se pudo cargar el documento completo.",
+        error?.message ?? "Documento no encontrado."
+      ),
+      document: null as KnowledgeDocument | null,
+    };
+  }
+
+  return {
+    status: "ready" as const,
+    message: "",
+    document: mapKnowledgeRow(data as KnowledgeDocumentRow),
   };
 }
 

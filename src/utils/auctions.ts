@@ -1,6 +1,47 @@
 import { supabase } from "./supabaseClient";
 import type { MarketAuction, MarketAuctionBid, AuctionStatus, Rarity } from "../types";
 
+const PLAYER_AUCTION_SELECT = `
+  id,
+  item_id,
+  item_name,
+  item_description,
+  item_category,
+  item_rarity,
+  item_image_url,
+  start_price,
+  min_increment,
+  status,
+  created_at,
+  expires_at,
+  closed_at,
+  highest_bid,
+  highest_bidder_id,
+  highest_bidder:players!highest_bidder_id(username)
+`;
+
+const ADMIN_AUCTION_SELECT = `
+  id,
+  item_id,
+  item_name,
+  item_description,
+  item_category,
+  item_rarity,
+  item_image_url,
+  start_price,
+  min_increment,
+  status,
+  created_at,
+  expires_at,
+  closed_at,
+  highest_bid,
+  highest_bidder_id,
+  whatsapp_message_id,
+  whatsapp_chat_id,
+  created_by,
+  highest_bidder:players!highest_bidder_id(username)
+`;
+
 export type PlaceBidResult =
   | {
       status: "success";
@@ -26,19 +67,29 @@ export type ResolveAuctionResult =
       message: string;
     };
 
-export async function fetchAuctions(currentPlayerId?: string): Promise<{
+export async function fetchAuctions(
+  currentPlayerId?: string,
+  options?: {
+    status?: AuctionStatus;
+    includeAdminFields?: boolean;
+  }
+): Promise<{
   status: "ready" | "error";
   auctions: MarketAuction[];
   message?: string;
 }> {
   try {
-    const { data, error } = await supabase
+    const includeAdminFields = options?.includeAdminFields !== false;
+    let query = supabase
       .from("market_auctions")
-      .select(`
-        *,
-        highest_bidder:players!highest_bidder_id(username)
-      `)
+      .select(includeAdminFields ? ADMIN_AUCTION_SELECT : PLAYER_AUCTION_SELECT)
       .order("created_at", { ascending: false });
+
+    if (options?.status) {
+      query = query.eq("status", options.status);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return { status: "error", auctions: [], message: error.message };
@@ -46,10 +97,14 @@ export async function fetchAuctions(currentPlayerId?: string): Promise<{
 
     const participantMap: Record<string, boolean> = {};
     if (currentPlayerId && data && data.length > 0) {
+      const auctionIds = data
+        .map((row: any) => row.id as string | undefined)
+        .filter((value): value is string => Boolean(value));
       const { data: partData, error: partError } = await supabase
         .from("market_auction_participants")
         .select("auction_id, has_withdrawn")
-        .eq("player_id", currentPlayerId);
+        .eq("player_id", currentPlayerId)
+        .in("auction_id", auctionIds);
 
       if (!partError && partData) {
         partData.forEach((p) => {
@@ -74,9 +129,9 @@ export async function fetchAuctions(currentPlayerId?: string): Promise<{
       closedAt: row.closed_at,
       highestBid: row.highest_bid,
       highestBidderId: row.highest_bidder_id,
-      whatsappMessageId: row.whatsapp_message_id,
-      whatsappChatId: row.whatsapp_chat_id,
-      createdBy: row.created_by,
+      whatsappMessageId: row.whatsapp_message_id ?? null,
+      whatsappChatId: row.whatsapp_chat_id ?? null,
+      createdBy: row.created_by ?? null,
       highestBidderUsername: row.highest_bidder?.username || null,
       hasWithdrawn: !!participantMap[row.id],
     }));

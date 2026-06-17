@@ -29,6 +29,16 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 17/06/2026] - [Autor: Claude (Opus 4.8)] - Proyecto hermano: kingdoom-fichas
+*   **Archivos Modificados:** Repo aparte `XxxRaiconxxX/kingdoom-fichas` (no es este repo). Aquí solo se deja constancia.
+*   **Resumen de Tareas:** Lanzada la **v2.0** de la app **kingdoom-fichas** (asistente de fichas, APK Android). Pasada de calidad visual premium + cierre de funciones; APK de distribución generado.
+*   **Cambios Clave:**
+    *   **[v2.0 push + tag]:** commit y tag `v2.0.0` en `github.com/XxxRaiconxxX/kingdoom-fichas` (rama main). `versionCode 2` / `versionName 2.0`.
+    *   **[UI premium]:** fuentes Cinzel + Inter empaquetadas, rediseño de identidad Kingdoom, medidores de estadísticas/poderes, estados de vacío/error/listo, mobile-first con safe-areas Android, favicon heráldico.
+    *   **[Funciones]:** Análisis con IA usando el endpoint `analyze-ficha` de ESTE repo (Vercel) + sync del Grimorio desde la tabla `grimoire_magic_styles` de Supabase.
+    *   **[APK]:** `dist-apk/Kingdoom-Fichas-v2.0.apk` (~4.5 MB, debug/sideload). El binario NO se versiona (artefacto); ver `kingdoom-fichas/dist-apk/LEEME-v2.md` y `kingdoom-fichas/CHANGELOG.md`.
+*   **Notas/Advertencias:** Build de APK por CLI con `npm run apk:debug` (requiere JDK 17/21 — el JBR de Android Studio sirve — y Android SDK). Dependencia con este repo: el endpoint IA `analyze-ficha` ya está desplegado y con CORS abierto para los orígenes de la app.
+
 ### [Fecha: 17/06/2026] - [Autor: Claude (Opus 4.8)]
 *   **Archivos Modificados:** `api/admin/analyze-ficha.ts` (NUEVO). Proyecto hermano nuevo: `../kingdoom-fichas/` (APK Capacitor asistente de fichas de rol).
 *   **Resumen de Tareas:** Arranque del proyecto **kingdoom-fichas** (app/APK que ayuda a los nuevos a crear/validar su ficha antes de enviarla al grupo de WhatsApp) + nuevo endpoint de IA en este repo para el análisis "asistente".

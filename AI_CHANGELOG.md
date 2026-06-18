@@ -28,6 +28,9 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 15/06/2026] - [Autor: Jules]
+- Optimización de rendimiento: Se solucionó el problema de consultas N+1 en `archivistActions.ts` al implementar una actualización masiva de oro. Se añadió `bulkUpdatePlayerGold` en `players.ts` aprovechando la RPC de Supabase `bulk_increment_gold`, mejorando drásticamente el rendimiento y reduciendo la carga de la base de datos al dar oro a múltiples jugadores simultáneamente.
+
 
 ### [Fecha: 17/06/2026] - [Autor: Claude (Opus 4.8)] - Proyecto hermano: kingdoom-fichas
 *   **Archivos Modificados:** Repo aparte `XxxRaiconxxX/kingdoom-fichas` (no es este repo). Aquí solo se deja constancia.

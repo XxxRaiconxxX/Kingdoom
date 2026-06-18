@@ -12,7 +12,7 @@ import {
 import { deleteKnowledgeDocument, slugifyKnowledgeId, upsertKnowledgeDocument } from "../../utils/knowledge";
 import { deleteMarketItem, slugifyMarketItem, upsertMarketItem } from "../../utils/market";
 import { deleteRealmMission, upsertRealmMission } from "../../utils/missions";
-import { createPlayerAccount, updatePlayerGold } from "../../utils/players";
+import { createPlayerAccount, updatePlayerGold, bulkUpdatePlayerGold } from "../../utils/players";
 import type { ArchivistActionDraft, ArchivistLiveContext } from "./archivist.types";
 
 type ExecutionResult = {
@@ -224,8 +224,8 @@ async function executePlayerAction(
     if (amount <= 0) {
       return { status: "error", message: "La cantidad a dar debe ser mayor a 0." };
     }
-    const promises = context.players.map(player => updatePlayerGold(player.id, player.gold + amount));
-    await Promise.all(promises);
+    const playerIds = context.players.map(player => player.id);
+    await bulkUpdatePlayerGold(playerIds, amount);
     return {
       status: "success",
       message: `Se entregaron ${amount.toLocaleString("es-PY")} de oro a todos los jugadores del reino (${context.players.length} jugadores en total).`,
@@ -250,8 +250,8 @@ async function executePlayerAction(
       return { status: "error", message: "No se encontro a ninguno de los jugadores solicitados." };
     }
 
-    const promises = foundPlayers.map(player => updatePlayerGold(player.id, player.gold + amount));
-    await Promise.all(promises);
+    const playerIds = foundPlayers.map(p => p.id);
+    await bulkUpdatePlayerGold(playerIds, amount);
     
     const names = foundPlayers.map(p => p.username).join(", ");
     return {

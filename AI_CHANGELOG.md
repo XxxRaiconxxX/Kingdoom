@@ -3688,6 +3688,15 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ---
 ### [Fecha: 19/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/App.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Correccion del recorte de texto en las tarjetas de misiones del reino.
+*   **Cambios Clave:**
+    *   **Descripcion de Mision:** La descripcion principal deja de quedar fija en tres lineas sin salida; ahora se expande completa cuando el jugador abre el detalle.
+    *   **Instrucciones de Mision:** El bloque de instrucciones pasa a un contenedor desplegable dentro de la misma tarjeta, conservando preview compacto en la grilla y lectura completa bajo demanda.
+    *   **UX del Grid:** Se mantuvo la densidad visual de las cards en estado normal, evitando romper el tablero de misiones mientras se agrega acceso real al contenido largo.
+*   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasaron correctamente despues del ajuste.
+
+### [Fecha: 19/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `src/utils/players.ts`, `src/context/PlayerSessionContext.tsx`, `src/components/TavernCrash.tsx`, `src/components/TavernExpedition.tsx`, `src/components/TavernExpeditionArcade.tsx`, `src/components/TavernHorseRace.tsx`, `src/components/TavernPenalty.tsx`, `src/components/TavernPlinko.tsx`, `src/components/TavernRoulette.tsx`, `src/components/TavernSlots.tsx`, `src/components/TavernTowerDefense.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Blindaje del oro en minijuegos web para evitar premios perdidos por sobrescritura de saldo absoluto.
 *   **Cambios Clave:**

@@ -29,6 +29,15 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 
+### [Fecha: 19/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `AGENTS.md`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Simplificacion del protocolo operativo para eliminar loops de bootstrap en agentes externos.
+*   **Cambios Clave:**
+    *   **[Protocolo - AGENTS]:** Se elimino el bootstrap obligatorio como ritual fijo del repositorio.
+    *   **[Continuidad]:** `AGENTS.md` ahora deja una regla mas simple: el agente puede leer changelog o memoria cuando haga falta, pero debe hacerlo en silencio y continuar desde el estado actual.
+    *   **[Anti-loop]:** Se corto explicitamente la practica de responder con "Contexto cargado..." como arranque repetitivo entre mensajes o subtareas.
+*   **Notas/Advertencias:** No se ejecutaron `npx tsc --noEmit` ni `npm run build` porque el cambio fue exclusivamente documental y de protocolo operativo.
+
 ### [Fecha: 17/06/2026] - [Autor: Claude (Opus 4.8)] - Proyecto hermano: kingdoom-fichas
 *   **Archivos Modificados:** Repo aparte `XxxRaiconxxX/kingdoom-fichas` (no es este repo). Aquí solo se deja constancia.
 *   **Resumen de Tareas:** Lanzada la **v2.0** de la app **kingdoom-fichas** (asistente de fichas, APK Android). Pasada de calidad visual premium + cierre de funciones; APK de distribución generado.

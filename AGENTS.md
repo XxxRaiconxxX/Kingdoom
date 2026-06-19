@@ -177,47 +177,24 @@ CSS / CSS vanilla, comunicándose directamente con la base de datos Supabase.
 - Verificar siempre que los estados de carga ("loading") y de error estén
   controlados en cada llamada a Supabase.
 
-## 6. Protocolo de Inicio de Sesión (Session Bootstrap)
+## 6. Regla de Contexto y Continuidad
 
-Al comenzar cualquier sesión de trabajo, el agente DEBE ejecutar los siguientes
-pasos UNA SOLA VEZ, en orden, sin que el usuario se lo pida:
+No existe bootstrap obligatorio en este repositorio.
 
-1. Leer `AI_CHANGELOG.md` desde el repositorio local.
-2. Leer el último bloque de "Relevo" o "Handoff" del changelog.
-3. Cargar el contexto persistente de memoria:
-   - Si el agente tiene acceso al MCP de memoria, consultarlo.
-   - Si NO tiene MCP disponible, leer directamente
-     `ai-memory/kingdoom-memory.jsonl` del repo. La falta de MCP no exime
-     de cargar contexto: se lee el archivo a mano.
-4. Informar al usuario con un resumen de una sola línea:
-   "Contexto cargado — último relevo: [fecha]. Listo para trabajar."
+El agente puede consultar `AI_CHANGELOG.md`, relevo reciente o memoria cuando
+eso ayude a ejecutar mejor la tarea, pero:
 
-### Cuándo ocurre el bootstrap (CRÍTICO)
+- no debe anunciar "Contexto cargado" como ritual fijo;
+- no debe reiniciar una tarea por volver a leer contexto;
+- no debe convertir la carga de contexto en una respuesta automática;
+- no debe usar lectura de contexto como sustituto de trabajo real.
 
-El bootstrap es lo PRIMERO de la sesión. Ocurre ANTES de la primera tarea,
-una sola vez, y nunca más.
+Regla práctica:
 
-⛔ PROHIBIDO ejecutar el bootstrap a mitad de una tarea en curso.
-⛔ PROHIBIDO ejecutar el bootstrap DESPUÉS de hacer un cambio, como si fuera
-   el cierre de la tarea. El bootstrap NO es un reporte ni un cierre.
-⛔ PROHIBIDO terminar una tarea con "Contexto cargado... Listo para trabajar."
-   Esa frase pertenece SOLO al arranque de la sesión, jamás al final de un
-   trabajo. Una tarea se cierra con el reporte de la Sección 8, no con el
-   mensaje de bootstrap.
-
-ORDEN CORRECTO de una sesión:
-  1. Bootstrap (estos 4 pasos) → "Listo para trabajar."
-  2. El usuario asigna una tarea.
-  3. El agente ejecuta la tarea completa (Secciones 9, 10, 11).
-  4. El agente cierra con el reporte de la Sección 8.
-  5. Tareas siguientes repiten pasos 2 a 4. El bootstrap NO se repite.
-
-Si el agente ya hizo el bootstrap en esta sesión y se encuentra explorando el
-changelog o la memoria de nuevo, es señal de que está fuera de foco: debe
-detenerse, volver a la tarea asignada y cerrarla.
-
-⛔ No preguntar al usuario si debe hacer el bootstrap. Es obligatorio.
-⛔ No iniciar ninguna tarea hasta completar estos pasos.
+- si la tarea ya está en curso, el agente continúa desde el estado actual;
+- si necesita contexto, lo carga en silencio y sigue trabajando;
+- el usuario solo debe ver ejecución, validación y reporte, no un arranque
+  repetitivo.
 
 ## 7. Protocolo de Verificación de Subidas y Cierre de Tarea
 

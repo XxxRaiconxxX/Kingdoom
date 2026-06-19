@@ -390,7 +390,7 @@ function getSheetSummary(sheet: CharacterSheet | null) {
 }
 
 export function TavernExpeditionArcade() {
-  const { player, isHydrating, setPlayerGold, refreshPlayer } = usePlayerSession();
+  const { player, isHydrating, addPlayerGold } = usePlayerSession();
   const playerId = player?.id ?? null;
   const [selectedEncounterId, setSelectedEncounterId] = useState(
     ARCADE_ENCOUNTERS[0]?.id ?? ""
@@ -533,7 +533,7 @@ export function TavernExpeditionArcade() {
     }
 
     setIsUpdating(true);
-    const updatedPlayer = await setPlayerGold(player.gold - selectedEncounter.entryFee);
+    const updatedPlayer = await addPlayerGold(-selectedEncounter.entryFee);
     setIsUpdating(false);
 
     if (!updatedPlayer) {
@@ -811,9 +811,7 @@ export function TavernExpeditionArcade() {
 
     if (result === "victory" && reward > 0) {
       setIsUpdating(true);
-      const refreshedPlayer = await refreshPlayer();
-      const goldBase = refreshedPlayer?.gold ?? player.gold;
-      await setPlayerGold(goldBase + reward);
+      await addPlayerGold(reward);
 
       const expResult = grantPveExperience(progress, expReward);
       let nextProgress = expResult.progress;

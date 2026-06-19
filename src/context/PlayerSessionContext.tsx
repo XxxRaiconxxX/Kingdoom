@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 import type { PlayerAccount } from "../types";
 import {
   fetchPlayerByUsername,
+  incrementPlayerGold,
   isPlayerLinkedToAuthUser,
   linkPlayerToAuthUser,
   updatePlayerGold,
@@ -51,6 +52,7 @@ type PlayerSessionContextValue = {
     message: string;
   }>;
   setPlayerGold: (nextGold: number) => Promise<PlayerAccount | null>;
+  addPlayerGold: (delta: number) => Promise<PlayerAccount | null>;
   notifyInventoryChanged: () => void;
   setProfileError: (message: string) => void;
 };
@@ -254,6 +256,28 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     [player]
   );
 
+  const addPlayerGold = useCallback(
+    async (delta: number) => {
+      if (!player) {
+        return null;
+      }
+
+      const appliedGold = await incrementPlayerGold(player.id, delta);
+
+      if (appliedGold === null) {
+        setProfileError(
+          "No se pudo actualizar el oro del jugador. Intenta refrescar el perfil."
+        );
+        return null;
+      }
+
+      const nextPlayer = { ...player, gold: appliedGold };
+      setPlayer(nextPlayer);
+      return nextPlayer;
+    },
+    [player]
+  );
+
   useEffect(() => {
     let isMounted = true;
 
@@ -447,6 +471,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       refreshPlayer,
       linkCurrentPlayerToSecureSession,
       setPlayerGold,
+      addPlayerGold,
       notifyInventoryChanged,
       setProfileError,
     }),
@@ -466,6 +491,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       linkCurrentPlayerToSecureSession,
       secureAuthUserId,
       secureSessionError,
+      addPlayerGold,
       setPlayerGold,
     ]
   );

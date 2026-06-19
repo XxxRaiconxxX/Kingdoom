@@ -567,7 +567,7 @@ export function TavernTowerDefense() {
   const selectedTowerRef = useRef<TowerBlueprint>(TOWERS[0]);
   const pathCellsRef = useRef(buildPathCells(MAPS[0].path));
   const victoryTokenRef = useRef(0);
-  const { player, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, addPlayerGold } = usePlayerSession();
   const [difficultyId, setDifficultyId] = useState<DifficultyId>("frontier");
   const [mapId, setMapId] = useState<MapId>("northGate");
   const [selectedTowerId, setSelectedTowerId] = useState<TowerId>("sentinel");
@@ -1050,9 +1050,7 @@ export function TavernTowerDefense() {
         return;
       }
 
-      const freshPlayer = await refreshPlayer();
-      const basis = freshPlayer ?? player;
-      const updated = await setPlayerGold(basis.gold + difficulty.reward);
+      const updated = await addPlayerGold(difficulty.reward);
 
       if (!updated) {
         setNotice("No se pudo acreditar el oro. Refresca tu perfil e intenta otra victoria.");
@@ -1064,7 +1062,7 @@ export function TavernTowerDefense() {
     }
 
     void awardVictoryGold();
-  }, [difficulty, player, refreshPlayer, setPlayerGold, victoryToken]);
+  }, [addPlayerGold, difficulty, player, victoryToken]);
 
   return (
     <div className="overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-[#03170c] shadow-2xl shadow-emerald-950/30">

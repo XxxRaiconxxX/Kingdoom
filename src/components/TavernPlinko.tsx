@@ -245,7 +245,7 @@ function polygon(ctx: CanvasRenderingContext2D, x: number, y: number, radius: nu
 }
 
 export function TavernPlinko() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const trailsRef = useRef<Record<number, Array<{ x: number; y: number; alpha: number }>>>({});
@@ -334,9 +334,7 @@ export function TavernPlinko() {
     const rawNet = totalRawPrize - finalStake;
     const cappedNet = rawNet > 0 ? Math.min(rawNet, remainingDailyNet) : rawNet;
     const finalPrize = rawNet > 0 ? finalStake + cappedNet : totalRawPrize;
-    const finalGold = currentGold - finalStake + finalPrize;
-
-    const updated = await setPlayerGold(finalGold);
+    const updated = await addPlayerGold(-finalStake + finalPrize);
     if (!updated) {
       setUpdating(false);
       setMessage("No se pudo procesar la apuesta. Intenta refrescar tu perfil.");

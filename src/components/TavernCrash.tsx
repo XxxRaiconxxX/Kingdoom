@@ -20,7 +20,7 @@ interface Point {
 }
 
 export function TavernCrash() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, addPlayerGold } = usePlayerSession();
   
   const [status, setStatus] = useState<GameStatus>("betting");
   const [bet, setBet] = useState(0);
@@ -46,7 +46,7 @@ export function TavernCrash() {
   const playerRef = useRef(player);
   const updatingRef = useRef(updating);
   const multiplierRef = useRef(multiplier);
-  const setPlayerGoldRef = useRef(setPlayerGold);
+  const addPlayerGoldRef = useRef(addPlayerGold);
 
   // Mantener refs sincronizados
   useEffect(() => { statusRef.current = status; }, [status]);
@@ -54,7 +54,7 @@ export function TavernCrash() {
   useEffect(() => { betRef.current = bet; }, [bet]);
   useEffect(() => { playerRef.current = player; }, [player]);
   useEffect(() => { updatingRef.current = updating; }, [updating]);
-  useEffect(() => { setPlayerGoldRef.current = setPlayerGold; }, [setPlayerGold]);
+  useEffect(() => { addPlayerGoldRef.current = addPlayerGold; }, [addPlayerGold]);
 
   const redrawCanvas = useCallback((nextMultiplier: number, elapsedSeconds: number) => {
     const canvas = canvasRef.current;
@@ -192,9 +192,7 @@ export function TavernCrash() {
     const winAmount = Math.floor(betRef.current * m);
     
     setUpdating(true);
-    const freshPlayer = await refreshPlayer();
-    const goldBase = freshPlayer?.gold ?? playerRef.current.gold;
-    const success = await setPlayerGoldRef.current(goldBase + winAmount);
+    const success = await addPlayerGoldRef.current(winAmount);
     
     if (success) {
       setLastWin(winAmount);
@@ -202,7 +200,7 @@ export function TavernCrash() {
       // The updateMultiplier loop continues because statusRef.current is not "crashed"
     }
     setUpdating(false);
-  }, [refreshPlayer]);
+  }, []);
 
   const updateMultiplier = useCallback((time: number) => {
     if (!startTimeRef.current) {
@@ -257,7 +255,7 @@ export function TavernCrash() {
     if (!player || bet <= 0 || bet > player.gold || updating) return;
 
     setUpdating(true);
-    const success = await setPlayerGold(player.gold - bet);
+    const success = await addPlayerGold(-bet);
     if (!success) {
       setUpdating(false);
       return;

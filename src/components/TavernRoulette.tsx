@@ -53,7 +53,7 @@ function buildWheelGradient() {
 }
 
 export function TavernRoulette() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
   const [phase, setPhase] = useState<RoulettePhase>("betting");
   const [selectedChip, setSelectedChip] = useState<number>(ROULETTE_CHIPS[2]);
   const [bets, setBets] = useState<RouletteBets>({});
@@ -151,8 +151,7 @@ export function TavernRoulette() {
     setUpdating(true);
     const snapshot = { ...bets };
     const betCost = sumBets(snapshot);
-    const balanceAfterBet = player.gold - betCost;
-    const deducted = await setPlayerGold(balanceAfterBet);
+    const deducted = await addPlayerGold(-betCost);
 
     if (!deducted) {
       setUpdating(false);
@@ -173,8 +172,7 @@ export function TavernRoulette() {
 
     window.setTimeout(async () => {
       if (result.totalPayout > 0) {
-        const freshPlayer = await refreshPlayer();
-        await setPlayerGold((freshPlayer?.gold ?? balanceAfterBet) + result.totalPayout);
+        await addPlayerGold(result.totalPayout);
       }
 
       setRoundResult(result);

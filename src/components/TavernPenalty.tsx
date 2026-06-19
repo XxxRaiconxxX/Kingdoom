@@ -396,7 +396,7 @@ export function TavernPenalty() {
   const keeperImageRef = useRef<HTMLImageElement | null>(null);
   const frameRef = useRef(0);
   const timeoutRefs = useRef<number[]>([]);
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
   const [phase, setPhase] = useState<Phase>("betting");
   const [bet, setBet] = useState(100);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -556,10 +556,7 @@ export function TavernPenalty() {
       const rawNetWin = result === "goal" ? stake * (currentMultiplier - 1) : 0;
       const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
       const prize = result === "goal" ? stake + cappedNetWin : 0;
-      const freshPlayer = await refreshPlayer();
-      const goldBase = freshPlayer?.gold ?? player.gold;
-      const nextGold = goldBase - stake + prize;
-      const updated = await setPlayerGold(nextGold);
+      const updated = await addPlayerGold(-stake + prize);
 
       if (!updated) {
         setMessage("No se pudo actualizar el oro. Refresca tu perfil.");
@@ -610,9 +607,7 @@ export function TavernPenalty() {
     const rawNetWin = stake * (currentMultiplier - 1);
     const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
     const prize = stake + cappedNetWin;
-    const freshPlayer = await refreshPlayer();
-    const goldBase = freshPlayer?.gold ?? player.gold;
-    const updated = await setPlayerGold(goldBase - stake + prize);
+    const updated = await addPlayerGold(-stake + prize);
 
     if (!updated) {
       setMessage("No se pudo cobrar. Refresca tu perfil.");

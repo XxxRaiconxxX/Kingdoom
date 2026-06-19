@@ -193,7 +193,7 @@ function buildVisibleStrip(center: SymbolId): [SymbolId, SymbolId, SymbolId] {
 }
 
 export function TavernSlots() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
   const intervalRefs = useRef<number[]>([]);
   const timeoutRefs = useRef<number[]>([]);
   const dateKey = useMemo(() => buildScratchDateKey(), []);
@@ -270,10 +270,7 @@ export function TavernSlots() {
     const rawNetWin = Math.max(0, rawPayout - lockedBet);
     const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
     const finalPayout = outcome.multiplier > 0 ? lockedBet + cappedNetWin : 0;
-    const freshPlayer = await refreshPlayer();
-    const goldBase = freshPlayer?.gold ?? player.gold;
-    const nextGold = goldBase - lockedBet + finalPayout;
-    const updated = await setPlayerGold(nextGold);
+    const updated = await addPlayerGold(-lockedBet + finalPayout);
 
     if (!updated) {
       setMessage("No se pudo actualizar el oro. Refresca tu perfil.");

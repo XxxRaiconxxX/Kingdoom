@@ -67,7 +67,7 @@ function toneClasses(tone: BattleLogEntry["tone"]) {
 }
 
 export function TavernExpedition() {
-  const { player, isHydrating, setPlayerGold, refreshPlayer } = usePlayerSession();
+  const { player, isHydrating, addPlayerGold } = usePlayerSession();
   const [selectedEncounterId, setSelectedEncounterId] = useState<string>(
     NARRATIVE_ENCOUNTERS[0]?.id ?? ""
   );
@@ -92,7 +92,7 @@ export function TavernExpedition() {
     }
 
     setIsUpdating(true);
-    const updated = await setPlayerGold(player.gold - selectedEncounter.entryFee);
+    const updated = await addPlayerGold(-selectedEncounter.entryFee);
     setIsUpdating(false);
 
     if (!updated) {
@@ -229,9 +229,7 @@ export function TavernExpedition() {
 
     if (payout > 0) {
       setIsUpdating(true);
-      const freshPlayer = await refreshPlayer();
-      const goldBase = freshPlayer?.gold ?? player.gold;
-      await setPlayerGold(goldBase + payout);
+      await addPlayerGold(payout);
       setIsUpdating(false);
     }
 

@@ -254,7 +254,7 @@ function drawNumberBadge(ctx: CanvasRenderingContext2D, x: number, y: number, nu
 }
 
 export function TavernHorseRace() {
-  const { player, isAdmin, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isAdmin, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const raceRef = useRef<HorseRaceResult | null>(null);
@@ -658,9 +658,7 @@ export function TavernHorseRace() {
       const cappedNet = rawNet > 0 ? Math.min(rawNet, remainingDailyNet) : rawNet;
       const finalPrize = rawNet > 0 ? stake + cappedNet : 0;
 
-      const freshPlayer = await refreshPlayer();
-      const goldBase = freshPlayer?.gold ?? Math.max(0, player.gold - stake);
-      const updated = finalPrize > 0 ? await setPlayerGold(goldBase + finalPrize) : freshPlayer;
+      const updated = finalPrize > 0 ? await addPlayerGold(finalPrize) : player;
 
       if (cappedNet > 0) {
         setDailyNetWins(addPlayerDailyHorseRaceNetWins(player.id, dateKey, cappedNet));
@@ -686,7 +684,7 @@ export function TavernHorseRace() {
 
       setMessage(`${winner.name} cruzo primero. Pierdes ${formatGold(stake)} oro.`);
     },
-    [dateKey, player, refreshPlayer, remainingDailyNet, setPlayerGold]
+    [addPlayerGold, dateKey, player, remainingDailyNet]
   );
 
   async function startRace() {
@@ -704,7 +702,7 @@ export function TavernHorseRace() {
       return;
     }
 
-    const debited = await setPlayerGold(currentGold - stake);
+    const debited = await addPlayerGold(-stake);
     if (!debited) {
       setUpdating(false);
       setMessage("No se pudo descontar la apuesta. Refresca tu perfil.");

@@ -272,6 +272,23 @@ export async function updatePlayerGold(
   return !error;
 }
 
+export async function incrementPlayerGold(
+  playerId: string,
+  delta: number
+): Promise<number | null> {
+  const { data, error } = await supabase.rpc("increment_gold", {
+    p_player_id: playerId,
+    p_amount: Math.trunc(delta),
+  });
+
+  if (error || !Array.isArray(data) || !data[0]?.success) {
+    return null;
+  }
+
+  const nextGold = Number(data[0].new_gold);
+  return Number.isFinite(nextGold) ? nextGold : null;
+}
+
 export async function touchPlayerActivity(playerId: string): Promise<boolean> {
   const { error } = await supabase
     .from("players")

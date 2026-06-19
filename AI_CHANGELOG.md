@@ -3685,3 +3685,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Participaciones Acotadas:** La lectura de `market_auction_participants` del jugador ahora se limita a las subastas efectivamente devueltas por la consulta principal.
     *   **Biblioteca IA Ligera:** El manager admin de conocimiento ya no trae `content` completo para toda la lista; ahora consume resúmenes livianos y solo carga el documento completo por `id` cuando se va a editar.
 *   **Notas/Advertencias:** Este cambio reduce payload y sobrelectura desde la SPA, pero no elimina por si solo consumidores externos o lecturas del Archivista que sigan necesitando contenido completo.
+
+---
+### [Fecha: 19/06/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `src/utils/players.ts`, `src/context/PlayerSessionContext.tsx`, `src/components/TavernCrash.tsx`, `src/components/TavernExpedition.tsx`, `src/components/TavernExpeditionArcade.tsx`, `src/components/TavernHorseRace.tsx`, `src/components/TavernPenalty.tsx`, `src/components/TavernPlinko.tsx`, `src/components/TavernRoulette.tsx`, `src/components/TavernSlots.tsx`, `src/components/TavernTowerDefense.tsx`, `AI_CHANGELOG.md`
+*   **Resumen de Tareas:** Blindaje del oro en minijuegos web para evitar premios perdidos por sobrescritura de saldo absoluto.
+*   **Cambios Clave:**
+    *   **Delta Atómico:** Se agregó `incrementPlayerGold(...)` sobre la RPC `increment_gold` y `PlayerSessionContext` expone ahora `addPlayerGold(delta)` para cobrar o descontar oro de forma atómica.
+    *   **Tavern Web:** Crash, Expedition, Expedition Arcade, Horse Race offline, Penalty, Plinko, Roulette, Slots y Tower Defense dejaron de recalcular `gold = saldoBase +/- ...` en cliente y ahora usan delta real sobre Supabase.
+    *   **Corrección del Síntoma Reportado:** El problema más probable era una carrera entre `refreshPlayer()` y `setPlayerGold(nextGold)` en rondas consecutivas o pestañas activas, lo que podía pisar premios ganados con un saldo viejo.
+*   **Notas/Advertencias:** `setPlayerGold(nextGold)` se mantuvo para flujos donde la fuente de verdad ya devuelve el saldo final exacto. Conviene migrar gradualmente cualquier otro flujo económico que siga escribiendo saldos absolutos.

@@ -11,7 +11,7 @@ export function formatAdminPermissionMessage(
     message.includes("not allowed");
 
   if (looksLikePermissionError) {
-    return `${fallback} Vincula este perfil admin con la sesion segura de Supabase para usar esta accion.`;
+    return `${fallback} Vincula tu perfil con una sesión segura de Supabase para usar esta acción (Inicia Sesión).`;
   }
 
   return rawMessage ? `${fallback} ${rawMessage}` : fallback;

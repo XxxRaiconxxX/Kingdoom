@@ -1,4 +1,7 @@
 
+## [2026-06-21] Portal Anime Proveedor por Defecto
+- Se cambió el proveedor inicial por defecto a TioAnime y se deshabilitó temporalmente la opción de AnimeFLV (marcada como En Mantenimiento) debido a fallos en el scraper externo. [Antigravity]
+
 ## [2026-06-21] Limite de Misiones UI
 - Se agregó un límite inicial de 3 misiones visibles en App.tsx con un botón de ocultar/mostrar para liberar espacio vertical en el tablero operativo. [Antigravity]
 # AI Collaboration Log & Project Context
@@ -3716,4 +3719,5 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Tavern Web:** Crash, Expedition, Expedition Arcade, Horse Race offline, Penalty, Plinko, Roulette, Slots y Tower Defense dejaron de recalcular `gold = saldoBase +/- ...` en cliente y ahora usan delta real sobre Supabase.
     *   **CorrecciÃ³n del SÃ­ntoma Reportado:** El problema mÃ¡s probable era una carrera entre `refreshPlayer()` y `setPlayerGold(nextGold)` en rondas consecutivas o pestaÃ±as activas, lo que podÃ­a pisar premios ganados con un saldo viejo.
 *   **Notas/Advertencias:** `setPlayerGold(nextGold)` se mantuvo para flujos donde la fuente de verdad ya devuelve el saldo final exacto. Conviene migrar gradualmente cualquier otro flujo econÃ³mico que siga escribiendo saldos absolutos.
+
 

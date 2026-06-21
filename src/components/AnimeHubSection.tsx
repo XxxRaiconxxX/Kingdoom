@@ -64,7 +64,7 @@ function preserveGeneratedArtwork(
 
 export function AnimeHubSection() {
   const [query, setQuery] = useState("");
-  const [selectedProvider, setSelectedProvider] = useState<string>("animeflv");
+  const [selectedProvider, setSelectedProvider] = useState<string>("tioanime");
   const [results, setResults] = useState<AnimeSeriesSummary[]>([]);
   const [selectedSeries, setSelectedSeries] = useState<AnimeSeriesDetail | null>(null);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>("");
@@ -97,7 +97,7 @@ export function AnimeHubSection() {
 
     async function loadInitialState() {
       setIsLoading(true);
-      const nextResults = await activeProvider.searchSeries({ query: "", genre: "", provider: "animeflv" });
+      const nextResults = await activeProvider.searchSeries({ query: "", genre: "", provider: "tioanime" });
       const nextSelected = nextResults[0] ? await resolveSeriesDetail(nextResults[0]) : null;
 
       if (cancelled) {
@@ -207,9 +207,9 @@ export function AnimeHubSection() {
                 onChange={(e) => setSelectedProvider(e.target.value)}
                 className="hidden h-11 rounded-2xl border border-stone-800 bg-black/35 px-3 text-xs text-stone-400 outline-none transition focus:border-amber-300/50 md:block"
               >
-                <option value="animeflv">AnimeFLV (Español)</option>
                 <option value="tioanime">TioAnime (Español)</option>
                 <option value="anime-website">GogoAnime (Inglés)</option>
+                <option value="animeflv" disabled>AnimeFLV (Mantenimiento)</option>
               </select>
               <button
                 type="submit"

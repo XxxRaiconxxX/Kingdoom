@@ -44,7 +44,7 @@ const PLACEHOLDER_PALETTES = [
 ] as const;
 
 function hasRemoteAnimeProvider() {
-  return Boolean(ANIME_WEBSITE_BASE_URL || ANIME_PLATFORM_BASE_URL || ANIMEFLV_BASE_URL);
+  return true;
 }
 
 function endpoint(path: string, baseUrl?: string) {

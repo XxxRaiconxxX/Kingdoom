@@ -208,8 +208,8 @@ export function AnimeHubSection() {
                 className="hidden h-11 rounded-2xl border border-stone-800 bg-black/35 px-3 text-xs text-stone-400 outline-none transition focus:border-amber-300/50 md:block"
               >
                 <option value="tioanime">TioAnime (Español)</option>
+                <option value="veranimeonline">VerAnimeOnline (Español)</option>
                 <option value="anime-website">GogoAnime (Inglés)</option>
-                <option value="animeflv" disabled>AnimeFLV (Mantenimiento)</option>
               </select>
               <button
                 type="submit"

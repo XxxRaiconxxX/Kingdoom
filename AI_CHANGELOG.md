@@ -3721,3 +3721,11 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** `setPlayerGold(nextGold)` se mantuvo para flujos donde la fuente de verdad ya devuelve el saldo final exacto. Conviene migrar gradualmente cualquier otro flujo económico que siga escribiendo saldos absolutos.
 
 
+
+### [Fecha: 21/06/2026] - [Autor: Antigravity]
+*   **Archivos Modificados:** src/components/AnimeHubSection.tsx, src/features/animeHub/animeHub.remoteProvider.ts
+*   **Resumen de Tareas:** Habilitacion de VerAnimeOnline como proveedor activo en el frontend.
+*   **Cambios Clave:**
+    *   **UI:** Se reemplazo la opcion deshabilitada de AnimeFLV por VerAnimeOnline (Espanol) en el selector de proveedores.
+    *   **Logica Remota:** Se anadieron los metodos de busqueda y resolucion y se enrutaron al nuevo caso veranimeonline en el remoteProvider para consumir la API previamente actualizada.
+*   **Notas/Advertencias:** La API externa ya soporta la nueva ruta, asegurando que la integracion funcione.

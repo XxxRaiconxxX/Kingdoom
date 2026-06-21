@@ -6,7 +6,7 @@ import type {
   AnimeSeriesSummary,
 } from "./animeHub.types";
 
-type ProviderSource = "anime-website" | "anime-platform" | "animeflv" | "tioanime";
+type ProviderSource = "anime-website" | "anime-platform" | "animeflv" | "tioanime" | "veranimeonline";
 
 type SeriesReference = {
   source: ProviderSource;
@@ -265,6 +265,8 @@ function providerLabel(source: ProviderSource) {
       return "animeflv";
     case "tioanime":
       return "tioanime";
+    case "veranimeonline":
+      return "veranimeonline";
     default:
       return "anime remoto";
   }
@@ -658,6 +660,40 @@ async function fetchTioAnimeLinks(reference: EpisodeReference) {
   return normalizeLinks(data);
 }
 
+async function searchVerAnimeOnline(query: string) {
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  const params = new URLSearchParams({
+    q: query,
+    source: "veranimeonline"
+  });
+  
+  const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, {
+    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
+  });
+  const payload = unwrapPayload(data);
+  return asList<any>(payload?.results ?? payload).map((item) =>
+    normalizeSummary("veranimeonline", item)
+  );
+}
+
+async function fetchVerAnimeOnlineDetail(reference: SeriesReference) {
+  if (!reference.id) return null;
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=veranimeonline`, {
+    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
+  });
+  return normalizeDetail("veranimeonline", unwrapPayload(data), reference);
+}
+
+async function fetchVerAnimeOnlineLinks(reference: EpisodeReference) {
+  if (!reference.id) return null;
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  const data = await fetchJson(`${baseUrl}/api/episode/${encodeURIComponent(reference.id)}?source=veranimeonline`, {
+    "Authorization": `Bearer ${ANIME_HUB_API_KEY}`
+  });
+  return normalizeLinks(data);
+}
+
 async function searchAnimePlatform(query: string, genre?: string) {
   if (!ANIME_PLATFORM_BASE_URL) {
     return [];
@@ -822,6 +858,10 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           collected.push(...(await searchTioAnime(variant)));
         }
 
+        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "veranimeonline")) {
+          collected.push(...(await searchVerAnimeOnline(variant)));
+        }
+
         // Mejora 3: Smart Fallback si el proveedor específico falló
         if (collected.length === 0 && provider && provider !== "all") {
           console.log(`Smart Fallback: No results in ${provider}, trying other sources...`);
@@ -861,6 +901,9 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           break;
         case "tioanime":
           detail = await fetchTioAnimeDetail(reference);
+          break;
+        case "veranimeonline":
+          detail = await fetchVerAnimeOnlineDetail(reference);
           break;
       }
 
@@ -904,6 +947,8 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           return await fetchAnimeFlvLinks(reference);
         case "tioanime":
           return await fetchTioAnimeLinks(reference);
+        case "veranimeonline":
+          return await fetchVerAnimeOnlineLinks(reference);
         default:
           return null;
       }

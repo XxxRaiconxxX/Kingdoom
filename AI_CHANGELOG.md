@@ -1,3 +1,6 @@
+
+## [2026-06-21] Limite de Misiones UI
+- Se agreg� un l�mite inicial de 3 misiones visibles en App.tsx con un bot�n de ocultar/mostrar para liberar espacio vertical en el tablero operativo. [Antigravity]
 # AI Collaboration Log & Project Context
 
 Este archivo sirve como puente de comunicacion y registro de actividad entre los asistentes de IA (**Antigravity** y **Jarvis**) y el desarrollador (**e_grado**).
@@ -3713,3 +3716,4 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Tavern Web:** Crash, Expedition, Expedition Arcade, Horse Race offline, Penalty, Plinko, Roulette, Slots y Tower Defense dejaron de recalcular `gold = saldoBase +/- ...` en cliente y ahora usan delta real sobre Supabase.
     *   **Corrección del Síntoma Reportado:** El problema más probable era una carrera entre `refreshPlayer()` y `setPlayerGold(nextGold)` en rondas consecutivas o pestañas activas, lo que podía pisar premios ganados con un saldo viejo.
 *   **Notas/Advertencias:** `setPlayerGold(nextGold)` se mantuvo para flujos donde la fuente de verdad ya devuelve el saldo final exacto. Conviene migrar gradualmente cualquier otro flujo económico que siga escribiendo saldos absolutos.
+

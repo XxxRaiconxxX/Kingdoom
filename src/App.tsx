@@ -269,6 +269,7 @@ function HomeSection({
   const StatusIcon = KINGDOM_STATUS.icon;
   const [events, setEvents] = useState(ACTIVE_EVENTS);
   const [missions, setMissions] = useState(FALLBACK_MISSIONS);
+  const [showAllMissions, setShowAllMissions] = useState(false);
   const [claimingMissionId, setClaimingMissionId] = useState("");
   const [submittingEvidenceMissionId, setSubmittingEvidenceMissionId] =
     useState("");
@@ -724,7 +725,7 @@ function HomeSection({
           }
         />
         <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {missions.map((mission) => {
+          {(showAllMissions ? missions : missions.slice(0, 3)).map((mission) => {
             const hasPersistedMission = isSupabaseRecordId(mission.id);
             const missionClaim = mission.id
               ? playerMissionClaims[mission.id]
@@ -755,6 +756,16 @@ function HomeSection({
             );
           })}
         </div>
+        {missions.length > 3 && (
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => setShowAllMissions(!showAllMissions)}
+              className="kd-touch rounded-full border border-stone-700 bg-stone-900 px-6 py-2 text-sm font-semibold text-stone-300 transition hover:border-cyan-500/50 hover:bg-stone-800 hover:text-cyan-100"
+            >
+              {showAllMissions ? "Ocultar misiones" : `Ver todas las misiones (${missions.length})`}
+            </button>
+          </div>
+        )}
       </div>
 
       <div

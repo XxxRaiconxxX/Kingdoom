@@ -209,6 +209,8 @@ export function AnimeHubSection() {
               >
                 <option value="tioanime">TioAnime (Español)</option>
                 <option value="veranimeonline">VerAnimeOnline (Español)</option>
+                <option value="animeav1">AnimeAV1 (Español)</option>
+                <option value="jkanime">JKAnime (Español)</option>
                 <option value="anime-website">GogoAnime (Inglés)</option>
               </select>
               <button

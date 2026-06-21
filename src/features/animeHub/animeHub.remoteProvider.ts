@@ -6,7 +6,7 @@ import type {
   AnimeSeriesSummary,
 } from "./animeHub.types";
 
-type ProviderSource = "anime-website" | "anime-platform" | "animeflv" | "tioanime" | "veranimeonline";
+type ProviderSource = "anime-website" | "anime-platform" | "animeflv" | "tioanime" | "veranimeonline" | "animeav1" | "jkanime";
 
 type SeriesReference = {
   source: ProviderSource;
@@ -267,6 +267,10 @@ function providerLabel(source: ProviderSource) {
       return "tioanime";
     case "veranimeonline":
       return "veranimeonline";
+    case "animeav1":
+      return "animeav1";
+    case "jkanime":
+      return "jkanime";
     default:
       return "anime remoto";
   }
@@ -694,6 +698,51 @@ async function fetchVerAnimeOnlineLinks(reference: EpisodeReference) {
   return normalizeLinks(data);
 }
 
+async function searchAnimeAV1(query: string) {
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  const params = new URLSearchParams({ q: query, source: "animeav1" });
+  const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, { "Authorization": `Bearer ${ANIME_HUB_API_KEY}` });
+  const payload = unwrapPayload(data);
+  return asList<any>(payload?.results ?? payload).map((item) => normalizeSummary("animeav1", item));
+}
+
+async function fetchAnimeAV1Detail(reference: SeriesReference) {
+  if (!reference.id) return null;
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=animeav1`, { "Authorization": `Bearer ${ANIME_HUB_API_KEY}` });
+  return normalizeDetail("animeav1", unwrapPayload(data), reference);
+}
+
+async function fetchAnimeAV1Links(reference: EpisodeReference) {
+  if (!reference.id) return null;
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  // En animeav1 el id de episodio trae la estructura para llamar al endpoint
+  const data = await fetchJson(`${baseUrl}/api/episode/${encodeURIComponent(reference.id)}?source=animeav1`, { "Authorization": `Bearer ${ANIME_HUB_API_KEY}` });
+  return normalizeLinks(data);
+}
+
+async function searchJKAnime(query: string) {
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  const params = new URLSearchParams({ q: query, source: "jkanime" });
+  const data = await fetchJson(`${baseUrl}/api/search?${params.toString()}`, { "Authorization": `Bearer ${ANIME_HUB_API_KEY}` });
+  const payload = unwrapPayload(data);
+  return asList<any>(payload?.results ?? payload).map((item) => normalizeSummary("jkanime", item));
+}
+
+async function fetchJKAnimeDetail(reference: SeriesReference) {
+  if (!reference.id) return null;
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  const data = await fetchJson(`${baseUrl}/api/anime/${encodeURIComponent(reference.id)}?source=jkanime`, { "Authorization": `Bearer ${ANIME_HUB_API_KEY}` });
+  return normalizeDetail("jkanime", unwrapPayload(data), reference);
+}
+
+async function fetchJKAnimeLinks(reference: EpisodeReference) {
+  if (!reference.id) return null;
+  const baseUrl = "https://scraping-web-anime-api.vercel.app";
+  const data = await fetchJson(`${baseUrl}/api/episode/${encodeURIComponent(reference.id)}?source=jkanime`, { "Authorization": `Bearer ${ANIME_HUB_API_KEY}` });
+  return normalizeLinks(data);
+}
+
 async function searchAnimePlatform(query: string, genre?: string) {
   if (!ANIME_PLATFORM_BASE_URL) {
     return [];
@@ -862,6 +911,14 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           collected.push(...(await searchVerAnimeOnline(variant)));
         }
 
+        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "animeav1")) {
+          collected.push(...(await searchAnimeAV1(variant)));
+        }
+
+        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "jkanime")) {
+          collected.push(...(await searchJKAnime(variant)));
+        }
+
         // Mejora 3: Smart Fallback si el proveedor específico falló
         if (collected.length === 0 && provider && provider !== "all") {
           console.log(`Smart Fallback: No results in ${provider}, trying other sources...`);
@@ -904,6 +961,12 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           break;
         case "veranimeonline":
           detail = await fetchVerAnimeOnlineDetail(reference);
+          break;
+        case "animeav1":
+          detail = await fetchAnimeAV1Detail(reference);
+          break;
+        case "jkanime":
+          detail = await fetchJKAnimeDetail(reference);
           break;
       }
 
@@ -949,6 +1012,10 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           return await fetchTioAnimeLinks(reference);
         case "veranimeonline":
           return await fetchVerAnimeOnlineLinks(reference);
+        case "animeav1":
+          return await fetchAnimeAV1Links(reference);
+        case "jkanime":
+          return await fetchJKAnimeLinks(reference);
         default:
           return null;
       }

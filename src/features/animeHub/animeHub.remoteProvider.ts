@@ -488,6 +488,9 @@ async function searchAnimeWebsiteCatalog(query: string) {
 
 async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
   const candidates = [reference.id, reference.title].filter(Boolean) as string[];
+  const refTitle = String(reference.title ?? "").toLowerCase().trim();
+  const refId = String(reference.id ?? "").toLowerCase().trim();
+
   for (const query of candidates) {
     const proxyUrl = new URL("/api/anime/proxy", window.location.origin);
     proxyUrl.searchParams.set("provider", "anime-website");
@@ -501,8 +504,6 @@ async function resolveAnimeWebsiteSeed(reference: SeriesReference) {
     const bestMatch =
       results.find((item) => {
         const itemTitle = String(item?.title ?? item?.name ?? "").toLowerCase().trim();
-        const refTitle = String(reference.title ?? "").toLowerCase().trim();
-        const refId = String(reference.id ?? "").toLowerCase().trim();
         return itemTitle === refTitle || String(item?.id ?? "").toLowerCase().trim() === refId;
       }) ?? results[0];
 
@@ -804,13 +805,14 @@ async function fetchAnimePlatformDetail(reference: SeriesReference) {
   }
 
   const candidates = [reference.title, reference.id].filter(Boolean) as string[];
+  const targetTitle = String(reference.title ?? "").toLowerCase().trim();
+
   for (const query of candidates) {
     const results = await searchAnimePlatform(query);
     const match =
       results.find(
         (item) =>
-          item.title.toLowerCase().trim() ===
-          String(reference.title ?? "").toLowerCase().trim()
+          item.title.toLowerCase().trim() === targetTitle
       ) ?? results[0];
 
     if (match) {

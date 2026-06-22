@@ -17,6 +17,22 @@ $$;
 revoke all on function public.is_current_user_admin() from public;
 grant execute on function public.is_current_user_admin() to authenticated;
 
+create table if not exists public.market_items (
+  id text primary key,
+  name text not null,
+  description text not null,
+  ability text,
+  price integer not null check (price >= 0),
+  rarity text not null check (rarity in ('mythic', 'legendary', 'epic', 'rare', 'common')),
+  image_url text not null,
+  image_fit text,
+  image_position text,
+  category text not null,
+  stock_status text not null,
+  featured boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 alter table public.market_items enable row level security;
 alter table public.realm_events enable row level security;
 alter table public.weekly_activity_rankings enable row level security;

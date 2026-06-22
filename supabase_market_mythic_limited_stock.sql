@@ -3,6 +3,22 @@
 
 create extension if not exists pgcrypto;
 
+create table if not exists public.market_items (
+  id text primary key,
+  name text not null,
+  description text not null,
+  ability text,
+  price integer not null check (price >= 0),
+  rarity text not null check (rarity in ('mythic', 'legendary', 'epic', 'rare', 'common')),
+  image_url text not null,
+  image_fit text,
+  image_position text,
+  category text not null,
+  stock_status text not null,
+  featured boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 alter table public.market_items
 add column if not exists stock_limit integer not null default 0 check (stock_limit >= 0),
 add column if not exists stock_sold integer not null default 0 check (stock_sold >= 0);
@@ -183,6 +199,7 @@ begin
     into v_player
     from public.players
     where id = p_player_id
+      and auth_user_id is null
     for update;
   end if;
 
@@ -383,8 +400,12 @@ declare
   v_stock_limit integer;
   v_stock_sold integer;
   v_remaining_stock integer;
+  v_auth_user_id uuid;
+  v_is_linked boolean := false;
 begin
-  if auth.uid() is null and auth.role() <> 'service_role' then
+  v_auth_user_id := auth.uid();
+
+  if v_auth_user_id is null and auth.role() <> 'service_role' then
     return query select false, 'Debes iniciar sesion antes de comprar.', 0, 0, false, v_order_ref;
     return;
   end if;
@@ -394,19 +415,42 @@ begin
   from public.players
   where id = p_player_id
     and (
-      auth_user_id = auth.uid()
+      auth_user_id = v_auth_user_id
       or auth.role() = 'service_role'
       or exists (
         select 1 from public.player_auth_links pal
         where pal.player_id = p_player_id
-          and pal.auth_user_id = auth.uid()
+          and pal.auth_user_id = v_auth_user_id
       )
     )
   for update;
 
-  if not found then
+  if v_player.id is null and auth.role() = 'authenticated' and v_auth_user_id is not null then
+    select *
+    into v_player
+    from public.players
+    where id = p_player_id
+      and auth_user_id is null
+    for update;
+  end if;
+
+  if v_player.id is null then
     return query select false, 'Jugador no encontrado o no autorizado.', 0, 0, false, v_order_ref;
     return;
+  end if;
+
+  if v_auth_user_id is not null and auth.role() <> 'service_role' then
+    select exists(
+      select 1 from public.player_auth_links pal
+      where pal.player_id = v_player.id
+        and pal.auth_user_id = v_auth_user_id
+    ) into v_is_linked;
+
+    if not v_is_linked and v_player.auth_user_id is null then
+      insert into public.player_auth_links (player_id, auth_user_id)
+      values (v_player.id, v_auth_user_id)
+      on conflict do nothing;
+    end if;
   end if;
 
   select *

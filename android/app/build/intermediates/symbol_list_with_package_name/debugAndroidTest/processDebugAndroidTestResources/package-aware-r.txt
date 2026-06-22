@@ -1,3 +1,0 @@
-com.reborn.app.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme

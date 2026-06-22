@@ -39,6 +39,19 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 14/06/2026] - [Autor: Jules]
+**Archivos:**
+- `src/features/businesses/__tests__/businesses.adapter.test.ts` (creado)
+- `package.json` (modificado)
+- `package-lock.json` (ignorado, no se commitea)
+
+**Resumen:**
+🧪 Se añadió vitest y suite de tests para el adaptador de negocios.
+
+**Cambios Clave:**
+1. **Testing Gap**: Se instaló vitest como dependencia de desarrollo.
+2. **Cobertura**: Se crearon tests exhaustivos para `mapBusinessProposalRow`, `mapBusinessRow`, `mapBusinessCollectionLogRow`, `buildBusinessProposalPayload`, `projectBusinessStorage` y `formatBusinessPaybackHours` cubriendo happy paths, fallbacks de null/undefined y casos extremos de parsing.
+3. **Resultado**: 10 tests creados y pasando correctamente con el script `npm run test`.
 
 ### [Fecha: 19/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `AGENTS.md`, `AI_CHANGELOG.md`

@@ -39,6 +39,9 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [Fecha: 15/06/2026] - [Autor: [Jules]]
+- **Performance:** Optimizado el incremento de oro múltiple usando una consulta RPC a Supabase (`add_gold_to_multiple_players`) para resolver el problema de query N+1 en `archivistActions.ts`. Se solucionó una regresión reportada al entregar oro a 0 jugadores.
+
 
 ### [Fecha: 19/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `AGENTS.md`, `AI_CHANGELOG.md`

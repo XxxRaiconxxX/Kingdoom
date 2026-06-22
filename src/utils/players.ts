@@ -260,6 +260,26 @@ export async function isPlayerLinkedToAuthUser(
   }
 }
 
+export async function addGoldToMultiplePlayers(
+  playerIds: string[],
+  amount: number
+): Promise<{ success: boolean; message: string; affected_count: number }> {
+  const { data, error } = await supabase.rpc("add_gold_to_multiple_players", {
+    p_player_ids: playerIds,
+    p_amount: amount,
+  });
+
+  if (error || !data) {
+    return { success: false, message: error?.message ?? "Error en la transaccion", affected_count: 0 };
+  }
+
+  return {
+    success: data[0].success,
+    message: data[0].message,
+    affected_count: data[0].affected_count,
+  };
+}
+
 export async function updatePlayerGold(
   playerId: string,
   nextGold: number

@@ -911,11 +911,11 @@ export const remoteAnimeHubProvider: AnimeHubProvider = {
           collected.push(...(await searchVerAnimeOnline(variant)));
         }
 
-        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "animeav1")) {
+        if (collected.length < 12 && (!provider || provider === "all" || provider === "animeav1")) {
           collected.push(...(await searchAnimeAV1(variant)));
         }
 
-        if (collected.length < 12 && ANIMEFLV_BASE_URL && (!provider || provider === "all" || provider === "jkanime")) {
+        if (collected.length < 12 && (!provider || provider === "all" || provider === "jkanime")) {
           collected.push(...(await searchJKAnime(variant)));
         }
 

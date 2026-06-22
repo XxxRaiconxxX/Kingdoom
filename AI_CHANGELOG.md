@@ -1,9 +1,14 @@
 
+## [2026-06-22] Higiene del Repositorio y Escrow del Bot de WhatsApp
+- Se removieron los artefactos de compilación de Android del tracking de git (git rm --cached) y se añadieron al .gitignore para mantener la higiene del repositorio.
+- Se implementó un sistema de Escrow (tabla `bot_active_bets` y funciones RPC `place_bet` / `resolve_bet`) en Supabase para evitar pérdidas de oro en minijuegos (`!trampa`, `!dados`, `!21`) si el contenedor de Hugging Face se reinicia a mitad de la jugada.
+- Se añadió un sistema de recuperación en el evento `ready` del bot que busca apuestas huérfanas de más de 10 minutos de antigüedad y devuelve automáticamente el oro a los jugadores. [Antigravity]
+
 ## [2026-06-21] Portal Anime Proveedor por Defecto
-- Se cambi� el proveedor inicial por defecto a TioAnime y se deshabilit� temporalmente la opci�n de AnimeFLV (marcada como En Mantenimiento) debido a fallos en el scraper externo. [Antigravity]
+- Se cambió el proveedor inicial por defecto a TioAnime y se deshabilitó temporalmente la opción de AnimeFLV (marcada como En Mantenimiento) debido a fallos en el scraper externo. [Antigravity]
 
 ## [2026-06-21] Limite de Misiones UI
-- Se agreg� un l�mite inicial de 3 misiones visibles en App.tsx con un bot�n de ocultar/mostrar para liberar espacio vertical en el tablero operativo. [Antigravity]
+- Se agregó un límite inicial de 3 misiones visibles en App.tsx con un botón de ocultar/mostrar para liberar espacio vertical en el tablero operativo. [Antigravity]
 # AI Collaboration Log & Project Context
 
 Este archivo sirve como puente de comunicacion y registro de actividad entre los asistentes de IA (**Antigravity** y **Jarvis**) y el desarrollador (**e_grado**).
@@ -14,7 +19,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ## Instrucciones para Inteligencias Artificiales (Antigravity y Jarvis)
 
 1. **Leer antes de actuar:** Cada vez que inicies sesion o recibas una tarea compleja, revisa rapidamente la seccion `Historial de Cambios` para saber que se modifico recientemente.
-2. **Registrar despues de actuar:** **SIEMPRE** que se finalice CUALQUIER cambio (incluso mﾃδｭnimo), el asistente responsable debe aﾃδｱadir una nueva entrada al `Historial de Cambios` y a la memoria MCP (`kingdoom-memory.jsonl`), y asegurarse de subir ambos a Git (`git add`, `git commit`, `git push`).
+2. **Registrar despues de actuar:** **SIEMPRE** que se finalice CUALQUIER cambio (incluso mï¾ƒÎ´ï½­nimo), el asistente responsable debe aï¾ƒÎ´ï½±adir una nueva entrada al `Historial de Cambios` y a la memoria MCP (`kingdoom-memory.jsonl`), y asegurarse de subir ambos a Git (`git add`, `git commit`, `git push`).
 3. **Formato estricto:** Usa el formato de plantilla de la seccion de historial. Las entradas mas recientes van **arriba**.
 4. **Claridad ante todo:** Deja notas claras. Si un componente quedo a medias o tiene un error conocido, marcalo bajo "Notas/Advertencias".
 
@@ -45,22 +50,22 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Notas/Advertencias:** No se ejecutaron `npx tsc --noEmit` ni `npm run build` porque el cambio fue exclusivamente documental y de protocolo operativo.
 
 ### [Fecha: 17/06/2026] - [Autor: Claude (Opus 4.8)] - Proyecto hermano: kingdoom-fichas
-*   **Archivos Modificados:** Repo aparte `XxxRaiconxxX/kingdoom-fichas` (no es este repo). Aquí solo se deja constancia.
-*   **Resumen de Tareas:** Lanzada la **v2.0** de la app **kingdoom-fichas** (asistente de fichas, APK Android). Pasada de calidad visual premium + cierre de funciones; APK de distribución generado.
+*   **Archivos Modificados:** Repo aparte `XxxRaiconxxX/kingdoom-fichas` (no es este repo). AquÃ­ solo se deja constancia.
+*   **Resumen de Tareas:** Lanzada la **v2.0** de la app **kingdoom-fichas** (asistente de fichas, APK Android). Pasada de calidad visual premium + cierre de funciones; APK de distribuciÃ³n generado.
 *   **Cambios Clave:**
     *   **[v2.0 push + tag]:** commit y tag `v2.0.0` en `github.com/XxxRaiconxxX/kingdoom-fichas` (rama main). `versionCode 2` / `versionName 2.0`.
-    *   **[UI premium]:** fuentes Cinzel + Inter empaquetadas, rediseño de identidad Kingdoom, medidores de estadísticas/poderes, estados de vacío/error/listo, mobile-first con safe-areas Android, favicon heráldico.
-    *   **[Funciones]:** Análisis con IA usando el endpoint `analyze-ficha` de ESTE repo (Vercel) + sync del Grimorio desde la tabla `grimoire_magic_styles` de Supabase.
+    *   **[UI premium]:** fuentes Cinzel + Inter empaquetadas, rediseÃ±o de identidad Kingdoom, medidores de estadÃ­sticas/poderes, estados de vacÃ­o/error/listo, mobile-first con safe-areas Android, favicon herÃ¡ldico.
+    *   **[Funciones]:** AnÃ¡lisis con IA usando el endpoint `analyze-ficha` de ESTE repo (Vercel) + sync del Grimorio desde la tabla `grimoire_magic_styles` de Supabase.
     *   **[APK]:** `dist-apk/Kingdoom-Fichas-v2.0.apk` (~4.5 MB, debug/sideload). El binario NO se versiona (artefacto); ver `kingdoom-fichas/dist-apk/LEEME-v2.md` y `kingdoom-fichas/CHANGELOG.md`.
-*   **Notas/Advertencias:** Build de APK por CLI con `npm run apk:debug` (requiere JDK 17/21 — el JBR de Android Studio sirve — y Android SDK). Dependencia con este repo: el endpoint IA `analyze-ficha` ya está desplegado y con CORS abierto para los orígenes de la app.
+*   **Notas/Advertencias:** Build de APK por CLI con `npm run apk:debug` (requiere JDK 17/21 â€” el JBR de Android Studio sirve â€” y Android SDK). Dependencia con este repo: el endpoint IA `analyze-ficha` ya estÃ¡ desplegado y con CORS abierto para los orÃ­genes de la app.
 
 ### [Fecha: 17/06/2026] - [Autor: Claude (Opus 4.8)]
 *   **Archivos Modificados:** `api/admin/analyze-ficha.ts` (NUEVO). Proyecto hermano nuevo: `../kingdoom-fichas/` (APK Capacitor asistente de fichas de rol).
-*   **Resumen de Tareas:** Arranque del proyecto **kingdoom-fichas** (app/APK que ayuda a los nuevos a crear/validar su ficha antes de enviarla al grupo de WhatsApp) + nuevo endpoint de IA en este repo para el análisis "asistente".
+*   **Resumen de Tareas:** Arranque del proyecto **kingdoom-fichas** (app/APK que ayuda a los nuevos a crear/validar su ficha antes de enviarla al grupo de WhatsApp) + nuevo endpoint de IA en este repo para el anÃ¡lisis "asistente".
 *   **Cambios Clave:**
-    *   **[Nuevo endpoint]:** `api/admin/analyze-ficha.ts` — proxy Gemini (mismo patrón que `generate-magic.ts`: `_aiOrchestrator` + `setCorsHeaders`). Recibe `{ficha, avisosLocales}` y devuelve JSON `{veredicto, resumen, sugerencias[]}`. Juzga lo que las reglas locales NO pueden: coherencia edad↔historia, raza/reino↔lore, calidad de personalidad y debilidades reales. Temperatura 0.5.
-    *   **[App kingdoom-fichas]:** Vite+React+TS+Capacitor (Android). Validador local de reglas duras (stats=12, niveles de poderes=5, raza/reino del catálogo, arma/habilidades sin magia, mínimos de texto escalados por edad). Generador de ficha aleatoria válida. Copiar/Compartir a WhatsApp con el formato exacto de la plantilla. Sync del Grimorio desde la tabla `grimoire_magic_styles` (fusionado sobre bundle de 31 magias iniciales extraídas de `extracted_powers/Poderes/`).
-*   **Notas/Advertencias:** Endpoint `analyze-ficha` **DESPLEGADO y verificado** (POST real → 200 con JSON `{veredicto, resumen, sugerencias}`; flujo end-to-end probado desde la app en `localhost:4320`, CORS OK). `MISSION_AI_ALLOWED_ORIGINS` ampliada en Vercel con `http://localhost:4320`, `https://localhost`, `capacitor://localhost` (necesario para el APK). Detalle completo del proyecto hermano en `../kingdoom-fichas/HANDOFF.md`. `npm run build` OK en ambos lados. Pendiente del lado fichas: generar el `.apk` (Android Studio).
+    *   **[Nuevo endpoint]:** `api/admin/analyze-ficha.ts` â€” proxy Gemini (mismo patrÃ³n que `generate-magic.ts`: `_aiOrchestrator` + `setCorsHeaders`). Recibe `{ficha, avisosLocales}` y devuelve JSON `{veredicto, resumen, sugerencias[]}`. Juzga lo que las reglas locales NO pueden: coherencia edadâ†”historia, raza/reinoâ†”lore, calidad de personalidad y debilidades reales. Temperatura 0.5.
+    *   **[App kingdoom-fichas]:** Vite+React+TS+Capacitor (Android). Validador local de reglas duras (stats=12, niveles de poderes=5, raza/reino del catÃ¡logo, arma/habilidades sin magia, mÃ­nimos de texto escalados por edad). Generador de ficha aleatoria vÃ¡lida. Copiar/Compartir a WhatsApp con el formato exacto de la plantilla. Sync del Grimorio desde la tabla `grimoire_magic_styles` (fusionado sobre bundle de 31 magias iniciales extraÃ­das de `extracted_powers/Poderes/`).
+*   **Notas/Advertencias:** Endpoint `analyze-ficha` **DESPLEGADO y verificado** (POST real â†’ 200 con JSON `{veredicto, resumen, sugerencias}`; flujo end-to-end probado desde la app en `localhost:4320`, CORS OK). `MISSION_AI_ALLOWED_ORIGINS` ampliada en Vercel con `http://localhost:4320`, `https://localhost`, `capacitor://localhost` (necesario para el APK). Detalle completo del proyecto hermano en `../kingdoom-fichas/HANDOFF.md`. `npm run build` OK en ambos lados. Pendiente del lado fichas: generar el `.apk` (Android Studio).
 
 ### [Fecha: 15/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `TavernCards.tsx`, `TavernRoulette.tsx`, `TavernScratch.tsx`, `TavernPlinko.tsx`, `TavernHorseRace.tsx`, `TavernPenalty.tsx`, `TavernExpedition.tsx`, `TavernExpeditionArcade.tsx` (todos en `src/components/`)
@@ -68,7 +73,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Cambios Clave:**
     *   **[Cifras tabulares]:** `font-variant-numeric: tabular-nums` + `toLocaleString("es-PY")` en todos los displays de oro/saldo/premio/apuesta (chips StatChip/RaceStat/StatusChip/MiniStat y headers). Las cifras dejan de "bailar" al cambiar y muestran separador de miles.
     *   **[Headers de saldo]:** Cards y Scratch adoptaron el patron premium (icono `Coins`, hairline ambar superior, borde `amber-500/15`) ya usado en Cofres.
-    *   **[Feedback tactil]:** `kd-touch` agregado a botones planos que no lo tenian — refrescar (Cards, Scratch, Ruleta) y CTA principal (Plinko "Lanzar esferas", Carreras "Apostar/Iniciar"). Se evito `motion.button` para no chocar con framer-motion.
+    *   **[Feedback tactil]:** `kd-touch` agregado a botones planos que no lo tenian â€” refrescar (Cards, Scratch, Ruleta) y CTA principal (Plinko "Lanzar esferas", Carreras "Apostar/Iniciar"). Se evito `motion.button` para no chocar con framer-motion.
     *   **[Sin tocar]:** `TavernCrash` (WIP de Codex, ya en `677e04b`) y `TavernTowerDefense`/`TavernSlots`/`TavernPenalty` que ya tenian `kd-touch` completo y oro formateado.
 *   **Notas/Advertencias:** `tsc --noEmit` 0 errores y `npm run build` OK en las 3 tandas. Verificacion: DOM-inspection en `vite preview` (el screenshot se cuelga por la red de Supabase en preview, sin relacion con el cambio). Pendiente para cuando haya sesion logueada: mejoras profundas de los canvas (tableros de Plinko/Carreras/Defensa/Penales) que requieren ojos en vivo.
 
@@ -82,12 +87,12 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 15/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/PurchaseModal.tsx`, `src/sections/MarketSection.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/features/market/market.rotation.ts`, `src/features/market/market.rotation.test.ts`
-*   **Resumen de Tareas:** Corrección de la posición del modal de compra del mercado en móviles, ajustes visuales en el Frente de Temporada, y cambio en el intervalo de rotación del mercado a 2 horas.
+*   **Resumen de Tareas:** CorrecciÃ³n de la posiciÃ³n del modal de compra del mercado en mÃ³viles, ajustes visuales en el Frente de Temporada, y cambio en el intervalo de rotaciÃ³n del mercado a 2 horas.
 *   **Cambios Clave:**
-    *   **[Market - Modal de compra en móviles]:** Se centró el modal verticalmente en el viewport móvil y se añadió `overflow-y-auto` al contenedor exterior para permitir el scroll del formulario en pantallas pequeñas.
-    *   **[Market - Causa raíz transform/fixed]:** Se envolvió el renderizado de `PurchaseModal` con `createPortal(..., document.body)` para evitar que ancestros con transformaciones CSS (animación `content-fade-in` de `kd-stage` en `index.css`) rompieran la posición fija del modal.
-    *   **[Profile - Frente de Temporada]:** Se redujo el tamaño de la etiqueta "Avance" en `SeasonRing` de `8px` a `6.5px` y se disminuyó el espaciado de letras a `0.12em` para evitar desbordes en el círculo de progreso. Se eliminó la etiqueta de ayuda redundante *"El resumen detallado de la temporada queda oculto..."* en estado colapsado.
-    *   **[Market - Rotación de la tienda]:** Se cambió la frecuencia de rotación de artículos (`MARKET_ROTATION_WINDOW_MS`) de 5 horas a 2 horas, adaptando además el intervalo en los tests de simulación en `market.rotation.test.ts`.
+    *   **[Market - Modal de compra en mÃ³viles]:** Se centrÃ³ el modal verticalmente en el viewport mÃ³vil y se aÃ±adiÃ³ `overflow-y-auto` al contenedor exterior para permitir el scroll del formulario en pantallas pequeÃ±as.
+    *   **[Market - Causa raÃ­z transform/fixed]:** Se envolviÃ³ el renderizado de `PurchaseModal` con `createPortal(..., document.body)` para evitar que ancestros con transformaciones CSS (animaciÃ³n `content-fade-in` de `kd-stage` en `index.css`) rompieran la posiciÃ³n fija del modal.
+    *   **[Profile - Frente de Temporada]:** Se redujo el tamaÃ±o de la etiqueta "Avance" en `SeasonRing` de `8px` a `6.5px` y se disminuyÃ³ el espaciado de letras a `0.12em` para evitar desbordes en el cÃ­rculo de progreso. Se eliminÃ³ la etiqueta de ayuda redundante *"El resumen detallado de la temporada queda oculto..."* en estado colapsado.
+    *   **[Market - RotaciÃ³n de la tienda]:** Se cambiÃ³ la frecuencia de rotaciÃ³n de artÃ­culos (`MARKET_ROTATION_WINDOW_MS`) de 5 horas a 2 horas, adaptando ademÃ¡s el intervalo en los tests de simulaciÃ³n en `market.rotation.test.ts`.
 ### [Fecha: 16/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
 *   **Resumen de Tareas:** Correccion de desincronizacion visual en TavernCrash cuando la ronda colapsaba instantaneamente o al reiniciar el canvas.
@@ -106,7 +111,7 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
     *   **[UI - Avance circular]:** el "Avance %" paso de una cajita de texto a un anillo SVG animado (`SeasonRing`), coherente con los gauges del diseno.
     *   **[UI - Detalle]:** tiles Misiones/Eventos/Staff con iconos tematizados (Swords/Sparkles/Crown); "Siguiente objetivo" con icono Target y chip del color del proximo rango; `tabular-nums` en todas las cifras; eyebrow con Sparkles y "Cierre estimado" con CalendarClock.
     *   **[CSS - index.css]:** `kd-season-orb` (halo del rango que respira) y `kd-season-bar::after` (barrido de luz en la barra) + marcas de cuartos en la barra. Ambas animaciones se desactivan bajo `prefers-reduced-motion`.
-*   **Notas/Advertencias:** `tsc --noEmit` 0 errores; `npm run build` OK; CSS+JS confirmados en el bundle. Cambio 100% presentacional (mismos props y wiring de datos). No se pudo capturar screenshot logueado (el panel solo renderiza con jugador conectado y no hay credenciales de jugador real en el entorno) — verificacion visual final queda a cargo del usuario en su sesion.
+*   **Notas/Advertencias:** `tsc --noEmit` 0 errores; `npm run build` OK; CSS+JS confirmados en el bundle. Cambio 100% presentacional (mismos props y wiring de datos). No se pudo capturar screenshot logueado (el panel solo renderiza con jugador conectado y no hay credenciales de jugador real en el entorno) â€” verificacion visual final queda a cargo del usuario en su sesion.
 
 ### [Fecha: 15/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `supabase_season_rank_seasons.sql`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
@@ -176,46 +181,46 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`
-*   **Resumen de Tareas:** Actualización de las directrices operativas del agente a la realidad actual del proyecto.
+*   **Resumen de Tareas:** ActualizaciÃ³n de las directrices operativas del agente a la realidad actual del proyecto.
 *   **Cambios Clave:**
-    *   **[Documentación - Agentes]:** Se reestructuraron las secciones 1 a 5 de `AGENTS.md` para incluir el nuevo Working Directory, la arquitectura del repositorio completa (los nuevos minijuegos, vistas de administración y modales de pago), las reglas de negocio de cuotas e intereses de financiación, las nuevas tablas y RPCs de Supabase y las convenciones premium de diseño de UI/UX. Las secciones 6, 7 y 8 se mantuvieron intactas.
+    *   **[DocumentaciÃ³n - Agentes]:** Se reestructuraron las secciones 1 a 5 de `AGENTS.md` para incluir el nuevo Working Directory, la arquitectura del repositorio completa (los nuevos minijuegos, vistas de administraciÃ³n y modales de pago), las reglas de negocio de cuotas e intereses de financiaciÃ³n, las nuevas tablas y RPCs de Supabase y las convenciones premium de diseÃ±o de UI/UX. Las secciones 6, 7 y 8 se mantuvieron intactas.
 
 ### [Fecha: 11/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/sections/MarketSection.tsx`, `src/components/PlayerAuctionPanel.tsx` [NEW]
-*   **Resumen de Tareas:** Creación de la interfaz web de Subastas para jugadores con soporte transaccional y sincronización en tiempo real.
+*   **Resumen de Tareas:** CreaciÃ³n de la interfaz web de Subastas para jugadores con soporte transaccional y sincronizaciÃ³n en tiempo real.
 *   **Cambios Clave:**
-    *   **[Web - Player UI]:** Se diseñó y desarrolló el componente `PlayerAuctionPanel` con un panel de subastas activas, countdowns individuales en vivo, soporte para el envío de pujas y botón de retiro con confirmaciones.
-    *   **[Web - Integración]:** Se incrustó el panel en `MarketSection.tsx` bajo un nuevo bloque `<details>` premium de color ámbar con el icono `Gavel`.
-    *   **[Web - Realtime]:** Se enlazó el componente a Supabase Realtime para recibir actualizaciones automáticas de ofertas y ganadores al instante sin recarga de página.
-*   **Notas/Advertencias:** Validación de build exitosa (`npm run build` completado en 2m 56s).
+    *   **[Web - Player UI]:** Se diseÃ±Ã³ y desarrollÃ³ el componente `PlayerAuctionPanel` con un panel de subastas activas, countdowns individuales en vivo, soporte para el envÃ­o de pujas y botÃ³n de retiro con confirmaciones.
+    *   **[Web - IntegraciÃ³n]:** Se incrustÃ³ el panel en `MarketSection.tsx` bajo un nuevo bloque `<details>` premium de color Ã¡mbar con el icono `Gavel`.
+    *   **[Web - Realtime]:** Se enlazÃ³ el componente a Supabase Realtime para recibir actualizaciones automÃ¡ticas de ofertas y ganadores al instante sin recarga de pÃ¡gina.
+*   **Notas/Advertencias:** ValidaciÃ³n de build exitosa (`npm run build` completado en 2m 56s).
 
 ### [Fecha: 11/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/src/scheduler.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/handlers/auctions.js` [NEW], `kingdoom-bot/src/handlers/auctionsRealtime.js` [NEW]
-*   **Resumen de Tareas:** Integración completa de la mecánica de Subastas en el Bot de WhatsApp: comandos de jugador, anuncios en tiempo real y resolución automática de expiraciones.
+*   **Resumen de Tareas:** IntegraciÃ³n completa de la mecÃ¡nica de Subastas en el Bot de WhatsApp: comandos de jugador, anuncios en tiempo real y resoluciÃ³n automÃ¡tica de expiraciones.
 *   **Cambios Clave:**
-    *   **[Bot - Comandos]:** Se implementaron los comandos públicos `!subastas` (listar subastas activas), `!pujar <item / #lista> <monto>` (realizar pujas atómicas mediante RPC) y `!retirarse <item / #lista>` (bloquear pujas futuras en una subasta).
-    *   **[Bot - Realtime]:** Se añadió `startAuctionsRealtime` para que el bot escuche cambios en Supabase Realtime y publique automáticamente en WhatsApp cuando una subasta se crea, se puja, o se resuelve.
-    *   **[Bot - Scheduler]:** Se configuró una tarea recurrente en el cron del scheduler que comprueba cada minuto si hay subastas expiradas para resolverlas automáticamente llamando a la RPC `resolve_market_auction`.
+    *   **[Bot - Comandos]:** Se implementaron los comandos pÃºblicos `!subastas` (listar subastas activas), `!pujar <item / #lista> <monto>` (realizar pujas atÃ³micas mediante RPC) y `!retirarse <item / #lista>` (bloquear pujas futuras en una subasta).
+    *   **[Bot - Realtime]:** Se aÃ±adiÃ³ `startAuctionsRealtime` para que el bot escuche cambios en Supabase Realtime y publique automÃ¡ticamente en WhatsApp cuando una subasta se crea, se puja, o se resuelve.
+    *   **[Bot - Scheduler]:** Se configurÃ³ una tarea recurrente en el cron del scheduler que comprueba cada minuto si hay subastas expiradas para resolverlas automÃ¡ticamente llamando a la RPC `resolve_market_auction`.
 *   **Notas/Advertencias:** Los archivos JavaScript modificados pasan el control de sintaxis de Node sin errores.
 
 ### [Fecha: 11/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `ai-memory/kingdoom-memory.jsonl`
-*   **Resumen de Tareas:** Handoff de la sesión para Antigravity 2. Todo ha sido validado, el bot fue limpiado y optimizado, y la carga inicial de la web fue mejorada.
+*   **Resumen de Tareas:** Handoff de la sesiÃ³n para Antigravity 2. Todo ha sido validado, el bot fue limpiado y optimizado, y la carga inicial de la web fue mejorada.
 *   **Cambios Clave:**
     *   **[Handoff / Next Steps]:** 
-        1. **Atómica de apuestas:** Priorizar la refactorización de las apuestas del bot (`!dados`, `!trampa`, `!21`) mediante funciones RPC atómicas en Supabase (`place_bet`) para evitar condiciones de carrera y pérdidas de oro inconsistentes.
-        2. **Subastas:** Validar y completar la interfaz de subastas (actualmente están hechas las utilidades y SQL).
-        3. **Monitoreo Bot:** Observar la estabilidad del bot en Hugging Face (sin el flag `--single-process`) para comprobar la mitigación del reinicio.
-*   **Notas/Advertencias:** El repositorio web (`Kingdoom-sync`) compila sin errores (`tsc --noEmit` y `build` exitosos). El bot (`kingdoom-bot`) tiene los cambios de optimización empujados.
+        1. **AtÃ³mica de apuestas:** Priorizar la refactorizaciÃ³n de las apuestas del bot (`!dados`, `!trampa`, `!21`) mediante funciones RPC atÃ³micas en Supabase (`place_bet`) para evitar condiciones de carrera y pÃ©rdidas de oro inconsistentes.
+        2. **Subastas:** Validar y completar la interfaz de subastas (actualmente estÃ¡n hechas las utilidades y SQL).
+        3. **Monitoreo Bot:** Observar la estabilidad del bot en Hugging Face (sin el flag `--single-process`) para comprobar la mitigaciÃ³n del reinicio.
+*   **Notas/Advertencias:** El repositorio web (`Kingdoom-sync`) compila sin errores (`tsc --noEmit` y `build` exitosos). El bot (`kingdoom-bot`) tiene los cambios de optimizaciÃ³n empujados.
 
 ### [Fecha: 11/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `kingdoom-bot/src/ai.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/Dockerfile` (+ borrados: `src/scripts/notebooklm_*.py`, `test_notebooklm.js`)
 *   **Resumen de Tareas:** Hardening del bot tras auditoria: cadena de fallback de Gemini corregida, eliminado `--single-process` de Puppeteer (sospechoso principal del loop de reinicios) y limpieza completa de los restos de NotebookLM.
 *   **Cambios Clave:**
     *   **[Bot - IA]:** la cadena de fallback de `askKingdoomAI` incluia `gemini-3.5-flash` (modelo inexistente -> 404 garantizado en cada fallback) y `gemini-1.5-flash` (retirado por Google). Ahora: modelo base -> `gemini-2.5-flash` -> `gemini-2.0-flash`. Menos latencia y mas fiabilidad del GM cuando el modelo primario falla por cuota.
-    *   **[Bot - Estabilidad]:** se quito `--single-process` de los args de Puppeteer. Ese flag es causa conocida de `Protocol error / Target closed / Session closed` con whatsapp-web.js — exactamente los errores que el propio `index.js` detecta para reiniciar el contenedor. Observar si baja la frecuencia de reinicios en HF Spaces.
+    *   **[Bot - Estabilidad]:** se quito `--single-process` de los args de Puppeteer. Ese flag es causa conocida de `Protocol error / Target closed / Session closed` con whatsapp-web.js â€” exactamente los errores que el propio `index.js` detecta para reiniciar el contenedor. Observar si baja la frecuencia de reinicios en HF Spaces.
     *   **[Bot - Limpieza NotebookLM]:** el Dockerfile instalaba `python3`, `pip` y `notebooklm-py` aunque la integracion se removio el 08/06 (imagen mas pesada sin razon). Eliminados tambien los scripts Python muertos, `test_notebooklm.js`, y las funciones sin callers `getMissionsWithMissingNotebooks`/`updateMissionNotebookId` en `supabase.js` (la columna `notebook_id` sigue en la BD, el bot ya no la usa).
-*   **Notas/Advertencias:** `node --check` OK en los 3 JS editados; sin referencias rotas (grep). Pusheado a GitHub y a Hugging Face (redeploy del Space — el bot se reinicio con la imagen nueva). Pendientes de la auditoria, NO implementados aun: (1) race condition en apuestas `!dados`/`!trampa`/`!21` — la validacion de saldo y el debito no son atomicos, requiere RPC `place_bet` en Supabase; (2) sesiones de blackjack en memoria se pierden ante reinicios con apuesta ya debitada.
+*   **Notas/Advertencias:** `node --check` OK en los 3 JS editados; sin referencias rotas (grep). Pusheado a GitHub y a Hugging Face (redeploy del Space â€” el bot se reinicio con la imagen nueva). Pendientes de la auditoria, NO implementados aun: (1) race condition en apuestas `!dados`/`!trampa`/`!21` â€” la validacion de saldo y el debito no son atomicos, requiere RPC `place_bet` en Supabase; (2) sesiones de blackjack en memoria se pierden ante reinicios con apuesta ya debitada.
 
 ### [Fecha: 11/06/2026] - [Autor: Claude]
 *   **Archivos Modificados:** `src/index.css`
@@ -223,9 +228,9 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 *   **Cambios Clave:**
     *   **[Accesibilidad/Polish]:** anillo de foco global `:focus-visible` que sigue el color de acento de cada seccion (ambar en Inicio, violeta en Grimorio, etc.); el outline solo aparece navegando con teclado, mouse/touch no lo muestran (`:focus:not(:focus-visible)`).
     *   **[Movil]:** `-webkit-tap-highlight-color: transparent` (elimina el flash gris de Android al tocar; el feedback tactil lo sigue dando `.kd-touch` con su scale) y `overscroll-behavior-y: contain` en body (sensacion app-like, sin rebote del documento).
-    *   **[Fluidez de layout]:** `scrollbar-gutter: stable` en html — al cambiar entre pestañas cortas (Inicio) y largas (Grimorio) ya no hay salto horizontal por aparicion/desaparicion del scrollbar. Los paneles internos con scroll (modales, admin) usan `overscroll-behavior: contain` para no arrastrar el scroll de la pagina.
+    *   **[Fluidez de layout]:** `scrollbar-gutter: stable` en html â€” al cambiar entre pestaÃ±as cortas (Inicio) y largas (Grimorio) ya no hay salto horizontal por aparicion/desaparicion del scrollbar. Los paneles internos con scroll (modales, admin) usan `overscroll-behavior: contain` para no arrastrar el scroll de la pagina.
     *   **[Tipografia]:** `text-wrap: balance` en h1-h3 (titulos multilinea reparten palabras equilibradamente, visible en movil: "Reino de / las Sombras") y `font-variant-numeric: tabular-nums` en `.kd-stat-card` (los contadores no "bailan" al cambiar de valor).
-    *   **[Navegacion]:** micro-interaccion en la barra inferior — el icono de la pestaña activa se eleva 1px con scale 1.06 y transicion suave; deshabilitada bajo `prefers-reduced-motion`.
+    *   **[Navegacion]:** micro-interaccion en la barra inferior â€” el icono de la pestaÃ±a activa se eleva 1px con scale 1.06 y transicion suave; deshabilitada bajo `prefers-reduced-motion`.
 *   **Notas/Advertencias:** build OK; verificado en vivo con `vite preview` (computed styles confirmados via DevTools y screenshots desktop/movil, 0 errores de consola). Todo es CSS progresivo: navegadores viejos ignoran `text-wrap: balance` y `scrollbar-gutter` sin romper nada.
 
 ### [Fecha: 11/06/2026] - [Autor: Claude]
@@ -241,76 +246,76 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 11/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `Kingdoom-sync/src/components/AdminControlSheet.tsx`, `Kingdoom-sync/src/components/admin/AdminControlPrimitives.tsx`, `Kingdoom-sync/src/index.css`
-*   **Resumen:** Rediseño completo y premium del menú de navegación de pestañas del panel de administración y eliminación total del "Generador de Items IA / Pinterest" de la sección Mercado del admin.
+*   **Resumen:** RediseÃ±o completo y premium del menÃº de navegaciÃ³n de pestaÃ±as del panel de administraciÃ³n y eliminaciÃ³n total del "Generador de Items IA / Pinterest" de la secciÃ³n Mercado del admin.
 *   **Cambios Clave:**
-    *   **[Admin - Navegación/Tabs]:** Rediseño estético y responsivo de las 10 pestañas del menú de administración.
-        - Se agregaron iconos de Lucide-React semánticos para cada botón de pestaña.
-        - Se estructuraron las pestañas en 3 grupos lógicos diferenciados con separadores visuales (`.kd-admin-tab-divider`): **Gestión** (Jugadores, Misiones, Eventos), **Economía** (Mercado, Negocios) e **IA & Lore** (Staff IA, Magias, Bestiario, Flora, Archivo IA).
-        - Se optimizó el estilo activo/inactivo con gradientes premium, sombras internas y hover interactivo suave.
-        - Se añadió responsividad: en dispositivos móviles (`< 640px`) se despliega en un grid compacto de 2 columnas para una cómoda navegación táctil; en pantallas de escritorio se mantiene la disposición en línea optimizando el espacio horizontal.
-    *   **[Admin - Limpieza de Generador IA]:** Remoción completa del módulo experimental "Generador de Items IA" basado en Pinterest en la pestaña de Mercado.
-        - Se eliminó todo el código JSX que contenía el visualizador de Pinterest y el disparador de IA (inputs de URL de Pinterest, previsualizadores, feedbacks, tema de IA y botones de acción).
+    *   **[Admin - NavegaciÃ³n/Tabs]:** RediseÃ±o estÃ©tico y responsivo de las 10 pestaÃ±as del menÃº de administraciÃ³n.
+        - Se agregaron iconos de Lucide-React semÃ¡nticos para cada botÃ³n de pestaÃ±a.
+        - Se estructuraron las pestaÃ±as en 3 grupos lÃ³gicos diferenciados con separadores visuales (`.kd-admin-tab-divider`): **GestiÃ³n** (Jugadores, Misiones, Eventos), **EconomÃ­a** (Mercado, Negocios) e **IA & Lore** (Staff IA, Magias, Bestiario, Flora, Archivo IA).
+        - Se optimizÃ³ el estilo activo/inactivo con gradientes premium, sombras internas y hover interactivo suave.
+        - Se aÃ±adiÃ³ responsividad: en dispositivos mÃ³viles (`< 640px`) se despliega en un grid compacto de 2 columnas para una cÃ³moda navegaciÃ³n tÃ¡ctil; en pantallas de escritorio se mantiene la disposiciÃ³n en lÃ­nea optimizando el espacio horizontal.
+    *   **[Admin - Limpieza de Generador IA]:** RemociÃ³n completa del mÃ³dulo experimental "Generador de Items IA" basado en Pinterest en la pestaÃ±a de Mercado.
+        - Se eliminÃ³ todo el cÃ³digo JSX que contenÃ­a el visualizador de Pinterest y el disparador de IA (inputs de URL de Pinterest, previsualizadores, feedbacks, tema de IA y botones de acciÃ³n).
         - Se limpiaron las variables de estado relacionadas (`marketPinterestUrl`, `marketPinterestFeedback`, `marketPinterestPreview`, `marketAiTheme`, `marketAiFeedback`, `isGeneratingMarketItemAi`, `isLoadingPinterestReference`).
         - Se eliminaron las funciones controladoras (`handleLoadPinterestReference`, `handleGenerateMarketItemFromPin`) y se quitaron sus inicializaciones y dependencias en `resetMarketForm`, `preloadMarketItem` y `handleMarketImageUpload`.
         - Se eliminaron los imports obsoletos de `marketAi` y `pinterestPicker` en la cabecera.
-    *   **[Admin - Estilos del Sistema]:** Adición en `index.css` de clases CSS `.kd-admin-tabs`, `.kd-admin-tab-group` y `.kd-admin-tab-divider` con transiciones fluidas y gradientes HSL.
-*   **Notas/Advertencias:** Los archivos utilitarios subyacentes (`utils/marketAi.ts` y `utils/pinterestPicker.ts`) se preservaron en el repositorio para no romper posibles dependencias en API routes, pero ya no tienen acoplamiento con la interfaz de usuario. Verificado con `npx tsc --noEmit` y `npm run build` con éxito.
+    *   **[Admin - Estilos del Sistema]:** AdiciÃ³n en `index.css` de clases CSS `.kd-admin-tabs`, `.kd-admin-tab-group` y `.kd-admin-tab-divider` con transiciones fluidas y gradientes HSL.
+*   **Notas/Advertencias:** Los archivos utilitarios subyacentes (`utils/marketAi.ts` y `utils/pinterestPicker.ts`) se preservaron en el repositorio para no romper posibles dependencias en API routes, pero ya no tienen acoplamiento con la interfaz de usuario. Verificado con `npx tsc --noEmit` y `npm run build` con Ã©xito.
 
 ### [Fecha: 10/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `api/admin/generate-market-item.ts`
-*   **Resumen de Tareas:** Mejora del prompt de generación de ítems con IA (Market Forge) para alinear mecánicas y hacer los efectos más descriptivos.
+*   **Resumen de Tareas:** Mejora del prompt de generaciÃ³n de Ã­tems con IA (Market Forge) para alinear mecÃ¡nicas y hacer los efectos mÃ¡s descriptivos.
 *   **Cambios Clave:**
-    *   **Contexto del Sistema:** Se actualizó el prompt para incluir las reglas exactas del sistema de Kingdoom: dados (d20 + stat, daño en d6), mecánicas de mano blanca (física) y mano negra (mágica/veneno), y las defensas activas (STR = Bloquear, INT = Defender, AGI = Esquivar).
-    *   **Generación de Habilidad (`ability`):** Se ajustaron las reglas JSON del prompt. Ahora la IA debe obligatoriamente describir el efecto mecánico con porcentajes exactos ligados a stats (ej. 30% del STR) y definir una frecuencia clara de uso (cooldown en turnos o porcentaje de probabilidad de activación).
-*   **Notas/Advertencias:** Validación de build sin errores (`npm run build` exitoso). Las mecánicas deberían estar mucho mejor representadas en el texto autogenerado.
+    *   **Contexto del Sistema:** Se actualizÃ³ el prompt para incluir las reglas exactas del sistema de Kingdoom: dados (d20 + stat, daÃ±o en d6), mecÃ¡nicas de mano blanca (fÃ­sica) y mano negra (mÃ¡gica/veneno), y las defensas activas (STR = Bloquear, INT = Defender, AGI = Esquivar).
+    *   **GeneraciÃ³n de Habilidad (`ability`):** Se ajustaron las reglas JSON del prompt. Ahora la IA debe obligatoriamente describir el efecto mecÃ¡nico con porcentajes exactos ligados a stats (ej. 30% del STR) y definir una frecuencia clara de uso (cooldown en turnos o porcentaje de probabilidad de activaciÃ³n).
+*   **Notas/Advertencias:** ValidaciÃ³n de build sin errores (`npm run build` exitoso). Las mecÃ¡nicas deberÃ­an estar mucho mejor representadas en el texto autogenerado.
 
 ### [Fecha: 10/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/types.ts`, `src/utils/inventory.ts`, `src/components/PlayerInventorySheet.tsx`
-*   **Resumen de Tareas:** Visualización del estado de cuotas e ítems bloqueados en el Inventario del jugador.
+*   **Resumen de Tareas:** VisualizaciÃ³n del estado de cuotas e Ã­tems bloqueados en el Inventario del jugador.
 *   **Cambios Clave:**
-    *   **`src/types.ts`**: Se añadió `isLocked?: boolean` a `InventoryEntry` y se creó el nuevo tipo `PaymentPlan` que mapea la tabla `payment_plans` de Supabase.
-    *   **`src/utils/inventory.ts`**: Se añadió `is_locked` al select y al mapeo de `fetchPlayerInventory`. Se creó `fetchPlayerPaymentPlans` que obtiene todos los planes activos/en-mora del jugador.
-    *   **`src/components/PlayerInventorySheet.tsx`**: Reescrito con sistema de pestañas: pestaña "Inventario" (con badge 🔒 "En cuotas" en cada ítem bloqueado) y pestaña "Créditos" que muestra resumen (planes activos, en mora, deuda total) y tarjetas detalladas por plan (cuotas pagadas/total, barra de progreso, saldo restante, próximo pago, días de mora).
-*   **Notas/Advertencias:** `npx tsc --noEmit` → exit 0. Sin errores.
+    *   **`src/types.ts`**: Se aÃ±adiÃ³ `isLocked?: boolean` a `InventoryEntry` y se creÃ³ el nuevo tipo `PaymentPlan` que mapea la tabla `payment_plans` de Supabase.
+    *   **`src/utils/inventory.ts`**: Se aÃ±adiÃ³ `is_locked` al select y al mapeo de `fetchPlayerInventory`. Se creÃ³ `fetchPlayerPaymentPlans` que obtiene todos los planes activos/en-mora del jugador.
+    *   **`src/components/PlayerInventorySheet.tsx`**: Reescrito con sistema de pestaÃ±as: pestaÃ±a "Inventario" (con badge ðŸ”’ "En cuotas" en cada Ã­tem bloqueado) y pestaÃ±a "CrÃ©ditos" que muestra resumen (planes activos, en mora, deuda total) y tarjetas detalladas por plan (cuotas pagadas/total, barra de progreso, saldo restante, prÃ³ximo pago, dÃ­as de mora).
+*   **Notas/Advertencias:** `npx tsc --noEmit` â†’ exit 0. Sin errores.
 
 ### [Fecha: 10/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/purchases.ts`, `supabase_market_installments.sql`, `ai-memory/kingdoom-memory.jsonl`
-*   **Resumen de Tareas:** Corrección del error "Tu cuenta segura aun no esta vinculada a un jugador del reino." al intentar comprar artículos en el mercado.
+*   **Resumen de Tareas:** CorrecciÃ³n del error "Tu cuenta segura aun no esta vinculada a un jugador del reino." al intentar comprar artÃ­culos en el mercado.
 *   **Cambios Clave:**
-    *   **TypeScript (`src/utils/purchases.ts`)**: Se agregó el parámetro `p_player_id: input.playerId` que faltaba en la llamada RPC a `purchase_market_item_v2`. Al omitir este parámetro en el frontend, la base de datos recibía un valor NULL y por lo tanto fallaba al resolver la relación de vinculación.
-    *   **SQL (`supabase_market_installments.sql`)**: Se ajustó la firma de la función `purchase_market_item_v2` para aceptar `p_player_id uuid` e implementó lógica de auto-vinculación. Si el jugador no está vinculado pero el usuario está autenticado, la base de datos inserta automáticamente una fila en `player_auth_links` para vincularlos en el primer intento de compra segura.
-*   **Notas/Advertencias:** Se corrió `npx tsc --noEmit` y `npm run build` con éxito. La base de datos ya cuenta con la función actualizada.
+    *   **TypeScript (`src/utils/purchases.ts`)**: Se agregÃ³ el parÃ¡metro `p_player_id: input.playerId` que faltaba en la llamada RPC a `purchase_market_item_v2`. Al omitir este parÃ¡metro en el frontend, la base de datos recibÃ­a un valor NULL y por lo tanto fallaba al resolver la relaciÃ³n de vinculaciÃ³n.
+    *   **SQL (`supabase_market_installments.sql`)**: Se ajustÃ³ la firma de la funciÃ³n `purchase_market_item_v2` para aceptar `p_player_id uuid` e implementÃ³ lÃ³gica de auto-vinculaciÃ³n. Si el jugador no estÃ¡ vinculado pero el usuario estÃ¡ autenticado, la base de datos inserta automÃ¡ticamente una fila en `player_auth_links` para vincularlos en el primer intento de compra segura.
+*   **Notas/Advertencias:** Se corriÃ³ `npx tsc --noEmit` y `npm run build` con Ã©xito. La base de datos ya cuenta con la funciÃ³n actualizada.
 
 ### [Fecha: 08/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `Kingdoom-sync/AI_CHANGELOG.md`
-*   **Resumen:** Optimización drástica de latencia en la lectura de mensajes del bot y adecuación para despliegue en Hugging Face Spaces.
+*   **Resumen:** OptimizaciÃ³n drÃ¡stica de latencia en la lectura de mensajes del bot y adecuaciÃ³n para despliegue en Hugging Face Spaces.
 *   **Cambios Clave:**
-    *   **[Bot - Optimización de Latencia]:** Se refactorizó el manejador de mensajes en `index.js`. La función `checkIsAdmin`, que ejecutaba una consulta a Supabase por cada mensaje recibido, ahora es *perezosa (lazy)*. Solo consulta la BD si el mensaje contiene un comando de la lista blanca administrativa o si el usuario está interactuando en el `Market Forge`. Esto reduce a cero la latencia de base de datos para tráfico estándar de rol.
-    *   **[Bot - Despliegue en Hugging Face]:** Se confirmó el correcto funcionamiento del servidor HTTP existente en `index.js`, el cual expone el puerto definido por el entorno (`PORT` 7860), asegurando que el *healthcheck* de Hugging Face Spaces apruebe el arranque y mantenga el contenedor vivo (estado *Running*).
+    *   **[Bot - OptimizaciÃ³n de Latencia]:** Se refactorizÃ³ el manejador de mensajes en `index.js`. La funciÃ³n `checkIsAdmin`, que ejecutaba una consulta a Supabase por cada mensaje recibido, ahora es *perezosa (lazy)*. Solo consulta la BD si el mensaje contiene un comando de la lista blanca administrativa o si el usuario estÃ¡ interactuando en el `Market Forge`. Esto reduce a cero la latencia de base de datos para trÃ¡fico estÃ¡ndar de rol.
+    *   **[Bot - Despliegue en Hugging Face]:** Se confirmÃ³ el correcto funcionamiento del servidor HTTP existente en `index.js`, el cual expone el puerto definido por el entorno (`PORT` 7860), asegurando que el *healthcheck* de Hugging Face Spaces apruebe el arranque y mantenga el contenedor vivo (estado *Running*).
 
 ### [Fecha: 08/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `Kingdoom-sync/AI_CHANGELOG.md`
-*   **Resumen:** Refactorización y simplificación del tracker del Game Master (GM): eliminación de la integración con Google NotebookLM.
+*   **Resumen:** RefactorizaciÃ³n y simplificaciÃ³n del tracker del Game Master (GM): eliminaciÃ³n de la integraciÃ³n con Google NotebookLM.
 *   **Cambios Clave:**
-    *   **[Bot - Limpieza de NotebookLM]:** Se eliminaron los subprocesos de Python y las funciones de aprovisionamiento de libretas en caliente. La integración previa resultaba inestable al depender fuertemente de cookies mediante Playwright.
-    *   **[Bot - Motor Gemini Puro]:** La narrativa del GM ahora vuelve a procesarse exclusivamente con el motor base de Gemini (`askKingdoomAI`), asegurando respuestas más estables y sin retrasos de aprovisionamiento.
-    *   **[Bot - Optimización de Arranque]:** Se eliminó el loop de `autoProvisionMissions()` en el evento `ready` de WhatsApp (`index.js`), acelerando el encendido del bot y limpiando logs innecesarios.
+    *   **[Bot - Limpieza de NotebookLM]:** Se eliminaron los subprocesos de Python y las funciones de aprovisionamiento de libretas en caliente. La integraciÃ³n previa resultaba inestable al depender fuertemente de cookies mediante Playwright.
+    *   **[Bot - Motor Gemini Puro]:** La narrativa del GM ahora vuelve a procesarse exclusivamente con el motor base de Gemini (`askKingdoomAI`), asegurando respuestas mÃ¡s estables y sin retrasos de aprovisionamiento.
+    *   **[Bot - OptimizaciÃ³n de Arranque]:** Se eliminÃ³ el loop de `autoProvisionMissions()` en el evento `ready` de WhatsApp (`index.js`), acelerando el encendido del bot y limpiando logs innecesarios.
 
 ### [Fecha: 08/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/scripts/notebooklm_provisioner.py`, `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `Kingdoom-sync/AI_CHANGELOG.md`
-*   **Resumen:** Integraciﾃｳn completa y automatizaciﾃｳn del Game Master con Google NotebookLM mediante sincronizaciﾃｳn dinﾃ｡mica de grimorio y enciclopedia y aprovisionamiento bajo demanda.
+*   **Resumen:** Integraciï¾ƒï½³n completa y automatizaciï¾ƒï½³n del Game Master con Google NotebookLM mediante sincronizaciï¾ƒï½³n dinï¾ƒï½¡mica de grimorio y enciclopedia y aprovisionamiento bajo demanda.
 *   **Cambios Clave:**
-    *   **[Bot - Supabase Integraciﾃｳn]:** Creaciﾃｳn de dos funciones helper robustas en `supabase.js`: `getFormattedGrimoire()` y `getFormattedEncyclopedia()`.
-        - `getFormattedGrimoire()`: Consulta la tabla `grimoire_magic_styles` de Supabase, extrayendo la informaciﾃｳn estructurada de hechizos, sus niveles, cooldowns, lﾃｭmites de uso, efectos y contramedidas de seguridad ("anti-mano negra"). Genera un documento en formato Markdown riguroso y jerﾃ｡rquico.
-        - `getFormattedEncyclopedia()`: Consulta la tabla `knowledge_documents` de Supabase para compilar las entradas histﾃｳricas, facciones, reglamentos del sistema de combate, geopolﾃｭtica y lore general del Reino, formateando todo en un Markdown legible.
-    *   **[Bot - Provisionador Python]:** Actualizaciﾃｳn de `notebooklm_provisioner.py` para aceptar el payload ampliado con `grimorio_content` y `enciclopedia_content`. Este script normaliza la cookie `NOTEBOOKLM_COOKIES` en formato Playwright, crea el Notebook con el tﾃｭtulo `[GM] <Nombre de Misiﾃｳn>` y aﾃｱade secuencialmente cuatro fuentes de texto independientes usando el cliente automatizado de NotebookLM:
+    *   **[Bot - Supabase Integraciï¾ƒï½³n]:** Creaciï¾ƒï½³n de dos funciones helper robustas en `supabase.js`: `getFormattedGrimoire()` y `getFormattedEncyclopedia()`.
+        - `getFormattedGrimoire()`: Consulta la tabla `grimoire_magic_styles` de Supabase, extrayendo la informaciï¾ƒï½³n estructurada de hechizos, sus niveles, cooldowns, lï¾ƒï½­mites de uso, efectos y contramedidas de seguridad ("anti-mano negra"). Genera un documento en formato Markdown riguroso y jerï¾ƒï½¡rquico.
+        - `getFormattedEncyclopedia()`: Consulta la tabla `knowledge_documents` de Supabase para compilar las entradas histï¾ƒï½³ricas, facciones, reglamentos del sistema de combate, geopolï¾ƒï½­tica y lore general del Reino, formateando todo en un Markdown legible.
+    *   **[Bot - Provisionador Python]:** Actualizaciï¾ƒï½³n de `notebooklm_provisioner.py` para aceptar el payload ampliado con `grimorio_content` y `enciclopedia_content`. Este script normaliza la cookie `NOTEBOOKLM_COOKIES` en formato Playwright, crea el Notebook con el tï¾ƒï½­tulo `[GM] <Nombre de Misiï¾ƒï½³n>` y aï¾ƒï½±ade secuencialmente cuatro fuentes de texto independientes usando el cliente automatizado de NotebookLM:
         1. "Reglas Generales del Game Master (GM)" (System Prompt base).
-        2. "Lore e Indicaciones de la Misiﾃｳn - <Nombre>" (Instrucciones especﾃｭficas).
-        3. "Grimorio Oficial de Magias y Hechizos" (Markdown dinﾃ｡mico desde Supabase).
-        4. "Enciclopedia y Codex del Reino" (Markdown dinﾃ｡mico de lore desde Supabase).
-    *   **[Bot - Aprovisionamiento Justo a Tiempo (On-Demand)]:** Modificaciﾃｳn en `gmTracker.js` dentro de `startMissionTracker()`. Al iniciar el rastreo de una misiﾃｳn con el comando `!misionstart`, si la misiﾃｳn no posee un `notebook_id` configurado y existen las cookies de autenticaciﾃｳn, el bot genera el NotebookLM en caliente y actualiza el campo `notebook_id` en `realm_missions` mediante Supabase. Esto permite crear misiones nuevas en la interfaz administrativa web de la aplicaciﾃｳn y disponer de sus libretas al instante sin reiniciar el servicio.
-    *   **[Bot - Sincronizaciﾃｳn al Inicio]:** Modificaciﾃｳn en `index.js` para ejecutar `autoProvisionMissions()` durante el evento `ready`. Busca todas las misiones en base de datos que carezcan de un `notebook_id` asociado y las aprovisiona en lotes de manera asﾃｭncrona, optimizando la consulta a base de datos al recuperar el grimorio y la enciclopedia una sola vez al inicio del bucle.
-*   **Notas/Advertencias:** El flujo depende de que la variable de entorno `NOTEBOOKLM_COOKIES` estﾃｩ configurada correctamente. La generaciﾃｳn en caliente requiere un tiempo extra de aprovisionamiento (~2-5s) durante la primera ejecuciﾃｳn de `!misionstart`, tiempo durante el cual el bot procesa el flujo en segundo plano y asocia el ID de forma transparente para el usuario final.
+        2. "Lore e Indicaciones de la Misiï¾ƒï½³n - <Nombre>" (Instrucciones especï¾ƒï½­ficas).
+        3. "Grimorio Oficial de Magias y Hechizos" (Markdown dinï¾ƒï½¡mico desde Supabase).
+        4. "Enciclopedia y Codex del Reino" (Markdown dinï¾ƒï½¡mico de lore desde Supabase).
+    *   **[Bot - Aprovisionamiento Justo a Tiempo (On-Demand)]:** Modificaciï¾ƒï½³n en `gmTracker.js` dentro de `startMissionTracker()`. Al iniciar el rastreo de una misiï¾ƒï½³n con el comando `!misionstart`, si la misiï¾ƒï½³n no posee un `notebook_id` configurado y existen las cookies de autenticaciï¾ƒï½³n, el bot genera el NotebookLM en caliente y actualiza el campo `notebook_id` en `realm_missions` mediante Supabase. Esto permite crear misiones nuevas en la interfaz administrativa web de la aplicaciï¾ƒï½³n y disponer de sus libretas al instante sin reiniciar el servicio.
+    *   **[Bot - Sincronizaciï¾ƒï½³n al Inicio]:** Modificaciï¾ƒï½³n en `index.js` para ejecutar `autoProvisionMissions()` durante el evento `ready`. Busca todas las misiones en base de datos que carezcan de un `notebook_id` asociado y las aprovisiona en lotes de manera asï¾ƒï½­ncrona, optimizando la consulta a base de datos al recuperar el grimorio y la enciclopedia una sola vez al inicio del bucle.
+*   **Notas/Advertencias:** El flujo depende de que la variable de entorno `NOTEBOOKLM_COOKIES` estï¾ƒï½© configurada correctamente. La generaciï¾ƒï½³n en caliente requiere un tiempo extra de aprovisionamiento (~2-5s) durante la primera ejecuciï¾ƒï½³n de `!misionstart`, tiempo durante el cual el bot procesa el flujo en segundo plano y asocia el ID de forma transparente para el usuario final.
 
 ### [Fecha: 04/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `AI_CHANGELOG.md`
@@ -377,33 +382,33 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ### [Fecha: 03/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/blackjack.js`
-*   **Resumen:** Implementaciﾃｳn del flujo de "aceptar" y "negar" para el modo multijugador PvP del Blackjack (!21) en WhatsApp.
+*   **Resumen:** Implementaciï¾ƒï½³n del flujo de "aceptar" y "negar" para el modo multijugador PvP del Blackjack (!21) en WhatsApp.
 *   **Cambios Clave:**
-    *   **[Bot - Blackjack PvP Accept/Deny]:** Se agregﾃｳ el estado "pending" a las sesiones de multijugador para esperar la respuesta de los invitados ("aceptar" o "negar").
-    *   **[Bot - Timeout Pendiente]:** Si expira el tiempo mientras la sesiﾃｳn estﾃ｡ pendiente, automﾃ｡ticamente se declina por los inactivos y comienza la partida con los que sﾃｭ aceptaron.
+    *   **[Bot - Blackjack PvP Accept/Deny]:** Se agregï¾ƒï½³ el estado "pending" a las sesiones de multijugador para esperar la respuesta de los invitados ("aceptar" o "negar").
+    *   **[Bot - Timeout Pendiente]:** Si expira el tiempo mientras la sesiï¾ƒï½³n estï¾ƒï½¡ pendiente, automï¾ƒï½¡ticamente se declina por los inactivos y comienza la partida con los que sï¾ƒï½­ aceptaron.
 
 ### [Fecha: 03/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `docs/blackjack-simulation.md` (en Kingdoom-sync), `AI_CHANGELOG.md`
-*   **Resumen:** Creaciﾃｳn del documento de simulaciﾃｳn detallado para el minijuego de Blackjack (!21) en WhatsApp, cubriendo los flujos Solo y PvP.
+*   **Resumen:** Creaciï¾ƒï½³n del documento de simulaciï¾ƒï½³n detallado para el minijuego de Blackjack (!21) en WhatsApp, cubriendo los flujos Solo y PvP.
 *   **Cambios Clave:**
-    *   **[Docs - Blackjack Simulation]:** Creaciﾃｳn de `blackjack-simulation.md` que detalla el paso a paso, lﾃｭmites diarios de uso, lﾃｭmites de apuesta segﾃｺn fin de semana, mecﾃ｡nica de juego y el cﾃ｡lculo exacto del pozo y las garantﾃｭas de pago del modo multijugador PvP en WhatsApp.
+    *   **[Docs - Blackjack Simulation]:** Creaciï¾ƒï½³n de `blackjack-simulation.md` que detalla el paso a paso, lï¾ƒï½­mites diarios de uso, lï¾ƒï½­mites de apuesta segï¾ƒï½ºn fin de semana, mecï¾ƒï½¡nica de juego y el cï¾ƒï½¡lculo exacto del pozo y las garantï¾ƒï½­as de pago del modo multijugador PvP en WhatsApp.
 
 ### [Fecha: 02/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/blackjack.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md` (en Kingdoom-sync)
-*   **Resumen:** Implementaciﾃｳn de la modalidad multijugador PvP para el Blackjack (`!21`) por WhatsApp con control de turnos, timeout de 5 minutos y divisiﾃｳn proporcional del pozo de apuestas.
+*   **Resumen:** Implementaciï¾ƒï½³n de la modalidad multijugador PvP para el Blackjack (`!21`) por WhatsApp con control de turnos, timeout de 5 minutos y divisiï¾ƒï½³n proporcional del pozo de apuestas.
 *   **Cambios Clave:**
-    *   **[Bot - Blackjack PvP]:** Se expandiﾃｳ `blackjack.js` para dar soporte a partidas multijugador PvP (2+ jugadores) cuando se etiqueta a otros usuarios.
-    *   **[Bot - Primera Ronda con 1 Carta]:** Se modificﾃｳ la distribuciﾃｳn de cartas iniciales para entregar exactamente 1 carta por jugador en la primera ronda del modo multijugador PvP.
-    *   **[Bot - Interceptor Multijugador]:** Se actualizﾃｳ `index.js` para autorizar a cualquiera de los participantes del grupo a interactuar con el tablero enviando sus comandos de juego (`pedir` o `plantarse`).
-    *   **[Bot - Autoplantado por Timeout]:** Se programﾃｳ un temporizador de 5 minutos que fuerza la acciﾃｳn de "plantarse" para los participantes inactivos de la ronda.
-    *   **[Bot - Garantﾃｭa de Ganancias y Empates]:** En caso de empate, el pozo se distribuye equitativamente. Se implementaron multiplicadores garantizados mﾃｭnimos del sistema (`2.5x` para 21 natural, `2x` para victoria regular) por encima de la porciﾃｳn correspondiente del pozo si esta es menor.
-*   **Notas/Advertencias:** Validado localmente con un script de prueba de cﾃ｡lculo de puntuaciones y verificaciﾃｳn sintﾃ｡ctica de Node.js.
+    *   **[Bot - Blackjack PvP]:** Se expandiï¾ƒï½³ `blackjack.js` para dar soporte a partidas multijugador PvP (2+ jugadores) cuando se etiqueta a otros usuarios.
+    *   **[Bot - Primera Ronda con 1 Carta]:** Se modificï¾ƒï½³ la distribuciï¾ƒï½³n de cartas iniciales para entregar exactamente 1 carta por jugador en la primera ronda del modo multijugador PvP.
+    *   **[Bot - Interceptor Multijugador]:** Se actualizï¾ƒï½³ `index.js` para autorizar a cualquiera de los participantes del grupo a interactuar con el tablero enviando sus comandos de juego (`pedir` o `plantarse`).
+    *   **[Bot - Autoplantado por Timeout]:** Se programï¾ƒï½³ un temporizador de 5 minutos que fuerza la acciï¾ƒï½³n de "plantarse" para los participantes inactivos de la ronda.
+    *   **[Bot - Garantï¾ƒï½­a de Ganancias y Empates]:** En caso de empate, el pozo se distribuye equitativamente. Se implementaron multiplicadores garantizados mï¾ƒï½­nimos del sistema (`2.5x` para 21 natural, `2x` para victoria regular) por encima de la porciï¾ƒï½³n correspondiente del pozo si esta es menor.
+*   **Notas/Advertencias:** Validado localmente con un script de prueba de cï¾ƒï½¡lculo de puntuaciones y verificaciï¾ƒï½³n sintï¾ƒï½¡ctica de Node.js.
 
 ### [Fecha: 02/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** kingdoom-bot/src/handlers/blackjack.js, AI_CHANGELOG.md
 *   **Resumen:** Revision tecnica del azar en !21 y ajuste del limite diario base del Blackjack en WhatsApp.
 *   **Cambios Clave:**
-    *   **[Bot - Blackjack] Azar auditado:** Se reviso lackjack.js y no hay evidencia de cartas amaﾃｱadas. El juego crea un mazo completo de 52 cartas, aplica Fisher-Yates con Math.random() y reparte desde ese mazo barajado, por lo que una racha de 3 derrotas seguidas entra dentro de lo esperable para Blackjack.
+    *   **[Bot - Blackjack] Azar auditado:** Se reviso lackjack.js y no hay evidencia de cartas amaï¾ƒï½±adas. El juego crea un mazo completo de 52 cartas, aplica Fisher-Yates con Math.random() y reparte desde ese mazo barajado, por lo que una racha de 3 derrotas seguidas entra dentro de lo esperable para Blackjack.
     *   **[Bot - Blackjack] Limite diario ampliado:** El limite base de usos de !21 sube de 3 a 5, quedando 5 entre semana y 5 en fin de semana.
     *   **[Bot - Crupier] Regla verificada:** El crupier roba solo mientras tenga menos de 17 y luego se planta. No se encontro una ventaja artificial extra fuera de la regla normal del juego.
 *   **Notas/Advertencias:** Validado con 
@@ -411,19 +416,19 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 02/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/src/handlers/player.js`, `AI_CHANGELOG.md`
-*   **Resumen:** Integraciﾃδｳn del minijuego !21 (Blackjack) por WhatsApp y protecciﾃδｳn contra interferencias.
+*   **Resumen:** Integraciï¾ƒÎ´ï½³n del minijuego !21 (Blackjack) por WhatsApp y protecciï¾ƒÎ´ï½³n contra interferencias.
 *   **Cambios Clave:**
-    *   **[Bot - Blackjack]:** Se registrﾃδｳ el comando `!21` en `index.js`, redirigiendo al handler de Blackjack para iniciar partidas.
-    *   **[Bot - Intercepciﾃδｳn de Respuestas]:** Se implementﾃδｳ un interceptor estricto al inicio de la recepciﾃδｳn de mensajes. Si un mensaje cita a uno de los mensajes de partidas de Blackjack activas, solo se procesa el comando (`pedir` o `plantarse`) si proviene exactamente del jugador que iniciﾃδｳ la partida (`sender === session.playerPhone`). Cualquier otro mensaje es ignorado completamente para evitar interferencias en grupos.
-    *   **[Bot - Menﾃδｺ de Ayuda]:** Se aﾃδｱadiﾃδｳ la descripciﾃδｳn del comando `!21 <monto>` al compendio de comandos del aventurero (`!ayuda`).
-*   **Notas/Advertencias:** La validaciﾃδｳn de sintaxis de los archivos modificados ha sido completada con ﾃδｩxito.
+    *   **[Bot - Blackjack]:** Se registrï¾ƒÎ´ï½³ el comando `!21` en `index.js`, redirigiendo al handler de Blackjack para iniciar partidas.
+    *   **[Bot - Intercepciï¾ƒÎ´ï½³n de Respuestas]:** Se implementï¾ƒÎ´ï½³ un interceptor estricto al inicio de la recepciï¾ƒÎ´ï½³n de mensajes. Si un mensaje cita a uno de los mensajes de partidas de Blackjack activas, solo se procesa el comando (`pedir` o `plantarse`) si proviene exactamente del jugador que iniciï¾ƒÎ´ï½³ la partida (`sender === session.playerPhone`). Cualquier otro mensaje es ignorado completamente para evitar interferencias en grupos.
+    *   **[Bot - Menï¾ƒÎ´ï½º de Ayuda]:** Se aï¾ƒÎ´ï½±adiï¾ƒÎ´ï½³ la descripciï¾ƒÎ´ï½³n del comando `!21 <monto>` al compendio de comandos del aventurero (`!ayuda`).
+*   **Notas/Advertencias:** La validaciï¾ƒÎ´ï½³n de sintaxis de los archivos modificados ha sido completada con ï¾ƒÎ´ï½©xito.
 
 ### [Fecha: 02/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/assistant/market/_confirm.ts`, `AI_CHANGELOG.md`
 *   **Resumen:** Reparacion del crash aislado al confirmar items forjados por WhatsApp.
 *   **Cambios Clave:**
     *   **[Backend - Confirm Publish]:** `_confirm.ts` ya no importa `slugifyMarketItem` ni `buildMarketItemPayload` desde `src/features/market/market.adapter` (arbol frontend). Ahora define ambos helpers inline dentro de la funcion serverless.
-    *   **[Diagnostico del caso]:** El flujo `draft` y `revise` funcionaba, pero `confirm` devolvia `500 FUNCTION_INVOCATION_FAILED`, seﾃδｱal de crash al cargar ese submodulo en Vercel. El import cruzado desde `src/features/market/*` era el punto mas fragil y quedo eliminado.
+    *   **[Diagnostico del caso]:** El flujo `draft` y `revise` funcionaba, pero `confirm` devolvia `500 FUNCTION_INVOCATION_FAILED`, seï¾ƒÎ´ï½±al de crash al cargar ese submodulo en Vercel. El import cruzado desde `src/features/market/*` era el punto mas fragil y quedo eliminado.
     *   **[Arquitectura]:** La publicacion final del item queda desacoplada del bundle de frontend, reduciendo riesgo de que una dependencia del lado web tumbe el endpoint administrativo.
 *   **Notas/Advertencias:** Validado con compilacion dirigida del endpoint `api/admin/assistant/market/_confirm.ts`. El siguiente paso es reprobar `confirmar` sobre un borrador activo despues del redeploy de Vercel.
 
@@ -462,14 +467,14 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 01/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `api/admin/_assistantSecurity.ts`, `api/admin/_marketAssistant.ts`, `api/admin/_supabaseAdmin.ts`, `api/admin/_visualReference.ts`, `api/admin/assistant/market/draft.ts`, `api/admin/assistant/market/revise.ts`, `api/admin/assistant/market/confirm.ts`, `supabase_assistant_admin_actions.sql`, `kingdoom-bot/src/adminStore.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/handlers/marketForge.js`, `kingdoom-bot/src/marketForgeApi.js`, `kingdoom-bot/src/marketForgeStore.js`, `AI_CHANGELOG.md`
-*   **Resumen:** MVP de forja automﾃδ｡tica de ﾃδｭtems de mercado por WhatsApp con borrador IA, ajustes conversacionales, confirmaciﾃδｳn explﾃδｭcita y auditorﾃδｭa en Supabase.
+*   **Resumen:** MVP de forja automï¾ƒÎ´ï½¡tica de ï¾ƒÎ´ï½­tems de mercado por WhatsApp con borrador IA, ajustes conversacionales, confirmaciï¾ƒÎ´ï½³n explï¾ƒÎ´ï½­cita y auditorï¾ƒÎ´ï½­a en Supabase.
 *   **Cambios Clave:**
-    *   **[Backend - Assistant Market]:** Se aﾃδｱadieron los endpoints protegidos `POST /api/admin/assistant/market/draft`, `revise` y `confirm`, todos autenticados por `WHATSAPP_ASSISTANT_SECRET` y pensados para uso exclusivo del `kingdoom-bot`.
-    *   **[Backend - Auditorﾃδｭa/Draft State]:** Se versionﾃδｳ `supabase_assistant_admin_actions.sql` como tabla fuente de verdad para borradores administrativos. Guarda actor, rol (`admin|staff`), payload propuesto, referencia visual, confirmaciﾃδｳn/cancelaciﾃδｳn, modelo IA y resultado final.
-    *   **[Backend - IA de Mercado]:** Se creﾃδｳ un motor server-side compartido para generar y revisar drafts de ﾃδｭtems usando referencia visual + prompt del staff + contexto resumido del mercado actual. El precio puede ajustarse por conversaciﾃδｳn antes de confirmar.
-    *   **[Bot - Flujo Conversacional]:** Se integrﾃδｳ `!forjaritem <idea> [url]` y `!mercado crear ...` en WhatsApp. El bot detecta una sola sesiﾃδｳn activa por staff/admin por chat, acepta ajustes conversacionales, soporta `confirmar` / `cancelar` y publica en `market_items` solo tras confirmaciﾃδｳn explﾃδｭcita.
-    *   **[Bot - Permisos]:** Ademﾃδ｡s de admins, ahora existe `isStaffUser()` con whitelist por `STAFF_NUMBERS` para habilitar el flujo de forja a staff sin abrir el resto de comandos administrativos sensibles.
-*   **Notas/Advertencias:** `node --check` pasﾃδｳ en los archivos nuevos/modificados del bot. Los endpoints nuevos de `api/` compilaron con `npx tsc --noEmit --skipLibCheck ...`. El `npx tsc --noEmit` global y `npm run build` de `Kingdoom-sync` siguen fallando por un problema preexistente de resoluciﾃδｳn de `swr` en `src/components/GrimoireSection.tsx` y `src/sections/MarketSection.tsx`, ajeno a esta implementaciﾃδｳn. Para que el flujo funcione en producciﾃδｳn deben configurarse `WHATSAPP_ASSISTANT_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y, si se usarﾃδ｡n staff no-admin, `WHATSAPP_ASSISTANT_STAFF_NUMBERS` en backend y `STAFF_NUMBERS` en el bot.
+    *   **[Backend - Assistant Market]:** Se aï¾ƒÎ´ï½±adieron los endpoints protegidos `POST /api/admin/assistant/market/draft`, `revise` y `confirm`, todos autenticados por `WHATSAPP_ASSISTANT_SECRET` y pensados para uso exclusivo del `kingdoom-bot`.
+    *   **[Backend - Auditorï¾ƒÎ´ï½­a/Draft State]:** Se versionï¾ƒÎ´ï½³ `supabase_assistant_admin_actions.sql` como tabla fuente de verdad para borradores administrativos. Guarda actor, rol (`admin|staff`), payload propuesto, referencia visual, confirmaciï¾ƒÎ´ï½³n/cancelaciï¾ƒÎ´ï½³n, modelo IA y resultado final.
+    *   **[Backend - IA de Mercado]:** Se creï¾ƒÎ´ï½³ un motor server-side compartido para generar y revisar drafts de ï¾ƒÎ´ï½­tems usando referencia visual + prompt del staff + contexto resumido del mercado actual. El precio puede ajustarse por conversaciï¾ƒÎ´ï½³n antes de confirmar.
+    *   **[Bot - Flujo Conversacional]:** Se integrï¾ƒÎ´ï½³ `!forjaritem <idea> [url]` y `!mercado crear ...` en WhatsApp. El bot detecta una sola sesiï¾ƒÎ´ï½³n activa por staff/admin por chat, acepta ajustes conversacionales, soporta `confirmar` / `cancelar` y publica en `market_items` solo tras confirmaciï¾ƒÎ´ï½³n explï¾ƒÎ´ï½­cita.
+    *   **[Bot - Permisos]:** Ademï¾ƒÎ´ï½¡s de admins, ahora existe `isStaffUser()` con whitelist por `STAFF_NUMBERS` para habilitar el flujo de forja a staff sin abrir el resto de comandos administrativos sensibles.
+*   **Notas/Advertencias:** `node --check` pasï¾ƒÎ´ï½³ en los archivos nuevos/modificados del bot. Los endpoints nuevos de `api/` compilaron con `npx tsc --noEmit --skipLibCheck ...`. El `npx tsc --noEmit` global y `npm run build` de `Kingdoom-sync` siguen fallando por un problema preexistente de resoluciï¾ƒÎ´ï½³n de `swr` en `src/components/GrimoireSection.tsx` y `src/sections/MarketSection.tsx`, ajeno a esta implementaciï¾ƒÎ´ï½³n. Para que el flujo funcione en producciï¾ƒÎ´ï½³n deben configurarse `WHATSAPP_ASSISTANT_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y, si se usarï¾ƒÎ´ï½¡n staff no-admin, `WHATSAPP_ASSISTANT_STAFF_NUMBERS` en backend y `STAFF_NUMBERS` en el bot.
 
 ### [Fecha: 01/06/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `AI_CHANGELOG.md`
@@ -508,40 +513,40 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 01/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `docs/agents/KingdoomArchitect.md`, `docs/agents/KingdoomFrontend.md`, `docs/agents/KingdoomBackend.md`, `docs/agents/KingdoomMinigames.md`, `docs/agents/KingdoomLoreKeeper.md`, `docs/agents/KingdoomDevOps.md`, `docs/agents/KingdoomDesigner.md`
-*   **Resumen:** Creaciﾃδｳn de directrices exhaustivas de agentes (Personas) para el Reino.
+*   **Resumen:** Creaciï¾ƒÎ´ï½³n de directrices exhaustivas de agentes (Personas) para el Reino.
 *   **Cambios Clave:**
-    *   **[Docs - Agentes]:** Se crearon 7 nuevos perfiles de contexto en `docs/agents/` cubriendo todas las ﾃδ｡reas posibles del proyecto (`Kingdoom-sync` y `Kingdoom-bot`): Architect, Frontend, Backend, Minigames, LoreKeeper, DevOps, y Designer.
+    *   **[Docs - Agentes]:** Se crearon 7 nuevos perfiles de contexto en `docs/agents/` cubriendo todas las ï¾ƒÎ´ï½¡reas posibles del proyecto (`Kingdoom-sync` y `Kingdoom-bot`): Architect, Frontend, Backend, Minigames, LoreKeeper, DevOps, y Designer.
 
 ### [Fecha: 01/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `docs/agents/KingdoomAuditor.md`, `docs/agents/KingdoomDebugger.md`, `docs/agents/KingdoomReviewer.md`, `docs/agents/KingdoomBotMaster.md`
-*   **Resumen:** Creaciﾃδｳn de directrices de agentes especializados (Personas) para el Reino.
+*   **Resumen:** Creaciï¾ƒÎ´ï½³n de directrices de agentes especializados (Personas) para el Reino.
 *   **Cambios Clave:**
-    *   **[Docs - Agentes]:** Se crearon 4 perfiles de contexto estandarizados dentro de `docs/agents/` que detallan las reglas, responsabilidades y prioridades para que cualquier agente de la arquitectura (Jarvis, Antigravity 2, etc.) asuma roles dedicados: Auditor de Economﾃδｭa/Seguridad, Depurador UI/Estado, Revisor de Calidad/Reglas y BotMaster de WhatsApp.
+    *   **[Docs - Agentes]:** Se crearon 4 perfiles de contexto estandarizados dentro de `docs/agents/` que detallan las reglas, responsabilidades y prioridades para que cualquier agente de la arquitectura (Jarvis, Antigravity 2, etc.) asuma roles dedicados: Auditor de Economï¾ƒÎ´ï½­a/Seguridad, Depurador UI/Estado, Revisor de Calidad/Reglas y BotMaster de WhatsApp.
 
 ### [Fecha: 31/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `GrimoireSection.tsx`, `MarketSection.tsx`, `imageUtils.ts` (Nuevo), `package.json`
-*   **Resumen:** Implementaciﾃδｳn de Optimizaciﾃδｳn Extrema (SWR Cachﾃδｩ y Transformaciﾃδｳn de Imﾃδ｡genes).
+*   **Resumen:** Implementaciï¾ƒÎ´ï½³n de Optimizaciï¾ƒÎ´ï½³n Extrema (SWR Cachï¾ƒÎ´ï½© y Transformaciï¾ƒÎ´ï½³n de Imï¾ƒÎ´ï½¡genes).
 *   **Cambios Clave:**
-    *   **[Web] Performance (Cachﾃδｩ):** Se reemplazﾃδｳ el `useEffect` por `useSWR` en las llamadas pesadas de Supabase (Grimorio, Mercado, Bestiario, Flora) con un cachﾃδｩ local de 5 minutos, logrando cargas instantﾃδ｡neas (0ms) al navegar entre pestaﾃδｱas.
-    *   **[Web] Performance (Imﾃδ｡genes):** Se introdujo `getOptimizedImageUrl` para interceptar imﾃδ｡genes de Supabase Storage e inyectar el modo "render" para devolverlas comprimidas a formato WebP y tamaﾃδｱo miniatura.
+    *   **[Web] Performance (Cachï¾ƒÎ´ï½©):** Se reemplazï¾ƒÎ´ï½³ el `useEffect` por `useSWR` en las llamadas pesadas de Supabase (Grimorio, Mercado, Bestiario, Flora) con un cachï¾ƒÎ´ï½© local de 5 minutos, logrando cargas instantï¾ƒÎ´ï½¡neas (0ms) al navegar entre pestaï¾ƒÎ´ï½±as.
+    *   **[Web] Performance (Imï¾ƒÎ´ï½¡genes):** Se introdujo `getOptimizedImageUrl` para interceptar imï¾ƒÎ´ï½¡genes de Supabase Storage e inyectar el modo "render" para devolverlas comprimidas a formato WebP y tamaï¾ƒÎ´ï½±o miniatura.
 
 ### [Fecha: 31/05/2026] - [Autor: ui_ux_designer (Subagente) / Antigravity]
-*   **Archivos Modificados:** Mﾃδ｡s de 20 componentes React en `Kingdoom-sync/src` (ej. `AnimeHubSection.tsx`, `MarketItemCard.tsx`, etc.)
-*   **Resumen:** Optimizaciﾃδｳn masiva de carga de imﾃδ｡genes en el frontend web.
+*   **Archivos Modificados:** Mï¾ƒÎ´ï½¡s de 20 componentes React en `Kingdoom-sync/src` (ej. `AnimeHubSection.tsx`, `MarketItemCard.tsx`, etc.)
+*   **Resumen:** Optimizaciï¾ƒÎ´ï½³n masiva de carga de imï¾ƒÎ´ï½¡genes en el frontend web.
 *   **Cambios Clave:**
-    *   **[Web] Performance:** Se inyectaron los atributos `loading="lazy"` y `decoding="async"` en todas las etiquetas `<img />` del proyecto para evitar cuellos de botella en la renderizaciﾃδｳn y mejorar el tiempo de carga en listas pesadas como el mercado, el inventario y el anime hub.
+    *   **[Web] Performance:** Se inyectaron los atributos `loading="lazy"` y `decoding="async"` en todas las etiquetas `<img />` del proyecto para evitar cuellos de botella en la renderizaciï¾ƒÎ´ï½³n y mejorar el tiempo de carga en listas pesadas como el mercado, el inventario y el anime hub.
 
 ### [Fecha: 30/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/tracker.js`
 *   **Resumen:** Fix del error de guardado del tracker provocado por restricciones de Supabase.
 *   **Cambios Clave:**
-    *   **[Bot] Base de Datos:** Se corrigiﾃδｳ una violaciﾃδｳn de la restricciﾃδｳn `knowledge_documents_type_check`. El `type` del tracker se cambiﾃδｳ de `tracker` a `other`, y se aﾃδｱadiﾃδｳ el campo obligatorio `title`.
+    *   **[Bot] Base de Datos:** Se corrigiï¾ƒÎ´ï½³ una violaciï¾ƒÎ´ï½³n de la restricciï¾ƒÎ´ï½³n `knowledge_documents_type_check`. El `type` del tracker se cambiï¾ƒÎ´ï½³ de `tracker` a `other`, y se aï¾ƒÎ´ï½±adiï¾ƒÎ´ï½³ el campo obligatorio `title`.
 ### [Fecha: 30/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `.gemini/antigravity/mcp_config.json` (Local IDE Config)
-*   **Resumen:** Configuraciﾃδｳn e integraciﾃδｳn del servidor MCP de Vercel.
+*   **Resumen:** Configuraciï¾ƒÎ´ï½³n e integraciï¾ƒÎ´ï½³n del servidor MCP de Vercel.
 *   **Cambios Clave:**
-    *   **[Tooling - MCP]:** Se agregﾃδｳ exitosamente el servidor MCP de Vercel (`https://mcp.vercel.com`) al entorno de Google IDE (Antigravity).
-    *   **[Tooling - Auth]:** Se configurﾃδｳ el Bearer Token de Vercel para permitir a los agentes realizar consultas de despliegues, logs de proyectos y administrar el entorno web alojado en Vercel sin salir del IDE.
+    *   **[Tooling - MCP]:** Se agregï¾ƒÎ´ï½³ exitosamente el servidor MCP de Vercel (`https://mcp.vercel.com`) al entorno de Google IDE (Antigravity).
+    *   **[Tooling - Auth]:** Se configurï¾ƒÎ´ï½³ el Bearer Token de Vercel para permitir a los agentes realizar consultas de despliegues, logs de proyectos y administrar el entorno web alojado en Vercel sin salir del IDE.
 
 ### [Fecha: 30/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/src/components/TavernScratchNative.tsx`, `apps/mobile/src/utils/scratchUtils.ts`, `AI_CHANGELOG.md`
@@ -564,13 +569,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 30/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `apps/mobile/src/components/TavernScratchNative.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
-*   **Resumen:** Integraciﾃδｳn de "TavernScratchNative" y cierre definitivo de la Fase 3 de reactivaciﾃδｳn mobile.
+*   **Resumen:** Integraciï¾ƒÎ´ï½³n de "TavernScratchNative" y cierre definitivo de la Fase 3 de reactivaciï¾ƒÎ´ï½³n mobile.
 *   **Cambios Clave:**
-    *   **[Mobile - Minijuego]:** Se integrﾃδｳ exitosamente el segundo minijuego nativo, "Rasca y Gana" (`TavernScratchNative.tsx`). Mantiene paridad con la lﾃδｳgica web, empleando configuraciﾃδｳn de probabilidades, lﾃδｭmites diarios y costos generados dinﾃδ｡micamente vﾃδｭa `getDailyScratchConfig`.
-    *   **[Mobile - Economﾃδｭa Segura]:** La transacciﾃδｳn de oro utiliza exclusivamente `sessionStore.addGold`, el cual estﾃδ｡ respaldado por el RPC seguro de Supabase `increment_gold`, evitando cualquier condiciﾃδｳn de carrera.
-    *   **[Mobile - Persistencia Local]:** Se implementﾃδｳ `AsyncStorage` para manejar el lﾃδｭmite de ganancias diarias de forma eficiente y segura a nivel de dispositivo.
-    *   **[Mobile - Integraciﾃδｳn UI]:** El minijuego se renderiza de forma fluida y elegante en la tab del mercado, empleando la arquitectura `KingdoomUI` y `StaggerItem` existente.
-    *   **[Backlog] Cierre Fase 3:** Con la implementaciﾃδｳn de este segundo minijuego y las notificaciones previamente aprobadas, la Fase 3 de reactivaciﾃδｳn mobile se considera cumplida.
+    *   **[Mobile - Minijuego]:** Se integrï¾ƒÎ´ï½³ exitosamente el segundo minijuego nativo, "Rasca y Gana" (`TavernScratchNative.tsx`). Mantiene paridad con la lï¾ƒÎ´ï½³gica web, empleando configuraciï¾ƒÎ´ï½³n de probabilidades, lï¾ƒÎ´ï½­mites diarios y costos generados dinï¾ƒÎ´ï½¡micamente vï¾ƒÎ´ï½­a `getDailyScratchConfig`.
+    *   **[Mobile - Economï¾ƒÎ´ï½­a Segura]:** La transacciï¾ƒÎ´ï½³n de oro utiliza exclusivamente `sessionStore.addGold`, el cual estï¾ƒÎ´ï½¡ respaldado por el RPC seguro de Supabase `increment_gold`, evitando cualquier condiciï¾ƒÎ´ï½³n de carrera.
+    *   **[Mobile - Persistencia Local]:** Se implementï¾ƒÎ´ï½³ `AsyncStorage` para manejar el lï¾ƒÎ´ï½­mite de ganancias diarias de forma eficiente y segura a nivel de dispositivo.
+    *   **[Mobile - Integraciï¾ƒÎ´ï½³n UI]:** El minijuego se renderiza de forma fluida y elegante en la tab del mercado, empleando la arquitectura `KingdoomUI` y `StaggerItem` existente.
+    *   **[Backlog] Cierre Fase 3:** Con la implementaciï¾ƒÎ´ï½³n de este segundo minijuego y las notificaciones previamente aprobadas, la Fase 3 de reactivaciï¾ƒÎ´ï½³n mobile se considera cumplida.
 *   **Notas/Advertencias:** Validado localmente con `npm run mobile:typecheck` sin errores nuevos atribuibles a esta funcionalidad.
 ### [Fecha: 29/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/src/components/PlayerNotificationBellNative.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
@@ -583,30 +588,30 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 29/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `apps/mobile/src/features/notifications/notificationsService.ts`, `apps/mobile/src/components/PlayerNotificationBellNative.tsx`, `apps/mobile/app/(tabs)/home.tsx`, `apps/mobile/app/(tabs)/profile.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
-*   **Resumen:** Implementaciﾃδｳn de Notificaciones Mobile (Fase 3).
+*   **Resumen:** Implementaciï¾ƒÎ´ï½³n de Notificaciones Mobile (Fase 3).
 *   **Cambios Clave:**
-    *   **[Mobile - Notificaciones]:** Se implementﾃδｳ el servicio de notificaciones nativo (`notificationsService.ts`) que interactﾃδｺa con Supabase para la app mobile, manteniendo paridad con la estructura de datos web.
-    *   **[Mobile - Componente UI]:** Se creﾃδｳ `PlayerNotificationBellNative.tsx` utilizando `TanStack Query` para polling cada 15 segundos y `react-native-reanimated` para animaciones fluidas del modal bottom-sheet. Se garantizﾃδｳ el tamaﾃδｱo de 46x46 en los elementos clickeables (incluyendo botﾃδｳn de cerrar modal).
-    *   **[Mobile - Integraciﾃδｳn]:** Se inyectﾃδｳ la campana de notificaciones en el `rightSlot` de las pantallas principales `home.tsx` y `profile.tsx` para brindar mﾃδ｡xima visibilidad sobre transacciones y recompensas sin afectar la ergonomﾃδｭa ni requerir tabs adicionales.
-    *   **[Backlog] Actualizaciﾃδｳn:** Tareas de notificaciﾃδｳn/features econﾃδｳmicas adicionales marcadas como evaluadas e implementadas.
-*   **Notas/Advertencias:** Validado con `npm run mobile:typecheck` limpio. La economﾃδｭa mﾃδｳvil sigue intacta ya que la campana es solo un observador de estado.
+    *   **[Mobile - Notificaciones]:** Se implementï¾ƒÎ´ï½³ el servicio de notificaciones nativo (`notificationsService.ts`) que interactï¾ƒÎ´ï½ºa con Supabase para la app mobile, manteniendo paridad con la estructura de datos web.
+    *   **[Mobile - Componente UI]:** Se creï¾ƒÎ´ï½³ `PlayerNotificationBellNative.tsx` utilizando `TanStack Query` para polling cada 15 segundos y `react-native-reanimated` para animaciones fluidas del modal bottom-sheet. Se garantizï¾ƒÎ´ï½³ el tamaï¾ƒÎ´ï½±o de 46x46 en los elementos clickeables (incluyendo botï¾ƒÎ´ï½³n de cerrar modal).
+    *   **[Mobile - Integraciï¾ƒÎ´ï½³n]:** Se inyectï¾ƒÎ´ï½³ la campana de notificaciones en el `rightSlot` de las pantallas principales `home.tsx` y `profile.tsx` para brindar mï¾ƒÎ´ï½¡xima visibilidad sobre transacciones y recompensas sin afectar la ergonomï¾ƒÎ´ï½­a ni requerir tabs adicionales.
+    *   **[Backlog] Actualizaciï¾ƒÎ´ï½³n:** Tareas de notificaciï¾ƒÎ´ï½³n/features econï¾ƒÎ´ï½³micas adicionales marcadas como evaluadas e implementadas.
+*   **Notas/Advertencias:** Validado con `npm run mobile:typecheck` limpio. La economï¾ƒÎ´ï½­a mï¾ƒÎ´ï½³vil sigue intacta ya que la campana es solo un observador de estado.
 
 ### [Fecha: 29/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/anime.tsx`, `apps/mobile/src/components/RealmStockExchangeNative.tsx`, `apps/mobile/app/(tabs)/archivist.tsx`, `apps/mobile/src/components/TavernHorseRaceNative.tsx`, `apps/mobile/src/components/TavernSlotsNative.tsx`, `AI_CHANGELOG.md`
-*   **Resumen:** Segunda pasada de polish visual/ergonﾃδｳmico para la reactivaciﾃδｳn mobile (Fase 3). 
+*   **Resumen:** Segunda pasada de polish visual/ergonï¾ƒÎ´ï½³mico para la reactivaciï¾ƒÎ´ï½³n mobile (Fase 3). 
 *   **Cambios Clave:**
-    *   **[Mobile - UI/Ergonomﾃδｭa]:** Se estandarizaron los touch targets a un mﾃδｭnimo de 46px en componentes interactivos clave de toda la app (botones, tabs, pills y search inputs) para cumplir con las guﾃδｭas de accesibilidad en Android. Esto incluyﾃδｳ ajustes en Archivist, Anime, Exchange, HorseRace y Slots, solucionando los problemas de fat-finger.
-    *   **[Arquitectura - Decisiﾃδｳn]:** Se evaluﾃδｳ si `Archivist` y `Anime` justifican una expansiﾃδｳn profunda. Se decide mantenerlos como mﾃδｳdulos compactos. `Archivist` sirve como referencia rﾃδ｡pida y `Anime` como un hub de enlaces ligeros. Aﾃδｱadirles una navegaciﾃδｳn profunda y dependencias pesadas impactarﾃδｭa negativamente el rendimiento de React Native y la filosofﾃδｭa "compact-mode" que guﾃδｭa el resurgimiento mﾃδｳvil.
-*   **Notas/Advertencias:** Todos los cambios pasaron `npm run mobile:typecheck` y no se inyectﾃδｳ lﾃδｳgica econﾃδｳmica nueva.
+    *   **[Mobile - UI/Ergonomï¾ƒÎ´ï½­a]:** Se estandarizaron los touch targets a un mï¾ƒÎ´ï½­nimo de 46px en componentes interactivos clave de toda la app (botones, tabs, pills y search inputs) para cumplir con las guï¾ƒÎ´ï½­as de accesibilidad en Android. Esto incluyï¾ƒÎ´ï½³ ajustes en Archivist, Anime, Exchange, HorseRace y Slots, solucionando los problemas de fat-finger.
+    *   **[Arquitectura - Decisiï¾ƒÎ´ï½³n]:** Se evaluï¾ƒÎ´ï½³ si `Archivist` y `Anime` justifican una expansiï¾ƒÎ´ï½³n profunda. Se decide mantenerlos como mï¾ƒÎ´ï½³dulos compactos. `Archivist` sirve como referencia rï¾ƒÎ´ï½¡pida y `Anime` como un hub de enlaces ligeros. Aï¾ƒÎ´ï½±adirles una navegaciï¾ƒÎ´ï½³n profunda y dependencias pesadas impactarï¾ƒÎ´ï½­a negativamente el rendimiento de React Native y la filosofï¾ƒÎ´ï½­a "compact-mode" que guï¾ƒÎ´ï½­a el resurgimiento mï¾ƒÎ´ï½³vil.
+*   **Notas/Advertencias:** Todos los cambios pasaron `npm run mobile:typecheck` y no se inyectï¾ƒÎ´ï½³ lï¾ƒÎ´ï½³gica econï¾ƒÎ´ï½³mica nueva.
 
 ### [Fecha: 29/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `apps/mobile/src/features/session/sessionStore.ts`, `apps/mobile/src/components/TavernSlotsNative.tsx`, `apps/mobile/src/components/TavernHorseRaceNative.tsx`, `apps/mobile/src/components/RealmStockExchangeNative.tsx`, `docs/mobile-reactivation/mobile-reactivation-backlog.md`, `AI_CHANGELOG.md`
-*   **Resumen:** Cierre definitivo de Fase 2 (Antigravity 2) de reactivaciﾃδｳn mobile: sincronizaciﾃδｳn atﾃδｳmica de economﾃδｭa y estabilizaciﾃδｳn del Stock Exchange.
+*   **Resumen:** Cierre definitivo de Fase 2 (Antigravity 2) de reactivaciï¾ƒÎ´ï½³n mobile: sincronizaciï¾ƒÎ´ï½³n atï¾ƒÎ´ï½³mica de economï¾ƒÎ´ï½­a y estabilizaciï¾ƒÎ´ï½³n del Stock Exchange.
 *   **Cambios Clave:**
-    *   **[Mobile - Economﾃδｭa] QA Funcional Completo y Sincronizaciﾃδｳn atﾃδｳmica:** Se auditﾃδｳ funcionalmente el ciclo de compra en el mercado mﾃδｳvil (se descuenta una sola vez, se refresca el saldo, se actualiza el inventario). Se refactorizaron `TavernSlotsNative`, `TavernHorseRaceNative` y `RealmStockExchangeNative` para utilizar `addGold` (basado en el RPC `increment_gold` de Supabase) en lugar del mﾃδｩtodo inseguro `updateGold`, previniendo race conditions y asegurando la consistencia entre saldo visible e historial. Ademﾃδ｡s, se documentﾃδｳ el SQL del RPC `increment_gold` (`supabase_increment_gold.sql`) en el repositorio para evitar desincronizaciones futuras. Fase 2 completada y validada con \`npm run mobile:typecheck\` y \`npm run build\`.
-    *   **[Mobile - Mercado] Estabilizaciﾃδｳn:** Se verificﾃδｳ la paridad operativa del `RealmStockExchangeNative` con la web, confirmando que las operaciones respetan el bloqueo transaccional (`applyOperation`) y propagan correctamente los deltas de oro.
-    *   **[Backlog] Actualizaciﾃδｳn:** Se marcaron como completadas las tareas restantes del sprint de Antigravity 2 en `mobile-reactivation-backlog.md`.
-*   **Notas/Advertencias:** Validado con lectura de cﾃδｳdigo y `npm run mobile:typecheck` exitoso. La arquitectura financiera mﾃδｳvil ya no sobrescribe el oro total, operando exclusivamente mediante incrementos/decrementos validados en Supabase.
+    *   **[Mobile - Economï¾ƒÎ´ï½­a] QA Funcional Completo y Sincronizaciï¾ƒÎ´ï½³n atï¾ƒÎ´ï½³mica:** Se auditï¾ƒÎ´ï½³ funcionalmente el ciclo de compra en el mercado mï¾ƒÎ´ï½³vil (se descuenta una sola vez, se refresca el saldo, se actualiza el inventario). Se refactorizaron `TavernSlotsNative`, `TavernHorseRaceNative` y `RealmStockExchangeNative` para utilizar `addGold` (basado en el RPC `increment_gold` de Supabase) en lugar del mï¾ƒÎ´ï½©todo inseguro `updateGold`, previniendo race conditions y asegurando la consistencia entre saldo visible e historial. Ademï¾ƒÎ´ï½¡s, se documentï¾ƒÎ´ï½³ el SQL del RPC `increment_gold` (`supabase_increment_gold.sql`) en el repositorio para evitar desincronizaciones futuras. Fase 2 completada y validada con \`npm run mobile:typecheck\` y \`npm run build\`.
+    *   **[Mobile - Mercado] Estabilizaciï¾ƒÎ´ï½³n:** Se verificï¾ƒÎ´ï½³ la paridad operativa del `RealmStockExchangeNative` con la web, confirmando que las operaciones respetan el bloqueo transaccional (`applyOperation`) y propagan correctamente los deltas de oro.
+    *   **[Backlog] Actualizaciï¾ƒÎ´ï½³n:** Se marcaron como completadas las tareas restantes del sprint de Antigravity 2 en `mobile-reactivation-backlog.md`.
+*   **Notas/Advertencias:** Validado con lectura de cï¾ƒÎ´ï½³digo y `npm run mobile:typecheck` exitoso. La arquitectura financiera mï¾ƒÎ´ï½³vil ya no sobrescribe el oro total, operando exclusivamente mediante incrementos/decrementos validados en Supabase.
 
 ### [Fecha: 29/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `apps/mobile/src/features/missions/missionsService.ts`, `AI_CHANGELOG.md`
@@ -631,7 +636,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Resumen:** Cierre de la Fase 1 de reactivacion mobile con auditoria, backlog y briefs operativos.
 *   **Cambios Clave:**
     *   **[Mobile] Target congelado:** Se formalizo `apps/mobile` como unico frente movil real y `android/` raiz como artefacto no prioritario.
-    *   **[Arquitectura] Matriz de paridad:** Se documento `web vs mobile` por dominio con estado (`lista`, `parcial`, `ausente`, `no prioritaria`) y dueﾃδｱo principal.
+    *   **[Arquitectura] Matriz de paridad:** Se documento `web vs mobile` por dominio con estado (`lista`, `parcial`, `ausente`, `no prioritaria`) y dueï¾ƒÎ´ï½±o principal.
     *   **[Contratos] Alineacion inicial:** Se documentaron divergencias entre `src/types.ts` y `apps/mobile/src/features/shared/types.ts`, con foco en `player/session`, `missions`, `events`, `market items` e `inventory`.
     *   **[Ejecucion] Backlog y prompts:** Se dejaron briefs separados para Antigravity 1 y 2 con alcance, prioridades, restricciones y validacion.
 *   **Notas/Advertencias:** Es una implementacion de Fase 1 orientada a ejecucion; no modifica aun logica funcional de la app movil.
@@ -646,10 +651,10 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 29/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernPlinko.tsx`, `AI_CHANGELOG.md`
-*   **Resumen:** Ampliaciﾃδｳn de la cantidad mﾃδ｡xima de esferas a lanzar en la Torre del Mago.
+*   **Resumen:** Ampliaciï¾ƒÎ´ï½³n de la cantidad mï¾ƒÎ´ï½¡xima de esferas a lanzar en la Torre del Mago.
 *   **Cambios Clave:**
-    *   **[Minijuegos - Torre del Mago]:** Se ajustaron los botones de selecciﾃδｳn de cantidad de esferas, cambiando las opciones de `[1, 3, 5, 10]` a `[1, 5, 10, 20]`.
-*   **Notas/Advertencias:** Actualizaciﾃδｳn rﾃδ｡pida de UI para escalar las apuestas.
+    *   **[Minijuegos - Torre del Mago]:** Se ajustaron los botones de selecciï¾ƒÎ´ï½³n de cantidad de esferas, cambiando las opciones de `[1, 3, 5, 10]` a `[1, 5, 10, 20]`.
+*   **Notas/Advertencias:** Actualizaciï¾ƒÎ´ï½³n rï¾ƒÎ´ï½¡pida de UI para escalar las apuestas.
 
 ### [Fecha: 29/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
@@ -663,38 +668,38 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 28/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernPlinko.tsx`
-*   **Resumen:** Correcciﾃδｳn visual y lﾃδｳgica del cﾃδ｡lculo de apuestas en Esfera de las Runas.
+*   **Resumen:** Correcciï¾ƒÎ´ï½³n visual y lï¾ƒÎ´ï½³gica del cï¾ƒÎ´ï½¡lculo de apuestas en Esfera de las Runas.
 *   **Cambios Clave:**
-    *   **[Minijuegos] Correcciﾃδｳn cﾃδ｡lculo de total:** El costo total de la jugada ahora calcula `apuestaPorEsfera * cantidad`, mostrﾃδ｡ndose explﾃδｭcitamente y utilizﾃδ｡ndose correctamente para la deducciﾃδｳn de oro y los cﾃδ｡lculos de RTP/premio.
-    *   **[UI] Claridad de Etiquetas:** Actualizadas etiquetas "Multiplicador" a "Lanzamiento" y "Apuesta unitaria" a "Apuesta por esfera" para evitar confusiﾃδｳn. Se muestra de manera clara el costo total real de la jugada.
-    *   **[UX] Estado del Botﾃδｳn:** Actualizados los mensajes en el botﾃδｳn de lanzar (Oro insuficiente, lﾃδｭmite alcanzado, apuesta invﾃδ｡lida) para informar dinﾃδ｡micamente y con base al oro que requiere la apuesta total.
+    *   **[Minijuegos] Correcciï¾ƒÎ´ï½³n cï¾ƒÎ´ï½¡lculo de total:** El costo total de la jugada ahora calcula `apuestaPorEsfera * cantidad`, mostrï¾ƒÎ´ï½¡ndose explï¾ƒÎ´ï½­citamente y utilizï¾ƒÎ´ï½¡ndose correctamente para la deducciï¾ƒÎ´ï½³n de oro y los cï¾ƒÎ´ï½¡lculos de RTP/premio.
+    *   **[UI] Claridad de Etiquetas:** Actualizadas etiquetas "Multiplicador" a "Lanzamiento" y "Apuesta unitaria" a "Apuesta por esfera" para evitar confusiï¾ƒÎ´ï½³n. Se muestra de manera clara el costo total real de la jugada.
+    *   **[UX] Estado del Botï¾ƒÎ´ï½³n:** Actualizados los mensajes en el botï¾ƒÎ´ï½³n de lanzar (Oro insuficiente, lï¾ƒÎ´ï½­mite alcanzado, apuesta invï¾ƒÎ´ï½¡lida) para informar dinï¾ƒÎ´ï½¡micamente y con base al oro que requiere la apuesta total.
 *   **Notas/Advertencias:** Validado localmente con `npx tsc --noEmit` y `npm run build` sin errores en este componente.
 ### [Fecha: 29/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`
-*   **Resumen:** Reducciﾃδｳn del plazo de inactividad para purga de 5 a 3 dﾃδｭas.
+*   **Resumen:** Reducciï¾ƒÎ´ï½³n del plazo de inactividad para purga de 5 a 3 dï¾ƒÎ´ï½­as.
 *   **Cambios Clave:**
-    *   **[Admin] Comando !purga:** Se actualizﾃδｳ la constante `THREE_DAYS_MS` y la lﾃδｳgica de cﾃδ｡lculo de tiempo para que el bot advierta y expulse a los usuarios sin ficha o inactivos luego de 3 dﾃδｭas en lugar de 5.
-    *   **[Admin] Notificaciones de UI:** Se ajustaron los textos enviados por WhatsApp al ejecutar la purga para que reporten correctamente el lﾃδｭmite de 3 dﾃδｭas.
+    *   **[Admin] Comando !purga:** Se actualizï¾ƒÎ´ï½³ la constante `THREE_DAYS_MS` y la lï¾ƒÎ´ï½³gica de cï¾ƒÎ´ï½¡lculo de tiempo para que el bot advierta y expulse a los usuarios sin ficha o inactivos luego de 3 dï¾ƒÎ´ï½­as en lugar de 5.
+    *   **[Admin] Notificaciones de UI:** Se ajustaron los textos enviados por WhatsApp al ejecutar la purga para que reporten correctamente el lï¾ƒÎ´ï½­mite de 3 dï¾ƒÎ´ï½­as.
 *   **Notas/Advertencias:** Los cambios se hicieron en el repositorio del bot y se empujaron a `origin/main`.
 
 ### [Fecha: 28/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/admin/AdminMissionManager.tsx`, `src/utils/missions.ts`
 *   **Resumen:** Funcionalidad para eliminar participantes de misiones desde el panel de admin.
 *   **Cambios Clave:**
-    *   **[Admin] Botﾃδｳn Eliminar:** Nuevo botﾃδｳn de "Eliminar" en la tarjeta de participante (`AdminMissionManager.tsx`) con prompt de confirmaciﾃδｳn de seguridad.
-    *   **[Backend] Borrado y Recﾃδ｡lculo:** La funciﾃδｳn `deleteMissionClaim` (`missions.ts`) borra el reclamo, elimina las pruebas del Storage (`MISSION_EVIDENCE_BUCKET`) y devuelve el estado de la misiﾃδｳn a `available` automﾃδ｡ticamente si se libera un cupo en una misiﾃδｳn `in-progress`.
-*   **Notas/Advertencias:** Listo para producciﾃδｳn, confirmado con `git push`. Las validaciones de TS fallan por errores previos ajenos al ﾃδ｡rea afectada.
+    *   **[Admin] Botï¾ƒÎ´ï½³n Eliminar:** Nuevo botï¾ƒÎ´ï½³n de "Eliminar" en la tarjeta de participante (`AdminMissionManager.tsx`) con prompt de confirmaciï¾ƒÎ´ï½³n de seguridad.
+    *   **[Backend] Borrado y Recï¾ƒÎ´ï½¡lculo:** La funciï¾ƒÎ´ï½³n `deleteMissionClaim` (`missions.ts`) borra el reclamo, elimina las pruebas del Storage (`MISSION_EVIDENCE_BUCKET`) y devuelve el estado de la misiï¾ƒÎ´ï½³n a `available` automï¾ƒÎ´ï½¡ticamente si se libera un cupo en una misiï¾ƒÎ´ï½³n `in-progress`.
+*   **Notas/Advertencias:** Listo para producciï¾ƒÎ´ï½³n, confirmado con `git push`. Las validaciones de TS fallan por errores previos ajenos al ï¾ƒÎ´ï½¡rea afectada.
 
 ### [Fecha: 28/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/components/admin/AdminControlPrimitives.tsx`, `DATABASE_SCHEMA.md`, `patch.cjs` (eliminado), `test-supabase.ts` (eliminado)
-*   **Resumen:** Sincronizaciﾃδｳn en tiempo real de misiones en UI, resoluciﾃδｳn de conflictos y limpieza de repositorio.
+*   **Resumen:** Sincronizaciï¾ƒÎ´ï½³n en tiempo real de misiones en UI, resoluciï¾ƒÎ´ï½³n de conflictos y limpieza de repositorio.
 *   **Cambios Clave:**
-    *   **[Mobile/UI] Sincronizaciﾃδｳn de misiones:** Implementada lﾃδｳgica para reflejar cambios de estado de misiones (reclamos de cupos, actualizaciones de admin) en tiempo real en la UI mﾃδｳvil sin recarga manual.
-    *   **[Mantenimiento] Resoluciﾃδｳn de conflictos:** Solucionados conflictos de Git en `AdminControlSheet.tsx` y `AdminControlPrimitives.tsx` para mantener consistencia Mobile-First.
-    *   **[Mantenimiento] Limpieza de metadatos:** Se auditaron y limpiaron residuos huﾃδｩrfanos de Git (`REBASE_HEAD`, `.COMMIT_EDITMSG.swp`) tras confirmar un working tree limpio.
-    *   **[Documentaciﾃδｳn] Correcciﾃδｳn de Schema:** Actualizado `DATABASE_SCHEMA.md` para clarificar la diferencia de casing entre `playerId` (`character_sheets`) y `player_id` (`player_inventory`).
-    *   **[Mantenimiento] Archivos temporales:** Eliminados scripts temporales (`patch.cjs`, `test-supabase.ts`) que no pertenecen a producciﾃδｳn.
-*   **Notas/Advertencias:** Persisten errores de tipos de Typescript en `RankingCard.tsx` y `WeeklyRankingPodium.tsx` que requieren futura revisiﾃδｳn.
+    *   **[Mobile/UI] Sincronizaciï¾ƒÎ´ï½³n de misiones:** Implementada lï¾ƒÎ´ï½³gica para reflejar cambios de estado de misiones (reclamos de cupos, actualizaciones de admin) en tiempo real en la UI mï¾ƒÎ´ï½³vil sin recarga manual.
+    *   **[Mantenimiento] Resoluciï¾ƒÎ´ï½³n de conflictos:** Solucionados conflictos de Git en `AdminControlSheet.tsx` y `AdminControlPrimitives.tsx` para mantener consistencia Mobile-First.
+    *   **[Mantenimiento] Limpieza de metadatos:** Se auditaron y limpiaron residuos huï¾ƒÎ´ï½©rfanos de Git (`REBASE_HEAD`, `.COMMIT_EDITMSG.swp`) tras confirmar un working tree limpio.
+    *   **[Documentaciï¾ƒÎ´ï½³n] Correcciï¾ƒÎ´ï½³n de Schema:** Actualizado `DATABASE_SCHEMA.md` para clarificar la diferencia de casing entre `playerId` (`character_sheets`) y `player_id` (`player_inventory`).
+    *   **[Mantenimiento] Archivos temporales:** Eliminados scripts temporales (`patch.cjs`, `test-supabase.ts`) que no pertenecen a producciï¾ƒÎ´ï½³n.
+*   **Notas/Advertencias:** Persisten errores de tipos de Typescript en `RankingCard.tsx` y `WeeklyRankingPodium.tsx` que requieren futura revisiï¾ƒÎ´ï½³n.
 
 ### [Fecha: 28/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
@@ -737,17 +742,17 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 30/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
-*   **Resumen:** Reducciﾃδｳn del tiempo de gracia del comando `!purga` a peticiﾃδｳn del administrador.
+*   **Resumen:** Reducciï¾ƒÎ´ï½³n del tiempo de gracia del comando `!purga` a peticiï¾ƒÎ´ï½³n del administrador.
 *   **Cambios Clave:**
-    *   **[Bot] Reglas de Purga:** Se modificﾃδｳ la duraciﾃδｳn permitida de un jugador sin ficha de 5 dﾃδｭas a 3 dﾃδｭas. Los textos de advertencia del menﾃδｺ de comandos tambiﾃδｩn fueron actualizados a 3 dﾃδｭas.
+    *   **[Bot] Reglas de Purga:** Se modificï¾ƒÎ´ï½³ la duraciï¾ƒÎ´ï½³n permitida de un jugador sin ficha de 5 dï¾ƒÎ´ï½­as a 3 dï¾ƒÎ´ï½­as. Los textos de advertencia del menï¾ƒÎ´ï½º de comandos tambiï¾ƒÎ´ï½©n fueron actualizados a 3 dï¾ƒÎ´ï½­as.
 
 ### [Fecha: 30/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/tracker.js`, `kingdoom-bot/src/handlers/admin.js`, `AI_CHANGELOG.md`
-*   **Resumen:** Soluciﾃδｳn al reseteo del comando `!purga` provocado por reinicios del servidor en Hugging Face.
+*   **Resumen:** Soluciï¾ƒÎ´ï½³n al reseteo del comando `!purga` provocado por reinicios del servidor en Hugging Face.
 *   **Cambios Clave:**
-    *   **[Bot] Persistencia en Supabase:** Se reescribiﾃδｳ `tracker.js` para que ya no guarde `pending_tracker.json` en el sistema de archivos local, ya que Hugging Face Spaces es efﾃδｭmero y borraba el progreso.
+    *   **[Bot] Persistencia en Supabase:** Se reescribiï¾ƒÎ´ï½³ `tracker.js` para que ya no guarde `pending_tracker.json` en el sistema de archivos local, ya que Hugging Face Spaces es efï¾ƒÎ´ï½­mero y borraba el progreso.
     *   **[Bot] Documento Oculto:** El estado del tracker ahora se serializa y se guarda directamente en la tabla `knowledge_documents` bajo el ID `bot-pending-tracker` con visibilidad falsa, aprovechando la base de datos sin requerir migraciones SQL nuevas.
-    *   **[Bot] Funciones Asﾃδｭncronas:** Se modificﾃδｳ `admin.js` para usar `await` en las llamadas del tracker, permitiendo consultas remotas.
+    *   **[Bot] Funciones Asï¾ƒÎ´ï½­ncronas:** Se modificï¾ƒÎ´ï½³ `admin.js` para usar `await` en las llamadas del tracker, permitiendo consultas remotas.
 
 ### [Fecha: 27/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
@@ -769,12 +774,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 27/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `src/components/admin/AdminMissionManager.tsx`, `src/utils/missions.ts`, `src/types.ts`, `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
-*   **Resumen:** Puente canﾃδｳnico entre misiones del panel admin y el Game Master para restringir magias de NPCs al grimorio oficial.
+*   **Resumen:** Puente canï¾ƒÎ´ï½³nico entre misiones del panel admin y el Game Master para restringir magias de NPCs al grimorio oficial.
 *   **Cambios Clave:**
-    *   **[Admin] NPCs tﾃδ｡cticos canﾃδｳnicos:** El editor de misiones ahora permite definir NPCs del encounter con rol, stats, notas tﾃδ｡cticas y una lista explﾃδｭcita de magias permitidas tomadas del grimorio administrado.
-    *   **[Compatibilidad] Config embebida sin migraciﾃδｳn:** La configuraciﾃδｳn del GM se serializa dentro de `instructions` usando bloques `[GM_CONFIG]...[/GM_CONFIG]`, evitando cambios de esquema en Supabase y manteniendo compatibilidad con las misiones existentes.
-    *   **[GM-bot] Magia restringida por payload:** El bot parsea esa configuraciﾃδｳn embebida y la inyecta en `DATOS_DE_MISION` como bloque canﾃδｳnico de NPCs y magias permitidas, junto con una regla explﾃδｭcita para no inventar hechizos fuera de la lista.
-*   **Notas/Advertencias:** `npx tsc --noEmit` sigue fallando por errores previos y ajenos en `src/components/RankingCard.tsx` y `src/components/WeeklyRankingPodium.tsx`. La validaciﾃδｳn de estos cambios se hizo con chequeo sintﾃδ｡ctico del bot y revisiﾃδｳn focalizada del flujo admin -> misiﾃδｳn -> GM.
+    *   **[Admin] NPCs tï¾ƒÎ´ï½¡cticos canï¾ƒÎ´ï½³nicos:** El editor de misiones ahora permite definir NPCs del encounter con rol, stats, notas tï¾ƒÎ´ï½¡cticas y una lista explï¾ƒÎ´ï½­cita de magias permitidas tomadas del grimorio administrado.
+    *   **[Compatibilidad] Config embebida sin migraciï¾ƒÎ´ï½³n:** La configuraciï¾ƒÎ´ï½³n del GM se serializa dentro de `instructions` usando bloques `[GM_CONFIG]...[/GM_CONFIG]`, evitando cambios de esquema en Supabase y manteniendo compatibilidad con las misiones existentes.
+    *   **[GM-bot] Magia restringida por payload:** El bot parsea esa configuraciï¾ƒÎ´ï½³n embebida y la inyecta en `DATOS_DE_MISION` como bloque canï¾ƒÎ´ï½³nico de NPCs y magias permitidas, junto con una regla explï¾ƒÎ´ï½­cita para no inventar hechizos fuera de la lista.
+*   **Notas/Advertencias:** `npx tsc --noEmit` sigue fallando por errores previos y ajenos en `src/components/RankingCard.tsx` y `src/components/WeeklyRankingPodium.tsx`. La validaciï¾ƒÎ´ï½³n de estos cambios se hizo con chequeo sintï¾ƒÎ´ï½¡ctico del bot y revisiï¾ƒÎ´ï½³n focalizada del flujo admin -> misiï¾ƒÎ´ï½³n -> GM.
 
 ### [Fecha: 27/05/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/ai.js`, `AI_CHANGELOG.md`
@@ -812,78 +817,78 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 27/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/gmTracker.js`, `kingdoom-bot/src/ai.js`
-*   **Resumen:** Optimizaciﾃδｳn del motor del Game Master para rol narrativo orgﾃδ｡nico sin lﾃδｭmites rﾃδｭgidos y agnﾃδｳstico al lore.
+*   **Resumen:** Optimizaciï¾ƒÎ´ï½³n del motor del Game Master para rol narrativo orgï¾ƒÎ´ï½¡nico sin lï¾ƒÎ´ï½­mites rï¾ƒÎ´ï½­gidos y agnï¾ƒÎ´ï½³stico al lore.
 *   **Cambios Clave:**
-    *   **Prompt Dinﾃδ｡mico y Agnﾃδｳstico:** Se refactorizﾃδｳ `buildGMPrompt` en `gmTracker.js` para eliminar referencias estﾃδ｡ticas (como "Shadow Garden"). Ahora el GM adopta la personalidad y el lore definidos exclusivamente en las instrucciones de la misiﾃδｳn desde la base de datos.
-    *   **Eliminaciﾃδｳn de Lﾃδｭmites y Formato Natural:** Se removiﾃδｳ la restricciﾃδｳn de 350 palabras y el uso de listas numeradas (1., 2., 3...). El bot ahora usa prosa fluida y bloques de cﾃδｳdigo Markdown para exponer mecﾃδ｡nicas RPG (cooldowns, niveles, daﾃδｱo) imitando el estilo de rol avanzado humano.
-    *   **Expansiﾃδｳn de Tokens:** Se incrementﾃδｳ `maxOutputTokens` de 1024 a 2048 en `ai.js` para prevenir que respuestas narrativas extensas se corten prematuramente.
-    *   **Fidelidad Tﾃδ｡ctica:** El sistema ahora estﾃδ｡ instruido para priorizar el respeto estricto a las estadﾃδｭsticas reales (niveles, HP, etc.) de los NPCs creados en el panel de control.
+    *   **Prompt Dinï¾ƒÎ´ï½¡mico y Agnï¾ƒÎ´ï½³stico:** Se refactorizï¾ƒÎ´ï½³ `buildGMPrompt` en `gmTracker.js` para eliminar referencias estï¾ƒÎ´ï½¡ticas (como "Shadow Garden"). Ahora el GM adopta la personalidad y el lore definidos exclusivamente en las instrucciones de la misiï¾ƒÎ´ï½³n desde la base de datos.
+    *   **Eliminaciï¾ƒÎ´ï½³n de Lï¾ƒÎ´ï½­mites y Formato Natural:** Se removiï¾ƒÎ´ï½³ la restricciï¾ƒÎ´ï½³n de 350 palabras y el uso de listas numeradas (1., 2., 3...). El bot ahora usa prosa fluida y bloques de cï¾ƒÎ´ï½³digo Markdown para exponer mecï¾ƒÎ´ï½¡nicas RPG (cooldowns, niveles, daï¾ƒÎ´ï½±o) imitando el estilo de rol avanzado humano.
+    *   **Expansiï¾ƒÎ´ï½³n de Tokens:** Se incrementï¾ƒÎ´ï½³ `maxOutputTokens` de 1024 a 2048 en `ai.js` para prevenir que respuestas narrativas extensas se corten prematuramente.
+    *   **Fidelidad Tï¾ƒÎ´ï½¡ctica:** El sistema ahora estï¾ƒÎ´ï½¡ instruido para priorizar el respeto estricto a las estadï¾ƒÎ´ï½­sticas reales (niveles, HP, etc.) de los NPCs creados en el panel de control.
 
 ### [Fecha: 26/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/auditLog.js`, `kingdoom-bot/src/adminStore.js`
-*   **Resumen:** Correcciﾃδｳn de rutas absolutas para garantizar persistencia local y remota del bot.
+*   **Resumen:** Correcciï¾ƒÎ´ï½³n de rutas absolutas para garantizar persistencia local y remota del bot.
 *   **Cambios Clave:**
-    *   **[Admin] Rutas dinﾃδ｡micas:** Se implementaron rutas dinﾃδ｡micas (usando `__dirname` y `path.join`) para `admin_audit_log.json` y `admins.json`. Esto corrige el fallo silencioso donde el comando `!bitacora` no mostraba informaciﾃδｳn al correr en Windows y asegura compatibilidad nativa tanto local como en el contenedor de Hugging Face.
+    *   **[Admin] Rutas dinï¾ƒÎ´ï½¡micas:** Se implementaron rutas dinï¾ƒÎ´ï½¡micas (usando `__dirname` y `path.join`) para `admin_audit_log.json` y `admins.json`. Esto corrige el fallo silencioso donde el comando `!bitacora` no mostraba informaciï¾ƒÎ´ï½³n al correr en Windows y asegura compatibilidad nativa tanto local como en el contenedor de Hugging Face.
 
 ### [Fecha: 27/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/components/admin/AdminControlPrimitives.tsx`, `src/components/PlayerProfilePanel.tsx`
-*   **Resumen:** Revisiﾃδｳn integral de UX/UI Mobile-First para compactar y optimizar espacio en pantallas pequeﾃδｱas.
+*   **Resumen:** Revisiï¾ƒÎ´ï½³n integral de UX/UI Mobile-First para compactar y optimizar espacio en pantallas pequeï¾ƒÎ´ï½±as.
 *   **Cambios Clave:**
-    *   **[UI Admin] Modal Full-screen:** `AdminControlSheet` ahora ocupa el 100% de la pantalla en dispositivos mﾃδｳviles sin bordes redondeados, maximizando el espacio ﾃδｺtil, mientras que en desktop mantiene su diseﾃδｱo de panel flotante (`md:h-[92vh] md:rounded-[2rem]`).
+    *   **[UI Admin] Modal Full-screen:** `AdminControlSheet` ahora ocupa el 100% de la pantalla en dispositivos mï¾ƒÎ´ï½³viles sin bordes redondeados, maximizando el espacio ï¾ƒÎ´ï½ºtil, mientras que en desktop mantiene su diseï¾ƒÎ´ï½±o de panel flotante (`md:h-[92vh] md:rounded-[2rem]`).
     *   **[UI Admin] Formularios y Primitivas Compactas:** Se redujo el padding excesivo (`p-5` a `p-4 sm:p-5`) y los gaps en los inputs, tarjetas informativas y previas del mercado dentro de `AdminControlPrimitives.tsx`, requiriendo menos scroll vertical para administrar el reino desde el celular.
-    *   **[UI Perfil] Optimizaciﾃδｳn de Layout:** `PlayerProfilePanel` ajustﾃδｳ la separaciﾃδｳn de sus bloques (`gap-5` a `gap-4 sm:gap-5`) y compactﾃδｳ los paddings generales de sus secciones internas para eliminar espacios vacﾃδｭos innecesarios sin perder jerarquﾃδｭa visual.
-*   **Notas/Advertencias:** Ningﾃδｺn cambio de lﾃδｳgica de Supabase ni del bot. Exclusivo de Frontend UI.
+    *   **[UI Perfil] Optimizaciï¾ƒÎ´ï½³n de Layout:** `PlayerProfilePanel` ajustï¾ƒÎ´ï½³ la separaciï¾ƒÎ´ï½³n de sus bloques (`gap-5` a `gap-4 sm:gap-5`) y compactï¾ƒÎ´ï½³ los paddings generales de sus secciones internas para eliminar espacios vacï¾ƒÎ´ï½­os innecesarios sin perder jerarquï¾ƒÎ´ï½­a visual.
+*   **Notas/Advertencias:** Ningï¾ƒÎ´ï½ºn cambio de lï¾ƒÎ´ï½³gica de Supabase ni del bot. Exclusivo de Frontend UI.
 
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/player.js`
-*   **Resumen:** Actualizaciﾃδｳn del comando `!ayuda`.
+*   **Resumen:** Actualizaciï¾ƒÎ´ï½³n del comando `!ayuda`.
 *   **Cambios Clave:**
-    *   **[Admin/Soberano] Menﾃδｺ de Ayuda:** Se aﾃδｱadieron los comandos administrativos faltantes (`!actividad`, `!grupoactual` y `!groupid`) a la lista desplegada por el comando `!ayuda`.
+    *   **[Admin/Soberano] Menï¾ƒÎ´ï½º de Ayuda:** Se aï¾ƒÎ´ï½±adieron los comandos administrativos faltantes (`!actividad`, `!grupoactual` y `!groupid`) a la lista desplegada por el comando `!ayuda`.
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/src/supabase.js`
-*   **Resumen:** Creaciﾃδｳn del comando de reporte `!actividad` (o `!inactivos`).
+*   **Resumen:** Creaciï¾ƒÎ´ï½³n del comando de reporte `!actividad` (o `!inactivos`).
 *   **Cambios Clave:**
-    *   **[Admin] Reporte de Inactividad:** Se aﾃδｱadiﾃδｳ el comando `!actividad` exclusivo para administradores, el cual extrae a todos los usuarios ordenados por su ﾃδｺltima fecha de conexiﾃδｳn y los formatea visualmente en columnas monospaciadas para rﾃδ｡pida lectura en WhatsApp.
+    *   **[Admin] Reporte de Inactividad:** Se aï¾ƒÎ´ï½±adiï¾ƒÎ´ï½³ el comando `!actividad` exclusivo para administradores, el cual extrae a todos los usuarios ordenados por su ï¾ƒÎ´ï½ºltima fecha de conexiï¾ƒÎ´ï½³n y los formatea visualmente en columnas monospaciadas para rï¾ƒÎ´ï½¡pida lectura en WhatsApp.
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `Kingdoom-sync/supabase_purge_inactive.sql`, `Kingdoom-sync/src/utils/players.ts`, `Kingdoom-sync/src/context/PlayerSessionContext.tsx`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/index.js`
-*   **Resumen:** Sistema de purga automﾃδ｡tica por 15 dﾃδｭas de inactividad (Web y WhatsApp).
+*   **Resumen:** Sistema de purga automï¾ƒÎ´ï½¡tica por 15 dï¾ƒÎ´ï½­as de inactividad (Web y WhatsApp).
 *   **Cambios Clave:**
-    *   **[Base de Datos] SQL Cron:** Nuevo script para aﾃδｱadir la columna `last_active_at` y crear un cron diario (`pg_cron`) que purgue perfiles inactivos.
-    *   **[Web] Rastreo de Actividad:** Se ha integrado `touchPlayerActivity` al iniciar o recuperar sesiﾃδｳn en la web para evitar purgas errﾃδｳneas.
-    *   **[Bot] Intercepciﾃδｳn de Mensajes:** Todo comando procesado por el bot en WhatsApp actualizarﾃδ｡ la actividad del usuario en tiempo real.
+    *   **[Base de Datos] SQL Cron:** Nuevo script para aï¾ƒÎ´ï½±adir la columna `last_active_at` y crear un cron diario (`pg_cron`) que purgue perfiles inactivos.
+    *   **[Web] Rastreo de Actividad:** Se ha integrado `touchPlayerActivity` al iniciar o recuperar sesiï¾ƒÎ´ï½³n en la web para evitar purgas errï¾ƒÎ´ï½³neas.
+    *   **[Bot] Intercepciï¾ƒÎ´ï½³n de Mensajes:** Todo comando procesado por el bot en WhatsApp actualizarï¾ƒÎ´ï½¡ la actividad del usuario en tiempo real.
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`
 *   **Resumen:** Mejora del comando !purga para reportar y etiquetar a los usuarios pendientes.
 *   **Cambios Clave:**
-    *   **[Admin] Reporte de dﾃδｭas restantes:** El comando `!purga` ahora enumera a todos los usuarios pendientes que aﾃδｺn no han superado el lﾃδｭmite de 5 dﾃδｭas, mencionﾃδ｡ndolos mediante etiqueta (`@usuario`) y mostrando cuﾃδ｡ntos dﾃδｭas les quedan para ser eliminados ("X dﾃδｭas para eliminaciﾃδｳn"). Esto funciona en adiciﾃδｳn a la expulsiﾃδｳn automﾃδ｡tica de aquellos que ya hayan cumplido el plazo.
+    *   **[Admin] Reporte de dï¾ƒÎ´ï½­as restantes:** El comando `!purga` ahora enumera a todos los usuarios pendientes que aï¾ƒÎ´ï½ºn no han superado el lï¾ƒÎ´ï½­mite de 5 dï¾ƒÎ´ï½­as, mencionï¾ƒÎ´ï½¡ndolos mediante etiqueta (`@usuario`) y mostrando cuï¾ƒÎ´ï½¡ntos dï¾ƒÎ´ï½­as les quedan para ser eliminados ("X dï¾ƒÎ´ï½­as para eliminaciï¾ƒÎ´ï½³n"). Esto funciona en adiciï¾ƒÎ´ï½³n a la expulsiï¾ƒÎ´ï½³n automï¾ƒÎ´ï½¡tica de aquellos que ya hayan cumplido el plazo.
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`, `mcp_config.json`
-*   **Resumen:** Reforzamiento de reglas de protocolo e integraciﾃδｳn local del MCP Kingdoom-memory.
+*   **Resumen:** Reforzamiento de reglas de protocolo e integraciï¾ƒÎ´ï½³n local del MCP Kingdoom-memory.
 *   **Cambios Clave:**
-    *   **[Core Rule] Registro Obligatorio:** Se actualizﾃδｳ la regla de Inteligencias Artificiales del changelog para exigir que **cualquier** cambio, por mﾃδｭnimo que sea, deba documentarse en el historial y en la memoria MCP, y subirse obligatoriamente a Git de inmediato.
-    *   **[Core Rule] Sincronizaciﾃδｳn:** Se inyectaron directrices principales (`core-rule`) en la memoria MCP exigiendo sincronizaciﾃδｳn obligatoria inicial (`git pull`) y publicaciﾃδｳn obligatoria final (`git push`) en cada sesiﾃδｳn.
-    *   **[Sistema] Servidor MCP:** Se configurﾃδｳ exitosamente el servidor local MCP en `mcp_config.json` para tener acceso nativo a la memoria compartida de la IA.
+    *   **[Core Rule] Registro Obligatorio:** Se actualizï¾ƒÎ´ï½³ la regla de Inteligencias Artificiales del changelog para exigir que **cualquier** cambio, por mï¾ƒÎ´ï½­nimo que sea, deba documentarse en el historial y en la memoria MCP, y subirse obligatoriamente a Git de inmediato.
+    *   **[Core Rule] Sincronizaciï¾ƒÎ´ï½³n:** Se inyectaron directrices principales (`core-rule`) en la memoria MCP exigiendo sincronizaciï¾ƒÎ´ï½³n obligatoria inicial (`git pull`) y publicaciï¾ƒÎ´ï½³n obligatoria final (`git push`) en cada sesiï¾ƒÎ´ï½³n.
+    *   **[Sistema] Servidor MCP:** Se configurï¾ƒÎ´ï½³ exitosamente el servidor local MCP en `mcp_config.json` para tener acceso nativo a la memoria compartida de la IA.
 
 ### [Fecha: 25/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/scheduler.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/activeProfileStore.js`
-*   **Resumen:** Correcciﾃδｳn de bug de usuarios con mﾃδｺltiples nﾃδｺmeros en reportes, implementaciﾃδｳn de mensajes motivacionales automatizados, y habilitaciﾃδｳn oficial de sistema multicuentas para WhatsApp.
+*   **Resumen:** Correcciï¾ƒÎ´ï½³n de bug de usuarios con mï¾ƒÎ´ï½ºltiples nï¾ƒÎ´ï½ºmeros en reportes, implementaciï¾ƒÎ´ï½³n de mensajes motivacionales automatizados, y habilitaciï¾ƒÎ´ï½³n oficial de sistema multicuentas para WhatsApp.
 *   **Cambios Clave:**
-    *   **Bugfix en !pendientes y Scheduler (Fix):** Se ajustﾃδｳ la funciﾃδｳn de limpieza de nﾃδｺmeros `normalizePhone` porque estaba fusionando nﾃδｺmeros separados por coma en un ﾃδｺnico nﾃδｺmero corrupto. Ahora, cuando el bot revisa listas de participantes o envﾃδｭa notificaciones masivas, separa las comas primero y evalﾃδｺa cada nﾃδｺmero individualmente, arreglando falsos positivos de "no registrados" para los administradores y permitiendo que les lleguen las recompensas.
-    *   **Mensajes Motivacionales de Rol (Feature):** El planificador de tareas (`scheduler.js`) fue rediseﾃδｱado. Se eliminﾃδｳ el reporte semanal de ranking, y ahora envﾃδｭa un mensaje inmersivo y poﾃδｩtico ("Un nuevo ciclo comienza...") todos los lunes. Ademﾃδ｡s, el aviso de reset diario a la medianoche fue adaptado para incluir el nombre del personaje principal del usuario, haciﾃδｩndolo 100% de rol.
-    *   **Soporte Multicuentas (Feature):** Se eliminﾃδｳ la restricciﾃδｳn en la base de datos que impedﾃδｭa a los usuarios vincular un nﾃδｺmero de telﾃδｩfono que ya estaba en uso. 
-    *   **Comando `!cambiarcuenta` (Nuevo):** Los jugadores con mﾃδｺltiples cuentas web (ej: Nothing y Alexander) pueden vincular ambas a su mismo WhatsApp. Se aﾃδｱadiﾃδｳ un store local (`activeProfileStore.js`) y un comando `!cambiarcuenta <nombre>` para que el jugador elija cuﾃδ｡l de sus fichas estﾃδ｡ activa para interactuar con el Orﾃδ｡culo, jugar o recibir oro.
+    *   **Bugfix en !pendientes y Scheduler (Fix):** Se ajustï¾ƒÎ´ï½³ la funciï¾ƒÎ´ï½³n de limpieza de nï¾ƒÎ´ï½ºmeros `normalizePhone` porque estaba fusionando nï¾ƒÎ´ï½ºmeros separados por coma en un ï¾ƒÎ´ï½ºnico nï¾ƒÎ´ï½ºmero corrupto. Ahora, cuando el bot revisa listas de participantes o envï¾ƒÎ´ï½­a notificaciones masivas, separa las comas primero y evalï¾ƒÎ´ï½ºa cada nï¾ƒÎ´ï½ºmero individualmente, arreglando falsos positivos de "no registrados" para los administradores y permitiendo que les lleguen las recompensas.
+    *   **Mensajes Motivacionales de Rol (Feature):** El planificador de tareas (`scheduler.js`) fue rediseï¾ƒÎ´ï½±ado. Se eliminï¾ƒÎ´ï½³ el reporte semanal de ranking, y ahora envï¾ƒÎ´ï½­a un mensaje inmersivo y poï¾ƒÎ´ï½©tico ("Un nuevo ciclo comienza...") todos los lunes. Ademï¾ƒÎ´ï½¡s, el aviso de reset diario a la medianoche fue adaptado para incluir el nombre del personaje principal del usuario, haciï¾ƒÎ´ï½©ndolo 100% de rol.
+    *   **Soporte Multicuentas (Feature):** Se eliminï¾ƒÎ´ï½³ la restricciï¾ƒÎ´ï½³n en la base de datos que impedï¾ƒÎ´ï½­a a los usuarios vincular un nï¾ƒÎ´ï½ºmero de telï¾ƒÎ´ï½©fono que ya estaba en uso. 
+    *   **Comando `!cambiarcuenta` (Nuevo):** Los jugadores con mï¾ƒÎ´ï½ºltiples cuentas web (ej: Nothing y Alexander) pueden vincular ambas a su mismo WhatsApp. Se aï¾ƒÎ´ï½±adiï¾ƒÎ´ï½³ un store local (`activeProfileStore.js`) y un comando `!cambiarcuenta <nombre>` para que el jugador elija cuï¾ƒÎ´ï½¡l de sus fichas estï¾ƒÎ´ï½¡ activa para interactuar con el Orï¾ƒÎ´ï½¡culo, jugar o recibir oro.
 
 ### [Fecha: 22/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `Kingdoom-bot/src/handlers/player.js`, `Kingdoom-bot/src/supabase.js`, `Kingdoom-bot/src/handlers/games.js`
-*   **Resumen:** Correcciﾃθ津つｳn de parseo en comandos y expansiﾃθ津つｳn de la visiﾃθ津つｳn del Orﾃθ津つ｡culo hacia el Inventario Real.
+*   **Resumen:** Correcciï¾ƒÎ¸æ´¥ã�¤ï½³n de parseo en comandos y expansiï¾ƒÎ¸æ´¥ã�¤ï½³n de la visiï¾ƒÎ¸æ´¥ã�¤ï½³n del Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo hacia el Inventario Real.
 *   **Cambios Clave:**
-    *   **Trim de prefijo (Fix):** Se ajustﾃθ津つｳ la funciﾃθ津つｳn `parseCommand` en `player.js` para aplicar un `.trim()` sobre el string inmediatamente despuﾃθ津つｩs de remover el prefijo `!`. Esto soluciona un error crﾃθ津つｭtico donde comandos como `! Verificar <id>` se registraban como comando vacﾃθ津つｭo (`""`) debido al espacio residual.
-    *   **Inventario en el Orﾃθ津つ｡culo (Feature):** Se aﾃθ津つｱadiﾃθ津つｳ `getPlayerInventory` en `supabase.js` para consultar la tabla `player_inventory`. Ahora el `handleOraculo` en `games.js` inyecta las compras reales del mercado web (con sus cantidades correspondientes) directo al contexto de la IA. Si el jugador le pregunta "ﾃ�堙つｿCﾃθ津つｳmo es mi equipamiento?", el Orﾃθ津つ｡culo ya no alucinarﾃθ津つ｡ basﾃθ津つ｡ndose solo en su ficha original, sino que comentarﾃθ津つ｡ mﾃθ津つ｡gicamente sobre las pociones o espadas reales que haya adquirido con oro.
+    *   **Trim de prefijo (Fix):** Se ajustï¾ƒÎ¸æ´¥ã�¤ï½³ la funciï¾ƒÎ¸æ´¥ã�¤ï½³n `parseCommand` en `player.js` para aplicar un `.trim()` sobre el string inmediatamente despuï¾ƒÎ¸æ´¥ã�¤ï½©s de remover el prefijo `!`. Esto soluciona un error crï¾ƒÎ¸æ´¥ã�¤ï½­tico donde comandos como `! Verificar <id>` se registraban como comando vacï¾ƒÎ¸æ´¥ã�¤ï½­o (`""`) debido al espacio residual.
+    *   **Inventario en el Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo (Feature):** Se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ `getPlayerInventory` en `supabase.js` para consultar la tabla `player_inventory`. Ahora el `handleOraculo` en `games.js` inyecta las compras reales del mercado web (con sus cantidades correspondientes) directo al contexto de la IA. Si el jugador le pregunta "ï¾ƒï¿½Â€å ™ã�¤ï½¿Cï¾ƒÎ¸æ´¥ã�¤ï½³mo es mi equipamiento?", el Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo ya no alucinarï¾ƒÎ¸æ´¥ã�¤ï½¡ basï¾ƒÎ¸æ´¥ã�¤ï½¡ndose solo en su ficha original, sino que comentarï¾ƒÎ¸æ´¥ã�¤ï½¡ mï¾ƒÎ¸æ´¥ã�¤ï½¡gicamente sobre las pociones o espadas reales que haya adquirido con oro.
 
 ### [Fecha: 22/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernHorseRace.tsx`, `AI_CHANGELOG.md`
@@ -896,39 +901,39 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 22/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `Kingdoom-bot/src/handlers/games.js`
-*   **Resumen:** Mejora del Orﾃθ津つ｡culo con Memoria y Contexto de Jugador.
+*   **Resumen:** Mejora del Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo con Memoria y Contexto de Jugador.
 *   **Cambios Clave:**
-    *   `games.js`: Se implementﾃθ津つｳ un mapa en memoria (`oraculoMemory`) que guarda el historial de los ﾃθ津つｺltimos 3 intercambios por cada chat/grupo, dﾃθ津つ｡ndole al Orﾃθ津つ｡culo memoria a corto plazo.
-    *   El orﾃθ津つ｡culo ahora sabe quiﾃθ津つｩn le habla y cuﾃθ津つ｡nto oro tiene. El prompt fue ajustado para referirse al jugador por su nombre, y para burlarse o codiciar sus riquezas basﾃθ津つ｡ndose en su saldo en la base de datos, mejorando drﾃθ津つ｡sticamente el rol en vivo.
-    *   **Flexibilidad (Nuevo):** Se eliminﾃθ津つｳ la restricciﾃθ津つｳn rﾃθ津つｭgida de "exactamente 2-3 lﾃθ津つｭneas". Ahora se le permite adaptarse: puede dar respuestas de 1-2 lﾃθ津つｭneas si es un simple vaticinio o explayarse hasta 2 pﾃθ津つ｡rrafos si la pregunta requiere contexto del *lore*. Ademﾃθ津つ｡s, puede interpretar preguntas "Off-Rol" (fuera de personaje) absorbiﾃθ津つｩndolas de forma poﾃθ津つｩtica como si fueran hechicerﾃθ津つｭa o idiomas forasteros.
-    *   **Integraciﾃθ津つｳn de Fichas (Nuevo):** Se aﾃθ津つｱadiﾃθ津つｳ `getPlayerSheet` en `supabase.js`. El orﾃθ津つ｡culo ahora extrae la Ficha de Personaje (Rol) del jugador desde Supabase e inyecta su Nombre de personaje, Raza, Origen, Poderes, Arma y Personalidad en el sistema de la IA. Esto permite al orﾃθ津つ｡culo dar profecﾃθ津つｭas hiper-personalizadas basadas en la lore individual de cada guerrero.
-    *   `ai.js`: Se implementﾃθ津つｳ un tercer modelo de respaldo (`gemini-1.5-flash`) en la cascada de fallbacks para mitigar errores `503 Service Unavailable` provocados por la saturaciﾃθ津つｳn global de los servidores de Google Generative AI en los modelos `2.5` y `3.5`.
-    *   `ai.js`: Se implementﾃθ津つｳ un tercer modelo de respaldo (`gemini-1.5-flash`) en la cascada de fallbacks para mitigar errores `503 Service Unavailable` provocados por la saturaciﾃθ津つｳn global de los servidores de Google Generative AI en los modelos `2.5` y `3.5`.
-    *   **Prevenciﾃθ津つｳn de Alucinaciones (Nuevo):** Se le dio la instrucciﾃθ津つｳn estricta al Orﾃθ津つ｡culo de negarse a revelar las riquezas o secretos de *otros* jugadores. Si se le pregunta por alguien ajeno, ahora dirﾃθ津つ｡ de forma misteriosa que no puede revelar secretos que estﾃθ津つ｡n bajo la sombra, evitando que la IA invente nﾃθ津つｺmeros falsos para compensar la falta de contexto en memoria.
-    *   **Transferencia de Oro (`!oro`):** Se modificﾃθ津つｳ el comando `!oro` en `player.js`. Ahora, si se usa sin parﾃθ津つ｡metros, muestra el saldo actual. Si se usa como `!oro <monto> <@usuario>`, permite a los jugadores enviarse oro entre sﾃθ津つｭ, descontando de la cuenta del emisor y sumando a la del receptor (con validaciﾃθ津つｳn de fondos y protecciﾃθ津つｳn de auto-envﾃθ津つｭo).
+    *   `games.js`: Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ un mapa en memoria (`oraculoMemory`) que guarda el historial de los ï¾ƒÎ¸æ´¥ã�¤ï½ºltimos 3 intercambios por cada chat/grupo, dï¾ƒÎ¸æ´¥ã�¤ï½¡ndole al Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo memoria a corto plazo.
+    *   El orï¾ƒÎ¸æ´¥ã�¤ï½¡culo ahora sabe quiï¾ƒÎ¸æ´¥ã�¤ï½©n le habla y cuï¾ƒÎ¸æ´¥ã�¤ï½¡nto oro tiene. El prompt fue ajustado para referirse al jugador por su nombre, y para burlarse o codiciar sus riquezas basï¾ƒÎ¸æ´¥ã�¤ï½¡ndose en su saldo en la base de datos, mejorando drï¾ƒÎ¸æ´¥ã�¤ï½¡sticamente el rol en vivo.
+    *   **Flexibilidad (Nuevo):** Se eliminï¾ƒÎ¸æ´¥ã�¤ï½³ la restricciï¾ƒÎ¸æ´¥ã�¤ï½³n rï¾ƒÎ¸æ´¥ã�¤ï½­gida de "exactamente 2-3 lï¾ƒÎ¸æ´¥ã�¤ï½­neas". Ahora se le permite adaptarse: puede dar respuestas de 1-2 lï¾ƒÎ¸æ´¥ã�¤ï½­neas si es un simple vaticinio o explayarse hasta 2 pï¾ƒÎ¸æ´¥ã�¤ï½¡rrafos si la pregunta requiere contexto del *lore*. Ademï¾ƒÎ¸æ´¥ã�¤ï½¡s, puede interpretar preguntas "Off-Rol" (fuera de personaje) absorbiï¾ƒÎ¸æ´¥ã�¤ï½©ndolas de forma poï¾ƒÎ¸æ´¥ã�¤ï½©tica como si fueran hechicerï¾ƒÎ¸æ´¥ã�¤ï½­a o idiomas forasteros.
+    *   **Integraciï¾ƒÎ¸æ´¥ã�¤ï½³n de Fichas (Nuevo):** Se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ `getPlayerSheet` en `supabase.js`. El orï¾ƒÎ¸æ´¥ã�¤ï½¡culo ahora extrae la Ficha de Personaje (Rol) del jugador desde Supabase e inyecta su Nombre de personaje, Raza, Origen, Poderes, Arma y Personalidad en el sistema de la IA. Esto permite al orï¾ƒÎ¸æ´¥ã�¤ï½¡culo dar profecï¾ƒÎ¸æ´¥ã�¤ï½­as hiper-personalizadas basadas en la lore individual de cada guerrero.
+    *   `ai.js`: Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ un tercer modelo de respaldo (`gemini-1.5-flash`) en la cascada de fallbacks para mitigar errores `503 Service Unavailable` provocados por la saturaciï¾ƒÎ¸æ´¥ã�¤ï½³n global de los servidores de Google Generative AI en los modelos `2.5` y `3.5`.
+    *   `ai.js`: Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ un tercer modelo de respaldo (`gemini-1.5-flash`) en la cascada de fallbacks para mitigar errores `503 Service Unavailable` provocados por la saturaciï¾ƒÎ¸æ´¥ã�¤ï½³n global de los servidores de Google Generative AI en los modelos `2.5` y `3.5`.
+    *   **Prevenciï¾ƒÎ¸æ´¥ã�¤ï½³n de Alucinaciones (Nuevo):** Se le dio la instrucciï¾ƒÎ¸æ´¥ã�¤ï½³n estricta al Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo de negarse a revelar las riquezas o secretos de *otros* jugadores. Si se le pregunta por alguien ajeno, ahora dirï¾ƒÎ¸æ´¥ã�¤ï½¡ de forma misteriosa que no puede revelar secretos que estï¾ƒÎ¸æ´¥ã�¤ï½¡n bajo la sombra, evitando que la IA invente nï¾ƒÎ¸æ´¥ã�¤ï½ºmeros falsos para compensar la falta de contexto en memoria.
+    *   **Transferencia de Oro (`!oro`):** Se modificï¾ƒÎ¸æ´¥ã�¤ï½³ el comando `!oro` en `player.js`. Ahora, si se usa sin parï¾ƒÎ¸æ´¥ã�¤ï½¡metros, muestra el saldo actual. Si se usa como `!oro <monto> <@usuario>`, permite a los jugadores enviarse oro entre sï¾ƒÎ¸æ´¥ã�¤ï½­, descontando de la cuenta del emisor y sumando a la del receptor (con validaciï¾ƒÎ¸æ´¥ã�¤ï½³n de fondos y protecciï¾ƒÎ¸æ´¥ã�¤ï½³n de auto-envï¾ƒÎ¸æ´¥ã�¤ï½­o).
 *   **Archivos Modificados:** `Kingdoom-bot/src/supabase.js`, `Kingdoom-bot/src/handlers/games.js`, `Kingdoom-bot/src/handlers/admin.js`, `Kingdoom-bot/src/index.js`
-*   **Resumen:** Arquitectura RAG e integraciﾃθ津つｳn de Base de Conocimiento entre Kingdoom-sync (Archivista) y Kingdoom-bot.
+*   **Resumen:** Arquitectura RAG e integraciï¾ƒÎ¸æ´¥ã�¤ï½³n de Base de Conocimiento entre Kingdoom-sync (Archivista) y Kingdoom-bot.
 *   **Cambios Clave:**
-    *   `supabase.js`: Se aﾃθ津つｱadieron funciones `getKnowledgeDocuments` y `pickKnowledgeContext` para consultar la tabla `knowledge_documents`.
-    *   `!oraculo` (`games.js`): Ahora inyecta dinﾃθ津つ｡micamente hasta 2 documentos relevantes de la base de datos de conocimiento como contexto al prompt de Gemini, compartiendo la misma memoria del Archivista web.
-    *   `!data` (`admin.js` y `index.js`): Se aﾃθ津つｱadiﾃθ津つｳ este comando exclusivo de admin para WhatsApp. Permite adjuntar un archivo `.txt` y cargarlo a la tabla Supabase, sincronizando la memoria directamente desde WhatsApp hacia la web.
+    *   `supabase.js`: Se aï¾ƒÎ¸æ´¥ã�¤ï½±adieron funciones `getKnowledgeDocuments` y `pickKnowledgeContext` para consultar la tabla `knowledge_documents`.
+    *   `!oraculo` (`games.js`): Ahora inyecta dinï¾ƒÎ¸æ´¥ã�¤ï½¡micamente hasta 2 documentos relevantes de la base de datos de conocimiento como contexto al prompt de Gemini, compartiendo la misma memoria del Archivista web.
+    *   `!data` (`admin.js` y `index.js`): Se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ este comando exclusivo de admin para WhatsApp. Permite adjuntar un archivo `.txt` y cargarlo a la tabla Supabase, sincronizando la memoria directamente desde WhatsApp hacia la web.
 
 ### [Fecha: 22/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/features/businesses/businesses.service.ts`
-*   **Resumen:** Implementaciﾃθ津つｳn de la funcionalidad de borrado de negocios y propuestas de negocios desde el panel de control administrativo.
+*   **Resumen:** Implementaciï¾ƒÎ¸æ´¥ã�¤ï½³n de la funcionalidad de borrado de negocios y propuestas de negocios desde el panel de control administrativo.
 *   **Cambios Clave:**
-    *   **[Backend] Eliminaciﾃθ津つｳn de registros:** Se aﾃθ津つｱadieron las funciones `deleteBusiness` y `deleteBusinessProposal` a los servicios de negocios para ejecutar los borrados con su respectivo manejo de estado.
-    *   **[Admin] Botﾃθ津つｳn Borrar Negocio Activo:** Los administradores ahora pueden borrar negocios permanentemente pulsando el ﾃθ津つｭcono de la papelera junto al estado del almacenamiento en la tarjeta del negocio, con un diﾃθ津つ｡logo de confirmaciﾃθ津つｳn previo.
-    *   **[Admin] Botﾃθ津つｳn Borrar Propuesta:** Se agregﾃθ津つｳ un botﾃθ津つｳn rojo de "Borrar" en el formulario de creaciﾃθ津つｳn/ediciﾃθ津つｳn de propuestas, posibilitando la eliminaciﾃθ津つｳn de propuestas mal formuladas o expiradas, igualmente protegido por confirmaciﾃθ津つｳn.
-*   **Notas/Advertencias:** Estas acciones no se pueden deshacer y el oro no reclamado en negocios activos se perderﾃθ津つ｡ si son eliminados.
+    *   **[Backend] Eliminaciï¾ƒÎ¸æ´¥ã�¤ï½³n de registros:** Se aï¾ƒÎ¸æ´¥ã�¤ï½±adieron las funciones `deleteBusiness` y `deleteBusinessProposal` a los servicios de negocios para ejecutar los borrados con su respectivo manejo de estado.
+    *   **[Admin] Botï¾ƒÎ¸æ´¥ã�¤ï½³n Borrar Negocio Activo:** Los administradores ahora pueden borrar negocios permanentemente pulsando el ï¾ƒÎ¸æ´¥ã�¤ï½­cono de la papelera junto al estado del almacenamiento en la tarjeta del negocio, con un diï¾ƒÎ¸æ´¥ã�¤ï½¡logo de confirmaciï¾ƒÎ¸æ´¥ã�¤ï½³n previo.
+    *   **[Admin] Botï¾ƒÎ¸æ´¥ã�¤ï½³n Borrar Propuesta:** Se agregï¾ƒÎ¸æ´¥ã�¤ï½³ un botï¾ƒÎ¸æ´¥ã�¤ï½³n rojo de "Borrar" en el formulario de creaciï¾ƒÎ¸æ´¥ã�¤ï½³n/ediciï¾ƒÎ¸æ´¥ã�¤ï½³n de propuestas, posibilitando la eliminaciï¾ƒÎ¸æ´¥ã�¤ï½³n de propuestas mal formuladas o expiradas, igualmente protegido por confirmaciï¾ƒÎ¸æ´¥ã�¤ï½³n.
+*   **Notas/Advertencias:** Estas acciones no se pueden deshacer y el oro no reclamado en negocios activos se perderï¾ƒÎ¸æ´¥ã�¤ï½¡ si son eliminados.
 
 ### [Fecha: 22/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`
-*   **Resumen:** Optimizaciﾃθ津つｳn de la interfaz de "Tus negocios" para ahorrar espacio y mejorar la experiencia de usuario.
+*   **Resumen:** Optimizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de la interfaz de "Tus negocios" para ahorrar espacio y mejorar la experiencia de usuario.
 *   **Cambios Clave:**
-    *   **[UI] Filtrado Automﾃθ津つ｡tico:** Las propuestas de negocios ahora desaparecen instantﾃθ津つ｡neamente de la lista "Propuestas pendientes" una vez que son respondidas, mostrando solo aquellas en estado "pending".
-    *   **[UI] Secciﾃθ津つｳn Colapsable:** Se aﾃθ津つｱadiﾃθ津つｳ un botﾃθ津つｳn "Mostrar / Ocultar" en la cabecera. Por defecto, todo el bloque interno de "Negocios activos" y "Propuestas" aparece colapsado, limpiando visualmente el perfil del jugador.
-*   **Notas/Advertencias:** Estos cambios operan exclusivamente a nivel de presentaciﾃθ津つｳn en la SPA; la lﾃθ津つｳgica de red y base de datos (RPC) permanece intacta.
+    *   **[UI] Filtrado Automï¾ƒÎ¸æ´¥ã�¤ï½¡tico:** Las propuestas de negocios ahora desaparecen instantï¾ƒÎ¸æ´¥ã�¤ï½¡neamente de la lista "Propuestas pendientes" una vez que son respondidas, mostrando solo aquellas en estado "pending".
+    *   **[UI] Secciï¾ƒÎ¸æ´¥ã�¤ï½³n Colapsable:** Se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ un botï¾ƒÎ¸æ´¥ã�¤ï½³n "Mostrar / Ocultar" en la cabecera. Por defecto, todo el bloque interno de "Negocios activos" y "Propuestas" aparece colapsado, limpiando visualmente el perfil del jugador.
+*   **Notas/Advertencias:** Estos cambios operan exclusivamente a nivel de presentaciï¾ƒÎ¸æ´¥ã�¤ï½³n en la SPA; la lï¾ƒÎ¸æ´¥ã�¤ï½³gica de red y base de datos (RPC) permanece intacta.
 
 ### [Fecha: 22/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/supabaseClient.ts`, `src/utils/players.ts`, `src/context/PlayerSessionContext.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/components/AdminControlSheet.tsx`, `src/components/admin/AdminControlPrimitives.tsx`, `src/utils/supabaseErrors.ts`, `supabase_secure_admin_links.sql`
@@ -962,114 +967,114 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **[CRITICO] RPC segura de economia:** Se agrego `supabase_player_businesses.sql` con las tablas `business_proposals`, `businesses`, `business_collection_log` y las RPC `respond_business_proposal` y `collect_business_gold` para evitar dobles cobros o dobles recolecciones.
     *   **[NUEVO] Historial de recoleccion:** El perfil del jugador ya puede mostrar un historial corto de oro retirado del negocio.
 
-### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesiﾃθ津つｳn 3 - Auditorﾃθ津つｭa de Comandos]
+### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesiï¾ƒÎ¸æ´¥ã�¤ï½³n 3 - Auditorï¾ƒÎ¸æ´¥ã�¤ï½­a de Comandos]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/games.js`, `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`
-*   **Resumen:** Auditorﾃθ津つｭa estﾃθ津つ｡tica de todos los handlers del bot y correcciﾃθ津つｳn de permisos/comandos de administraciﾃθ津つｳn.
+*   **Resumen:** Auditorï¾ƒÎ¸æ´¥ã�¤ï½­a estï¾ƒÎ¸æ´¥ã�¤ï½¡tica de todos los handlers del bot y correcciï¾ƒÎ¸æ´¥ã�¤ï½³n de permisos/comandos de administraciï¾ƒÎ¸æ´¥ã�¤ï½³n.
 *   **Cambios Clave:**
-    *   **[SOPORTE] Comando `!pendiente` singular:** Se mapeﾃθ津つｳ `!pendiente` en el router principal (`index.js`) y en `admin.js` para que los administradores y dueﾃθ津つｱos puedan usar tanto el formato singular como el plural (`!pendientes`). Anteriormente, usar el singular hacﾃθ津つｭa que la peticiﾃθ津つｳn fuera procesada por la IA al no estar en la lista blanca de comandos de administrador en `index.js`.
-    *   **[SOPORTE] Acceso a `!censo` y `!pendientes` para Administradores:** Se validﾃθ津つｳ y asegurﾃθ津つｳ que los usuarios que posean privilegios de administrador (ademﾃθ津つ｡s del Owner) puedan ejecutar `!censo` y `!pendientes` sin restricciones de permisos.
-    *   **[CRﾃθ津つ控ICO] Fix `!dados` ﾃδ｢ﾃやぎﾃや� sender incorrecto en grupos (`games.js`):** El comando `!dados` usaba `msg.from` para buscar al jugador en Supabase. En grupos de WhatsApp, `msg.from` devuelve el JID del **grupo** (ej: `12345@g.us`), no el del jugador. Esto hacﾃθ津つｭa que el bot nunca encontrara al jugador y siempre respondiera "No estﾃθ津つ｡s registrado". Corregido usando `msg.author || msg.from`, el patrﾃθ津つｳn estﾃθ津つ｡ndar del resto de los handlers.
-    *   **[MEDIO] Fix `!ban` ﾃδ｢ﾃやぎﾃや� falso positivo (`admin.js`):** Cuando un admin ejecutaba `!ban` con un nﾃθ津つｺmero no registrado en la DB, Supabase actualizaba 0 filas sin lanzar un error, y el bot respondﾃθ津つｭa "baneado" falsamente. Se agregﾃθ津つｳ una verificaciﾃθ津つｳn previa que consulta al jugador y retorna un error claro si no existe. Ademﾃθ津つ｡s, el mensaje de confirmaciﾃθ津つｳn ahora muestra el **username** del jugador baneado, no solo el nﾃθ津つｺmero.
-    *   **[MEJORA] Comando `!grant` y nuevo `!quitar` (`admin.js`, `index.js`):** Se mejorﾃθ津つｳ la gestiﾃθ津つｳn de oro para los administradores. Ahora `!grant` acepta tanto el celular, el **nombre de usuario**, o el **ID de la pﾃθ津つ｡gina web** (prefijo UUID) del jugador (ej. `!grant Zoelfrost 1000`, `!grant 2354 1000`), facilitando enormemente la administraciﾃθ津つｳn. Ademﾃθ津つ｡s, se aﾃθ津つｱadiﾃθ津つｳ el comando `!quitar` para restar oro sin necesidad de usar nﾃθ津つｺmeros negativos (ej. `!quitar Zoelfrost 500`). Se actualizﾃθ津つｳ el menﾃθ津つｺ de ayuda (`!admin`) para reflejar estos cambios.
-    *   **[MEJORA] Orﾃθ津つ｡culo y Memoria**
-        - **Inyecciﾃθ津つｳn de Inventario Real:** El Orﾃθ津つ｡culo ahora lee el inventario real del jugador (comprado en el mercado con oro) y lo integra en sus respuestas. Se corrigiﾃθ津つｳ un error en la consulta a Supabase que causaba fallos silenciosos al buscar la columna `category` (que en realidad es `item_category`), logrando que el bot vuelva a "ver" los ﾃθ津つｭtems correctamente, extrayendo tambiﾃθ津つｩn el `item_name`. Ademﾃθ津つ｡s, se agregﾃθ津つｳ una inyecciﾃθ津つｳn explﾃθ津つｭcita para inventarios vacﾃθ津つｭos, evitando que el Orﾃθ津つ｡culo "evada" la pregunta con frases mﾃθ津つｭsticas cuando el jugador no tiene ﾃθ津つｭtems.
-        - **Identidad del Jugador (15-digit ID Fix):** Se agregﾃθ津つｳ un mapeo interno para que el Orﾃθ津つ｡culo reconozca correctamente el ID de 15 dﾃθ津つｭgitos (`275162062668001`) del Owner como el perfil principal (`595987273405`), evitando que el sistema lo trate como un "alma sin nombre".
-        - **Personalidad Mejorada:** Se rediseﾃθ津つｱﾃθ津つｳ el prompt del Orﾃθ津つ｡culo para que actﾃθ津つｺe como un "vidente veterano y cﾃθ津つｭnico", hablando de forma mﾃθ津つ｡s directa, coloquial y menos poﾃθ津つｩtica. Su longitud se limitﾃθ津つｳ a 3 pﾃθ津つ｡rrafos y se instruyﾃθ津つｳ para negarse a revelar fortunas de terceros.
-    *   **[MEJORA] Baneo y gestiﾃθ津つｳn de Administradores unificada (`admin.js`):** Se implementﾃθ津つｳ un helper centralizado para que `!ban`, `!add admin`, `!remove admin`, `!grant` y `!quitar` puedan procesar a los jugadores usando su **ID web**, **username** o **celular**. Esto estandariza la experiencia de administraciﾃθ津つｳn, permitiendo identificar jugadores de mﾃθ津つｺltiples maneras, tal como se hace en el comando de vinculaciﾃθ津つｳn `!verificar`.
-    *   **[ELIMINADO] Comando `!broadcast` removido (`admin.js`, `index.js`):** El comando fue eliminado por decisiﾃθ津つｳn del Soberano. WhatsApp ya ofrece la funcionalidad nativa de @all / @todos en grupos, lo que hace innecesario un broadcast por DM que ademﾃθ津つ｡s tenﾃθ津つｭa problemas de compatibilidad con nﾃθ津つｺmeros no registrados.
-    *   **[NUEVO] Comando `!purga` (`admin.js`, `tracker.js`, `index.js`):** Nuevo comando que permite al Staff expulsar del grupo de WhatsApp a los usuarios que llevan mﾃθ津つ｡s de 5 dﾃθ津つｭas sin hacer su ficha. El bot mantiene un archivo JSON interno (`pending_tracker.json`) que registra la primera vez que un usuario aparece en `!pendientes`. Al ejecutar `!purga`, el bot verifica quiﾃθ津つｩnes superaron los 5 dﾃθ津つｭas y los remueve automﾃθ津つ｡ticamente. Requiere que el bot sea admin del grupo.
-    *   **[MEJORA] `!pendientes` ahora rastrea fechas (`admin.js`, `tracker.js`):** Cada vez que se ejecuta `!pendientes`, el bot registra la fecha de detecciﾃθ津つｳn de cada usuario pendiente. Esto alimenta al tracker que `!purga` consume para calcular los 5 dﾃθ津つｭas de gracia.
-    *   **[FIX] `!censo` / `!fichas` ﾃδ｢ﾃやぎﾃや� columna inexistente (`supabase.js`):** La query de `getRealmCensus()` pedﾃθ津つｭa `player_id` a la tabla `character_sheets`, pero esa columna no existe en Supabase (solo existe `playerId` en camelCase). Esto hacﾃθ津つｭa que el comando fallara con "Error al obtener el censo del reino". Corregido removiendo la columna fantasma.
-    *   **[BONUS] Formato de oro en `!dados`:** Se aplicﾃθ津つｳ `.toLocaleString('es-PY')` al mostrar el oro del jugador en el mensaje de saldo insuficiente, siendo consistente con el resto del bot.
-### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesiﾃθ津つｳn 3 - Fix Orﾃθ津つ｡culo Cuota y Migraciﾃθ津つｳn a Gemini 2.5]
+    *   **[SOPORTE] Comando `!pendiente` singular:** Se mapeï¾ƒÎ¸æ´¥ã�¤ï½³ `!pendiente` en el router principal (`index.js`) y en `admin.js` para que los administradores y dueï¾ƒÎ¸æ´¥ã�¤ï½±os puedan usar tanto el formato singular como el plural (`!pendientes`). Anteriormente, usar el singular hacï¾ƒÎ¸æ´¥ã�¤ï½­a que la peticiï¾ƒÎ¸æ´¥ã�¤ï½³n fuera procesada por la IA al no estar en la lista blanca de comandos de administrador en `index.js`.
+    *   **[SOPORTE] Acceso a `!censo` y `!pendientes` para Administradores:** Se validï¾ƒÎ¸æ´¥ã�¤ï½³ y asegurï¾ƒÎ¸æ´¥ã�¤ï½³ que los usuarios que posean privilegios de administrador (ademï¾ƒÎ¸æ´¥ã�¤ï½¡s del Owner) puedan ejecutar `!censo` y `!pendientes` sin restricciones de permisos.
+    *   **[CRï¾ƒÎ¸æ´¥ã�¤æŽ§ICO] Fix `!dados` ï¾ƒÎ´ï½¢ï¾ƒã‚„ã�Žï¾ƒã‚„Â€ï¿½ sender incorrecto en grupos (`games.js`):** El comando `!dados` usaba `msg.from` para buscar al jugador en Supabase. En grupos de WhatsApp, `msg.from` devuelve el JID del **grupo** (ej: `12345@g.us`), no el del jugador. Esto hacï¾ƒÎ¸æ´¥ã�¤ï½­a que el bot nunca encontrara al jugador y siempre respondiera "No estï¾ƒÎ¸æ´¥ã�¤ï½¡s registrado". Corregido usando `msg.author || msg.from`, el patrï¾ƒÎ¸æ´¥ã�¤ï½³n estï¾ƒÎ¸æ´¥ã�¤ï½¡ndar del resto de los handlers.
+    *   **[MEDIO] Fix `!ban` ï¾ƒÎ´ï½¢ï¾ƒã‚„ã�Žï¾ƒã‚„Â€ï¿½ falso positivo (`admin.js`):** Cuando un admin ejecutaba `!ban` con un nï¾ƒÎ¸æ´¥ã�¤ï½ºmero no registrado en la DB, Supabase actualizaba 0 filas sin lanzar un error, y el bot respondï¾ƒÎ¸æ´¥ã�¤ï½­a "baneado" falsamente. Se agregï¾ƒÎ¸æ´¥ã�¤ï½³ una verificaciï¾ƒÎ¸æ´¥ã�¤ï½³n previa que consulta al jugador y retorna un error claro si no existe. Ademï¾ƒÎ¸æ´¥ã�¤ï½¡s, el mensaje de confirmaciï¾ƒÎ¸æ´¥ã�¤ï½³n ahora muestra el **username** del jugador baneado, no solo el nï¾ƒÎ¸æ´¥ã�¤ï½ºmero.
+    *   **[MEJORA] Comando `!grant` y nuevo `!quitar` (`admin.js`, `index.js`):** Se mejorï¾ƒÎ¸æ´¥ã�¤ï½³ la gestiï¾ƒÎ¸æ´¥ã�¤ï½³n de oro para los administradores. Ahora `!grant` acepta tanto el celular, el **nombre de usuario**, o el **ID de la pï¾ƒÎ¸æ´¥ã�¤ï½¡gina web** (prefijo UUID) del jugador (ej. `!grant Zoelfrost 1000`, `!grant 2354 1000`), facilitando enormemente la administraciï¾ƒÎ¸æ´¥ã�¤ï½³n. Ademï¾ƒÎ¸æ´¥ã�¤ï½¡s, se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ el comando `!quitar` para restar oro sin necesidad de usar nï¾ƒÎ¸æ´¥ã�¤ï½ºmeros negativos (ej. `!quitar Zoelfrost 500`). Se actualizï¾ƒÎ¸æ´¥ã�¤ï½³ el menï¾ƒÎ¸æ´¥ã�¤ï½º de ayuda (`!admin`) para reflejar estos cambios.
+    *   **[MEJORA] Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo y Memoria**
+        - **Inyecciï¾ƒÎ¸æ´¥ã�¤ï½³n de Inventario Real:** El Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo ahora lee el inventario real del jugador (comprado en el mercado con oro) y lo integra en sus respuestas. Se corrigiï¾ƒÎ¸æ´¥ã�¤ï½³ un error en la consulta a Supabase que causaba fallos silenciosos al buscar la columna `category` (que en realidad es `item_category`), logrando que el bot vuelva a "ver" los ï¾ƒÎ¸æ´¥ã�¤ï½­tems correctamente, extrayendo tambiï¾ƒÎ¸æ´¥ã�¤ï½©n el `item_name`. Ademï¾ƒÎ¸æ´¥ã�¤ï½¡s, se agregï¾ƒÎ¸æ´¥ã�¤ï½³ una inyecciï¾ƒÎ¸æ´¥ã�¤ï½³n explï¾ƒÎ¸æ´¥ã�¤ï½­cita para inventarios vacï¾ƒÎ¸æ´¥ã�¤ï½­os, evitando que el Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo "evada" la pregunta con frases mï¾ƒÎ¸æ´¥ã�¤ï½­sticas cuando el jugador no tiene ï¾ƒÎ¸æ´¥ã�¤ï½­tems.
+        - **Identidad del Jugador (15-digit ID Fix):** Se agregï¾ƒÎ¸æ´¥ã�¤ï½³ un mapeo interno para que el Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo reconozca correctamente el ID de 15 dï¾ƒÎ¸æ´¥ã�¤ï½­gitos (`275162062668001`) del Owner como el perfil principal (`595987273405`), evitando que el sistema lo trate como un "alma sin nombre".
+        - **Personalidad Mejorada:** Se rediseï¾ƒÎ¸æ´¥ã�¤ï½±ï¾ƒÎ¸æ´¥ã�¤ï½³ el prompt del Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo para que actï¾ƒÎ¸æ´¥ã�¤ï½ºe como un "vidente veterano y cï¾ƒÎ¸æ´¥ã�¤ï½­nico", hablando de forma mï¾ƒÎ¸æ´¥ã�¤ï½¡s directa, coloquial y menos poï¾ƒÎ¸æ´¥ã�¤ï½©tica. Su longitud se limitï¾ƒÎ¸æ´¥ã�¤ï½³ a 3 pï¾ƒÎ¸æ´¥ã�¤ï½¡rrafos y se instruyï¾ƒÎ¸æ´¥ã�¤ï½³ para negarse a revelar fortunas de terceros.
+    *   **[MEJORA] Baneo y gestiï¾ƒÎ¸æ´¥ã�¤ï½³n de Administradores unificada (`admin.js`):** Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ un helper centralizado para que `!ban`, `!add admin`, `!remove admin`, `!grant` y `!quitar` puedan procesar a los jugadores usando su **ID web**, **username** o **celular**. Esto estandariza la experiencia de administraciï¾ƒÎ¸æ´¥ã�¤ï½³n, permitiendo identificar jugadores de mï¾ƒÎ¸æ´¥ã�¤ï½ºltiples maneras, tal como se hace en el comando de vinculaciï¾ƒÎ¸æ´¥ã�¤ï½³n `!verificar`.
+    *   **[ELIMINADO] Comando `!broadcast` removido (`admin.js`, `index.js`):** El comando fue eliminado por decisiï¾ƒÎ¸æ´¥ã�¤ï½³n del Soberano. WhatsApp ya ofrece la funcionalidad nativa de @all / @todos en grupos, lo que hace innecesario un broadcast por DM que ademï¾ƒÎ¸æ´¥ã�¤ï½¡s tenï¾ƒÎ¸æ´¥ã�¤ï½­a problemas de compatibilidad con nï¾ƒÎ¸æ´¥ã�¤ï½ºmeros no registrados.
+    *   **[NUEVO] Comando `!purga` (`admin.js`, `tracker.js`, `index.js`):** Nuevo comando que permite al Staff expulsar del grupo de WhatsApp a los usuarios que llevan mï¾ƒÎ¸æ´¥ã�¤ï½¡s de 5 dï¾ƒÎ¸æ´¥ã�¤ï½­as sin hacer su ficha. El bot mantiene un archivo JSON interno (`pending_tracker.json`) que registra la primera vez que un usuario aparece en `!pendientes`. Al ejecutar `!purga`, el bot verifica quiï¾ƒÎ¸æ´¥ã�¤ï½©nes superaron los 5 dï¾ƒÎ¸æ´¥ã�¤ï½­as y los remueve automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente. Requiere que el bot sea admin del grupo.
+    *   **[MEJORA] `!pendientes` ahora rastrea fechas (`admin.js`, `tracker.js`):** Cada vez que se ejecuta `!pendientes`, el bot registra la fecha de detecciï¾ƒÎ¸æ´¥ã�¤ï½³n de cada usuario pendiente. Esto alimenta al tracker que `!purga` consume para calcular los 5 dï¾ƒÎ¸æ´¥ã�¤ï½­as de gracia.
+    *   **[FIX] `!censo` / `!fichas` ï¾ƒÎ´ï½¢ï¾ƒã‚„ã�Žï¾ƒã‚„Â€ï¿½ columna inexistente (`supabase.js`):** La query de `getRealmCensus()` pedï¾ƒÎ¸æ´¥ã�¤ï½­a `player_id` a la tabla `character_sheets`, pero esa columna no existe en Supabase (solo existe `playerId` en camelCase). Esto hacï¾ƒÎ¸æ´¥ã�¤ï½­a que el comando fallara con "Error al obtener el censo del reino". Corregido removiendo la columna fantasma.
+    *   **[BONUS] Formato de oro en `!dados`:** Se aplicï¾ƒÎ¸æ´¥ã�¤ï½³ `.toLocaleString('es-PY')` al mostrar el oro del jugador en el mensaje de saldo insuficiente, siendo consistente con el resto del bot.
+### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesiï¾ƒÎ¸æ´¥ã�¤ï½³n 3 - Fix Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo Cuota y Migraciï¾ƒÎ¸æ´¥ã�¤ï½³n a Gemini 2.5]
 *   **Archivos Modificados:** `kingdoom-bot/src/ai.js`
 *   **Cambios Clave:**
-    *   **[CRﾃθ津つ控ICO] Fallback de modelo en `!oraculo` (`ai.js`):** Se identificﾃθ津つｳ que todos los modelos Gemini 1.0 y 1.5 (incluyendo `gemini-1.5-flash`) fueron desactivados por Google, arrojando error `404 Not Found`. Se migrﾃθ津つｳ el modelo por defecto del bot de `gemini-1.5-flash` a **`gemini-2.5-flash`**.
-    *   **[CRﾃθ津つ控ICO] Soporte para mﾃθ津つｺltiples claves API con rotaciﾃθ津つｳn automﾃθ津つ｡tica (`ai.js`):** El usuario configurﾃθ津つｳ dos llaves API separadas por comas en `GEMINI_API_KEY`. Se rediseﾃθ津つｱﾃθ津つｳ el manejador para procesar una lista de llaves de manera dinﾃθ津つ｡mica. Al invocar el Orﾃθ津つ｡culo, intenta secuencialmente con cada clave. Si una falla (por ejemplo, por lﾃθ津つｭmite de cuota o error 429), realiza un log detallado y reintenta con la siguiente clave transparente y automﾃθ津つ｡ticamente.
-    *   **[MEJORA] Cadena de Fallback de Modelos en caso de 404/503 (`ai.js`):** Se implementﾃθ津つｳ una lﾃθ津つｳgica de fallback de modelos en bucle. Si el modelo actual (ej: `gemini-2.5-flash`) devuelve `404 Not Found` o un error temporal de sobrecarga `503 Service Unavailable`, el bot no descartarﾃθ津つ｡ la clave de inmediato; en su lugar, intentarﾃθ津つ｡ automﾃθ津つ｡ticamente con otros modelos candidatos como **`gemini-3.5-flash`** para asegurar respuestas exitosas durante picos de demanda del servidor de Google.
+    *   **[CRï¾ƒÎ¸æ´¥ã�¤æŽ§ICO] Fallback de modelo en `!oraculo` (`ai.js`):** Se identificï¾ƒÎ¸æ´¥ã�¤ï½³ que todos los modelos Gemini 1.0 y 1.5 (incluyendo `gemini-1.5-flash`) fueron desactivados por Google, arrojando error `404 Not Found`. Se migrï¾ƒÎ¸æ´¥ã�¤ï½³ el modelo por defecto del bot de `gemini-1.5-flash` a **`gemini-2.5-flash`**.
+    *   **[CRï¾ƒÎ¸æ´¥ã�¤æŽ§ICO] Soporte para mï¾ƒÎ¸æ´¥ã�¤ï½ºltiples claves API con rotaciï¾ƒÎ¸æ´¥ã�¤ï½³n automï¾ƒÎ¸æ´¥ã�¤ï½¡tica (`ai.js`):** El usuario configurï¾ƒÎ¸æ´¥ã�¤ï½³ dos llaves API separadas por comas en `GEMINI_API_KEY`. Se rediseï¾ƒÎ¸æ´¥ã�¤ï½±ï¾ƒÎ¸æ´¥ã�¤ï½³ el manejador para procesar una lista de llaves de manera dinï¾ƒÎ¸æ´¥ã�¤ï½¡mica. Al invocar el Orï¾ƒÎ¸æ´¥ã�¤ï½¡culo, intenta secuencialmente con cada clave. Si una falla (por ejemplo, por lï¾ƒÎ¸æ´¥ã�¤ï½­mite de cuota o error 429), realiza un log detallado y reintenta con la siguiente clave transparente y automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente.
+    *   **[MEJORA] Cadena de Fallback de Modelos en caso de 404/503 (`ai.js`):** Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ una lï¾ƒÎ¸æ´¥ã�¤ï½³gica de fallback de modelos en bucle. Si el modelo actual (ej: `gemini-2.5-flash`) devuelve `404 Not Found` o un error temporal de sobrecarga `503 Service Unavailable`, el bot no descartarï¾ƒÎ¸æ´¥ã�¤ï½¡ la clave de inmediato; en su lugar, intentarï¾ƒÎ¸æ´¥ã�¤ï½¡ automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente con otros modelos candidatos como **`gemini-3.5-flash`** para asegurar respuestas exitosas durante picos de demanda del servidor de Google.
 
 
 
-### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesiﾃθ津つｳn 3 - Auditorﾃθ津つｭa Scheduler]
+### [Fecha: 20/05/2026] - [Autor: Antigravity] - [Sesiï¾ƒÎ¸æ´¥ã�¤ï½³n 3 - Auditorï¾ƒÎ¸æ´¥ã�¤ï½­a Scheduler]
 *   **Archivos Modificados:** `kingdoom-bot/src/scheduler.js`
 *   **Cambios Clave:**
-    *   **[CRﾃθ津つ控ICO] Fix reset semanal `weekly_gold` (`scheduler.js`):** La operaciﾃθ津つｳn `supabase.from('players').update({ weekly_gold: 0 })` sin ningﾃθ津つｺn filtro es **bloqueada por defecto** por Supabase JS v2 como medida de seguridad contra actualizaciones masivas accidentales. Esto hacﾃθ津つｭa que el ranking semanal se anunciara correctamente cada lunes pero el oro semanal nunca se reseteara, acumulﾃθ津つ｡ndose indefinidamente. Se corrigiﾃθ津つｳ agregando `.gte('weekly_gold', 0)` como filtro de seguridad que coincide con todos los jugadores (el oro nunca es negativo por diseﾃθ津つｱo).
+    *   **[CRï¾ƒÎ¸æ´¥ã�¤æŽ§ICO] Fix reset semanal `weekly_gold` (`scheduler.js`):** La operaciï¾ƒÎ¸æ´¥ã�¤ï½³n `supabase.from('players').update({ weekly_gold: 0 })` sin ningï¾ƒÎ¸æ´¥ã�¤ï½ºn filtro es **bloqueada por defecto** por Supabase JS v2 como medida de seguridad contra actualizaciones masivas accidentales. Esto hacï¾ƒÎ¸æ´¥ã�¤ï½­a que el ranking semanal se anunciara correctamente cada lunes pero el oro semanal nunca se reseteara, acumulï¾ƒÎ¸æ´¥ã�¤ï½¡ndose indefinidamente. Se corrigiï¾ƒÎ¸æ´¥ã�¤ï½³ agregando `.gte('weekly_gold', 0)` como filtro de seguridad que coincide con todos los jugadores (el oro nunca es negativo por diseï¾ƒÎ¸æ´¥ã�¤ï½±o).
 
 ### [Fecha: 20/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/handlers/welcome.js`, `kingdoom-bot/src/handlers/admin.js`, `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `kingdoom-bot/README.md`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/handlers/player.js`
-*   **Resumen de Tareas:** Correcciﾃθ津つｳn del sistema de bienvenida, comando `!groupid`, fix del mercado, correcciﾃθ津つｳn de textos truncados, fix de imports en consultas detalladas y migraciﾃθ津つｳn del bot a Hugging Face Spaces (16 GB RAM gratis).
+*   **Resumen de Tareas:** Correcciï¾ƒÎ¸æ´¥ã�¤ï½³n del sistema de bienvenida, comando `!groupid`, fix del mercado, correcciï¾ƒÎ¸æ´¥ã�¤ï½³n de textos truncados, fix de imports en consultas detalladas y migraciï¾ƒÎ¸æ´¥ã�¤ï½³n del bot a Hugging Face Spaces (16 GB RAM gratis).
 *   **Cambios Clave:**
-    *   **Migraciﾃθ津つｳn a Hugging Face Spaces:** Se trasladﾃθ津つｳ el bot desde Railway (con crﾃθ津つｩditos agotados) a Hugging Face Spaces basado en Docker, obteniendo **16 GB de RAM y 2 vCPU** de forma completamente gratuita, eliminando crasheos de memoria por Puppeteer/Chromium.
-    *   **Resoluciﾃθ津つｳn de puertos (7860) y metadatos:** Se agregﾃθ津つｳ `ENV PORT=7860` en el `Dockerfile` y se creﾃθ津つｳ el `README.md` con la cabecera YAML requerida por Hugging Face. Esto solucionﾃθ津つｳ la pantalla infinita de "Preparing Space" permitiendo la comunicaciﾃθ津つｳn correcta con la interfaz web.
-    *   **Fix de permisos no-root:** Se crearon los directorios del bot y se asignﾃθ津つｳ `chmod -R 777` en el Dockerfile para que el usuario de Hugging Face (`1000`) pueda escribir los datos de autenticaciﾃθ津つｳn de WhatsApp en la carpeta temporal de persistencia.
-    *   **Fix del comando !mercado (columna 'available' inexistente):** Se detectﾃθ津つｳ que las consultas a la tabla `market_items` en `supabase.js` filtraban usando `.eq('available', true)`. Dado que la columna `available` no existe en la base de datos de Kingdoom (el stock se gestiona en su lugar con `stock_status`), la API de Supabase devolvﾃθ津つｭa un error de columna inexistente, causando que el bot reportara falsamente que el mercado estaba vacﾃθ津つｭo. Se corrigiﾃθ津つｳ removiendo este filtro y adaptando `getRealmSnapshot` para excluir items con `stock_status = 'sold-out'`.
-    *   **Fix de importaciﾃθ津つｳn de getMissionDetails y getEventDetails:** Los comandos de detalle de misiones (`!mision <nombre>`) y eventos (`!evento <nombre>`) fallaban silenciosamente lanzando el error de sistema `"El reino estﾃθ津つ｡ en llamas..."`. Se detectﾃθ津つｳ que las funciones `getMissionDetails` y `getEventDetails` no estaban importadas al inicio de `player.js` desde `../supabase.js` a pesar de estar declaradas e implementadas. Se agregaron a los imports del archivo para solucionar el fallo de referencia.
-    *   **Ampliaciﾃθ津つｳn del lﾃθ津つｭmite de texto en comandos (!item, !mision, !evento):** Las descripciones y habilidades se recortaban excesivamente en WhatsApp (`clipText` recortaba a 110, 130 o 140 caracteres, dejando textos incompletos con suspensivos). Se ampliﾃθ津つｳ el lﾃθ津つｭmite en los comandos de detalle a **500 caracteres**, permitiendo la lectura de habilidades legendarias completas y descripciones extendidas sin spam descontrolado.
+    *   **Migraciï¾ƒÎ¸æ´¥ã�¤ï½³n a Hugging Face Spaces:** Se trasladï¾ƒÎ¸æ´¥ã�¤ï½³ el bot desde Railway (con crï¾ƒÎ¸æ´¥ã�¤ï½©ditos agotados) a Hugging Face Spaces basado en Docker, obteniendo **16 GB de RAM y 2 vCPU** de forma completamente gratuita, eliminando crasheos de memoria por Puppeteer/Chromium.
+    *   **Resoluciï¾ƒÎ¸æ´¥ã�¤ï½³n de puertos (7860) y metadatos:** Se agregï¾ƒÎ¸æ´¥ã�¤ï½³ `ENV PORT=7860` en el `Dockerfile` y se creï¾ƒÎ¸æ´¥ã�¤ï½³ el `README.md` con la cabecera YAML requerida por Hugging Face. Esto solucionï¾ƒÎ¸æ´¥ã�¤ï½³ la pantalla infinita de "Preparing Space" permitiendo la comunicaciï¾ƒÎ¸æ´¥ã�¤ï½³n correcta con la interfaz web.
+    *   **Fix de permisos no-root:** Se crearon los directorios del bot y se asignï¾ƒÎ¸æ´¥ã�¤ï½³ `chmod -R 777` en el Dockerfile para que el usuario de Hugging Face (`1000`) pueda escribir los datos de autenticaciï¾ƒÎ¸æ´¥ã�¤ï½³n de WhatsApp en la carpeta temporal de persistencia.
+    *   **Fix del comando !mercado (columna 'available' inexistente):** Se detectï¾ƒÎ¸æ´¥ã�¤ï½³ que las consultas a la tabla `market_items` en `supabase.js` filtraban usando `.eq('available', true)`. Dado que la columna `available` no existe en la base de datos de Kingdoom (el stock se gestiona en su lugar con `stock_status`), la API de Supabase devolvï¾ƒÎ¸æ´¥ã�¤ï½­a un error de columna inexistente, causando que el bot reportara falsamente que el mercado estaba vacï¾ƒÎ¸æ´¥ã�¤ï½­o. Se corrigiï¾ƒÎ¸æ´¥ã�¤ï½³ removiendo este filtro y adaptando `getRealmSnapshot` para excluir items con `stock_status = 'sold-out'`.
+    *   **Fix de importaciï¾ƒÎ¸æ´¥ã�¤ï½³n de getMissionDetails y getEventDetails:** Los comandos de detalle de misiones (`!mision <nombre>`) y eventos (`!evento <nombre>`) fallaban silenciosamente lanzando el error de sistema `"El reino estï¾ƒÎ¸æ´¥ã�¤ï½¡ en llamas..."`. Se detectï¾ƒÎ¸æ´¥ã�¤ï½³ que las funciones `getMissionDetails` y `getEventDetails` no estaban importadas al inicio de `player.js` desde `../supabase.js` a pesar de estar declaradas e implementadas. Se agregaron a los imports del archivo para solucionar el fallo de referencia.
+    *   **Ampliaciï¾ƒÎ¸æ´¥ã�¤ï½³n del lï¾ƒÎ¸æ´¥ã�¤ï½­mite de texto en comandos (!item, !mision, !evento):** Las descripciones y habilidades se recortaban excesivamente en WhatsApp (`clipText` recortaba a 110, 130 o 140 caracteres, dejando textos incompletos con suspensivos). Se ampliï¾ƒÎ¸æ´¥ã�¤ï½³ el lï¾ƒÎ¸æ´¥ã�¤ï½­mite en los comandos de detalle a **500 caracteres**, permitiendo la lectura de habilidades legendarias completas y descripciones extendidas sin spam descontrolado.
     *   **Fix de filtro de grupo en bienvenida:** Ahora la bienvenida se dispara en cualquier grupo si no hay filtro configurado en las variables de entorno, evitando retornos silenciosos.
-    *   **Log de diagnﾃθ津つｳstico:** Se aﾃθ津つｱade `console.log` para `group_join` detallando los IDs de grupos.
-    *   **Comando !groupid:** Se creﾃθ津つｳ el comando `!groupid` para administradores que devuelve el JID ﾃθ津つｺnico del grupo (`@g.us`) donde se ejecuta para poder configurar las variables del bot de bienvenida.
-*   **Notas/Advertencias:** El bot estﾃθ津つ｡ completamente enlazado, conectado y activo de forma gratuita en su nueva infraestructura de Hugging Face Spaces.
+    *   **Log de diagnï¾ƒÎ¸æ´¥ã�¤ï½³stico:** Se aï¾ƒÎ¸æ´¥ã�¤ï½±ade `console.log` para `group_join` detallando los IDs de grupos.
+    *   **Comando !groupid:** Se creï¾ƒÎ¸æ´¥ã�¤ï½³ el comando `!groupid` para administradores que devuelve el JID ï¾ƒÎ¸æ´¥ã�¤ï½ºnico del grupo (`@g.us`) donde se ejecuta para poder configurar las variables del bot de bienvenida.
+*   **Notas/Advertencias:** El bot estï¾ƒÎ¸æ´¥ã�¤ï½¡ completamente enlazado, conectado y activo de forma gratuita en su nueva infraestructura de Hugging Face Spaces.
 
 
 
-### [Fecha: 19/05/2026] - [Autor: Antigravity] - [Sesiﾃθ津つｳn 2]
+### [Fecha: 19/05/2026] - [Autor: Antigravity] - [Sesiï¾ƒÎ¸æ´¥ã�¤ï½³n 2]
 *   **Archivos Modificados:** `src/utils/players.ts`, `src/components/PlayerProfilePanel.tsx`, `kingdoom-bot/src/supabase.js`, `kingdoom-bot/src/handlers/player.js`, `kingdoom-bot/src/index.js`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Implementaciﾃθ津つｳn del sistema de vinculaciﾃθ津つｳn segura (`!verificar`) entre perfiles web y WhatsApp y visualizaciﾃθ津つｳn en el Panel de Perfil de la web.
+*   **Resumen de Tareas:** Implementaciï¾ƒÎ¸æ´¥ã�¤ï½³n del sistema de vinculaciï¾ƒÎ¸æ´¥ã�¤ï½³n segura (`!verificar`) entre perfiles web y WhatsApp y visualizaciï¾ƒÎ¸æ´¥ã�¤ï½³n en el Panel de Perfil de la web.
 *   **Cambios Clave:**
-    *   **Comando de Vinculaciﾃθ津つｳn !verificar:** Se creﾃθ津つｳ la funciﾃθ津つｳn `verifyAndLinkPlayer` en el backend del bot (`kingdoom-bot/src/supabase.js`) que permite a cualquier usuario vincular su nﾃθ津つｺmero de WhatsApp con su cuenta web medieval existente ingresando su nombre de usuario (sin distinguir mayﾃθ津つｺsculas/minﾃθ津つｺsculas) o el segmento inicial de su ID UUID (ej. `!verificar Zoelfrost` o `!verificar 2354`).
-    *   **Bypass de Jugador no Registrado:** Se ubicﾃθ津つｳ el manejador de `!verificar` en `kingdoom-bot/src/handlers/player.js` arriba del control de seguridad de usuario no registrado, permitiendo que nuevos contactos puedan vincularse de manera fluida sin ser rechazados como viajero desconocido.
-    *   **Visualizaciﾃθ津つｳn de ID en la Web:** Se actualizﾃθ津つｳ `src/components/PlayerProfilePanel.tsx` tanto en la vista colapsada como expandida para mostrar el ID corto (los primeros 8 caracteres del UUID) de manera clara y estﾃθ津つｩtica.
-    *   **Instrucciones de Vinculaciﾃθ津つｳn en UI:** En caso de que la cuenta web no tenga ningﾃθ津つｺn WhatsApp vinculado (`player.phone` es null), el Panel de Perfil muestra una tarjeta dorada estilizada con instrucciones precisas y el comando exacto para copiar y enviar al bot: `!verificar <id_corto>`.
-    *   **Actualizaciﾃθ津つｳn de Modelos y Consultas:** Se incluyﾃθ津つｳ la columna `phone` en todas las consultas y payloads de creaciﾃθ津つｳn de jugadores de `src/utils/players.ts` para que el estado de vinculaciﾃθ津つｳn se sincronice en tiempo real con la UI de la SPA.
-    *   **Habilitaciﾃθ津つｳn del Comando en Ruteador:** Se registrﾃθ津つｳ `'verificar'` en la lista blanca de comandos del ruteador principal `kingdoom-bot/src/index.js` para asegurar el procesamiento correcto de su prefijo.
-    *   **Soporte de Citado para !add/!remove admin:** Se corrigiﾃθ津つｳ una discrepancia UX donde los comandos `!add admin` y `!remove admin` requerﾃθ津つｭan especificar manualmente el nﾃθ津つｺmero. Ahora soportan plenamente citar (responder a) un mensaje para extraer automﾃθ津つ｡ticamente el nﾃθ津つｺmero del remitente del mensaje citado (Opciﾃθ津つｳn A).
-    *   **Preservaciﾃθ津つｳn de Prototipo de Mensaje:** Se solventﾃθ津つｳ un error crﾃθ津つｭtico de `TypeError: msg.getQuotedMessage is not a function` que provocaba que el bot crasheara con "El reino estﾃθ津つ｡ en llamas..." al usar citados en comandos modificados. La causa era que la destructuraciﾃθ津つｳn `{ ...msg }` eliminaba los mﾃθ津つｩtodos de la clase `Message` de `whatsapp-web.js`. Se solucionﾃθ津つｳ implementando un envoltorio limpio basado en `Object.create(originalMsg)` que preserva la cadena de prototipos intacta.
-    *   **Administradores Persistentes en Supabase:** Se detectﾃθ津つｳ que el almacenamiento local `admins.json` dentro del contenedor de Railway se perdﾃθ津つｭa al redesplegar la aplicaciﾃθ津つｳn. Para solucionar esto de forma definitiva, se habilitﾃθ津つｳ el chequeo hﾃθ津つｭbrido: el bot ahora valida los privilegios de administrador consultando la columna `is_admin` en la tabla `players` de Supabase de manera asﾃθ津つｭncrona. Los comandos `!add admin` y `!remove admin` ahora actualizan automﾃθ津つ｡ticamente la base de datos en tiempo real para garantizar persistencia absoluta.
-    *   **Correcciﾃθ津つｳn de ID en Citados de Grupo:** Se solucionﾃθ津つｳ un bug crﾃθ津つｭtico donde responder a un mensaje de grupo con `!add admin` o `!registrar` extraﾃθ津つｭa errﾃθ津つｳneamente el JID del chat del grupo (`xxxx@g.us`) a travﾃθ津つｩs de `quoted.from`, registrando o agregando el ID de grupo completo (`5959823815251611282780`) en lugar del nﾃθ津つｺmero del jugador. Se corrigiﾃθ津つｳ cambiando el objetivo para priorizar `quoted.author` (el emisor real del mensaje dentro del grupo) con fallback a `quoted.from` (en chats directos).
-    *   **Mejora de UX en !registrar Autﾃθ津つｳnomo:** Se optimizﾃθ津つｳ el flujo de error cuando un administrador ejecuta el comando `!registrar` de forma standalone (sin citar a un usuario y con argumentos incompletos). Ahora el bot detecta que no se especificaron los parﾃθ津つ｡metros mﾃθ津つｭnimos y responde con un mensaje guiado e instructivo que explica detalladamente el formato correcto para ambas opciones (Opciﾃθ津つｳn A: Respondiendo, Opciﾃθ津つｳn B: Directo/Manual).
-    *   **Censo General de Fichas y Vinculaciones (!censo / !fichas):** Se implementﾃθ津つｳ una funciﾃθ津つｳn integrada `getRealmCensus` en `kingdoom-bot/src/supabase.js` que realiza una consulta unificada de todos los jugadores y sus respectivas fichas de personajes (`character_sheets`). Se expuso el comando exclusivo para administradores `!censo` / `!fichas` en `kingdoom-bot/src/handlers/admin.js`, el cual genera un hermoso y estructurado reporte que detalla: total de aventureros, porcentaje de vinculaciﾃθ津つｳn a WhatsApp, nﾃθ津つｺmero de PJs por usuario, los nombres de cada uno de sus PJs (PJ 1, PJ 2) y, para aquellos pendientes sin ficha completada, calcula automﾃθ津つ｡ticamente el tiempo transcurrido en dﾃθ津つｭas desde su registro original con una alerta de advertencia.
-    *   **Consistencia y Citados en !grant y !ban:** Se habilitﾃθ津つｳ el soporte para citar/responder mensajes de WhatsApp en los comandos de administraciﾃθ津つｳn `!grant` y `!ban`. Esto permite otorgar oro (ej. `!grant 500` respondiendo al jugador) o banear (ej. `!ban` respondiendo al jugador) directamente sin requerir escribir sus nﾃθ津つｺmeros de telﾃθ津つｩfono a mano.
-*   **Notas/Advertencias:** Todas las modificaciones son 100% compatibles con la base de datos Supabase existente y la lﾃθ津つｳgica del bot. El compilador TypeScript pasﾃθ津つｳ con ﾃθ津つｩxito (`Exit code: 0`).
+    *   **Comando de Vinculaciï¾ƒÎ¸æ´¥ã�¤ï½³n !verificar:** Se creï¾ƒÎ¸æ´¥ã�¤ï½³ la funciï¾ƒÎ¸æ´¥ã�¤ï½³n `verifyAndLinkPlayer` en el backend del bot (`kingdoom-bot/src/supabase.js`) que permite a cualquier usuario vincular su nï¾ƒÎ¸æ´¥ã�¤ï½ºmero de WhatsApp con su cuenta web medieval existente ingresando su nombre de usuario (sin distinguir mayï¾ƒÎ¸æ´¥ã�¤ï½ºsculas/minï¾ƒÎ¸æ´¥ã�¤ï½ºsculas) o el segmento inicial de su ID UUID (ej. `!verificar Zoelfrost` o `!verificar 2354`).
+    *   **Bypass de Jugador no Registrado:** Se ubicï¾ƒÎ¸æ´¥ã�¤ï½³ el manejador de `!verificar` en `kingdoom-bot/src/handlers/player.js` arriba del control de seguridad de usuario no registrado, permitiendo que nuevos contactos puedan vincularse de manera fluida sin ser rechazados como viajero desconocido.
+    *   **Visualizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de ID en la Web:** Se actualizï¾ƒÎ¸æ´¥ã�¤ï½³ `src/components/PlayerProfilePanel.tsx` tanto en la vista colapsada como expandida para mostrar el ID corto (los primeros 8 caracteres del UUID) de manera clara y estï¾ƒÎ¸æ´¥ã�¤ï½©tica.
+    *   **Instrucciones de Vinculaciï¾ƒÎ¸æ´¥ã�¤ï½³n en UI:** En caso de que la cuenta web no tenga ningï¾ƒÎ¸æ´¥ã�¤ï½ºn WhatsApp vinculado (`player.phone` es null), el Panel de Perfil muestra una tarjeta dorada estilizada con instrucciones precisas y el comando exacto para copiar y enviar al bot: `!verificar <id_corto>`.
+    *   **Actualizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de Modelos y Consultas:** Se incluyï¾ƒÎ¸æ´¥ã�¤ï½³ la columna `phone` en todas las consultas y payloads de creaciï¾ƒÎ¸æ´¥ã�¤ï½³n de jugadores de `src/utils/players.ts` para que el estado de vinculaciï¾ƒÎ¸æ´¥ã�¤ï½³n se sincronice en tiempo real con la UI de la SPA.
+    *   **Habilitaciï¾ƒÎ¸æ´¥ã�¤ï½³n del Comando en Ruteador:** Se registrï¾ƒÎ¸æ´¥ã�¤ï½³ `'verificar'` en la lista blanca de comandos del ruteador principal `kingdoom-bot/src/index.js` para asegurar el procesamiento correcto de su prefijo.
+    *   **Soporte de Citado para !add/!remove admin:** Se corrigiï¾ƒÎ¸æ´¥ã�¤ï½³ una discrepancia UX donde los comandos `!add admin` y `!remove admin` requerï¾ƒÎ¸æ´¥ã�¤ï½­an especificar manualmente el nï¾ƒÎ¸æ´¥ã�¤ï½ºmero. Ahora soportan plenamente citar (responder a) un mensaje para extraer automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente el nï¾ƒÎ¸æ´¥ã�¤ï½ºmero del remitente del mensaje citado (Opciï¾ƒÎ¸æ´¥ã�¤ï½³n A).
+    *   **Preservaciï¾ƒÎ¸æ´¥ã�¤ï½³n de Prototipo de Mensaje:** Se solventï¾ƒÎ¸æ´¥ã�¤ï½³ un error crï¾ƒÎ¸æ´¥ã�¤ï½­tico de `TypeError: msg.getQuotedMessage is not a function` que provocaba que el bot crasheara con "El reino estï¾ƒÎ¸æ´¥ã�¤ï½¡ en llamas..." al usar citados en comandos modificados. La causa era que la destructuraciï¾ƒÎ¸æ´¥ã�¤ï½³n `{ ...msg }` eliminaba los mï¾ƒÎ¸æ´¥ã�¤ï½©todos de la clase `Message` de `whatsapp-web.js`. Se solucionï¾ƒÎ¸æ´¥ã�¤ï½³ implementando un envoltorio limpio basado en `Object.create(originalMsg)` que preserva la cadena de prototipos intacta.
+    *   **Administradores Persistentes en Supabase:** Se detectï¾ƒÎ¸æ´¥ã�¤ï½³ que el almacenamiento local `admins.json` dentro del contenedor de Railway se perdï¾ƒÎ¸æ´¥ã�¤ï½­a al redesplegar la aplicaciï¾ƒÎ¸æ´¥ã�¤ï½³n. Para solucionar esto de forma definitiva, se habilitï¾ƒÎ¸æ´¥ã�¤ï½³ el chequeo hï¾ƒÎ¸æ´¥ã�¤ï½­brido: el bot ahora valida los privilegios de administrador consultando la columna `is_admin` en la tabla `players` de Supabase de manera asï¾ƒÎ¸æ´¥ã�¤ï½­ncrona. Los comandos `!add admin` y `!remove admin` ahora actualizan automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente la base de datos en tiempo real para garantizar persistencia absoluta.
+    *   **Correcciï¾ƒÎ¸æ´¥ã�¤ï½³n de ID en Citados de Grupo:** Se solucionï¾ƒÎ¸æ´¥ã�¤ï½³ un bug crï¾ƒÎ¸æ´¥ã�¤ï½­tico donde responder a un mensaje de grupo con `!add admin` o `!registrar` extraï¾ƒÎ¸æ´¥ã�¤ï½­a errï¾ƒÎ¸æ´¥ã�¤ï½³neamente el JID del chat del grupo (`xxxx@g.us`) a travï¾ƒÎ¸æ´¥ã�¤ï½©s de `quoted.from`, registrando o agregando el ID de grupo completo (`5959823815251611282780`) en lugar del nï¾ƒÎ¸æ´¥ã�¤ï½ºmero del jugador. Se corrigiï¾ƒÎ¸æ´¥ã�¤ï½³ cambiando el objetivo para priorizar `quoted.author` (el emisor real del mensaje dentro del grupo) con fallback a `quoted.from` (en chats directos).
+    *   **Mejora de UX en !registrar Autï¾ƒÎ¸æ´¥ã�¤ï½³nomo:** Se optimizï¾ƒÎ¸æ´¥ã�¤ï½³ el flujo de error cuando un administrador ejecuta el comando `!registrar` de forma standalone (sin citar a un usuario y con argumentos incompletos). Ahora el bot detecta que no se especificaron los parï¾ƒÎ¸æ´¥ã�¤ï½¡metros mï¾ƒÎ¸æ´¥ã�¤ï½­nimos y responde con un mensaje guiado e instructivo que explica detalladamente el formato correcto para ambas opciones (Opciï¾ƒÎ¸æ´¥ã�¤ï½³n A: Respondiendo, Opciï¾ƒÎ¸æ´¥ã�¤ï½³n B: Directo/Manual).
+    *   **Censo General de Fichas y Vinculaciones (!censo / !fichas):** Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ una funciï¾ƒÎ¸æ´¥ã�¤ï½³n integrada `getRealmCensus` en `kingdoom-bot/src/supabase.js` que realiza una consulta unificada de todos los jugadores y sus respectivas fichas de personajes (`character_sheets`). Se expuso el comando exclusivo para administradores `!censo` / `!fichas` en `kingdoom-bot/src/handlers/admin.js`, el cual genera un hermoso y estructurado reporte que detalla: total de aventureros, porcentaje de vinculaciï¾ƒÎ¸æ´¥ã�¤ï½³n a WhatsApp, nï¾ƒÎ¸æ´¥ã�¤ï½ºmero de PJs por usuario, los nombres de cada uno de sus PJs (PJ 1, PJ 2) y, para aquellos pendientes sin ficha completada, calcula automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente el tiempo transcurrido en dï¾ƒÎ¸æ´¥ã�¤ï½­as desde su registro original con una alerta de advertencia.
+    *   **Consistencia y Citados en !grant y !ban:** Se habilitï¾ƒÎ¸æ´¥ã�¤ï½³ el soporte para citar/responder mensajes de WhatsApp en los comandos de administraciï¾ƒÎ¸æ´¥ã�¤ï½³n `!grant` y `!ban`. Esto permite otorgar oro (ej. `!grant 500` respondiendo al jugador) o banear (ej. `!ban` respondiendo al jugador) directamente sin requerir escribir sus nï¾ƒÎ¸æ´¥ã�¤ï½ºmeros de telï¾ƒÎ¸æ´¥ã�¤ï½©fono a mano.
+*   **Notas/Advertencias:** Todas las modificaciones son 100% compatibles con la base de datos Supabase existente y la lï¾ƒÎ¸æ´¥ã�¤ï½³gica del bot. El compilador TypeScript pasï¾ƒÎ¸æ´¥ã�¤ï½³ con ï¾ƒÎ¸æ´¥ã�¤ï½©xito (`Exit code: 0`).
 
 ### [Fecha: 19/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `kingdoom-bot/src/index.js`, `kingdoom-bot/Dockerfile`, `kingdoom-bot/src/handlers/player.js` (en repo secundario)
-*   **Resumen de Tareas:** Migraciﾃθ津つｳn completa de Kingdoom Bot a Railway y soporte de visualizaciﾃθ津つｳn de QR en alta definiciﾃθ津つｳn para WhatsApp Web.
+*   **Resumen de Tareas:** Migraciï¾ƒÎ¸æ´¥ã�¤ï½³n completa de Kingdoom Bot a Railway y soporte de visualizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de QR en alta definiciï¾ƒÎ¸æ´¥ã�¤ï½³n para WhatsApp Web.
 *   **Cambios Clave:**
-    *   **Migraciﾃθ津つｳn a Railway:** Se adaptﾃθ津つｳ la configuraciﾃθ津つｳn del bot para desplegarse de manera robusta en Railway.app, superando las limitaciones de RAM (512MB) y disco volﾃθ津つ｡til del plan gratuito de Render.
-    *   **Docker & Volumen Persistente:** Se removiﾃθ津つｳ la directiva `VOLUME` en el `Dockerfile` (no soportada nativamente por Railway) y se configurﾃθ津つｳ la persistencia de la sesiﾃθ津つｳn mediante un disco montado en `/app/.wwebjs_auth` desde la interfaz de Railway.
-    *   **Servidor Web QR en HD:** Se implementﾃθ津つｳ una pﾃθ津つ｡gina interactiva en `PORT = 8080` (en `src/index.js`) que sirve el cﾃθ津つｳdigo QR generado como imagen PNG en alta definiciﾃθ津つｳn, facilitando su escaneo e indicando el estado `ﾃδ｢ﾃで禿やｦ Bot Conectado` una vez autenticado.
-    *   **Remociﾃθ津つｳn del comando !daily:** Se removiﾃθ津つｳ por completo la funcionalidad de reclamo de recompensas diarias (`!daily`), limpiando sus imports, su lﾃθ津つｳgica interna de base de datos, la funciﾃθ津つｳn de selecciﾃθ津つｳn de premios, su menciﾃθ津つｳn en el comando `!ayuda` y su registro en la lista de comandos procesados de `index.js`.
-    *   **Privilegios de Owner y Administradores:** Se aﾃθ津つｱadiﾃθ津つｳ un sistema robusto de permisos gestionado en `src/adminStore.js` con persistencia en el volumen de Railway (`/app/.wwebjs_auth/admins.json`). El nﾃθ津つｺmero `595987273405` se definiﾃθ津つｳ como **Soberano (Owner)** del bot, teniendo acceso exclusivo a comandos para conceder (`!add admin <numero>`) o revocar (`!remove admin <numero>`) roles de administrador.
-    *   **Restricciﾃθ津つｳn y Mejoras de !registrar:** El comando `!registrar` ahora estﾃθ津つ｡ restringido ﾃθ津つｺnicamente a los administradores y al owner. Otorga **2500 de oro inicial** por defecto, y permite especificar un monto a la derecha (ej. `!registrar pepe 200000`, soportando separadores de miles). Ademﾃθ津つ｡s, se aﾃθ津つｱadiﾃθ津つｳ soporte UX premium: si se ejecuta respondiendo a un mensaje de WhatsApp, extrae automﾃθ津つ｡ticamente el nﾃθ津つｺmero del remitente del mensaje citado.
-    *   **Mensaje de Bienvenida Premium en Dos Partes:** Se actualizﾃθ津つｳ `src/handlers/welcome.js` para enviar dos mensajes secuenciales e interactivos con un intervalo de 1.5s al detectar nuevos miembros en el grupo de WhatsApp. El primer mensaje incluye una caja medieval de bienvenida para `ﾃδｰﾃつ敕つ静で� ﾃδｰﾃつ敕つ静ね� ﾃδｰﾃつ敕つ静つ� ﾃδｰﾃつ敕つ静や� ﾃδｰﾃつ敕つ静と� ﾃδｰﾃつ敕つ静でｽ ﾃδｰﾃつ敕つ静でｽ ﾃδｰﾃつ敕つ静で蛋 y un link directo a su canal de informaciﾃθ津つｳn para crear el primer personaje, mientras que el segundo lista oficialmente a los "Guardianes del Reino" (`Nothing`, `Zoelfrost`, `Ord`, `E.xe`). Incorpora menciones automﾃθ津つ｡ticas en alta prioridad a los miembros reciﾃθ津つｩn unidos.
-    *   **Resoluciﾃθ津つｳn de Discrepancias de JID en Paraguay:** Se identificﾃθ津つｳ que WhatsApp a nivel de servidor aﾃθ津つｱade o remueve un dﾃθ津つｭgito `9` despuﾃθ津つｩs del cﾃθ津つｳdigo de paﾃθ津つｭs paraguayo (`595`), resultando en discrepancias de formato JID (ej. `5959987273405@c.us` vs `595987273405@c.us`). Se actualizﾃθ津つｳ `src/adminStore.js` para admitir y homologar automﾃθ津つ｡ticamente ambos formatos, permitiendo que seas reconocido como Soberano (Owner) de inmediato.
-    *   **Identificaciﾃθ津つｳn de Remitentes en Grupos de WhatsApp:** Se corrigiﾃθ津つｳ el error de mapeo donde el bot extraﾃθ津つｭa el emisor usando `msg.from` (que en grupos devuelve el ID del grupo en lugar del nﾃθ津つｺmero del remitente). Ahora el bot extrae al emisor real de forma infalible con `msg.author || msg.from`, permitiendo a los administradores ejecutar comandos desde grupos.
-    *   **Filtrado Silencioso de Mensajes No Registrados:** Para evitar spam masivo de `Viajero desconocido...` ante palabras cotidianas en grupos y PV, se configurﾃθ津つｳ el bot para ignorar de manera silenciosa cualquier mensaje de usuario no registrado que carezca del prefijo de comando `!`.
-    *   **Correcciﾃθ津つｳn de ReferenceError en el Handler de Jugadores:** Al refactorizar la identificaciﾃθ津つｳn de emisores se removiﾃθ津つｳ accidentalmente la declaraciﾃθ津つｳn local de `chatId` en `src/handlers/player.js` que el historial de chat con Inteligencia Artificial requerﾃθ津つｭa. Se reincorporﾃθ津つｳ `const chatId = msg.from;` restableciendo la persistencia correcta y solventando el crash que arrojaba `ﾃδ｢ﾃで｡ﾃや敕δｯﾃつｸﾃつ� El reino esta en llamas...`.
-    *   **Menﾃθ津つｺ Dinﾃθ津つ｡mico e Inteligente para !ayuda:** Se reprogramﾃθ津つｳ el comando `!ayuda` en `src/handlers/player.js` para detectar en tiempo real si el remitente del mensaje es el Soberano (Owner) o un Administrador del Reino, anexando de manera dinﾃθ津つ｡mica sus comandos exclusivos (como `!registrar`, `!grant`, `!stats`, `!broadcast`, `!admin`, etc.) al menﾃθ津つｺ tradicional de juego de WhatsApp.
-    *   **Fortalecimiento en Normalizaciﾃθ津つｳn de Telﾃθ津つｩfonos:** Se securizﾃθ津つｳ `normalizePhone` en `src/supabase.js` convirtiendo el argumento de entrada a String y aplicando valores por defecto seguros para prevenir TypeErrors inesperados si el JID o nﾃθ津つｺmero remitente no estﾃθ津つ｡ definido.
-    *   **Restricciﾃθ津つｳn Estricta de Respuestas a Prefijo (!):** Para evitar que el bot responda con el Heraldo AI a conversaciones cotidianas de cualquier usuario (incluidos dueﾃθ津つｱos y administradores), se configurﾃθ津つｳ una regla estricta al inicio del manejador de mensajes de WhatsApp. Si el mensaje no inicia con el prefijo `!`, se ignora de manera inmediata y silenciosa (`if (!hasPrefix) return;`).
-    *   **Identificaciﾃθ津つｳn Dinﾃθ津つ｡mica de Dueﾃθ津つｱo por Env y JID de Acompaﾃθ津つｱante:** Se adaptﾃθ津つｳ `isOwner` en `src/adminStore.js` para validar dinﾃθ津つ｡micamente si el nﾃθ津つｺmero del emisor coincide con la variable de entorno `OWNER_NUMBER` o `ADMIN_NUMBER` definida en Railway, e incorporﾃθ津つｳ soporte directo nativo para el identificador de dispositivo acompaﾃθ津つｱante `275162062668001` como Soberano (Owner).
-    *   **Normalizaciﾃθ津つｳn Unificada de Telﾃθ津つｩfonos Internacionales:** Se unificﾃθ津つｳ la lﾃθ津つｳgica de `normalizePhone` importﾃθ津つ｡ndose desde `adminStore.js` a `supabase.js`. Ahora formatea de forma consistente nﾃθ津つｺmeros de Paraguay (removiendo el 9 adicional si tiene 13 dﾃθ津つｭgitos), Mﾃθ津つｩxico (canonicalizando a `521` si tiene 12 dﾃθ津つｭgitos) y Argentina (canonicalizando a `549` y eliminando el `15` si estﾃθ津つ｡ presente). Esto previene inconsistencias entre los datos guardados en la BD y las llamadas de eventos en WhatsApp.
-    *   **Bypass de !ayuda para Nuevos Admins/Usuarios No Registrados:** Se modificﾃθ津つｳ `handlePlayerMessage` en `src/handlers/player.js` para procesar el comando `!ayuda` antes de comprobar si el jugador existe en la BD. Esto permite a los administradores reciﾃθ津つｩn aﾃθ津つｱadidos u dueﾃθ津つｱos ver el menﾃθ津つｺ, identificar sus roles y diagnosticar su telﾃθ津つｩfono con una nota explicativa sobre cﾃθ津つｳmo registrarse, en lugar de recibir el mensaje de "Viajero desconocido".
-    *   **Registro de Handoff:** Se registrﾃθ津つｳ formalmente el estado y las instrucciones del bot en la memoria compartida (`kingdoom-memory` MCP) para sincronizar el trabajo con Codex.
-*   **Notas/Advertencias:** El bot estﾃθ津つ｡ activo y online. Solo requiere escanear el QR generado en su dominio pﾃθ津つｺblico de Railway. El cambio de la remociﾃθ津つｳn del !daily, la reestructuraciﾃθ津つｳn de permisos/registro, la bienvenida en dos partes, la correcciﾃθ津つｳn de JIDs/mensajerﾃθ津つｭa grupal, el menﾃθ津つｺ dinﾃθ津つ｡mico de ayuda, la restricciﾃθ津つｳn estricta de prefijos, el diagnﾃθ津つｳstico de identidad, el JID especﾃθ津つｭfico del dueﾃθ津つｱo, la normalizaciﾃθ津つｳn unificada de telﾃθ津つｩfonos internacionales y el bypass de ayuda fue committeado y pusheado de inmediato para gatillar el despliegue automﾃθ津つ｡tico en Railway.
+    *   **Migraciï¾ƒÎ¸æ´¥ã�¤ï½³n a Railway:** Se adaptï¾ƒÎ¸æ´¥ã�¤ï½³ la configuraciï¾ƒÎ¸æ´¥ã�¤ï½³n del bot para desplegarse de manera robusta en Railway.app, superando las limitaciones de RAM (512MB) y disco volï¾ƒÎ¸æ´¥ã�¤ï½¡til del plan gratuito de Render.
+    *   **Docker & Volumen Persistente:** Se removiï¾ƒÎ¸æ´¥ã�¤ï½³ la directiva `VOLUME` en el `Dockerfile` (no soportada nativamente por Railway) y se configurï¾ƒÎ¸æ´¥ã�¤ï½³ la persistencia de la sesiï¾ƒÎ¸æ´¥ã�¤ï½³n mediante un disco montado en `/app/.wwebjs_auth` desde la interfaz de Railway.
+    *   **Servidor Web QR en HD:** Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ una pï¾ƒÎ¸æ´¥ã�¤ï½¡gina interactiva en `PORT = 8080` (en `src/index.js`) que sirve el cï¾ƒÎ¸æ´¥ã�¤ï½³digo QR generado como imagen PNG en alta definiciï¾ƒÎ¸æ´¥ã�¤ï½³n, facilitando su escaneo e indicando el estado `ï¾ƒÎ´ï½¢ï¾ƒã�§ç¦¿ã‚„Â€ï½¦ Bot Conectado` una vez autenticado.
+    *   **Remociï¾ƒÎ¸æ´¥ã�¤ï½³n del comando !daily:** Se removiï¾ƒÎ¸æ´¥ã�¤ï½³ por completo la funcionalidad de reclamo de recompensas diarias (`!daily`), limpiando sus imports, su lï¾ƒÎ¸æ´¥ã�¤ï½³gica interna de base de datos, la funciï¾ƒÎ¸æ´¥ã�¤ï½³n de selecciï¾ƒÎ¸æ´¥ã�¤ï½³n de premios, su menciï¾ƒÎ¸æ´¥ã�¤ï½³n en el comando `!ayuda` y su registro en la lista de comandos procesados de `index.js`.
+    *   **Privilegios de Owner y Administradores:** Se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ un sistema robusto de permisos gestionado en `src/adminStore.js` con persistencia en el volumen de Railway (`/app/.wwebjs_auth/admins.json`). El nï¾ƒÎ¸æ´¥ã�¤ï½ºmero `595987273405` se definiï¾ƒÎ¸æ´¥ã�¤ï½³ como **Soberano (Owner)** del bot, teniendo acceso exclusivo a comandos para conceder (`!add admin <numero>`) o revocar (`!remove admin <numero>`) roles de administrador.
+    *   **Restricciï¾ƒÎ¸æ´¥ã�¤ï½³n y Mejoras de !registrar:** El comando `!registrar` ahora estï¾ƒÎ¸æ´¥ã�¤ï½¡ restringido ï¾ƒÎ¸æ´¥ã�¤ï½ºnicamente a los administradores y al owner. Otorga **2500 de oro inicial** por defecto, y permite especificar un monto a la derecha (ej. `!registrar pepe 200000`, soportando separadores de miles). Ademï¾ƒÎ¸æ´¥ã�¤ï½¡s, se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ soporte UX premium: si se ejecuta respondiendo a un mensaje de WhatsApp, extrae automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente el nï¾ƒÎ¸æ´¥ã�¤ï½ºmero del remitente del mensaje citado.
+    *   **Mensaje de Bienvenida Premium en Dos Partes:** Se actualizï¾ƒÎ¸æ´¥ã�¤ï½³ `src/handlers/welcome.js` para enviar dos mensajes secuenciales e interactivos con un intervalo de 1.5s al detectar nuevos miembros en el grupo de WhatsApp. El primer mensaje incluye una caja medieval de bienvenida para `ï¾ƒÎ´ï½°ï¾ƒã�¤æ••ã�¤é�™ã�§ï¿½ ï¾ƒÎ´ï½°ï¾ƒã�¤æ••ã�¤é�™ã�­ï¿½ ï¾ƒÎ´ï½°ï¾ƒã�¤æ••ã�¤é�™ã�¤ï¿½ ï¾ƒÎ´ï½°ï¾ƒã�¤æ••ã�¤é�™ã‚„Â€ï¿½ ï¾ƒÎ´ï½°ï¾ƒã�¤æ••ã�¤é�™ã�¨ï¿½ ï¾ƒÎ´ï½°ï¾ƒã�¤æ••ã�¤é�™ã�§ï½½ ï¾ƒÎ´ï½°ï¾ƒã�¤æ••ã�¤é�™ã�§ï½½ ï¾ƒÎ´ï½°ï¾ƒã�¤æ••ã�¤é�™ã�§è›‹ y un link directo a su canal de informaciï¾ƒÎ¸æ´¥ã�¤ï½³n para crear el primer personaje, mientras que el segundo lista oficialmente a los "Guardianes del Reino" (`Nothing`, `Zoelfrost`, `Ord`, `E.xe`). Incorpora menciones automï¾ƒÎ¸æ´¥ã�¤ï½¡ticas en alta prioridad a los miembros reciï¾ƒÎ¸æ´¥ã�¤ï½©n unidos.
+    *   **Resoluciï¾ƒÎ¸æ´¥ã�¤ï½³n de Discrepancias de JID en Paraguay:** Se identificï¾ƒÎ¸æ´¥ã�¤ï½³ que WhatsApp a nivel de servidor aï¾ƒÎ¸æ´¥ã�¤ï½±ade o remueve un dï¾ƒÎ¸æ´¥ã�¤ï½­gito `9` despuï¾ƒÎ¸æ´¥ã�¤ï½©s del cï¾ƒÎ¸æ´¥ã�¤ï½³digo de paï¾ƒÎ¸æ´¥ã�¤ï½­s paraguayo (`595`), resultando en discrepancias de formato JID (ej. `5959987273405@c.us` vs `595987273405@c.us`). Se actualizï¾ƒÎ¸æ´¥ã�¤ï½³ `src/adminStore.js` para admitir y homologar automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente ambos formatos, permitiendo que seas reconocido como Soberano (Owner) de inmediato.
+    *   **Identificaciï¾ƒÎ¸æ´¥ã�¤ï½³n de Remitentes en Grupos de WhatsApp:** Se corrigiï¾ƒÎ¸æ´¥ã�¤ï½³ el error de mapeo donde el bot extraï¾ƒÎ¸æ´¥ã�¤ï½­a el emisor usando `msg.from` (que en grupos devuelve el ID del grupo en lugar del nï¾ƒÎ¸æ´¥ã�¤ï½ºmero del remitente). Ahora el bot extrae al emisor real de forma infalible con `msg.author || msg.from`, permitiendo a los administradores ejecutar comandos desde grupos.
+    *   **Filtrado Silencioso de Mensajes No Registrados:** Para evitar spam masivo de `Viajero desconocido...` ante palabras cotidianas en grupos y PV, se configurï¾ƒÎ¸æ´¥ã�¤ï½³ el bot para ignorar de manera silenciosa cualquier mensaje de usuario no registrado que carezca del prefijo de comando `!`.
+    *   **Correcciï¾ƒÎ¸æ´¥ã�¤ï½³n de ReferenceError en el Handler de Jugadores:** Al refactorizar la identificaciï¾ƒÎ¸æ´¥ã�¤ï½³n de emisores se removiï¾ƒÎ¸æ´¥ã�¤ï½³ accidentalmente la declaraciï¾ƒÎ¸æ´¥ã�¤ï½³n local de `chatId` en `src/handlers/player.js` que el historial de chat con Inteligencia Artificial requerï¾ƒÎ¸æ´¥ã�¤ï½­a. Se reincorporï¾ƒÎ¸æ´¥ã�¤ï½³ `const chatId = msg.from;` restableciendo la persistencia correcta y solventando el crash que arrojaba `ï¾ƒÎ´ï½¢ï¾ƒã�§ï½¡ï¾ƒã‚„Â€æ••Î´ï½¯ï¾ƒã�¤ï½¸ï¾ƒã�¤ï¿½ El reino esta en llamas...`.
+    *   **Menï¾ƒÎ¸æ´¥ã�¤ï½º Dinï¾ƒÎ¸æ´¥ã�¤ï½¡mico e Inteligente para !ayuda:** Se reprogramï¾ƒÎ¸æ´¥ã�¤ï½³ el comando `!ayuda` en `src/handlers/player.js` para detectar en tiempo real si el remitente del mensaje es el Soberano (Owner) o un Administrador del Reino, anexando de manera dinï¾ƒÎ¸æ´¥ã�¤ï½¡mica sus comandos exclusivos (como `!registrar`, `!grant`, `!stats`, `!broadcast`, `!admin`, etc.) al menï¾ƒÎ¸æ´¥ã�¤ï½º tradicional de juego de WhatsApp.
+    *   **Fortalecimiento en Normalizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de Telï¾ƒÎ¸æ´¥ã�¤ï½©fonos:** Se securizï¾ƒÎ¸æ´¥ã�¤ï½³ `normalizePhone` en `src/supabase.js` convirtiendo el argumento de entrada a String y aplicando valores por defecto seguros para prevenir TypeErrors inesperados si el JID o nï¾ƒÎ¸æ´¥ã�¤ï½ºmero remitente no estï¾ƒÎ¸æ´¥ã�¤ï½¡ definido.
+    *   **Restricciï¾ƒÎ¸æ´¥ã�¤ï½³n Estricta de Respuestas a Prefijo (!):** Para evitar que el bot responda con el Heraldo AI a conversaciones cotidianas de cualquier usuario (incluidos dueï¾ƒÎ¸æ´¥ã�¤ï½±os y administradores), se configurï¾ƒÎ¸æ´¥ã�¤ï½³ una regla estricta al inicio del manejador de mensajes de WhatsApp. Si el mensaje no inicia con el prefijo `!`, se ignora de manera inmediata y silenciosa (`if (!hasPrefix) return;`).
+    *   **Identificaciï¾ƒÎ¸æ´¥ã�¤ï½³n Dinï¾ƒÎ¸æ´¥ã�¤ï½¡mica de Dueï¾ƒÎ¸æ´¥ã�¤ï½±o por Env y JID de Acompaï¾ƒÎ¸æ´¥ã�¤ï½±ante:** Se adaptï¾ƒÎ¸æ´¥ã�¤ï½³ `isOwner` en `src/adminStore.js` para validar dinï¾ƒÎ¸æ´¥ã�¤ï½¡micamente si el nï¾ƒÎ¸æ´¥ã�¤ï½ºmero del emisor coincide con la variable de entorno `OWNER_NUMBER` o `ADMIN_NUMBER` definida en Railway, e incorporï¾ƒÎ¸æ´¥ã�¤ï½³ soporte directo nativo para el identificador de dispositivo acompaï¾ƒÎ¸æ´¥ã�¤ï½±ante `275162062668001` como Soberano (Owner).
+    *   **Normalizaciï¾ƒÎ¸æ´¥ã�¤ï½³n Unificada de Telï¾ƒÎ¸æ´¥ã�¤ï½©fonos Internacionales:** Se unificï¾ƒÎ¸æ´¥ã�¤ï½³ la lï¾ƒÎ¸æ´¥ã�¤ï½³gica de `normalizePhone` importï¾ƒÎ¸æ´¥ã�¤ï½¡ndose desde `adminStore.js` a `supabase.js`. Ahora formatea de forma consistente nï¾ƒÎ¸æ´¥ã�¤ï½ºmeros de Paraguay (removiendo el 9 adicional si tiene 13 dï¾ƒÎ¸æ´¥ã�¤ï½­gitos), Mï¾ƒÎ¸æ´¥ã�¤ï½©xico (canonicalizando a `521` si tiene 12 dï¾ƒÎ¸æ´¥ã�¤ï½­gitos) y Argentina (canonicalizando a `549` y eliminando el `15` si estï¾ƒÎ¸æ´¥ã�¤ï½¡ presente). Esto previene inconsistencias entre los datos guardados en la BD y las llamadas de eventos en WhatsApp.
+    *   **Bypass de !ayuda para Nuevos Admins/Usuarios No Registrados:** Se modificï¾ƒÎ¸æ´¥ã�¤ï½³ `handlePlayerMessage` en `src/handlers/player.js` para procesar el comando `!ayuda` antes de comprobar si el jugador existe en la BD. Esto permite a los administradores reciï¾ƒÎ¸æ´¥ã�¤ï½©n aï¾ƒÎ¸æ´¥ã�¤ï½±adidos u dueï¾ƒÎ¸æ´¥ã�¤ï½±os ver el menï¾ƒÎ¸æ´¥ã�¤ï½º, identificar sus roles y diagnosticar su telï¾ƒÎ¸æ´¥ã�¤ï½©fono con una nota explicativa sobre cï¾ƒÎ¸æ´¥ã�¤ï½³mo registrarse, en lugar de recibir el mensaje de "Viajero desconocido".
+    *   **Registro de Handoff:** Se registrï¾ƒÎ¸æ´¥ã�¤ï½³ formalmente el estado y las instrucciones del bot en la memoria compartida (`kingdoom-memory` MCP) para sincronizar el trabajo con Codex.
+*   **Notas/Advertencias:** El bot estï¾ƒÎ¸æ´¥ã�¤ï½¡ activo y online. Solo requiere escanear el QR generado en su dominio pï¾ƒÎ¸æ´¥ã�¤ï½ºblico de Railway. El cambio de la remociï¾ƒÎ¸æ´¥ã�¤ï½³n del !daily, la reestructuraciï¾ƒÎ¸æ´¥ã�¤ï½³n de permisos/registro, la bienvenida en dos partes, la correcciï¾ƒÎ¸æ´¥ã�¤ï½³n de JIDs/mensajerï¾ƒÎ¸æ´¥ã�¤ï½­a grupal, el menï¾ƒÎ¸æ´¥ã�¤ï½º dinï¾ƒÎ¸æ´¥ã�¤ï½¡mico de ayuda, la restricciï¾ƒÎ¸æ´¥ã�¤ï½³n estricta de prefijos, el diagnï¾ƒÎ¸æ´¥ã�¤ï½³stico de identidad, el JID especï¾ƒÎ¸æ´¥ã�¤ï½­fico del dueï¾ƒÎ¸æ´¥ã�¤ï½±o, la normalizaciï¾ƒÎ¸æ´¥ã�¤ï½³n unificada de telï¾ƒÎ¸æ´¥ã�¤ï½©fonos internacionales y el bypass de ayuda fue committeado y pusheado de inmediato para gatillar el despliegue automï¾ƒÎ¸æ´¥ã�¤ï½¡tico en Railway.
 
 ### [Fecha: 18/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/archivist/archivistActions.ts`, `src/features/archivist/archivist.types.ts`, `api/admin/ask-archivist.ts`, `api/admin/_aiPrompts.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se aﾃθ津つｱadiﾃθ津つｳ la capacidad de dar oro a mﾃθ津つｺltiples jugadores simultﾃθ津つ｡neamente ("add_multiple_players_gold").
+*   **Resumen de Tareas:** Se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ la capacidad de dar oro a mï¾ƒÎ¸æ´¥ã�¤ï½ºltiples jugadores simultï¾ƒÎ¸æ´¥ã�¤ï½¡neamente ("add_multiple_players_gold").
 *   **Cambios Clave:**
-    *   **Acciﾃθ津つｳn de lista:** Se implementﾃθ津つｳ `add_multiple_players_gold` para procesar una lista de nombres de usuario.
-    *   **Bﾃθ津つｺsqueda flexible:** El motor busca a los jugadores indicados ignorando mayﾃθ津つｺsculas/minﾃθ津つｺsculas y buscando coincidencias parciales, igual que en la bﾃθ津つｺsqueda individual.
-    *   **Prompts:** Se actualizﾃθ津つｳ el prompt de IA para utilizar un payload de la forma `{"usernames": ["User A", "User B"], "amount": X}` cuando se le piden varios nombres.
+    *   **Acciï¾ƒÎ¸æ´¥ã�¤ï½³n de lista:** Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ `add_multiple_players_gold` para procesar una lista de nombres de usuario.
+    *   **Bï¾ƒÎ¸æ´¥ã�¤ï½ºsqueda flexible:** El motor busca a los jugadores indicados ignorando mayï¾ƒÎ¸æ´¥ã�¤ï½ºsculas/minï¾ƒÎ¸æ´¥ã�¤ï½ºsculas y buscando coincidencias parciales, igual que en la bï¾ƒÎ¸æ´¥ã�¤ï½ºsqueda individual.
+    *   **Prompts:** Se actualizï¾ƒÎ¸æ´¥ã�¤ï½³ el prompt de IA para utilizar un payload de la forma `{"usernames": ["User A", "User B"], "amount": X}` cuando se le piden varios nombres.
 *   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
 
 ### [Fecha: 18/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/archivist/archivistActions.ts`, `src/features/archivist/archivist.types.ts`, `api/admin/ask-archivist.ts`, `api/admin/_aiPrompts.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se aﾃθ津つｱadiﾃθ津つｳ la capacidad de dar oro a todos los jugadores ("add_all_players_gold") desde el Archivista.
+*   **Resumen de Tareas:** Se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ la capacidad de dar oro a todos los jugadores ("add_all_players_gold") desde el Archivista.
 *   **Cambios Clave:**
-    *   **Acciﾃθ津つｳn global:** Se implementﾃθ津つｳ `add_all_players_gold` en el motor de acciones del Archivista, permitiendo actualizar a todos los jugadores del contexto en una sola solicitud.
-    *   **Prompts:** Se actualizﾃθ津つｳ el prompt de IA para reconocer comandos globales y emitir un payload simple de `{ "amount": X }` sin requerir nombre de usuario.
+    *   **Acciï¾ƒÎ¸æ´¥ã�¤ï½³n global:** Se implementï¾ƒÎ¸æ´¥ã�¤ï½³ `add_all_players_gold` en el motor de acciones del Archivista, permitiendo actualizar a todos los jugadores del contexto en una sola solicitud.
+    *   **Prompts:** Se actualizï¾ƒÎ¸æ´¥ã�¤ï½³ el prompt de IA para reconocer comandos globales y emitir un payload simple de `{ "amount": X }` sin requerir nombre de usuario.
 *   **Notas/Advertencias:** Validado con `npx tsc --noEmit` y `npm run build`.
 
 ### [Fecha: 13/05/2026] - [Autor: Jarvis]
@@ -1091,12 +1096,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 13/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/archivist/archivistLive.ts`, `src/components/ArchivistSection.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Finalizaciﾃθ津つｳn del fix para el ranking de oro del Archivista y refuerzo semﾃθ津つ｡ntico.
+*   **Resumen de Tareas:** Finalizaciï¾ƒÎ¸æ´¥ã�¤ï½³n del fix para el ranking de oro del Archivista y refuerzo semï¾ƒÎ¸æ´¥ã�¤ï½¡ntico.
 *   **Cambios Clave:**
-    *   **Contexto Admin:** Se verificﾃθ津つｳ la inclusiﾃθ津つｳn de `richestPlayers` en el resumen runtime para staff.
-    *   **Refuerzo Semﾃθ津つ｡ntico:** Se eliminﾃθ津つｳ `oro` de `CARD_STOPWORDS` y se duplicﾃθ津つｳ el `categoryBoost` para asegurar que las tarjetas de jugadores tengan prioridad absoluta en consultas econﾃθ津つｳmicas.
-    *   **Detecciﾃθ津つｳn de Intenciﾃθ津つｳn:** Se flexibilizﾃθ津つｳ `isPlayerGoldQuestion` para detectar "ranking", "ricos" y "riqueza" sin necesidad de mencionar explﾃθ津つｭcitamente "jugador".
-*   **Notas/Advertencias:** Validado con `npm run build`. El sistema ahora diferencia correctamente entre "comprar oro" (mercado) y "ﾃ�堙つｿquiﾃθ津つｩn tiene mﾃθ津つ｡s oro?" (jugadores).
+    *   **Contexto Admin:** Se verificï¾ƒÎ¸æ´¥ã�¤ï½³ la inclusiï¾ƒÎ¸æ´¥ã�¤ï½³n de `richestPlayers` en el resumen runtime para staff.
+    *   **Refuerzo Semï¾ƒÎ¸æ´¥ã�¤ï½¡ntico:** Se eliminï¾ƒÎ¸æ´¥ã�¤ï½³ `oro` de `CARD_STOPWORDS` y se duplicï¾ƒÎ¸æ´¥ã�¤ï½³ el `categoryBoost` para asegurar que las tarjetas de jugadores tengan prioridad absoluta en consultas econï¾ƒÎ¸æ´¥ã�¤ï½³micas.
+    *   **Detecciï¾ƒÎ¸æ´¥ã�¤ï½³n de Intenciï¾ƒÎ¸æ´¥ã�¤ï½³n:** Se flexibilizï¾ƒÎ¸æ´¥ã�¤ï½³ `isPlayerGoldQuestion` para detectar "ranking", "ricos" y "riqueza" sin necesidad de mencionar explï¾ƒÎ¸æ´¥ã�¤ï½­citamente "jugador".
+*   **Notas/Advertencias:** Validado con `npm run build`. El sistema ahora diferencia correctamente entre "comprar oro" (mercado) y "ï¾ƒï¿½Â€å ™ã�¤ï½¿quiï¾ƒÎ¸æ´¥ã�¤ï½©n tiene mï¾ƒÎ¸æ´¥ã�¤ï½¡s oro?" (jugadores).
 
 
 
@@ -1209,37 +1214,37 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 12/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/ArchivistSection.tsx`, `src/features/archivist/archivistLive.ts`, `src/features/archivist/archivistActions.ts`, `src/features/archivist/archivist.types.ts`, `src/utils/archivistSources.ts`, `src/utils/archivistAi.ts`, `api/admin/_aiPrompts.ts`, `api/admin/ask-archivist.ts`, `docs/superpowers/specs/2026-05-12-archivista-vivo-design.md`, `docs/superpowers/plans/2026-05-12-archivista-vivo.md`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Reconstrucciﾃθ津つｳn del Archivista hacia un formato de chat puro con contexto vivo del reino, tarjetas compactas y preparaciﾃθ津つｳn/ejecuciﾃθ津つｳn de acciones admin por confirmaciﾃθ津つｳn conversacional.
+*   **Resumen de Tareas:** Reconstrucciï¾ƒÎ¸æ´¥ã�¤ï½³n del Archivista hacia un formato de chat puro con contexto vivo del reino, tarjetas compactas y preparaciï¾ƒÎ¸æ´¥ã�¤ï½³n/ejecuciï¾ƒÎ¸æ´¥ã�¤ï½³n de acciones admin por confirmaciï¾ƒÎ¸æ´¥ã�¤ï½³n conversacional.
 *   **Cambios Clave:**
-    *   **Chat puro:** Se eliminﾃθ津つｳ la estructura anterior con panel lateral y controles de memoria visibles para concentrar toda la experiencia en una sola interfaz conversacional.
-    *   **Contexto vivo:** El Archivista ahora resume mercado, misiones, eventos, grimorio, biblioteca y, en modo admin, tambiﾃθ津つｩn jugadores cargados.
-    *   **Tarjetas compactas:** Las respuestas pueden adjuntar tarjetas breves de mercado, eventos, misiones, magias, bestiario, flora y documentos sin romper la versiﾃθ津つｳn mﾃθ津つｳvil.
-    *   **Modo admin real:** Se integrﾃθ津つｳ el borrador y la ejecuciﾃθ津つｳn de acciones del reino tras confirmaciﾃθ津つｳn `si/no` en el chat para oro, misiones, eventos, mercado, magia, bestiario, flora y documentos.
-    *   **Cache y contexto:** Se ajustﾃθ津つｳ el endpoint para separar respuestas pﾃθ津つｺblicas/admin y considerar el resumen vivo del reino al generar la respuesta IA.
-*   **Notas/Advertencias:** El Archivista sigue dependiendo de las APIs/configuraciones IA ya existentes. Conviene validar flujo pﾃθ津つｺblico y flujo admin tras cada redeploy porque ahora la capa operativa ya no es solo informativa.
+    *   **Chat puro:** Se eliminï¾ƒÎ¸æ´¥ã�¤ï½³ la estructura anterior con panel lateral y controles de memoria visibles para concentrar toda la experiencia en una sola interfaz conversacional.
+    *   **Contexto vivo:** El Archivista ahora resume mercado, misiones, eventos, grimorio, biblioteca y, en modo admin, tambiï¾ƒÎ¸æ´¥ã�¤ï½©n jugadores cargados.
+    *   **Tarjetas compactas:** Las respuestas pueden adjuntar tarjetas breves de mercado, eventos, misiones, magias, bestiario, flora y documentos sin romper la versiï¾ƒÎ¸æ´¥ã�¤ï½³n mï¾ƒÎ¸æ´¥ã�¤ï½³vil.
+    *   **Modo admin real:** Se integrï¾ƒÎ¸æ´¥ã�¤ï½³ el borrador y la ejecuciï¾ƒÎ¸æ´¥ã�¤ï½³n de acciones del reino tras confirmaciï¾ƒÎ¸æ´¥ã�¤ï½³n `si/no` en el chat para oro, misiones, eventos, mercado, magia, bestiario, flora y documentos.
+    *   **Cache y contexto:** Se ajustï¾ƒÎ¸æ´¥ã�¤ï½³ el endpoint para separar respuestas pï¾ƒÎ¸æ´¥ã�¤ï½ºblicas/admin y considerar el resumen vivo del reino al generar la respuesta IA.
+*   **Notas/Advertencias:** El Archivista sigue dependiendo de las APIs/configuraciones IA ya existentes. Conviene validar flujo pï¾ƒÎ¸æ´¥ã�¤ï½ºblico y flujo admin tras cada redeploy porque ahora la capa operativa ya no es solo informativa.
 
 ### [Fecha: 12/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `src/components/ArchivistSection.tsx`, `api/anime/proxy.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Resoluciﾃθ津つｳn de problemas de visualizaciﾃθ津つｳn de enlaces, rediseﾃθ津つｱo de la interfaz de reproducciﾃθ津つｳn/descarga para mayor compacidad y limpieza de la secciﾃθ津つｳn del Archivista.
+*   **Resumen de Tareas:** Resoluciï¾ƒÎ¸æ´¥ã�¤ï½³n de problemas de visualizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de enlaces, rediseï¾ƒÎ¸æ´¥ã�¤ï½±o de la interfaz de reproducciï¾ƒÎ¸æ´¥ã�¤ï½³n/descarga para mayor compacidad y limpieza de la secciï¾ƒÎ¸æ´¥ã�¤ï½³n del Archivista.
 *   **Cambios Clave:**
-    *   **Limpieza de Interfaz (ArchivistSection):** Eliminaciﾃθ津つｳn de la descripciﾃθ津つｳn redundante en la cabecera del Archivista ("Consulta el reino..."), siguiendo el rediseﾃθ津つｱo hacia un formato de chat puro.
-    *   **UI Minimalista (AnimeHubSection):** Sustituciﾃθ津つｳn del selector de servidores por un componente ultra-compacto con icono de flecha (`ChevronDown`), optimizando el espacio en la consola de acciones.
-    *   **Normalizaciﾃθ津つｳn de Enlaces:** Se actualizﾃθ津つｳ `normalizeLinks` para soportar arrays directos de `servers` y `downloads` que devuelven los scrapers actuales.
-    *   **Correcciﾃθ津つｳn de Mapeo (AnimeFLV):** Se corrigiﾃθ津つｳ `fetchAnimeFlvLinks` para procesar correctamente el payload envuelto de la API.
-    *   **Seguridad:** Migraciﾃθ津つｳn total de API Keys hardcodeadas a la constante `ANIME_HUB_API_KEY`.
-    *   **Proxy API:** Actualizaciﾃθ津つｳn de `api/anime/proxy.ts` para mejorar la compatibilidad del mapeo de fuentes y enlaces.
-*   **Notas/Advertencias:** La interfaz ahora es mﾃθ津つ｡s limpia y evita solapamientos en resoluciones bajas o mﾃθ津つｳviles.
+    *   **Limpieza de Interfaz (ArchivistSection):** Eliminaciï¾ƒÎ¸æ´¥ã�¤ï½³n de la descripciï¾ƒÎ¸æ´¥ã�¤ï½³n redundante en la cabecera del Archivista ("Consulta el reino..."), siguiendo el rediseï¾ƒÎ¸æ´¥ã�¤ï½±o hacia un formato de chat puro.
+    *   **UI Minimalista (AnimeHubSection):** Sustituciï¾ƒÎ¸æ´¥ã�¤ï½³n del selector de servidores por un componente ultra-compacto con icono de flecha (`ChevronDown`), optimizando el espacio en la consola de acciones.
+    *   **Normalizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de Enlaces:** Se actualizï¾ƒÎ¸æ´¥ã�¤ï½³ `normalizeLinks` para soportar arrays directos de `servers` y `downloads` que devuelven los scrapers actuales.
+    *   **Correcciï¾ƒÎ¸æ´¥ã�¤ï½³n de Mapeo (AnimeFLV):** Se corrigiï¾ƒÎ¸æ´¥ã�¤ï½³ `fetchAnimeFlvLinks` para procesar correctamente el payload envuelto de la API.
+    *   **Seguridad:** Migraciï¾ƒÎ¸æ´¥ã�¤ï½³n total de API Keys hardcodeadas a la constante `ANIME_HUB_API_KEY`.
+    *   **Proxy API:** Actualizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de `api/anime/proxy.ts` para mejorar la compatibilidad del mapeo de fuentes y enlaces.
+*   **Notas/Advertencias:** La interfaz ahora es mï¾ƒÎ¸æ´¥ã�¤ï½¡s limpia y evita solapamientos en resoluciones bajas o mï¾ƒÎ¸æ´¥ã�¤ï½³viles.
 
 ### [Fecha: 11/05/2026] - [Autor: Antigravity & Jarvis]
 *   **Archivos Modificados:** `api/anime/stream.ts`, `api/anime/download.ts`, `api/admin/_serverAiProviders.ts`, `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `apps/mobile/app/(tabs)/anime.tsx`, `.env.example`
-*   **Resumen de Tareas:** Finalizaciﾃθ津つｳn de la integraciﾃθ津つｳn de AnimeFLV, implementaciﾃθ津つｳn de filtros por proveedor y optimizaciﾃθ津つｳn de conectividad (CORS/Timeouts).
+*   **Resumen de Tareas:** Finalizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de la integraciï¾ƒÎ¸æ´¥ã�¤ï½³n de AnimeFLV, implementaciï¾ƒÎ¸æ´¥ã�¤ï½³n de filtros por proveedor y optimizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de conectividad (CORS/Timeouts).
 *   **Cambios Clave:**
-    *   **Endpoints:** Optimizaciﾃθ津つｳn de proxies en Vercel para streaming y descargas; ahora aceptan `ANIMEFLV_API_URL` como variable server-side.
-    *   **UI Web/Mﾃθ津つｳvil:** Implementaciﾃθ津つｳn de selectores de proveedor y filtros dinﾃθ津つ｡micos en ambas plataformas.
-    *   **Conectividad:** Correcciﾃθ津つｳn de tipos TypeScript para `ApiRequest` (aﾃθ津つｱadido `query`) e inclusiﾃθ津つｳn de declaraciones globales para entornos Node.js.
-    *   **Robustez:** Inyecciﾃθ津つｳn de `User-Agent` real en peticiones de backend para evitar bloqueos 403 y timeouts de 8s con `AbortController`.
-    *   **Configuraciﾃθ津つｳn:** Documentada la nueva variable `ANIMEFLV_API_URL` en `.env.example`.
-*   **Notas/Advertencias:** La integraciﾃθ津つｳn es ahora resiliente a fallos de red y cumple con los estﾃθ津つ｡ndares de tipado de Vercel. Se requiere redeploy final.
+    *   **Endpoints:** Optimizaciï¾ƒÎ¸æ´¥ã�¤ï½³n de proxies en Vercel para streaming y descargas; ahora aceptan `ANIMEFLV_API_URL` como variable server-side.
+    *   **UI Web/Mï¾ƒÎ¸æ´¥ã�¤ï½³vil:** Implementaciï¾ƒÎ¸æ´¥ã�¤ï½³n de selectores de proveedor y filtros dinï¾ƒÎ¸æ´¥ã�¤ï½¡micos en ambas plataformas.
+    *   **Conectividad:** Correcciï¾ƒÎ¸æ´¥ã�¤ï½³n de tipos TypeScript para `ApiRequest` (aï¾ƒÎ¸æ´¥ã�¤ï½±adido `query`) e inclusiï¾ƒÎ¸æ´¥ã�¤ï½³n de declaraciones globales para entornos Node.js.
+    *   **Robustez:** Inyecciï¾ƒÎ¸æ´¥ã�¤ï½³n de `User-Agent` real en peticiones de backend para evitar bloqueos 403 y timeouts de 8s con `AbortController`.
+    *   **Configuraciï¾ƒÎ¸æ´¥ã�¤ï½³n:** Documentada la nueva variable `ANIMEFLV_API_URL` en `.env.example`.
+*   **Notas/Advertencias:** La integraciï¾ƒÎ¸æ´¥ã�¤ï½³n es ahora resiliente a fallos de red y cumple con los estï¾ƒÎ¸æ´¥ã�¤ï½¡ndares de tipado de Vercel. Se requiere redeploy final.
 
 ### [Fecha: 11/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `.env.example`, `apps/mobile/.env.example`
@@ -1294,14 +1299,14 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 11/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `apps/mobile/app/(tabs)/anime.tsx`
-*   **Resumen de Tareas:** Se ampliﾃθ津つｳ Anime Hub para aprovechar mejor las capacidades reales de `anime1v` con filtros por proveedor, enlaces mﾃθ津つ｡s completos y una experiencia coherente entre web y app.
+*   **Resumen de Tareas:** Se ampliï¾ƒÎ¸æ´¥ã�¤ï½³ Anime Hub para aprovechar mejor las capacidades reales de `anime1v` con filtros por proveedor, enlaces mï¾ƒÎ¸æ´¥ã�¤ï½¡s completos y una experiencia coherente entre web y app.
 *   **Cambios Clave:**
-    *   Se aﾃθ津つｱadieron filtros reales por proveedor `anime1v` (`AnimeAV1`, `AnimeFLV`, `TioAnime`, `JKAnime`, `HentaiLA`, `MonosChinos`) en web y mﾃθ津つｳvil.
-    *   La bﾃθ津つｺsqueda ahora puede forzar el dominio correcto en `anime1v`, en lugar de tratarlo como una ﾃθ津つｺnica fuente genﾃθ津つｩrica.
+    *   Se aï¾ƒÎ¸æ´¥ã�¤ï½±adieron filtros reales por proveedor `anime1v` (`AnimeAV1`, `AnimeFLV`, `TioAnime`, `JKAnime`, `HentaiLA`, `MonosChinos`) en web y mï¾ƒÎ¸æ´¥ã�¤ï½³vil.
+    *   La bï¾ƒÎ¸æ´¥ã�¤ï½ºsqueda ahora puede forzar el dominio correcto en `anime1v`, en lugar de tratarlo como una ï¾ƒÎ¸æ´¥ã�¤ï½ºnica fuente genï¾ƒÎ¸æ´¥ã�¤ï½©rica.
     *   Los resultados de `anime1v` ahora muestran la etiqueta real del proveedor origen, no solo `anime1v remoto`.
     *   La carga de enlaces de episodio ahora combina variantes `SUB` y `DUB`, e intenta pedir `includeMega=true` para exprimir mejor lo que ofrece el backend.
-    *   Se corrigiﾃθ津つｳ la referencia del endpoint batch a `/api/v1/anime/batch-download` para mantenerla alineada con el backend real.
-*   **Notas/Advertencias:** Validar con `npx tsc --noEmit` y `npm run build` antes de publicar. Los proveedores mﾃθ津つ｡s allﾃθ津つ｡ de `AnimeAV1` siguen dependiendo de que el backend `anime1v` tenga esos scrapers y requisitos externos operativos.
+    *   Se corrigiï¾ƒÎ¸æ´¥ã�¤ï½³ la referencia del endpoint batch a `/api/v1/anime/batch-download` para mantenerla alineada con el backend real.
+*   **Notas/Advertencias:** Validar con `npx tsc --noEmit` y `npm run build` antes de publicar. Los proveedores mï¾ƒÎ¸æ´¥ã�¤ï½¡s allï¾ƒÎ¸æ´¥ã�¤ï½¡ de `AnimeAV1` siguen dependiendo de que el backend `anime1v` tenga esos scrapers y requisitos externos operativos.
 
 ### [Fecha: 08/05/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`
@@ -1426,24 +1431,24 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 07/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.types.ts`, `src/features/animeHub/animeHub.remoteProvider.ts`, `src/features/animeHub/animeHub.mockProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Finalizada la integraciﾃθ津つｳn de Anime Hub con soporte completo para reproducciﾃθ津つｳn (streaming) y descargas directas desde la API real.
+*   **Resumen de Tareas:** Finalizada la integraciï¾ƒÎ¸æ´¥ã�¤ï½³n de Anime Hub con soporte completo para reproducciï¾ƒÎ¸æ´¥ã�¤ï½³n (streaming) y descargas directas desde la API real.
 *   **Cambios Clave:**
-    *   **Tipado:** Extendida la interfaz `AnimeHubProvider` con `getEpisodeLinks` para soportar la obtenciﾃθ津つｳn dinﾃθ津つ｡mica de servidores.
+    *   **Tipado:** Extendida la interfaz `AnimeHubProvider` con `getEpisodeLinks` para soportar la obtenciï¾ƒÎ¸æ´¥ã�¤ï½³n dinï¾ƒÎ¸æ´¥ã�¤ï½¡mica de servidores.
     *   **Web/Remote:** Implementado fetcher de enlaces en `remoteAnimeHubProvider` y corregido el mapeo de detalles de serie (id, episodios y metadata).
-    *   **UI Web:** `AnimeHubSection` ahora permite seleccionar episodios, cargando dinﾃθ津つ｡micamente los servidores de streaming y enlaces de descarga en un panel integrado.
+    *   **UI Web:** `AnimeHubSection` ahora permite seleccionar episodios, cargando dinï¾ƒÎ¸æ´¥ã�¤ï½¡micamente los servidores de streaming y enlaces de descarga en un panel integrado.
     *   **Mobile:** Actualizado el proveedor nativo para incluir `fetchMobileEpisodeLinks` y corregido el mapeo de series para consistencia con la API.
-    *   **API Hotfix:** Se redirigiﾃθ津つｳ el almacenamiento temporal de la API para evitar errores 500 en entornos serverless (Vercel).
-*   **Notas/Advertencias:** Validado y sincronizado en GitHub. El sistema mantiene fallback automﾃθ津つ｡tico al modo cascarﾃθ津つｳn si la API no responde.
+    *   **API Hotfix:** Se redirigiï¾ƒÎ¸æ´¥ã�¤ï½³ el almacenamiento temporal de la API para evitar errores 500 en entornos serverless (Vercel).
+*   **Notas/Advertencias:** Validado y sincronizado en GitHub. El sistema mantiene fallback automï¾ƒÎ¸æ´¥ã�¤ï½¡tico al modo cascarï¾ƒÎ¸æ´¥ã�¤ï½³n si la API no responde.
 
 
 ### [Fecha: 07/05/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/features/animeHub/animeHub.remoteProvider.ts`, `src/components/AnimeHubSection.tsx`, `apps/mobile/src/features/animeHub/animeHubProvider.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Conexiﾃθ津つｳn real del mﾃθ津つｳdulo Anime Hub con `anime1v-api` mediante variables de entorno, manteniendo el modo cascarﾃθ津つｳn como fallback seguro.
+*   **Resumen de Tareas:** Conexiï¾ƒÎ¸æ´¥ã�¤ï½³n real del mï¾ƒÎ¸æ´¥ã�¤ï½³dulo Anime Hub con `anime1v-api` mediante variables de entorno, manteniendo el modo cascarï¾ƒÎ¸æ´¥ã�¤ï½³n como fallback seguro.
 *   **Cambios Clave:**
     *   **Web:** Implementado adaptador real en `remoteAnimeHubProvider` usando `VITE_ANIME_HUB_API_URL`. Soporta `searchSeries` y `getSeriesDetail` con mapeo a tipos internos.
-    *   **Web:** `AnimeHubSection` ahora detecta automﾃθ津つ｡ticamente si existe la URL de la API para conmutar entre el proveedor mock y el remoto, con manejo de errores elegante en el feedback.
-    *   **Mobile:** Actualizado `animeHubProvider.ts` para consumir `EXPO_PUBLIC_ANIME_HUB_API_URL` si estﾃθ津つ｡ presente, integrando los flujos de bﾃθ津つｺsqueda e informaciﾃθ津つｳn real con fallback automﾃθ津つ｡tico al shell mock en caso de error o ausencia de configuraciﾃθ津つｳn.
-    *   **Resiliencia:** Se preservﾃθ津つｳ el diseﾃθ津つｱo premium y el funcionamiento del modo cascarﾃθ津つｳn para entornos sin configuraciﾃθ津つｳn de API.
+    *   **Web:** `AnimeHubSection` ahora detecta automï¾ƒÎ¸æ´¥ã�¤ï½¡ticamente si existe la URL de la API para conmutar entre el proveedor mock y el remoto, con manejo de errores elegante en el feedback.
+    *   **Mobile:** Actualizado `animeHubProvider.ts` para consumir `EXPO_PUBLIC_ANIME_HUB_API_URL` si estï¾ƒÎ¸æ´¥ã�¤ï½¡ presente, integrando los flujos de bï¾ƒÎ¸æ´¥ã�¤ï½ºsqueda e informaciï¾ƒÎ¸æ´¥ã�¤ï½³n real con fallback automï¾ƒÎ¸æ´¥ã�¤ï½¡tico al shell mock en caso de error o ausencia de configuraciï¾ƒÎ¸æ´¥ã�¤ï½³n.
+    *   **Resiliencia:** Se preservï¾ƒÎ¸æ´¥ã�¤ï½³ el diseï¾ƒÎ¸æ´¥ã�¤ï½±o premium y el funcionamiento del modo cascarï¾ƒÎ¸æ´¥ã�¤ï½³n para entornos sin configuraciï¾ƒÎ¸æ´¥ã�¤ï½³n de API.
 *   **Notas/Advertencias:** Validado con `npx tsc --noEmit`, `npm run mobile:typecheck` y `npm run build`. No se requiere `package-lock.json`.
 
 ### [Fecha: 07/05/2026] - [Autor: Jarvis]
@@ -1568,7 +1573,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Cambios Clave:**
     *   Si una rareza tiene menos items disponibles que su cupo, se muestran solo esos items disponibles.
     *   Los items agotados ya no rellenan cupos faltantes dentro de la rotacion.
-*   **Notas/Advertencias:** No cambia precios, compras ni probabilidades; solo evita que la vitrina rotativa enseﾃθ津つｱe agotados como reemplazo.
+*   **Notas/Advertencias:** No cambia precios, compras ni probabilidades; solo evita que la vitrina rotativa enseï¾ƒÎ¸æ´¥ã�¤ï½±e agotados como reemplazo.
 *   **Validacion:** `npx tsc --noEmit`, `npm run mobile:typecheck` y `npm run build` ejecutados correctamente.
 
 ### [Fecha: 05/05/2026] - [Autor: Jarvis]
@@ -1772,7 +1777,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Archivos Modificados:** `apps/mobile/app/(tabs)/_layout.tsx`, `apps/mobile/app/(tabs)/grimoire.tsx`, `apps/mobile/app/(tabs)/library.tsx`, `apps/mobile/app/(tabs)/market.tsx`, `apps/mobile/src/components/DetailSheet.tsx`, `apps/mobile/src/components/KingdoomUI.tsx`, `apps/mobile/src/components/ScreenShell.tsx`
 *   **Resumen de Tareas:** Se hizo una pasada premium de UI/UX nativa con foco en mobile, errores visuales, microinteracciones y estados de carga mas claros.
 *   **Cambios Clave:**
-    *   La barra inferior ahora resalta la pestaﾃθ津つｱa activa con una capsula visual mas premium y menos ruido en pantallas estrechas.
+    *   La barra inferior ahora resalta la pestaï¾ƒÎ¸æ´¥ã�¤ï½±a activa con una capsula visual mas premium y menos ruido en pantallas estrechas.
     *   Tarjetas, botones y chips suman profundidad, glow sutil, escala tactil y transiciones con curva pesada.
     *   Los inputs de busqueda ahora tienen foco dorado, teclado oscuro y autocorreccion desactivada para nombres del rol.
     *   Se agrego un loader compacto reutilizable para Mercado, Biblioteca y Grimorio.
@@ -1880,7 +1885,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 29/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/admin/AdminStaffAssistant.tsx`
-*   **Resumen de Tareas:** Se rediseﾃθ津つｱo el panel `Staff IA` para que cualquier miembro del staff pueda usarlo sin perderse.
+*   **Resumen de Tareas:** Se rediseï¾ƒÎ¸æ´¥ã�¤ï½±o el panel `Staff IA` para que cualquier miembro del staff pueda usarlo sin perderse.
 *   **Cambios Clave:**
     *   El formulario ahora se organiza en 3 pasos claros: que revisar, parametros de trabajo y limites/condiciones.
     *   Cada tipo (`Mision`, `Evento`, `Recompensa`, `Lore`, `Mercado`, `General`) muestra ayuda contextual, ejemplos y mini checklist.
@@ -1904,7 +1909,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   El Archivista ahora permite fijar temas activos como chips locales para orientar busqueda y continuidad sin convertirlos en canon.
     *   El endpoint del Archivista recibe memoria tematica y la incluye en prompt/cache de forma segura.
     *   Se creo `advise-staff` para analizar misiones, eventos, recompensas, lore, mercado o decisiones generales con IA.
-    *   El panel admin suma la pestaﾃθ津つｱa `Staff IA` con recomendaciones de riesgo, dificultad, cupos, oro, checklist y texto publicable.
+    *   El panel admin suma la pestaï¾ƒÎ¸æ´¥ã�¤ï½±a `Staff IA` con recomendaciones de riesgo, dificultad, cupos, oro, checklist y texto publicable.
 *   **Notas/Advertencias:** La memoria tematica vive en `localStorage`; no toca Supabase ni reglas economicas. Requiere `VITE_STAFF_AI_API_URL` si se quiere endpoint explicito en Vercel.
 
 ### [Fecha: 29/04/2026] - [Autor: Jarvis]
@@ -1987,14 +1992,14 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ### [Fecha: 27/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/serverAiProviders.ts`, `src/utils/aiDebug.ts`, `src/components/admin/AdminControlPrimitives.tsx`, `api/admin/generate-mission.ts`, `api/admin/generate-magic.ts`, `api/admin/generate-bestiary.ts`, `api/admin/ask-archivist.ts`, `.env.example`
-*   **Resumen de Tareas:** Se integrﾃθ津つｳ soporte de Groq como proveedor IA de respaldo para misiones, magias, bestiario y Archivista, con posibilidad de varias keys y debug admin ampliado por proveedor.
+*   **Resumen de Tareas:** Se integrï¾ƒÎ¸æ´¥ã�¤ï½³ soporte de Groq como proveedor IA de respaldo para misiones, magias, bestiario y Archivista, con posibilidad de varias keys y debug admin ampliado por proveedor.
 *   **Cambios Clave:**
-    *   Se creﾃθ津つｳ un motor compartido en `src/utils/serverAiProviders.ts` para manejar Gemini y Groq fuera de `api/admin`, evitando repetir lﾃθ津つｳgica y manteniendo compatibilidad con Vercel.
+    *   Se creï¾ƒÎ¸æ´¥ã�¤ï½³ un motor compartido en `src/utils/serverAiProviders.ts` para manejar Gemini y Groq fuera de `api/admin`, evitando repetir lï¾ƒÎ¸æ´¥ã�¤ï½³gica y manteniendo compatibilidad con Vercel.
     *   Los endpoints de misiones, magias, bestiario y Archivista ahora pueden responder con `Gemini -> Groq` como cadena de fallback.
-    *   Se aﾃθ津つｱadiﾃθ津つｳ soporte para `GROQ_API_KEYS` ademﾃθ津つ｡s de `GROQ_API_KEY`, junto con `GROQ_MODEL_PRIMARY` y `GROQ_MODEL_FALLBACK`.
-    *   El debug admin ahora contempla proveedor y modelo, para que staff pueda ver si la llamada saliﾃθ津つｳ por Gemini o por Groq.
+    *   Se aï¾ƒÎ¸æ´¥ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¤ï½³ soporte para `GROQ_API_KEYS` ademï¾ƒÎ¸æ´¥ã�¤ï½¡s de `GROQ_API_KEY`, junto con `GROQ_MODEL_PRIMARY` y `GROQ_MODEL_FALLBACK`.
+    *   El debug admin ahora contempla proveedor y modelo, para que staff pueda ver si la llamada saliï¾ƒÎ¸æ´¥ã�¤ï½³ por Gemini o por Groq.
 *   **Notas/Advertencias:**
-    *   La extracciﾃθ津つｳn de PDF sigue dependiendo de Gemini, porque ese flujo actual usa inline PDF y no se migrﾃθ津つｳ a Groq.
+    *   La extracciï¾ƒÎ¸æ´¥ã�¤ï½³n de PDF sigue dependiendo de Gemini, porque ese flujo actual usa inline PDF y no se migrï¾ƒÎ¸æ´¥ã�¤ï½³ a Groq.
 
 ### Plantilla de Nueva Entrada (Copiar y usar)
 ```markdown
@@ -2075,7 +2080,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se creo la tabla SQL `knowledge_documents` para guardar lore, reglas, magias, bestiario, flora, eventos, misiones y otros textos visibles u ocultos.
     *   El panel admin ahora incluye `Archivo IA` para cargar documentos manualmente o extraer texto desde PDF/TXT/MD, editar metadatos y administrar la visibilidad.
     *   Se agregaron endpoints Vercel para preguntar al Archivista con Gemini y para extraer texto desde PDF sin exponer la API key al cliente.
-    *   La web suma la pestaﾃθ津つｱa `Archivista`, con busqueda contextual local sobre documentos visibles y respuestas basadas en fuentes cargadas.
+    *   La web suma la pestaï¾ƒÎ¸æ´¥ã�¤ï½±a `Archivista`, con busqueda contextual local sobre documentos visibles y respuestas basadas en fuentes cargadas.
     *   `.env.example` documenta las nuevas variables `VITE_ARCHIVIST_AI_API_URL` y `VITE_PDF_EXTRACT_API_URL`.
 *   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` pasan OK. Hace falta ejecutar `supabase_knowledge_documents.sql` en Supabase y configurar las variables nuevas en Vercel antes de usar PDF/Archivista en produccion.
 
@@ -2749,7 +2754,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Cambios Clave:**
     *   `RealmRegistry` ahora carga todas las fichas al abrirse, las muestra en grid con filtro en vivo y permite revisar cualquier ficha del reino sin editarla.
     *   El acceso al registro publico ya puede abrirse incluso antes de conectar un perfil, para que cualquier visitante pueda consultar personajes.
-    *   Se elimino la pestaﾃθ津つｱa `Plantillas` del panel admin para dejar el centro de control mas limpio.
+    *   Se elimino la pestaï¾ƒÎ¸æ´¥ã�¤ï½±a `Plantillas` del panel admin para dejar el centro de control mas limpio.
     *   Se retiro el boton de unirse por WhatsApp del inicio y se anadio un CTA configurable para descargar la app de la comunidad mediante `COMMUNITY_APP_DOWNLOAD_URL`.
 *   **Notas/Advertencias:** Para activar el boton de descarga debes rellenar `COMMUNITY_APP_DOWNLOAD_URL` en `src/data/home.ts` con el enlace real del APK o la pagina de descarga.
 
@@ -2888,7 +2893,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 16/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/TavernExpeditionArcade.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se aﾃθ津つｱadieron mutadores aleatorios por caceria y criticos especiales por dificultad para darle mas variedad y personalidad al PvE arcade.
+*   **Resumen de Tareas:** Se aï¾ƒÎ¸æ´¥ã�¤ï½±adieron mutadores aleatorios por caceria y criticos especiales por dificultad para darle mas variedad y personalidad al PvE arcade.
 *   **Cambios Clave:**
     *   Cada contrato ahora recibe un mutador aleatorio al iniciarse, con efectos reales sobre dano, defensa, fase dos o recompensa final.
     *   Las tres dificultades tienen identidad propia de critico: `Corte preciso` en controlado, `Ruptura brutal` en medio y `Juicio del verdugo` en dificil.
@@ -2990,13 +2995,13 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 14/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/App.tsx`, `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`, `src/components/CharSheetModal.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Optimizaciﾃθ津と津�堙つｳn mobile-first para que la navegaciﾃθ津と津�堙つｳn sea mﾃθ津と津�堙つ｡s fluida y los modales no queden tapados por la barra inferior.
+*   **Resumen de Tareas:** Optimizaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n mobile-first para que la navegaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n sea mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡s fluida y los modales no queden tapados por la barra inferior.
 *   **Cambios Clave:**
     *   El panel `Tu sesion de jugador` ahora se auto-compacta fuera de `Inicio` y permite expandir/compactar manualmente.
-    *   Al cambiar de pestaﾃθ津と津�堙つｱa se hace scroll al inicio (evita que el usuario ﾃθ津つ｢ﾃδ｢ﾃや堙つｬﾃ�ｦﾃや彡aigaﾃθ津つ｢ﾃδ｢ﾃや堙つｬﾃ�堙つ� a mitad de pﾃθ津と津�堙つ｡gina en mﾃθ津と津�堙つｳvil).
-    *   Mercado: los catﾃθ津と津�堙つ｡logos por categorﾃθ津と津�堙つｭa ya no aparecen abiertos por defecto (reduce scroll infinito).
-    *   Modales de fichas (`CharImportModal`/`CharSheetModal`) suben su z-index y ajustan alto/padding para no quedar detrﾃθ津と津�堙つ｡s de la barra inferior.
-*   **Notas/Advertencias:** Sin cambios en la lﾃθ津と津�堙つｳgica de Supabase o guardado; solo UX/layout.
+    *   Al cambiar de pestaï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±a se hace scroll al inicio (evita que el usuario ï¾ƒÎ¸æ´¥ã�¤ï½¢ï¾ƒÎ´ï½¢ï¾ƒã‚„Â€å ™ã�¤ï½¬ï¾ƒï¿½Â€ï½¦ï¾ƒã‚„Â€å½¡aigaï¾ƒÎ¸æ´¥ã�¤ï½¢ï¾ƒÎ´ï½¢ï¾ƒã‚„Â€å ™ã�¤ï½¬ï¾ƒï¿½Â€å ™ã�¤ï¿½ a mitad de pï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡gina en mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³vil).
+    *   Mercado: los catï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡logos por categorï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a ya no aparecen abiertos por defecto (reduce scroll infinito).
+    *   Modales de fichas (`CharImportModal`/`CharSheetModal`) suben su z-index y ajustan alto/padding para no quedar detrï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡s de la barra inferior.
+*   **Notas/Advertencias:** Sin cambios en la lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³gica de Supabase o guardado; solo UX/layout.
 
 ---
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
@@ -3011,21 +3016,21 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Archivos Modificados:** `src/utils/sheetParser.ts`, `src/components/CharSheetModal.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Limpieza total de caracteres de formato (`*`, `-`) al importar fichas y mejora del render de ficha para que listas (Extras/Debilidades/etc.) se vean elegantes con colapsado "Ver mas".
 *   **Cambios Clave:**
-    *   El parser ahora elimina asteriscos restantes dentro del contenido y omite lﾃθ津と津�堙つｭneas de plantilla tipo "Noble, plebeyo o burgues" / "En caso de ser".
+    *   El parser ahora elimina asteriscos restantes dentro del contenido y omite lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­neas de plantilla tipo "Noble, plebeyo o burgues" / "En caso de ser".
     *   `CharSheetModal` renderiza bloques tipo lista como bullets y mantiene "Ver mas / Ver menos" para textos largos.
-*   **Notas/Advertencias:** Para fichas viejas ya guardadas, el modal tambiﾃθ津と津�堙つｩn limpia `*` y guiones al mostrar (no es necesario re-importar).
+*   **Notas/Advertencias:** Para fichas viejas ya guardadas, el modal tambiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½©n limpia `*` y guiones al mostrar (no es necesario re-importar).
 
 ---
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/sheetParser.ts`, `src/utils/characterSheets.ts`, `src/types.ts`, `src/components/PlayerProfilePanel.tsx`, `src/components/CharImportModal.tsx`, `src/components/RealmRegistry.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Se termino y estabilizo el sistema de Fichas de Personaje (importar desde WhatsApp, guardar con defaults, y buscador publico) con soporte opcional para mostrar/buscar por usuario (sin depender del UUID).
 *   **Cambios Clave:**
-    *   Parser reescrito (`sheetParser.ts`) para tolerar mejor el formato decorado de WhatsApp y capturar secciones multilﾃθ津と津�堙つｭnea sin ﾃθ津つ｢ﾃδ｢ﾃや堙つｬﾃ�ｦﾃや徇ezclarﾃθ津つ｢ﾃδ｢ﾃや堙つｬﾃ�堙つ� campos.
-    *   Guardado de fichas ahora completa valores por defecto al crear la ficha (evita `undefined` y hace el upsert mﾃθ津と津�堙つ｡s estable).
-    *   Se aﾃθ津と津�堙つｱadiﾃθ津と津�堙つｳ `playerUsername?: string` al tipo `CharacterSheet` y la capa de guardado detecta si la tabla soporta esa columna; si no, omite la propiedad para no romper el upsert.
-    *   Registro del Reino (`RealmRegistry`) mejorado: bﾃθ津と津�堙つｺsqueda por personaje/raza/profesiﾃθ津と津�堙つｳn y, si existe la columna, por `playerUsername`; si no, cae a `playerId`.
-    *   Importador (`CharImportModal`) con placeholder limpio (plantilla) y grilla de stats mﾃθ津と津�堙つ｡s usable en mﾃθ津と津�堙つｳvil.
-*   **Notas/Advertencias:** Si quieres que el Registro muestre y busque por nombre de jugador, crea la columna opcional `playerUsername` en `character_sheets` (texto) o avﾃθ津と津�堙つｭsame y te paso el SQL exacto para tu esquema.
+    *   Parser reescrito (`sheetParser.ts`) para tolerar mejor el formato decorado de WhatsApp y capturar secciones multilï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­nea sin ï¾ƒÎ¸æ´¥ã�¤ï½¢ï¾ƒÎ´ï½¢ï¾ƒã‚„Â€å ™ã�¤ï½¬ï¾ƒï¿½Â€ï½¦ï¾ƒã‚„Â€å¾‡ezclarï¾ƒÎ¸æ´¥ã�¤ï½¢ï¾ƒÎ´ï½¢ï¾ƒã‚„Â€å ™ã�¤ï½¬ï¾ƒï¿½Â€å ™ã�¤ï¿½ campos.
+    *   Guardado de fichas ahora completa valores por defecto al crear la ficha (evita `undefined` y hace el upsert mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡s estable).
+    *   Se aï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ `playerUsername?: string` al tipo `CharacterSheet` y la capa de guardado detecta si la tabla soporta esa columna; si no, omite la propiedad para no romper el upsert.
+    *   Registro del Reino (`RealmRegistry`) mejorado: bï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½ºsqueda por personaje/raza/profesiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n y, si existe la columna, por `playerUsername`; si no, cae a `playerId`.
+    *   Importador (`CharImportModal`) con placeholder limpio (plantilla) y grilla de stats mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡s usable en mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³vil.
+*   **Notas/Advertencias:** Si quieres que el Registro muestre y busque por nombre de jugador, crea la columna opcional `playerUsername` en `character_sheets` (texto) o avï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­same y te paso el SQL exacto para tu esquema.
 
 ### [Fecha: 13/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `.env.example`, `AI_CHANGELOG.md`
@@ -3040,7 +3045,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Resumen de Tareas:** Integracion y saneamiento del repo tras cambios externos: se unifico el historial con `origin/main` y se corrigieron errores de TypeScript que rompian consistencia del proyecto.
 *   **Cambios Clave:**
     *   Se integro `origin/main` (merge) y se resolvio el conflicto en `scratchUtils` manteniendo el limite diario dinamico del Rasca y Gana.
-    *   Se restauro la navegacion principal (Inicio, Grimorio, Biblioteca, Mercado, Ranking) para que coincida con `TabId` y el diseﾃθ津と津�堙つｱo acordado.
+    *   Se restauro la navegacion principal (Inicio, Grimorio, Biblioteca, Mercado, Ranking) para que coincida con `TabId` y el diseï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±o acordado.
     *   Se corrigio `PlayerProfilePanel` para incluir `motion` en los modales y evitar errores en runtime.
     *   Se normalizo Supabase para que el cliente no sea `null`: ahora falla rapido con un error claro si faltan `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`, y `src/lib/supabase.ts` reexporta el mismo cliente.
 *   **Notas/Advertencias:** `npx tsc --noEmit` y `npm run build` verificados sin errores.
@@ -3048,56 +3053,56 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 13/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Correcciﾃθ津と津�堙つｳn del sistema de retiro automﾃθ津と津�堙つ｡tico y visualizaciﾃθ津と津�堙つｳn del tope en el minijuego Crash.
+*   **Resumen de Tareas:** Correcciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n del sistema de retiro automï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡tico y visualizaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n del tope en el minijuego Crash.
 *   **Cambios Clave:**
-    *   **Soluciﾃθ津と津�堙つｳn de Stale Closures:** Implementaciﾃθ津と津�堙つｳn de `useRef` para variables crﾃθ津と津�堙つｭticas (apuesta, jugador, multiplicador) asegurando lecturas en tiempo real dentro del bucle `requestAnimationFrame`.
-    *   **Visualizaciﾃθ津と津�堙つｳn del Tope:** Ajuste dinﾃθ津と津�堙つ｡mico del eje Y (`maxY`) en el canvas para que la lﾃθ津と津�堙つｭnea de retiro automﾃθ津と津�堙つ｡tico sea siempre visible en el grﾃθ津と津�堙つ｡fico.
-    *   **Precisiﾃθ津と津�堙つｳn de Cobro:** El retiro automﾃθ津と津�堙つ｡tico ahora asegura el multiplicador exacto configurado por el usuario, evitando discrepancias por saltos de frames.
-*   **Notas/Advertencias:** Simulaciﾃθ津と津�堙つｳn y compilaciﾃθ津と津�堙つｳn verificadas exitosamente.
+    *   **Soluciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de Stale Closures:** Implementaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de `useRef` para variables crï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­ticas (apuesta, jugador, multiplicador) asegurando lecturas en tiempo real dentro del bucle `requestAnimationFrame`.
+    *   **Visualizaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n del Tope:** Ajuste dinï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡mico del eje Y (`maxY`) en el canvas para que la lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­nea de retiro automï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡tico sea siempre visible en el grï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡fico.
+    *   **Precisiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de Cobro:** El retiro automï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡tico ahora asegura el multiplicador exacto configurado por el usuario, evitando discrepancias por saltos de frames.
+*   **Notas/Advertencias:** Simulaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n y compilaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n verificadas exitosamente.
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/scratchUtils.ts`, `src/components/TavernScratch.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Aleatorizaciﾃθ津と津�堙つｳn del lﾃθ津と津�堙つｭmite diario de ganancias en el Rasca y Gana.
+*   **Resumen de Tareas:** Aleatorizaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n del lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite diario de ganancias en el Rasca y Gana.
 *   **Cambios Clave:**
-    *   **Lﾃθ津と津�堙つｭmite Dinﾃθ津と津�堙つ｡mico**: El lﾃθ津と津�堙つｭmite dejﾃθ津と津�堙つｳ de ser fijo (50,000) y ahora varﾃθ津と津�堙つｭa cada dﾃθ津と津�堙つｭa entre **10,000 y 150,000 de oro**.
-    *   **Semilla Diaria**: Se utiliza la misma semilla pseudo-aleatoria del dﾃθ津と津�堙つｭa para calcular el lﾃθ津と津�堙つｭmite, asegurando consistencia durante las 24 horas.
-    *   **Feedback Visual**: Se actualizﾃθ津と津�堙つｳ el mensaje de "Lﾃθ津と津�堙つｭmite Alcanzado" para mostrar dinﾃθ津と津�堙つ｡micamente el tope del dﾃθ津と津�堙つｭa actual.
-*   **Notas/Advertencias:** El lﾃθ津と津�堙つｭmite es por jugador y por dﾃθ津と津�堙つｭa local.
+    *   **Lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite Dinï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡mico**: El lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite dejï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ de ser fijo (50,000) y ahora varï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a cada dï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a entre **10,000 y 150,000 de oro**.
+    *   **Semilla Diaria**: Se utiliza la misma semilla pseudo-aleatoria del dï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a para calcular el lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite, asegurando consistencia durante las 24 horas.
+    *   **Feedback Visual**: Se actualizï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ el mensaje de "Lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite Alcanzado" para mostrar dinï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡micamente el tope del dï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a actual.
+*   **Notas/Advertencias:** El lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite es por jugador y por dï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a local.
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernCrash.tsx`, `src/App.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Implementaciﾃθ津と津�堙つｳn del minigame "El Multiplicador del Vacﾃθ津と津�堙つｭo" (Crash Game).
+*   **Resumen de Tareas:** Implementaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n del minigame "El Multiplicador del Vacï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­o" (Crash Game).
 *   **Cambios Clave:**
-    *   **Lﾃθ津と津�堙つｳgica de Tiempo Real**: Sistema basado en `requestAnimationFrame` para un conteo fluido y preciso.
-    *   **Curva Exponencial**: El multiplicador acelera con el tiempo (`1.06^t`), aumentando la presiﾃθ津と津�堙つｳn psicolﾃθ津と津�堙つｳgica.
-    *   **Punto de Colapso Dinﾃθ津と津�堙つ｡mico**: Algoritmo de azar con un 3% de margen de la casa (instant crash).
-    *   **Interfaz de Neﾃθ津と津�堙つｳn**: Diseﾃθ津と津�堙つｱo oscuro con efectos de brillo, anillos de energﾃθ津と津�堙つｭa y respuesta visual al ganar o perder.
-    *   **Integraciﾃθ津と津�堙つｳn de Saldo**: Sincronizaciﾃθ津と津�堙つｳn completa con `usePlayerSession` para apuestas y retiros.
+    *   **Lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³gica de Tiempo Real**: Sistema basado en `requestAnimationFrame` para un conteo fluido y preciso.
+    *   **Curva Exponencial**: El multiplicador acelera con el tiempo (`1.06^t`), aumentando la presiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n psicolï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³gica.
+    *   **Punto de Colapso Dinï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡mico**: Algoritmo de azar con un 3% de margen de la casa (instant crash).
+    *   **Interfaz de Neï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n**: Diseï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±o oscuro con efectos de brillo, anillos de energï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a y respuesta visual al ganar o perder.
+    *   **Integraciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de Saldo**: Sincronizaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n completa con `usePlayerSession` para apuestas y retiros.
 *   **Notas/Advertencias:** Limpieza de animaciones al desmontar el componente para evitar fugas de memoria.
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se corrigiﾃθ津と津�堙つｳ y potenciﾃθ津と津�堙つｳ el buscador del Grimorio para permitir bﾃθ津と津�堙つｺsquedas globales y profundas en todo el catﾃθ津と津�堙つ｡logo de habilidades.
+*   **Resumen de Tareas:** Se corrigiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ y potenciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ el buscador del Grimorio para permitir bï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½ºsquedas globales y profundas en todo el catï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡logo de habilidades.
 *   **Cambios Clave:**
-    *   **Bﾃθ津と津�堙つｺsqueda Global**: Al buscar una palabra, el sistema ahora ignora la categorﾃθ津と津�堙つｭa seleccionada y busca en TODO el grimorio simultﾃθ津と津�堙つ｡neamente.
-    *   **Expansiﾃθ津と津�堙つｳn de Criterios**: El buscador ahora analiza el tﾃθ津と津�堙つｭtulo, el Marco Teﾃθ津と津�堙つｳrico (descripciﾃθ津と津�堙つｳn), los nombres de habilidades, sus efectos y las restricciones de Anti-Mano Negra.
-    *   **Auto-Apertura Inteligente**: Las escuelas de magia y las tarjetas de habilidad que contienen la palabra buscada se abren automﾃθ津と津�堙つ｡ticamente para facilitar la lectura.
-    *   **Contexto de Bﾃθ津と津�堙つｺsqueda**: Se aﾃθ津と津�堙つｱadieron etiquetas visuales en los resultados que indican a quﾃθ津と津�堙つｩ categorﾃθ津と津�堙つｭa (Invocaciﾃθ津と津�堙つｳn, Elemental, etc.) pertenece cada estilo encontrado.
-*   **Notas/Advertencias:** `npx tsc --noEmit` verificado. Al limpiar el buscador, la interfaz regresa automﾃθ津と津�堙つ｡ticamente a la categorﾃθ津と津�堙つｭa que estaba seleccionada previamente.
+    *   **Bï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½ºsqueda Global**: Al buscar una palabra, el sistema ahora ignora la categorï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a seleccionada y busca en TODO el grimorio simultï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡neamente.
+    *   **Expansiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de Criterios**: El buscador ahora analiza el tï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­tulo, el Marco Teï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³rico (descripciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n), los nombres de habilidades, sus efectos y las restricciones de Anti-Mano Negra.
+    *   **Auto-Apertura Inteligente**: Las escuelas de magia y las tarjetas de habilidad que contienen la palabra buscada se abren automï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡ticamente para facilitar la lectura.
+    *   **Contexto de Bï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½ºsqueda**: Se aï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±adieron etiquetas visuales en los resultados que indican a quï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½© categorï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a (Invocaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n, Elemental, etc.) pertenece cada estilo encontrado.
+*   **Notas/Advertencias:** `npx tsc --noEmit` verificado. Al limpiar el buscador, la interfaz regresa automï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡ticamente a la categorï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a que estaba seleccionada previamente.
 
 ---
 ### [Fecha: 10/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/TavernCards.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Aumento de dificultad y sistema de rachas para el juego de cartas de la taberna.
 *   **Cambios Clave:**
-    *   **Mazo Ampliado**: El rango de cartas pasﾃθ津と津�堙つｳ de 1-10 a 1-15, dificultando las predicciones.
-    *   **Sistema de Doble o Nada (Rachas)**: Tras ganar, el premio no se cobra automﾃθ津と津�堙つ｡ticamente. El jugador debe decidir entre "Cobrar" o seguir con "Doble o Nada".
+    *   **Mazo Ampliado**: El rango de cartas pasï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ de 1-10 a 1-15, dificultando las predicciones.
+    *   **Sistema de Doble o Nada (Rachas)**: Tras ganar, el premio no se cobra automï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡ticamente. El jugador debe decidir entre "Cobrar" o seguir con "Doble o Nada".
     *   **Pozo Acumulado**: Las ganancias se acumulan en un pozo que se multiplica x2 con cada acierto. Si se falla, se pierde TODO el pozo acumulado.
-    *   **Optimizaciﾃθ津と津�堙つｳn Mobile-First**: Rediseﾃθ津と津�堙つｱo completo de la interfaz con botones mﾃθ津と津�堙つ｡s grandes, indicadores de racha/pozo y animaciones fluidas para una experiencia premium en mﾃθ津と津�堙つｳvil y escritorio.
-*   **Notas/Advertencias:** Los empates mantienen la racha y el pozo (neutral). Se verificﾃθ津と津�堙つｳ la lﾃθ津と津�堙つｳgica de persistencia con Supabase.
+    *   **Optimizaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n Mobile-First**: Rediseï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±o completo de la interfaz con botones mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡s grandes, indicadores de racha/pozo y animaciones fluidas para una experiencia premium en mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³vil y escritorio.
+*   **Notas/Advertencias:** Los empates mantienen la racha y el pozo (neutral). Se verificï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ la lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³gica de persistencia con Supabase.
 
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
@@ -3130,7 +3135,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/LibrarySection.tsx`, `src/assets/maps/vyralis-map.jpeg`, `src/assets/maps/geopolitica-map.jpeg`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se agregaron los mapas del continente a la pestaﾃθ津と津�堙つｱa `Mapa y Mundo` dentro de `Biblioteca`, con selector y visor en grande para movil.
+*   **Resumen de Tareas:** Se agregaron los mapas del continente a la pestaï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±a `Mapa y Mundo` dentro de `Biblioteca`, con selector y visor en grande para movil.
 *   **Cambios Clave:**
     *   Nuevo bloque de mapa al inicio de `Mapa y Mundo` con botones para alternar entre "Vyralis" y "Geopolitica".
     *   El mapa se puede tocar/abrir en un modal de pantalla completa para leer detalles sin saturar la UI.
@@ -3140,12 +3145,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/components/GrimoireSection.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Conversion automatica de unidades cientificas (N, kg, J, km/h, m/s, ﾃθ津や堙�堙つｰC) a "puntos" estilo D&D para que las habilidades se entiendan como stats (Fuerza, Velocidad, Danio).
+*   **Resumen de Tareas:** Conversion automatica de unidades cientificas (N, kg, J, km/h, m/s, ï¾ƒÎ¸æ´¥ã‚„Â€å ™ï¿½Â€å ™ã�¤ï½°C) a "puntos" estilo D&D para que las habilidades se entiendan como stats (Fuerza, Velocidad, Danio).
 *   **Cambios Clave:**
     *   Se implemento un formateador que reemplaza tokens tipo `$2000 N$` por equivalentes como `(+10 Fuerza)` y limpia escapes como `\\%`.
     *   El formateo se aplica a `effect`, `cd`, `limit`, `antiManoNegra` y tambien al texto de `Marco Teorico` dentro del Grimorio.
     *   La escala de conversion queda centralizada y facil de ajustar en una sola funcion (`convertUnitToDndPoints`).
-*   **Notas/Advertencias:** Escala inicial: N->Fuerza (N/200), m/s->Velocidad (m/s/5), J->Danio (J/500), ﾃθ津や堙�堙つｰC->Danio de Fuego (ﾃθ津や堙�堙つｰC/20), con tope 25. `npx tsc --noEmit` verificado sin errores.
+*   **Notas/Advertencias:** Escala inicial: N->Fuerza (N/200), m/s->Velocidad (m/s/5), J->Danio (J/500), ï¾ƒÎ¸æ´¥ã‚„Â€å ™ï¿½Â€å ™ã�¤ï½°C->Danio de Fuego (ï¾ƒÎ¸æ´¥ã‚„Â€å ™ï¿½Â€å ™ã�¤ï½°C/20), con tope 25. `npx tsc --noEmit` verificado sin errores.
 
 ---
 ### [Fecha: 09/04/2026] - [Autor: Jarvis]
@@ -3168,14 +3173,14 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 09/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/types.ts`, `src/data/grimorio.ts` (Nuevo), `src/components/GrimoireSection.tsx` (Nuevo), `src/components/LibrarySection.tsx` (Nuevo), `src/App.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Reestructuraciﾃθ津と津�堙つｳn de la arquitectura de la SPA para integrar un sistema de habilidades (Grimorio) y optimizar la navegaciﾃθ津と津�堙つｳn mﾃθ津と津�堙つｳvil mediante la fusiﾃθ津と津�堙つｳn de secciones informativas.
+*   **Resumen de Tareas:** Reestructuraciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de la arquitectura de la SPA para integrar un sistema de habilidades (Grimorio) y optimizar la navegaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³vil mediante la fusiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de secciones informativas.
 *   **Cambios Clave:**
-    *   **Fusiﾃθ津と津�堙つｳn "Biblioteca"**: Se unificaron las antiguas pestaﾃθ津と津�堙つｱas `Lore` y `Mundo` en una sola secciﾃθ津と津�堙つｳn de `Biblioteca` con un selector interno (Tabs), liberando espacio en la barra de navegaciﾃθ津と津�堙つｳn.
-    *   **Grimorio de Habilidades**: Implementaciﾃθ津と津�堙つｳn de una secciﾃθ津と津�堙つｳn dedicada para gestionar poderes y magias, categorizados por escuelas (Invocaciﾃθ津と津�堙つｳn, Elemental, etc.).
-    *   **Diseﾃθ津と津�堙つｱo Tﾃθ津と津�堙つｩcnico-Cientﾃθ津と津�堙つｭfico**: Las habilidades incluyen Lore basado en fﾃθ津と津�堙つｭsica real, niveles 1-5, tiempos de enfriamiento y limitantes especﾃθ津と津�堙つｭficas.
-    *   **Capa Anti-Mano Negra**: Se integrﾃθ津と津�堙つｳ una secciﾃθ津と津�堙つｳn visual distintiva en cada habilidad para definir reglas de balanceo y prohibiciones de uso (Anti-Powergaming).
-    *   **Navegaciﾃθ津と津�堙つｳn Optimizada**: La barra inferior se mantiene en 5 elementos (Inicio, Grimorio, Biblioteca, Mercado, Ranking), mejorando la UX en dispositivos mﾃθ津と津�堙つｳviles.
-*   **Notas/Advertencias:** Se dejﾃθ津と津�堙つｳ `src/data/grimorio.ts` con plantillas y comentarios para facilitar la expansiﾃθ津と津�堙つｳn manual de contenidos sin saturar el contexto de la IA.
+    *   **Fusiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n "Biblioteca"**: Se unificaron las antiguas pestaï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±as `Lore` y `Mundo` en una sola secciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de `Biblioteca` con un selector interno (Tabs), liberando espacio en la barra de navegaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n.
+    *   **Grimorio de Habilidades**: Implementaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de una secciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n dedicada para gestionar poderes y magias, categorizados por escuelas (Invocaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n, Elemental, etc.).
+    *   **Diseï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±o Tï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½©cnico-Cientï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­fico**: Las habilidades incluyen Lore basado en fï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­sica real, niveles 1-5, tiempos de enfriamiento y limitantes especï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­ficas.
+    *   **Capa Anti-Mano Negra**: Se integrï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ una secciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n visual distintiva en cada habilidad para definir reglas de balanceo y prohibiciones de uso (Anti-Powergaming).
+    *   **Navegaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n Optimizada**: La barra inferior se mantiene en 5 elementos (Inicio, Grimorio, Biblioteca, Mercado, Ranking), mejorando la UX en dispositivos mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³viles.
+*   **Notas/Advertencias:** Se dejï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ `src/data/grimorio.ts` con plantillas y comentarios para facilitar la expansiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n manual de contenidos sin saturar el contexto de la IA.
 
 ---
 ### [Fecha: 08/04/2026] - [Autor: Jarvis]
@@ -3189,15 +3194,15 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 08/04/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/utils/scratchUtils.ts` (Nuevo), `src/components/TavernScratch.tsx`, `src/App.tsx`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Implementaciﾃθ津と津�堙つｳn de la Loterﾃθ津と津�堙つｭa Dinﾃθ津と津�堙つ｡mica 24h con lﾃθ津と津�堙つｭmites de fortuna, reembolsos automﾃθ津と津�堙つ｡ticos y optimizaciones de interfaz mﾃθ津と津�堙つｳvil.
+*   **Resumen de Tareas:** Implementaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n de la Loterï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a Dinï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡mica 24h con lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mites de fortuna, reembolsos automï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡ticos y optimizaciones de interfaz mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³vil.
 *   **Cambios Clave:**
-    *   **Loterﾃθ津と津�堙つｭa Dinﾃθ津と津�堙つ｡mica (24h)**: Se creﾃθ津と津�堙つｳ `scratchUtils.ts` para generar precios (200-500) y probabilidades (10-40%) deterministas basados en la fecha actual (semilla diaria).
-    *   **Multi-Scratch & Jackpot**: Se aﾃθ津と津�堙つｱadiﾃθ津と津�堙つｳ la compra mﾃθ津と津�堙つｺltiple de tickets con "Auto-Scrape" y un Jackpot VIP fijo del 5% (10,000 oro) independiente de la racha diaria.
-    *   **Control de Inflaciﾃθ津と津�堙つｳn (Lﾃθ津と津�堙つｭmite 50k)**: Se implementﾃθ津と津�堙つｳ un tope de ganancias brutas diarias de 50,000 oro. Al alcanzarlo, el juego se bloquea hasta el dﾃθ津と津�堙つｭa siguiente.
-    *   **Sistema de Reembolsos**: Si una compra masiva choca con el lﾃθ津と津�堙つｭmite de 50k antes de terminar, los tickets sobrantes se cancelan automﾃθ津と津�堙つ｡ticamente y el oro se devuelve ﾃθ津と津�堙つｭntegro al jugador con una auditorﾃθ津と津�堙つｭa visual en el recibo.
-    *   **Mobile-First Admin**: Se refactorizaron los grupos de botones y filtros del panel de administraciﾃθ津と津�堙つｳn para evitar desbordamientos en pantallas pequeﾃθ津と津�堙つｱas mediante scroll horizontal y flex-wrap.
-    *   **UX Pulido**: Se ajustﾃθ津と津�堙つｳ la lﾃθ津と津�堙つｳgica de renderizado para permitir ver los resultados finales y reembolsos antes de que aparezca el mensaje bloqueante de "Lﾃθ津と津�堙つｭmite Alcanzado".
-*   **Notas/Advertencias:** El sistema de semillas asegura que todos los jugadores vean la misma "suerte" cada dﾃθ津と津�堙つｭa. El lﾃθ津と津�堙つｭmite de 50k se persiste en `localStorage` vinculado al ID del jugador y la fecha. `npx tsc --noEmit` verificado sin errores.
+    *   **Loterï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a Dinï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡mica (24h)**: Se creï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ `scratchUtils.ts` para generar precios (200-500) y probabilidades (10-40%) deterministas basados en la fecha actual (semilla diaria).
+    *   **Multi-Scratch & Jackpot**: Se aï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±adiï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ la compra mï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½ºltiple de tickets con "Auto-Scrape" y un Jackpot VIP fijo del 5% (10,000 oro) independiente de la racha diaria.
+    *   **Control de Inflaciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n (Lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite 50k)**: Se implementï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ un tope de ganancias brutas diarias de 50,000 oro. Al alcanzarlo, el juego se bloquea hasta el dï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a siguiente.
+    *   **Sistema de Reembolsos**: Si una compra masiva choca con el lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite de 50k antes de terminar, los tickets sobrantes se cancelan automï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½¡ticamente y el oro se devuelve ï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­ntegro al jugador con una auditorï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a visual en el recibo.
+    *   **Mobile-First Admin**: Se refactorizaron los grupos de botones y filtros del panel de administraciï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³n para evitar desbordamientos en pantallas pequeï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±as mediante scroll horizontal y flex-wrap.
+    *   **UX Pulido**: Se ajustï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³ la lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½³gica de renderizado para permitir ver los resultados finales y reembolsos antes de que aparezca el mensaje bloqueante de "Lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite Alcanzado".
+*   **Notas/Advertencias:** El sistema de semillas asegura que todos los jugadores vean la misma "suerte" cada dï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­a. El lï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½­mite de 50k se persiste en `localStorage` vinculado al ID del jugador y la fecha. `npx tsc --noEmit` verificado sin errores.
 
 ---
 ### [Fecha: 07/04/2026] - [Autor: Antigravity]
@@ -3207,7 +3212,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se creo `src/utils/market.ts` con `fetchMarketItems`, `upsertMarketItem`, `deleteMarketItem` y `slugifyMarketItem`, siguiendo el patron de `events.ts`.
     *   El mercado publico ahora carga los items desde Supabase (tabla `market_items`) con fallback transparente al archivo local `src/data/market.ts`.
     *   La pestana `Mercado` del admin tiene formulario completo: nombre, descripcion, habilidad, categoria, rareza, stock, precio, imagen (URL, ajuste, posicion) y destacado.
-    *   El ID se auto-genera como slug de categoria+nombre al crear (ej: "Mi Espada" + swords ﾃθ津つ｢ﾃδ｢ﾃやぎﾃつ�ﾃδ｢ﾃやぎﾃや┐ `sword-mi-espada`); en edicion muestra el ID existente.
+    *   El ID se auto-genera como slug de categoria+nombre al crear (ej: "Mi Espada" + swords ï¾ƒÎ¸æ´¥ã�¤ï½¢ï¾ƒÎ´ï½¢ï¾ƒã‚„ã�Žï¾ƒã�¤ï¿½ï¾ƒÎ´ï½¢ï¾ƒã‚„ã�Žï¾ƒã‚„â”� `sword-mi-espada`); en edicion muestra el ID existente.
     *   Lista de items a la derecha con buscador por nombre y filtro por categoria; clic precarga el formulario.
 *   **Notas/Advertencias:** Para activar la gestion dinamica hay que crear la tabla `market_items` en Supabase con el SQL documentado en `src/utils/market.ts`. Sin la tabla, el mercado sigue mostrando los datos locales. `npx tsc --noEmit` paso sin errores.
 
@@ -3277,14 +3282,14 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Resumen de Tareas:** Se anadio un gestor de eventos desde el panel admin manteniendo el mismo formato visual de las tarjetas que aparecen en Inicio.
 *   **Cambios Clave:**
     *   La Home ahora intenta leer eventos desde Supabase y, si no hay tabla o datos, cae con seguridad al archivo local `src/data/events.ts`.
-    *   Se agrego una pestaﾃθ津と津�堙つｱa `Eventos` al panel admin para crear y editar los eventos visibles del inicio sin tocar codigo manualmente.
-    *   El diseﾃθ津と津�堙つｱo publico de los eventos no cambia: solo cambia el origen del contenido cuando Supabase esta disponible.
+    *   Se agrego una pestaï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±a `Eventos` al panel admin para crear y editar los eventos visibles del inicio sin tocar codigo manualmente.
+    *   El diseï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±o publico de los eventos no cambia: solo cambia el origen del contenido cuando Supabase esta disponible.
 *   **Notas/Advertencias:** Para administrarlos desde la web hace falta crear manualmente la tabla `realm_events` usando el SQL sugerido en `src/utils/events.ts`.
 
 ---
 ### [Fecha: 06/04/2026] - [Autor: Jarvis]
 *   **Archivos Modificados:** `src/utils/players.ts`, `src/components/AdminControlSheet.tsx`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Se anadio la pestaﾃθ津と津�堙つｱa `Jugadores` al panel admin para crear perfiles nuevos y corregir oro sin entrar manualmente a Supabase.
+*   **Resumen de Tareas:** Se anadio la pestaï¾ƒÎ¸æ´¥ã�¨æ´¥ï¿½Â€å ™ã�¤ï½±a `Jugadores` al panel admin para crear perfiles nuevos y corregir oro sin entrar manualmente a Supabase.
 *   **Cambios Clave:**
     *   El panel ahora incluye un formulario de alta para crear jugadores con oro inicial y opcion de admin.
     *   Se agrego una herramienta para sumar, restar o fijar el oro de cualquier jugador registrado.
@@ -3480,9 +3485,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Con esto se resuelve el error de TypeScript que bloqueaba el build en Vercel para el endpoint `api/admin/advise-staff.ts`.
 *   **Notas/Advertencias:** El build local con `npm run build` paso correctamente despues del ajuste.
 ## [2026-05-25] - Oracle and Profile Improvements
-- Conectado el Orﾃδ｡culo a las tablas de eventos y misiones activas.
-- Refinado el comando '!perfil' para separar y clasificar inteligentemente los IDs de WhatsApp y los nﾃδｺmeros de telﾃδｩfono reales.
-- Aﾃδｱadidos comandos faltantes al menﾃδｺ de ayuda (!ayuda) con restricciﾃδｳn por roles.
+- Conectado el Orï¾ƒÎ´ï½¡culo a las tablas de eventos y misiones activas.
+- Refinado el comando '!perfil' para separar y clasificar inteligentemente los IDs de WhatsApp y los nï¾ƒÎ´ï½ºmeros de telï¾ƒÎ´ï½©fono reales.
+- Aï¾ƒÎ´ï½±adidos comandos faltantes al menï¾ƒÎ´ï½º de ayuda (!ayuda) con restricciï¾ƒÎ´ï½³n por roles.
 
 
 
@@ -3499,12 +3504,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 02/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/handlers/player.js` (en kingdoom-bot), `src/index.js` (en kingdoom-bot), `src/supabase.js` (en kingdoom-bot), `src/handlers/blackjack.js` (Nuevo en kingdoom-bot), `AI_CHANGELOG.md` (en Kingdoom-sync)
-*   **Resumen de Tareas:** Implementaciﾃδｳn del minijuego de Blackjack (`!21`) para el bot de WhatsApp con control de sesiﾃδｳn estricto mediante respuestas.
+*   **Resumen de Tareas:** Implementaciï¾ƒÎ´ï½³n del minijuego de Blackjack (`!21`) para el bot de WhatsApp con control de sesiï¾ƒÎ´ï½³n estricto mediante respuestas.
 *   **Cambios Clave:**
-    *   Creaciﾃδｳn de `src/handlers/blackjack.js` con la lﾃδｳgica de Blackjack (apuestas, lﾃδｭmites diarios de 3 usos entre semana y 5 los fines de semana, crupier que planta en 17).
-    *   La sesiﾃδｳn del juego estﾃδ｡ anclada a la respuesta directa al mensaje del bot para evitar interferencias en grupos.
-    *   Integraciﾃδｳn con Supabase para descontar la apuesta antes de jugar y registrar/verificar el uso diario.
-    *   Modificaciﾃδｳn de `src/index.js` para interceptar respuestas a mensajes activos y ejecutar el comando `!21`.
+    *   Creaciï¾ƒÎ´ï½³n de `src/handlers/blackjack.js` con la lï¾ƒÎ´ï½³gica de Blackjack (apuestas, lï¾ƒÎ´ï½­mites diarios de 3 usos entre semana y 5 los fines de semana, crupier que planta en 17).
+    *   La sesiï¾ƒÎ´ï½³n del juego estï¾ƒÎ´ï½¡ anclada a la respuesta directa al mensaje del bot para evitar interferencias en grupos.
+    *   Integraciï¾ƒÎ´ï½³n con Supabase para descontar la apuesta antes de jugar y registrar/verificar el uso diario.
+    *   Modificaciï¾ƒÎ´ï½³n de `src/index.js` para interceptar respuestas a mensajes activos y ejecutar el comando `!21`.
 *   **Notas/Advertencias:** Se validaron las sintaxis con `node --check` antes de proceder al commit y push.
 
 
@@ -3524,7 +3529,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 
 ## [2026-06-10] - Supabase Cron Installments
 *   **Archivos Modificados:** supabase_cron_installments.sql, supabase_market_installments.sql 
-*   **Resumen:** Implementaci� de la funci� RPC process_market_installments para el cobro autom疸ico de cuotas con reglas estrictas (1 d僘 de gracia, 5% mora acumulativa diaria, embargo a los 5 d僘s). Bloqueo de compras a cr馘ito limitado a 14 d僘s post-embargo.
+*   **Resumen:** Implementaciï¿½ de la funciï¿½ RPC process_market_installments para el cobro automç–¸ico de cuotas con reglas estrictas (1 dåƒ˜ de gracia, 5% mora acumulativa diaria, embargo a los 5 dåƒ˜s). Bloqueo de compras a cré¦˜ito limitado a 14 dåƒ˜s post-embargo.
 
 ---
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
@@ -3539,64 +3544,64 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ---
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
-*   **Resumen de Tareas:** Actualización de protocolos en AGENTS.md (bootstrap, cierre y subidas).
+*   **Resumen de Tareas:** ActualizaciÃ³n de protocolos en AGENTS.md (bootstrap, cierre y subidas).
 *   **Cambios Clave:**
-    *   Se integró la subsección "Cuándo ocurre el bootstrap (CRÍTICO)" aclarando las fases y el flujo ordenado de una sesión.
-    *   Se expandieron las reglas de subidas y cierres en la Sección 7, regulando la detección de intención del usuario (7.2), el mapeo de repositorios y destinos de push (7.3) y la secuencia exacta de cierre de tareas (7.4).
+    *   Se integrÃ³ la subsecciÃ³n "CuÃ¡ndo ocurre el bootstrap (CRÃ�TICO)" aclarando las fases y el flujo ordenado de una sesiÃ³n.
+    *   Se expandieron las reglas de subidas y cierres en la SecciÃ³n 7, regulando la detecciÃ³n de intenciÃ³n del usuario (7.2), el mapeo de repositorios y destinos de push (7.3) y la secuencia exacta de cierre de tareas (7.4).
 *   **Notas/Advertencias:** Ninguno detectado.
 
 ---
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `.gitignore`, `AGENTS.md`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
-*   **Resumen de Tareas:** Corrección de remotos de la web en AGENTS.md e ignorado de archivos temporales.
+*   **Resumen de Tareas:** CorrecciÃ³n de remotos de la web en AGENTS.md e ignorado de archivos temporales.
 *   **Cambios Clave:**
-    *   Se corrigieron los remotos de `Kingdoom-sync` en la tabla 7.3 de `AGENTS.md` para especificar que va únicamente a GitHub (origin).
+    *   Se corrigieron los remotos de `Kingdoom-sync` en la tabla 7.3 de `AGENTS.md` para especificar que va Ãºnicamente a GitHub (origin).
     *   Se agregaron las carpetas y archivos temporales `scratch/`, `temp_diff.txt` y `repomix-output-*.md` al archivo `.gitignore`.
 *   **Notas/Advertencias:** Ninguno detectado.
 
 ---
 ### [Fecha: 13/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `AGENTS.md`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
-*   **Resumen de Tareas:** Adición de directrices para agentes asíncronos (Jules) en AGENTS.md.
+*   **Resumen de Tareas:** AdiciÃ³n de directrices para agentes asÃ­ncronos (Jules) en AGENTS.md.
 *   **Cambios Clave:**
-    *   Se integró la subsección 7.5 en `AGENTS.md` para regular el comportamiento del agente asíncrono Jules (bootstrap automático, honestidad de push en su entorno y disciplina de alcance al correr sin supervisión).
+    *   Se integrÃ³ la subsecciÃ³n 7.5 en `AGENTS.md` para regular el comportamiento del agente asÃ­ncrono Jules (bootstrap automÃ¡tico, honestidad de push en su entorno y disciplina de alcance al correr sin supervisiÃ³n).
 *   **Notas/Advertencias:** Ninguno detectado.
 
 ---
 ### [Fecha: 14/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/AdminControlSheet.tsx`, `src/features/market/market.adapter.ts`, `src/features/market/market.rotation.ts`, `src/features/market/market.service.ts`, `src/features/market/market.types.ts`, `src/types.ts`, `supabase_market_installments.sql`, `supabase_market_mythic_limited_stock.sql`, `supabase_personal_market_migration.sql` (Nuevo), `src/features/market/market.rotation.test.ts` (Nuevo)
-*   **Resumen de Tareas:** Implementación de la mecánica de Mercado Personal para ítems de rol creados por usuarios con comisiones y tasas de aparición.
+*   **Resumen de Tareas:** ImplementaciÃ³n de la mecÃ¡nica de Mercado Personal para Ã­tems de rol creados por usuarios con comisiones y tasas de apariciÃ³n.
 *   **Cambios Clave:**
     *   **Base de Datos:** Se crearon las columnas `seller_id`, `seller_cut_percentage` y `spawn_chance` en la tabla `market_items` mediante `supabase_personal_market_migration.sql`.
-    *   **RPC de Compra:** Se modificaron las funciones RPC de compra de Supabase (`purchase_market_item` y `purchase_market_item_v2`) para realizar transferencias atómicas automáticas de las ganancias correspondientes del vendedor al saldo de oro de su cuenta.
+    *   **RPC de Compra:** Se modificaron las funciones RPC de compra de Supabase (`purchase_market_item` y `purchase_market_item_v2`) para realizar transferencias atÃ³micas automÃ¡ticas de las ganancias correspondientes del vendedor al saldo de oro de su cuenta.
     *   **Modelos y Adaptadores:** Se actualizaron las interfaces y los mappers para mapear los nuevos campos entre el cliente y Supabase de forma correcta.
-    *   **Lógica de Rotación:** Sincronización determinista del catálogo filtrando ítems mediante la probabilidad configurada en `spawn_chance`.
-    *   **Interfaz de Administración:** Se creó la pestaña "Mercado Personal" en `AdminControlSheet.tsx` que incluye autocompletado/búsqueda de jugadores, campos interactivos (precio, split de comisión, probabilidad de aparición en rotación), previsualizador en tiempo real de oro asignado a cada parte, y listado de ítems personales existentes.
-    *   **Verificación:** Cobertura de tests unitarios agregada en `src/features/market/market.rotation.test.ts` y ejecución limpia de compilación de producción.
+    *   **LÃ³gica de RotaciÃ³n:** SincronizaciÃ³n determinista del catÃ¡logo filtrando Ã­tems mediante la probabilidad configurada en `spawn_chance`.
+    *   **Interfaz de AdministraciÃ³n:** Se creÃ³ la pestaÃ±a "Mercado Personal" en `AdminControlSheet.tsx` que incluye autocompletado/bÃºsqueda de jugadores, campos interactivos (precio, split de comisiÃ³n, probabilidad de apariciÃ³n en rotaciÃ³n), previsualizador en tiempo real de oro asignado a cada parte, y listado de Ã­tems personales existentes.
+    *   **VerificaciÃ³n:** Cobertura de tests unitarios agregada en `src/features/market/market.rotation.test.ts` y ejecuciÃ³n limpia de compilaciÃ³n de producciÃ³n.
 *   **Notas/Advertencias:** Ninguno detectado.
 
 ---
 ### [Fecha: 15/06/2026] - [Autor: Antigravity]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/types.ts`, `src/utils/players.ts`, `supabase_character_slots_migration.sql` (Nuevo)
-*   **Resumen de Tareas:** Implementación de la compra de espacios adicionales para fichas de personaje con oro.
+*   **Resumen de Tareas:** ImplementaciÃ³n de la compra de espacios adicionales para fichas de personaje con oro.
 *   **Cambios Clave:**
-    *   **Base de Datos:** Creación de la columna `max_character_sheets` en `players` y de la función RPC transaccional `buy_character_slot` para la deducción atómica de oro e incremento del límite (máximo 10).
-    *   **Cálculo de Costo:** Se definió un costo plano de 1,000,000 de oro para todos los espacios adicionales (slots del 3 al 10).
-    *   **Frontend & Modelos:** Mapeo de la columna y exportación del helper de RPC en `src/utils/players.ts`. Actualización de la interfaz `PlayerAccount`.
-    *   **UI de Perfil:** Reemplazo de los límites hardcodeados de fichas en `PlayerProfilePanel.tsx` por el valor dinámico del jugador. Adición de un botón de compra interactivo y feedback visual premium para la compra de slots.
-*   **Notas/Advertencias:** Typecheck de TypeScript y compilación de producción validados con éxito sin errores.
+    *   **Base de Datos:** CreaciÃ³n de la columna `max_character_sheets` en `players` y de la funciÃ³n RPC transaccional `buy_character_slot` para la deducciÃ³n atÃ³mica de oro e incremento del lÃ­mite (mÃ¡ximo 10).
+    *   **CÃ¡lculo de Costo:** Se definiÃ³ un costo plano de 1,000,000 de oro para todos los espacios adicionales (slots del 3 al 10).
+    *   **Frontend & Modelos:** Mapeo de la columna y exportaciÃ³n del helper de RPC en `src/utils/players.ts`. ActualizaciÃ³n de la interfaz `PlayerAccount`.
+    *   **UI de Perfil:** Reemplazo de los lÃ­mites hardcodeados de fichas en `PlayerProfilePanel.tsx` por el valor dinÃ¡mico del jugador. AdiciÃ³n de un botÃ³n de compra interactivo y feedback visual premium para la compra de slots.
+*   **Notas/Advertencias:** Typecheck de TypeScript y compilaciÃ³n de producciÃ³n validados con Ã©xito sin errores.
 
 
 ---
 ### [Fecha: 15/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `src/components/PlayerProfilePanel.tsx`, `src/utils/playerRanks.ts`, `AI_CHANGELOG.md`
-*   **Resumen de Tareas:** Pulido visual del frente de clasificatoria en el perfil del jugador para volver el frontend mÃ¡s llamativo y legible.
+*   **Resumen de Tareas:** Pulido visual del frente de clasificatoria en el perfil del jugador para volver el frontend mÃƒÂ¡s llamativo y legible.
 *   **Cambios Clave:**
-    *   **Perfil Hero:** Se reemplazÃ³ el bloque simple de rango por un `SeasonRankSpotlight` con presencia visual de tarjeta hero, lectura de temporada y resumen de actividad.
-    *   **Progreso Real:** `fetchPlayerMonthlyRankSnapshot` ahora expone piso del rango actual, siguiente meta, progreso porcentual dentro del escalÃ³n y avance temporal de la temporada.
-    *   **UI de Temporada:** Se aÃ±adiÃ³ barra animada de progreso, contador de puntos faltantes al siguiente rango y mÃ©tricas compactas de misiones, eventos y premios manuales.
+    *   **Perfil Hero:** Se reemplazÃƒÂ³ el bloque simple de rango por un `SeasonRankSpotlight` con presencia visual de tarjeta hero, lectura de temporada y resumen de actividad.
+    *   **Progreso Real:** `fetchPlayerMonthlyRankSnapshot` ahora expone piso del rango actual, siguiente meta, progreso porcentual dentro del escalÃƒÂ³n y avance temporal de la temporada.
+    *   **UI de Temporada:** Se aÃƒÂ±adiÃƒÂ³ barra animada de progreso, contador de puntos faltantes al siguiente rango y mÃƒÂ©tricas compactas de misiones, eventos y premios manuales.
     *   **Legibilidad de Rangos:** El frontend ya muestra el siguiente rango con naming presentable en vez de identificadores crudos del sistema.
-*   **Notas/Advertencias:** `npm run build` pasÃ³ correctamente. `npx tsc --noEmit` sigue fallando por una dependencia faltante preexistente en `src/features/market/market.rotation.test.ts` (`vitest` no resuelto), ajena a este cambio visual.
+*   **Notas/Advertencias:** `npm run build` pasÃƒÂ³ correctamente. `npx tsc --noEmit` sigue fallando por una dependencia faltante preexistente en `src/features/market/market.rotation.test.ts` (`vitest` no resuelto), ajena a este cambio visual.
 ---
 ### [Fecha: 15/06/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `src/vitest.d.ts`, `AI_CHANGELOG.md`
@@ -3698,7 +3703,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **Subastas del Jugador:** `fetchAuctions` ahora acepta filtros y el panel del jugador pide solo subastas `active`, evitando traer historico completo para luego filtrarlo en cliente.
     *   **Recargas Realtime Coalescidas:** `PlayerAuctionPanel` deja de disparar una recarga por cada evento inmediato de `market_auctions`, `market_auction_bids` y `market_auction_participants`; ahora agrupa cambios cercanos en una sola lectura.
     *   **Participaciones Acotadas:** La lectura de `market_auction_participants` del jugador ahora se limita a las subastas efectivamente devueltas por la consulta principal.
-    *   **Biblioteca IA Ligera:** El manager admin de conocimiento ya no trae `content` completo para toda la lista; ahora consume resúmenes livianos y solo carga el documento completo por `id` cuando se va a editar.
+    *   **Biblioteca IA Ligera:** El manager admin de conocimiento ya no trae `content` completo para toda la lista; ahora consume resÃºmenes livianos y solo carga el documento completo por `id` cuando se va a editar.
 *   **Notas/Advertencias:** Este cambio reduce payload y sobrelectura desde la SPA, pero no elimina por si solo consumidores externos o lecturas del Archivista que sigan necesitando contenido completo.
 
 ---
@@ -3715,10 +3720,10 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Archivos Modificados:** `src/utils/players.ts`, `src/context/PlayerSessionContext.tsx`, `src/components/TavernCrash.tsx`, `src/components/TavernExpedition.tsx`, `src/components/TavernExpeditionArcade.tsx`, `src/components/TavernHorseRace.tsx`, `src/components/TavernPenalty.tsx`, `src/components/TavernPlinko.tsx`, `src/components/TavernRoulette.tsx`, `src/components/TavernSlots.tsx`, `src/components/TavernTowerDefense.tsx`, `AI_CHANGELOG.md`
 *   **Resumen de Tareas:** Blindaje del oro en minijuegos web para evitar premios perdidos por sobrescritura de saldo absoluto.
 *   **Cambios Clave:**
-    *   **Delta Atómico:** Se agregó `incrementPlayerGold(...)` sobre la RPC `increment_gold` y `PlayerSessionContext` expone ahora `addPlayerGold(delta)` para cobrar o descontar oro de forma atómica.
+    *   **Delta AtÃ³mico:** Se agregÃ³ `incrementPlayerGold(...)` sobre la RPC `increment_gold` y `PlayerSessionContext` expone ahora `addPlayerGold(delta)` para cobrar o descontar oro de forma atÃ³mica.
     *   **Tavern Web:** Crash, Expedition, Expedition Arcade, Horse Race offline, Penalty, Plinko, Roulette, Slots y Tower Defense dejaron de recalcular `gold = saldoBase +/- ...` en cliente y ahora usan delta real sobre Supabase.
-    *   **Corrección del Síntoma Reportado:** El problema más probable era una carrera entre `refreshPlayer()` y `setPlayerGold(nextGold)` en rondas consecutivas o pestañas activas, lo que podía pisar premios ganados con un saldo viejo.
-*   **Notas/Advertencias:** `setPlayerGold(nextGold)` se mantuvo para flujos donde la fuente de verdad ya devuelve el saldo final exacto. Conviene migrar gradualmente cualquier otro flujo económico que siga escribiendo saldos absolutos.
+    *   **CorrecciÃ³n del SÃ­ntoma Reportado:** El problema mÃ¡s probable era una carrera entre `refreshPlayer()` y `setPlayerGold(nextGold)` en rondas consecutivas o pestaÃ±as activas, lo que podÃ­a pisar premios ganados con un saldo viejo.
+*   **Notas/Advertencias:** `setPlayerGold(nextGold)` se mantuvo para flujos donde la fuente de verdad ya devuelve el saldo final exacto. Conviene migrar gradualmente cualquier otro flujo econÃ³mico que siga escribiendo saldos absolutos.
 
 
 

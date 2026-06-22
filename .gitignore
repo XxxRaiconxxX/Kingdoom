@@ -14,3 +14,9 @@ supabase/.temp/
 scratch/
 temp_diff.txt
 repomix-output-*.md
+
+# Android build artifacts
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+android/.gradle/
+android/local.properties

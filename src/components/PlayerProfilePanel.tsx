@@ -893,7 +893,7 @@ export function PlayerProfilePanel({
                         onClick={() => onCollapsedChange?.(!isCollapsed)}
                       />
                     </div>
-                    {isAdmin && !isPlayerSecureLinked ? (
+                    {!isPlayerSecureLinked ? (
                       <div className="rounded-[1.25rem] border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div>
@@ -901,8 +901,8 @@ export function PlayerProfilePanel({
                               Cuenta segura requerida
                             </p>
                             <p className="mt-1 leading-6 text-cyan-50/90">
-                              Este perfil admin aun no esta enlazado a la sesión segura de Supabase.
-                              Vincúlala una vez y las acciones del staff quedarán habilitadas en este navegador.
+                              Tu perfil aun no esta enlazado a la sesión segura de Supabase.
+                              Vincúlala una vez para poder participar en misiones y realizar compras en el mercado.
                             </p>
                             {secureSessionError ? (
                               <p className="mt-2 text-xs text-rose-200">{secureSessionError}</p>

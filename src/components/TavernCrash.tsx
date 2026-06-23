@@ -191,14 +191,17 @@ export function TavernCrash() {
     const m = typeof exactMultiplier === "number" ? exactMultiplier : multiplierRef.current;
     const winAmount = Math.floor(betRef.current * m);
     
+    updatingRef.current = true;
     setUpdating(true);
     const success = await addPlayerGoldRef.current(winAmount);
     
     if (success) {
       setLastWin(winAmount);
       setStatus("cashed_out");
+      statusRef.current = "cashed_out";
       // The updateMultiplier loop continues because statusRef.current is not "crashed"
     }
+    updatingRef.current = false;
     setUpdating(false);
   }, []);
 
@@ -216,7 +219,8 @@ export function TavernCrash() {
       autoCashOutRef.current >= 1.01 &&
       currentMult >= autoCashOutRef.current &&
       statusRef.current === "rising" &&
-      !autoCashedRef.current
+      !autoCashedRef.current &&
+      !updatingRef.current
     ) {
       autoCashedRef.current = true;
       handleCashOut(autoCashOutRef.current);
@@ -230,6 +234,7 @@ export function TavernCrash() {
       pointsRef.current.push({ time: elapsedSeconds, multiplier: crashPointRef.current });
       redrawCanvas(crashPointRef.current, elapsedSeconds);
       setStatus("crashed");
+      statusRef.current = "crashed";
       setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
       return; // Stop animation loop
     }
@@ -249,14 +254,16 @@ export function TavernCrash() {
 
     // Schedule next frame unless crashed
     requestRef.current = requestAnimationFrame(updateMultiplier);
-  }, [handleCashOut]);
+  }, [handleCashOut, redrawCanvas]);
 
   const handleStart = async () => {
-    if (!player || bet <= 0 || bet > player.gold || updating) return;
+    if (!player || bet <= 0 || bet > player.gold || updating || updatingRef.current) return;
 
+    updatingRef.current = true;
     setUpdating(true);
     const success = await addPlayerGold(-bet);
     if (!success) {
+      updatingRef.current = false;
       setUpdating(false);
       return;
     }
@@ -283,18 +290,22 @@ export function TavernCrash() {
       pointsRef.current = [{ time: 0, multiplier: 1.0 }];
       redrawCanvas(1.0, 0);
       setStatus("crashed");
+      statusRef.current = "crashed";
       setHistory(prev => [1.00, ...prev].slice(0, 10));
       setLastWin(0);
+      updatingRef.current = false;
       setUpdating(false);
       return;
     }
 
     setStatus("starting");
+    statusRef.current = "starting";
+    updatingRef.current = false;
     setUpdating(false);
 
-    
     setTimeout(() => {
       setStatus("rising");
+      statusRef.current = "rising";
       startTimeRef.current = 0;
       requestRef.current = requestAnimationFrame(updateMultiplier);
     }, 1200);

@@ -1,4 +1,18 @@
 
+## [2026-06-23] Fix Race Conditions en TavernCrash (Minijuego Crash)
+- Se corrigieron race conditions en `handleCashOut`, `updateMultiplier` y `handleStart` mutando `updatingRef.current` y `statusRef.current` de forma síncrona antes de los `await`, eliminando la ventana de tiempo donde React aún no había re-renderizado y un segundo click/frame podía disparar doble cobro.
+- Se añadió guardia `!updatingRef.current` en la condición de auto-cashout para evitar que un frame dispare el retiro automático mientras una transacción de oro está en vuelo.
+- Se sincroniza `statusRef.current = "crashed"` inmediatamente al detectar el crash point, cerrando el exploit de lag donde un frame-drop podía permitir un cashout después del colapso.
+- Se añadió `redrawCanvas` a las dependencias del `useCallback` de `updateMultiplier`.
+- Riesgos abiertos: Ninguno detectado. [Antigravity]
+
+## [2026-06-23] Fix Race Conditions en TavernCrash (Minijuego Crash)
+- Se corrigieron race conditions en handleCashOut, updateMultiplier y handleStart mutando updatingRef y statusRef de forma sincrona antes de los await.
+- Se anadio guardia !updatingRef.current en auto-cashout para evitar doble cobro.
+- Se sincroniza statusRef.current = crashed inmediatamente al detectar crash point.
+- Se anadio redrawCanvas a las dependencias del useCallback de updateMultiplier.
+- Riesgos abiertos: Ninguno. [Antigravity]
+
 ## [2026-06-22] Higiene del Repositorio y Escrow del Bot de WhatsApp
 - Se removieron los artefactos de compilación de Android del tracking de git (git rm --cached) y se añadieron al .gitignore para mantener la higiene del repositorio.
 - Se implementó un sistema de Escrow (tabla `bot_active_bets` y funciones RPC `place_bet` / `resolve_bet`) en Supabase para evitar pérdidas de oro en minijuegos (`!trampa`, `!dados`, `!21`) si el contenedor de Hugging Face se reinicia a mitad de la jugada.

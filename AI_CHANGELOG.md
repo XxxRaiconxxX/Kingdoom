@@ -1,4 +1,9 @@
 
+## [2026-06-24] Nota de auditoria retroactiva sobre autoria del 23/06
+- Por auditoria operativa posterior, las entregas subidas el `23/06/2026` sobre `TavernCrash` deben considerarse parte del ciclo de trabajo de **Antigravity 2**, aunque en este changelog hayan quedado firmadas solo como `[Antigravity]`.
+- Commits afectados en git: `9939836` (`fix: race conditions en TavernCrash - updatingRef/statusRef sincronos [Antigravity]`) y `cfdea92` (`Fix TavernCrash double cash out exploit and state desync bugs`).
+- Esta nota corrige la **atribucion operativa** del relevo, pero no altera la autoria tecnica registrada por git ni reescribe el contenido funcional de las entradas originales. [Codex]
+
 ## [2026-06-23] Fix Race Conditions en TavernCrash (Minijuego Crash)
 - Se corrigieron race conditions en `handleCashOut`, `updateMultiplier` y `handleStart` mutando `updatingRef.current` y `statusRef.current` de forma síncrona antes de los `await`, eliminando la ventana de tiempo donde React aún no había re-renderizado y un segundo click/frame podía disparar doble cobro.
 - Se añadió guardia `!updatingRef.current` en la condición de auto-cashout para evitar que un frame dispare el retiro automático mientras una transacción de oro está en vuelo.

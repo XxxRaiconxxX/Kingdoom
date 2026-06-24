@@ -73,8 +73,8 @@ export function TavernCrash() {
   }, []);
 
   const generateCrashPoint = () => {
-    if (Math.random() < 0.03) return 1.00;
-    const point = 0.99 / (1 - Math.random());
+    if (Math.random() < 0.015) return 1.00;
+    const point = 0.995 / (1 - Math.random());
     return Math.min(Math.max(point, 1.01), 1000);
   };
 
@@ -192,7 +192,6 @@ export function TavernCrash() {
     const m = typeof exactMultiplier === "number" ? exactMultiplier : multiplierRef.current;
     const winAmount = Math.floor(betRef.current * m);
     
-    updatingRef.current = true;
     setUpdating(true);
     const success = await addPlayerGoldRef.current(winAmount);
     
@@ -204,7 +203,6 @@ export function TavernCrash() {
     }
     updatingRef.current = false;
     setUpdating(false);
-    updatingRef.current = false;
   }, []);
 
   const updateMultiplier = useCallback((time: number) => {
@@ -267,7 +265,6 @@ export function TavernCrash() {
     if (!success) {
       updatingRef.current = false;
       setUpdating(false);
-      updatingRef.current = false;
       return;
     }
 
@@ -298,7 +295,6 @@ export function TavernCrash() {
       setLastWin(0);
       updatingRef.current = false;
       setUpdating(false);
-      updatingRef.current = false;
       return;
     }
 
@@ -380,7 +376,7 @@ export function TavernCrash() {
       </div>
 
       <div className="grid w-full gap-6 lg:grid-cols-[1fr_300px]">
-        <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-stone-800 bg-stone-950 shadow-2xl overflow-hidden group">
+        <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-stone-800 bg-stone-950 shadow-2xl group">
             <canvas 
                 ref={canvasRef} 
                 className="absolute inset-0 w-full h-full block"

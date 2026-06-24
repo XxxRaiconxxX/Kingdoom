@@ -1,4 +1,12 @@
 
+## [2026-06-24] Rebalance Generoso de TavernCrash
+- Se ajusto `generateCrashPoint()` en `src/components/TavernCrash.tsx` para volver el minijuego mas amable sin romper la economia.
+- El crash instantaneo en `1.00x` baja de `3%` a `1.5%`.
+- La constante principal sube de `0.99` a `0.995`, mejorando ligeramente las probabilidades de alcanzar multiplicadores como `1.5x`, `2x`, `3x` y `5x`.
+- Se limpiaron redundancias menores del componente (asignaciones duplicadas de `updatingRef.current` y una clase `overflow-hidden` repetida) para dejar el archivo mas ordenado.
+- El rebalance mantiene el tope de `1000x` y no toca la logica de retiro manual/automatico ni el blindaje anti doble cashout.
+- Riesgos abiertos: Ninguno detectado a nivel de tipado o build; el unico punto pendiente es observar el comportamiento economico en uso real para confirmar que la sensacion generosa siga siendo sana para el oro del reino. [Codex]
+
 ## [2026-06-24] Nota de auditoria retroactiva sobre autoria del 23/06
 - Por auditoria operativa posterior, las entregas subidas el `23/06/2026` sobre `TavernCrash` deben considerarse parte del ciclo de trabajo de **Antigravity 2**, aunque en este changelog hayan quedado firmadas solo como `[Antigravity]`.
 - Commits afectados en git: `9939836` (`fix: race conditions en TavernCrash - updatingRef/statusRef sincronos [Antigravity]`) y `cfdea92` (`Fix TavernCrash double cash out exploit and state desync bugs`).

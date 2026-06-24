@@ -188,6 +188,7 @@ export function TavernCrash() {
   const handleCashOut = useCallback(async (exactMultiplier?: number | React.MouseEvent) => {
     if (statusRef.current !== "rising" || updatingRef.current || !playerRef.current) return;
 
+    updatingRef.current = true;
     const m = typeof exactMultiplier === "number" ? exactMultiplier : multiplierRef.current;
     const winAmount = Math.floor(betRef.current * m);
     
@@ -203,6 +204,7 @@ export function TavernCrash() {
     }
     updatingRef.current = false;
     setUpdating(false);
+    updatingRef.current = false;
   }, []);
 
   const updateMultiplier = useCallback((time: number) => {
@@ -265,6 +267,7 @@ export function TavernCrash() {
     if (!success) {
       updatingRef.current = false;
       setUpdating(false);
+      updatingRef.current = false;
       return;
     }
 
@@ -295,13 +298,14 @@ export function TavernCrash() {
       setLastWin(0);
       updatingRef.current = false;
       setUpdating(false);
+      updatingRef.current = false;
       return;
     }
 
     setStatus("starting");
     statusRef.current = "starting";
-    updatingRef.current = false;
     setUpdating(false);
+    updatingRef.current = false;
 
     setTimeout(() => {
       setStatus("rising");
@@ -404,13 +408,13 @@ export function TavernCrash() {
                         <div className="relative">
                             <h2 className={`text-6xl md:text-8xl font-black tabular-nums transition-colors duration-300 drop-shadow-[0_0_40px_rgba(0,0,0,0.8)] ${
                                 status === "crashed" ? "text-rose-600" : 
-                                status === "cashed_out" ? "text-emerald-500/60" : "text-stone-50"
+                                (status === "cashed_out" || lastWin > 0) ? "text-emerald-500/60" : "text-stone-50"
                             }`}>
                                 {multiplier.toFixed(2)}x
                             </h2>
                         </div>
 
-                        {status === "crashed" && (
+                        {status === "crashed" && lastWin === 0 && (
                             <motion.div 
                                 initial={{ y: 20, opacity: 0 }} 
                                 animate={{ y: 0, opacity: 1 }}
@@ -420,7 +424,7 @@ export function TavernCrash() {
                             </motion.div>
                         )}
 
-                        {status === "cashed_out" && (
+                        {(status === "cashed_out" || lastWin > 0) && (
                             <motion.div 
                                 initial={{ y: 20, opacity: 0 }} 
                                 animate={{ y: 0, opacity: 1 }}

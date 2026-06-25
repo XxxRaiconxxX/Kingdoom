@@ -20,8 +20,10 @@ import {
 import { supabase } from "../utils/supabaseClient";
 
 const PLAYER_STORAGE_KEY = "kingdoom.active-player";
-// El polling refresca el perfil cada 10s, pero el UPDATE de actividad en la BD
-// solo necesita granularidad de minutos: throttle para reducir escrituras.
+// El perfil se refresca en foco y con un polling lento para no inflar PostgREST
+// mientras el jugador deja la web abierta.
+const PROFILE_REFRESH_INTERVAL_MS = 60 * 1000;
+// El UPDATE de actividad en la BD solo necesita granularidad de minutos.
 const ACTIVITY_TOUCH_INTERVAL_MS = 5 * 60 * 1000;
 
 function getSessionProfileErrorMessage(error: unknown, fallback: string) {
@@ -442,8 +444,10 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     };
 
     const intervalId = window.setInterval(() => {
-      void refreshPlayer();
-    }, 10000);
+      if (document.visibilityState === "visible") {
+        void refreshPlayer();
+      }
+    }, PROFILE_REFRESH_INTERVAL_MS);
 
     window.addEventListener("focus", handleFocus);
 

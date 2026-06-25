@@ -1,4 +1,11 @@
 
+## [2026-06-25] Reduccion de Egress Web: Perfil y Archivista
+- Se redujo el polling automatico de perfil en `PlayerSessionContext` de cada `10s` a cada `60s`, y ahora solo refresca por intervalo si la pestana esta visible.
+- Se conserva el refresh inmediato al volver a enfocar la ventana y los refresh explicitos tras compras/minijuegos, para no perder coherencia de saldo.
+- `ArchivistSection` deja de ejecutar dos bootstraps paralelos que repetian mercado, eventos, misiones, grimorio y documentos.
+- Se agrego `buildArchivistKnowledgeDocumentsFromContext()` para construir el corpus IA desde el mismo contexto vivo ya cargado por el Archivista.
+- Impacto esperado: baja directa de lecturas repetitivas de `players` y eliminacion de una carga duplicada fuerte del Archivista. Riesgos abiertos: el Archivista mantiene el mismo corpus, pero conviene observar si alguna respuesta pierde contexto por depender de diferencias entre las dos cargas previas. [Codex]
+
 ## [2026-06-24] Rebalance Generoso de TavernCrash
 - Se ajusto `generateCrashPoint()` en `src/components/TavernCrash.tsx` para volver el minijuego mas amable sin romper la economia.
 - El crash instantaneo en `1.00x` baja de `3%` a `1.5%`.

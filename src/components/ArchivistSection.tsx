@@ -13,7 +13,7 @@ import {
 import { SectionHeader } from "./SectionHeader";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { askArchivistAi, type ArchivistMode } from "../utils/archivistAi";
-import { fetchArchivistKnowledgeDocuments } from "../utils/archivistSources";
+import { buildArchivistKnowledgeDocumentsFromContext } from "../utils/archivistSources";
 import { pickKnowledgeFragments } from "../utils/knowledge";
 import type { KnowledgeDocument } from "../types";
 import {
@@ -356,10 +356,8 @@ export function ArchivistSection() {
       setStatus("loading");
     }
 
-    const [knowledgeResult, liveResult] = await Promise.all([
-      fetchArchivistKnowledgeDocuments(),
-      fetchArchivistLiveContext({ includeAdminData: isAdmin }),
-    ]);
+    const liveResult = await fetchArchivistLiveContext({ includeAdminData: isAdmin });
+    const knowledgeResult = buildArchivistKnowledgeDocumentsFromContext(liveResult.context);
 
     setDocuments(knowledgeResult.documents);
     setLiveState(liveResult);

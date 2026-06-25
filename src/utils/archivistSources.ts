@@ -438,3 +438,31 @@ export async function fetchArchivistKnowledgeDocuments() {
     documents,
   };
 }
+
+export function buildArchivistKnowledgeDocumentsFromContext(context: {
+  marketItems: MarketItem[];
+  events: RealmEvent[];
+  missions: RealmMission[];
+  grimoireCategories: GrimoireCategory[];
+  bestiary: BestiaryEntry[];
+  flora: FloraEntry[];
+  documents: KnowledgeDocument[];
+}) {
+  const documents = dedupeDocuments([
+    ...context.documents,
+    ...buildMagicDocuments(context.grimoireCategories),
+    ...buildBestiaryDocuments(context.bestiary),
+    ...buildFloraDocuments(context.flora),
+    ...buildLoreDocuments(),
+    ...buildWorldDocuments(),
+    ...buildEventDocuments(context.events),
+    ...buildMissionDocuments(context.missions),
+    ...buildMarketDocuments(context.marketItems),
+  ]);
+
+  return {
+    status: documents.length > 0 ? ("ready" as const) : ("error" as const),
+    message: "",
+    documents,
+  };
+}

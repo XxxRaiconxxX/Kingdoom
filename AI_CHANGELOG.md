@@ -1,4 +1,19 @@
 
+## [2026-06-25] Registro del Reino: fichas recicladas y fix de listado vacio
+- Se corrigio la carga del modal `Buscar fichas`: `getCharacterSheetRegistrySummaries()` ya no depende de que existan columnas opcionales como `playerUsername`, `portraitUrl` o campos de reciclaje; ahora detecta soporte de columnas y arma la consulta compatible con el esquema real.
+- Se agrego en `RealmRegistry` un selector entre `Fichas publicas` y `Fichas recicladas`, manteniendo contadores separados, busqueda por propietario original y mensajes vacios especificos.
+- Se agregaron campos tipados de reciclaje en `CharacterSheet` (`recycleStatus`, `originalPlayerId`, `originalPlayerUsername`, `recycledAt`, `assignedAt`, `assignedToPlayerId`).
+- Se versiono `supabase_character_sheet_recycling.sql` con columnas nuevas, indices, politicas de lectura/escritura compatibles con el flujo actual, tabla `player_lifecycle_log` y RPCs para el bot: `mark_player_sheets_recyclable()` y `assign_recycled_character_sheet()`.
+- Se actualizo `docs/whatsapp-player-lifecycle-spec.md` para aclarar el apartado web de fichas recicladas y el comando futuro `!asignarficha <ficha|nombre> @usuario`.
+- Validacion: `npx tsc --noEmit` y `npm run build` pasaron correctamente. Riesgos abiertos: el SQL debe ejecutarse en Supabase antes de que existan fichas recicladas reales y antes de conectar el comando del bot. [Codex]
+
+## [2026-06-25] Especificacion del ciclo de vida de jugadores WhatsApp: salida, archivo y reciclaje
+- Se documento en `docs/whatsapp-player-lifecycle-spec.md` el diseno operativo para jugadores que abandonan el grupo principal de WhatsApp.
+- La politica definida establece deteccion de salida, anuncio del bot, estado `left_grace`, gracia de `14 dias` en horario `America/Asuncion` y archivado automatico posterior.
+- Se fijo como regla de seguridad que **la ficha puede reciclarse, pero la identidad historica del jugador no se reutiliza**; el `player_id` viejo no debe pasar a otra persona.
+- Tambien quedaron definidos los estados sugeridos (`active`, `left_grace`, `archived`, `recycled`, `purged`), la tabla de auditoria `player_lifecycle_log` y los comandos staff/admin base (`!salidos`, `!archivados`, `!reactivar`, `!reciclarficha`, `!purgarperfil`).
+- Riesgos abiertos: aun falta concretar la implementacion fina de reasignacion de fichas recicladas y su UX administrativa; en esta entrega se dejo la base funcional y las reglas de negocio. [Codex]
+
 ## [2026-06-25] Reduccion de Egress Web: Perfil y Archivista
 - Se redujo el polling automatico de perfil en `PlayerSessionContext` de cada `10s` a cada `60s`, y ahora solo refresca por intervalo si la pestana esta visible.
 - Se conserva el refresh inmediato al volver a enfocar la ventana y los refresh explicitos tras compras/minijuegos, para no perder coherencia de saldo.

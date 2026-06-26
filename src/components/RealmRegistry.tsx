@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, ScrollText, Search, User, Users, X } from "lucide-react";
+import { ArchiveRestore, Loader2, ScrollText, Search, User, Users, X } from "lucide-react";
 import { CharacterSheet } from "../types";
 import { supabase } from "../lib/supabase";
 import { CharSheetModal } from "./CharSheetModal";
@@ -14,9 +14,13 @@ interface RealmRegistryProps {
   onClose: () => void;
 }
 
+type RegistryViewMode = "public" | "recycled";
+
 export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [allSheets, setAllSheets] = useState<CharacterSheetRegistrySummary[]>([]);
+  const [publicSheets, setPublicSheets] = useState<CharacterSheetRegistrySummary[]>([]);
+  const [recycledSheets, setRecycledSheets] = useState<CharacterSheetRegistrySummary[]>([]);
+  const [registryMode, setRegistryMode] = useState<RegistryViewMode>("public");
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [selectedSheet, setSelectedSheet] = useState<CharacterSheet | null>(null);
@@ -41,6 +45,14 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
   };
 
   const formatPlayerLabel = (sheet: CharacterSheetRegistrySummary | CharacterSheet) => {
+    if (sheet.recycleStatus === "available") {
+      const originalOwner =
+        sheet.originalPlayerUsername ||
+        (sheet.originalPlayerId ? playerNamesById[sheet.originalPlayerId] : "") ||
+        "";
+      return originalOwner ? `Ficha reciclada de ${originalOwner}` : "Ficha reciclada";
+    }
+
     const explicitUsername = getSheetPlayerUsername(sheet);
     if (explicitUsername) {
       return explicitUsername;
@@ -66,8 +78,9 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
       setLoadError("");
 
       try {
-        const [sheetsResponse, playersResponse] = await Promise.all([
-          getCharacterSheetRegistrySummaries(),
+        const [publicSheetsResponse, recycledSheetsResponse, playersResponse] = await Promise.all([
+          getCharacterSheetRegistrySummaries("active"),
+          getCharacterSheetRegistrySummaries("recycled"),
           supabase.from("players").select("id, username"),
         ]);
 
@@ -83,7 +96,8 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
               )
             );
 
-        setAllSheets(sheetsResponse);
+        setPublicSheets(publicSheetsResponse);
+        setRecycledSheets(recycledSheetsResponse);
         setPlayerNamesById(nextPlayerNamesById);
       } catch (error) {
         console.error("Error loading registry sheets:", error);
@@ -103,6 +117,9 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
       cancelled = true;
     };
   }, []);
+
+  const activeSheets = registryMode === "recycled" ? recycledSheets : publicSheets;
+  const activeRegistryLabel = registryMode === "recycled" ? "Fichas recicladas" : "Fichas publicas";
 
   useEffect(() => {
     if (!selectedSheetId) {
@@ -147,25 +164,29 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
     if (!normalizedQuery) {
-      return allSheets;
+      return activeSheets;
     }
 
-    return allSheets.filter((sheet) => {
+    return activeSheets.filter((sheet) => {
       const playerId = getSheetPlayerId(sheet);
       const playerUsername = getSheetPlayerUsername(sheet) || playerNamesById[playerId] || "";
+      const originalUsername =
+        sheet.originalPlayerUsername ||
+        (sheet.originalPlayerId ? playerNamesById[sheet.originalPlayerId] : "");
       const searchableValues = [
         sheet.name,
         sheet.race,
         sheet.profession,
         sheet.birthRealm,
         playerUsername,
+        originalUsername,
       ];
 
       return searchableValues.some((value) =>
         String(value ?? "").toLowerCase().includes(normalizedQuery)
       );
     });
-  }, [allSheets, playerNamesById, searchQuery]);
+  }, [activeSheets, playerNamesById, searchQuery]);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/80 p-3 backdrop-blur-sm sm:items-center sm:p-4">
@@ -186,7 +207,7 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
                   Registro del Reino
                 </h2>
                 <p className="text-sm text-stone-400">
-                  Fichas publicas del reino.
+                  {activeRegistryLabel} del reino.
                 </p>
               </div>
             </div>
@@ -201,6 +222,33 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
         </div>
 
         <div className="sticky top-[89px] z-10 border-b border-stone-800 bg-stone-900/88 p-4 backdrop-blur-sm sm:top-[109px] sm:p-6">
+          <div className="mb-3 grid grid-cols-2 gap-2 rounded-2xl border border-stone-800 bg-stone-950/60 p-1">
+            <button
+              type="button"
+              onClick={() => setRegistryMode("public")}
+              className={`flex min-h-[46px] items-center justify-center gap-2 rounded-xl px-3 text-xs font-black uppercase tracking-[0.14em] transition-colors ${
+                registryMode === "public"
+                  ? "bg-amber-500 text-stone-950"
+                  : "text-stone-400 hover:bg-stone-900 hover:text-stone-100"
+              }`}
+            >
+              <Users className="h-4 w-4" />
+              Publicas
+            </button>
+            <button
+              type="button"
+              onClick={() => setRegistryMode("recycled")}
+              className={`flex min-h-[46px] items-center justify-center gap-2 rounded-xl px-3 text-xs font-black uppercase tracking-[0.14em] transition-colors ${
+                registryMode === "recycled"
+                  ? "bg-emerald-400 text-stone-950"
+                  : "text-stone-400 hover:bg-stone-900 hover:text-stone-100"
+              }`}
+            >
+              <ArchiveRestore className="h-4 w-4" />
+              Recicladas
+            </button>
+          </div>
+
           <div className="relative">
             <input
               type="text"
@@ -273,7 +321,7 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
                         {sheet.birthRealm || "Reino no indicado"}
                       </span>
                       <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-amber-200">
-                        Ver ficha
+                        {registryMode === "recycled" ? "Disponible" : "Ver ficha"}
                       </span>
                     </div>
                   </button>
@@ -285,7 +333,9 @@ export const RealmRegistry: React.FC<RealmRegistryProps> = ({ onClose }) => {
                 <p>
                   {searchQuery
                     ? "No se encontraron fichas con ese filtro."
-                    : "No hay fichas publicas registradas todavia."}
+                    : registryMode === "recycled"
+                      ? "Aun no hay fichas recicladas disponibles."
+                      : "No hay fichas publicas registradas todavia."}
                 </p>
               </div>
             )}

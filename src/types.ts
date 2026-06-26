@@ -523,6 +523,8 @@ export type CharacterStats = {
   magicDefense: number;
 };
 
+export type CharacterSheetRecycleStatus = "active" | "available" | "assigned";
+
 export type PveStatKey =
   | "strength"
   | "life"
@@ -670,6 +672,12 @@ export type CharacterSheet = {
    */
   playerUsername?: string;
   portraitUrl?: string;
+  recycleStatus?: CharacterSheetRecycleStatus | null;
+  originalPlayerId?: string | null;
+  originalPlayerUsername?: string | null;
+  recycledAt?: string | null;
+  assignedAt?: string | null;
+  assignedToPlayerId?: string | null;
   name: string;
   age: string;
   gender: string;

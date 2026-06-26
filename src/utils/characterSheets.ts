@@ -4,85 +4,95 @@ import { deleteCharacterPortraitByUrl } from "./characterPortraits";
 
 const STORAGE_KEY = "kingdoom_character_sheets";
 export const MAX_PLAYER_CHARACTER_SHEETS = 2;
-const CHARACTER_SHEET_REGISTRY_SUMMARY_SELECT = [
+const CHARACTER_SHEET_REGISTRY_BASE_SELECT = [
   "id",
   "playerId",
-  "playerUsername",
-  "portraitUrl",
   "name",
   "race",
   "profession",
   "birthRealm",
-].join(", ");
+];
 
-let supportsPlayerUsername: boolean | null = null;
-let supportsPortraitUrl: boolean | null = null;
+const CHARACTER_SHEET_REGISTRY_OPTIONAL_COLUMNS = [
+  "playerUsername",
+  "portraitUrl",
+  "recycleStatus",
+  "originalPlayerId",
+  "originalPlayerUsername",
+  "recycledAt",
+  "assignedAt",
+  "assignedToPlayerId",
+] as const;
+
+type CharacterSheetOptionalColumn = (typeof CHARACTER_SHEET_REGISTRY_OPTIONAL_COLUMNS)[number];
+
+const optionalColumnSupport: Partial<Record<CharacterSheetOptionalColumn, boolean>> = {};
 
 export type CharacterSheetRegistrySummary = Pick<
   CharacterSheet,
-  "id" | "playerId" | "playerUsername" | "portraitUrl" | "name" | "race" | "profession" | "birthRealm"
+  | "id"
+  | "playerId"
+  | "playerUsername"
+  | "portraitUrl"
+  | "recycleStatus"
+  | "originalPlayerId"
+  | "originalPlayerUsername"
+  | "recycledAt"
+  | "assignedAt"
+  | "assignedToPlayerId"
+  | "name"
+  | "race"
+  | "profession"
+  | "birthRealm"
 >;
 
-async function detectPlayerUsernameSupport() {
-  if (supportsPlayerUsername !== null) {
-    return supportsPlayerUsername;
+type RegistryMode = "active" | "recycled";
+
+async function detectOptionalColumnSupport(column: CharacterSheetOptionalColumn) {
+  const cached = optionalColumnSupport[column];
+  if (typeof cached === "boolean") {
+    return cached;
   }
 
   try {
     const { error } = await supabase
       .from("character_sheets")
-      .select("playerUsername")
+      .select(column)
       .limit(1);
 
     if (error) {
-      // If the column doesn't exist, Postgres usually returns 42703.
       const message = String((error as any).message ?? "");
       const code = String((error as any).code ?? "");
       const missingColumn =
         code === "42703" ||
-        message.toLowerCase().includes("playerusername") &&
+        message.toLowerCase().includes(column.toLowerCase()) &&
           message.toLowerCase().includes("does not exist");
-      supportsPlayerUsername = !missingColumn;
-      return supportsPlayerUsername;
+      optionalColumnSupport[column] = !missingColumn;
+      return optionalColumnSupport[column];
     }
 
-    supportsPlayerUsername = true;
+    optionalColumnSupport[column] = true;
     return true;
   } catch {
-    // If this check fails for any reason, do not block saving.
-    supportsPlayerUsername = false;
+    optionalColumnSupport[column] = false;
     return false;
   }
 }
 
-async function detectPortraitUrlSupport() {
-  if (supportsPortraitUrl !== null) {
-    return supportsPortraitUrl;
-  }
+async function buildCharacterSheetRegistrySelect() {
+  const optionalColumns = await Promise.all(
+    CHARACTER_SHEET_REGISTRY_OPTIONAL_COLUMNS.map(async (column) => ({
+      column,
+      supported: await detectOptionalColumnSupport(column),
+    }))
+  );
 
-  try {
-    const { error } = await supabase
-      .from("character_sheets")
-      .select("portraitUrl")
-      .limit(1);
-
-    if (error) {
-      const message = String((error as any).message ?? "");
-      const code = String((error as any).code ?? "");
-      const missingColumn =
-        code === "42703" ||
-        (message.toLowerCase().includes("portraiturl") &&
-          message.toLowerCase().includes("does not exist"));
-      supportsPortraitUrl = !missingColumn;
-      return supportsPortraitUrl;
-    }
-
-    supportsPortraitUrl = true;
-    return true;
-  } catch {
-    supportsPortraitUrl = false;
-    return false;
-  }
+  return [
+    ...CHARACTER_SHEET_REGISTRY_BASE_SELECT,
+    ...optionalColumns
+      .filter(({ supported }) => supported)
+      .map(({ column }) => column),
+  ].join(", ");
 }
 
 // Fallback: Local Storage
@@ -129,15 +139,37 @@ export async function getCharacterSheets(): Promise<CharacterSheet[]> {
   return (data ?? []) as CharacterSheet[];
 }
 
-export async function getCharacterSheetRegistrySummaries(): Promise<CharacterSheetRegistrySummary[]> {
-  const { data, error } = await supabase
+export async function getCharacterSheetRegistrySummaries(
+  mode: RegistryMode = "active"
+): Promise<CharacterSheetRegistrySummary[]> {
+  const canFilterRecycleStatus = await detectOptionalColumnSupport("recycleStatus");
+
+  if (mode === "recycled" && !canFilterRecycleStatus) {
+    return [];
+  }
+
+  let query = supabase
     .from("character_sheets")
-    .select(CHARACTER_SHEET_REGISTRY_SUMMARY_SELECT)
+    .select(await buildCharacterSheetRegistrySelect())
     .order("name", { ascending: true });
+
+  if (canFilterRecycleStatus) {
+    query =
+      mode === "recycled"
+        ? query.eq("recycleStatus", "available")
+        : query.or("recycleStatus.is.null,recycleStatus.neq.available");
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Supabase error fetching registry summaries:", error);
     return getLocalSheets()
+      .filter((sheet) =>
+        mode === "recycled"
+          ? sheet.recycleStatus === "available"
+          : sheet.recycleStatus !== "available"
+      )
       .slice()
       .sort((a, b) =>
         String(a.name ?? "").localeCompare(String(b.name ?? ""), "es", {
@@ -149,6 +181,12 @@ export async function getCharacterSheetRegistrySummaries(): Promise<CharacterShe
         playerId: sheet.playerId,
         playerUsername: sheet.playerUsername,
         portraitUrl: sheet.portraitUrl,
+        recycleStatus: sheet.recycleStatus,
+        originalPlayerId: sheet.originalPlayerId,
+        originalPlayerUsername: sheet.originalPlayerUsername,
+        recycledAt: sheet.recycledAt,
+        assignedAt: sheet.assignedAt,
+        assignedToPlayerId: sheet.assignedToPlayerId,
         name: sheet.name,
         race: sheet.race,
         profession: sheet.profession,
@@ -160,8 +198,8 @@ export async function getCharacterSheetRegistrySummaries(): Promise<CharacterShe
 }
 
 export async function saveCharacterSheet(sheet: CharacterSheet): Promise<void> {
-  const canStorePlayerUsername = await detectPlayerUsernameSupport();
-  const canStorePortraitUrl = await detectPortraitUrlSupport();
+  const canStorePlayerUsername = await detectOptionalColumnSupport("playerUsername");
+  const canStorePortraitUrl = await detectOptionalColumnSupport("portraitUrl");
   const payload = sanitizeSheetForSupabase(
     sheet,
     canStorePlayerUsername,
@@ -217,11 +255,27 @@ function sanitizeSheetForSupabase(
   canStorePlayerUsername: boolean,
   canStorePortraitUrl: boolean
 ) {
-  const { playerUsername, portraitUrl, ...rest } = sheet;
+  const {
+    playerUsername,
+    portraitUrl,
+    recycleStatus,
+    originalPlayerId,
+    originalPlayerUsername,
+    recycledAt,
+    assignedAt,
+    assignedToPlayerId,
+    ...rest
+  } = sheet;
 
   return {
     ...rest,
     ...(canStorePlayerUsername ? { playerUsername } : {}),
     ...(canStorePortraitUrl ? { portraitUrl } : {}),
+    ...(optionalColumnSupport.recycleStatus ? { recycleStatus } : {}),
+    ...(optionalColumnSupport.originalPlayerId ? { originalPlayerId } : {}),
+    ...(optionalColumnSupport.originalPlayerUsername ? { originalPlayerUsername } : {}),
+    ...(optionalColumnSupport.recycledAt ? { recycledAt } : {}),
+    ...(optionalColumnSupport.assignedAt ? { assignedAt } : {}),
+    ...(optionalColumnSupport.assignedToPlayerId ? { assignedToPlayerId } : {}),
   };
 }

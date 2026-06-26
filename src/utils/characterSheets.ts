@@ -223,14 +223,23 @@ export async function deleteCharacterSheet(id: string, portraitUrl?: string): Pr
 }
 
 export async function getPlayerSheets(playerId: string): Promise<CharacterSheet[]> {
-  const { data, error } = await supabase
+  const canFilterRecycleStatus = await detectOptionalColumnSupport("recycleStatus");
+  let query = supabase
     .from("character_sheets")
     .select("*")
     .eq("playerId", playerId)
     .order("createdAt", { ascending: false });
+
+  if (canFilterRecycleStatus) {
+    query = query.or("recycleStatus.is.null,recycleStatus.neq.available");
+  }
+
+  const { data, error } = await query;
   if (error) {
     console.error("Supabase error fetching player sheets:", error);
-    return getLocalSheets().filter((s) => s.playerId === playerId); // Fallback
+    return getLocalSheets().filter(
+      (s) => s.playerId === playerId && s.recycleStatus !== "available"
+    ); // Fallback
   }
   return (data ?? []) as CharacterSheet[];
 }

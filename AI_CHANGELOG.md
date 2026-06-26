@@ -1,4 +1,10 @@
 
+## [2026-06-26] Revision preproduccion: ocultar fichas reciclables del panel del jugador original
+- Se corrigio `getPlayerSheets()` para que las fichas marcadas con `recycleStatus = available` ya no aparezcan en el apartado normal de fichas del jugador original.
+- Esto evita que una ficha archivada/reciclable siga viendose como activa en `Mis personajes` mientras espera reasignacion.
+- El filtro mantiene compatibilidad hacia atras: si la columna `recycleStatus` no existe, el comportamiento sigue funcionando sin romper el panel.
+- Validacion: `npx tsc --noEmit` y `npm run build` pasaron correctamente. [Codex]
+
 ## [2026-06-25] Registro del Reino: fichas recicladas y fix de listado vacio
 - Se corrigio la carga del modal `Buscar fichas`: `getCharacterSheetRegistrySummaries()` ya no depende de que existan columnas opcionales como `playerUsername`, `portraitUrl` o campos de reciclaje; ahora detecta soporte de columnas y arma la consulta compatible con el esquema real.
 - Se agrego en `RealmRegistry` un selector entre `Fichas publicas` y `Fichas recicladas`, manteniendo contadores separados, busqueda por propietario original y mensajes vacios especificos.

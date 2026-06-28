@@ -48,12 +48,10 @@ export function TavernCrash() {
   const multiplierRef = useRef(multiplier);
   const addPlayerGoldRef = useRef(addPlayerGold);
 
-  // Mantener refs sincronizados
-  useEffect(() => { statusRef.current = status; }, [status]);
+  // Mantener refs sincronizados (statusRef y updatingRef mutan sincrónicamente, NO usar useEffect)
   useEffect(() => { autoCashOutRef.current = autoCashOut; }, [autoCashOut]);
   useEffect(() => { betRef.current = bet; }, [bet]);
   useEffect(() => { playerRef.current = player; }, [player]);
-  useEffect(() => { updatingRef.current = updating; }, [updating]);
   useEffect(() => { addPlayerGoldRef.current = addPlayerGold; }, [addPlayerGold]);
 
   const redrawCanvas = useCallback((nextMultiplier: number, elapsedSeconds: number) => {
@@ -185,7 +183,7 @@ export function TavernCrash() {
     }
   };
 
-  const handleCashOut = useCallback(async (exactMultiplier?: number | React.MouseEvent) => {
+  const handleCashOut = useCallback(async (exactMultiplier?: number) => {
     if (statusRef.current !== "rising" || updatingRef.current || !playerRef.current) return;
 
     updatingRef.current = true;
@@ -554,7 +552,7 @@ export function TavernCrash() {
                 <div className="space-y-4">
                     {status === "rising" ? (
                         <button
-                            onClick={handleCashOut}
+                            onClick={() => handleCashOut()}
                             disabled={updating}
                             className="w-full group relative overflow-hidden rounded-2xl bg-emerald-600 py-5 font-black text-white hover:bg-emerald-500 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all"
                         >

@@ -1,4 +1,10 @@
 
+## [2026-06-27] Fix: Botón de Retiro Inactivo en TavernCrash
+- Se corrigió un bug grave en `TavernCrash` donde clics en el botón de retiro fallaban silenciosamente o quedaban bloqueados por condiciones de carrera introducidas en un parche anterior.
+- Se eliminaron los `useEffect` que sincronizaban `updatingRef` y `statusRef`. Dichos efectos, al ser asíncronos en React, sobreescribían las mutaciones síncronas requeridas antes de los awaits (ej. `updatingRef.current = true`), provocando que la interfaz inhabilitara el botón temporalmente o fallara en registrar el estado `"cashed_out"` antes de un colapso.
+- Se ajustó el argumento de `handleCashOut` y el bindeo en el botón (`onClick={() => handleCashOut()}`) para evitar que el evento sintético de React (`React.MouseEvent`) interfiera con el tipado interno del componente y la lógica de caída por defecto (fallback) al multiplicador local.
+- Validación: Build limpia (`npx tsc --noEmit` y `npm run build` OK). No hay riesgos detectados ya que se restaura el aislamiento del flujo manual contra el bucle de animaciones. [Antigravity]
+
 ## [2026-06-26] Revision preproduccion: ocultar fichas reciclables del panel del jugador original
 - Se corrigio `getPlayerSheets()` para que las fichas marcadas con `recycleStatus = available` ya no aparezcan en el apartado normal de fichas del jugador original.
 - Esto evita que una ficha archivada/reciclable siga viendose como activa en `Mis personajes` mientras espera reasignacion.

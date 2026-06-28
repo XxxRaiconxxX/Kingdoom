@@ -1,4 +1,13 @@
 
+## [2026-06-28] Reforma Económica y Balanceo de Minijuegos
+- **[Slots]:** Rediseñada la tabla de pagos (gemas x6, coronas x15, pares x1.5) y reajustadas las probabilidades de giro para fijar un RTP global de **91.5%** con 63% de probabilidad de pérdida.
+- **[Penalty]:** Ajustados los multiplicadores por ronda a **x1.7 / x2.8 / x4.8 / x8.0** para fijar el RTP en **94.0%** e incentivado el riesgo. Adaptada la UI (Tanda x8).
+- **[Ruleta]:** Migrada la ruleta de 25 números a una **Ruleta Francesa estándar de 37 números (0 al 36)**. El pleno ahora paga un **x35** real (RTP 97.30%) y se reajustó la grilla del frontend a 6 columnas incluyendo la celda del 0 al tope.
+- **[Minijuegos Seguros]:** Limitado el RTP de *RouletteSecure* al **94.0%**, reducida la racha de cartas a incremento **0.15** y habilitados colapsos instantáneos en 1.01 para *CrashSecure* (5% de chance).
+- **[Bot Games]:** Reducida la tabla de recompensas del cofre gratis diario a un promedio de **570 oro por cofre** y subido el objetivo de victoria en dados a **suma >= 8** desactivando permanentemente el multiplicador x4.
+- **[Base de Datos & Alexander]:** Ejecutada la detracción de 900M de Alexander (balance inicial de 90M), aisladas las cuentas de administradores en `purchase_market_item` y creada la función `apply_wealth_tax` (tasa del 0.2% y 0.5% diario) colectando **18,311,444 de oro** en su primer ejecución.
+- **[Validación]:** `npx tsc --noEmit` y `npm run build` completados con éxito. Commits y pushes realizados en ambos repositorios. [Antigravity]
+
 ## [2026-06-27] Fix: Botón de Retiro Inactivo en TavernCrash
 - Se corrigió un bug grave en `TavernCrash` donde clics en el botón de retiro fallaban silenciosamente o quedaban bloqueados por condiciones de carrera introducidas en un parche anterior.
 - Se eliminaron los `useEffect` que sincronizaban `updatingRef` y `statusRef`. Dichos efectos, al ser asíncronos en React, sobreescribían las mutaciones síncronas requeridas antes de los awaits (ej. `updatingRef.current = true`), provocando que la interfaz inhabilitara el botón temporalmente o fallara en registrar el estado `"cashed_out"` antes de un colapso.

@@ -54,7 +54,7 @@ const HEIGHT = 420;
 const CONTACT_MS = 800;
 const BALL_MS = 820;
 const RESULT_MS = 900;
-const ROUND_MULTIPLIERS = [2, 4, 8, 12] as const;
+const ROUND_MULTIPLIERS = [1.7, 2.8, 4.8, 8.0] as const;
 const MAX_ROUNDS = ROUND_MULTIPLIERS.length;
 
 const DIRECTIONS: Direction[] = [
@@ -402,7 +402,7 @@ export function TavernPenalty() {
   const [roundIndex, setRoundIndex] = useState(0);
   const [lockedBet, setLockedBet] = useState(0);
   const [shotState, setShotState] = useState<ShotState>(DEFAULT_SHOT);
-  const [message, setMessage] = useState("Supera 4 penales seguidos para llegar al x12.");
+  const [message, setMessage] = useState("Supera 4 penales seguidos para llegar al x8.");
   const [dailyNetWins, setDailyNetWins] = useState(0);
   const [updating, setUpdating] = useState(false);
 
@@ -553,7 +553,7 @@ export function TavernPenalty() {
         return;
       }
 
-      const rawNetWin = result === "goal" ? stake * (currentMultiplier - 1) : 0;
+      const rawNetWin = result === "goal" ? Math.floor(stake * (currentMultiplier - 1)) : 0;
       const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
       const prize = result === "goal" ? stake + cappedNetWin : 0;
       const updated = await addPlayerGold(-stake + prize);
@@ -604,7 +604,7 @@ export function TavernPenalty() {
 
     setUpdating(true);
     const stake = lockedBet || safeBet;
-    const rawNetWin = stake * (currentMultiplier - 1);
+    const rawNetWin = Math.floor(stake * (currentMultiplier - 1));
     const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
     const prize = stake + cappedNetWin;
     const updated = await addPlayerGold(-stake + prize);
@@ -635,7 +635,7 @@ export function TavernPenalty() {
     setRoundIndex(0);
     setLockedBet(0);
     setShotState(DEFAULT_SHOT);
-    setMessage("Supera 4 penales seguidos para llegar al x12.");
+    setMessage("Supera 4 penales seguidos para llegar al x8.");
   }
 
   if (isHydrating) {
@@ -664,7 +664,7 @@ export function TavernPenalty() {
               Penalty arcade
             </p>
             <h3 className="mt-2 text-2xl font-black text-stone-50 sm:text-3xl">
-              Tanda x12
+              Tanda x8
             </h3>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold uppercase tracking-[0.12em] text-stone-300">

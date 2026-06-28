@@ -132,8 +132,8 @@ function resolveMultiplier(reels: [SymbolId, SymbolId, SymbolId]) {
   const triple = SYMBOL_IDS.find((symbol) => counts[symbol] === 3);
   const pair = SYMBOL_IDS.find((symbol) => counts[symbol] === 2 && symbol !== "skull");
 
-  if (triple === "crown") return 24;
-  if (triple === "gem") return 16;
+  if (triple === "crown") return 15;
+  if (triple === "gem") return 6;
   if (triple === "sword") return 10;
   if (triple === "potion") return 6;
   if (triple === "shield") return 4;
@@ -159,17 +159,17 @@ function generateSpinOutcome(): SpinOutcome {
   const roll = Math.random();
   let reels: [SymbolId, SymbolId, SymbolId];
 
-  if (roll < 0.008) {
+  if (roll < 0.005) {
     reels = ["crown", "crown", "crown"];
-  } else if (roll < 0.099) {
+  } else if (roll < 0.025) {
     reels = ["gem", "gem", "gem"];
-  } else if (roll < 0.125) {
+  } else if (roll < 0.035) {
     reels = ["sword", "sword", "sword"];
-  } else if (roll < 0.200) {
+  } else if (roll < 0.050) {
     reels = ["potion", "potion", "potion"];
-  } else if (roll < 0.250) {
+  } else if (roll < 0.070) {
     reels = ["shield", "shield", "shield"];
-  } else if (roll < 0.450) {
+  } else if (roll < 0.370) {
     reels = buildPairReels();
   } else {
     reels = buildLosingReels();
@@ -503,12 +503,12 @@ export function TavernSlots() {
 
           <Panel title="Pagos" icon={<Crown className="h-4 w-4" />}>
             <div className="grid gap-2 text-xs font-bold text-stone-300">
-              <PayRow label="3 coronas" value="x24" />
-              <PayRow label="3 gemas" value="x16" />
+              <PayRow label="3 coronas" value="x15" />
+              <PayRow label="3 gemas" value="x6" />
               <PayRow label="3 espadas" value="x10" />
               <PayRow label="3 pociones" value="x6" />
               <PayRow label="3 escudos" value="x4" />
-              <PayRow label="2 iguales" value="x2" />
+              <PayRow label="2 iguales" value="x1.5" />
             </div>
           </Panel>
         </aside>

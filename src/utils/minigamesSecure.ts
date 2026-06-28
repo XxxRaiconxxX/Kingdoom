@@ -164,11 +164,11 @@ function buildCardsResponse(playerId: string, remainingGold: number, session: St
 
 function chooseRouletteMultiplier() {
   const roll = Math.random();
-  if (roll < 0.34) return 0;
-  if (roll < 0.54) return 0.5;
-  if (roll < 0.77) return 2;
-  if (roll < 0.91) return 3;
-  if (roll < 0.985) return 5;
+  if (roll < 0.485) return 0;
+  if (roll < 0.685) return 0.5;
+  if (roll < 0.885) return 2;
+  if (roll < 0.965) return 3;
+  if (roll < 0.995) return 5;
   return 10;
 }
 
@@ -239,10 +239,11 @@ export function getCrashGrowthMultiplier(elapsedSeconds: number) {
 
 function randomCrashAt() {
   const roll = Math.random();
-  if (roll < 0.34) return 1.45 + Math.random() * 0.85;
-  if (roll < 0.7) return 2.35 + Math.random() * 1.9;
-  if (roll < 0.93) return 4.4 + Math.random() * 3.8;
-  return 8.5 + Math.random() * 9.5;
+  if (roll < 0.05) return 1.01;
+  if (roll < 0.39) return 1.05 + Math.random() * 1.25;
+  if (roll < 0.72) return 2.30 + Math.random() * 1.9;
+  if (roll < 0.94) return 4.2 + Math.random() * 4.0;
+  return 8.2 + Math.random() * 9.8;
 }
 
 async function resolveCrashState(playerId: string, playerGold: number) {
@@ -367,7 +368,7 @@ export async function guessCardsSecure(
   }
 
   const streak = session.streak + 1;
-  const bonus = Math.max(10, Math.floor(session.bet * (0.7 + streak * 0.45)));
+  const bonus = Math.max(10, Math.floor(session.bet * (0.7 + streak * 0.15)));
   const equalBonus = nextCard === session.currentCard ? Math.floor(session.bet * 0.4) : 0;
   const nextSession: StoredCardsSession = {
     ...session,

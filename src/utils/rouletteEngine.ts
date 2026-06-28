@@ -1,4 +1,5 @@
 export type RoulettePocket =
+  | "0"
   | "1"
   | "2"
   | "3"
@@ -23,7 +24,18 @@ export type RoulettePocket =
   | "22"
   | "23"
   | "24"
-  | "25";
+  | "25"
+  | "26"
+  | "27"
+  | "28"
+  | "29"
+  | "30"
+  | "31"
+  | "32"
+  | "33"
+  | "34"
+  | "35"
+  | "36";
 
 export type RouletteBetId =
   | `straight:${RoulettePocket}`
@@ -49,41 +61,54 @@ export type RouletteRoundResult = {
 };
 
 export const ROULETTE_WHEEL_ORDER: RoulettePocket[] = [
-  "7",
-  "18",
-  "3",
-  "22",
-  "11",
-  "25",
-  "4",
+  "0",
+  "32",
+  "15",
   "19",
+  "4",
+  "21",
+  "2",
+  "25",
+  "17",
+  "34",
+  "6",
+  "27",
+  "13",
+  "36",
+  "11",
+  "30",
   "8",
-  "14",
-  "1",
   "23",
   "10",
-  "16",
   "5",
-  "21",
-  "12",
-  "2",
   "24",
-  "9",
-  "17",
-  "6",
+  "16",
+  "33",
+  "1",
   "20",
-  "13",
-  "15",
+  "14",
+  "31",
+  "9",
+  "22",
+  "18",
+  "29",
+  "7",
+  "28",
+  "12",
+  "35",
+  "3",
+  "26",
 ];
 
 export const ROULETTE_CHIPS = [1, 5, 10, 25, 100] as const;
 
 export const ROULETTE_NUMBER_GRID: RoulettePocket[][] = [
-  ["1", "2", "3", "4", "5"],
-  ["6", "7", "8", "9", "10"],
-  ["11", "12", "13", "14", "15"],
-  ["16", "17", "18", "19", "20"],
-  ["21", "22", "23", "24", "25"],
+  ["1", "2", "3", "4", "5", "6"],
+  ["7", "8", "9", "10", "11", "12"],
+  ["13", "14", "15", "16", "17", "18"],
+  ["19", "20", "21", "22", "23", "24"],
+  ["25", "26", "27", "28", "29", "30"],
+  ["31", "32", "33", "34", "35", "36"],
 ];
 
 const RED_POCKETS = new Set<RoulettePocket>([
@@ -100,6 +125,11 @@ const RED_POCKETS = new Set<RoulettePocket>([
   "21",
   "23",
   "25",
+  "27",
+  "30",
+  "32",
+  "34",
+  "36",
 ]);
 
 const BLACK_POCKETS = new Set<RoulettePocket>([
@@ -115,6 +145,12 @@ const BLACK_POCKETS = new Set<RoulettePocket>([
   "20",
   "22",
   "24",
+  "26",
+  "28",
+  "29",
+  "31",
+  "33",
+  "35",
 ]);
 
 type BetDefinition = {
@@ -149,28 +185,28 @@ function getOutsideBetDefinition(id: RouletteBetId): BetDefinition {
         id,
         label: "Par",
         payoutMultiplier: 1,
-        covers: ["2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24"],
+        covers: ["2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36"],
       };
     case "outside:odd":
       return {
         id,
         label: "Impar",
         payoutMultiplier: 1,
-        covers: ["1", "3", "5", "7", "9", "11", "13", "15", "17", "19", "21", "23", "25"],
+        covers: ["1", "3", "5", "7", "9", "11", "13", "15", "17", "19", "21", "23", "25", "27", "29", "31", "33", "35"],
       };
     case "outside:low":
       return {
         id,
-        label: "1 a 12",
+        label: "1 a 18",
         payoutMultiplier: 1,
-        covers: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+        covers: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"],
       };
     case "outside:high":
       return {
         id,
-        label: "13 a 25",
+        label: "19 a 36",
         payoutMultiplier: 1,
-        covers: ["13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"],
+        covers: ["19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36"],
       };
     default:
       throw new Error(`Apuesta fuera de rango no soportada: ${id}`);
@@ -183,7 +219,7 @@ export function getBetDefinition(id: RouletteBetId): BetDefinition {
     return {
       id,
       label: pocket,
-      payoutMultiplier: 24,
+      payoutMultiplier: 35,
       covers: [pocket],
     };
   }
@@ -192,6 +228,7 @@ export function getBetDefinition(id: RouletteBetId): BetDefinition {
 }
 
 export function getPocketColor(pocket: RoulettePocket) {
+  if (pocket === "0") return "green" as const;
   return RED_POCKETS.has(pocket) ? ("red" as const) : ("black" as const);
 }
 
@@ -207,7 +244,7 @@ export function resolveRouletteRound(
   const winningBets: RouletteResolvedBet[] = [];
   let totalBet = 0;
   let totalPayout = 0;
-
+ 
   for (const [betId, amount] of Object.entries(bets) as Array<[RouletteBetId, number | undefined]>) {
     if (!amount || amount <= 0) {
       continue;
@@ -258,5 +295,6 @@ export function getNeighborPreview(pocket: RoulettePocket) {
 }
 
 export function getPocketParityLabel(pocket: RoulettePocket) {
+  if (pocket === "0") return "Cero";
   return getPocketNumberValue(pocket) % 2 === 0 ? "Par" : "Impar";
 }

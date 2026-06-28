@@ -27,8 +27,8 @@ type RouletteBets = Partial<Record<RouletteBetId, number>>;
 
 const OUTSIDE_BET_ROWS: Array<Array<{ id: RouletteBetId; label: string; color?: "red" | "black" }>> = [
   [
-    { id: "outside:low", label: "1 a 12" },
-    { id: "outside:high", label: "13 a 25" },
+    { id: "outside:low", label: "1 a 18" },
+    { id: "outside:high", label: "19 a 36" },
   ],
   [
     { id: "outside:even", label: "PAR" },
@@ -46,7 +46,8 @@ function buildWheelGradient() {
   return `conic-gradient(${ROULETTE_WHEEL_ORDER.map((pocket, index) => {
     const start = index * SEGMENT_ANGLE;
     const end = start + SEGMENT_ANGLE;
-    const tone = getPocketColor(pocket) === "red" ? "#e53935" : "#161616";
+    const color = getPocketColor(pocket);
+    const tone = color === "red" ? "#e53935" : color === "green" ? "#2e7d32" : "#161616";
 
     return `${tone} ${start}deg ${end}deg`;
   }).join(", ")})`;
@@ -249,14 +250,14 @@ export function TavernRoulette() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/65">
-                    Ruleta compacta
+                    Ruleta Francesa
                   </p>
                   <p className="mt-1 text-sm text-stone-200/80">
-                    Solo del 1 al 25. Mesa compacta para movil y cobro real sobre tu oro del reino.
+                    Estándar de 37 números (0 al 36). Mesa completa para móvil y cobro real sobre tu oro del reino.
                   </p>
                 </div>
                 <span className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100/70">
-                  1-25
+                  0-36
                 </span>
               </div>
 
@@ -277,14 +278,16 @@ export function TavernRoulette() {
                         winningPocket
                           ? winningColor === "red"
                             ? "border-rose-300/25 bg-rose-500/90 text-white"
-                            : "border-stone-500 bg-stone-950 text-stone-100"
+                            : winningColor === "green"
+                              ? "border-emerald-300/25 bg-emerald-500/90 text-white"
+                              : "border-stone-500 bg-stone-950 text-stone-100"
                           : "border-white/10 bg-black/20 text-stone-300"
                       }`}>
                         {winningPocket ?? "--"}
                       </span>
                       <div className="text-left">
                         <p className="text-sm font-black text-stone-100">
-                          {winningPocket ? `${winningColor === "red" ? "Rojo" : "Negro"} / ${getPocketParityLabel(winningPocket)}` : "Esperando giro"}
+                          {winningPocket ? `${winningColor === "red" ? "Rojo" : winningColor === "green" ? "Verde" : "Negro"}${winningColor === "green" ? "" : ` / ${getPocketParityLabel(winningPocket)}`}` : "Esperando giro"}
                         </p>
                         <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-stone-400">
                           {phase === "spinning"
@@ -310,7 +313,9 @@ export function TavernRoulette() {
                           className={`inline-flex h-9 min-w-9 items-center justify-center rounded-full border text-sm font-black ${
                             getPocketColor(pocket) === "red"
                               ? "border-rose-300/25 bg-rose-500/90 text-white"
-                              : "border-stone-500 bg-stone-950 text-stone-100"
+                              : getPocketColor(pocket) === "green"
+                                ? "border-emerald-300/25 bg-emerald-500/90 text-white"
+                                : "border-stone-500 bg-stone-950 text-stone-100"
                           }`}
                         >
                           {pocket}
@@ -403,7 +408,7 @@ export function TavernRoulette() {
                 </p>
               </div>
               <div className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-100/70">
-                Gana con pleno x24
+                Gana con pleno x35
               </div>
             </div>
 
@@ -442,8 +447,19 @@ export function TavernRoulette() {
                   >
                     <div className="rounded-[1.5rem] border border-emerald-200/20 bg-[linear-gradient(180deg,rgba(12,116,54,0.36),rgba(8,66,31,0.52))] p-2.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] md:p-3">
                       <div className="space-y-2">
+                        {/* Botón Cero de Ancho Completo */}
+                        <div className="grid grid-cols-1">
+                          <BetCell
+                            label="0"
+                            amount={bets["straight:0"]}
+                            active={highlightedWinningIds.has("straight:0")}
+                            tone="green"
+                            onClick={() => handlePlaceBet("straight:0")}
+                          />
+                        </div>
+
                         {ROULETTE_NUMBER_GRID.map((row, rowIndex) => (
-                          <div key={`row-${rowIndex}`} className="grid grid-cols-5 gap-2">
+                          <div key={`row-${rowIndex}`} className="grid grid-cols-6 gap-2">
                             {row.map((pocket) => (
                               <BetCell
                                 key={pocket}

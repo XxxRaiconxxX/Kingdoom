@@ -376,7 +376,7 @@ export function TavernRoulette() {
                           key={chip}
                           type="button"
                           onClick={() => setSelectedChip(chip)}
-                          className={`inline-flex h-16 w-16 items-center justify-center rounded-full border-[5px] font-black shadow-[0_10px_22px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 ${
+                          className={`inline-flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full border-[4px] sm:border-[5px] font-black text-xs sm:text-base shadow-[0_10px_22px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 ${
                             selectedChip === chip
                               ? "border-amber-200 bg-gradient-to-br from-amber-200 to-amber-400 text-stone-950"
                               : chip === 1
@@ -699,7 +699,7 @@ function BetCell({
       disabled={disabled}
       onClick={onClick}
       className={`relative overflow-hidden rounded-[0.95rem] border ${toneClass} ${
-        compact ? "min-h-14 px-2 py-2.5 text-sm" : "min-h-14 px-2 py-3 text-base"
+        compact ? "min-h-11 sm:min-h-14 px-1 sm:px-2 py-2 sm:py-2.5 text-xs sm:text-sm" : "min-h-11 sm:min-h-14 px-1 sm:px-2 py-2 sm:py-3 text-sm sm:text-base"
       } font-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_18px_rgba(0,0,0,0.18)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none`}
     >
       {active ? (

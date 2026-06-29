@@ -58,7 +58,7 @@ CSS / CSS vanilla, comunicándose directamente con la base de datos Supabase.
     - `AdminControlPrimitives.tsx`: Widgets de input admin compartidos.
     - `AdminKnowledgeManager.tsx`: Gestión de documentos de grimorio/conocimiento.
     - `AdminStaffAssistant.tsx`: Interfaz de asistente IA para staff y moderadores.
-- Archivos `*.sql` en raíz: Esquemas de BD, políticas RLS y procedimientos RPC.
+- `supabase/*.sql`: Esquemas de BD, políticas RLS y procedimientos RPC.
 
 ## Project Guardrails
 

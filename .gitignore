@@ -14,6 +14,9 @@ supabase/.temp/
 scratch/
 temp_diff.txt
 repomix-output-*.md
+tmp_*.txt
+**/__MACOSX/
+*.DS_Store
 
 # Android build artifacts
 android/app/build/

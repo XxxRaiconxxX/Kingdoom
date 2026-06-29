@@ -1,6 +1,6 @@
 import json
 
-with open('grimorio_final.json', 'r', encoding='utf-8') as f:
+with open('docs/source-material/grimorio_final.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 # The file needs to be a TypeScript file with an export

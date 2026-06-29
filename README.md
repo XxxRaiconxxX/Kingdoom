@@ -78,6 +78,8 @@ src/
 - `src/components/PurchaseModal.tsx`: compra de objetos con descuento de oro.
 - `src/components/TavernGame.tsx`: minijuego de cofres.
 - `src/components/TavernRoulette.tsx`: ruleta.
+- `supabase/*.sql`: scripts SQL versionados del proyecto.
+- `docs/reference/`: reglas operativas y esquema documental del reino.
 - `src/components/TavernCards.tsx`: cartas.
 - `src/components/PlayerProfilePanel.tsx`: panel global del jugador.
 - `src/context/PlayerSessionContext.tsx`: sesion compartida del perfil activo.

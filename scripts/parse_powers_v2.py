@@ -73,5 +73,5 @@ for cid, files in mapping.items():
             if res: styles.append(res)
     final.append({"id": cid, "title": cid.capitalize(), "styles": styles})
 
-with open("grimorio_final.json", "w", encoding="utf-8") as f:
+with open("docs/source-material/grimorio_final.json", "w", encoding="utf-8") as f:
     json.dump(final, f, indent=2, ensure_ascii=False)

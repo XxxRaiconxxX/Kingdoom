@@ -86,6 +86,10 @@ begin
     raise exception 'Tu cuenta segura aun no esta vinculada a un jugador del reino.' using errcode = '42501';
   end if;
 
+  if v_player.is_admin = true then
+    raise exception 'Los administradores no pueden realizar compras comerciales en el mercado de jugadores.' using errcode = '42501';
+  end if;
+
   select *
   into v_item
   from public.market_items

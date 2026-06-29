@@ -139,6 +139,27 @@ export async function getCharacterSheets(): Promise<CharacterSheet[]> {
   return (data ?? []) as CharacterSheet[];
 }
 
+export async function getActiveCharacterSheetCount(): Promise<number> {
+  const canFilterRecycleStatus = await detectOptionalColumnSupport("recycleStatus");
+
+  let query = supabase
+    .from("character_sheets")
+    .select("id", { count: "exact", head: true });
+
+  if (canFilterRecycleStatus) {
+    query = query.or("recycleStatus.is.null,recycleStatus.neq.available");
+  }
+
+  const { count, error } = await query;
+
+  if (error) {
+    console.error("Supabase error fetching character sheet count:", error);
+    return getLocalSheets().filter((sheet) => sheet.recycleStatus !== "available").length;
+  }
+
+  return count ?? 0;
+}
+
 export async function getCharacterSheetRegistrySummaries(
   mode: RegistryMode = "active"
 ): Promise<CharacterSheetRegistrySummary[]> {

@@ -4,14 +4,11 @@ import {
   Bell,
   Castle,
   ChevronDown,
-  Download,
   FileSearch,
   Home,
   Library,
-  ScrollText,
   Sparkles,
   Store,
-  UserRound,
 } from "lucide-react";
 import { EventCard } from "./components/EventCard";
 import { ExpandableText } from "./components/ExpandableText";
@@ -21,16 +18,15 @@ import { usePlayerSession } from "./context/PlayerSessionContext";
 import { ACTIVE_EVENTS } from "./data/events";
 import { FALLBACK_MISSIONS } from "./data/missions";
 import {
-  COMMUNITY_APP_DOWNLOAD_FALLBACK_URL,
-  COMMUNITY_APP_UPDATED_AT,
-  COMMUNITY_APP_VERSION,
   HOME_STATS,
   JOIN_STEPS,
   KINGDOM_ANNOUNCEMENTS,
   KINGDOM_STATUS,
 } from "./data/home";
 import { useGsapStaggerReveal } from "./hooks/useGsapStaggerReveal";
+import { supabase } from "./lib/supabase";
 import type {
+  HomeStat,
   NavItem,
   RealmEvent,
   RealmEventParticipant,
@@ -75,7 +71,7 @@ const missionClaimStatusLabels = {
 
 const loadEventUtils = () => import("./utils/events");
 const loadMissionUtils = () => import("./utils/missions");
-const loadSiteSettingsUtils = () => import("./utils/siteSettings");
+const loadCharacterSheetUtils = () => import("./utils/characterSheets");
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
@@ -179,15 +175,7 @@ export default function App() {
           key={activeTab}
           className="kd-stage animate-[content-fade-in_180ms_ease-out]"
         >
-          {activeTab === "home" ? (
-            <HomeSection
-              onFocusProfile={() => {
-                startTransition(() => setIsProfileCollapsed(false));
-                window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-              }}
-              onOpenMarket={() => startTransition(() => setActiveTab("market"))}
-            />
-          ) : null}
+          {activeTab === "home" ? <HomeSection /> : null}
           {activeTab === "grimoire" ? (
             <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el grimorio prohibido..." />}>
               <GrimoireSection />
@@ -257,13 +245,7 @@ export default function App() {
   );
 }
 
-function HomeSection({
-  onFocusProfile,
-  onOpenMarket,
-}: {
-  onFocusProfile: () => void;
-  onOpenMarket: () => void;
-}) {
+function HomeSection() {
   const homeRevealRef = useRef<HTMLElement | null>(null);
   const { player, isHydrating } = usePlayerSession();
   const StatusIcon = KINGDOM_STATUS.icon;
@@ -285,9 +267,7 @@ function HomeSection({
   const [playerEventParticipations, setPlayerEventParticipations] = useState<
     Record<string, RealmEventParticipant>
   >({});
-  const [communityAppDownloadUrl, setCommunityAppDownloadUrl] = useState(
-    COMMUNITY_APP_DOWNLOAD_FALLBACK_URL
-  );
+  const [characterCount, setCharacterCount] = useState<number | null>(null);
 
   useGsapStaggerReveal(homeRevealRef, {
     selector: "[data-gsap-home]",
@@ -302,19 +282,16 @@ function HomeSection({
     let cancelled = false;
 
     async function loadHomeData() {
-      const [
-        { fetchRealmEvents },
-        { fetchPublicRealmMissions },
-        { fetchCommunityAppDownloadUrl },
-      ] = await Promise.all([
-        loadEventUtils(),
-        loadMissionUtils(),
-        loadSiteSettingsUtils(),
-      ]);
-      const [eventsResult, missionsResult, nextUrl] = await Promise.all([
+      const [{ fetchRealmEvents }, { fetchPublicRealmMissions }, { getActiveCharacterSheetCount }] =
+        await Promise.all([
+          loadEventUtils(),
+          loadMissionUtils(),
+          loadCharacterSheetUtils(),
+        ]);
+      const [eventsResult, missionsResult, nextCharacterCount] = await Promise.all([
         fetchRealmEvents(),
         fetchPublicRealmMissions(),
-        fetchCommunityAppDownloadUrl(COMMUNITY_APP_DOWNLOAD_FALLBACK_URL),
+        getActiveCharacterSheetCount(),
       ]);
 
       if (cancelled) {
@@ -324,7 +301,7 @@ function HomeSection({
       startTransition(() => {
         setEvents(eventsResult.events);
         setMissions(missionsResult.missions);
-        setCommunityAppDownloadUrl(nextUrl);
+        setCharacterCount(nextCharacterCount);
       });
     }
 
@@ -334,6 +311,47 @@ function HomeSection({
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function refreshCharacterCount() {
+      const { getActiveCharacterSheetCount } = await loadCharacterSheetUtils();
+      const nextCount = await getActiveCharacterSheetCount();
+
+      if (cancelled) {
+        return;
+      }
+
+      setCharacterCount(nextCount);
+    }
+
+    const channel = supabase
+      .channel("home-character-count")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "character_sheets" },
+        () => {
+          void refreshCharacterCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const homeStats: HomeStat[] = HOME_STATS.map((stat) =>
+    stat.label === "Personajes"
+      ? {
+          ...stat,
+          value:
+            characterCount === null ? "..." : characterCount.toLocaleString("es-PY"),
+        }
+      : stat
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -616,7 +634,7 @@ function HomeSection({
         </p>
 
         <div className="mt-5 grid grid-cols-3 gap-3 md:max-w-xl">
-          {HOME_STATS.map((stat) => (
+          {homeStats.map((stat) => (
             <StatCard
               key={stat.label}
               icon={stat.icon}
@@ -624,61 +642,6 @@ function HomeSection({
               label={stat.label}
             />
           ))}
-        </div>
-
-        <div className="mt-5 grid gap-2 sm:grid-cols-3 md:max-w-3xl">
-          <HomeActionButton
-            icon={UserRound}
-            label="Conectar jugador"
-            onClick={onFocusProfile}
-          />
-          <HomeActionButton
-            icon={ScrollText}
-            label="Ver fichas"
-            onClick={onFocusProfile}
-          />
-          <HomeActionButton
-            icon={Store}
-            label="Mercado y taberna"
-            onClick={onOpenMarket}
-          />
-        </div>
-
-        <div className="mt-6 flex flex-col gap-3 md:flex-row">
-          {communityAppDownloadUrl ? (
-            <div className="w-full rounded-[1.6rem] border border-amber-500/20 bg-stone-950/45 p-3 md:max-w-xl">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300">
-                    App de la comunidad
-                  </p>
-                  <p className="mt-1 text-xs text-stone-400">
-                    {COMMUNITY_APP_VERSION} · Actualizada {COMMUNITY_APP_UPDATED_AT}
-                  </p>
-                </div>
-                <a
-                  href={communityAppDownloadUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  download
-                  className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
-                >
-                  <Download className="h-4 w-4" />
-                  Descargar APK
-                </a>
-              </div>
-              <p className="mt-3 rounded-2xl border border-stone-800 bg-black/25 px-3 py-2 text-xs leading-5 text-stone-400">
-                Android puede pedir permitir instalacion externa.
-              </p>
-            </div>
-          ) : (
-            <div className="w-full rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100 md:w-fit md:min-w-72">
-              <p className="font-extrabold text-amber-300">App de la comunidad</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.16em] text-amber-200/80">
-                Configura el enlace de descarga cuando el APK este listo
-              </p>
-            </div>
-          )}
         </div>
       </div>
 
@@ -1175,27 +1138,6 @@ function MissionCard({
       ) : null}
 
     </article>
-  );
-}
-
-function HomeActionButton({
-  icon: Icon,
-  label,
-  onClick,
-}: {
-  icon: typeof UserRound;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="kd-touch flex items-center justify-center gap-2 rounded-2xl border border-stone-800 bg-stone-950/55 px-3 py-3 text-xs font-extrabold uppercase tracking-[0.12em] text-stone-200 transition hover:border-amber-500/30 hover:text-amber-200"
-    >
-      <Icon className="h-4 w-4 text-amber-300" />
-      {label}
-    </button>
   );
 }
 

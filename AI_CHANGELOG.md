@@ -1,4 +1,10 @@
-﻿## [2026-06-29] Reorganizacion estructural de docs, SQL y materiales fuente
+﻿## [2026-06-29] Inicio: limpieza del hero y contador vivo de personajes
+- Se elimino del hero principal de `Inicio` el apartado de **App de la comunidad** junto con los accesos rapidos **Conectar jugador**, **Ver fichas** y **Mercado y taberna**.
+- La metrica `Personajes` del bloque superior dejo de mostrar un texto estatico y ahora consume el total real de fichas en `character_sheets`.
+- El conteo excluye fichas recicladas disponibles cuando existe `recycleStatus`, para reflejar los personajes activos actuales del reino.
+- Se agrego actualizacion en vivo del contador mediante cambios de Supabase sobre la tabla `character_sheets`, de modo que el numero se refresque cuando se crea, edita o elimina una ficha.
+- Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Codex]
+## [2026-06-29] Reorganizacion estructural de docs, SQL y materiales fuente
 - Se movieron todos los scripts SQL versionados desde la raiz a `supabase/`, dejando el bloque de base de datos agrupado en una carpeta unica.
 - Se trasladaron `AI_GOLDEN_RULES.md` y `DATABASE_SCHEMA.md` a `docs/reference/` para separar documentacion operativa/esquematica del runtime de la app.
 - Se movieron `grimorio_final.json` y `Poderes.zip` a `docs/source-material/` como insumos fuente del grimorio, y se ajustaron `scripts/generate_grimoire_ts.py` y `scripts/parse_powers_v2.py` para usar la nueva ruta.
@@ -3816,4 +3822,5 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   **UI:** Se reemplazo la opcion deshabilitada de AnimeFLV por VerAnimeOnline (Espanol) en el selector de proveedores.
     *   **Logica Remota:** Se anadieron los metodos de busqueda y resolucion y se enrutaron al nuevo caso veranimeonline en el remoteProvider para consumir la API previamente actualizada.
 *   **Notas/Advertencias:** La API externa ya soporta la nueva ruta, asegurando que la integracion funcione.
+
 

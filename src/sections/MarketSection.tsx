@@ -264,6 +264,7 @@ const PurchaseModal = lazy(() =>
 
 export function MarketSection() {
   const { player } = usePlayerSession();
+  const isRoleplayLocked = Boolean(player?.roleplayAccess?.isLocked);
   const marketRevealRef = useRef<HTMLElement | null>(null);
   const nativeApp = isNativeApp();
   const [selectedCategoryId, setSelectedCategoryId] = useState<
@@ -276,26 +277,13 @@ export function MarketSection() {
   const [rarityFilter, setRarityFilter] = useState<Rarity | "all">("all");
   const [priceSort, setPriceSort] = useState<PriceSort>("featured");
   const { data: marketItemsResult } = useSWR(
-    "market-items",
+    isRoleplayLocked ? null : "market-items",
     fetchMarketItems,
     {
       revalidateOnFocus: false,
       dedupingInterval: 1000 * 60 * 5, // Cache for 5 minutes
     }
   );
-
-  if (player?.roleplayAccess?.isLocked) {
-    return (
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Mercado y taberna"
-          title="Acceso pausado"
-          description="Tus misiones, eventos y fichas siguen disponibles, pero la economia y los minijuegos se reactivan cuando vuelvas a rolear."
-        />
-        <RoleplayLockNotice />
-      </section>
-    );
-  }
   
   const marketItems = marketItemsResult?.items || MARKET_ITEMS;
   const [marketRotationNow, setMarketRotationNow] = useState(() => Date.now());
@@ -406,6 +394,19 @@ export function MarketSection() {
         return <TavernGame />;
     }
   }, [nativeApp, tavernMode]);
+
+  if (isRoleplayLocked) {
+    return (
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="Mercado y taberna"
+          title="Acceso pausado"
+          description="Tus misiones, eventos y fichas siguen disponibles, pero la economia y los minijuegos se reactivan cuando vuelvas a rolear."
+        />
+        <RoleplayLockNotice />
+      </section>
+    );
+  }
 
   const selectTavernMode = (mode: TavernMode) => {
     setTavernMode(mode);

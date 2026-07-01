@@ -326,18 +326,7 @@ function messageRoleLabel(message: ChatMessage, isAdmin: boolean) {
 
 export function ArchivistSection() {
   const { isAdmin, player } = usePlayerSession();
-  if (player?.roleplayAccess?.isLocked) {
-    return (
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Archivista"
-          title="Consulta recreativa pausada"
-          description="El archivista vivo se reactiva cuando vuelvas a rolear en el grupo principal del reino."
-        />
-        <RoleplayLockNotice />
-      </section>
-    );
-  }
+  const isRoleplayLocked = Boolean(player?.roleplayAccess?.isLocked);
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [liveState, setLiveState] = useState<ArchivistLiveState | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
@@ -392,8 +381,13 @@ export function ArchivistSection() {
   }
 
   useEffect(() => {
+    if (isRoleplayLocked) {
+      setIsRefreshing(false);
+      return;
+    }
+
     void loadArchivistBootstrap();
-  }, [isAdmin]);
+  }, [isAdmin, isRoleplayLocked]);
 
   useEffect(() => {
     const node = scrollRef.current;
@@ -421,6 +415,19 @@ export function ArchivistSection() {
       "Crea un jugador nuevo llamado Aventurero.",
     ];
   }, [isAdmin]);
+
+  if (isRoleplayLocked) {
+    return (
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="Archivista"
+          title="Consulta recreativa pausada"
+          description="El archivista vivo se reactiva cuando vuelvas a rolear en el grupo principal del reino."
+        />
+        <RoleplayLockNotice />
+      </section>
+    );
+  }
 
   async function handleAttachImage(file?: File) {
     if (!file) return;

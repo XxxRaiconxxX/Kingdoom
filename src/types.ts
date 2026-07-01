@@ -35,8 +35,6 @@ export type PlayerAccount = {
     graceUntil: string | null;
     lockedAt: string | null;
     lockReason: string | null;
-    lastRoleplayGroupJid: string | null;
-    lastHumanRoleplayPhone: string | null;
     isExempt: boolean;
     exemptReason: string | null;
     isLocked: boolean;

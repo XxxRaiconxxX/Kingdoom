@@ -3837,3 +3837,12 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - `src/components/PlayerProfilePanel.tsx` muestra una advertencia visible cuando el perfil esta bloqueado por no rolear en los ultimos 3 dias.
 - `src/sections/MarketSection.tsx` y `src/components/ArchivistSection.tsx` quedaron gateados: si el jugador esta bloqueado por roleo, la web mantiene perfil/misiones/eventos pero corta mercado, taberna y archivista con aviso explicito.
 - Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Codex]
+
+## [2026-07-01] Auditoria y hardening del acceso web por roleo
+- Se corrigio un bug de orden de hooks en `MarketSection` y `ArchivistSection`: el aviso de bloqueo ya no retorna antes de declarar todos los hooks, evitando errores de React al pasar de bloqueado a desbloqueado.
+- `MarketSection` deja de disparar la carga SWR de mercado cuando el jugador esta bloqueado por roleo, reduciendo lecturas innecesarias.
+- `supabase_roleplay_access.sql` ahora expone `player_roleplay_access_public` como vista segura para la web y elimina las politicas de lectura publica directa sobre `player_roleplay_access`, `roleplay_phone_activity` y `player_roleplay_access_log`.
+- `players.ts` consume la vista publica cuando existe y mantiene fallback temporal a la tabla legacy para evitar corte de servicio hasta aplicar el SQL actualizado.
+- Se removieron del tipo web los campos internos `lastRoleplayGroupJid` y `lastHumanRoleplayPhone`, que no eran necesarios para la UI.
+- Se reparo `ai-memory/kingdoom-memory.jsonl` para recuperar formato JSONL valido tras el rebase y corregir una entrada antigua no-JSON.
+- Validacion: `npx tsc --noEmit`, `npm run build` y parseo JSONL completados con exito. [Codex]

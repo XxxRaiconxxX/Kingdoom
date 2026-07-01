@@ -16,6 +16,8 @@ type PlayerRow = {
 let supportsAuthUserId: boolean | null = null;
 let supportsPlayerAuthLinks: boolean | null = null;
 let supportsRoleplayAccess: boolean | null = null;
+let roleplayAccessRelation: "player_roleplay_access_public" | "player_roleplay_access" =
+  "player_roleplay_access_public";
 const PLAYER_QUERY_TIMEOUT_MS = 8000;
 
 function isAbortLikeError(error: unknown) {
@@ -86,8 +88,6 @@ function mapRoleplayAccessRow(row: {
   grace_until?: string | null;
   locked_at?: string | null;
   lock_reason?: string | null;
-  last_roleplay_group_jid?: string | null;
-  last_human_roleplay_phone?: string | null;
   is_exempt?: boolean | null;
   exempt_reason?: string | null;
 } | null | undefined) {
@@ -96,12 +96,14 @@ function mapRoleplayAccessRow(row: {
     graceUntil: row?.grace_until ?? null,
     lockedAt: row?.locked_at ?? null,
     lockReason: row?.lock_reason ?? null,
-    lastRoleplayGroupJid: row?.last_roleplay_group_jid ?? null,
-    lastHumanRoleplayPhone: row?.last_human_roleplay_phone ?? null,
     isExempt: Boolean(row?.is_exempt),
     exemptReason: row?.exempt_reason ?? null,
     isLocked: Boolean(row?.locked_at) && !Boolean(row?.is_exempt),
   };
+}
+
+function isMissingRelationError(error: { code?: string | null } | null | undefined) {
+  return error?.code === "42P01";
 }
 
 async function detectRoleplayAccessSupport() {
@@ -109,17 +111,33 @@ async function detectRoleplayAccessSupport() {
     return supportsRoleplayAccess;
   }
 
-  const { error } = await runPlayerQueryWithTimeout(() =>
-    supabase.from("player_roleplay_access").select("player_id").limit(1)
+  const publicViewResult = await runPlayerQueryWithTimeout(() =>
+    supabase.from("player_roleplay_access_public").select("player_id").limit(1)
   );
 
-  if (!error) {
+  if (!publicViewResult.error) {
+    roleplayAccessRelation = "player_roleplay_access_public";
     supportsRoleplayAccess = true;
     return true;
   }
 
-  supportsRoleplayAccess = error.code !== "42P01";
-  return supportsRoleplayAccess;
+  if (!isMissingRelationError(publicViewResult.error)) {
+    supportsRoleplayAccess = false;
+    return false;
+  }
+
+  const legacyTableResult = await runPlayerQueryWithTimeout(() =>
+    supabase.from("player_roleplay_access").select("player_id").limit(1)
+  );
+
+  if (!legacyTableResult.error) {
+    roleplayAccessRelation = "player_roleplay_access";
+    supportsRoleplayAccess = true;
+    return true;
+  }
+
+  supportsRoleplayAccess = false;
+  return false;
 }
 
 async function attachRoleplayAccess(player: PlayerAccount | null): Promise<PlayerAccount | null> {
@@ -135,9 +153,9 @@ async function attachRoleplayAccess(player: PlayerAccount | null): Promise<Playe
 
     const { data, error } = await runPlayerQueryWithTimeout(() =>
       supabase
-        .from("player_roleplay_access")
+        .from(roleplayAccessRelation)
         .select(
-          "last_roleplay_at, grace_until, locked_at, lock_reason, last_roleplay_group_jid, last_human_roleplay_phone, is_exempt, exempt_reason"
+          "last_roleplay_at, grace_until, locked_at, lock_reason, is_exempt, exempt_reason"
         )
         .eq("player_id", player.id)
         .maybeSingle()
@@ -169,9 +187,9 @@ async function attachRoleplayAccessToMany(players: PlayerAccount[]): Promise<Pla
 
     const { data, error } = await runPlayerQueryWithTimeout(() =>
       supabase
-        .from("player_roleplay_access")
+        .from(roleplayAccessRelation)
         .select(
-          "player_id, last_roleplay_at, grace_until, locked_at, lock_reason, last_roleplay_group_jid, last_human_roleplay_phone, is_exempt, exempt_reason"
+          "player_id, last_roleplay_at, grace_until, locked_at, lock_reason, is_exempt, exempt_reason"
         )
         .in(
           "player_id",

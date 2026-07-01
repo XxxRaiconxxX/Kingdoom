@@ -66,12 +66,6 @@ alter table public.roleplay_phone_activity enable row level security;
 alter table public.player_roleplay_access_log enable row level security;
 
 drop policy if exists "Allow public roleplay access read" on public.player_roleplay_access;
-create policy "Allow public roleplay access read"
-on public.player_roleplay_access
-for select
-to public
-using (true);
-
 drop policy if exists "Allow roleplay access write" on public.player_roleplay_access;
 create policy "Allow roleplay access write"
 on public.player_roleplay_access
@@ -81,12 +75,6 @@ using ((select public.is_current_user_admin()))
 with check ((select public.is_current_user_admin()));
 
 drop policy if exists "Allow public roleplay phone read" on public.roleplay_phone_activity;
-create policy "Allow public roleplay phone read"
-on public.roleplay_phone_activity
-for select
-to public
-using (true);
-
 drop policy if exists "Allow roleplay phone write" on public.roleplay_phone_activity;
 create policy "Allow roleplay phone write"
 on public.roleplay_phone_activity
@@ -96,12 +84,6 @@ using ((select public.is_current_user_admin()))
 with check ((select public.is_current_user_admin()));
 
 drop policy if exists "Allow public roleplay access log read" on public.player_roleplay_access_log;
-create policy "Allow public roleplay access log read"
-on public.player_roleplay_access_log
-for select
-to public
-using (true);
-
 drop policy if exists "Allow roleplay access log write" on public.player_roleplay_access_log;
 create policy "Allow roleplay access log write"
 on public.player_roleplay_access_log
@@ -109,6 +91,21 @@ for all
 to authenticated
 using ((select public.is_current_user_admin()))
 with check ((select public.is_current_user_admin()));
+
+create or replace view public.player_roleplay_access_public as
+select
+  player_id,
+  last_roleplay_at,
+  grace_until,
+  locked_at,
+  lock_reason,
+  is_exempt,
+  exempt_reason,
+  created_at,
+  updated_at
+from public.player_roleplay_access;
+
+grant select on public.player_roleplay_access_public to anon, authenticated;
 
 create or replace function public.set_player_roleplay_access_updated_at()
 returns trigger

@@ -1,4 +1,11 @@
-﻿## [2026-06-29] Inicio: limpieza del hero y contador vivo de personajes
+## [2026-06-30] Creación de subagente KingdoomFB y materiales de marketing
+- Se configuró el nuevo subagente persistente `KingdoomFB` en `.agents/agents/KingdoomFB/agent.json`, especializado en marketing, posicionamiento estratégico y copywriting para redes sociales y WhatsApp.
+- Se recopilaron y analizaron 10 publicidades de grupos competidores de Facebook, elaborando un estudio de mercado profundo con matriz de ventajas competitivas.
+- Se redactaron copys optimizados y extendidos (limpios y muy espaciados) y prompts de imagen en formato horizontal y vertical basados en una estética anime/fantasía premium (estilo Ufotable).
+- Se redactó el borrador de la primera publicación oficial optimizada para el feed de Facebook.
+- Los entregables de marketing se organizaron en `docs/marketing/`. [Antigravity]
+
+## [2026-06-29] Inicio: limpieza del hero y contador vivo de personajes
 - Se elimino del hero principal de `Inicio` el apartado de **App de la comunidad** junto con los accesos rapidos **Conectar jugador**, **Ver fichas** y **Mercado y taberna**.
 - La metrica `Personajes` del bloque superior dejo de mostrar un texto estatico y ahora consume el total real de fichas en `character_sheets`.
 - El conteo excluye fichas recicladas disponibles cuando existe `recycleStatus`, para reflejar los personajes activos actuales del reino.

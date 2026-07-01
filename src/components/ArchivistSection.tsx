@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
+import { RoleplayLockNotice } from "./RoleplayLockNotice";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { askArchivistAi, type ArchivistMode } from "../utils/archivistAi";
 import { buildArchivistKnowledgeDocumentsFromContext } from "../utils/archivistSources";
@@ -325,6 +326,18 @@ function messageRoleLabel(message: ChatMessage, isAdmin: boolean) {
 
 export function ArchivistSection() {
   const { isAdmin, player } = usePlayerSession();
+  if (player?.roleplayAccess?.isLocked) {
+    return (
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="Archivista"
+          title="Consulta recreativa pausada"
+          description="El archivista vivo se reactiva cuando vuelvas a rolear en el grupo principal del reino."
+        />
+        <RoleplayLockNotice />
+      </section>
+    );
+  }
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [liveState, setLiveState] = useState<ArchivistLiveState | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>(() => [

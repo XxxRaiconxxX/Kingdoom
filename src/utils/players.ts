@@ -15,6 +15,7 @@ type PlayerRow = {
 
 let supportsAuthUserId: boolean | null = null;
 let supportsPlayerAuthLinks: boolean | null = null;
+let supportsRoleplayAccess: boolean | null = null;
 const PLAYER_QUERY_TIMEOUT_MS = 8000;
 
 function isAbortLikeError(error: unknown) {
@@ -78,6 +79,124 @@ function mapPlayerRow(row: PlayerRow): PlayerAccount {
     avatar_gif_url: row.avatar_gif_url ?? null,
     maxCharacterSheets: row.max_character_sheets ?? 2,
   };
+}
+
+function mapRoleplayAccessRow(row: {
+  last_roleplay_at?: string | null;
+  grace_until?: string | null;
+  locked_at?: string | null;
+  lock_reason?: string | null;
+  last_roleplay_group_jid?: string | null;
+  last_human_roleplay_phone?: string | null;
+  is_exempt?: boolean | null;
+  exempt_reason?: string | null;
+} | null | undefined) {
+  return {
+    lastRoleplayAt: row?.last_roleplay_at ?? null,
+    graceUntil: row?.grace_until ?? null,
+    lockedAt: row?.locked_at ?? null,
+    lockReason: row?.lock_reason ?? null,
+    lastRoleplayGroupJid: row?.last_roleplay_group_jid ?? null,
+    lastHumanRoleplayPhone: row?.last_human_roleplay_phone ?? null,
+    isExempt: Boolean(row?.is_exempt),
+    exemptReason: row?.exempt_reason ?? null,
+    isLocked: Boolean(row?.locked_at) && !Boolean(row?.is_exempt),
+  };
+}
+
+async function detectRoleplayAccessSupport() {
+  if (supportsRoleplayAccess !== null) {
+    return supportsRoleplayAccess;
+  }
+
+  const { error } = await runPlayerQueryWithTimeout(() =>
+    supabase.from("player_roleplay_access").select("player_id").limit(1)
+  );
+
+  if (!error) {
+    supportsRoleplayAccess = true;
+    return true;
+  }
+
+  supportsRoleplayAccess = error.code !== "42P01";
+  return supportsRoleplayAccess;
+}
+
+async function attachRoleplayAccess(player: PlayerAccount | null): Promise<PlayerAccount | null> {
+  if (!player) {
+    return null;
+  }
+
+  try {
+    const supportsRoleplay = await detectRoleplayAccessSupport();
+    if (!supportsRoleplay) {
+      return player;
+    }
+
+    const { data, error } = await runPlayerQueryWithTimeout(() =>
+      supabase
+        .from("player_roleplay_access")
+        .select(
+          "last_roleplay_at, grace_until, locked_at, lock_reason, last_roleplay_group_jid, last_human_roleplay_phone, is_exempt, exempt_reason"
+        )
+        .eq("player_id", player.id)
+        .maybeSingle()
+    );
+
+    if (error) {
+      return player;
+    }
+
+    return {
+      ...player,
+      roleplayAccess: mapRoleplayAccessRow(data),
+    };
+  } catch {
+    return player;
+  }
+}
+
+async function attachRoleplayAccessToMany(players: PlayerAccount[]): Promise<PlayerAccount[]> {
+  if (!players.length) {
+    return players;
+  }
+
+  try {
+    const supportsRoleplay = await detectRoleplayAccessSupport();
+    if (!supportsRoleplay) {
+      return players;
+    }
+
+    const { data, error } = await runPlayerQueryWithTimeout(() =>
+      supabase
+        .from("player_roleplay_access")
+        .select(
+          "player_id, last_roleplay_at, grace_until, locked_at, lock_reason, last_roleplay_group_jid, last_human_roleplay_phone, is_exempt, exempt_reason"
+        )
+        .in(
+          "player_id",
+          players.map((player) => player.id)
+        )
+    );
+
+    if (error) {
+      return players;
+    }
+
+    const roleplayMap = new Map(
+      ((data ?? []) as Array<Record<string, unknown>>).map((entry) => [
+        String(entry.player_id),
+        mapRoleplayAccessRow(entry as never),
+      ])
+    );
+
+    return players.map((player) => ({
+      ...player,
+      roleplayAccess: roleplayMap.get(player.id),
+    }));
+  } catch {
+    return players;
+  }
 }
 
 async function detectAuthUserIdSupport() {
@@ -147,7 +266,7 @@ export async function fetchPlayerByUsername(
       return null;
     }
 
-    return mapPlayerRow(data as PlayerRow);
+    return await attachRoleplayAccess(mapPlayerRow(data as PlayerRow));
   } catch (error) {
     throw new Error(getPlayersConnectionErrorMessage(error));
   }
@@ -180,7 +299,7 @@ export async function fetchPlayerByAuthUserId(
       const linkedPlayer = (data as { player?: PlayerRow | null } | null)?.player;
 
       if (!error && linkedPlayer) {
-        return mapPlayerRow(linkedPlayer);
+    return await attachRoleplayAccess(mapPlayerRow(linkedPlayer));
       }
     }
 
@@ -202,7 +321,7 @@ export async function fetchPlayerByAuthUserId(
       return null;
     }
 
-    return mapPlayerRow(data as PlayerRow);
+    return await attachRoleplayAccess(mapPlayerRow(data as PlayerRow));
   } catch (error) {
     throw new Error(getPlayersConnectionErrorMessage(error));
   }
@@ -314,7 +433,7 @@ export async function fetchAllPlayers(): Promise<PlayerAccount[]> {
     return [];
   }
 
-  return (data as PlayerRow[]).map(mapPlayerRow);
+  return await attachRoleplayAccessToMany((data as PlayerRow[]).map(mapPlayerRow));
 }
 
 export async function createPlayerAccount(input: {

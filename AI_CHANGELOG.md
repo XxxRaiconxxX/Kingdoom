@@ -3831,3 +3831,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Notas/Advertencias:** La API externa ya soporta la nueva ruta, asegurando que la integracion funcione.
 
 
+## [2026-07-01] Acceso web condicionado por roleo activo y nueva base SQL compartida
+- Se agrego `supabase/supabase_roleplay_access.sql` para introducir `player_roleplay_access`, `roleplay_phone_activity` y `player_roleplay_access_log` como nueva capa persistente del sistema de roleo.
+- `src/utils/players.ts` ahora detecta y lee `player_roleplay_access` junto al perfil del jugador, anexando al `PlayerAccount` el estado de bloqueo, gracia, ultima actividad de roleo y exenciones.
+- `src/components/PlayerProfilePanel.tsx` muestra una advertencia visible cuando el perfil esta bloqueado por no rolear en los ultimos 3 dias.
+- `src/sections/MarketSection.tsx` y `src/components/ArchivistSection.tsx` quedaron gateados: si el jugador esta bloqueado por roleo, la web mantiene perfil/misiones/eventos pero corta mercado, taberna y archivista con aviso explicito.
+- Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Codex]

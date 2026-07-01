@@ -20,7 +20,9 @@ import {
 } from "lucide-react";
 import { FilterPill } from "../components/FilterPill";
 import { MarketItemCard } from "../components/MarketItemCard";
+import { RoleplayLockNotice } from "../components/RoleplayLockNotice";
 import { SectionHeader } from "../components/SectionHeader";
+import { usePlayerSession } from "../context/PlayerSessionContext";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "../data/market";
 import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
 import { getMarketRotationState } from "../features/market/market.rotation";
@@ -261,6 +263,7 @@ const PurchaseModal = lazy(() =>
 );
 
 export function MarketSection() {
+  const { player } = usePlayerSession();
   const marketRevealRef = useRef<HTMLElement | null>(null);
   const nativeApp = isNativeApp();
   const [selectedCategoryId, setSelectedCategoryId] = useState<
@@ -280,6 +283,19 @@ export function MarketSection() {
       dedupingInterval: 1000 * 60 * 5, // Cache for 5 minutes
     }
   );
+
+  if (player?.roleplayAccess?.isLocked) {
+    return (
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="Mercado y taberna"
+          title="Acceso pausado"
+          description="Tus misiones, eventos y fichas siguen disponibles, pero la economia y los minijuegos se reactivan cuando vuelvas a rolear."
+        />
+        <RoleplayLockNotice />
+      </section>
+    );
+  }
   
   const marketItems = marketItemsResult?.items || MARKET_ITEMS;
   const [marketRotationNow, setMarketRotationNow] = useState(() => Date.now());

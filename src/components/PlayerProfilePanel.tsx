@@ -38,6 +38,7 @@ import type {
 } from "../types";
 import { PlayerNotificationBell } from "./PlayerNotificationBell";
 import { RankBadge } from "./RankBadge";
+import { RoleplayLockNotice } from "./RoleplayLockNotice";
 import {
   collectBusinessGold,
   fetchPlayerBusinessCollectionLog,
@@ -934,6 +935,9 @@ export function PlayerProfilePanel({
                           <p className="mt-3 text-xs text-cyan-100/90">{secureLinkFeedback}</p>
                         ) : null}
                       </div>
+                    ) : null}
+                    {player.roleplayAccess?.isLocked ? (
+                      <RoleplayLockNotice compact />
                     ) : null}
                   </div>
                 </div>

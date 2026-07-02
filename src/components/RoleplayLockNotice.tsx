@@ -1,5 +1,7 @@
 import { AlertTriangle, ScrollText } from "lucide-react";
 
+const ROLEPLAY_LOCK_WINDOW_DAYS = 9;
+
 type RoleplayLockNoticeProps = {
   title?: string;
   compact?: boolean;
@@ -21,7 +23,7 @@ export function RoleplayLockNotice({
           </p>
           <h3 className="mt-1 text-lg font-black text-rose-50">{title}</h3>
           <p className="mt-2 text-sm leading-6 text-rose-100/90">
-            No roleaste en los ultimos 3 dias. Para recuperar acceso a minijuegos,
+            No roleaste en los ultimos {ROLEPLAY_LOCK_WINDOW_DAYS} dias. Para recuperar acceso a minijuegos,
             economia y consultas recreativas, vuelve a rolear en el grupo principal
             del reino.
           </p>

@@ -3834,7 +3834,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 ## [2026-07-01] Acceso web condicionado por roleo activo y nueva base SQL compartida
 - Se agrego `supabase/supabase_roleplay_access.sql` para introducir `player_roleplay_access`, `roleplay_phone_activity` y `player_roleplay_access_log` como nueva capa persistente del sistema de roleo.
 - `src/utils/players.ts` ahora detecta y lee `player_roleplay_access` junto al perfil del jugador, anexando al `PlayerAccount` el estado de bloqueo, gracia, ultima actividad de roleo y exenciones.
-- `src/components/PlayerProfilePanel.tsx` muestra una advertencia visible cuando el perfil esta bloqueado por no rolear en los ultimos 3 dias.
+- `src/components/PlayerProfilePanel.tsx` muestra una advertencia visible cuando el perfil esta bloqueado por no rolear en los ultimos 9 dias.
 - `src/sections/MarketSection.tsx` y `src/components/ArchivistSection.tsx` quedaron gateados: si el jugador esta bloqueado por roleo, la web mantiene perfil/misiones/eventos pero corta mercado, taberna y archivista con aviso explicito.
 - Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Codex]
 
@@ -3846,3 +3846,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - Se removieron del tipo web los campos internos `lastRoleplayGroupJid` y `lastHumanRoleplayPhone`, que no eran necesarios para la UI.
 - Se reparo `ai-memory/kingdoom-memory.jsonl` para recuperar formato JSONL valido tras el rebase y corregir una entrada antigua no-JSON.
 - Validacion: `npx tsc --noEmit`, `npm run build` y parseo JSONL completados con exito. [Codex]
+
+## [2026-07-02] Cambio de ventana de roleo: 9 dias
+- La politica de acceso por roleo pasa de 3 a 9 dias para el bloqueo automatico y la gracia inicial.
+- `supabase/supabase_roleplay_access.sql` ahora siembra `grace_until` a 9 dias y extiende a 9 dias los perfiles no exentos, aun desbloqueados y sin roleo registrado cuando se reejecuta el SQL.
+- `src/components/RoleplayLockNotice.tsx` actualiza el mensaje visible del frontend para reflejar la nueva ventana de 9 dias.
+- Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Codex]

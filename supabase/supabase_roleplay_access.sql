@@ -149,7 +149,7 @@ insert into public.player_roleplay_access (
 )
 select
   p.id,
-  timezone('utc', now()) + interval '3 days',
+  timezone('utc', now()) + interval '9 days',
   coalesce(p.is_admin, false),
   case when coalesce(p.is_admin, false) then 'player_is_admin' else null end
 from public.players p
@@ -158,3 +158,13 @@ where not exists (
   from public.player_roleplay_access access
   where access.player_id = p.id
 );
+
+update public.player_roleplay_access
+set grace_until = timezone('utc', now()) + interval '9 days'
+where coalesce(is_exempt, false) = false
+  and locked_at is null
+  and last_roleplay_at is null
+  and (
+    grace_until is null
+    or grace_until < timezone('utc', now()) + interval '9 days'
+  );

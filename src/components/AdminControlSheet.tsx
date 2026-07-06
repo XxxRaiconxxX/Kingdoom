@@ -255,6 +255,40 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
   const [personalMarketSpawnChance, setPersonalMarketSpawnChance] = useState(100);
   const [personalMarketSearch, setPersonalMarketSearch] = useState("");
   const [showAllPersonalMarketItemsList, setShowAllPersonalMarketItemsList] = useState(false);
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false);
+
+  useEffect(() => {
+    // Bloquear el scroll de la página de fondo en móvil y escritorio al abrir
+    const originalOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+    };
+  }, []);
+
+  const adminTabsConfig = useMemo(() => [
+    { id: "players" as AdminTab, label: "Jugadores", icon: <Users className="h-4 w-4" /> },
+    { id: "missions" as AdminTab, label: "Misiones", icon: <Flag className="h-4 w-4" /> },
+    { id: "events" as AdminTab, label: "Eventos", icon: <Calendar className="h-4 w-4" /> },
+    { id: "market" as AdminTab, label: "Mercado", icon: <Store className="h-4 w-4" /> },
+    { id: "personalMarket" as AdminTab, label: "Mercado Personal", icon: <Tag className="h-4 w-4" /> },
+    { id: "businesses" as AdminTab, label: "Negocios", icon: <Building2 className="h-4 w-4" /> },
+    { id: "auctions" as AdminTab, label: "Subastas", icon: <Gavel className="h-4 w-4" /> },
+    { id: "staff" as AdminTab, label: "Staff IA", icon: <Bot className="h-4 w-4" /> },
+    { id: "magic" as AdminTab, label: "Magias", icon: <Sparkles className="h-4 w-4" /> },
+    { id: "bestiary" as AdminTab, label: "Bestiario", icon: <Bug className="h-4 w-4" /> },
+    { id: "flora" as AdminTab, label: "Flora", icon: <Leaf className="h-4 w-4" /> },
+    { id: "knowledge" as AdminTab, label: "Archivo IA", icon: <BookOpen className="h-4 w-4" /> },
+  ], []);
+
+  const activeTabConfig = useMemo(() => {
+    return adminTabsConfig.find((tab) => tab.id === activeTab) ?? adminTabsConfig[0];
+  }, [activeTab, adminTabsConfig]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1200,26 +1234,67 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
           data-gsap-admin
           className="border-b border-amber-500/10 px-4 py-3 sm:px-5 sm:py-4 md:px-6"
         >
-          <div className="kd-admin-tabs">
+          {/* Vista móvil colapsada */}
+          {!isMenuExpanded ? (
+            <button
+              type="button"
+              onClick={() => setIsMenuExpanded(true)}
+              className="flex w-full items-center justify-between rounded-2xl border border-stone-850 bg-stone-900/60 px-4 py-3 text-stone-100 transition hover:bg-stone-900 sm:hidden"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-amber-500">{activeTabConfig.icon}</span>
+                <span className="text-sm font-extrabold tracking-wide uppercase">{activeTabConfig.label}</span>
+              </div>
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                Menú ▾
+              </span>
+            </button>
+          ) : (
+            // Cabecera en móvil cuando el menú está expandido
+            <div className="flex flex-col gap-2 sm:hidden mb-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs uppercase tracking-wider text-stone-500 font-extrabold">Seleccionar sección</span>
+                <button
+                  type="button"
+                  onClick={() => setIsMenuExpanded(false)}
+                  className="text-xs font-extrabold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-xl transition hover:bg-amber-500/15"
+                >
+                  Contraer ▴
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Contenedor de pestañas */}
+          <div className={`${isMenuExpanded ? "grid sm:flex" : "hidden sm:flex"} kd-admin-tabs`}>
             {/* ── Gestión ── */}
             <div className="kd-admin-tab-group">
               <AdminTabButton
                 icon={<Users />}
                 label="Jugadores"
                 active={activeTab === "players"}
-                onClick={() => setActiveTab("players")}
+                onClick={() => {
+                  setActiveTab("players");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<Flag />}
                 label="Misiones"
                 active={activeTab === "missions"}
-                onClick={() => setActiveTab("missions")}
+                onClick={() => {
+                  setActiveTab("missions");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<Calendar />}
                 label="Eventos"
                 active={activeTab === "events"}
-                onClick={() => setActiveTab("events")}
+                onClick={() => {
+                  setActiveTab("events");
+                  setIsMenuExpanded(false);
+                }}
               />
             </div>
 
@@ -1231,25 +1306,37 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 icon={<Store />}
                 label="Mercado"
                 active={activeTab === "market"}
-                onClick={() => setActiveTab("market")}
+                onClick={() => {
+                  setActiveTab("market");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<Tag />}
                 label="Mercado Personal"
                 active={activeTab === "personalMarket"}
-                onClick={() => setActiveTab("personalMarket")}
+                onClick={() => {
+                  setActiveTab("personalMarket");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<Building2 />}
                 label="Negocios"
                 active={activeTab === "businesses"}
-                onClick={() => setActiveTab("businesses")}
+                onClick={() => {
+                  setActiveTab("businesses");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<Gavel />}
                 label="Subastas"
                 active={activeTab === "auctions"}
-                onClick={() => setActiveTab("auctions")}
+                onClick={() => {
+                  setActiveTab("auctions");
+                  setIsMenuExpanded(false);
+                }}
               />
             </div>
 
@@ -1261,31 +1348,46 @@ export function AdminControlSheet({ onClose }: { onClose: () => void }) {
                 icon={<Bot />}
                 label="Staff IA"
                 active={activeTab === "staff"}
-                onClick={() => setActiveTab("staff")}
+                onClick={() => {
+                  setActiveTab("staff");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<Sparkles />}
                 label="Magias"
                 active={activeTab === "magic"}
-                onClick={() => setActiveTab("magic")}
+                onClick={() => {
+                  setActiveTab("magic");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<Bug />}
                 label="Bestiario"
                 active={activeTab === "bestiary"}
-                onClick={() => setActiveTab("bestiary")}
+                onClick={() => {
+                  setActiveTab("bestiary");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<Leaf />}
                 label="Flora"
                 active={activeTab === "flora"}
-                onClick={() => setActiveTab("flora")}
+                onClick={() => {
+                  setActiveTab("flora");
+                  setIsMenuExpanded(false);
+                }}
               />
               <AdminTabButton
                 icon={<BookOpen />}
                 label="Archivo IA"
                 active={activeTab === "knowledge"}
-                onClick={() => setActiveTab("knowledge")}
+                onClick={() => {
+                  setActiveTab("knowledge");
+                  setIsMenuExpanded(false);
+                }}
               />
             </div>
           </div>

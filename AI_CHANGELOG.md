@@ -3852,3 +3852,10 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - `supabase/supabase_roleplay_access.sql` ahora siembra `grace_until` a 9 dias y extiende a 9 dias los perfiles no exentos, aun desbloqueados y sin roleo registrado cuando se reejecuta el SQL.
 - `src/components/RoleplayLockNotice.tsx` actualiza el mensaje visible del frontend para reflejar la nueva ventana de 9 dias.
 - Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Codex]
+
+## [2026-07-05] Menu colapsable para admin y control de scroll en movil
+- Se agrego un estado `isMenuExpanded` en `src/components/AdminControlSheet.tsx` para permitir que el menu de secciones administrativas se contraiga y expanda en dispositivos moviles.
+- En resoluciones móviles (< 640px), si el menu esta contraido, se muestra una barra compacta premium con el icono y label de la pestaña activa, liberando espacio para el contenido.
+- Al hacer clic en un boton del menu desplegado, el panel cambia de pestana y se contrae de forma automatica.
+- Se implemento un `useEffect` para aplicar `overflow: hidden` en `body` y `documentElement` cuando el panel administrador esta montado, previniendo el scroll de fondo y evitando la duplicidad de barras de scroll naranjas.
+- Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Antigravity]

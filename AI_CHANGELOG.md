@@ -3859,4 +3859,5 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - Al hacer clic en un boton del menu desplegado, el panel cambia de pestana y se contrae de forma automatica.
 - Se implemento un `useEffect` para aplicar `overflow: hidden` en `body` y `documentElement` cuando el panel administrador esta montado, previniendo el scroll de fondo y evitando la duplicidad de barras de scroll naranjas.
 - Se corrigio la especificidad CSS de `.kd-admin-tabs` en `src/index.css` usando el selector `:not(.hidden)` en movil, asegurando que las clases de visualizacion condicionales (`hidden`) oculten la grilla de pestañas de forma efectiva en el colapso.
+- Se reforzo el ocultamiento del menu colapsado en `src/index.css` agregando la regla `.kd-admin-tabs.hidden { display: none !important; }` para evitar que la definicion de visualizacion flex de la clase base gane por especificidad o cascada.
 - Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Antigravity]

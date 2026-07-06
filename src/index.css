@@ -401,6 +401,10 @@
   scrollbar-width: none;
 }
 
+.kd-admin-tabs.hidden {
+  display: none !important;
+}
+
 .kd-admin-tabs::-webkit-scrollbar {
   display: none;
 }

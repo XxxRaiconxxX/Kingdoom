@@ -8,7 +8,7 @@ import {
   fetchAuctionBids,
   resolveMarketAuction,
 } from "../../utils/auctions";
-import { fetchMarketItems } from "../../utils/market";
+import { fetchMarketItems } from "../../features/market";
 import {
   ADMIN_LIST_PREVIEW_COUNT,
   AdminInfoCard,

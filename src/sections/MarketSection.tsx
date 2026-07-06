@@ -26,7 +26,7 @@ import { usePlayerSession } from "../context/PlayerSessionContext";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "../data/market";
 import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
 import { getMarketRotationState } from "../features/market/market.rotation";
-import { fetchMarketItems } from "../utils/market";
+import { fetchMarketItems } from "../features/market";
 import { isNativeApp } from "../utils/platform";
 import useSWR from "swr";
 import type { LucideIcon } from "lucide-react";

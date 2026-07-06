@@ -23,7 +23,7 @@ import type {
 import { fetchRealmEvents } from "./events";
 import { fetchGrimoireContent } from "./grimoireContent";
 import { fetchKnowledgeDocuments, slugifyKnowledgeId } from "./knowledge";
-import { fetchMarketItems } from "./market";
+import { fetchMarketItems } from "../features/market";
 import { fetchPublicRealmMissions } from "./missions";
 
 function cleanText(value: string) {

@@ -10,7 +10,7 @@ import {
   upsertMagicStyle,
 } from "../../utils/grimoireContent";
 import { deleteKnowledgeDocument, slugifyKnowledgeId, upsertKnowledgeDocument } from "../../utils/knowledge";
-import { deleteMarketItem, slugifyMarketItem, upsertMarketItem } from "../../utils/market";
+import { deleteMarketItem, slugifyMarketItem, upsertMarketItem } from "../market";
 import { deleteRealmMission, upsertRealmMission } from "../../utils/missions";
 import { createPlayerAccount, updatePlayerGold } from "../../utils/players";
 import type { ArchivistActionDraft, ArchivistLiveContext } from "./archivist.types";

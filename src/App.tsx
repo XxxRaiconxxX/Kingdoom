@@ -24,7 +24,7 @@ import {
   KINGDOM_STATUS,
 } from "./data/home";
 import { useGsapStaggerReveal } from "./hooks/useGsapStaggerReveal";
-import { supabase } from "./lib/supabase";
+import { supabase } from "./utils/supabaseClient";
 import type {
   HomeStat,
   NavItem,

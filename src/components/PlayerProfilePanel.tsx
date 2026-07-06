@@ -46,7 +46,7 @@ import {
   fetchPlayerBusinessProposals,
   projectBusinessStorage,
   respondBusinessProposal,
-} from "../utils/businesses";
+} from "../features/businesses";
 import {
   MAX_PLAYER_CHARACTER_SHEETS,
   getPlayerSheets,

@@ -1,5 +1,5 @@
 import type { CharacterSheet } from "../types";
-import { supabase } from "../lib/supabase";
+import { supabase } from "./supabaseClient";
 import { deleteCharacterPortraitByUrl } from "./characterPortraits";
 
 const STORAGE_KEY = "kingdoom_character_sheets";

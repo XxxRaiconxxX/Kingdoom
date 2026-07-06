@@ -18,7 +18,7 @@ import {
   APP_LIVE_HUNT_TEMPLATES,
 } from "../data/appLiveHunts";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../utils/supabaseClient";
 import type {
   AppLiveHuntActionType,
   AppLiveHuntMember,

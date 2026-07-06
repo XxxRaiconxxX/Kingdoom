@@ -7,7 +7,7 @@ import type {
   RealmMission,
 } from "../../types";
 import { fetchRealmEvents } from "../../utils/events";
-import { fetchMarketItems } from "../../utils/market";
+import { fetchMarketItems } from "../market";
 import { fetchAllPlayers } from "../../utils/players";
 import { fetchGrimoireContent } from "../../utils/grimoireContent";
 import { fetchKnowledgeDocuments } from "../../utils/knowledge";

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ArchiveRestore, Loader2, ScrollText, Search, User, Users, X } from "lucide-react";
 import { CharacterSheet } from "../types";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../utils/supabaseClient";
 import { CharSheetModal } from "./CharSheetModal";
 import {
   getCharacterSheetById,

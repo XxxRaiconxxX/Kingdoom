@@ -49,13 +49,13 @@ import {
   upsertBusinessProposal,
   deleteBusiness,
   deleteBusinessProposal,
-} from "../utils/businesses";
+} from "../features/businesses";
 import {
   deleteMarketItem,
   fetchMarketItems,
   slugifyMarketItem,
   upsertMarketItem,
-} from "../utils/market";
+} from "../features/market";
 
 import type {
   EventRewardNotification,

@@ -3861,3 +3861,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - Se corrigio la especificidad CSS de `.kd-admin-tabs` en `src/index.css` usando el selector `:not(.hidden)` en movil, asegurando que las clases de visualizacion condicionales (`hidden`) oculten la grilla de pestañas de forma efectiva en el colapso.
 - Se reforzo el ocultamiento del menu colapsado en `src/index.css` agregando la regla `.kd-admin-tabs.hidden { display: none !important; }` para evitar que la definicion de visualizacion flex de la clase base gane por especificidad o cascada.
 - Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Antigravity]
+
+## [2026-07-05] Auditoria de sobreingenieria y remocion de redundancias (YAGNI)
+- Se eliminaron los archivos `src/lib/supabase.ts`, `src/utils/businesses.ts` y `src/utils/market.ts` que solo actuaban como wrappers redundantes de re-exportacion.
+- Se actualizo el direccionamiento de imports de Supabase, businesses y market en los componentes `App.tsx`, `AdminControlSheet.tsx`, `PlayerProfilePanel.tsx`, `AppLiveHuntSection.tsx`, `RealmRegistry.tsx`, `MarketSection.tsx` y las features/utilidades correspondientes para conectar directamente con sus fuentes originales (`utils/supabaseClient`, `features/businesses`, `features/market`).
+- Se removio el archivo temporal vacio `src/utils/test`.
+- Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Antigravity]

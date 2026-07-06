@@ -8,6 +8,14 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-06] Auditoria de minijuegos web y cobros recuperables
+- Se auditaron los minijuegos web de la Taberna en funcionamiento, IU y decoracion, con foco en liquidacion de oro, estados bloqueados y mensajes visibles al jugador.
+- `TavernRoulette.tsx`, `TavernHorseRace.tsx`, `TavernCrash.tsx`, `TavernExpedition.tsx`, `TavernExpeditionArcade.tsx` y `TavernTowerDefense.tsx` ahora convierten fallos de acreditacion en cobros pendientes recuperables, con aviso visible y boton de reintento.
+- Las nuevas rondas, contratos, carreras u oleadas quedan bloqueadas mientras exista un cobro pendiente para evitar estados confusos o perdidas silenciosas.
+- En `TavernHorseRace.tsx`, el tope diario de ganancia offline se aplica solo despues de acreditar correctamente el premio o de cobrar el pendiente.
+- Se verifico que `TavernSlots.tsx`, `TavernPenalty.tsx` y `TavernPlinko.tsx` ya usan liquidacion neta en una sola operacion de oro; no requerian ajuste funcional.
+- Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Codex]
+
 ### [2026-07-06] Reestructuracion del changelog activo
 - `AI_CHANGELOG.md` ahora conserva solo la ventana operativa reciente del 2026-05-06 al 2026-07-06.
 - Se retiro del changelog activo el historico anterior a esa ventana para mantener el relevo rapido y accionable.

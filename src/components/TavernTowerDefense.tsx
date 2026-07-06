@@ -574,6 +574,9 @@ export function TavernTowerDefense() {
   const [hud, setHud] = useState<Hud>(DEFAULT_HUD);
   const [notice, setNotice] = useState("");
   const [victoryToken, setVictoryToken] = useState(0);
+  const [pendingReward, setPendingReward] = useState(0);
+  const [isRewardUpdating, setIsRewardUpdating] = useState(false);
+  const hasPendingReward = pendingReward > 0;
 
   const difficulty = useMemo(
     () => DIFFICULTIES.find((item) => item.id === difficultyId) ?? DIFFICULTIES[0],
@@ -609,7 +612,7 @@ export function TavernTowerDefense() {
   const startWave = useCallback(() => {
     const runtime = runtimeRef.current;
 
-    if (!runtime || (runtime.phase !== "ready" && runtime.phase !== "between")) {
+    if (!runtime || hasPendingReward || (runtime.phase !== "ready" && runtime.phase !== "between")) {
       return;
     }
 
@@ -619,7 +622,7 @@ export function TavernTowerDefense() {
     runtime.spawnTimer = 0;
     runtime.message = `Oleada ${runtime.wave}/${MAX_WAVE} en marcha.`;
     setHud(snapshot(runtime));
-  }, []);
+  }, [hasPendingReward]);
 
   const placeTower = useCallback((canvasX: number, canvasY: number) => {
     const runtime = runtimeRef.current;
@@ -1053,16 +1056,41 @@ export function TavernTowerDefense() {
       const updated = await addPlayerGold(difficulty.reward);
 
       if (!updated) {
-        setNotice("No se pudo acreditar el oro. Refresca tu perfil e intenta otra victoria.");
+        setPendingReward(difficulty.reward);
+        setNotice(
+          `Victoria lograda, pero el cobro de ${difficulty.reward.toLocaleString("es-PY")} oro quedo pendiente. Reintenta antes de otra oleada.`
+        );
         return;
       }
 
       window.localStorage.setItem(key, "claimed");
+      setPendingReward(0);
       setNotice(`Recompensa cobrada: +${difficulty.reward.toLocaleString("es-PY")} oro.`);
     }
 
     void awardVictoryGold();
   }, [addPlayerGold, difficulty, player, victoryToken]);
+
+  async function retryPendingReward() {
+    if (!player || !pendingReward || isRewardUpdating) {
+      return;
+    }
+
+    setIsRewardUpdating(true);
+    const updated = await addPlayerGold(pendingReward);
+    setIsRewardUpdating(false);
+
+    if (!updated) {
+      setNotice(
+        `No se pudo acreditar el cobro pendiente de ${pendingReward.toLocaleString("es-PY")} oro. Refresca e intenta otra vez.`
+      );
+      return;
+    }
+
+    window.localStorage.setItem(rewardKey(player.id, difficulty.id), "claimed");
+    setNotice(`Recompensa pendiente cobrada: +${pendingReward.toLocaleString("es-PY")} oro.`);
+    setPendingReward(0);
+  }
 
   return (
     <div className="overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-[#03170c] shadow-2xl shadow-emerald-950/30">
@@ -1138,11 +1166,12 @@ export function TavernTowerDefense() {
                       key={item.id}
                       type="button"
                       onClick={() => setDifficultyId(item.id)}
+                      disabled={hasPendingReward}
                       className={`kd-touch rounded-2xl border px-3 py-3 text-left transition ${
                         difficultyId === item.id
                           ? "border-amber-300/50 bg-amber-500/15 text-amber-50"
                           : "border-stone-800 bg-stone-950/55 text-stone-300"
-                      }`}
+                      } disabled:cursor-not-allowed disabled:opacity-50`}
                     >
                       <span className="flex items-center justify-between gap-2 text-sm font-black">
                         {item.label}
@@ -1163,11 +1192,12 @@ export function TavernTowerDefense() {
                       key={item.id}
                       type="button"
                       onClick={() => setMapId(item.id)}
+                      disabled={hasPendingReward}
                       className={`kd-touch w-full rounded-2xl border px-3 py-3 text-left transition ${
                         mapId === item.id
                           ? "border-emerald-300/45 bg-emerald-500/12 text-emerald-50"
                           : "border-stone-800 bg-stone-950/55 text-stone-300"
-                      }`}
+                      } disabled:cursor-not-allowed disabled:opacity-50`}
                     >
                       <span className="block text-sm font-black">{item.label}</span>
                       <span className="mt-1 block text-xs text-stone-500">
@@ -1194,7 +1224,7 @@ export function TavernTowerDefense() {
               <button
                 type="button"
                 onClick={startWave}
-                disabled={hud.phase !== "ready" && hud.phase !== "between"}
+                disabled={hasPendingReward || (hud.phase !== "ready" && hud.phase !== "between")}
                 className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-3 py-3 text-sm font-black text-black transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-stone-800 disabled:text-stone-500"
               >
                 <Play className="h-4 w-4" />
@@ -1203,7 +1233,8 @@ export function TavernTowerDefense() {
               <button
                 type="button"
                 onClick={resetGame}
-                className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-700 bg-stone-950/70 px-3 py-3 text-sm font-black text-stone-200 transition active:scale-[0.98]"
+                disabled={hasPendingReward}
+                className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-stone-700 bg-stone-950/70 px-3 py-3 text-sm font-black text-stone-200 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RotateCcw className="h-4 w-4" />
                 Reiniciar
@@ -1229,6 +1260,17 @@ export function TavernTowerDefense() {
               <div className="mt-3 rounded-2xl border border-amber-400/25 bg-amber-500/10 p-3 text-sm font-bold leading-6 text-amber-100">
                 <Coins className="mr-2 inline h-4 w-4" />
                 {notice}
+                {hasPendingReward ? (
+                  <button
+                    type="button"
+                    onClick={() => void retryPendingReward()}
+                    disabled={isRewardUpdating}
+                    className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Coins className="h-4 w-4" />
+                    Reintentar cobro
+                  </button>
+                ) : null}
               </div>
             ) : null}
           </Panel>

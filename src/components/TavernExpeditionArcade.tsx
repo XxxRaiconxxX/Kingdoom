@@ -402,6 +402,9 @@ export function TavernExpeditionArcade() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showUpgrades, setShowUpgrades] = useState(false);
   const [showContracts, setShowContracts] = useState(false);
+  const [pendingPayout, setPendingPayout] = useState(0);
+  const [settlementMessage, setSettlementMessage] = useState("");
+  const hasPendingPayout = pendingPayout > 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -509,7 +512,7 @@ export function TavernExpeditionArcade() {
   }, [safeProgress.level, selectedEncounter]);
 
   function handleSelectActiveSheet(sheetId: string) {
-    if (!player || battle?.result === "active") {
+    if (!player || battle?.result === "active" || hasPendingPayout) {
       return;
     }
 
@@ -520,7 +523,7 @@ export function TavernExpeditionArcade() {
   }
 
   async function startRun() {
-    if (!player || !selectedEncounter || isUpdating || !progress || !activeSheetId || !activeSheet) {
+    if (!player || !selectedEncounter || isUpdating || hasPendingPayout || !progress || !activeSheetId || !activeSheet) {
       return;
     }
 
@@ -539,6 +542,8 @@ export function TavernExpeditionArcade() {
     if (!updatedPlayer) {
       return;
     }
+
+    setSettlementMessage("");
 
     const nextProgress = consumeEncounterAttempt(
       progress,
@@ -811,7 +816,7 @@ export function TavernExpeditionArcade() {
 
     if (result === "victory" && reward > 0) {
       setIsUpdating(true);
-      await addPlayerGold(reward);
+      const updatedPlayer = await addPlayerGold(reward);
 
       const expResult = grantPveExperience(progress, expReward);
       let nextProgress = expResult.progress;
@@ -823,12 +828,45 @@ export function TavernExpeditionArcade() {
       savePveProgress(nextProgress);
       setProgress(nextProgress);
 
+      if (!updatedPlayer) {
+        setPendingPayout(reward);
+        setSettlementMessage(
+          `Oro pendiente: ${reward.toLocaleString("es-PY")}. La experiencia ya fue registrada; reintenta el cobro antes de otro combate.`
+        );
+      } else {
+        setSettlementMessage("");
+      }
+
       setIsUpdating(false);
     }
   }
 
   function resetBattle() {
+    if (hasPendingPayout) {
+      return;
+    }
+
     setBattle(null);
+  }
+
+  async function handleRetryPendingPayout() {
+    if (!pendingPayout || isUpdating) {
+      return;
+    }
+
+    setIsUpdating(true);
+    const updatedPlayer = await addPlayerGold(pendingPayout);
+    setIsUpdating(false);
+
+    if (!updatedPlayer) {
+      setSettlementMessage(
+        `No se pudo acreditar el oro pendiente de ${pendingPayout.toLocaleString("es-PY")}. Refresca e intenta otra vez.`
+      );
+      return;
+    }
+
+    setSettlementMessage(`Oro pendiente acreditado: ${pendingPayout.toLocaleString("es-PY")}.`);
+    setPendingPayout(0);
   }
 
   async function upgradeStat(stat: PveStatKey) {
@@ -932,7 +970,7 @@ export function TavernExpeditionArcade() {
                 <button
                   key={sheet.id}
                   type="button"
-                  disabled={battle?.result === "active"}
+                  disabled={battle?.result === "active" || hasPendingPayout}
                   onClick={() => handleSelectActiveSheet(sheet.id)}
                   className={`rounded-[1.2rem] border px-3 py-3 text-left transition ${
                     active
@@ -1044,7 +1082,7 @@ export function TavernExpeditionArcade() {
                       value={effectiveStats[upgrade.stat]}
                       hint={`PvE ${safeProgress.stats[upgrade.stat]} | Ficha +${sheetValue}`}
                       detail={upgrade.detail(effectiveStats[upgrade.stat])}
-                      disabled={safeProgress.availablePoints <= 0 || battle?.result === "active" || isUpdating}
+                      disabled={safeProgress.availablePoints <= 0 || battle?.result === "active" || isUpdating || hasPendingPayout}
                       onUpgrade={() => void upgradeStat(upgrade.stat)}
                     />
                   );
@@ -1094,7 +1132,7 @@ export function TavernExpeditionArcade() {
                         ? "border-amber-400/30 bg-amber-500/10 shadow-[0_0_16px_rgba(245,158,11,0.08)]"
                         : "border-stone-800 bg-stone-950/50"
                     } ${locked ? "opacity-60" : ""}`}
-                    disabled={locked}
+                    disabled={locked || hasPendingPayout}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -1160,6 +1198,7 @@ export function TavernExpeditionArcade() {
                 disabled={
                   selectedEncounterLocked ||
                   isUpdating ||
+                  hasPendingPayout ||
                   player.gold < selectedEncounter.entryFee ||
                   battle?.result === "active" ||
                   getEncounterUsageCount(
@@ -1172,6 +1211,8 @@ export function TavernExpeditionArcade() {
               >
                 {selectedEncounterLocked
                   ? `Bloqueado hasta nivel ${selectedEncounter.minLevel}`
+                  : hasPendingPayout
+                    ? "Oro pendiente"
                   : player.gold < selectedEncounter.entryFee
                   ? "Oro insuficiente"
                   : battle?.result === "active"
@@ -1268,10 +1309,31 @@ export function TavernExpeditionArcade() {
                           ) : null}
                         </div>
                       ) : null}
+                      {settlementMessage ? (
+                        <div className={`mt-3 rounded-2xl border p-3 text-sm font-bold ${
+                          hasPendingPayout
+                            ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
+                            : "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
+                        }`}>
+                          <p>{settlementMessage}</p>
+                          {hasPendingPayout ? (
+                            <button
+                              type="button"
+                              onClick={() => void handleRetryPendingPayout()}
+                              disabled={isUpdating}
+                              className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Coins className="h-4 w-4" />
+                              Reintentar cobro
+                            </button>
+                          ) : null}
+                        </div>
+                      ) : null}
                       <button
                         type="button"
                         onClick={resetBattle}
-                        className="mt-3 w-full rounded-2xl bg-stone-100 px-4 py-3 text-sm font-black text-stone-950"
+                        disabled={hasPendingPayout}
+                        className="mt-3 w-full rounded-2xl bg-stone-100 px-4 py-3 text-sm font-black text-stone-950 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Reiniciar combate
                       </button>

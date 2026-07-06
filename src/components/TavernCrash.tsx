@@ -29,7 +29,10 @@ export function TavernCrash() {
   const [updating, setUpdating] = useState(false);
   const [lastWin, setLastWin] = useState(0);
   const [autoCashOutStr, setAutoCashOutStr] = useState<string>("");
+  const [pendingPayout, setPendingPayout] = useState(0);
+  const [settlementMessage, setSettlementMessage] = useState("");
   const autoCashOut = parseFloat(autoCashOutStr) || 0;
+  const hasPendingPayout = pendingPayout > 0;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>();
@@ -194,11 +197,18 @@ export function TavernCrash() {
     const success = await addPlayerGoldRef.current(winAmount);
     
     if (success) {
-      setLastWin(winAmount);
-      setStatus("cashed_out");
-      statusRef.current = "cashed_out";
-      // The updateMultiplier loop continues because statusRef.current is not "crashed"
+      setSettlementMessage("");
+    } else {
+      setPendingPayout(winAmount);
+      setSettlementMessage(
+        `Cobro pendiente: ${winAmount.toLocaleString("es-PY")} oro. Reintenta antes de iniciar otra ronda.`
+      );
     }
+
+    setLastWin(winAmount);
+    setStatus("cashed_out");
+    statusRef.current = "cashed_out";
+    // The updateMultiplier loop continues because statusRef.current is not "crashed"
     updatingRef.current = false;
     setUpdating(false);
   }, []);
@@ -255,10 +265,11 @@ export function TavernCrash() {
   }, [handleCashOut, redrawCanvas]);
 
   const handleStart = async () => {
-    if (!player || bet <= 0 || bet > player.gold || updating || updatingRef.current) return;
+    if (!player || bet <= 0 || bet > player.gold || updating || updatingRef.current || hasPendingPayout) return;
 
     updatingRef.current = true;
     setUpdating(true);
+    setSettlementMessage("");
     const success = await addPlayerGold(-bet);
     if (!success) {
       updatingRef.current = false;
@@ -307,6 +318,28 @@ export function TavernCrash() {
       startTimeRef.current = 0;
       requestRef.current = requestAnimationFrame(updateMultiplier);
     }, 1200);
+  };
+
+  const handleRetryPendingPayout = async () => {
+    if (!pendingPayout || updating || updatingRef.current) return;
+
+    updatingRef.current = true;
+    setUpdating(true);
+    const success = await addPlayerGoldRef.current(pendingPayout);
+
+    if (!success) {
+      setSettlementMessage(
+        `No se pudo acreditar el cobro pendiente de ${pendingPayout.toLocaleString("es-PY")} oro. Refresca e intenta otra vez.`
+      );
+      updatingRef.current = false;
+      setUpdating(false);
+      return;
+    }
+
+    setSettlementMessage(`Cobro pendiente acreditado: ${pendingPayout.toLocaleString("es-PY")} oro.`);
+    setPendingPayout(0);
+    updatingRef.current = false;
+    setUpdating(false);
   };
 
 
@@ -491,7 +524,7 @@ export function TavernCrash() {
                               }
                             }}
 
-                            disabled={status === "rising" || status === "starting"}
+                            disabled={status === "rising" || status === "starting" || hasPendingPayout}
                             className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 text-lg font-black text-stone-100 focus:outline-none focus:border-amber-500/50 transition"
                         />
                     </div>
@@ -500,14 +533,14 @@ export function TavernCrash() {
                     <div className="grid grid-cols-2 gap-2 mb-4">
                          <button 
                             onClick={() => setBet(Math.floor(player.gold / 2))}
-                            disabled={status === "rising" || status === "starting"}
+                            disabled={status === "rising" || status === "starting" || hasPendingPayout}
                             className="py-2 rounded-xl bg-stone-800 text-[10px] font-black text-stone-400 hover:text-stone-100 transition"
                          >
                             50% SALDO
                          </button>
                          <button 
                             onClick={() => setBet(player.gold)}
-                            disabled={status === "rising" || status === "starting"}
+                            disabled={status === "rising" || status === "starting" || hasPendingPayout}
                             className="py-2 rounded-xl bg-stone-800 text-[10px] font-black text-stone-400 hover:text-stone-100 transition"
                          >
                             ALL IN
@@ -531,7 +564,7 @@ export function TavernCrash() {
                             if ((val.match(/\./g) || []).length > 1) return;
                             setAutoCashOutStr(val);
                           }}
-                          disabled={status === "rising" || status === "starting"}
+                          disabled={status === "rising" || status === "starting" || hasPendingPayout}
                           placeholder="Ej: 1.50  (0 = desactivado)"
                           className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 pr-8 text-base font-black text-amber-400 placeholder:text-stone-600 placeholder:font-normal focus:outline-none focus:border-amber-500/50 transition"
                         />
@@ -569,7 +602,7 @@ export function TavernCrash() {
                     ) : (
                         <button
                             onClick={handleStart}
-                            disabled={bet <= 0 || bet > player.gold || updating || status === "starting" || (status === "cashed_out" && multiplier < crashPointRef.current)}
+                            disabled={hasPendingPayout || bet <= 0 || bet > player.gold || updating || status === "starting" || (status === "cashed_out" && multiplier < crashPointRef.current)}
                             className="w-full group relative overflow-hidden rounded-2xl bg-stone-100 py-5 font-black text-stone-900 transition hover:bg-white active:scale-95 disabled:opacity-30"
                         >
                             <span className="relative z-10 flex items-center justify-center gap-2 uppercase tracking-tighter">
@@ -578,6 +611,26 @@ export function TavernCrash() {
                             </span>
                         </button>
                     )}
+                    {settlementMessage ? (
+                      <div className={`rounded-2xl border p-3 text-xs font-bold leading-5 ${
+                        hasPendingPayout
+                          ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
+                          : "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
+                      }`}>
+                        <p>{settlementMessage}</p>
+                        {hasPendingPayout ? (
+                          <button
+                            type="button"
+                            onClick={() => void handleRetryPendingPayout()}
+                            disabled={updating}
+                            className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Coins className="h-4 w-4" />
+                            Reintentar cobro
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
                 </div>
                 
                 <p className="mt-4 text-[9px] text-stone-600 uppercase font-black tracking-[0.2em] text-center leading-normal">

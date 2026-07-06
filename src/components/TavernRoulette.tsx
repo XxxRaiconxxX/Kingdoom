@@ -63,10 +63,13 @@ export function TavernRoulette() {
   const [roundResult, setRoundResult] = useState<RouletteRoundResult | null>(null);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [updating, setUpdating] = useState(false);
+  const [pendingPayout, setPendingPayout] = useState(0);
+  const [settlementMessage, setSettlementMessage] = useState("");
 
   const wheelGradient = useMemo(() => buildWheelGradient(), []);
   const totalBet = useMemo(() => sumBets(bets), [bets]);
-  const canSpin = Boolean(player && totalBet > 0 && player.gold >= totalBet && phase !== "spinning" && !updating);
+  const hasPendingPayout = pendingPayout > 0;
+  const canSpin = Boolean(player && totalBet > 0 && player.gold >= totalBet && phase !== "spinning" && !updating && !hasPendingPayout);
   const highlightedWinningIds = useMemo(() => new Set(roundResult?.winningBets.map((bet) => bet.id) ?? []), [roundResult]);
   const isSpinning = phase === "spinning";
 
@@ -77,7 +80,7 @@ export function TavernRoulette() {
   }
 
   function handlePlaceBet(id: RouletteBetId) {
-    if (!player || phase === "spinning") {
+    if (!player || phase === "spinning" || hasPendingPayout) {
       return;
     }
 
@@ -94,6 +97,7 @@ export function TavernRoulette() {
     }
 
     setRoundResult(null);
+    setSettlementMessage("");
     setPhase("betting");
     setBets((current) => ({
       ...current,
@@ -102,17 +106,18 @@ export function TavernRoulette() {
   }
 
   function handleClearBets() {
-    if (phase === "spinning") {
+    if (phase === "spinning" || hasPendingPayout) {
       return;
     }
 
     setBets({});
     setRoundResult(null);
+    setSettlementMessage("");
     setPhase("betting");
   }
 
   function handleDoubleBets() {
-    if (!player || phase === "spinning" || totalBet <= 0) {
+    if (!player || phase === "spinning" || hasPendingPayout || totalBet <= 0) {
       return;
     }
 
@@ -126,11 +131,12 @@ export function TavernRoulette() {
       ) as RouletteBets,
     );
     setRoundResult(null);
+    setSettlementMessage("");
     setPhase("betting");
   }
 
   function handleRebet() {
-    if (!player || phase === "spinning") {
+    if (!player || phase === "spinning" || hasPendingPayout) {
       return;
     }
 
@@ -141,6 +147,7 @@ export function TavernRoulette() {
 
     setBets(lastSubmittedBets);
     setRoundResult(null);
+    setSettlementMessage("");
     setPhase("betting");
   }
 
@@ -150,11 +157,13 @@ export function TavernRoulette() {
     }
 
     setUpdating(true);
+    setSettlementMessage("");
     const snapshot = { ...bets };
     const betCost = sumBets(snapshot);
     const deducted = await addPlayerGold(-betCost);
 
     if (!deducted) {
+      setSettlementMessage("No se pudo descontar la apuesta. Refresca tu perfil e intenta de nuevo.");
       setUpdating(false);
       return;
     }
@@ -173,7 +182,13 @@ export function TavernRoulette() {
 
     window.setTimeout(async () => {
       if (result.totalPayout > 0) {
-        await addPlayerGold(result.totalPayout);
+        const credited = await addPlayerGold(result.totalPayout);
+        if (!credited) {
+          setPendingPayout(result.totalPayout);
+          setSettlementMessage(
+            `Premio pendiente: ${result.totalPayout.toLocaleString("es-PY")} de oro. Reintenta el cobro antes de girar otra vez.`
+          );
+        }
       }
 
       setRoundResult(result);
@@ -182,6 +197,27 @@ export function TavernRoulette() {
       setPhase("resolved");
       setUpdating(false);
     }, SPIN_DURATION_MS);
+  }
+
+  async function handleRetryPendingPayout() {
+    if (!pendingPayout || updating) {
+      return;
+    }
+
+    setUpdating(true);
+    const credited = await addPlayerGold(pendingPayout);
+
+    if (!credited) {
+      setSettlementMessage(
+        `No se pudo acreditar el premio pendiente de ${pendingPayout.toLocaleString("es-PY")} oro. Refresca tu perfil y vuelve a intentar.`
+      );
+      setUpdating(false);
+      return;
+    }
+
+    setSettlementMessage(`Premio pendiente cobrado: ${pendingPayout.toLocaleString("es-PY")} oro.`);
+    setPendingPayout(0);
+    setUpdating(false);
   }
 
   if (isHydrating) {
@@ -539,21 +575,21 @@ export function TavernRoulette() {
                 <ActionButton
                   label="Repetir"
                   icon={RotateCcw}
-                  disabled={isSpinning || sumBets(lastSubmittedBets) <= 0 || sumBets(lastSubmittedBets) > player.gold}
+                  disabled={hasPendingPayout || isSpinning || sumBets(lastSubmittedBets) <= 0 || sumBets(lastSubmittedBets) > player.gold}
                   tone="secondary"
                   onClick={handleRebet}
                 />
                 <ActionButton
                   label="x2 apuesta"
                   icon={Coins}
-                  disabled={isSpinning || totalBet <= 0 || totalBet * 2 > player.gold}
+                  disabled={hasPendingPayout || isSpinning || totalBet <= 0 || totalBet * 2 > player.gold}
                   tone="secondary"
                   onClick={handleDoubleBets}
                 />
                 <ActionButton
                   label="Limpiar"
                   icon={Trash2}
-                  disabled={isSpinning || totalBet <= 0}
+                  disabled={hasPendingPayout || isSpinning || totalBet <= 0}
                   tone="secondary"
                   onClick={handleClearBets}
                 />
@@ -566,6 +602,11 @@ export function TavernRoulette() {
                 />
               </div>
             </div>
+            {settlementMessage && phase !== "resolved" ? (
+              <div className="mt-4 rounded-2xl border border-amber-300/25 bg-amber-400/10 p-3 text-sm font-bold text-amber-100">
+                {settlementMessage}
+              </div>
+            ) : null}
 
             <AnimatePresence initial={false}>
               {phase === "resolved" && roundResult ? (
@@ -581,7 +622,9 @@ export function TavernRoulette() {
                         Resultado de la ronda
                       </p>
                       <p className="mt-2 text-xl font-black text-stone-50">
-                        {roundResult.totalPayout > 0
+                        {hasPendingPayout
+                          ? `Premio pendiente: ${pendingPayout.toLocaleString("es-PY")} de oro`
+                          : roundResult.totalPayout > 0
                           ? `Cobraste ${roundResult.totalPayout} de oro`
                           : "La casa se queda esta ronda"}
                       </p>
@@ -594,6 +637,26 @@ export function TavernRoulette() {
                       <p className="mt-1">Ganancia neta: <span className={`font-black ${roundResult.totalPayout > roundResult.totalBet ? "text-emerald-300" : "text-rose-300"}`}>{roundResult.totalPayout - roundResult.totalBet}</span></p>
                     </div>
                   </div>
+                  {settlementMessage ? (
+                    <div className={`mt-4 flex flex-col gap-3 rounded-2xl border p-3 text-sm font-bold sm:flex-row sm:items-center sm:justify-between ${
+                      hasPendingPayout
+                        ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
+                        : "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
+                    }`}>
+                      <span>{settlementMessage}</span>
+                      {hasPendingPayout ? (
+                        <button
+                          type="button"
+                          onClick={() => void handleRetryPendingPayout()}
+                          disabled={updating}
+                          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <Coins className="h-4 w-4" />
+                          Reintentar cobro
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </motion.div>
               ) : null}
             </AnimatePresence>

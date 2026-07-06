@@ -281,6 +281,8 @@ export function TavernHorseRace() {
   const [resolvedFinishedSession, setResolvedFinishedSession] = useState<PublicHorseRaceSession | null>(null);
   const [onlineBets, setOnlineBets] = useState<PublicHorseRaceBet[]>([]);
   const [targetBets, setTargetBets] = useState(2);
+  const [pendingOfflinePayout, setPendingOfflinePayout] = useState(0);
+  const [pendingOfflineNetWin, setPendingOfflineNetWin] = useState(0);
 
   useEffect(() => {
     resolvedFinishedSessionRef.current = resolvedFinishedSession;
@@ -315,7 +317,8 @@ export function TavernHorseRace() {
   const safeBet = clamp(Math.floor(Number.isFinite(bet) ? bet : 0), 1, Math.max(1, balance));
   const remainingDailyNet = Math.max(0, MAX_DAILY_HORSE_RACE_WIN_LIMIT - dailyNetWins);
   const limitReached = dailyNetWins >= MAX_DAILY_HORSE_RACE_WIN_LIMIT;
-  const canRace = Boolean(player && selectedHorse && phase !== "running" && !updating && !limitReached && safeBet <= balance);
+  const hasPendingOfflinePayout = pendingOfflinePayout > 0;
+  const canRace = Boolean(player && selectedHorse && phase !== "running" && !updating && !limitReached && !hasPendingOfflinePayout && safeBet <= balance);
   const canPlaceOnlineBet = Boolean(
     player &&
       selectedSession &&
@@ -323,6 +326,7 @@ export function TavernHorseRace() {
       selectedSession.status === "betting" &&
       !playerOnlineBet &&
       !onlineLoading &&
+      !hasPendingOfflinePayout &&
       onlineBets.length < onlineTarget &&
       safeBet <= balance
   );
@@ -495,6 +499,10 @@ export function TavernHorseRace() {
   }, [onlineBets, raceMode, selectedSession]);
 
   function handleBetInput(value: string) {
+    if (hasPendingOfflinePayout) {
+      return;
+    }
+
     const parsed = Number.parseInt(value.replace(/[^0-9]/g, ""), 10);
     setBet(Number.isFinite(parsed) ? parsed : 0);
   }
@@ -512,7 +520,7 @@ export function TavernHorseRace() {
   }
 
   function generateNewRace() {
-    if (phase === "running") return;
+    if (phase === "running" || hasPendingOfflinePayout) return;
     const nextHorses = createHorseField();
     setHorses(nextHorses);
     setSelectedHorseId(nextHorses[0]?.id ?? null);
@@ -660,17 +668,21 @@ export function TavernHorseRace() {
 
       const updated = finalPrize > 0 ? await addPlayerGold(finalPrize) : player;
 
-      if (cappedNet > 0) {
-        setDailyNetWins(addPlayerDailyHorseRaceNetWins(player.id, dateKey, cappedNet));
-      }
-
       setPhase("finished");
       setLastResult(result);
       setUpdating(false);
 
       if (!updated) {
-        setMessage("La carrera termino, pero no se pudo actualizar el oro.");
+        setPendingOfflinePayout(finalPrize);
+        setPendingOfflineNetWin(Math.max(0, cappedNet));
+        setMessage(
+          `La carrera termino, pero el premio de ${formatGold(finalPrize)} oro quedo pendiente. Reintenta el cobro antes de apostar otra vez.`
+        );
         return;
+      }
+
+      if (cappedNet > 0) {
+        setDailyNetWins(addPlayerDailyHorseRaceNetWins(player.id, dateKey, cappedNet));
       }
 
       if (won) {
@@ -686,6 +698,32 @@ export function TavernHorseRace() {
     },
     [addPlayerGold, dateKey, player, remainingDailyNet]
   );
+
+  async function handleRetryOfflinePayout() {
+    if (!player || !pendingOfflinePayout || updating) {
+      return;
+    }
+
+    setUpdating(true);
+    const credited = await addPlayerGold(pendingOfflinePayout);
+
+    if (!credited) {
+      setMessage(
+        `No se pudo acreditar el premio pendiente de ${formatGold(pendingOfflinePayout)} oro. Refresca tu perfil y vuelve a intentar.`
+      );
+      setUpdating(false);
+      return;
+    }
+
+    if (pendingOfflineNetWin > 0) {
+      setDailyNetWins(addPlayerDailyHorseRaceNetWins(player.id, dateKey, pendingOfflineNetWin));
+    }
+
+    setMessage(`Premio pendiente cobrado: ${formatGold(pendingOfflinePayout)} oro.`);
+    setPendingOfflinePayout(0);
+    setPendingOfflineNetWin(0);
+    setUpdating(false);
+  }
 
   async function startRace() {
     if (!player || !selectedHorse || !canRace) return;
@@ -780,7 +818,7 @@ export function TavernHorseRace() {
             <button
               type="button"
               onClick={() => setRaceMode("offline")}
-              disabled={phase === "running"}
+              disabled={phase === "running" || hasPendingOfflinePayout}
               className={`rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
                 raceMode === "offline"
                   ? "border-amber-300/55 bg-amber-400/15 text-amber-100"
@@ -792,7 +830,7 @@ export function TavernHorseRace() {
             <button
               type="button"
               onClick={() => setRaceMode("online")}
-              disabled={phase === "running"}
+              disabled={phase === "running" || hasPendingOfflinePayout}
               className={`rounded-full border px-3 py-2 text-[11px] font-black uppercase tracking-[0.14em] transition ${
                 raceMode === "online"
                   ? "border-cyan-300/55 bg-cyan-400/15 text-cyan-100"
@@ -836,6 +874,22 @@ export function TavernHorseRace() {
                 ? `Ya ganaste ${formatGold(MAX_DAILY_HORSE_RACE_WIN_LIMIT)} de oro neto hoy en carreras offline.`
                 : message}
           </div>
+          {raceMode === "offline" && hasPendingOfflinePayout ? (
+            <div className="mt-3 flex flex-col gap-3 rounded-2xl border border-amber-300/30 bg-amber-400/10 p-3 text-sm font-bold text-amber-100 sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                Cobro pendiente: {formatGold(pendingOfflinePayout)} oro. No abras otra carrera hasta liquidarlo.
+              </span>
+              <button
+                type="button"
+                onClick={() => void handleRetryOfflinePayout()}
+                disabled={updating}
+                className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Coins className="h-4 w-4" />
+                Reintentar cobro
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <aside className="rounded-[1.6rem] border border-stone-800 bg-stone-950/75 p-4">
@@ -917,7 +971,7 @@ export function TavernHorseRace() {
                 key={horse.id}
                 type="button"
                 onClick={() => setSelectedHorseId(horse.id)}
-                disabled={phase === "running" || (raceMode === "online" && selectedSession?.status !== "betting")}
+                disabled={phase === "running" || hasPendingOfflinePayout || (raceMode === "online" && selectedSession?.status !== "betting")}
                 className={`rounded-2xl border p-3 text-left transition ${
                   selectedHorseId === horse.id
                     ? "border-lime-300/55 bg-lime-400/10 shadow-[0_0_22px_rgba(132,204,22,0.12)]"
@@ -949,7 +1003,7 @@ export function TavernHorseRace() {
           <input
             value={bet || ""}
             onChange={(event) => handleBetInput(event.target.value)}
-            disabled={phase === "running" || (raceMode === "online" && Boolean(playerOnlineBet || selectedSession?.status !== "betting"))}
+            disabled={phase === "running" || hasPendingOfflinePayout || (raceMode === "online" && Boolean(playerOnlineBet || selectedSession?.status !== "betting"))}
             inputMode="numeric"
             className="mt-4 w-full rounded-2xl border border-stone-700 bg-black px-4 py-3 text-lg font-black text-stone-100 outline-none transition placeholder:text-stone-600 focus:border-amber-300/50"
             placeholder="2500"
@@ -961,7 +1015,7 @@ export function TavernHorseRace() {
                 key={preset}
                 type="button"
                 onClick={() => setBet(preset)}
-                disabled={phase === "running" || (raceMode === "online" && Boolean(playerOnlineBet || selectedSession?.status !== "betting"))}
+                disabled={phase === "running" || hasPendingOfflinePayout || (raceMode === "online" && Boolean(playerOnlineBet || selectedSession?.status !== "betting"))}
                 className="rounded-xl border border-stone-800 bg-stone-900 px-2 py-2 text-xs font-black text-stone-300 transition hover:border-amber-400/35 hover:text-amber-200 disabled:opacity-50"
               >
                 {formatGold(preset)}
@@ -991,7 +1045,7 @@ export function TavernHorseRace() {
             <button
               type="button"
               onClick={generateNewRace}
-              disabled={phase === "running"}
+              disabled={phase === "running" || hasPendingOfflinePayout}
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-stone-700 px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-stone-300 transition hover:border-lime-300/40 hover:text-lime-200 disabled:opacity-50"
             >
               <Shuffle className="h-4 w-4" />

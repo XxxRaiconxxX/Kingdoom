@@ -74,6 +74,9 @@ export function TavernExpedition() {
   const [phase, setPhase] = useState<ExpeditionPhase>("select");
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [pendingPayout, setPendingPayout] = useState(0);
+  const [settlementMessage, setSettlementMessage] = useState("");
+  const hasPendingPayout = pendingPayout > 0;
 
   const selectedEncounter = useMemo(
     () =>
@@ -83,7 +86,7 @@ export function TavernExpedition() {
   );
 
   async function startEncounter() {
-    if (!player || !selectedEncounter || isUpdating) {
+    if (!player || !selectedEncounter || isUpdating || hasPendingPayout) {
       return;
     }
 
@@ -229,16 +232,49 @@ export function TavernExpedition() {
 
     if (payout > 0) {
       setIsUpdating(true);
-      await addPlayerGold(payout);
+      const updated = await addPlayerGold(payout);
       setIsUpdating(false);
+
+      if (!updated) {
+        setPendingPayout(payout);
+        setSettlementMessage(
+          `Cobro pendiente: ${payout.toLocaleString("es-PY")} oro. Reintenta antes de tomar otro contrato.`
+        );
+      } else {
+        setSettlementMessage("");
+      }
     }
 
     setPhase("resolved");
   }
 
   function resetExpedition() {
+    if (hasPendingPayout) {
+      return;
+    }
+
     setBattle(null);
     setPhase("select");
+  }
+
+  async function handleRetryPendingPayout() {
+    if (!pendingPayout || isUpdating) {
+      return;
+    }
+
+    setIsUpdating(true);
+    const updated = await addPlayerGold(pendingPayout);
+    setIsUpdating(false);
+
+    if (!updated) {
+      setSettlementMessage(
+        `No se pudo acreditar el cobro pendiente de ${pendingPayout.toLocaleString("es-PY")} oro. Refresca e intenta otra vez.`
+      );
+      return;
+    }
+
+    setSettlementMessage(`Cobro pendiente acreditado: ${pendingPayout.toLocaleString("es-PY")} oro.`);
+    setPendingPayout(0);
   }
 
   if (isHydrating) {
@@ -350,10 +386,12 @@ export function TavernExpedition() {
               <button
                 type="button"
                 onClick={() => void startEncounter()}
-                disabled={isUpdating || player.gold < selectedEncounter.entryFee}
+                disabled={isUpdating || hasPendingPayout || player.gold < selectedEncounter.entryFee}
                 className="mt-6 w-full rounded-2xl bg-amber-500 px-4 py-4 text-sm font-black text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {player.gold < selectedEncounter.entryFee
+                {hasPendingPayout
+                  ? "Cobro pendiente"
+                  : player.gold < selectedEncounter.entryFee
                   ? "Oro insuficiente para este contrato"
                   : "Aceptar contrato"}
               </button>
@@ -479,16 +517,38 @@ export function TavernExpedition() {
                     Cierre del contrato
                   </p>
                   <p className="mt-2 text-sm leading-6 text-stone-300">
-                    {battle.result === "victory"
+                    {hasPendingPayout
+                      ? `Cobro pendiente: ${pendingPayout.toLocaleString("es-PY")} oro. Reintenta antes de seguir.`
+                      : battle.result === "victory"
                       ? `Cobras ${battle.reward} de oro y vuelves al reino con la historia intacta.`
                       : battle.result === "retreat"
                         ? `Recuperas ${battle.reward} de oro y conservas solo fragmentos del contrato.`
                         : "La expedicion se pierde. Esta vez el reino se queda sin botin."}
                   </p>
+                  {settlementMessage ? (
+                    <div className={`mt-4 rounded-2xl border p-3 text-sm font-bold ${
+                      hasPendingPayout
+                        ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
+                        : "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
+                    }`}>
+                      <p>{settlementMessage}</p>
+                      {hasPendingPayout ? (
+                        <button
+                          type="button"
+                          onClick={() => void handleRetryPendingPayout()}
+                          disabled={isUpdating}
+                          className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Reintentar cobro
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
                   <button
                     type="button"
                     onClick={resetExpedition}
-                    className="mt-4 w-full rounded-2xl bg-stone-100 px-4 py-3 text-sm font-black text-stone-950 transition hover:bg-white"
+                    disabled={hasPendingPayout}
+                    className="mt-4 w-full rounded-2xl bg-stone-100 px-4 py-3 text-sm font-black text-stone-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Tomar otro contrato
                   </button>

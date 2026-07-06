@@ -3858,4 +3858,5 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - En resoluciones móviles (< 640px), si el menu esta contraido, se muestra una barra compacta premium con el icono y label de la pestaña activa, liberando espacio para el contenido.
 - Al hacer clic en un boton del menu desplegado, el panel cambia de pestana y se contrae de forma automatica.
 - Se implemento un `useEffect` para aplicar `overflow: hidden` en `body` y `documentElement` cuando el panel administrador esta montado, previniendo el scroll de fondo y evitando la duplicidad de barras de scroll naranjas.
+- Se corrigio la especificidad CSS de `.kd-admin-tabs` en `src/index.css` usando el selector `:not(.hidden)` en movil, asegurando que las clases de visualizacion condicionales (`hidden`) oculten la grilla de pestañas de forma efectiva en el colapso.
 - Validacion: `npx tsc --noEmit` y `npm run build` completados con exito. [Antigravity]

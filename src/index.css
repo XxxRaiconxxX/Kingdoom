@@ -427,7 +427,7 @@
 }
 
 @media (max-width: 639px) {
-  .kd-admin-tabs {
+  .kd-admin-tabs:not(.hidden) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.35rem;

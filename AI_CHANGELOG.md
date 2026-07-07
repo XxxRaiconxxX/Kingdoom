@@ -8,6 +8,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-07] Setup portable de Graphify para Antigravity 2
+- Se reforzo `AGENTS.md` para que Graphify sea la via preferente en auditoria, debugging, impacto y handoff dentro de `Kingdoom-sync`, especialmente en trazas UI -> hooks/contexto -> utilidades -> Supabase.
+- Se agregaron `.agents/rules/graphify.md` y `.agents/workflows/graphify.md` para que Antigravity 2 consulte el grafo del repo antes de responder preguntas de arquitectura o codigo.
+- Se versionaron `scripts/antigravity2-graphify-setup.ps1` y `docs/antigravity2-graphify-guia.md` para preparar otro ordenador con Graphify + Antigravity 2, incluyendo MCP, skills `.agents`, hooks y build inicial de `Kingdoom-sync`, `kingdoom-bot` y `kingdoom-fichas`.
+- Validacion: revision manual de rutas, JSON de MCP valido y verificacion de archivos `.agents` generados. [Codex]
+
 ### [2026-07-06] Auditoria de minijuegos web y cobros recuperables
 - Se auditaron los minijuegos web de la Taberna en funcionamiento, IU y decoracion, con foco en liquidacion de oro, estados bloqueados y mensajes visibles al jugador.
 - `TavernRoulette.tsx`, `TavernHorseRace.tsx`, `TavernCrash.tsx`, `TavernExpedition.tsx`, `TavernExpeditionArcade.tsx` y `TavernTowerDefense.tsx` ahora convierten fallos de acreditacion en cobros pendientes recuperables, con aviso visible y boton de reintento.

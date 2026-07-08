@@ -516,6 +516,9 @@ When the user types `/graphify`, use the installed graphify skill or instruction
 
 Rules:
 - For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- **Impact Analysis (affected):** Before modifying shared functions, utils, types, or database schemas, run `graphify affected "<symbol_or_file>"` to identify all components, handlers, or pages that depend on it and prevent regression bugs.
+- **Inter-Repo Tracing (global):** Use the global graph merge (`graphify global list` / `graphify global path`) to trace dependencies and data contracts that cross the boundary between the web client (`Kingdoom-sync`) and the WhatsApp bot (`kingdoom-bot`).
+- **Flow Visualizations:** For documenting complex transaction flows (like auctions escrow or tavern minigames), use `graphify export callflow-html` or `graphify tree` to generate interactive architecture/flow maps.
 - Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.

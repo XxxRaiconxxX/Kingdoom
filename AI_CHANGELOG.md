@@ -2014,3 +2014,10 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 *   **Cambios Clave:**
     *   Se movió el bloque `param(...)` a la primera línea del archivo. En PowerShell, el bloque de parámetros debe ser la primera sentencia ejecutable en el script; colocar asignaciones de variables antes de `param` causaba un error de sintaxis del parser (`ParserError: InvalidLeftHandSide`).
 *   **Notas/Advertencias:** Este fix permite que el script se ejecute correctamente en cualquier terminal de PowerShell.
+
+### [2026-07-08] - [Autor: Antigravity]
+*   **Archivos Modificados:** `AGENTS.md`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Expansión de reglas y utilidades de Graphify en el manual para agentes.
+*   **Cambios Clave:**
+    *   Se documentaron y agregaron pautas explícitas sobre el uso de `graphify affected` para análisis de impacto antes de refactorizar componentes o bases de datos, `graphify global` para cruzar dependencias inter-repositorios, y comandos de visualización gráfica (`callflow-html` y `tree`).
+*   **Notas/Advertencias:** Ninguna.

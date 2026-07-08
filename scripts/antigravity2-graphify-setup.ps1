@@ -1,11 +1,11 @@
-$ErrorActionPreference = "Stop"
-
 param(
     [string]$BasePath = "",
     [string]$KingdoomSyncPath = "",
     [string]$KingdoomBotPath = "",
     [string]$KingdoomFichasPath = ""
 )
+
+$ErrorActionPreference = "Stop"
 
 function Write-Step($message) {
     Write-Host ""

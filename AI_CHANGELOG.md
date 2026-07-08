@@ -2007,3 +2007,10 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   La imagen seleccionada se convierte a data URL local para no depender de enlaces externos.
     *   El formulario deja feedback claro cuando la imagen se carga correctamente o falla la lectura.
 *   **Notas/Advertencias:** La carga reutiliza el mismo criterio practico ya usado en bestiario y flora, manteniendo consistencia en el panel admin.
+
+### [2026-07-07] - [Autor: Antigravity]
+*   **Archivos Modificados:** `scripts/antigravity2-graphify-setup.ps1`, `AI_CHANGELOG.md`, `ai-memory/kingdoom-memory.jsonl`
+*   **Resumen de Tareas:** Corrección de sintaxis de parser de PowerShell en el script de instalación de Graphify.
+*   **Cambios Clave:**
+    *   Se movió el bloque `param(...)` a la primera línea del archivo. En PowerShell, el bloque de parámetros debe ser la primera sentencia ejecutable en el script; colocar asignaciones de variables antes de `param` causaba un error de sintaxis del parser (`ParserError: InvalidLeftHandSide`).
+*   **Notas/Advertencias:** Este fix permite que el script se ejecute correctamente en cualquier terminal de PowerShell.

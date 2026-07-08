@@ -8,6 +8,10 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-08] Hotfix de rutas SPA en Vercel para Asedio
+- Se agrego `vercel.json` en la raiz para reescribir rutas internas de la SPA hacia `index.html`.
+- Corrige el 404 directo al abrir `/asedio-reinos?returnTo=%2F` desde la tarjeta exclusiva del mercado en produccion. [Codex]
+
 ### [2026-07-08] Base Supabase y entrada web para El Asedio de los Reinos
 - Se agrego `supabase/supabase_realm_siege.sql` con temporada, facciones, territorios, estado de jugador, depositos diarios, acciones del frente y RPCs seguras para elegir faccion, depositar oro, cobrar produccion e invertir en produccion territorial.
 - La economia inicial queda alineada con el balance actual del prototipo: deposito diario maximo de 25K, ciclo de produccion de 24h, recompensa de conquista de 20K y cupo de 3 jugadores por reino.

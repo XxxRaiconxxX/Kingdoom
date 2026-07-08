@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence } from "framer-motion";
 import {
   Box,
+  Castle,
   ChevronDown,
   Crown,
   Dices,
@@ -28,6 +29,7 @@ import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
 import { getMarketRotationState } from "../features/market/market.rotation";
 import { fetchMarketItems } from "../features/market";
 import { isNativeApp } from "../utils/platform";
+import { openRealmSiegeWindow, REALM_SIEGE_CATALOG_ENTRY } from "../utils/realmSiege";
 import useSWR from "swr";
 import type { LucideIcon } from "lucide-react";
 import type { MarketCategory, MarketCategoryId, MarketItem, Rarity } from "../types";
@@ -413,6 +415,10 @@ export function MarketSection() {
     window.localStorage.setItem(TAVERN_MODE_STORAGE_KEY, mode);
   };
 
+  const openRealmSiege = () => {
+    openRealmSiegeWindow(`${window.location.pathname}${window.location.search}` || "/");
+  };
+
   useGsapStaggerReveal(marketRevealRef, {
     selector: "[data-gsap-market]",
     duration: 0.54,
@@ -450,6 +456,52 @@ export function MarketSection() {
             </div>
           }
         />
+      </div>
+
+      <div
+        data-gsap-market
+        className="kd-glass kd-hover-lift overflow-hidden rounded-[2rem] border border-amber-500/20 bg-stone-950/80"
+      >
+        <div className="relative isolate p-6">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_0%,rgba(245,158,11,0.22),transparent_32%),radial-gradient(circle_at_80%_25%,rgba(59,130,246,0.15),transparent_30%),linear-gradient(135deg,rgba(28,25,23,0.98),rgba(12,10,9,0.9))]" />
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-3 text-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.12)]">
+                <Castle className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-300">
+                  {REALM_SIEGE_CATALOG_ENTRY.eyebrow}
+                </p>
+                <h3 className="mt-2 text-2xl font-black text-stone-100">
+                  {REALM_SIEGE_CATALOG_ENTRY.title}
+                </h3>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-400">
+                  {REALM_SIEGE_CATALOG_ENTRY.description}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-amber-200">
+                    Temporada minima 7 dias
+                  </span>
+                  <span className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-cyan-200">
+                    Ventana independiente
+                  </span>
+                  <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-200">
+                    Supabase economico
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={openRealmSiege}
+              className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-400 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-stone-950 transition hover:bg-amber-300"
+            >
+              Abrir Asedio
+            </button>
+          </div>
+        </div>
       </div>
 
       <details

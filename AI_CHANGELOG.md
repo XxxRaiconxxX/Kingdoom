@@ -8,6 +8,13 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-08] Base Supabase y entrada web para El Asedio de los Reinos
+- Se agrego `supabase/supabase_realm_siege.sql` con temporada, facciones, territorios, estado de jugador, depositos diarios, acciones del frente y RPCs seguras para elegir faccion, depositar oro, cobrar produccion e invertir en produccion territorial.
+- La economia inicial queda alineada con el balance actual del prototipo: deposito diario maximo de 25K, ciclo de produccion de 24h, recompensa de conquista de 20K y cupo de 3 jugadores por reino.
+- Se incorporo `src/utils/realmSiege.ts` como cliente unico de Supabase para el Asedio, incluyendo normalizacion de estado, apertura de ventana exclusiva y utilidades de oro.
+- Se agrego `src/sections/RealmSiegeSection.tsx` como centro de mando web independiente con seleccion bloqueada de faccion, tesoro, produccion por territorios, inversiones y lectura de cronica.
+- `src/App.tsx` reconoce `/asedio-reinos` como experiencia separada sin barra inferior ni perfil superior, y `src/sections/MarketSection.tsx` expone una tarjeta de catalogo que abre el Asedio en ventana aparte. [Codex]
+
 ### [2026-07-07] Setup portable de Graphify para Antigravity 2
 - Se reforzo `AGENTS.md` para que Graphify sea la via preferente en auditoria, debugging, impacto y handoff dentro de `Kingdoom-sync`, especialmente en trazas UI -> hooks/contexto -> utilidades -> Supabase.
 - Se agregaron `.agents/rules/graphify.md` y `.agents/workflows/graphify.md` para que Antigravity 2 consulte el grafo del repo antes de responder preguntas de arquitectura o codigo.

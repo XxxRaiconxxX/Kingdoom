@@ -93,6 +93,10 @@ const loadMarketSection = () =>
   import("./sections/MarketSection").then((module) => ({
     default: module.MarketSection,
   }));
+const loadRealmSiegeSection = () =>
+  import("./sections/RealmSiegeSection").then((module) => ({
+    default: module.RealmSiegeSection,
+  }));
 const loadArchivistSection = () =>
   import("./components/ArchivistSection").then((module) => ({
     default: module.ArchivistSection,
@@ -108,6 +112,7 @@ const loadPlayerProfilePanel = () =>
 const LibrarySection = lazy(loadLibrarySection);
 const GrimoireSection = lazy(loadGrimoireSection);
 const MarketSection = lazy(loadMarketSection);
+const RealmSiegeSection = lazy(loadRealmSiegeSection);
 const ArchivistSection = lazy(loadArchivistSection);
 const AnimeHubSection = lazy(loadAnimeHubSection);
 const PlayerProfilePanel = lazy(loadPlayerProfilePanel);
@@ -134,14 +139,44 @@ function preloadTab(tabId: TabId) {
   }
 }
 
+function isRealmSiegeStandaloneRoute() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const path = window.location.pathname.toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  return (
+    path.endsWith("/asedio-reinos") ||
+    params.get("catalogo") === "asedio-reinos" ||
+    params.get("view") === "asedio-reinos"
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [isProfileCollapsed, setIsProfileCollapsed] = useState(false);
+  const [isRealmSiegeStandalone] = useState(isRealmSiegeStandaloneRoute);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     startTransition(() => setIsProfileCollapsed(activeTab !== "home"));
   }, [activeTab]);
+
+  if (isRealmSiegeStandalone) {
+    return (
+      <div
+        className="kd-ambient min-h-screen bg-stone-950 text-stone-300"
+        data-kd-theme="market"
+      >
+        <main className="kd-shell mx-auto min-h-screen w-full max-w-7xl px-4 py-5 md:px-6 md:py-8">
+          <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo El Asedio de los Reinos..." />}>
+            <RealmSiegeSection standalone />
+          </Suspense>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div

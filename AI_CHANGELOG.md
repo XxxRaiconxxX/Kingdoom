@@ -8,6 +8,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-09] Pozo acumulativo de victoria para El Asedio
+- Se agrego al esquema de Asedio un pozo de premio con base de 125.000 oro, crecimiento de 125.000 por ciclo de 24 h y tope de 1.000.000 oro.
+- Se incorporo la RPC `settle_realm_siege_prize`, que reparte el pozo una sola vez al reino que conquiste todo el mapa o al que tenga mas territorios al cierre semanal.
+- El reparto queda limitado a integrantes activos del reino ganador y se registra en la cronica como `prize_awarded`.
+- La UI muestra una tarjeta compacta "Pozo de victoria" con progreso, candidato/ganador, cierre previsto y boton de reparto cuando corresponde. [Codex]
+
 ### [2026-07-09] Ajuste responsive del encabezado y cronica del Asedio
 - Se simplifico el encabezado exclusivo del Asedio eliminando los chips visibles de bloqueo e IA.
 - El boton de retorno a la pagina inicial ahora es compacto y ocupa menos espacio en desktop y movil.

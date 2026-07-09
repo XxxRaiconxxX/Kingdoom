@@ -25,6 +25,7 @@ import {
   investRealmSiegeIncome,
   joinRealmSiegeFaction,
   REALM_SIEGE_CATALOG_ENTRY,
+  settleRealmSiegePrize,
   type RealmSiegeAction,
   type RealmSiegeFaction,
   type RealmSiegeFactionId,
@@ -57,6 +58,111 @@ const factionFlavor: Record<RealmSiegeFactionId, string> = {
   arcania: "Magia, recursos refinados y asedios calculados.",
   paramos: "Juego agresivo, castigo frontal y fortaleza dura.",
 };
+
+type PrizePreview = {
+  winnerFactionId: RealmSiegeFactionId | null;
+  territoriesControlled: number;
+  isReady: boolean;
+  reason: "full_conquest" | "territory_lead" | "pending";
+  closesAt: Date | null;
+};
+
+function getPrizePreview(state: RealmSiegeState | null): PrizePreview {
+  if (!state) {
+    return {
+      winnerFactionId: null,
+      territoriesControlled: 0,
+      isReady: false,
+      reason: "pending",
+      closesAt: null,
+    };
+  }
+
+  if (state.season.winnerFactionId) {
+    return {
+      winnerFactionId: state.season.winnerFactionId,
+      territoriesControlled: state.territories.filter(
+        (territory) => territory.ownerFactionId === state.season.winnerFactionId
+      ).length,
+      isReady: false,
+      reason: state.season.winnerReason === "full_conquest" ? "full_conquest" : "territory_lead",
+      closesAt: state.season.endsAt ? new Date(state.season.endsAt) : null,
+    };
+  }
+
+  const closesAt = state.season.endsAt
+    ? new Date(state.season.endsAt)
+    : new Date(
+        new Date(state.season.startsAt).getTime() +
+          state.season.minDurationDays * 24 * 60 * 60 * 1000
+      );
+  const counts = new Map<RealmSiegeFactionId, { territories: number; garrison: number }>();
+
+  state.factions.forEach((faction) => {
+    counts.set(faction.id, { territories: 0, garrison: 0 });
+  });
+
+  state.territories.forEach((territory) => {
+    if (!territory.ownerFactionId) {
+      return;
+    }
+
+    const current = counts.get(territory.ownerFactionId) ?? { territories: 0, garrison: 0 };
+    counts.set(territory.ownerFactionId, {
+      territories: current.territories + 1,
+      garrison: current.garrison + territory.garrisonPower,
+    });
+  });
+
+  const fullConquest = [...counts.entries()].find(
+    ([, value]) => value.territories === state.territories.length && state.territories.length > 0
+  );
+
+  if (fullConquest) {
+    return {
+      winnerFactionId: fullConquest[0],
+      territoriesControlled: fullConquest[1].territories,
+      isReady: true,
+      reason: "full_conquest",
+      closesAt,
+    };
+  }
+
+  const sorted = state.factions
+    .map((faction) => {
+      const count = counts.get(faction.id) ?? { territories: 0, garrison: 0 };
+      return {
+        faction,
+        territories: count.territories,
+        garrison: count.garrison,
+      };
+    })
+    .sort((left, right) => {
+      if (right.territories !== left.territories) {
+        return right.territories - left.territories;
+      }
+
+      if (right.faction.treasuryGold !== left.faction.treasuryGold) {
+        return right.faction.treasuryGold - left.faction.treasuryGold;
+      }
+
+      if (right.garrison !== left.garrison) {
+        return right.garrison - left.garrison;
+      }
+
+      return FACTION_ORDER.indexOf(left.faction.id) - FACTION_ORDER.indexOf(right.faction.id);
+    });
+
+  const leader = sorted[0];
+
+  return {
+    winnerFactionId: leader?.faction.id ?? null,
+    territoriesControlled: leader?.territories ?? 0,
+    isReady: Date.now() >= closesAt.getTime() && Boolean(leader && leader.territories > 0),
+    reason: Date.now() >= closesAt.getTime() ? "territory_lead" : "pending",
+    closesAt,
+  };
+}
 
 export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps) {
   const {
@@ -138,6 +244,7 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
       null,
     [selectedTerritoryId, siegeState?.territories]
   );
+  const prizePreview = useMemo(() => getPrizePreview(siegeState), [siegeState]);
 
   const playerFaction = siegeState?.playerState
     ? factionById.get(siegeState.playerState.factionId) ?? null
@@ -265,7 +372,7 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
             <SectionHeader
               eyebrow={REALM_SIEGE_CATALOG_ENTRY.eyebrow}
               title={REALM_SIEGE_CATALOG_ENTRY.title}
-              description="Entrada especial del mercado: elige una faccion una sola vez, aporta al tesoro, cobra produccion por territorio y prepara el avance de una campana minima de una semana."
+              description="Entrada especial del mercado: elige una faccion una sola vez, domina territorios y pelea por un pozo creciente de hasta 1.000.000 de oro."
             />
             {standalone ? (
               <button
@@ -331,12 +438,18 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
 
       {siegeState ? (
         <>
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-5 md:gap-3">
             <SiegeStatCard
               icon={Crown}
               label="Duracion minima"
               value={`${siegeState.season.minDurationDays} dias`}
               detail="No es una ronda rapida."
+            />
+            <SiegeStatCard
+              icon={Gem}
+              label="Pozo"
+              value={formatRealmSiegeGold(siegeState.season.currentPrizePoolGold)}
+              detail={`Tope ${formatRealmSiegeGold(siegeState.season.prizePoolCapGold)}.`}
             />
             <SiegeStatCard
               icon={Banknote}
@@ -387,6 +500,22 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
             </div>
 
             <aside className="space-y-5">
+              <PrizePoolPanel
+                season={siegeState.season}
+                factions={siegeState.factions}
+                preview={prizePreview}
+                territoryTotal={siegeState.territories.length}
+                canSettle={canUseEconomy && prizePreview.isReady}
+                busyAction={busyAction}
+                onSettlePrize={() =>
+                  player
+                    ? void runMutation("settle-prize", () =>
+                        settleRealmSiegePrize(player.id)
+                      )
+                    : undefined
+                }
+              />
+
               <EconomyPanel
                 canUseEconomy={canUseEconomy}
                 playerGold={player?.gold ?? 0}
@@ -858,6 +987,114 @@ function TerritoryMap({
   );
 }
 
+function PrizePoolPanel({
+  season,
+  factions,
+  preview,
+  territoryTotal,
+  canSettle,
+  busyAction,
+  onSettlePrize,
+}: {
+  season: RealmSiegeState["season"];
+  factions: RealmSiegeFaction[];
+  preview: PrizePreview;
+  territoryTotal: number;
+  canSettle: boolean;
+  busyAction: string;
+  onSettlePrize: () => void;
+}) {
+  const winner = preview.winnerFactionId
+    ? factions.find((faction) => faction.id === preview.winnerFactionId) ?? null
+    : null;
+  const awarded = Boolean(season.prizePoolAwardedAt);
+  const visiblePrize = awarded ? season.prizePoolAwardedGold : season.currentPrizePoolGold;
+  const progress = Math.min(100, Math.max(0, (visiblePrize / season.prizePoolCapGold) * 100));
+  const closesAtLabel = preview.closesAt
+    ? preview.closesAt.toLocaleString("es-PY", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Por definir";
+  const statusLabel = awarded
+    ? `Repartido a ${winner?.displayName ?? "el reino ganador"}.`
+    : preview.reason === "full_conquest"
+      ? "Conquista total lista para repartir."
+      : preview.isReady
+        ? "Semana cerrada: listo para repartir."
+        : `Sube ${formatRealmSiegeGold(season.prizePoolGrowthPerCycle)} cada ${season.incomeCycleHours} h.`;
+  const buttonLabel = awarded
+    ? "Pozo repartido"
+    : busyAction === "settle-prize"
+      ? "Repartiendo..."
+      : preview.isReady
+        ? "Repartir pozo"
+        : "Aun no listo";
+
+  return (
+    <div className="kd-glass rounded-[1.6rem] border border-amber-500/20 bg-stone-900/75 p-4 md:rounded-[2rem] md:p-5">
+      <SectionHeader
+        eyebrow="Premio"
+        title="Pozo de victoria"
+        description="El oro sube por ciclo y se reparte en partes iguales entre integrantes activos del reino ganador."
+      />
+
+      <div className="mt-5 rounded-[1.35rem] border border-amber-400/20 bg-amber-500/10 p-4">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-300">
+              Pozo actual
+            </p>
+            <p className="mt-1 text-2xl font-black text-stone-100">
+              {formatRealmSiegeGold(visiblePrize)}
+            </p>
+          </div>
+          <span className="rounded-full border border-amber-300/20 bg-stone-950/55 px-3 py-2 text-xs font-black text-amber-100">
+            Max {formatRealmSiegeGold(season.prizePoolCapGold)}
+          </span>
+        </div>
+
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-stone-950/80">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-amber-500 via-yellow-300 to-emerald-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <DetailMetric
+          label={awarded ? "Ganador" : "Candidato"}
+          value={winner?.displayName ?? "Sin definir"}
+          icon={Crown}
+        />
+        <DetailMetric
+          label="Territorios"
+          value={`${preview.territoriesControlled}/${Math.max(1, territoryTotal)}`}
+          icon={Castle}
+        />
+      </div>
+
+      <p className="mt-4 text-sm leading-6 text-stone-400">{statusLabel}</p>
+      <p className="mt-2 text-xs leading-5 text-stone-500">
+        Cierre previsto: {closesAtLabel}. Si nadie conquista todo antes, gana quien tenga mas territorio.
+      </p>
+
+      <button
+        type="button"
+        disabled={!canSettle || awarded || busyAction === "settle-prize"}
+        onClick={onSettlePrize}
+        className="kd-touch mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-amber-100 transition hover:border-amber-300/50 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-800/50 disabled:text-stone-500"
+      >
+        {busyAction === "settle-prize" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        {buttonLabel}
+      </button>
+    </div>
+  );
+}
+
 function EconomyPanel({
   canUseEconomy,
   playerGold,
@@ -1159,6 +1396,8 @@ function describeAction(
       return `${faction} cobro ${formatRealmSiegeGold(action.amount ?? 0)} de produccion.`;
     case "invest_income":
       return `${faction} invirtio en la produccion de ${action.territoryId ?? "un territorio"}.`;
+    case "prize_awarded":
+      return `${faction} gano el pozo de ${formatRealmSiegeGold(action.amount ?? 0)}.`;
     case "ai_fortify":
       return `${faction} reforzo automaticamente ${action.territoryId ?? "su defensa"}.`;
     case "ai_strategy_tick":

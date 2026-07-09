@@ -7,7 +7,7 @@ export const REALM_SIEGE_CATALOG_ENTRY = {
   title: "El Asedio de los Reinos",
   eyebrow: "Catalogo exclusivo",
   description:
-    "Campana estrategica de una semana: elige faccion, fortalece el tesoro diario, produce por territorio y compite por conquistar el mapa.",
+    "Campana estrategica de una semana: elige faccion, domina territorios y pelea por un pozo creciente de hasta 1.000.000 de oro.",
   route: "/asedio-reinos",
 } as const;
 
@@ -32,6 +32,14 @@ export type RealmSiegeSeason = {
   incomeInvestCostStep: number;
   incomeInvestGain: number;
   maxIncomeInvestLevel: number;
+  prizePoolBaseGold: number;
+  prizePoolGrowthPerCycle: number;
+  prizePoolCapGold: number;
+  currentPrizePoolGold: number;
+  prizePoolAwardedGold: number;
+  prizePoolAwardedAt: string | null;
+  winnerFactionId: RealmSiegeFactionId | null;
+  winnerReason: string | null;
 };
 
 export type RealmSiegeFaction = {
@@ -101,6 +109,11 @@ export type RealmSiegeMutationResult = {
   treasuryGold?: number;
   income?: number;
   cost?: number;
+  winnerFactionId?: RealmSiegeFactionId;
+  prizePoolGold?: number;
+  eligibleWinners?: number;
+  payoutPerPlayer?: number;
+  remainderGold?: number;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -218,6 +231,14 @@ function normalizeState(value: unknown): RealmSiegeState {
       incomeInvestCostStep: toNumber(season.incomeInvestCostStep, 50000),
       incomeInvestGain: toNumber(season.incomeInvestGain, 1000),
       maxIncomeInvestLevel: toNumber(season.maxIncomeInvestLevel, 5),
+      prizePoolBaseGold: toNumber(season.prizePoolBaseGold, 125000),
+      prizePoolGrowthPerCycle: toNumber(season.prizePoolGrowthPerCycle, 125000),
+      prizePoolCapGold: toNumber(season.prizePoolCapGold, 1000000),
+      currentPrizePoolGold: toNumber(season.currentPrizePoolGold, 125000),
+      prizePoolAwardedGold: toNumber(season.prizePoolAwardedGold),
+      prizePoolAwardedAt: toStringOrNull(season.prizePoolAwardedAt),
+      winnerFactionId: season.winnerFactionId ? asFactionId(season.winnerFactionId) : null,
+      winnerReason: toStringOrNull(season.winnerReason),
     },
     factions: Array.isArray(value.factions) ? value.factions.map(normalizeFaction) : [],
     territories: Array.isArray(value.territories)
@@ -247,6 +268,13 @@ function normalizeMutationResult(value: unknown): RealmSiegeMutationResult {
     treasuryGold: row.treasuryGold === undefined ? undefined : toNumber(row.treasuryGold),
     income: row.income === undefined ? undefined : toNumber(row.income),
     cost: row.cost === undefined ? undefined : toNumber(row.cost),
+    winnerFactionId: row.winnerFactionId ? asFactionId(row.winnerFactionId) : undefined,
+    prizePoolGold: row.prizePoolGold === undefined ? undefined : toNumber(row.prizePoolGold),
+    eligibleWinners:
+      row.eligibleWinners === undefined ? undefined : toNumber(row.eligibleWinners),
+    payoutPerPlayer:
+      row.payoutPerPlayer === undefined ? undefined : toNumber(row.payoutPerPlayer),
+    remainderGold: row.remainderGold === undefined ? undefined : toNumber(row.remainderGold),
   };
 }
 
@@ -344,6 +372,19 @@ export async function investRealmSiegeIncome(playerId: string, territoryId: stri
   const { data, error } = await supabase.rpc("invest_realm_siege_income", {
     p_player_id: playerId,
     p_territory_id: territoryId,
+    p_season_slug: REALM_SIEGE_SLUG,
+  });
+
+  if (error) {
+    throw new Error(getSupabaseErrorMessage(error));
+  }
+
+  return normalizeMutationResult(data);
+}
+
+export async function settleRealmSiegePrize(playerId: string) {
+  const { data, error } = await supabase.rpc("settle_realm_siege_prize", {
+    p_player_id: playerId,
     p_season_slug: REALM_SIEGE_SLUG,
   });
 

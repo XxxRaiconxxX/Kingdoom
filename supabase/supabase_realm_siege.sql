@@ -23,9 +23,44 @@ create table if not exists public.realm_siege_seasons (
   income_invest_cost_step integer not null default 50000 check (income_invest_cost_step >= 0),
   income_invest_gain integer not null default 1000 check (income_invest_gain >= 0),
   max_income_invest_level integer not null default 5 check (max_income_invest_level >= 0),
+  prize_pool_base_gold integer not null default 125000 check (prize_pool_base_gold >= 0),
+  prize_pool_growth_per_cycle integer not null default 125000 check (prize_pool_growth_per_cycle >= 0),
+  prize_pool_cap_gold integer not null default 1000000 check (prize_pool_cap_gold > 0),
+  prize_pool_awarded_gold integer not null default 0 check (prize_pool_awarded_gold >= 0),
+  prize_pool_awarded_at timestamptz,
+  winner_faction_id text check (
+    winner_faction_id is null
+    or winner_faction_id in ('kaelum', 'oakhaven', 'arcania', 'paramos')
+  ),
+  winner_reason text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.realm_siege_seasons
+  add column if not exists prize_pool_base_gold integer not null default 125000 check (prize_pool_base_gold >= 0),
+  add column if not exists prize_pool_growth_per_cycle integer not null default 125000 check (prize_pool_growth_per_cycle >= 0),
+  add column if not exists prize_pool_cap_gold integer not null default 1000000 check (prize_pool_cap_gold > 0),
+  add column if not exists prize_pool_awarded_gold integer not null default 0 check (prize_pool_awarded_gold >= 0),
+  add column if not exists prize_pool_awarded_at timestamptz,
+  add column if not exists winner_faction_id text,
+  add column if not exists winner_reason text;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'realm_siege_winner_faction_id_check'
+  ) then
+    alter table public.realm_siege_seasons
+      add constraint realm_siege_winner_faction_id_check
+      check (
+        winner_faction_id is null
+        or winner_faction_id in ('kaelum', 'oakhaven', 'arcania', 'paramos')
+      );
+  end if;
+end $$;
 
 create table if not exists public.realm_siege_factions (
   season_id uuid not null references public.realm_siege_seasons(id) on delete cascade,
@@ -214,13 +249,19 @@ insert into public.realm_siege_seasons (
   title,
   status,
   starts_at,
-  ends_at
+  ends_at,
+  prize_pool_base_gold,
+  prize_pool_growth_per_cycle,
+  prize_pool_cap_gold
 ) values (
   'asedio-reinos-t1',
   'El Asedio de los Reinos',
   'active',
   now(),
-  now() + interval '7 days'
+  now() + interval '7 days',
+  125000,
+  125000,
+  1000000
 )
 on conflict (slug) do update
 set
@@ -236,6 +277,9 @@ set
   income_invest_cost_step = 50000,
   income_invest_gain = 1000,
   max_income_invest_level = 5,
+  prize_pool_base_gold = 125000,
+  prize_pool_growth_per_cycle = 125000,
+  prize_pool_cap_gold = 1000000,
   updated_at = now();
 
 with season as (
@@ -389,6 +433,47 @@ $$;
 
 revoke all on function public.realm_siege_assert_player(uuid) from public;
 
+create or replace function public.realm_siege_current_prize_pool(
+  p_starts_at timestamptz,
+  p_ends_at timestamptz,
+  p_income_cycle_hours integer,
+  p_base_gold integer,
+  p_growth_per_cycle integer,
+  p_cap_gold integer,
+  p_awarded_gold integer,
+  p_awarded_at timestamptz
+)
+returns integer
+language sql
+stable
+as $$
+  select case
+    when p_awarded_at is not null then greatest(coalesce(p_awarded_gold, 0), 0)
+    else least(
+      greatest(coalesce(p_cap_gold, 1000000), 1),
+      greatest(coalesce(p_base_gold, 0), 0)
+        + (
+          floor(
+            greatest(
+              extract(
+                epoch from (
+                  least(now(), coalesce(p_ends_at, now()))
+                  - coalesce(p_starts_at, now())
+                )
+              ),
+              0
+            )
+            / (greatest(coalesce(p_income_cycle_hours, 24), 1) * 3600)
+          )::integer
+          * greatest(coalesce(p_growth_per_cycle, 0), 0)
+        )
+    )
+  end::integer;
+$$;
+
+revoke all on function public.realm_siege_current_prize_pool(timestamptz, timestamptz, integer, integer, integer, integer, integer, timestamptz) from public;
+grant execute on function public.realm_siege_current_prize_pool(timestamptz, timestamptz, integer, integer, integer, integer, integer, timestamptz) to anon, authenticated, service_role;
+
 create or replace function public.get_realm_siege_state(
   p_season_slug text default 'asedio-reinos-t1',
   p_player_id uuid default null
@@ -406,6 +491,7 @@ declare
   v_territories jsonb;
   v_actions jsonb;
   v_deposited_today integer := 0;
+  v_current_prize_pool integer := 0;
   v_today date := ((now() at time zone 'America/Asuncion')::date);
 begin
   select *
@@ -507,6 +593,17 @@ begin
     limit 12
   ) recent_actions;
 
+  v_current_prize_pool := public.realm_siege_current_prize_pool(
+    v_season.starts_at,
+    v_season.ends_at,
+    v_season.income_cycle_hours,
+    v_season.prize_pool_base_gold,
+    v_season.prize_pool_growth_per_cycle,
+    v_season.prize_pool_cap_gold,
+    v_season.prize_pool_awarded_gold,
+    v_season.prize_pool_awarded_at
+  );
+
   return jsonb_build_object(
     'season', jsonb_build_object(
       'id', v_season.id,
@@ -525,7 +622,15 @@ begin
       'incomeInvestBaseCost', v_season.income_invest_base_cost,
       'incomeInvestCostStep', v_season.income_invest_cost_step,
       'incomeInvestGain', v_season.income_invest_gain,
-      'maxIncomeInvestLevel', v_season.max_income_invest_level
+      'maxIncomeInvestLevel', v_season.max_income_invest_level,
+      'prizePoolBaseGold', v_season.prize_pool_base_gold,
+      'prizePoolGrowthPerCycle', v_season.prize_pool_growth_per_cycle,
+      'prizePoolCapGold', v_season.prize_pool_cap_gold,
+      'currentPrizePoolGold', v_current_prize_pool,
+      'prizePoolAwardedGold', v_season.prize_pool_awarded_gold,
+      'prizePoolAwardedAt', v_season.prize_pool_awarded_at,
+      'winnerFactionId', v_season.winner_faction_id,
+      'winnerReason', v_season.winner_reason
     ),
     'factions', v_factions,
     'territories', v_territories,
@@ -1013,6 +1118,231 @@ $$;
 
 revoke all on function public.invest_realm_siege_income(uuid, text, text) from public;
 grant execute on function public.invest_realm_siege_income(uuid, text, text) to authenticated, service_role;
+
+create or replace function public.settle_realm_siege_prize(
+  p_player_id uuid,
+  p_season_slug text default 'asedio-reinos-t1'
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_season public.realm_siege_seasons%rowtype;
+  v_player public.players%rowtype;
+  v_player_state public.realm_siege_player_state%rowtype;
+  v_total_territories integer := 0;
+  v_winner_faction_id text;
+  v_winner_territories integer := 0;
+  v_winner_reason text;
+  v_closes_at timestamptz;
+  v_current_prize_pool integer := 0;
+  v_eligible_count integer := 0;
+  v_payout_per_player integer := 0;
+  v_remainder_gold integer := 0;
+begin
+  v_player := public.realm_siege_assert_player(p_player_id);
+
+  select *
+  into v_season
+  from public.realm_siege_seasons
+  where slug = coalesce(nullif(trim(p_season_slug), ''), 'asedio-reinos-t1')
+  for update;
+
+  if v_season.id is null then
+    raise exception 'Temporada de Asedio no encontrada.'
+      using errcode = 'P0002';
+  end if;
+
+  if v_season.status in ('draft', 'archived') then
+    raise exception 'El Asedio no esta disponible para repartir premios.'
+      using errcode = '22023';
+  end if;
+
+  select *
+  into v_player_state
+  from public.realm_siege_player_state
+  where season_id = v_season.id
+    and player_id = v_player.id
+  for update;
+
+  if v_player_state.player_id is null then
+    raise exception 'Debes participar en el Asedio para cerrar el pozo.'
+      using errcode = '22023';
+  end if;
+
+  if v_season.prize_pool_awarded_at is not null then
+    return jsonb_build_object(
+      'success', true,
+      'message', 'El pozo del Asedio ya fue repartido.',
+      'winnerFactionId', v_season.winner_faction_id,
+      'prizePoolGold', v_season.prize_pool_awarded_gold,
+      'state', public.get_realm_siege_state(v_season.slug, v_player.id)
+    );
+  end if;
+
+  v_closes_at := coalesce(
+    v_season.ends_at,
+    v_season.starts_at + make_interval(days => v_season.min_duration_days)
+  );
+
+  select count(*)::integer
+  into v_total_territories
+  from public.realm_siege_territories
+  where season_id = v_season.id;
+
+  select owner_faction_id, count(*)::integer
+  into v_winner_faction_id, v_winner_territories
+  from public.realm_siege_territories
+  where season_id = v_season.id
+    and owner_faction_id is not null
+  group by owner_faction_id
+  having count(*) = v_total_territories
+  limit 1;
+
+  if v_winner_faction_id is not null then
+    v_winner_reason := 'full_conquest';
+  else
+    if now() < v_closes_at then
+      raise exception 'El pozo se reparte al conquistar todo el mapa o al cierre de la semana.'
+        using errcode = '22023';
+    end if;
+
+    select
+      factions.faction_id,
+      count(territories.territory_id)::integer
+    into v_winner_faction_id, v_winner_territories
+    from public.realm_siege_factions factions
+    left join public.realm_siege_territories territories
+      on territories.season_id = factions.season_id
+      and territories.owner_faction_id = factions.faction_id
+    where factions.season_id = v_season.id
+    group by factions.faction_id, factions.treasury_gold
+    order by
+      count(territories.territory_id) desc,
+      factions.treasury_gold desc,
+      coalesce(sum(territories.garrison_power), 0) desc,
+      factions.faction_id asc
+    limit 1;
+
+    v_winner_reason := 'territory_lead';
+  end if;
+
+  if v_winner_faction_id is null or v_winner_territories <= 0 then
+    raise exception 'Todavia no hay un reino ganador para repartir el pozo.'
+      using errcode = '22023';
+  end if;
+
+  v_current_prize_pool := public.realm_siege_current_prize_pool(
+    v_season.starts_at,
+    v_season.ends_at,
+    v_season.income_cycle_hours,
+    v_season.prize_pool_base_gold,
+    v_season.prize_pool_growth_per_cycle,
+    v_season.prize_pool_cap_gold,
+    v_season.prize_pool_awarded_gold,
+    v_season.prize_pool_awarded_at
+  );
+
+  if v_current_prize_pool <= 0 then
+    raise exception 'El pozo del Asedio aun no tiene oro para repartir.'
+      using errcode = '22023';
+  end if;
+
+  select count(*)::integer
+  into v_eligible_count
+  from public.realm_siege_player_state player_state
+  where player_state.season_id = v_season.id
+    and player_state.faction_id = v_winner_faction_id
+    and exists (
+      select 1
+      from public.realm_siege_actions actions
+      where actions.season_id = v_season.id
+        and actions.player_id = player_state.player_id
+        and actions.actor_faction_id = player_state.faction_id
+        and actions.action_type in ('deposit_gold', 'claim_income', 'invest_income')
+    );
+
+  if v_eligible_count <= 0 then
+    raise exception 'El reino ganador no tiene integrantes activos elegibles para cobrar el pozo.'
+      using errcode = '22023';
+  end if;
+
+  v_payout_per_player := floor(v_current_prize_pool::numeric / v_eligible_count)::integer;
+  v_remainder_gold := v_current_prize_pool - (v_payout_per_player * v_eligible_count);
+
+  if v_payout_per_player <= 0 then
+    raise exception 'El pozo no alcanza para repartir oro entre los elegibles.'
+      using errcode = '22023';
+  end if;
+
+  update public.players
+  set gold = gold + v_payout_per_player
+  where id in (
+    select player_state.player_id
+    from public.realm_siege_player_state player_state
+    where player_state.season_id = v_season.id
+      and player_state.faction_id = v_winner_faction_id
+      and exists (
+        select 1
+        from public.realm_siege_actions actions
+        where actions.season_id = v_season.id
+          and actions.player_id = player_state.player_id
+          and actions.actor_faction_id = player_state.faction_id
+          and actions.action_type in ('deposit_gold', 'claim_income', 'invest_income')
+      )
+  );
+
+  update public.realm_siege_seasons
+  set
+    status = 'completed',
+    ends_at = case
+      when ends_at is null or ends_at > now() then now()
+      else ends_at
+    end,
+    prize_pool_awarded_gold = v_current_prize_pool,
+    prize_pool_awarded_at = now(),
+    winner_faction_id = v_winner_faction_id,
+    winner_reason = v_winner_reason,
+    updated_at = now()
+  where id = v_season.id;
+
+  insert into public.realm_siege_actions (
+    season_id,
+    actor_faction_id,
+    action_type,
+    amount,
+    payload
+  ) values (
+    v_season.id,
+    v_winner_faction_id,
+    'prize_awarded',
+    v_current_prize_pool,
+    jsonb_build_object(
+      'winnerReason', v_winner_reason,
+      'territoriesControlled', v_winner_territories,
+      'eligiblePlayers', v_eligible_count,
+      'payoutPerPlayer', v_payout_per_player,
+      'remainderGold', v_remainder_gold
+    )
+  );
+
+  return jsonb_build_object(
+    'success', true,
+    'message', 'Pozo del Asedio repartido entre el reino ganador.',
+    'winnerFactionId', v_winner_faction_id,
+    'prizePoolGold', v_current_prize_pool,
+    'eligibleWinners', v_eligible_count,
+    'payoutPerPlayer', v_payout_per_player,
+    'remainderGold', v_remainder_gold,
+    'state', public.get_realm_siege_state(v_season.slug, v_player.id)
+  );
+end;
+$$;
+
+revoke all on function public.settle_realm_siege_prize(uuid, text) from public;
+grant execute on function public.settle_realm_siege_prize(uuid, text) to authenticated, service_role;
 
 create or replace function public.run_realm_siege_ai_strategy(
   p_season_slug text default 'asedio-reinos-t1'

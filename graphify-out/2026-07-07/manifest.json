@@ -1,0 +1,3172 @@
+{
+  ".agents/agents/KingdoomFB/agent.json": {
+    "mtime": 1782936652.8117118,
+    "ast_hash": "d5f4e1e8e1d7a75c67159161e94aeeef",
+    "semantic_hash": ""
+  },
+  ".agents/agents/analyst/agent.json": {
+    "mtime": 1781194874.0289018,
+    "ast_hash": "bc918560634034376a477823975ea810",
+    "semantic_hash": ""
+  },
+  ".agents/agents/archivist/agent.json": {
+    "mtime": 1781194874.0305147,
+    "ast_hash": "18c705018ed29d216b7ad8684e412b8d",
+    "semantic_hash": ""
+  },
+  ".agents/agents/bot_hacker/agent.json": {
+    "mtime": 1781194874.031413,
+    "ast_hash": "1ba4b5fd3ed3d27c3397f809506eca91",
+    "semantic_hash": ""
+  },
+  ".agents/agents/economist/agent.json": {
+    "mtime": 1781194874.0332665,
+    "ast_hash": "a03b26947311ea06a3a08739e8ad48a0",
+    "semantic_hash": ""
+  },
+  ".agents/agents/game_designer/agent.json": {
+    "mtime": 1781194874.034405,
+    "ast_hash": "6ff57e5e4b9f827088a991a993b6f470",
+    "semantic_hash": ""
+  },
+  ".agents/agents/qa_tester/agent.json": {
+    "mtime": 1781194874.0349915,
+    "ast_hash": "c8bbfa6d1a4f0da4a2f5743f361051c8",
+    "semantic_hash": ""
+  },
+  ".agents/agents/secops/agent.json": {
+    "mtime": 1781194874.0359795,
+    "ast_hash": "cb75027e0306945aabb2fcd2cf169151",
+    "semantic_hash": ""
+  },
+  ".agents/agents/ui_ux_designer/agent.json": {
+    "mtime": 1781194874.036994,
+    "ast_hash": "ae47d5121a6b79e85f80c458c0605843",
+    "semantic_hash": ""
+  },
+  ".agents/skills.json": {
+    "mtime": 1782770067.911629,
+    "ast_hash": "887e256902bdc67ce8550d6ffa331164",
+    "semantic_hash": ""
+  },
+  ".codex/hooks.json": {
+    "mtime": 1783428829.2582386,
+    "ast_hash": "a1b25ce6e2a5417be7ccd843f0811eed",
+    "semantic_hash": ""
+  },
+  ".vscode/mcp.json": {
+    "mtime": 1780145550.716334,
+    "ast_hash": "d89b8b92164f1f73b7a4246628d96fd7",
+    "semantic_hash": ""
+  },
+  ".vscode/settings.json": {
+    "mtime": 1776458769.6758163,
+    "ast_hash": "2d06b60b7caf61c40b4ebbd7f8a1afa2",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/capacitor.config.json": {
+    "mtime": 1777894960.7706306,
+    "ast_hash": "a7f54f6ea66c3b4acab640b3978ae882",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/capacitor.plugins.json": {
+    "mtime": 1777894960.7716308,
+    "ast_hash": "9b18156dd642bdc8c1081792469604e6",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/AdminControlSheet-Bpm6jjwC.js": {
+    "mtime": 1777894960.7726274,
+    "ast_hash": "efcbe7d85963cdae6c731cc01a92d11d",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/FilterPill-DJ9BdLgq.js": {
+    "mtime": 1777894960.7726274,
+    "ast_hash": "9ae4527cfc9a1b913447c49d0cd17c4a",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/GrimoireSection-jPpdvM2I.js": {
+    "mtime": 1777894960.7746212,
+    "ast_hash": "15bc93b72d647778f1e23ff8ca2d2f3a",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/LibrarySection-BDOvQQeu.js": {
+    "mtime": 1777894960.7746212,
+    "ast_hash": "22637a8659ad9e4da3d1eb9b71f98582",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/MarketSection-CH49VJKx.js": {
+    "mtime": 1777894960.7746212,
+    "ast_hash": "15ed6b8e7ae171038e039454dc395252",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/PlayerInventorySheet-rnhhPyWi.js": {
+    "mtime": 1777894960.775619,
+    "ast_hash": "3edf55902f4708b17c1169487304b287",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/PlayerTradeSheet-BbdhRWKM.js": {
+    "mtime": 1777894960.7766175,
+    "ast_hash": "b606b408166b079de51fbc18490a7a7c",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/PurchaseModal-DzE1LB3V.js": {
+    "mtime": 1777894960.7766175,
+    "ast_hash": "f67edff7ce76886af5f70db4f1faa069",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/RankingSection-Bv5XFtCT.js": {
+    "mtime": 1777894960.7766175,
+    "ast_hash": "aee38f77aa7f9e8355f4fbe069188ce8",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/TavernCards-DTX4zAip.js": {
+    "mtime": 1777894960.7776136,
+    "ast_hash": "5df489db0b213632e51de881fcfa07fb",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/TavernCrash-uEODwGr4.js": {
+    "mtime": 1777894960.7776136,
+    "ast_hash": "3fb8251fe74dbf296cab73f64d874483",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/TavernExpeditionArcade-CIUZgbPb.js": {
+    "mtime": 1777894960.7776136,
+    "ast_hash": "9600ca5f443652871b6519a2088f0b7f",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/TavernGame-C-HmGAX8.js": {
+    "mtime": 1777894960.778612,
+    "ast_hash": "aed3819843dace1a3116542e6a60ec43",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/TavernRoulette-BwNAY5A9.js": {
+    "mtime": 1777894960.778612,
+    "ast_hash": "2e24fc8eff1855f38c845809b7b39f56",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/TavernScratch-BwGWo4Fj.js": {
+    "mtime": 1777894960.7796085,
+    "ast_hash": "fc24ec12d7365691844bcbf71171527a",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/WeeklyRankingPodium-BwxnWERu.js": {
+    "mtime": 1777894960.7796085,
+    "ast_hash": "f1e7015e820d9b52856c4faee669185b",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/icons-DyPfT9Qp.js": {
+    "mtime": 1777894960.7826006,
+    "ast_hash": "83a1851957428656ff6803f9ec999250",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/index-Bn5bstj6.js": {
+    "mtime": 1777894960.7835977,
+    "ast_hash": "15c7b56ccfb9728adda9a0209b8a2d9a",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/inventory-OcgmmzEo.js": {
+    "mtime": 1777894960.7845955,
+    "ast_hash": "4ffd0afe185cb3d604231a239d705eb3",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/market-CMeKN37R.js": {
+    "mtime": 1777894960.7845955,
+    "ast_hash": "a09e7bf7fd20b08ccc8fe4106514bb54",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/motion-CUEKfUlm.js": {
+    "mtime": 1777894960.7855916,
+    "ast_hash": "fcd226a6bf69338df89020b03d885a5b",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/react-DUoe1Hmu.js": {
+    "mtime": 1777894960.7877426,
+    "ast_hash": "19ac6d4ac69ac110c6a8cb33828bc013",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/scratchUtils-BlNka2vw.js": {
+    "mtime": 1777894960.7917244,
+    "ast_hash": "19e5f7ad96806bbc1397b57e44e6a7da",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/supabase-DDf878CM.js": {
+    "mtime": 1777894960.7927222,
+    "ast_hash": "30d4be19a1ca0907aba1e4f006ce19e4",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/vercel-R2IQnd9F.js": {
+    "mtime": 1777894960.7937214,
+    "ast_hash": "f4cd3a883305b6e2c0b3bdb9ae4802ad",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/web-C3CPwoD9.js": {
+    "mtime": 1777894960.7947168,
+    "ast_hash": "c42a382c81acbcbcd522e037e56147cb",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/weeklyRanking-CMhmDk2c.js": {
+    "mtime": 1777894960.795714,
+    "ast_hash": "e8655dd51d5f9cadc924bb33b2b22c70",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/cordova.js": {
+    "mtime": 1777894960.795714,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/cordova_plugins.js": {
+    "mtime": 1777894960.795714,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": ""
+  },
+  "android/capacitor-cordova-android-plugins/build.gradle": {
+    "mtime": 1777894960.8007004,
+    "ast_hash": "a7a12dc65acd1f9b0af056843079c663",
+    "semantic_hash": ""
+  },
+  "android/capacitor-cordova-android-plugins/cordova.variables.gradle": {
+    "mtime": 1777894960.817825,
+    "ast_hash": "63baba6cd34447b34012133da561f604",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/api/anime/[id].ts": {
+    "mtime": 1778529516.977353,
+    "ast_hash": "7c326aea3dba3bd2e3b4adb8a0123d4b",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/api/episode/[id].ts": {
+    "mtime": 1778529526.892406,
+    "ast_hash": "c17d0c6682c79b519bfec2261f4061f3",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/api/recent.ts": {
+    "mtime": 1778529533.8764515,
+    "ast_hash": "b93a77c0b9c2118c7ce86942c5ffd0f3",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/api/search.ts": {
+    "mtime": 1778529508.9796355,
+    "ast_hash": "d74f44ecbb2c416059b99c6c8dce3e52",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/lib/scrapers/animeflv.ts": {
+    "mtime": 1778526173.4696748,
+    "ast_hash": "c0aa6834cd214b48294acc8950986fc8",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/lib/scrapers/gogoanime.ts": {
+    "mtime": 1778526190.4033132,
+    "ast_hash": "4620dd9a808302b3245a90bd7f3d52a1",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/lib/scrapers/tioanime.ts": {
+    "mtime": 1778529501.2252748,
+    "ast_hash": "5127497d1c556f61d6c154d1874e403c",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/lib/utils.ts": {
+    "mtime": 1778528349.7287252,
+    "ast_hash": "0c56207d2d6b71a445d3405342b33089",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/package.json": {
+    "mtime": 1778526128.9802728,
+    "ast_hash": "d43e0af46b8de7197aa1fc905fec104c",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/tsconfig.json": {
+    "mtime": 1778526128.9802728,
+    "ast_hash": "b486bdad5d9d813eb2b549a1b40d4af5",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/vercel.json": {
+    "mtime": 1778526128.9844167,
+    "ast_hash": "3e168a360cc2a064510ff193a140a1be",
+    "semantic_hash": ""
+  },
+  "api/admin/_aiCache.ts": {
+    "mtime": 1777468956.807309,
+    "ast_hash": "b5e47bfd0da28406a0e4130d1b1d3a90",
+    "semantic_hash": ""
+  },
+  "api/admin/_aiOrchestrator.ts": {
+    "mtime": 1781128575.7098503,
+    "ast_hash": "60ee7449dded7575fbd1eee818e8e935",
+    "semantic_hash": ""
+  },
+  "api/admin/_aiPrompts.ts": {
+    "mtime": 1781125199.4345238,
+    "ast_hash": "216a29657026935e191b0c32ac910b48",
+    "semantic_hash": ""
+  },
+  "api/admin/_assistantSecurity.ts": {
+    "mtime": 1780412254.974867,
+    "ast_hash": "8d74e01ee3ce6016b93e8ec643e7a696",
+    "semantic_hash": ""
+  },
+  "api/admin/_marketAssistant.ts": {
+    "mtime": 1780350329.1414056,
+    "ast_hash": "a1f561b0f49b31b45b0f14442e6e1500",
+    "semantic_hash": ""
+  },
+  "api/admin/_serverAiProviders.ts": {
+    "mtime": 1781128600.069353,
+    "ast_hash": "e9d82ff740a1b0122b4667eec6a78813",
+    "semantic_hash": ""
+  },
+  "api/admin/_supabaseAdmin.ts": {
+    "mtime": 1780350265.8517888,
+    "ast_hash": "30faba9d7e0d578b694059cc071a4702",
+    "semantic_hash": ""
+  },
+  "api/admin/_visualReference.ts": {
+    "mtime": 1780350265.8517888,
+    "ast_hash": "ef35d88109acba378cbb337af81a860d",
+    "semantic_hash": ""
+  },
+  "api/admin/advise-staff.ts": {
+    "mtime": 1778512079.4091027,
+    "ast_hash": "64985a494636df908021eb04e90e9586",
+    "semantic_hash": ""
+  },
+  "api/admin/analyze-ficha.ts": {
+    "mtime": 1781703121.4454896,
+    "ast_hash": "b40097ea6bd834f192c43f1137153b2f",
+    "semantic_hash": ""
+  },
+  "api/admin/analyze-magic-balance.ts": {
+    "mtime": 1777469136.5116546,
+    "ast_hash": "bd11dd36d9fda58df00ec893cc228d75",
+    "semantic_hash": ""
+  },
+  "api/admin/ask-archivist.ts": {
+    "mtime": 1779142126.461337,
+    "ast_hash": "2752c8bbadaad4a09dd8489a602602c0",
+    "semantic_hash": ""
+  },
+  "api/admin/assistant/market/_confirm.ts": {
+    "mtime": 1780414704.3761046,
+    "ast_hash": "2f41c8c80e3d13da6dcf0915a40af18f",
+    "semantic_hash": ""
+  },
+  "api/admin/assistant/market/_draft.ts": {
+    "mtime": 1780412254.8652668,
+    "ast_hash": "e87356e79d2628f0f015d7230d2c3f12",
+    "semantic_hash": ""
+  },
+  "api/admin/assistant/market/_revise.ts": {
+    "mtime": 1780412254.8666375,
+    "ast_hash": "9dafa7964e506b57ede8fb68213b1c7d",
+    "semantic_hash": ""
+  },
+  "api/admin/assistant/market/index.ts": {
+    "mtime": 1780413427.6896894,
+    "ast_hash": "4f42a9a36277727916dd3a35d2167e1c",
+    "semantic_hash": ""
+  },
+  "api/admin/extract-pdf-text.ts": {
+    "mtime": 1778510814.191896,
+    "ast_hash": "bd9869181848dfbbea6b151661b10c0d",
+    "semantic_hash": ""
+  },
+  "api/admin/extract-pinterest-reference.ts": {
+    "mtime": 1777487024.2802951,
+    "ast_hash": "0e5642fe35e3dde0dd69850e0a745dff",
+    "semantic_hash": ""
+  },
+  "api/admin/generate-bestiary.ts": {
+    "mtime": 1781125182.6431332,
+    "ast_hash": "32566f02ca39ccdb9efccfd24de60759",
+    "semantic_hash": ""
+  },
+  "api/admin/generate-magic.ts": {
+    "mtime": 1781125240.9909244,
+    "ast_hash": "dded0d7086f132a5e2c2e64fd15643c5",
+    "semantic_hash": ""
+  },
+  "api/admin/generate-market-item.ts": {
+    "mtime": 1781128719.203748,
+    "ast_hash": "41f8d930cf28481ba41588379d93b0bc",
+    "semantic_hash": ""
+  },
+  "api/admin/generate-mission.ts": {
+    "mtime": 1779971695.4659214,
+    "ast_hash": "1f867f77598c8f69adce15cbf5df1b79",
+    "semantic_hash": ""
+  },
+  "api/anime/proxy.ts": {
+    "mtime": 1778587576.597738,
+    "ast_hash": "a2c3f8979c92266b9d225d10cbaa399a",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.vscode/extensions.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "b2354ba0225f5689d13651ec0fac0de0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.vscode/settings.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "6b9302c1f72c315e90233c7539c48c9f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/cache-v2-3e9bebb65f43b306a565.json": {
+    "mtime": 1776877227.8032193,
+    "ast_hash": "991a36320e90efc1c84d221cb8cdb0f1",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/cmakeFiles-v1-1ce222933f87be72dd17.json": {
+    "mtime": 1776877227.8062117,
+    "ast_hash": "631a1ffc11a36b8c9016c92d974dd10e",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/codemodel-v2-d47e8a0f04a94d55034f.json": {
+    "mtime": 1776877227.8284962,
+    "ast_hash": "813570f92f8dadb54a200dc9a145de24",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/directory-.-Debug-d0094a50bb2071803777.json": {
+    "mtime": 1776877227.8216858,
+    "ast_hash": "9f40cd23d42f6f64a253672a38c7ce57",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/directory-rnasyncstorage_autolinked_build-Debug-b0b97812a6b6ecf20d64.json": {
+    "mtime": 1776877227.8228438,
+    "ast_hash": "72400a4c0814faa8ba45f6b5f73ee473",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/directory-rnreanimated_autolinked_build-Debug-548a2b75e31d16814f60.json": {
+    "mtime": 1776877227.8231661,
+    "ast_hash": "b8d6ec85120e303b8b52cb3f2bd75749",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/directory-rnscreens_autolinked_build-Debug-d00690a9e3fd3b36167b.json": {
+    "mtime": 1776877227.8261585,
+    "ast_hash": "95c99f7f4e6664b0ba0ddbd0af72345f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/directory-rnworklets_autolinked_build-Debug-7eda8f510b23a37b1c0e.json": {
+    "mtime": 1776877227.8271554,
+    "ast_hash": "a505601d88b680d7d80b9f479605eceb",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/directory-safeareacontext_autolinked_build-Debug-b0442c18cd4d6e9a527f.json": {
+    "mtime": 1776877227.824778,
+    "ast_hash": "184e7ab669112b9f5978a5fc18e3cafe",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/index-2026-04-22T17-00-27-0829.json": {
+    "mtime": 1776877227.8291502,
+    "ast_hash": "c0473bd2fdaf7372463fe5be52e98c65",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/target-appmodules-Debug-1fc50499df4b75a283f2.json": {
+    "mtime": 1776877227.811198,
+    "ast_hash": "a65ae9111c0b71390ceb466d24f7e01d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/target-react_codegen_rnasyncstorage-Debug-1cd4670726f043ffffcb.json": {
+    "mtime": 1776877227.813193,
+    "ast_hash": "d9adb443678b8a5f2a618daee539f118",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/target-react_codegen_rnreanimated-Debug-436595ea62a9ab83b640.json": {
+    "mtime": 1776877227.8142216,
+    "ast_hash": "bbc9b63fcb70ee2cd54b4cc935c65a09",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/target-react_codegen_rnscreens-Debug-6559beb070bc2740345e.json": {
+    "mtime": 1776877227.8161852,
+    "ast_hash": "15a3202de1c3f39483835fce91a1186c",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/target-react_codegen_rnworklets-Debug-f2af433f2219d38a23b7.json": {
+    "mtime": 1776877227.8187716,
+    "ast_hash": "ecc027a64e932f90d52b224dd13644e8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/.cmake/api/v1/reply/target-react_codegen_safeareacontext-Debug-4827a712bb389bd6c46f.json": {
+    "mtime": 1776877227.8201747,
+    "ast_hash": "969e1871b8105d6d9743085b42b49792",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdCXX/CMakeCXXCompilerId.cpp": {
+    "mtime": 1776877225.6422176,
+    "ast_hash": "493a7cc5e29a3cf2b0d95a50ee58d987",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdC/CMakeCCompilerId.c": {
+    "mtime": 1776877224.928892,
+    "ast_hash": "245b894a1d9b5e1b569506b0cfe5d36b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp": {
+    "mtime": 1776877227.2382886,
+    "ast_hash": "bbf8a05ecab16853fd9ad99b367175f8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp": {
+    "mtime": 1776877227.2405424,
+    "ast_hash": "6155bf9e179fd0f9c2529e16119d24d8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/android_gradle_build.json": {
+    "mtime": 1776877227.9358647,
+    "ast_hash": "3349d8a100cc6474d6ed95fd4ad90b7f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/android_gradle_build_mini.json": {
+    "mtime": 1776877228.042581,
+    "ast_hash": "54b68545eda1334b678e0fd1760d97ee",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/compile_commands.json": {
+    "mtime": 1776877227.7852678,
+    "ast_hash": "89861fe64ceec8f3994d77c1f08ad4ad",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/prefab_config.json": {
+    "mtime": 1776877228.0495632,
+    "ast_hash": "4e3424c539f93c1941dff06767a0a7e8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/cache-v2-80aea29872cdc93cec8d.json": {
+    "mtime": 1776877234.4822195,
+    "ast_hash": "d2c299fdbed2c7b7501b107fdada4853",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/cmakeFiles-v1-993bbaa06e4153a6b96b.json": {
+    "mtime": 1776877234.4892018,
+    "ast_hash": "215052616ebc1d5b6ece066ce5c15238",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/codemodel-v2-ed1d6556224a233d44d5.json": {
+    "mtime": 1776877234.5255709,
+    "ast_hash": "142259cb4620066b02d6b6139ff729c0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/directory-.-Debug-d0094a50bb2071803777.json": {
+    "mtime": 1776877234.5146003,
+    "ast_hash": "9f40cd23d42f6f64a253672a38c7ce57",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/directory-rnasyncstorage_autolinked_build-Debug-b0b97812a6b6ecf20d64.json": {
+    "mtime": 1776877234.5166106,
+    "ast_hash": "72400a4c0814faa8ba45f6b5f73ee473",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/directory-rnreanimated_autolinked_build-Debug-548a2b75e31d16814f60.json": {
+    "mtime": 1776877234.518589,
+    "ast_hash": "b8d6ec85120e303b8b52cb3f2bd75749",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/directory-rnscreens_autolinked_build-Debug-d00690a9e3fd3b36167b.json": {
+    "mtime": 1776877234.5215814,
+    "ast_hash": "95c99f7f4e6664b0ba0ddbd0af72345f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/directory-rnworklets_autolinked_build-Debug-7eda8f510b23a37b1c0e.json": {
+    "mtime": 1776877234.5235758,
+    "ast_hash": "a505601d88b680d7d80b9f479605eceb",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/directory-safeareacontext_autolinked_build-Debug-b0442c18cd4d6e9a527f.json": {
+    "mtime": 1776877234.519586,
+    "ast_hash": "184e7ab669112b9f5978a5fc18e3cafe",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/index-2026-04-22T17-00-34-0528.json": {
+    "mtime": 1776877234.5277722,
+    "ast_hash": "d0f39c62a8dee668acff51d3f2b9706c",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/target-appmodules-Debug-c80bff7abf278449c324.json": {
+    "mtime": 1776877234.4972417,
+    "ast_hash": "823faaff0f931159422a53f15e5ca5bf",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/target-react_codegen_rnasyncstorage-Debug-1b62de00c43cdcc1ce74.json": {
+    "mtime": 1776877234.5016346,
+    "ast_hash": "a01de8edaf179c21083d130dac3e3bc3",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/target-react_codegen_rnreanimated-Debug-1d3da8129526915de191.json": {
+    "mtime": 1776877234.5046277,
+    "ast_hash": "54794b2333bedaa854a9c48da6e957f1",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/target-react_codegen_rnscreens-Debug-d923cde5cbfba20757c6.json": {
+    "mtime": 1776877234.5076191,
+    "ast_hash": "de10ec41f8a9f9b59ce17ce5d5a66626",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/target-react_codegen_rnworklets-Debug-4edc08e1bee44e1472c3.json": {
+    "mtime": 1776877234.5106103,
+    "ast_hash": "022239ebc744e5af643c12e61d4b40b9",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/.cmake/api/v1/reply/target-react_codegen_safeareacontext-Debug-3a5b7d8fad39f8589eb6.json": {
+    "mtime": 1776877234.5136034,
+    "ast_hash": "babee09c411ccdc8644564a411db67ca",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdCXX/CMakeCXXCompilerId.cpp": {
+    "mtime": 1776877232.6992831,
+    "ast_hash": "493a7cc5e29a3cf2b0d95a50ee58d987",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdC/CMakeCCompilerId.c": {
+    "mtime": 1776877232.3796194,
+    "ast_hash": "245b894a1d9b5e1b569506b0cfe5d36b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp": {
+    "mtime": 1776877233.7448232,
+    "ast_hash": "bbf8a05ecab16853fd9ad99b367175f8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp": {
+    "mtime": 1776877233.7523284,
+    "ast_hash": "6155bf9e179fd0f9c2529e16119d24d8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/android_gradle_build.json": {
+    "mtime": 1776877234.6287305,
+    "ast_hash": "2ae38c6720bb216ce65ecb94f8ec5991",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/android_gradle_build_mini.json": {
+    "mtime": 1776877234.7340198,
+    "ast_hash": "930b83ce5d519da174ec401350cd6a41",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/compile_commands.json": {
+    "mtime": 1776877234.4541702,
+    "ast_hash": "7423c3ac782c5175a836ab5dd4115512",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/prefab_config.json": {
+    "mtime": 1776877234.7460194,
+    "ast_hash": "4e3424c539f93c1941dff06767a0a7e8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/cache-v2-ccf534174d55590f734e.json": {
+    "mtime": 1776877240.1978674,
+    "ast_hash": "0359c5c17adbe689cef0527968442fe3",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/cmakeFiles-v1-92566d2ebe7611cf0901.json": {
+    "mtime": 1776877240.1998618,
+    "ast_hash": "94b4ca88919566823cddae5992d55795",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/codemodel-v2-9839ee175560676d9ce9.json": {
+    "mtime": 1776877240.2277882,
+    "ast_hash": "13528e4be64cc38d751223a218714620",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/directory-.-Debug-d0094a50bb2071803777.json": {
+    "mtime": 1776871985.4136863,
+    "ast_hash": "9f40cd23d42f6f64a253672a38c7ce57",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/directory-rnasyncstorage_autolinked_build-Debug-b0b97812a6b6ecf20d64.json": {
+    "mtime": 1776877240.2198093,
+    "ast_hash": "72400a4c0814faa8ba45f6b5f73ee473",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/directory-rnreanimated_autolinked_build-Debug-548a2b75e31d16814f60.json": {
+    "mtime": 1776877240.2218037,
+    "ast_hash": "b8d6ec85120e303b8b52cb3f2bd75749",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/directory-rnscreens_autolinked_build-Debug-d00690a9e3fd3b36167b.json": {
+    "mtime": 1776877240.2247963,
+    "ast_hash": "95c99f7f4e6664b0ba0ddbd0af72345f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/directory-rnworklets_autolinked_build-Debug-7eda8f510b23a37b1c0e.json": {
+    "mtime": 1776877240.2257934,
+    "ast_hash": "a505601d88b680d7d80b9f479605eceb",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/directory-safeareacontext_autolinked_build-Debug-b0442c18cd4d6e9a527f.json": {
+    "mtime": 1776877240.2228012,
+    "ast_hash": "184e7ab669112b9f5978a5fc18e3cafe",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/index-2026-04-22T17-00-40-0230.json": {
+    "mtime": 1776877240.229783,
+    "ast_hash": "84e8a00b21150546d31bd1877f9fc8d4",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/target-appmodules-Debug-82bcbe0521868ce40cbf.json": {
+    "mtime": 1776877240.2038517,
+    "ast_hash": "1ac5989dab6dcbdc8a1b9ec267d4bb8d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/target-react_codegen_rnasyncstorage-Debug-a349d6ec213384acb87e.json": {
+    "mtime": 1776877240.2058468,
+    "ast_hash": "ad4b4a3a299df1d2b1445d1b578ca123",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/target-react_codegen_rnreanimated-Debug-16dda06ef4b28f031fc4.json": {
+    "mtime": 1776877240.20884,
+    "ast_hash": "0820b8082f171fb9245d705c32ec54e0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/target-react_codegen_rnscreens-Debug-af77379c7b8c1aa6a113.json": {
+    "mtime": 1776877240.2118306,
+    "ast_hash": "10c63d5ee90a22bc36d9f903b13a4372",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/target-react_codegen_rnworklets-Debug-f2af433f2219d38a23b7.json": {
+    "mtime": 1776877240.2138245,
+    "ast_hash": "ecc027a64e932f90d52b224dd13644e8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/.cmake/api/v1/reply/target-react_codegen_safeareacontext-Debug-0dce52a3ad0dc40c9ce4.json": {
+    "mtime": 1776877240.216818,
+    "ast_hash": "c8117971a9fd6fd6cfdbc3dc0d9fbd74",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdCXX/CMakeCXXCompilerId.cpp": {
+    "mtime": 1776871982.823522,
+    "ast_hash": "493a7cc5e29a3cf2b0d95a50ee58d987",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdC/CMakeCCompilerId.c": {
+    "mtime": 1776871982.3701892,
+    "ast_hash": "245b894a1d9b5e1b569506b0cfe5d36b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp": {
+    "mtime": 1776877239.5028992,
+    "ast_hash": "bbf8a05ecab16853fd9ad99b367175f8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp": {
+    "mtime": 1776877239.5048943,
+    "ast_hash": "6155bf9e179fd0f9c2529e16119d24d8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/android_gradle_build.json": {
+    "mtime": 1776871985.508233,
+    "ast_hash": "4877681606400c93df6a6a06cd1723be",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/android_gradle_build_mini.json": {
+    "mtime": 1776871985.554349,
+    "ast_hash": "3c9519b194604f2029554045afd87a9d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/compile_commands.json": {
+    "mtime": 1776877240.1480012,
+    "ast_hash": "d2bf2d1351cddd98a346ff59fbc60921",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/prefab_config.json": {
+    "mtime": 1776871985.5738094,
+    "ast_hash": "4e3424c539f93c1941dff06767a0a7e8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/cache-v2-2f41a394b6231e212fbc.json": {
+    "mtime": 1776877315.199631,
+    "ast_hash": "23ed2636161e25940d018814c4f156c4",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/cmakeFiles-v1-9be6e02c25db69b88e72.json": {
+    "mtime": 1776877315.2026286,
+    "ast_hash": "3b1a0d1fb1128a8fce3551b28a0f239e",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/codemodel-v2-d4d1bcbe1d3dfb02060a.json": {
+    "mtime": 1776877315.2219708,
+    "ast_hash": "bd70a07c667bc039226ed4230f8cc913",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/directory-.-Debug-d0094a50bb2071803777.json": {
+    "mtime": 1776877315.2156174,
+    "ast_hash": "9f40cd23d42f6f64a253672a38c7ce57",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/directory-rnasyncstorage_autolinked_build-Debug-b0b97812a6b6ecf20d64.json": {
+    "mtime": 1776877315.2176456,
+    "ast_hash": "72400a4c0814faa8ba45f6b5f73ee473",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/directory-rnreanimated_autolinked_build-Debug-548a2b75e31d16814f60.json": {
+    "mtime": 1776877315.2186096,
+    "ast_hash": "b8d6ec85120e303b8b52cb3f2bd75749",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/directory-rnscreens_autolinked_build-Debug-d00690a9e3fd3b36167b.json": {
+    "mtime": 1776877315.219607,
+    "ast_hash": "95c99f7f4e6664b0ba0ddbd0af72345f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/directory-rnworklets_autolinked_build-Debug-7eda8f510b23a37b1c0e.json": {
+    "mtime": 1776877315.2209704,
+    "ast_hash": "a505601d88b680d7d80b9f479605eceb",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/directory-safeareacontext_autolinked_build-Debug-b0442c18cd4d6e9a527f.json": {
+    "mtime": 1776877315.219607,
+    "ast_hash": "184e7ab669112b9f5978a5fc18e3cafe",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/index-2026-04-22T17-01-55-0223.json": {
+    "mtime": 1776877315.222969,
+    "ast_hash": "574c04fd9f308d76547813b17eb80bf8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/target-appmodules-Debug-2354b5a72f75f7a16840.json": {
+    "mtime": 1776877315.2066433,
+    "ast_hash": "f451eca931e9f1e9b346f89be93e9715",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/target-react_codegen_rnasyncstorage-Debug-6cb4d05d246e639592c5.json": {
+    "mtime": 1776877315.208637,
+    "ast_hash": "55f399d37dc50971d8c443a997a8c761",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/target-react_codegen_rnreanimated-Debug-16dda06ef4b28f031fc4.json": {
+    "mtime": 1776877315.2096353,
+    "ast_hash": "0820b8082f171fb9245d705c32ec54e0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/target-react_codegen_rnscreens-Debug-359718cce924541a96be.json": {
+    "mtime": 1776877315.2118838,
+    "ast_hash": "2ffa78b26cdc8a999ae19e79e94aaa1f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/target-react_codegen_rnworklets-Debug-f2af433f2219d38a23b7.json": {
+    "mtime": 1776877315.2138393,
+    "ast_hash": "ecc027a64e932f90d52b224dd13644e8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/.cmake/api/v1/reply/target-react_codegen_safeareacontext-Debug-b59d868fe6fbea2bebfe.json": {
+    "mtime": 1776877315.2146316,
+    "ast_hash": "45b2770f9ec2477dc50e7681b079db30",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdCXX/CMakeCXXCompilerId.cpp": {
+    "mtime": 1776877313.997967,
+    "ast_hash": "493a7cc5e29a3cf2b0d95a50ee58d987",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeFiles/3.22.1-g37088a8-dirty/CompilerIdC/CMakeCCompilerId.c": {
+    "mtime": 1776877313.5534182,
+    "ast_hash": "245b894a1d9b5e1b569506b0cfe5d36b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp": {
+    "mtime": 1776877314.6839943,
+    "ast_hash": "bbf8a05ecab16853fd9ad99b367175f8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp": {
+    "mtime": 1776877314.6858976,
+    "ast_hash": "6155bf9e179fd0f9c2529e16119d24d8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/android_gradle_build.json": {
+    "mtime": 1776877315.279154,
+    "ast_hash": "166e83d489dd5b8920069dad6e348af2",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/android_gradle_build_mini.json": {
+    "mtime": 1776877315.323552,
+    "ast_hash": "46098371d2896e65c6c56c0a1dd3c4c5",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/compile_commands.json": {
+    "mtime": 1776877315.1846714,
+    "ast_hash": "2e6d83e27fce166b2a8a9b73f9a97875",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/prefab_config.json": {
+    "mtime": 1776877315.3255484,
+    "ast_hash": "4e3424c539f93c1941dff06767a0a7e8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/tools/debug/arm64-v8a/compile_commands.json": {
+    "mtime": 1776877227.7852678,
+    "ast_hash": "89861fe64ceec8f3994d77c1f08ad4ad",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/tools/debug/armeabi-v7a/compile_commands.json": {
+    "mtime": 1776877234.4541702,
+    "ast_hash": "7423c3ac782c5175a836ab5dd4115512",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/tools/debug/x86/compile_commands.json": {
+    "mtime": 1776871985.3808656,
+    "ast_hash": "3ba334e0a4ba9701d351feb831045738",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/tools/debug/x86_64/compile_commands.json": {
+    "mtime": 1776877315.1846714,
+    "ast_hash": "2e6d83e27fce166b2a8a9b73f9a97875",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/build.gradle": {
+    "mtime": 1776871793.9838393,
+    "ast_hash": "928e4a9bdfd87588bd0aa9481992479f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/java/com/reborn/app/MainActivity.kt": {
+    "mtime": 1776871793.9733686,
+    "ast_hash": "56743136d083bc3dfe3efd88b9a75ce1",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/java/com/reborn/app/MainApplication.kt": {
+    "mtime": 1776871792.01735,
+    "ast_hash": "1308354d066e820fe52a2e39998a6b5e",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/build.gradle": {
+    "mtime": 1776871793.9733686,
+    "ast_hash": "55cec08c744fbe7b1f1294009fe3f65d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/gradlew": {
+    "mtime": 499162500.0,
+    "ast_hash": "ff1ddbebbc9b4d04f2e9f8cab50d6595",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/settings.gradle": {
+    "mtime": 1776871793.9733686,
+    "ast_hash": "7fb50a6d91000548585216c873dc5f9d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app.json": {
+    "mtime": 1776865822.0074377,
+    "ast_hash": "13ce233ce9fbcba6d58c186eb781fff8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/_layout.tsx": {
+    "mtime": 1778167749.269639,
+    "ast_hash": "dde1ad9bd6ff679a0030d0780c5fe7aa",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/anime.tsx": {
+    "mtime": 1780090902.3401973,
+    "ast_hash": "434f5ebd6e8a245ccfda1142bde53241",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/archivist.tsx": {
+    "mtime": 1780090932.8606932,
+    "ast_hash": "28ee62c6a590a4290b15b09fc3efe4c4",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/grimoire.tsx": {
+    "mtime": 1777563573.1570122,
+    "ast_hash": "ab0d1e3ce42a9bb0370fed300b109d44",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/home.tsx": {
+    "mtime": 1780091259.4145877,
+    "ast_hash": "0fe40a4159c03b6a90cd2b59c6dc63a4",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/index.tsx": {
+    "mtime": 1776780483.8249404,
+    "ast_hash": "fa5bfa695d555f322aa86cdbd2ceff31",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/library.tsx": {
+    "mtime": 1780090891.7567873,
+    "ast_hash": "4ba58371429cd9e98c4259aa714ce869",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/market.tsx": {
+    "mtime": 1780092158.7773044,
+    "ast_hash": "92af7202c7ba67a585cc0c4119aba4b2",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/(tabs)/profile.tsx": {
+    "mtime": 1780091356.1918378,
+    "ast_hash": "939d599151ac7175e160042595a57f59",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/+html.tsx": {
+    "mtime": 499162500.0,
+    "ast_hash": "56b602b5b9492c68c88388d86508e841",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/+not-found.tsx": {
+    "mtime": 499162500.0,
+    "ast_hash": "38550dbc30757ea8dc43a4601c2b1d4f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/_layout.tsx": {
+    "mtime": 1776779914.2935271,
+    "ast_hash": "07566aec66acecca225bcd289925c856",
+    "semantic_hash": ""
+  },
+  "apps/mobile/app/modal.tsx": {
+    "mtime": 499162500.0,
+    "ast_hash": "e621c49637832d1848fe4b8fc7007ad0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/EditScreenInfo.tsx": {
+    "mtime": 499162500.0,
+    "ast_hash": "76cdebe72bb7987a876a19cfafbe2f55",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/ExternalLink.tsx": {
+    "mtime": 1776780631.84831,
+    "ast_hash": "28ba03431c7630a0e15a20417d6629d1",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/StyledText.tsx": {
+    "mtime": 499162500.0,
+    "ast_hash": "c50b6e360fa81e992b0edb46473bfbb4",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/Themed.tsx": {
+    "mtime": 499162500.0,
+    "ast_hash": "322ede734ffc8f86ed2dc540b50a2752",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/__tests__/StyledText-test.js": {
+    "mtime": 499162500.0,
+    "ast_hash": "4be1bd384f743fab176f40db82e2f4de",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/useClientOnlyValue.ts": {
+    "mtime": 499162500.0,
+    "ast_hash": "1cac2ad5842f4258c04fde5f72d99a06",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/useClientOnlyValue.web.ts": {
+    "mtime": 499162500.0,
+    "ast_hash": "89b7d949967750bf9187d0a2c68dd525",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/useColorScheme.ts": {
+    "mtime": 499162500.0,
+    "ast_hash": "6f3444fcb9c7013a839a7832be518831",
+    "semantic_hash": ""
+  },
+  "apps/mobile/components/useColorScheme.web.ts": {
+    "mtime": 499162500.0,
+    "ast_hash": "114ae1ab68038f77c94c9353ba8f706f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/constants/Colors.ts": {
+    "mtime": 499162500.0,
+    "ast_hash": "ddcdf7a328bf16f1d8b6302dd4719716",
+    "semantic_hash": ""
+  },
+  "apps/mobile/eas.json": {
+    "mtime": 1776797541.5552385,
+    "ast_hash": "e7f6244b55c3d31ac8c902afd3aadc97",
+    "semantic_hash": ""
+  },
+  "apps/mobile/package.json": {
+    "mtime": 1776881500.5552182,
+    "ast_hash": "a8ca137069d8e531c1eb0a1682486533",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/DetailSheet.tsx": {
+    "mtime": 1777908497.5996678,
+    "ast_hash": "a99b9f7478328980b63414dab4c02434",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/KingdoomUI.tsx": {
+    "mtime": 1780090877.2884755,
+    "ast_hash": "e93851587ecce7dc29c8bcdf2c43cd89",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/PlayerNotificationBellNative.tsx": {
+    "mtime": 1780091834.7454045,
+    "ast_hash": "985bb29789d2e0eb16d6b30e4ef53e48",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/RealmStockExchangeNative.tsx": {
+    "mtime": 1780090912.9120567,
+    "ast_hash": "a807b94c5e7174f1eecab6ac2592c7b0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/ScreenShell.tsx": {
+    "mtime": 1777908379.9546366,
+    "ast_hash": "083161d533a47767501c8146bd3812c3",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/TavernHorseRaceNative.tsx": {
+    "mtime": 1780091005.1921072,
+    "ast_hash": "8dfd44865585c2020841e6a1132e8dd8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/TavernScratchNative.tsx": {
+    "mtime": 1780145895.5499692,
+    "ast_hash": "97ccebd3ae6e96f54303c53adc6ecab6",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/TavernSlotsNative.tsx": {
+    "mtime": 1780091020.5307796,
+    "ast_hash": "544baf507204075f53bc1c7bff7dac51",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/animeHub/animeHubMock.ts": {
+    "mtime": 1778506764.173255,
+    "ast_hash": "58659f76e54832161db6012576a5ea54",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/animeHub/animeHubProvider.ts": {
+    "mtime": 1778523425.979177,
+    "ast_hash": "3223ef006f5157dc556bff372b446f4b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/animeHub/animeHubTypes.ts": {
+    "mtime": 1778167456.6946979,
+    "ast_hash": "5d6e408d83a2dd0005622792c749196a",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/archivist/archivistService.ts": {
+    "mtime": 1777555053.2611513,
+    "ast_hash": "dc4e6e2be00efd2049f13d342926ffa3",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/events/eventsService.ts": {
+    "mtime": 1777562041.006737,
+    "ast_hash": "bc700c986200e88651506d6648aefbc1",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/grimoire/grimoireService.ts": {
+    "mtime": 1777562041.0057406,
+    "ast_hash": "4e18f26085dd768e8a32eeec1bf6c940",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/inventory/inventoryService.ts": {
+    "mtime": 1776781748.2838595,
+    "ast_hash": "b15fd838a44d7c3788edef5792830201",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/market/marketRotation.ts": {
+    "mtime": 1778003237.304358,
+    "ast_hash": "1032e1e1d2e9eea743a6c360d59b2656",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/market/marketService.ts": {
+    "mtime": 1777988492.292892,
+    "ast_hash": "bff4e5c8de10bf3562540121ad4f3282",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/market/purchaseHistoryStore.ts": {
+    "mtime": 1776783635.7189019,
+    "ast_hash": "f91cbf63b0ef73847108a89567a43295",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/market/purchaseService.ts": {
+    "mtime": 1776782541.049909,
+    "ast_hash": "8279b003401a1216ce824860152bbba4",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/missions/missionsService.ts": {
+    "mtime": 1780088402.679857,
+    "ast_hash": "d9631f55669381a8f44231bec93d016e",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/notifications/notificationsService.ts": {
+    "mtime": 1780091203.8983924,
+    "ast_hash": "5ba13a666db0124ba6a837a957660b61",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/realmExchange/realmExchangeData.ts": {
+    "mtime": 1778092701.8351552,
+    "ast_hash": "cf08afff4abed967c1494f0484ab4bcf",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/realmExchange/realmExchangeSimulation.ts": {
+    "mtime": 1778091162.341957,
+    "ast_hash": "c2b2212f2ff9884261d5e3e1a5bd2d98",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/realmExchange/realmExchangeStorage.ts": {
+    "mtime": 1778102351.8560722,
+    "ast_hash": "a37d6a1841505f53aa4893474bf5e976",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/realmExchange/realmExchangeTypes.ts": {
+    "mtime": 1778091118.8553536,
+    "ast_hash": "abd3bf6ff68cdb9729a7def807c900e0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/session/sessionStore.ts": {
+    "mtime": 1780088958.2936182,
+    "ast_hash": "0e4532f885758e72b13dd078169347da",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/features/shared/types.ts": {
+    "mtime": 1780087902.74736,
+    "ast_hash": "209e416c33410d7a62aec6a400c514ce",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/providers/AppProviders.tsx": {
+    "mtime": 1776780400.4610157,
+    "ast_hash": "c299215fb1c7ad45c45b54c4af62b639",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/services/supabase.ts": {
+    "mtime": 1777562041.0037441,
+    "ast_hash": "e6dddd07d331490483b2ba8b5225e193",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/theme/colors.ts": {
+    "mtime": 1777908207.2624264,
+    "ast_hash": "ee4729faf37bff2f1aac632afacfb269",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/utils/horseRaceUtils.ts": {
+    "mtime": 1778693612.4102437,
+    "ast_hash": "92834255b916c992964d57153ba63f73",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/utils/scratchUtils.ts": {
+    "mtime": 1780145895.548983,
+    "ast_hash": "f6f0be7e32cded70658207098463c9f0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/supabase_purchase_market_rpc.sql": {
+    "mtime": 1776782579.9325638,
+    "ast_hash": "0f139318b79a66b3ef67c15e0c77b1fa",
+    "semantic_hash": ""
+  },
+  "apps/mobile/tsconfig.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "54dc64d62868350b1d819e47e2ac8e9a",
+    "semantic_hash": ""
+  },
+  "docs/source-material/grimorio_final.json": {
+    "mtime": 1782760074.2155428,
+    "ast_hash": "f7ae0ec206701f708fcd43a12a6e6820",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1780412254.868297,
+    "ast_hash": "6e31a1ffa104df58797f0ed200748e82",
+    "semantic_hash": ""
+  },
+  "scripts/generate_grimoire_ts.py": {
+    "mtime": 1782760074.2155428,
+    "ast_hash": "9ca77e079100e7b2ac8d892f1ff0fb61",
+    "semantic_hash": ""
+  },
+  "scripts/kingdoom-memory-mcp.mjs": {
+    "mtime": 1778674153.2160926,
+    "ast_hash": "19937c54eb2fbb1d9c28973734bf4d3f",
+    "semantic_hash": ""
+  },
+  "scripts/manual/testVisual.ts": {
+    "mtime": 1782760074.2155428,
+    "ast_hash": "6b213e6222153bc4136fdf573366d2da",
+    "semantic_hash": ""
+  },
+  "scripts/parse_powers.py": {
+    "mtime": 1775736883.723116,
+    "ast_hash": "67bcbff4b3be1e9136c8983e1be49306",
+    "semantic_hash": ""
+  },
+  "scripts/parse_powers_v2.py": {
+    "mtime": 1782760074.2155428,
+    "ast_hash": "96d5423cce23e99341f83c67bff46f1a",
+    "semantic_hash": ""
+  },
+  "src/App.tsx": {
+    "mtime": 1783347421.5937705,
+    "ast_hash": "de9ae33cc377e454cbb749553d8f9825",
+    "semantic_hash": ""
+  },
+  "src/components/AdminControlSheet.tsx": {
+    "mtime": 1783347421.5962183,
+    "ast_hash": "e2a639e930162558871341e4eb4a7bae",
+    "semantic_hash": ""
+  },
+  "src/components/AdminGrimoireManagers.tsx": {
+    "mtime": 1780318790.5927882,
+    "ast_hash": "f3da9115d87a35b509ba6d6f54bd1d1a",
+    "semantic_hash": ""
+  },
+  "src/components/AnimeHubSection.tsx": {
+    "mtime": 1782242549.8569372,
+    "ast_hash": "ec2b444d7f3e5b158aa9d4b727c34319",
+    "semantic_hash": ""
+  },
+  "src/components/AppErrorBoundary.tsx": {
+    "mtime": 1777323121.7782655,
+    "ast_hash": "24b57e89c350707ba9459889c7083e88",
+    "semantic_hash": ""
+  },
+  "src/components/AppLiveHuntSection.tsx": {
+    "mtime": 1783347421.598214,
+    "ast_hash": "259e47de68dd97502eaad574fbaa2105",
+    "semantic_hash": ""
+  },
+  "src/components/ArchivistSection.tsx": {
+    "mtime": 1782938730.3032708,
+    "ast_hash": "75ab99b9f80f5d79b699b1bf2d08a963",
+    "semantic_hash": ""
+  },
+  "src/components/CharImportModal.tsx": {
+    "mtime": 1780318790.5958247,
+    "ast_hash": "54715096fb58b8d7e45a7971870e0956",
+    "semantic_hash": ""
+  },
+  "src/components/CharSheetModal.tsx": {
+    "mtime": 1780318790.5958247,
+    "ast_hash": "04a4cdd116ea80a214503ffdddc37510",
+    "semantic_hash": ""
+  },
+  "src/components/EventCard.tsx": {
+    "mtime": 1780318790.5958247,
+    "ast_hash": "cdb51e56cdabc43b35f40fc791a361fe",
+    "semantic_hash": ""
+  },
+  "src/components/ExpandableText.tsx": {
+    "mtime": 1776710648.9392037,
+    "ast_hash": "24ffb5f04cee736deba3256d9b98f6ca",
+    "semantic_hash": ""
+  },
+  "src/components/FilterPill.tsx": {
+    "mtime": 1776710210.4415357,
+    "ast_hash": "65698785c99d3fa43ad4ab193b76ba1c",
+    "semantic_hash": ""
+  },
+  "src/components/GrimoireSection.tsx": {
+    "mtime": 1780318790.598843,
+    "ast_hash": "92c278b5b2c1455f0366efc856f9da4b",
+    "semantic_hash": ""
+  },
+  "src/components/LibrarySection.tsx": {
+    "mtime": 1780318790.598843,
+    "ast_hash": "594102d4a3638466559d3fbeeabf8901",
+    "semantic_hash": ""
+  },
+  "src/components/MarketItemCard.tsx": {
+    "mtime": 1780318790.598843,
+    "ast_hash": "8d641d3f24c7008bf1dd37540b132b8c",
+    "semantic_hash": ""
+  },
+  "src/components/PayInstallmentModal.tsx": {
+    "mtime": 1781115088.299258,
+    "ast_hash": "de70ee8d1499cc5d5f5dc244917e8796",
+    "semantic_hash": ""
+  },
+  "src/components/PlayerAuctionPanel.tsx": {
+    "mtime": 1781702662.1767967,
+    "ast_hash": "854c12d4456efe6838d14bd0c367ff9e",
+    "semantic_hash": ""
+  },
+  "src/components/PlayerInventorySheet.tsx": {
+    "mtime": 1781114310.280152,
+    "ast_hash": "a7dd4e5c1b1be751ac8133569ca3ec81",
+    "semantic_hash": ""
+  },
+  "src/components/PlayerNotificationBell.tsx": {
+    "mtime": 1778242692.957272,
+    "ast_hash": "8c5e3cc52490e082889271d48d8367b6",
+    "semantic_hash": ""
+  },
+  "src/components/PlayerProfilePanel.tsx": {
+    "mtime": 1783347421.6002078,
+    "ast_hash": "dafea7de5a8f17743d2c1165c900ea6a",
+    "semantic_hash": ""
+  },
+  "src/components/PlayerTradeSheet.tsx": {
+    "mtime": 1780318790.598843,
+    "ast_hash": "653a8f7cbdcf833591cf966553ca6169",
+    "semantic_hash": ""
+  },
+  "src/components/PurchaseModal.tsx": {
+    "mtime": 1781619073.4218636,
+    "ast_hash": "81e16b7c7eec2d58da538d41eaee4c6d",
+    "semantic_hash": ""
+  },
+  "src/components/RankBadge.tsx": {
+    "mtime": 1781532256.5115428,
+    "ast_hash": "7d1022b565f14367a14a736ea8dc7ace",
+    "semantic_hash": ""
+  },
+  "src/components/RankingCard.tsx": {
+    "mtime": 1779981434.6783495,
+    "ast_hash": "7bb203fcc381254ec5eb4b23d1fc16fc",
+    "semantic_hash": ""
+  },
+  "src/components/RealmRegistry.tsx": {
+    "mtime": 1783347421.6022012,
+    "ast_hash": "e4b518071bf811cf58c666cba7daf1d4",
+    "semantic_hash": ""
+  },
+  "src/components/RealmStockExchange.tsx": {
+    "mtime": 1778535499.1330123,
+    "ast_hash": "7c6e16e39a40524da0115ce92a726d50",
+    "semantic_hash": ""
+  },
+  "src/components/RoleplayLockNotice.tsx": {
+    "mtime": 1782995844.4235744,
+    "ast_hash": "44c867f2980262abaeb5db918aa2cc55",
+    "semantic_hash": ""
+  },
+  "src/components/SectionHeader.tsx": {
+    "mtime": 1776966096.4835253,
+    "ast_hash": "b27b27315c28eeb49d40d3f51d9f003c",
+    "semantic_hash": ""
+  },
+  "src/components/StatCard.tsx": {
+    "mtime": 1776966138.7883441,
+    "ast_hash": "7ce25f82a50ed99742f669f10c95f617",
+    "semantic_hash": ""
+  },
+  "src/components/TavernCards.tsx": {
+    "mtime": 1781621036.0715778,
+    "ast_hash": "4adecd399f6a1102f1915d65c260e57c",
+    "semantic_hash": ""
+  },
+  "src/components/TavernCrash.tsx": {
+    "mtime": 1783375172.8843477,
+    "ast_hash": "092960917da16326c559e237eb921480",
+    "semantic_hash": ""
+  },
+  "src/components/TavernExpedition.tsx": {
+    "mtime": 1783375233.4387605,
+    "ast_hash": "3f2cc3d433c86743ac4ee83c38fdfe0f",
+    "semantic_hash": ""
+  },
+  "src/components/TavernExpeditionArcade.tsx": {
+    "mtime": 1783375293.2682402,
+    "ast_hash": "d11281344dade8ac859f702b1512fc23",
+    "semantic_hash": ""
+  },
+  "src/components/TavernGame.tsx": {
+    "mtime": 1781620122.638998,
+    "ast_hash": "e20a6c070c7296082562fcf11756f7c7",
+    "semantic_hash": ""
+  },
+  "src/components/TavernHorseRace.tsx": {
+    "mtime": 1783375035.9827075,
+    "ast_hash": "f88e522688ace477c85bb30af60d58f9",
+    "semantic_hash": ""
+  },
+  "src/components/TavernPenalty.tsx": {
+    "mtime": 1782760073.9274938,
+    "ast_hash": "63be72c48ebc4d746ee40a0a484da063",
+    "semantic_hash": ""
+  },
+  "src/components/TavernPlinko.tsx": {
+    "mtime": 1781870816.0214908,
+    "ast_hash": "a3d269b3f9e6dcb9f9b097b0e2d1d90b",
+    "semantic_hash": ""
+  },
+  "src/components/TavernRoulette.tsx": {
+    "mtime": 1783375049.1812131,
+    "ast_hash": "d16164ed433cabcc4cdbe071d1937dbd",
+    "semantic_hash": ""
+  },
+  "src/components/TavernScratch.tsx": {
+    "mtime": 1781621115.5300128,
+    "ast_hash": "65b38a2b779f8d2f020d06e284007295",
+    "semantic_hash": ""
+  },
+  "src/components/TavernSlots.tsx": {
+    "mtime": 1782760073.9274938,
+    "ast_hash": "2ef97947c5a4118547b52254d8c2aa88",
+    "semantic_hash": ""
+  },
+  "src/components/TavernTowerDefense.tsx": {
+    "mtime": 1783375489.1799457,
+    "ast_hash": "2c33c2348040cf291ae52ae946a530db",
+    "semantic_hash": ""
+  },
+  "src/components/WeeklyRankingPodium.tsx": {
+    "mtime": 1779981442.1320226,
+    "ast_hash": "27d61bee7c9d6eb3d6de6dd46ca58f72",
+    "semantic_hash": ""
+  },
+  "src/components/admin/AdminAuctionManager.tsx": {
+    "mtime": 1783347421.6041956,
+    "ast_hash": "e7b51590c0efdb96bbb48d4ec333078d",
+    "semantic_hash": ""
+  },
+  "src/components/admin/AdminControlPrimitives.tsx": {
+    "mtime": 1781352745.9076996,
+    "ast_hash": "db69935d6afc66d1462a0ad43fd5a8ab",
+    "semantic_hash": ""
+  },
+  "src/components/admin/AdminKnowledgeManager.tsx": {
+    "mtime": 1781702662.1767967,
+    "ast_hash": "44d3227addeb14951370c5e4aa3a846e",
+    "semantic_hash": ""
+  },
+  "src/components/admin/AdminMissionManager.tsx": {
+    "mtime": 1780940736.8496807,
+    "ast_hash": "cf6b0b0825bf0fcd7698b494a9465680",
+    "semantic_hash": ""
+  },
+  "src/components/admin/AdminStaffAssistant.tsx": {
+    "mtime": 1779971902.9441338,
+    "ast_hash": "007c0eb5e8772bb79bd52f358f9ca4e8",
+    "semantic_hash": ""
+  },
+  "src/context/PlayerSessionContext.tsx": {
+    "mtime": 1782410225.6925178,
+    "ast_hash": "61a34dd2455d28ed97d0ed95af02441e",
+    "semantic_hash": ""
+  },
+  "src/data/adminTemplates.ts": {
+    "mtime": 1775507885.583651,
+    "ast_hash": "2ba6673911b23c311b7a33659baa0689",
+    "semantic_hash": ""
+  },
+  "src/data/appLiveHunts.ts": {
+    "mtime": 1776515341.1062233,
+    "ast_hash": "a259b19d4fa0f31af66f617381f0168e",
+    "semantic_hash": ""
+  },
+  "src/data/events.ts": {
+    "mtime": 1774635957.6483986,
+    "ast_hash": "9418ae13e4748ee72a7572d29b5e93e0",
+    "semantic_hash": ""
+  },
+  "src/data/grimorio.ts": {
+    "mtime": 1775743944.0164287,
+    "ast_hash": "059f3e4d84de8595a84fe340b4ecedb4",
+    "semantic_hash": ""
+  },
+  "src/data/home.ts": {
+    "mtime": 1776775925.5571673,
+    "ast_hash": "61b6b82984dfcb1138d333bfabd410e0",
+    "semantic_hash": ""
+  },
+  "src/data/lore.ts": {
+    "mtime": 1775742170.0377018,
+    "ast_hash": "db624d018e7b188db6d5f27f0d10c087",
+    "semantic_hash": ""
+  },
+  "src/data/market.ts": {
+    "mtime": 1775312273.2591677,
+    "ast_hash": "0c861f759bfefce8b7049f59ea740107",
+    "semantic_hash": ""
+  },
+  "src/data/missions.ts": {
+    "mtime": 1776971653.2888913,
+    "ast_hash": "d39ca7770d69dcf2372af508bfc2c463",
+    "semantic_hash": ""
+  },
+  "src/data/pve.ts": {
+    "mtime": 1776458769.865932,
+    "ast_hash": "4d2a07f5f58a8750d23cfe368d8705db",
+    "semantic_hash": ""
+  },
+  "src/data/ranking.ts": {
+    "mtime": 1775481358.6283424,
+    "ast_hash": "3a8fd283abf03987fba6e609e1eb9f20",
+    "semantic_hash": ""
+  },
+  "src/data/world.ts": {
+    "mtime": 1774613916.4821038,
+    "ast_hash": "fbf48c6d145f851abb0f7ba2eab062ea",
+    "semantic_hash": ""
+  },
+  "src/features/animeHub/animeHub.mock.ts": {
+    "mtime": 1778506729.240547,
+    "ast_hash": "71a2ce68190cc4c3cec68c39cd7d8f77",
+    "semantic_hash": ""
+  },
+  "src/features/animeHub/animeHub.mockProvider.ts": {
+    "mtime": 1778506699.4879942,
+    "ast_hash": "9fd1afa2829b9d8906e1c48808164a3b",
+    "semantic_hash": ""
+  },
+  "src/features/animeHub/animeHub.remoteProvider.ts": {
+    "mtime": 1782242549.8645763,
+    "ast_hash": "9f88b56856abeebde95025cb4da54206",
+    "semantic_hash": ""
+  },
+  "src/features/animeHub/animeHub.types.ts": {
+    "mtime": 1778180148.189053,
+    "ast_hash": "94bc54d48e426d4edc28295c4b3fd6d5",
+    "semantic_hash": ""
+  },
+  "src/features/animeHub/index.ts": {
+    "mtime": 1778167235.9732351,
+    "ast_hash": "39a880ecad4ec594f494b8f2c13eb30c",
+    "semantic_hash": ""
+  },
+  "src/features/archivist/archivist.types.ts": {
+    "mtime": 1779142118.6789124,
+    "ast_hash": "eed833bcc3299fce1a0f14f54c06f0a9",
+    "semantic_hash": ""
+  },
+  "src/features/archivist/archivistActions.ts": {
+    "mtime": 1783347421.605195,
+    "ast_hash": "047329a689244d80a5b9c1036526f5ab",
+    "semantic_hash": ""
+  },
+  "src/features/archivist/archivistLive.ts": {
+    "mtime": 1783347421.60719,
+    "ast_hash": "ba9562d5a107a8beb2c872cae6f1099e",
+    "semantic_hash": ""
+  },
+  "src/features/businesses/businesses.adapter.ts": {
+    "mtime": 1779390510.7038991,
+    "ast_hash": "f89f6a2d0de9439389af9472bbd3a607",
+    "semantic_hash": ""
+  },
+  "src/features/businesses/businesses.service.ts": {
+    "mtime": 1779462115.1857772,
+    "ast_hash": "e3d492ddbea9d98676328e2ea178c109",
+    "semantic_hash": ""
+  },
+  "src/features/businesses/businesses.types.ts": {
+    "mtime": 1779390455.6577673,
+    "ast_hash": "8e3d3a1fbb44ef31bd3ce48b06d81783",
+    "semantic_hash": ""
+  },
+  "src/features/businesses/index.ts": {
+    "mtime": 1779390648.2245016,
+    "ast_hash": "72e1561f55b0fc4bad14cd15a45443d3",
+    "semantic_hash": ""
+  },
+  "src/features/market/index.ts": {
+    "mtime": 1776775776.7825787,
+    "ast_hash": "ee9fbadd246b562b985989ff6a3f2a2f",
+    "semantic_hash": ""
+  },
+  "src/features/market/market.adapter.ts": {
+    "mtime": 1781527312.2119524,
+    "ast_hash": "06124df1f2c5398ecec7f28648321f6c",
+    "semantic_hash": ""
+  },
+  "src/features/market/market.rotation.test.ts": {
+    "mtime": 1781619073.4238584,
+    "ast_hash": "4a0008bff699f872e2f675200fc2126c",
+    "semantic_hash": ""
+  },
+  "src/features/market/market.rotation.ts": {
+    "mtime": 1781619073.4248555,
+    "ast_hash": "a158b5e84ab8beea71bd8d52a3ca2747",
+    "semantic_hash": ""
+  },
+  "src/features/market/market.service.ts": {
+    "mtime": 1781527312.2246983,
+    "ast_hash": "3f2b1fefa730aea513526bd112733435",
+    "semantic_hash": ""
+  },
+  "src/features/market/market.types.ts": {
+    "mtime": 1781527312.2265842,
+    "ast_hash": "861d31599756709c01491362b9a25c08",
+    "semantic_hash": ""
+  },
+  "src/features/realmExchange/realmExchange.data.ts": {
+    "mtime": 1778101115.6295185,
+    "ast_hash": "32dc25667352ffd6d9ab5bc693dfd141",
+    "semantic_hash": ""
+  },
+  "src/features/realmExchange/realmExchange.simulation.ts": {
+    "mtime": 1778090524.9032922,
+    "ast_hash": "4c5a38606ccbaa9e01462a76765bacd9",
+    "semantic_hash": ""
+  },
+  "src/features/realmExchange/realmExchange.storage.ts": {
+    "mtime": 1778102300.7574277,
+    "ast_hash": "1cd13402365f55326e0a9852693e40f5",
+    "semantic_hash": ""
+  },
+  "src/features/realmExchange/realmExchange.types.ts": {
+    "mtime": 1778090490.8330617,
+    "ast_hash": "2099f701b5f7cbab3392c55b1a93791f",
+    "semantic_hash": ""
+  },
+  "src/hooks/useGsapStaggerReveal.ts": {
+    "mtime": 1777033987.631059,
+    "ast_hash": "f0d9c82d2b9d089507e46022e3b5e759",
+    "semantic_hash": ""
+  },
+  "src/main.tsx": {
+    "mtime": 1777323145.581784,
+    "ast_hash": "960a9ec3ad8d1ec38b466e86748f3aa9",
+    "semantic_hash": ""
+  },
+  "src/sections/HomeSection.tsx": {
+    "mtime": 1776712849.2692175,
+    "ast_hash": "226ae0b3f82b9bd0c3b7a2449ad28296",
+    "semantic_hash": ""
+  },
+  "src/sections/MarketSection.tsx": {
+    "mtime": 1783347421.6108794,
+    "ast_hash": "ffec01396c84d8e16cd8ca12e51b0254",
+    "semantic_hash": ""
+  },
+  "src/sections/RankingSection.tsx": {
+    "mtime": 1776458852.6955237,
+    "ast_hash": "a615aadaba4c2d86978ed0b059f9c9e7",
+    "semantic_hash": ""
+  },
+  "src/types.ts": {
+    "mtime": 1782938730.297355,
+    "ast_hash": "943fe18e2357f1e2bdd0f869c112f581",
+    "semantic_hash": ""
+  },
+  "src/utils/adminRanking.ts": {
+    "mtime": 1776458769.8709183,
+    "ast_hash": "9a95bec5f41926b3fcee8037fabd3689",
+    "semantic_hash": ""
+  },
+  "src/utils/aiDebug.ts": {
+    "mtime": 1777495769.7295015,
+    "ast_hash": "3f10bccf71f939a8c4a037ea53970551",
+    "semantic_hash": ""
+  },
+  "src/utils/appLiveHunts.ts": {
+    "mtime": 1776515392.2655113,
+    "ast_hash": "dd67909f8e70ba0b26a756b91a8e5186",
+    "semantic_hash": ""
+  },
+  "src/utils/archivistAi.ts": {
+    "mtime": 1778701285.2597997,
+    "ast_hash": "3cd2647533f64ff09396e935a93a182c",
+    "semantic_hash": ""
+  },
+  "src/utils/archivistSources.ts": {
+    "mtime": 1783347421.6118789,
+    "ast_hash": "ddc43034fdcd778cf2d1899aa4fd5bea",
+    "semantic_hash": ""
+  },
+  "src/utils/auctions.ts": {
+    "mtime": 1781702662.1767967,
+    "ast_hash": "ddb60635fca739c010114d965a2b50b1",
+    "semantic_hash": ""
+  },
+  "src/utils/characterPortraits.ts": {
+    "mtime": 1776458769.7235467,
+    "ast_hash": "ca04d193fe65338694c748585af34e65",
+    "semantic_hash": ""
+  },
+  "src/utils/characterSheets.ts": {
+    "mtime": 1783347421.6128745,
+    "ast_hash": "a439413c73380593d53c8d33c5213a3c",
+    "semantic_hash": ""
+  },
+  "src/utils/documentExtract.ts": {
+    "mtime": 1777309858.3535607,
+    "ast_hash": "8b86c6319625539f78a770d88497d706",
+    "semantic_hash": ""
+  },
+  "src/utils/events.ts": {
+    "mtime": 1778609241.3375936,
+    "ast_hash": "7ba7dfa86e1f2c47e8ea41d6eab2d810",
+    "semantic_hash": ""
+  },
+  "src/utils/gifUtils.ts": {
+    "mtime": 1779745471.2134447,
+    "ast_hash": "0f970568f0a228d12afe3ba0cb807275",
+    "semantic_hash": ""
+  },
+  "src/utils/gmPromptGenerator.ts": {
+    "mtime": 1780942042.2405784,
+    "ast_hash": "00a7bb11635988bda20d7fa094cca025",
+    "semantic_hash": ""
+  },
+  "src/utils/grimoireAi.ts": {
+    "mtime": 1777469197.2389207,
+    "ast_hash": "c1a2b183fd93861abaae68d21122b0e6",
+    "semantic_hash": ""
+  },
+  "src/utils/grimoireContent.ts": {
+    "mtime": 1781202040.971591,
+    "ast_hash": "2d2dbb96f84062c58249bdb9bab67412",
+    "semantic_hash": ""
+  },
+  "src/utils/horseRaceOnline.ts": {
+    "mtime": 1778695565.6862376,
+    "ast_hash": "fe9db73ed0abe6d8765e72bd3bcadb01",
+    "semantic_hash": ""
+  },
+  "src/utils/horseRaceUtils.ts": {
+    "mtime": 1778693612.4102437,
+    "ast_hash": "92834255b916c992964d57153ba63f73",
+    "semantic_hash": ""
+  },
+  "src/utils/imageUtils.ts": {
+    "mtime": 1780318790.612577,
+    "ast_hash": "0666d346bb1180cb3b4c31c900842cb3",
+    "semantic_hash": ""
+  },
+  "src/utils/inventory.ts": {
+    "mtime": 1781113054.511222,
+    "ast_hash": "154c1e40e8984f7428195b0eb39db8c6",
+    "semantic_hash": ""
+  },
+  "src/utils/knowledge.ts": {
+    "mtime": 1781702662.1767967,
+    "ast_hash": "bd0d1acae8f11a2df24d750389cf821d",
+    "semantic_hash": ""
+  },
+  "src/utils/magicBalance.ts": {
+    "mtime": 1778078824.0033624,
+    "ast_hash": "9317c4418cfd28e91741616e9b15cd99",
+    "semantic_hash": ""
+  },
+  "src/utils/marketAi.ts": {
+    "mtime": 1777488189.830882,
+    "ast_hash": "5d7085fbdc804a32eba45ddac0fd1798",
+    "semantic_hash": ""
+  },
+  "src/utils/minigamesSecure.ts": {
+    "mtime": 1782760073.9274938,
+    "ast_hash": "cdf2ca4cf820a9aa7798a95c94587f1e",
+    "semantic_hash": ""
+  },
+  "src/utils/missionAi.ts": {
+    "mtime": 1779971695.4675906,
+    "ast_hash": "9433bd5fccf744230170f70f8f20e4a6",
+    "semantic_hash": ""
+  },
+  "src/utils/missions.ts": {
+    "mtime": 1780002595.2555084,
+    "ast_hash": "c73f0e2113d35c77d19a56e1f368174c",
+    "semantic_hash": ""
+  },
+  "src/utils/orders.ts": {
+    "mtime": 1774613916.4821038,
+    "ast_hash": "bc3383e21e1ea9c514539238500e7e91",
+    "semantic_hash": ""
+  },
+  "src/utils/pinterestPicker.ts": {
+    "mtime": 1777483458.9694471,
+    "ast_hash": "2062d30bde06ddc610a0a3d0acad78c0",
+    "semantic_hash": ""
+  },
+  "src/utils/platform.ts": {
+    "mtime": 1776462343.2425077,
+    "ast_hash": "605f14c95b70187a9df1fc8d2aea67b7",
+    "semantic_hash": ""
+  },
+  "src/utils/playerNotifications.ts": {
+    "mtime": 1778081978.2355678,
+    "ast_hash": "ed382c3d4f54b99ebca7bbac9bf04420",
+    "semantic_hash": ""
+  },
+  "src/utils/playerRanks.ts": {
+    "mtime": 1781545594.0551407,
+    "ast_hash": "00ef9633bca46708437728a3e73eb184",
+    "semantic_hash": ""
+  },
+  "src/utils/players.ts": {
+    "mtime": 1782938730.2990437,
+    "ast_hash": "8d1f77b4e23014e9dad2bc1defc55d52",
+    "semantic_hash": ""
+  },
+  "src/utils/plinkUtils.ts": {
+    "mtime": 1778685414.4629188,
+    "ast_hash": "5a373b4ad278976a57258da4f89f6ac8",
+    "semantic_hash": ""
+  },
+  "src/utils/purchases.ts": {
+    "mtime": 1781114151.654215,
+    "ast_hash": "997f8beff1da3307116124aebb3fc3f9",
+    "semantic_hash": ""
+  },
+  "src/utils/pveProgress.ts": {
+    "mtime": 1778092635.0785277,
+    "ast_hash": "5636cef941a7998cf1cea980b4f51b03",
+    "semantic_hash": ""
+  },
+  "src/utils/rouletteEngine.ts": {
+    "mtime": 1782760073.9431148,
+    "ast_hash": "d9b2d799762c5441a7ab28a43949e6ad",
+    "semantic_hash": ""
+  },
+  "src/utils/scratchSecure.ts": {
+    "mtime": 1777985379.6755676,
+    "ast_hash": "a3d58e7ebf2b95c767777b30fb57d15d",
+    "semantic_hash": ""
+  },
+  "src/utils/scratchUtils.ts": {
+    "mtime": 1778686889.9780755,
+    "ast_hash": "19d8449afce0ee50403be323323e8eba",
+    "semantic_hash": ""
+  },
+  "src/utils/serverAiProviders.ts": {
+    "mtime": 1780412254.8694751,
+    "ast_hash": "5efc9104bfe37b1e25e1c10a68146ffe",
+    "semantic_hash": ""
+  },
+  "src/utils/sheetParser.ts": {
+    "mtime": 1776115998.2251446,
+    "ast_hash": "920072303410fdd2d427a5fffa2795d9",
+    "semantic_hash": ""
+  },
+  "src/utils/siteSettings.ts": {
+    "mtime": 1776460032.760038,
+    "ast_hash": "611edd1ecfafb9cf0019b8aaa8185318",
+    "semantic_hash": ""
+  },
+  "src/utils/staffAi.ts": {
+    "mtime": 1777479940.965779,
+    "ast_hash": "25d83310c266b288fd1e446a342be653",
+    "semantic_hash": ""
+  },
+  "src/utils/supabaseClient.ts": {
+    "mtime": 1779396304.2381709,
+    "ast_hash": "e5355c9e44d857b468842cba508d49ee",
+    "semantic_hash": ""
+  },
+  "src/utils/supabaseErrors.ts": {
+    "mtime": 1782242549.8725967,
+    "ast_hash": "a9c26e3cf8ef008607f3d46818f44e29",
+    "semantic_hash": ""
+  },
+  "src/utils/trade.ts": {
+    "mtime": 1778082147.941582,
+    "ast_hash": "2aba168ae5a45fedcbfee41ce37ec5fc",
+    "semantic_hash": ""
+  },
+  "src/utils/weeklyRanking.ts": {
+    "mtime": 1775481358.6307662,
+    "ast_hash": "da6af78d20367d40956eb3561e710365",
+    "semantic_hash": ""
+  },
+  "src/vercel-speed-insights.d.ts": {
+    "mtime": 1775501340.234117,
+    "ast_hash": "a242c2c7e2ad533a91adfef27e4f8d0d",
+    "semantic_hash": ""
+  },
+  "src/vitest.d.ts": {
+    "mtime": 1781547341.6557648,
+    "ast_hash": "1538fd3195ba69ee6389294da2d80203",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_admin_rls.sql": {
+    "mtime": 1782760074.2155428,
+    "ast_hash": "e4c4e7179e36ef129a2d1a875a74de25",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_app_live_hunts.sql": {
+    "mtime": 1782760074.2155428,
+    "ast_hash": "15cbcef41ae34e77fdda7b88f21da6d3",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_assistant_admin_actions.sql": {
+    "mtime": 1782760074.2236044,
+    "ast_hash": "59c825ffc75ae52d8be2bcf755545fca",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_auctions.sql": {
+    "mtime": 1782760074.2256103,
+    "ast_hash": "43e8507bb89502cb4c285b0b2fbf0b6f",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_bot_active_missions.sql": {
+    "mtime": 1782760074.2256303,
+    "ast_hash": "d30905cbb04e3f70f19d47f6bbe83275",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_bot_treasure_events.sql": {
+    "mtime": 1782760074.2256303,
+    "ast_hash": "69cf3885b7280b925a22a8000f6fe7ed",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_character_portraits_rls.sql": {
+    "mtime": 1782760074.2256303,
+    "ast_hash": "6c2f9dcf62b151c9a328bb1f38dfad52",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_character_sheet_recycling.sql": {
+    "mtime": 1782760074.2256303,
+    "ast_hash": "0eadaedff6d5e6c699e076685508ec16",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_character_slots_migration.sql": {
+    "mtime": 1782760074.2256303,
+    "ast_hash": "e449292ad0509ac3129aa5ed2ee980e9",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_cron_installments.sql": {
+    "mtime": 1782760074.2256303,
+    "ast_hash": "91268db8eecf8f6f6371d0ad7dd226f7",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_grimoire_admin.sql": {
+    "mtime": 1782760074.2256303,
+    "ast_hash": "389952277e0f2d4fb87a984729f340e8",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_grimoire_flora.sql": {
+    "mtime": 1782760074.233666,
+    "ast_hash": "6cdb272b6f49163885ad20baabb45afb",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_horse_race_online.sql": {
+    "mtime": 1782760074.233666,
+    "ast_hash": "dd3f4a44073b2191add5d25941b5f37c",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_increment_gold.sql": {
+    "mtime": 1782760074.233666,
+    "ast_hash": "a7384a3cc22f8b16b6eec826cac3f66f",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_knowledge_documents.sql": {
+    "mtime": 1782760074.233666,
+    "ast_hash": "e86696bf66cd01824e1039c32be21709",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_market_installments.sql": {
+    "mtime": 1782760074.233666,
+    "ast_hash": "e1e5ba6053e4f70a0ab965fdc819801e",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_market_mythic_limited_stock.sql": {
+    "mtime": 1782760074.233666,
+    "ast_hash": "3d36786c5aba8a5ef5656b4699b73cb7",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_market_purchase.sql": {
+    "mtime": 1782760073.9587362,
+    "ast_hash": "be4eade5c4c7341c804ef8f5e35140d1",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_minigame_cards_roulette.sql": {
+    "mtime": 1782760074.233666,
+    "ast_hash": "87232fb12e7eac9ebcfcd2e2e1b3e00a",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_minigame_chests_crash.sql": {
+    "mtime": 1782760074.2437186,
+    "ast_hash": "724a822cc7fa951f85ce78af2e372777",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_minigame_scratch.sql": {
+    "mtime": 1782760074.2437186,
+    "ast_hash": "b67e2cc39f0b5add8b4e52c2d7f88aaa",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_personal_market_migration.sql": {
+    "mtime": 1782760074.2457438,
+    "ast_hash": "993d368f70211330a4e4c5cbab223412",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_player_businesses.sql": {
+    "mtime": 1782760074.2457438,
+    "ast_hash": "75c270528e2e1490beead26f6b7f6053",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_player_notifications.sql": {
+    "mtime": 1782760074.2457438,
+    "ast_hash": "ae718a2613fe5d7560ac3b9fee208d1c",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_purge_inactive.sql": {
+    "mtime": 1782760074.2457438,
+    "ast_hash": "99ec577a6e0253c687d22b6876cd1dd3",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_query_performance_indexes.sql": {
+    "mtime": 1782760074.2457438,
+    "ast_hash": "7fcf94b162c2365ef0496284ada4e6f9",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_realm_events_participation.sql": {
+    "mtime": 1782760074.2457438,
+    "ast_hash": "830363d7cfffd2071df95c458a1a42a9",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_realm_exchange_sync.sql": {
+    "mtime": 1782760074.2457438,
+    "ast_hash": "16ad18ef839fe8a9be17fc60cc3f0cdc",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_realm_missions.sql": {
+    "mtime": 1782760074.2537725,
+    "ast_hash": "bd56c7a82ed350ca7edbd7353a4bcf1c",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_roleplay_access.sql": {
+    "mtime": 1782995844.4235744,
+    "ast_hash": "8bb51b500e03287a49ced4f068b73d61",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_season_rank_rules.sql": {
+    "mtime": 1782760074.2537725,
+    "ast_hash": "e8fa181ec2d11c193a78028f5ba988f2",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_season_rank_seasons.sql": {
+    "mtime": 1782760074.255796,
+    "ast_hash": "d3836274d674c7a79f25af95f221aae0",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_secure_admin_links.sql": {
+    "mtime": 1782760074.255796,
+    "ast_hash": "2471be109ed62a77c8006b358e4a6d59",
+    "semantic_hash": ""
+  },
+  "supabase/supabase_site_settings.sql": {
+    "mtime": 1782760074.255796,
+    "ast_hash": "a8bc052d009e298fad4b9818de26526a",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1774613916.4821038,
+    "ast_hash": "74b9ef87a09cc81eb1ec953107d93e8c",
+    "semantic_hash": ""
+  },
+  "vite.config.ts": {
+    "mtime": 1781191456.467391,
+    "ast_hash": "ab10e2160f2b2ba70ab104910c30ec94",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/SKILL.md": {
+    "mtime": 1783428829.2373004,
+    "ast_hash": "5930eed2d3154287930543b4a3af6f74",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/references/add-watch.md": {
+    "mtime": 1783428123.6860278,
+    "ast_hash": "58c888b5ec0689a886543dd765c1acc9",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/references/exports.md": {
+    "mtime": 1783428123.7016497,
+    "ast_hash": "ecc0c36852fee4ba6280cdf2b9149039",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/references/extraction-spec.md": {
+    "mtime": 1783428123.7016497,
+    "ast_hash": "e36dd450e4a3a90f5fe9073f4198fabc",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/references/github-and-merge.md": {
+    "mtime": 1783428123.7016497,
+    "ast_hash": "aa0e7ef186392cad062e60483ca7dbbf",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/references/hooks.md": {
+    "mtime": 1783428123.7016497,
+    "ast_hash": "0045c2f12c69bff3a641a8908a1ac057",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/references/query.md": {
+    "mtime": 1783428123.7016497,
+    "ast_hash": "852ef14334d60a75ae666ea103d4c4f0",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/references/transcribe.md": {
+    "mtime": 1783428123.7016497,
+    "ast_hash": "5c6a9af05d12b5797b2fa8b9493dcc37",
+    "semantic_hash": ""
+  },
+  ".codex/skills/graphify/references/update.md": {
+    "mtime": 1783428123.7016497,
+    "ast_hash": "01c78ea9438925c605b58a2eecbbcf5b",
+    "semantic_hash": ""
+  },
+  ".github/workflows/deploy.yml": {
+    "mtime": 1774613916.4821038,
+    "ast_hash": "4fbbaf9b71561b20b48a7d619753b600",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1783428829.2373004,
+    "ast_hash": "88c65eff97ea25ebc4cb05780a821d4c",
+    "semantic_hash": ""
+  },
+  "AI_CHANGELOG.md": {
+    "mtime": 1783375437.4226706,
+    "ast_hash": "063309afa833d223798cd4b5c2610854",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1782760074.1951592,
+    "ast_hash": "e6531d327e07aaf10160fe79479b509e",
+    "semantic_hash": ""
+  },
+  "RTK.md": {
+    "mtime": 1778697172.8203676,
+    "ast_hash": "5215800c9abc77330d271ad256c71f7f",
+    "semantic_hash": ""
+  },
+  "ai-memory/README.md": {
+    "mtime": 1778674200.6459417,
+    "ast_hash": "7c5f7d99d7c6684f48629e10288e5d33",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/index.html": {
+    "mtime": 1777894960.7977085,
+    "ast_hash": "04a9a7b43dbff1e93e0479a6906fa7ee",
+    "semantic_hash": ""
+  },
+  "anime-api-standalone/README.md": {
+    "mtime": 1778526252.7180176,
+    "ast_hash": "59babafa904ff916500b2a7628524f01",
+    "semantic_hash": ""
+  },
+  "apps/mobile/README.md": {
+    "mtime": 1777562578.1248767,
+    "ast_hash": "2b57a56b9e928054c72b0297e8488ebf",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeCache.txt": {
+    "mtime": 1776877227.6286857,
+    "ast_hash": "d47a999502ac65d109628cd9cec56685",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeFiles/TargetDirectories.txt": {
+    "mtime": 1776877227.779285,
+    "ast_hash": "d5843b3fddf6d2ebd73e389e1f4625f8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeCache.txt": {
+    "mtime": 1776877227.2655056,
+    "ast_hash": "34d1f8808e2260ffe99d498ea8e1dea8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/TargetDirectories.txt": {
+    "mtime": 1776877227.2724857,
+    "ast_hash": "19e5e50810267b817414424afb00af00",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt": {
+    "mtime": 1776877227.2356539,
+    "ast_hash": "4da62ef32315d0f698473abc5d91ca05",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/additional_project_files.txt": {
+    "mtime": 1776877227.9308805,
+    "ast_hash": "f5769d8d3383375ae727f72629ff3462",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/build_file_index.txt": {
+    "mtime": 1776877228.0505595,
+    "ast_hash": "0debe11a4c85d22d16f3e213ff429d94",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/metadata_generation_command.txt": {
+    "mtime": 1776877228.0485642,
+    "ast_hash": "8d851ef02dd01514769b5031e723ea8b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/arm64-v8a/symbol_folder_index.txt": {
+    "mtime": 1776877228.0495632,
+    "ast_hash": "d7982f4dc421ffd854589dd82334bd72",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeCache.txt": {
+    "mtime": 1776877234.1721232,
+    "ast_hash": "4bd3b056b8b9d869e25a70af1a058340",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeFiles/TargetDirectories.txt": {
+    "mtime": 1776877234.4451942,
+    "ast_hash": "59c45efb726f1fcc2c7589a62aebacd8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeCache.txt": {
+    "mtime": 1776877233.8039236,
+    "ast_hash": "c2ee7ac017b5058d4899183d807d4ed8",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/TargetDirectories.txt": {
+    "mtime": 1776877233.8169196,
+    "ast_hash": "2c8827f81dcf9d769fc059ef1532bf81",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt": {
+    "mtime": 1776877233.7385242,
+    "ast_hash": "4da62ef32315d0f698473abc5d91ca05",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/additional_project_files.txt": {
+    "mtime": 1776877234.6227472,
+    "ast_hash": "15c34f400014f0242b8d3e19d4378305",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/build_file_index.txt": {
+    "mtime": 1776877234.7997577,
+    "ast_hash": "0debe11a4c85d22d16f3e213ff429d94",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/metadata_generation_command.txt": {
+    "mtime": 1776877234.7360148,
+    "ast_hash": "3042b689ab3656a6feb451ff1410072c",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/armeabi-v7a/symbol_folder_index.txt": {
+    "mtime": 1776877234.7957368,
+    "ast_hash": "c661de809b6d5f1b3c5b6575b841deba",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/hash_key.txt": {
+    "mtime": 1776871985.638633,
+    "ast_hash": "dcbcd8cb8d511164d9f443450c32e499",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeCache.txt": {
+    "mtime": 1776877239.9674842,
+    "ast_hash": "ed54f2bf7a576cfeae3d747cd6a685bb",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeFiles/TargetDirectories.txt": {
+    "mtime": 1776877240.1440122,
+    "ast_hash": "84397d5b969d3cb6d0173673d2fecd08",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeCache.txt": {
+    "mtime": 1776877239.5451531,
+    "ast_hash": "b744721af1135825710729e7c791dbe5",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/TargetDirectories.txt": {
+    "mtime": 1776877239.5568652,
+    "ast_hash": "f1986d7e961ea21e9f11166aa19399b7",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt": {
+    "mtime": 1776877239.5003364,
+    "ast_hash": "4da62ef32315d0f698473abc5d91ca05",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/additional_project_files.txt": {
+    "mtime": 1776871985.5022516,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/build_file_index.txt": {
+    "mtime": 1776871985.5799732,
+    "ast_hash": "81a812c564d11684b6e585b04d0a7d58",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/metadata_generation_command.txt": {
+    "mtime": 1776871985.571087,
+    "ast_hash": "031059cd1b9114e709ba8ec0c58031cd",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86/symbol_folder_index.txt": {
+    "mtime": 1776871985.5790677,
+    "ast_hash": "6c280f0fe0f305208e2dea94d4a15b3b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeCache.txt": {
+    "mtime": 1776877315.057623,
+    "ast_hash": "442973a574ca4ac8dc318bb337fff872",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeFiles/TargetDirectories.txt": {
+    "mtime": 1776877315.1788805,
+    "ast_hash": "98b7e3c626793a0eafcd7683f740c061",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeCache.txt": {
+    "mtime": 1776877314.7094495,
+    "ast_hash": "bf8082a812fe1ba3343c1d457835fc1c",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/TargetDirectories.txt": {
+    "mtime": 1776877314.7173965,
+    "ast_hash": "d8fb0215eb9ca4fb0e98c38213c00603",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt": {
+    "mtime": 1776877314.681908,
+    "ast_hash": "4da62ef32315d0f698473abc5d91ca05",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/additional_project_files.txt": {
+    "mtime": 1776877315.2771592,
+    "ast_hash": "b3d3935eab739b4d52bf9901026fc778",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/build_file_index.txt": {
+    "mtime": 1776877315.3273213,
+    "ast_hash": "0debe11a4c85d22d16f3e213ff429d94",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/metadata_generation_command.txt": {
+    "mtime": 1776877315.3245482,
+    "ast_hash": "acf74b4f019ed43c4e59ca15eade3da3",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/.cxx/Debug/10q3m1c6/x86_64/symbol_folder_index.txt": {
+    "mtime": 1776877315.3265452,
+    "ast_hash": "705b088fbce77754d364858044682877",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomArchitect.md": {
+    "mtime": 1780318874.6748822,
+    "ast_hash": "8a16c9608577b2cc6e72241a5925f6f1",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomAuditor.md": {
+    "mtime": 1782760074.1951592,
+    "ast_hash": "207c7242c76cae1c1f04dee881deee6b",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomBackend.md": {
+    "mtime": 1780318895.1417208,
+    "ast_hash": "24e2ea5fc84a774654d3c60ec0b56746",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomBotMaster.md": {
+    "mtime": 1780318790.7306194,
+    "ast_hash": "85f297a4061a076c23fbe3a8d1ee339a",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomDebugger.md": {
+    "mtime": 1780318790.7306194,
+    "ast_hash": "00b92fef6031eacd91bc9eafe7f79753",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomDesigner.md": {
+    "mtime": 1780318919.7027333,
+    "ast_hash": "dc6b7e448c070884530aac3d9b637205",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomDevOps.md": {
+    "mtime": 1780318917.682649,
+    "ast_hash": "65dce3dce3b66da33f6aa793715312fa",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomFrontend.md": {
+    "mtime": 1780318893.1168265,
+    "ast_hash": "202e1431f8b744a30971e0d15de1a55b",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomLoreKeeper.md": {
+    "mtime": 1780318915.6628256,
+    "ast_hash": "f3d177b2607aaf6ec0d7c1730471c96d",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomMinigames.md": {
+    "mtime": 1780318897.169686,
+    "ast_hash": "83f5d2899c36d31409b5cd21d788bb62",
+    "semantic_hash": ""
+  },
+  "docs/agents/KingdoomReviewer.md": {
+    "mtime": 1780318790.7306194,
+    "ast_hash": "696af0ec318c88682a1d776dd796bf35",
+    "semantic_hash": ""
+  },
+  "docs/blackjack-simulation.md": {
+    "mtime": 1780494468.693581,
+    "ast_hash": "239af77a6a38729dcf40a253bcac8775",
+    "semantic_hash": ""
+  },
+  "docs/gm-system-prompt.md": {
+    "mtime": 1780940814.5230606,
+    "ast_hash": "6b5583f2d67801bb320e39170483d6ad",
+    "semantic_hash": ""
+  },
+  "docs/grimoire_balance_audit.md": {
+    "mtime": 1778078151.8429577,
+    "ast_hash": "ecf3e802c42558cff0b48fe38a5020b1",
+    "semantic_hash": ""
+  },
+  "docs/kingdoom-memory-mcp.md": {
+    "mtime": 1778674260.48131,
+    "ast_hash": "6d3332d9a528c80dadc94e89bf8f8006",
+    "semantic_hash": ""
+  },
+  "docs/marketing/primera_publicacion_facebook.md": {
+    "mtime": 1782936652.8529108,
+    "ast_hash": "3f79472349c5c68955abc24fb231d316",
+    "semantic_hash": ""
+  },
+  "docs/marketing/propuesta_publicidad_anime_extendida.md": {
+    "mtime": 1782936652.8622515,
+    "ast_hash": "7af469206c576db36b2442eefb4d96ea",
+    "semantic_hash": ""
+  },
+  "docs/mobile-reactivation/README.md": {
+    "mtime": 1780144281.131857,
+    "ast_hash": "37f8f46ccb37c0f5e1edfdcc6e115866",
+    "semantic_hash": ""
+  },
+  "docs/mobile-reactivation/antigravity-1-mobile-sprint.md": {
+    "mtime": 1780084011.3239753,
+    "ast_hash": "f968356128a5f54fe16ffee6da23da77",
+    "semantic_hash": ""
+  },
+  "docs/mobile-reactivation/antigravity-2-mobile-sprint.md": {
+    "mtime": 1780084011.3239753,
+    "ast_hash": "e062d4caa388100fc2082e1d8f0d8c89",
+    "semantic_hash": ""
+  },
+  "docs/mobile-reactivation/mobile-contract-alignment.md": {
+    "mtime": 1780084011.3239753,
+    "ast_hash": "378eab8801ac3c14e5929cb1b9af3744",
+    "semantic_hash": ""
+  },
+  "docs/mobile-reactivation/mobile-post-reactivation-backlog.md": {
+    "mtime": 1780144281.131857,
+    "ast_hash": "7294d928ad392b1d492b3bec0d248cf4",
+    "semantic_hash": ""
+  },
+  "docs/mobile-reactivation/mobile-qa-manual-checklist.md": {
+    "mtime": 1780144281.131857,
+    "ast_hash": "23099d70f29b2cfeb3b41d31af4fda30",
+    "semantic_hash": ""
+  },
+  "docs/mobile-reactivation/mobile-reactivation-backlog.md": {
+    "mtime": 1780092359.688838,
+    "ast_hash": "1ff63257879ac644b832599c0e7b6aa4",
+    "semantic_hash": ""
+  },
+  "docs/mobile-reactivation/mobile-v1-parity-matrix.md": {
+    "mtime": 1780144281.1273444,
+    "ast_hash": "dc1de772377be752a1278bd49e0623d5",
+    "semantic_hash": ""
+  },
+  "docs/reference/AI_GOLDEN_RULES.md": {
+    "mtime": 1782760074.2034686,
+    "ast_hash": "c44a9760c727648d729207d37dafe9d9",
+    "semantic_hash": ""
+  },
+  "docs/reference/DATABASE_SCHEMA.md": {
+    "mtime": 1782760074.205493,
+    "ast_hash": "8052b8d01572f727e2f1b382837fc1e5",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-05-04-bolsa-del-reino-implementation.md": {
+    "mtime": 1777918691.2872188,
+    "ast_hash": "732bb924dc948d8a7b96f5d585389f27",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-05-12-archivista-vivo.md": {
+    "mtime": 1778601057.5150428,
+    "ast_hash": "edb0de34d282ca0f709525c792c08e29",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-05-04-bolsa-del-reino-design.md": {
+    "mtime": 1777918277.0249157,
+    "ast_hash": "466ce891815b1574a6a873d2014a3deb",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-05-12-archivista-vivo-design.md": {
+    "mtime": 1778601057.512977,
+    "ast_hash": "a87f89b121c005e8c78facb5babcea0e",
+    "semantic_hash": ""
+  },
+  "docs/whatsapp-assistant.md": {
+    "mtime": 1776955376.1001284,
+    "ast_hash": "8ea0ea5f660ae369685885198e4d5b8e",
+    "semantic_hash": ""
+  },
+  "docs/whatsapp-player-lifecycle-spec.md": {
+    "mtime": 1782423802.9193518,
+    "ast_hash": "7e41a49f2708ae052dfafdc81c8a309e",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 10.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "b5d4d6dd746395ab3f2a2ad60be138cb",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 11.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "09064879c2e7aa0ea80c4a8a5465688e",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 12.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "2fff945bd10fc0855558bc2d47441edc",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 13.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "76ec4688be75a9b8bb8d2026ac1f1c4d",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 14.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "abc3d6e982010d0f4b4ad9efc5534be8",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 15.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "08fb4c12c7bac1fd2e2eb81a17458af3",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 16.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "6d1adcc093dbba771a516af634a3f0d0",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 17.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "b4ce497ddae9b25148a5f36aa889dbe0",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 18.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "6026b0a562d03b8f9c0c6eb32581a974",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 19.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "ce8f15623d27d49327835d8b6c5feae0",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 2.txt": {
+    "mtime": 1775735300.0,
+    "ast_hash": "ebe10ec7397291a97d1ab88d3f41de4d",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 20.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "9d2c8ecee90873020f497898c9eb9050",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 21.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "011f0c3aa66779bf43cb2b5f7c465f0f",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 22.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "4d5c93481a643b7d2121f0980d4be16a",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 23.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "026d37e60bef8296a538c5d7db914215",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 24.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "adf5bd264567038fcb351c4984837574",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 25.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "d455c140094724f36bddbe12334e8ce2",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 26.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "15051a72cea3c4ff06e5044a1541e598",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 27.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "0527ff90948d0e4f26dd266e7dd32810",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 28.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "af9530f12b5f7e95a50597d96cddf298",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 29.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "5c0e6f9be8cde7e20ab97b6577b210bd",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 3.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "43d8472eb885f0c730d979ea48e302e6",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 30.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "e3357be2910f990be06fb0506a282a8a",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 31.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "2cdd140cabdf6605941af1816cada13a",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 32.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "78c4b3aacddcb4c8973377eebcf7dc6b",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 33.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "b587ab0d8e8045cbbd550c2c5e78cd85",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 34.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "54b15af68e9452a930337642345c66ba",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 35.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "616f46d0f255194c28d283c4e54e3a65",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 36.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "006fbd59c5b4e372442c63a5a3005f41",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 37.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "f6a762a7ba51c35a7c47c6efbf3f365b",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 38.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "c5d9fb91e5ce503ccff7bcd071bc1beb",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 39.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "4c147bb20e5ca797c539d7c7cc944a4c",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 4.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "2d1b704feed4e3d7e2ea9f7d76af9508",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 40.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "cd929f6c47541885b47c717904d40b8b",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 41.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "0de828fbc781640f8e5343e1a8d16a5f",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 5.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "199ac6e807da5cc4d1c6b1fdc2a20aeb",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 6.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "a8eb0932709c62e12c1f35df005b7b06",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 7.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "6622a563ad55f05bb68dffefc5d5311f",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 8.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "1dc368e1f035fee864a956a609bccb91",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto 9.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "4acbe8d150ecccf01ed37ff9aa36b21b",
+    "semantic_hash": ""
+  },
+  "extracted_powers/Poderes/texto.txt": {
+    "mtime": 1774976592.0,
+    "ast_hash": "592a26503f6150bc9ae56a90111d12e5",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1781191087.2836585,
+    "ast_hash": "6771267528cacff696246e30f6c20e73",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/cofre-cerrado-BGziUxzO.png": {
+    "mtime": 1777894960.7806058,
+    "ast_hash": "08276443b6f3d37a40a3cd052028ecdd",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/cofre-oro-3ueTlqe0.png": {
+    "mtime": 1777894960.7806058,
+    "ast_hash": "d039e4aa8f1e65823108da5e2a12328a",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/cofre-vacio-ByVX8f21.png": {
+    "mtime": 1777894960.7806058,
+    "ast_hash": "b700f7323face48e20571ad992a5abdf",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/geopolitica-map-tY2cENb6.jpeg": {
+    "mtime": 1777894960.781603,
+    "ast_hash": "7da38f1146fce8450ddfe9abf3008356",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/scratch-lose-card-BAhA5Mu5.png": {
+    "mtime": 1777894960.789731,
+    "ast_hash": "09e5a2fadbff4f3f3146b7ca5ea1eea9",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/scratch-pristine-card-jD5YWIiH.png": {
+    "mtime": 1777894960.7907274,
+    "ast_hash": "247dde6f5c260fccc962cbd66c7ae8e1",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/scratch-win-card-BoflMh7r.png": {
+    "mtime": 1777894960.7917244,
+    "ast_hash": "727bec6b565a3e2b9ea9adfc2937ecc2",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/assets/vyralis-map-gBzM_WsS.jpeg": {
+    "mtime": 1777894960.7947168,
+    "ast_hash": "bfab4b23a193657f3f1930afc35909e5",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/img/chest-closed.png": {
+    "mtime": 1777894960.7967114,
+    "ast_hash": "478939775a56f5635805b11c988fac61",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/img/chest-open-empty.png": {
+    "mtime": 1777894960.7967114,
+    "ast_hash": "2b988a571c202dc96fdead29d5515146",
+    "semantic_hash": ""
+  },
+  "android/app/src/main/assets/public/img/chest-open-full.png": {
+    "mtime": 1777894960.7977085,
+    "ast_hash": "9eda8e8f53e25f1c1e40a6f9e73cc328",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-adaptive-foreground/android-adaptive-foreground-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-transparent/icon_108.png": {
+    "mtime": 1776806988.9290767,
+    "ast_hash": "ec173ec107d738f66bbfdfd7811b6429",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-adaptive-foreground/android-adaptive-foreground-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-transparent/icon_162.png": {
+    "mtime": 1776806988.9290767,
+    "ast_hash": "dd94500a123c317cc04b752525b51100",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-adaptive-foreground/android-adaptive-foreground-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-transparent/icon_216.png": {
+    "mtime": 1776806988.9290767,
+    "ast_hash": "d1ba1e248e5e7bb8f3526f8a27de170d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-adaptive-foreground/android-adaptive-foreground-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-transparent/icon_324.png": {
+    "mtime": 1776806989.1786575,
+    "ast_hash": "6d78d1353bcf5826d5a03242d7d600c1",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-adaptive-foreground/android-adaptive-foreground-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-transparent/icon_432.png": {
+    "mtime": 1776806989.1786575,
+    "ast_hash": "ff2258eeefb991c880562a64655b7750",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-circle/android-standard-circle-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_144.png": {
+    "mtime": 1776806987.2775898,
+    "ast_hash": "782c8ab3bab7afc6f0b2ce898e54c54c",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-circle/android-standard-circle-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_192.png": {
+    "mtime": 1776806987.7263844,
+    "ast_hash": "05e1164b033764d18dad82d62d7b88b4",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-circle/android-standard-circle-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_48.png": {
+    "mtime": 1776806986.920509,
+    "ast_hash": "bd0aaae5bc8746f30f0d235078e8f99a",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-circle/android-standard-circle-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_72.png": {
+    "mtime": 1776806987.2606347,
+    "ast_hash": "0b9a35a6fc7812c95752a646df96ca37",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-circle/android-standard-circle-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_96.png": {
+    "mtime": 1776806987.2606347,
+    "ast_hash": "05ab8a427a63d766b60787e6c8d1ee7c",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-square/android-standard-square-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_144.png": {
+    "mtime": 1776806986.3195746,
+    "ast_hash": "16ff426940de0a13a83d1a50f3368d26",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-square/android-standard-square-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_192.png": {
+    "mtime": 1776806986.2662008,
+    "ast_hash": "9473b868981c628ee5adb2eadbc97d24",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-square/android-standard-square-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_48.png": {
+    "mtime": 1776806986.2662008,
+    "ast_hash": "051fc915b1655ad1994ae3e0436ae267",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-square/android-standard-square-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_72.png": {
+    "mtime": 1776806986.2662008,
+    "ast_hash": "1bb37c59b12c631e97005045d09e6a2d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/android-standard-square/android-standard-square-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-cover-#060606/icon_96.png": {
+    "mtime": 1776806986.35082,
+    "ast_hash": "2941e9e2e2ba061334f1891dd8f026ee",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/splash-android/splash-android-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-contain/icon_200.png": {
+    "mtime": 1776806992.0747025,
+    "ast_hash": "7a90e4c3547cfb581c63c2458cb8fa8d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/splash-android/splash-android-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-contain/icon_300.png": {
+    "mtime": 1776806992.0747025,
+    "ast_hash": "51b05b4c991238545701aa2c4ac62c9d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/splash-android/splash-android-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-contain/icon_400.png": {
+    "mtime": 1776806992.4045138,
+    "ast_hash": "ee02afb2c708332642ece55e7dd24cc0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/splash-android/splash-android-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-contain/icon_600.png": {
+    "mtime": 1776806992.0747025,
+    "ast_hash": "b2b7e663bcd08fb21465543b4f64126b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/.expo/web/cache/production/images/splash-android/splash-android-5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8-contain/icon_800.png": {
+    "mtime": 1776806993.2744226,
+    "ast_hash": "8054fcb3b0460edb614411df7c36828f",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/drawable-hdpi/splashscreen_logo.png": {
+    "mtime": 1776871793.9045959,
+    "ast_hash": "d59449ce670fd6a8f3587a6c5cdf67dc",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/drawable-mdpi/splashscreen_logo.png": {
+    "mtime": 1776871793.9045959,
+    "ast_hash": "200000e6bdbe337b0de68c335f671744",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/drawable-xhdpi/splashscreen_logo.png": {
+    "mtime": 1776871793.9045959,
+    "ast_hash": "56f64b129fb13619eba03040378fbb09",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/drawable-xxhdpi/splashscreen_logo.png": {
+    "mtime": 1776871793.9045959,
+    "ast_hash": "94b70bdfac3d256a92a13142c06c3422",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/drawable-xxxhdpi/splashscreen_logo.png": {
+    "mtime": 1776871793.9045959,
+    "ast_hash": "65574a276824930ff12c1d7b0f1105f2",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "1bb37c59b12c631e97005045d09e6a2d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.webp": {
+    "mtime": 1776871792.1186323,
+    "ast_hash": "dd94500a123c317cc04b752525b51100",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "0b9a35a6fc7812c95752a646df96ca37",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "051fc915b1655ad1994ae3e0436ae267",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.webp": {
+    "mtime": 1776871792.1186323,
+    "ast_hash": "ec173ec107d738f66bbfdfd7811b6429",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "bd0aaae5bc8746f30f0d235078e8f99a",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "2941e9e2e2ba061334f1891dd8f026ee",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp": {
+    "mtime": 1776871792.1186323,
+    "ast_hash": "d1ba1e248e5e7bb8f3526f8a27de170d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "05ab8a427a63d766b60787e6c8d1ee7c",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "16ff426940de0a13a83d1a50f3368d26",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.webp": {
+    "mtime": 1776871792.1186323,
+    "ast_hash": "6d78d1353bcf5826d5a03242d7d600c1",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "782c8ab3bab7afc6f0b2ce898e54c54c",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "9473b868981c628ee5adb2eadbc97d24",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp": {
+    "mtime": 1776871792.1186323,
+    "ast_hash": "ff2258eeefb991c880562a64655b7750",
+    "semantic_hash": ""
+  },
+  "apps/mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp": {
+    "mtime": 1776871792.1030319,
+    "ast_hash": "05e1164b033764d18dad82d62d7b88b4",
+    "semantic_hash": ""
+  },
+  "apps/mobile/assets/images/adaptive-icon.png": {
+    "mtime": 1777905945.6012878,
+    "ast_hash": "65f911c354dc48e8f0f562f0ac0ae066",
+    "semantic_hash": ""
+  },
+  "apps/mobile/assets/images/favicon.png": {
+    "mtime": 1777905945.6325016,
+    "ast_hash": "c68329457f96ab780887bbd5f15d0764",
+    "semantic_hash": ""
+  },
+  "apps/mobile/assets/images/icon.png": {
+    "mtime": 1777905945.5166416,
+    "ast_hash": "8d45aea3446cbcacc1df077aa36850c6",
+    "semantic_hash": ""
+  },
+  "apps/mobile/assets/images/splash-icon.png": {
+    "mtime": 1777905945.6325016,
+    "ast_hash": "65f911c354dc48e8f0f562f0ac0ae066",
+    "semantic_hash": ""
+  },
+  "public/icons/anime-torii.png": {
+    "mtime": 1778241250.6512318,
+    "ast_hash": "34d9d383ac1bf0910e9b66d0691191af",
+    "semantic_hash": ""
+  },
+  "public/img/chest-closed.png": {
+    "mtime": 1774899747.1102705,
+    "ast_hash": "478939775a56f5635805b11c988fac61",
+    "semantic_hash": ""
+  },
+  "public/img/chest-open-empty.png": {
+    "mtime": 1774899747.1112688,
+    "ast_hash": "2b988a571c202dc96fdead29d5515146",
+    "semantic_hash": ""
+  },
+  "public/img/chest-open-full.png": {
+    "mtime": 1774899747.116254,
+    "ast_hash": "9eda8e8f53e25f1c1e40a6f9e73cc328",
+    "semantic_hash": ""
+  },
+  "public/img/ranks/caballero.png": {
+    "mtime": 1781531938.0557942,
+    "ast_hash": "fad65b20ac70dd14855d32ea28831cae",
+    "semantic_hash": ""
+  },
+  "public/img/ranks/escudero.png": {
+    "mtime": 1781531935.1649866,
+    "ast_hash": "e04aea94b8699d9961bb1f33336a44f2",
+    "semantic_hash": ""
+  },
+  "public/img/ranks/senor-oscuro.png": {
+    "mtime": 1781531943.7222116,
+    "ast_hash": "254bc537dc4147a83d881055efc26f94",
+    "semantic_hash": ""
+  },
+  "public/img/ranks/senor.png": {
+    "mtime": 1781531940.4361176,
+    "ast_hash": "e84c6ad61baf5c4285f706ac12a209d6",
+    "semantic_hash": ""
+  },
+  "public/img/ranks/siervo.png": {
+    "mtime": 1781531932.0053172,
+    "ast_hash": "cfd245ea7441af4e8b2ccfdfa507830f",
+    "semantic_hash": ""
+  },
+  "src/assets/cofre-cerrado.png": {
+    "mtime": 1775069292.6267655,
+    "ast_hash": "08276443b6f3d37a40a3cd052028ecdd",
+    "semantic_hash": ""
+  },
+  "src/assets/cofre-oro.png": {
+    "mtime": 1775069292.627763,
+    "ast_hash": "d039e4aa8f1e65823108da5e2a12328a",
+    "semantic_hash": ""
+  },
+  "src/assets/cofre-vacio.png": {
+    "mtime": 1775069292.6307564,
+    "ast_hash": "b700f7323face48e20571ad992a5abdf",
+    "semantic_hash": ""
+  },
+  "src/assets/maps/geopolitica-map.jpeg": {
+    "mtime": 1775740540.0,
+    "ast_hash": "7da38f1146fce8450ddfe9abf3008356",
+    "semantic_hash": ""
+  },
+  "src/assets/maps/vyralis-map.jpeg": {
+    "mtime": 1775740540.0,
+    "ast_hash": "bfab4b23a193657f3f1930afc35909e5",
+    "semantic_hash": ""
+  },
+  "src/assets/penalty-keeper-sprites.png": {
+    "mtime": 1777730839.363157,
+    "ast_hash": "268e4279bee30b579f44e1d6ab74ce8b",
+    "semantic_hash": ""
+  },
+  "src/assets/ruleta-optimized.jpg": {
+    "mtime": 1776458769.8449876,
+    "ast_hash": "37343830545efb701e092725296998e7",
+    "semantic_hash": ""
+  },
+  "src/assets/ruleta.png": {
+    "mtime": 1775069292.6377385,
+    "ast_hash": "81c2f231592571c2649454ee0ebb801c",
+    "semantic_hash": ""
+  },
+  "src/assets/scratch-lose-card-optimized.jpg": {
+    "mtime": 1776458769.8459826,
+    "ast_hash": "7f58242524b16eb4db940dc39c55b3be",
+    "semantic_hash": ""
+  },
+  "src/assets/scratch-lose-card.png": {
+    "mtime": 1775575943.7491417,
+    "ast_hash": "09e5a2fadbff4f3f3146b7ca5ea1eea9",
+    "semantic_hash": ""
+  },
+  "src/assets/scratch-lose-sheet.png": {
+    "mtime": 1775574426.0495079,
+    "ast_hash": "68020613908bc616a7b71c3e058bead3",
+    "semantic_hash": ""
+  },
+  "src/assets/scratch-pristine-card-optimized.jpg": {
+    "mtime": 1776458769.847977,
+    "ast_hash": "9686446c9149b21bfdef61c689a67624",
+    "semantic_hash": ""
+  },
+  "src/assets/scratch-pristine-card.png": {
+    "mtime": 1775575943.708885,
+    "ast_hash": "247dde6f5c260fccc962cbd66c7ae8e1",
+    "semantic_hash": ""
+  },
+  "src/assets/scratch-win-card-optimized.jpg": {
+    "mtime": 1776458769.848975,
+    "ast_hash": "677b45e22855f356014b72261f6d0fc4",
+    "semantic_hash": ""
+  },
+  "src/assets/scratch-win-card.png": {
+    "mtime": 1775575943.7245052,
+    "ast_hash": "727bec6b565a3e2b9ea9adfc2937ecc2",
+    "semantic_hash": ""
+  },
+  "src/assets/scratch-win-sheet.png": {
+    "mtime": 1775574449.830204,
+    "ast_hash": "e61f219566e8f655adad2c732cc8cf57",
+    "semantic_hash": ""
+  }
+}

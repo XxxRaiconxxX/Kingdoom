@@ -2175,8 +2175,8 @@
     "semantic_hash": ""
   },
   "AI_CHANGELOG.md": {
-    "mtime": 1783611498.8443108,
-    "ast_hash": "21e4b2ff71c1dcda59f88604a4c852a1",
+    "mtime": 1783621716.1331313,
+    "ast_hash": "0bc10564e180ccdc89375a70a88d57a8",
     "semantic_hash": ""
   },
   "README.md": {
@@ -3190,8 +3190,8 @@
     "semantic_hash": ""
   },
   "src/sections/RealmSiegeSection.tsx": {
-    "mtime": 1783610814.4621892,
-    "ast_hash": "2680395700ddaa528f9839918a29730a",
+    "mtime": 1783621807.282434,
+    "ast_hash": "2f658b4ec49fc7de816f908d53145643",
     "semantic_hash": ""
   },
   "src/utils/realmSiege.ts": {

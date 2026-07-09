@@ -1,16 +1,16 @@
 # Graph Report - Kingdoom-sync  (2026-07-09)
 
 ## Corpus Check
-- 481 files · ~1,143,911 words
+- 481 files · ~1,143,978 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4814 nodes · 10288 edges · 209 communities (188 shown, 21 thin omitted)
+- 4815 nodes · 10264 edges · 221 communities (195 shown, 26 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 607 edges (avg confidence: 0.72)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6021654f`
+- Built from commit: `43fd772b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -119,23 +119,28 @@
 - _marketAssistant.ts
 - marketRotation.ts
 - mn
+- startTimeout
 - package.json
 - generate-market-item.ts
 - Kingdoom Native (Fase 0)
 - Kingdoom
 - ._debug
 - compilerOptions
+- inventory.ts
 - RealmSiegeSection.tsx
 - Kingdoom Memory MCP
 - .constructor
 - ensureAiProvider
 - ⚔️ Escenario 2: Modo PvP (Multijugador)
 - Backlog de Reactivacion Mobile
+- s
 - extract-pdf-text.ts
 - CharImportModal.tsx
 - ._debug
 - fr
 - Contratos y Tipos a Alinear
+- RankingSection-Bv5XFtCT.js
+- o
 - magicBalance.ts
 - 🎌 Anime Scraper API (Kingdoom Edition)
 - compilerOptions
@@ -163,6 +168,7 @@
 - vitest.d.ts
 - vl
 - _layout.tsx
+- main.tsx
 - Kingdoom Architect Agent (Arquitectura de Sistemas)
 - Kingdoom Auditor Agent (Economy & Security)
 - Kingdoom Backend Agent (Supabase & Datos)
@@ -185,6 +191,7 @@
 - graphify reference: commit hook and native CLAUDE.md integration
 - graphify reference: incremental update and cluster-only
 - Borrador Definitivo: Primera Publicación Oficial en Facebook - Kingdoom
+- scratchUtils.ts
 - useColorScheme.web.ts
 - graphify reference: GitHub clone and cross-repo merge
 - graphify reference: transcribe video and audio
@@ -194,13 +201,18 @@
 - antigravity-1-mobile-sprint.md
 - antigravity-2-mobile-sprint.md
 - README.md
+- playerNotifications.ts
 - .getUser
 - antigravity2-graphify-setup.ps1
+- e
 - graphify.md
 - graphify.md
 - knowledge.ts
+- CharSheetModal.tsx
+- l
 - normalizeMutationResult
 - scratchUtils.ts
+- at
 
 ## God Nodes (most connected - your core abstractions)
 1. `2026-05` - 116 edges
@@ -229,15 +241,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (209 total, 21 thin omitted)
+## Communities (221 total, 26 thin omitted)
 
 ### Community 0 - "motion-CUEKfUlm.js"
-Cohesion: 0.03
-Nodes (112): ai, al(), ao, as(), at, bc, bl, br() (+104 more)
+Cohesion: 0.02
+Nodes (113): t(), ae(), ai, an, ao, bc, bl, br() (+105 more)
 
 ### Community 1 - "supabase-DDf878CM.js"
 Cohesion: 0.02
-Nodes (113): ajax(), appendParams(), at, batchSend(), binaryEncode(), Bs(), bt(), cancelRefEvent() (+105 more)
+Nodes (72): qs(), appendParams(), As(), at, binaryEncode(), bn, createNamespace(), createNamespaceIfNotExists() (+64 more)
 
 ### Community 2 - "2026-05"
 Cohesion: 0.02
@@ -245,15 +257,15 @@ Nodes (116): 2026-05, [2026-05-06] - [Autor: Jarvis], [2026-05-06] - [Autor: Jar
 
 ### Community 3 - "types.ts"
 Cohesion: 0.05
-Nodes (58): AdminMissionManager(), GM_MODE_OPTIONS, GmMagicOption, MissionListFilter, NPC_ROLE_OPTIONS, FALLBACK_MISSIONS, GmMissionMode, GmMissionNpc (+50 more)
+Nodes (59): AdminMissionManager(), GM_MODE_OPTIONS, GmMagicOption, MissionListFilter, NPC_ROLE_OPTIONS, FALLBACK_MISSIONS, GmMissionMode, GmMissionNpc (+51 more)
 
 ### Community 4 - "archivistActions.ts"
 Cohesion: 0.08
-Nodes (61): index(), GRIMOIRE_DATA, ensureArray(), ensureString(), executeArchivistAction(), executeBestiaryAction(), executeDocumentAction(), executeEventAction() (+53 more)
+Nodes (61): ensureArray(), ensureString(), executeArchivistAction(), executeBestiaryAction(), executeDocumentAction(), executeEventAction(), executeFloraAction(), executeMagicAction() (+53 more)
 
 ### Community 5 - "animeHub.remoteProvider.ts"
-Cohesion: 0.07
-Nodes (63): AnimeHubSection(), providerIsRemote(), ANIME_HUB_GENRES, ANIME_HUB_LIBRARY, mockAnimeHubProvider, asList(), encodeReference(), endpoint() (+55 more)
+Cohesion: 0.06
+Nodes (64): AnimeHubSection(), providerIsRemote(), ExpandableText(), ANIME_HUB_GENRES, ANIME_HUB_LIBRARY, mockAnimeHubProvider, asList(), encodeReference() (+56 more)
 
 ### Community 6 - "Historial de Cambios (Changelog)"
 Cohesion: 0.03
@@ -261,7 +273,7 @@ Nodes (77): [2026-06-01] - [Autor: Antigravity], [2026-06-01] - [Autor: Antigrav
 
 ### Community 7 - "knowledge.ts"
 Cohesion: 0.06
-Nodes (44): rarityColors, AdminAiDebugCard(), AdminInfoCard(), AdminModeButton(), ExpandableListToggle(), LabeledInput(), LabeledTextArea(), NumericInput() (+36 more)
+Nodes (44): rarityColors, PlayerAuctionPanel(), rarityColors, MARKET_CATEGORIES, MARKET_ITEMS, buildMarketItemPayload(), mapMarketItemRow(), getMarketRotationState() (+36 more)
 
 ### Community 8 - "realmExchangeStorage.ts"
 Cohesion: 0.08
@@ -272,24 +284,24 @@ Cohesion: 0.07
 Nodes (65): buildChartPath(), formatClock(), formatGold(), getAssetById(), PredictionChip(), RealmStockExchange(), REALM_EXCHANGE_ASSETS, REALM_EXCHANGE_PAYOUTS (+57 more)
 
 ### Community 10 - "index-Bn5bstj6.js"
-Cohesion: 0.04
-Nodes (74): _0, _1, a0, b0, B1, c1, e0, E1 (+66 more)
+Cohesion: 0.05
+Nodes (58): b, g, L, N, P, u, w, as (+50 more)
 
 ### Community 11 - "MarketSection.tsx"
-Cohesion: 0.08
-Nodes (23): AppLiveHuntSection, MARKET_RARITY_FILTERS, MarketSection(), PlayerAuctionPanel, PRICE_SORTS, PriceSort, PurchaseModal, RealmStockExchange (+15 more)
+Cohesion: 0.06
+Nodes (52): AppLiveHuntSection, MARKET_RARITY_FILTERS, MarketSection(), PlayerAuctionPanel, PRICE_SORTS, PriceSort, PurchaseModal, RealmStockExchange (+44 more)
 
 ### Community 12 - "ArchivistSection.tsx"
 Cohesion: 0.06
-Nodes (57): actionSupportsImage(), ArchivistSection(), AttachedImage, attachImageToAction(), buildDraftDetailResponse(), buildWelcomeMessage(), cardAccentClasses(), ChatMessage (+49 more)
+Nodes (56): actionSupportsImage(), ArchivistSection(), AttachedImage, attachImageToAction(), buildDraftDetailResponse(), buildWelcomeMessage(), cardAccentClasses(), ChatMessage (+48 more)
 
 ### Community 13 - "App.tsx"
-Cohesion: 0.06
-Nodes (29): AnimeHubSection, App(), ArchivistSection, GrimoireSection, HomeSection(), isRealmSiegeStandaloneRoute(), isSupabaseRecordId(), LibrarySection (+21 more)
+Cohesion: 0.10
+Nodes (14): AnimeHubSection, ArchivistSection, GrimoireSection, HomeSection(), isSupabaseRecordId(), LibrarySection, MarketSection, missionClaimStatusLabels (+6 more)
 
 ### Community 14 - "PlayerInventorySheet.tsx"
-Cohesion: 0.06
-Nodes (44): fmt(), PayInstallmentModal(), Props, ActiveTab, CATEGORY_LABELS, formatDate(), InventoryFilter, PaymentPlanCard() (+36 more)
+Cohesion: 0.09
+Nodes (21): fmt(), PayInstallmentModal(), Props, ActiveTab, CATEGORY_LABELS, formatDate(), InventoryFilter, PaymentPlanCard() (+13 more)
 
 ### Community 15 - "AppLiveHuntSection.tsx"
 Cohesion: 0.07
@@ -304,28 +316,28 @@ Cohesion: 0.11
 Nodes (32): EpisodeLinks, ChatMessage, TYPE_LABELS, EVENT_STATUS_FILTERS, LibraryMode, CATEGORY_FILTERS, CATEGORY_META, MarketFeedback (+24 more)
 
 ### Community 18 - "AdminControlSheet-Bpm6jjwC.js"
-Cohesion: 0.09
-Nodes (32): At(), C(), Et(), F(), It, Ks(), m(), Mt() (+24 more)
+Cohesion: 0.08
+Nodes (40): At(), C(), Et(), F(), It, Ks(), m(), Mt() (+32 more)
 
 ### Community 19 - "y"
-Cohesion: 0.10
-Nodes (10): r(), channel(), Et(), from(), K(), off(), Qs, te() (+2 more)
+Cohesion: 0.11
+Nodes (13): ns(), r(), channel(), Et(), from(), K(), ks(), off() (+5 more)
 
 ### Community 20 - "AdminControlSheet.tsx"
-Cohesion: 0.08
-Nodes (48): AdminAuctionManager(), adminCategoryLabel(), adminRarityLabel(), adminStockLabel(), AdminTabButton(), MarketAdminPreview(), AdminAuctionManager, AdminBestiaryManager (+40 more)
+Cohesion: 0.06
+Nodes (57): AdminAuctionManager(), adminCategoryLabel(), adminRarityLabel(), adminStockLabel(), MarketAdminPreview(), AdminAuctionManager, AdminBestiaryManager, AdminControlSheet() (+49 more)
 
 ### Community 21 - "ie"
-Cohesion: 0.07
-Nodes (29): EventCard(), EventCardProps, eventParticipationStatusLabels, eventStatusStyles, StatCard(), ADMIN_WEEKLY_TEMPLATES, ACTIVE_EVENTS, HOME_STATS (+21 more)
+Cohesion: 0.06
+Nodes (38): EventCard(), EventCardProps, eventParticipationStatusLabels, eventStatusStyles, normalizeRank(), normalizeTier(), RANK_META, RankBadge() (+30 more)
 
 ### Community 22 - "gl"
-Cohesion: 0.06
-Nodes (16): _a(), ca, cl(), Da(), _e(), fl(), gl, _i() (+8 more)
+Cohesion: 0.05
+Nodes (26): cl(), Cn(), co(), di, Dl(), fu(), gl, _i() (+18 more)
 
 ### Community 23 - "$r"
-Cohesion: 0.10
-Nodes (27): AdminMagicManager(), AdminMagicStyle, cleanHeading(), EMPTY_LEVELS, emptyLevels(), extractDraftCategory(), formatLevels(), normalizeForSearch() (+19 more)
+Cohesion: 0.06
+Nodes (44): index(), AdminMagicManager(), AdminMagicStyle, cleanHeading(), EMPTY_LEVELS, emptyLevels(), extractDraftCategory(), formatLevels() (+36 more)
 
 ### Community 24 - "archivistSources.ts"
 Cohesion: 0.10
@@ -344,12 +356,12 @@ Cohesion: 0.08
 Nodes (34): GrimoireMode, GrimoireScreen(), SelectedEntry, BestiaryRow, fetchGrimoireNative(), FloraRow, MagicStyleRow, mapBestiary() (+26 more)
 
 ### Community 28 - "icons-DyPfT9Qp.js"
-Cohesion: 0.18
-Nodes (16): b(), D(), f(), g(), L(), M(), P(), q (+8 more)
+Cohesion: 0.07
+Nodes (43): b(), D(), f(), g(), L(), M(), P(), q (+35 more)
 
 ### Community 29 - "Br"
-Cohesion: 0.05
-Nodes (23): lr(), ar, Br, clearHeartbeats(), connect(), connectWithFallback(), flushSendBuffer(), hasLogger() (+15 more)
+Cohesion: 0.06
+Nodes (23): ar, Br, clearHeartbeats(), connect(), filterBindings(), flushSendBuffer(), hasLogger(), heartbeatTimeout() (+15 more)
 
 ### Community 30 - "dependencies"
 Cohesion: 0.05
@@ -357,15 +369,15 @@ Nodes (41): dependencies, expo, expo-constants, expo-font, expo-linking, expo-ro
 
 ### Community 31 - "xr"
 Cohesion: 0.06
-Nodes (3): getChannels(), Ir(), xr
+Nodes (13): connectWithFallback(), download(), getPublicUrl(), onClose(), onError(), onMessage(), onOpen(), ping() (+5 more)
 
 ### Community 32 - "ask-archivist.ts"
 Cohesion: 0.11
 Nodes (35): handler(), normalizeStaffAdvisorResult(), StaffAdvisorResult, CacheEntry, getCachedAiResponse(), getStore(), globalCache, setCachedAiResponse() (+27 more)
 
 ### Community 33 - "bu"
-Cohesion: 0.06
-Nodes (27): au(), bu, Cn(), co(), es(), gu(), Hr(), hu() (+19 more)
+Cohesion: 0.09
+Nodes (25): au(), bu, dr(), fr(), gr(), gu(), Hr(), hu() (+17 more)
 
 ### Community 34 - "expo"
 Cohesion: 0.05
@@ -381,7 +393,7 @@ Nodes (38): Arquitectura propuesta, Asistente virtual de WhatsApp para Kingdoom,
 
 ### Community 37 - "handleOperation"
 Cohesion: 0.09
-Nodes (21): cc(), dn(), dr(), fr(), gr(), ir(), ke(), Lt() (+13 more)
+Nodes (21): a(), pi(), ve(), bt(), cn(), Cr(), createSignedUrls(), ct() (+13 more)
 
 ### Community 38 - "WhatsApp Player Lifecycle Spec"
 Cohesion: 0.05
@@ -393,7 +405,7 @@ Nodes (35): 0. Roles y División de Trabajo, 10. Protocolo de Verificación Prev
 
 ### Community 40 - "_e"
 Cohesion: 0.09
-Nodes (19): AdminControlSheet, CharImportModal, CharSheetModal, formatRankLabel(), PlayerInventorySheet, PlayerTradeSheet, RealmRegistry, SEASON_ACCENTS (+11 more)
+Nodes (25): Bs(), cloneRequestState(), containedBy(), contains(), delete(), Ds(), Ee(), explain() (+17 more)
 
 ### Community 41 - "setCorsHeaders"
 Cohesion: 0.15
@@ -404,84 +416,76 @@ Cohesion: 0.06
 Nodes (35): dependencies, framer-motion, gsap, @gsap/react, lucide-react, react, react-dom, @supabase/supabase-js (+27 more)
 
 ### Community 43 - "AdminGrimoireManagers.tsx"
-Cohesion: 0.24
-Nodes (11): MagicStyle, ABILITY_PATCHES, AbilityPatch, applyMagicBalanceToCategories(), applyMagicBalanceToStyles(), balanceStyle(), LEVEL_GUARDS, normalizeAbilityName() (+3 more)
+Cohesion: 0.14
+Nodes (23): PvePlayerProgress, PveStatKey, ActiveSheetStore, consumeEncounterAttempt(), createDefaultPveProgress(), EMPTY_STATS, getActivePveSheetId(), getLevelFromExperience() (+15 more)
 
 ### Community 44 - "TavernExpeditionArcade.tsx"
-Cohesion: 0.05
-Nodes (48): CharSheetModal(), ArcadeBattleState, CombatAction, CombatLog, CombatLogTone, CombatResult, CONTRACT_MUTATORS, difficultyLabel() (+40 more)
+Cohesion: 0.07
+Nodes (22): ArcadeBattleState, CombatAction, CombatLog, CombatLogTone, CombatResult, CONTRACT_MUTATORS, difficultyLabel(), difficultyTone() (+14 more)
 
 ### Community 45 - "TavernTowerDefense.tsx"
 Cohesion: 0.08
 Nodes (32): AttackStyle, buildPathCells(), cellKey(), createRuntime(), DEFAULT_HUD, DIFFICULTIES, Difficulty, DifficultyId (+24 more)
 
 ### Community 46 - "PlayerTradeSheet-BbdhRWKM.js"
-Cohesion: 0.11
-Nodes (34): d0, j, j0, M(), q0, T, v(), X (+26 more)
+Cohesion: 0.10
+Nodes (39): d0, j, j0, M(), q0, S, T, v() (+31 more)
 
 ### Community 47 - "TavernExpeditionArcade-CIUZgbPb.js"
-Cohesion: 0.10
-Nodes (25): j1, P1, q1, X1, Ce, Ae(), Be(), ce() (+17 more)
+Cohesion: 0.11
+Nodes (24): j1, P1, q1, X1, Ce, Ae(), Be(), ce() (+16 more)
 
 ### Community 48 - "_serverAiProviders.ts"
 Cohesion: 0.14
 Nodes (32): AiServerConfig, readAiServerConfig(), AiAttemptDebug, AiProvider, buildDebugFromFailure(), buildDebugFromSuccess(), DEFAULT_ALLOWED_ORIGINS, extractGeminiText() (+24 more)
 
 ### Community 49 - "PlayerProfilePanel.tsx"
-Cohesion: 0.06
-Nodes (12): ce(), ia(), ie, Kr(), na(), oa, pa, sa() (+4 more)
+Cohesion: 0.09
+Nodes (12): Be(), dn(), er(), hn(), ie, ke(), Kr(), se() (+4 more)
 
 ### Community 50 - "adminRanking.ts"
-Cohesion: 0.10
-Nodes (36): ExpandableText(), LibraryTab, FACTION_DOSSIERS, LORE_CHAPTERS, LORE_RULES, REALM_FACTIONS, COMMON_THREATS, DEMOGRAPHIC_BLOCS (+28 more)
+Cohesion: 0.11
+Nodes (36): LibraryTab, FACTION_DOSSIERS, LORE_CHAPTERS, LORE_RULES, REALM_FACTIONS, COMMON_THREATS, DEMOGRAPHIC_BLOCS, DIPLOMATIC_TENSIONS (+28 more)
 
 ### Community 51 - "GrimoireSection.tsx"
-Cohesion: 0.13
-Nodes (21): AbilityCard(), BestiaryView(), clampInt(), convertUnitToDndPoints(), DndUnitKind, FloraView(), formatAbilityText(), formatScientificTokenToDnD() (+13 more)
+Cohesion: 0.12
+Nodes (22): AbilityCard(), BestiaryView(), clampInt(), convertUnitToDndPoints(), DndUnitKind, FloraView(), formatAbilityText(), formatScientificTokenToDnD() (+14 more)
 
 ### Community 52 - "LibrarySection-BDOvQQeu.js"
-Cohesion: 0.11
-Nodes (21): PurchaseModal(), MARKET_CATEGORIES, MARKET_ITEMS, buildMarketItemPayload(), mapMarketItemRow(), getMarketRotationState(), hasAvailableStock(), hashSeed() (+13 more)
+Cohesion: 0.14
+Nodes (9): ca, Da(), _e(), fl(), oc, qr(), si(), va() (+1 more)
 
 ### Community 53 - "TavernRoulette.tsx"
 Cohesion: 0.11
 Nodes (26): buildWheelGradient(), OUTSIDE_BET_ROWS, RouletteBets, RoulettePhase, sumBets(), TavernRoulette(), BetDefinition, BLACK_POCKETS (+18 more)
 
 ### Community 54 - "vc"
-Cohesion: 0.15
-Nodes (11): fa(), fc(), gc(), ha, li, mc(), ua(), vc (+3 more)
-
-### Community 55 - "ei"
-Cohesion: 0.18
-Nodes (10): Ct(), Et(), ls, Lt(), Pt(), _t, Xt(), ze() (+2 more)
+Cohesion: 0.12
+Nodes (14): fc(), gc(), gn(), hc(), Ma(), mc(), ni(), tu() (+6 more)
 
 ### Community 56 - "ge"
-Cohesion: 0.08
-Nodes (13): As(), Cs(), disconnect(), ge, hasReceived(), onClose(), onError(), onMessage() (+5 more)
+Cohesion: 0.10
+Nodes (5): disconnect(), ge, leave(), push(), receive()
 
 ### Community 57 - "join"
-Cohesion: 0.17
-Nodes (12): getRealmSiegeStandaloneUrl(), openRealmSiegeWindow(), REALM_SIEGE_CATALOG_ENTRY, RealmSiegeAction, RealmSiegeFaction, RealmSiegeFactionId, RealmSiegeMutationResult, RealmSiegePlayerState (+4 more)
+Cohesion: 0.12
+Nodes (19): al(), cs(), dc(), eu(), ga(), Gi(), Gt, il() (+11 more)
 
 ### Community 58 - "TavernPlinko.tsx"
-Cohesion: 0.10
-Nodes (29): BallFrame, BET_PRESETS, buildAnimationPoints(), clamp(), drawRuneBoard(), EXPECTED_RETURN, PlinkoPhase, polygon() (+21 more)
+Cohesion: 0.11
+Nodes (24): BallFrame, BET_PRESETS, buildAnimationPoints(), clamp(), drawRuneBoard(), EXPECTED_RETURN, PlinkoPhase, polygon() (+16 more)
 
 ### Community 59 - "eventsService.ts"
-Cohesion: 0.06
-Nodes (17): canPush(), Cr(), filterBindings(), hn(), ht(), isMember(), joinRef(), le() (+9 more)
+Cohesion: 0.08
+Nodes (6): canPush(), getChannels(), Ir(), $r, rejoin(), remove()
 
 ### Community 60 - "TavernPenalty.tsx"
-Cohesion: 0.10
-Nodes (25): clamp(), DEFAULT_SHOT, Direction, DirectionId, DIRECTIONS, drawBall(), drawKeeper(), drawKeeperSprite() (+17 more)
+Cohesion: 0.11
+Nodes (22): clamp(), DEFAULT_SHOT, Direction, DirectionId, DIRECTIONS, drawBall(), drawKeeper(), drawKeeperSprite() (+14 more)
 
 ### Community 61 - "PlayerSessionContext.tsx"
 Cohesion: 0.18
 Nodes (26): getSessionProfileErrorMessage(), PlayerSessionContext, PlayerSessionContextValue, PlayerSessionProvider(), getGifDuration(), attachRoleplayAccess(), attachRoleplayAccessToMany(), createPlayerAccount() (+18 more)
-
-### Community 62 - "ue"
-Cohesion: 0.10
-Nodes (3): At, ue, l
 
 ### Community 63 - "kingdoom-memory-mcp.mjs"
 Cohesion: 0.12
@@ -492,24 +496,24 @@ Cohesion: 0.12
 Nodes (25): a1, f0, r0, Be(), D(), _e(), F, ge() (+17 more)
 
 ### Community 65 - "e"
-Cohesion: 0.13
-Nodes (28): os(), cs(), el, fu(), jt(), Ou(), Xe, Ec() (+20 more)
+Cohesion: 0.19
+Nodes (18): ps(), Ec(), gc(), kc(), wc(), be(), _e(), Ee() (+10 more)
 
 ### Community 66 - "aa"
 Cohesion: 0.08
-Nodes (17): aa(), ba(), gn(), il(), ji(), ka(), La(), Ma() (+9 more)
+Nodes (9): aa(), ba(), ka(), La(), pa, ra(), ze(), zn() (+1 more)
 
 ### Community 67 - "TavernExpedition.tsx"
-Cohesion: 0.13
-Nodes (12): BattleAction, BattleLogEntry, BattleOutcome, BattleState, ExpeditionPhase, TavernExpedition(), threatLabel(), toneClasses() (+4 more)
+Cohesion: 0.15
+Nodes (9): BattleAction, BattleLogEntry, BattleOutcome, BattleState, ExpeditionPhase, TavernExpedition(), threatLabel(), toneClasses() (+1 more)
 
 ### Community 68 - "pveProgress.ts"
-Cohesion: 0.08
-Nodes (32): s(), A, n0, O1, p0, x0, C, D() (+24 more)
+Cohesion: 0.11
+Nodes (14): A, n0, O1, p0, x0, C, E, k (+6 more)
 
 ### Community 69 - "match"
-Cohesion: 0.15
-Nodes (8): an(), ke(), mn(), on(), pn(), Ue(), vn(), wn
+Cohesion: 0.22
+Nodes (7): an(), ke(), mn(), on(), pn(), Ue(), vn()
 
 ### Community 70 - "x"
 Cohesion: 0.47
@@ -517,15 +521,15 @@ Nodes (5): binaryDecode(), decode(), decodeBroadcast(), decodePush(), decodeRepl
 
 ### Community 71 - "events.ts"
 Cohesion: 0.13
-Nodes (25): EventRewardNotification, RealmEventParticipationStatus, AdminRealmEventInput, buildRealmEventPayload(), fetchPendingEventRewards(), fetchPlayerEventParticipations(), fetchPublicEventParticipants(), fetchRealmEventParticipants() (+17 more)
+Nodes (24): EventRewardNotification, RealmEventParticipationStatus, AdminRealmEventInput, buildRealmEventPayload(), fetchPendingEventRewards(), fetchPlayerEventParticipations(), fetchPublicEventParticipants(), fetchRealmEventParticipants() (+16 more)
 
 ### Community 72 - "TavernSlots.tsx"
-Cohesion: 0.10
-Nodes (23): BET_PRESETS, buildLosingReels(), buildPairReels(), buildVisibleStrip(), clamp(), countSymbols(), generateSpinOutcome(), getSymbol() (+15 more)
+Cohesion: 0.11
+Nodes (20): BET_PRESETS, buildLosingReels(), buildPairReels(), buildVisibleStrip(), clamp(), countSymbols(), generateSpinOutcome(), getSymbol() (+12 more)
 
 ### Community 73 - "M"
-Cohesion: 0.17
-Nodes (21): D1, H1, I1, k0, R1, Y, J, c() (+13 more)
+Cohesion: 0.14
+Nodes (22): D1, H1, I1, k0, q, R1, Y, _a() (+14 more)
 
 ### Community 75 - "What You Must Do When Invoked"
 Cohesion: 0.08
@@ -549,14 +553,14 @@ Nodes (23): 1. Contexto fijo, 2. Contexto vivo, 3. Orquestacion del Archivista, 
 
 ### Community 80 - "characterSheets.ts"
 Cohesion: 0.12
-Nodes (29): PlayerProfilePanel(), RealmRegistryProps, RegistryViewMode, buildPortraitPath(), deleteCharacterPortraitByUrl(), extractBucketPathFromPublicUrl(), getFileExtension(), uploadCharacterPortrait() (+21 more)
+Nodes (28): PlayerProfilePanel(), RealmRegistryProps, RegistryViewMode, buildPortraitPath(), deleteCharacterPortraitByUrl(), extractBucketPathFromPublicUrl(), getFileExtension(), uploadCharacterPortrait() (+20 more)
 
 ### Community 81 - "2026-06"
 Cohesion: 0.11
 Nodes (18): 2026-06, [2026-06-21] Limite de Misiones UI, [2026-06-21] Portal Anime Proveedor por Defecto, [2026-06-22] Higiene del Repositorio y Escrow del Bot de WhatsApp, [2026-06-23] Fix Race Conditions en TavernCrash (Minijuego Crash), [2026-06-23] Fix Race Conditions en TavernCrash (Minijuego Crash), [2026-06-24] Nota de auditoria retroactiva sobre autoria del 23/06, [2026-06-24] Rebalance Generoso de TavernCrash (+10 more)
 
 ### Community 82 - "constructor"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (16): A(), clone(), constructor(), dn(), _handleTokenChanged(), _initRealtimeClient(), _initSupabaseAuthClient(), inPendingSyncState() (+8 more)
 
 ### Community 83 - "target-appmodules-Debug-1fc50499df4b75a283f2.json"
@@ -588,20 +592,20 @@ Cohesion: 0.13
 Nodes (22): buildMissionPointMap(), buildRankSteps(), clampPercent(), computeSeasonProgressPercent(), deriveRankFromSteps(), describeProgress(), EventRankParticipantRow, FALLBACK_MISSION_POINTS (+14 more)
 
 ### Community 90 - "pc"
-Cohesion: 0.17
-Nodes (8): ac(), gs(), ko, lc(), Nt(), Rt(), _t(), ys()
+Cohesion: 0.13
+Nodes (7): ac(), ko, lc(), Me(), pc(), Rt(), _t()
 
 ### Community 91 - "scratchSecure.ts"
 Cohesion: 0.17
 Nodes (17): ScratchBatchResult, ScratchPhase, TavernScratch(), buildScratchPlayerKey(), fetchScratchDailyState(), getActivePlayer(), getStoredGrossWins(), playScratchBatchSecure() (+9 more)
 
 ### Community 92 - "o"
-Cohesion: 0.07
-Nodes (41): e(), h(), k(), a(), o(), Be(), ec(), ki() (+33 more)
+Cohesion: 0.15
+Nodes (16): catch(), execute(), fetchRequest(), finally(), getPromise(), Gt(), parseJSON(), pt() (+8 more)
 
 ### Community 93 - "sc"
-Cohesion: 0.05
-Nodes (17): bo, en, Fo(), ht, iu, ju(), kc, ku (+9 more)
+Cohesion: 0.06
+Nodes (16): en, Fo(), hi(), ht, iu, ju(), ku, nu (+8 more)
 
 ### Community 94 - ".push"
 Cohesion: 0.20
@@ -615,13 +619,9 @@ Nodes (20): ArchivistScreen(), groupByType(), MODES, ArchivistMode, ArchivistRes
 Cohesion: 0.10
 Nodes (19): 0. CONTEXTO DEL UNIVERSO, 10. INTEGRACIÓN CON EL SISTEMA KINGDOOM, 1. IDENTIDAD DEL GM, 2. REGLAS ESTRICTAS DE BALANCE Y CONTROL COGNITIVO, 3. AUDITORÍA ANTICHEAT (EVALUAR ANTES DE CADA TURNO), 4. ESTRUCTURA OBLIGATORIA DE RESPUESTA POR TURNO, 5. GENERACIÓN DE REPORTES (BAJO DEMANDA), 6.1 — BRIEFING DE MISIÓN (+11 more)
 
-### Community 97 - "._returnResult"
-Cohesion: 0.15
-Nodes (11): t(), an, Fe(), ft(), ln(), ri(), Rs(), ui (+3 more)
-
 ### Community 98 - "MarketSection-CH49VJKx.js"
-Cohesion: 0.08
-Nodes (35): b, D, F1, g, g0, M0, P, q (+27 more)
+Cohesion: 0.15
+Nodes (16): F1, M0, b, B(), D, F, G(), L (+8 more)
 
 ### Community 99 - "join"
 Cohesion: 0.40
@@ -641,7 +641,11 @@ Nodes (16): getRarityLabel(), MarketScreen(), getMarketRotationState(), hasAvail
 
 ### Community 103 - "mn"
 Cohesion: 0.12
-Nodes (9): bi(), Bn(), Fn, ii, mn, qs(), un(), zr (+1 more)
+Nodes (7): bi(), Bn(), Fn, ii, mn, un(), zr
+
+### Community 104 - "startTimeout"
+Cohesion: 0.12
+Nodes (19): ajax(), batchSend(), cancelRefEvent(), cancelTimeout(), close(), closeAndRetry(), destroy(), hasReceived() (+11 more)
 
 ### Community 105 - "package.json"
 Cohesion: 0.11
@@ -667,17 +671,21 @@ Nodes (26): HomeScreen(), LibraryScreen(), ParticipantList(), ProfileScreen(), f
 Cohesion: 0.12
 Nodes (16): compilerOptions, allowImportingTsExtensions, isolatedModules, jsx, lib, module, moduleResolution, noEmit (+8 more)
 
+### Community 111 - "inventory.ts"
+Cohesion: 0.18
+Nodes (17): CATEGORY_LABELS, PlayerTradeSheet(), TradeMode, InventoryCategoryId, InventoryEntry, addItemToInventory(), buildInventoryPayload(), fetchPlayerInventory() (+9 more)
+
 ### Community 112 - "RealmSiegeSection.tsx"
-Cohesion: 0.12
-Nodes (19): ActionLog(), CAPITAL_TERRITORIES, castleImageByOwner, describeAction(), EconomyPanel(), FACTION_ORDER, factionFlavor, FactionPanel() (+11 more)
+Cohesion: 0.11
+Nodes (16): loadRealmSiegeSection(), ActionLog(), CAPITAL_TERRITORIES, castleImageByOwner, describeAction(), FACTION_ORDER, factionFlavor, FactionPanel() (+8 more)
 
 ### Community 113 - "Kingdoom Memory MCP"
 Cohesion: 0.13
 Nodes (14): Configuracion sugerida para Antigravity, Configuracion sugerida para Codex, Herramientas MCP, Kingdoom Memory MCP, `latest_memory`, Por que existe, `project_brief`, `record_handoff` (+6 more)
 
 ### Community 114 - ".constructor"
-Cohesion: 0.07
-Nodes (41): gt(), qt(), b(), copy(), createBucket(), createIndex(), createSignedUploadUrl(), createSignedUrl() (+33 more)
+Cohesion: 0.08
+Nodes (37): gt(), b(), copy(), createBucket(), createIndex(), createSignedUploadUrl(), createSignedUrl(), De() (+29 more)
 
 ### Community 115 - "ensureAiProvider"
 Cohesion: 0.24
@@ -691,6 +699,10 @@ Nodes (13): ⏱️ Control de Timeouts (Inactividad), Cálculo del Pozo y Payout
 Cohesion: 0.14
 Nodes (13): Antigravity 1, Antigravity 1, Antigravity 2, Antigravity 2, Backlog de Reactivacion Mobile, Criterios de aceptacion, Fase 1 - Cerrada, Fase 2 - Paridad operativa minima (+5 more)
 
+### Community 118 - "s"
+Cohesion: 0.15
+Nodes (15): s(), Ae(), pe(), qt(), St, D(), M(), p() (+7 more)
+
 ### Community 119 - "extract-pdf-text.ts"
 Cohesion: 0.26
 Nodes (12): ApiRequest, ApiResponse, DEFAULT_ALLOWED_ORIGINS, extractTextFromGeminiResponse(), getAllowedOrigin(), handler(), isQuotaLikeError(), normalizeHeaderValue() (+4 more)
@@ -700,16 +712,24 @@ Cohesion: 0.19
 Nodes (12): BASIC_FIELDS, CharImportModal(), CharImportModalProps, COMBAT_FIELDS, DEFAULT_STATS, EditableSheetField, LONG_FIELDS, STAT_FIELDS (+4 more)
 
 ### Community 121 - "._debug"
-Cohesion: 0.09
-Nodes (13): T(), V(), Ot(), ae(), C(), _e, Fe(), J() (+5 more)
+Cohesion: 0.14
+Nodes (7): ae(), C(), _e, Fe(), J(), st, x()
 
 ### Community 123 - "Contratos y Tipos a Alinear"
 Cohesion: 0.17
 Nodes (11): Contratos prioritarios, Contratos y Tipos a Alinear, Divergencias actuales, Estados de participacion y claim, MarketItem / InventoryEntry, Player / session, RealmEvent, RealmMission (+3 more)
 
+### Community 124 - "RankingSection-Bv5XFtCT.js"
+Cohesion: 0.18
+Nodes (13): R, W1, b(), M(), V(), d(), k(), l (+5 more)
+
+### Community 125 - "o"
+Cohesion: 0.18
+Nodes (4): o(), ec(), wn, Ee
+
 ### Community 126 - "magicBalance.ts"
-Cohesion: 0.64
-Nodes (9): asFactionId(), isRecord(), normalizeAction(), normalizeFaction(), normalizePlayerState(), normalizeState(), normalizeTerritory(), toNumber() (+1 more)
+Cohesion: 0.22
+Nodes (5): bo, kc, pl(), qu(), yu()
 
 ### Community 127 - "🎌 Anime Scraper API (Kingdoom Edition)"
 Cohesion: 0.18
@@ -752,8 +772,8 @@ Cohesion: 0.22
 Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
 
 ### Community 137 - "2026-07"
-Cohesion: 0.13
-Nodes (15): 2026-07, [2026-07-01] Acceso web condicionado por roleo activo y nueva base SQL compartida, [2026-07-01] Auditoria y hardening del acceso web por roleo, [2026-07-02] Cambio de ventana de roleo: 9 dias, [2026-07-05] Auditoria de sobreingenieria y remocion de redundancias (YAGNI), [2026-07-05] Menu colapsable para admin y control de scroll en movil, [2026-07-06] Auditoria de minijuegos web y cobros recuperables, [2026-07-06] Reestructuracion del changelog activo (+7 more)
+Cohesion: 0.12
+Nodes (16): 2026-07, [2026-07-01] Acceso web condicionado por roleo activo y nueva base SQL compartida, [2026-07-01] Auditoria y hardening del acceso web por roleo, [2026-07-02] Cambio de ventana de roleo: 9 dias, [2026-07-05] Auditoria de sobreingenieria y remocion de redundancias (YAGNI), [2026-07-05] Menu colapsable para admin y control de scroll en movil, [2026-07-06] Auditoria de minijuegos web y cobros recuperables, [2026-07-06] Reestructuracion del changelog activo (+8 more)
 
 ### Community 138 - "Auditoria de balance del Grimorio"
 Cohesion: 0.25
@@ -806,6 +826,10 @@ Nodes (5): Bolsa Del Reino Implementation Plan, Task 1: Exchange Domain And Loca
 ### Community 151 - "vl"
 Cohesion: 0.14
 Nodes (17): claimRealmMissionNative(), fetchMissionsNative(), fetchPlayerMissionClaimsNative(), getClaimPlayer(), isSupabaseMissionId(), mapMission(), mapMissionClaim(), MissionMetaRow (+9 more)
+
+### Community 153 - "main.tsx"
+Cohesion: 0.18
+Nodes (6): AppErrorBoundary, AppErrorBoundaryProps, AppErrorBoundaryState, Analytics, rootElement, SpeedInsights
 
 ### Community 154 - "Kingdoom Architect Agent (Arquitectura de Sistemas)"
 Cohesion: 0.40
@@ -875,41 +899,57 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 Cohesion: 0.50
 Nodes (3): Borrador Definitivo: Primera Publicación Oficial en Facebook - Kingdoom, 📝 COPY PARA COPIAR Y PEGAR EN FACEBOOK, 🎨 PROMPT DE FLYER (MIDJOURNEY 16:9)
 
+### Community 176 - "scratchUtils.ts"
+Cohesion: 0.30
+Nodes (11): addPlayerDailyCardsGrossWins(), addPlayerDailyPenaltyNetWins(), addPlayerDailySlotsNetWins(), DailyScratchConfig, getPlayerDailyCardsGrossWins(), getPlayerDailyPenaltyNetWins(), getPlayerDailySlotsNetWins(), getScratchSeed() (+3 more)
+
+### Community 208 - "playerNotifications.ts"
+Cohesion: 0.31
+Nodes (9): formatNotificationTime(), NotificationItem(), PlayerNotificationBell(), fetchPlayerNotifications(), mapNotificationRow(), markPlayerNotificationsRead(), PlayerNotification, PlayerNotificationKind (+1 more)
+
 ### Community 209 - ".getUser"
-Cohesion: 0.11
-Nodes (5): ei(), $o(), ot, pn, ta
+Cohesion: 0.06
+Nodes (13): cc(), ce(), ei(), ia(), na(), $o(), oa, ot (+5 more)
+
+### Community 211 - "e"
+Cohesion: 0.22
+Nodes (6): e(), ki(), be, he(), lt(), z
 
 ### Community 214 - "knowledge.ts"
-Cohesion: 0.14
-Nodes (22): KnowledgeDocument, KnowledgeDocumentType, extractKnowledgeTextFromFile(), getPdfExtractEndpoint(), readAsBase64(), readAsText(), buildKnowledgeFragments(), buildKnowledgePayload() (+14 more)
+Cohesion: 0.07
+Nodes (35): AdminAiDebugCard(), AdminInfoCard(), AdminModeButton(), AdminTabButton(), ExpandableListToggle(), LabeledInput(), LabeledTextArea(), NumericInput() (+27 more)
+
+### Community 215 - "CharSheetModal.tsx"
+Cohesion: 0.27
+Nodes (6): CharSheetModal(), ARCADE_ENCOUNTERS, ArcadeEncounter, NarrativeEncounter, getPvePower(), getPveProgressToNextLevel()
 
 ### Community 217 - "normalizeMutationResult"
-Cohesion: 0.54
-Nodes (8): RealmSiegeSection(), claimRealmSiegeIncome(), depositRealmSiegeGold(), getSupabaseErrorMessage(), investRealmSiegeIncome(), joinRealmSiegeFaction(), normalizeMutationResult(), settleRealmSiegePrize()
+Cohesion: 0.25
+Nodes (8): App(), isRealmSiegeStandaloneRoute(), loadAnimeHubSection(), loadArchivistSection(), loadGrimoireSection(), loadLibrarySection(), loadMarketSection(), preloadTab()
 
 ### Community 219 - "scratchUtils.ts"
 Cohesion: 0.60
 Nodes (4): buildScratchDateKey(), DailyScratchConfig, getDailyScratchConfig(), getScratchSeed()
 
 ## Knowledge Gaps
-- **1372 isolated node(s):** `Usage`, `What graphify is for`, `Step 0 - GitHub repos and multi-path merge (only if a URL or several paths)`, `Step 1 - Ensure graphify is installed`, `Step 2 - Detect files` (+1367 more)
+- **1379 isolated node(s):** `[2026-07-09] Redistribucion desktop del Asedio`, `[2026-07-09] Versionado de artefactos Graphify para relevo`, `[2026-07-09] Pozo acumulativo de victoria para El Asedio`, `[2026-07-09] Ajuste responsive del encabezado y cronica del Asedio`, `[2026-07-09] Restauracion visual del mapa de Asedio con castillos` (+1374 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **26 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `index()` connect `archivistActions.ts` to `supabase-DDf878CM.js`, `TavernPlinko.tsx`, `animeHub.remoteProvider.ts`, `.push`?**
-  _High betweenness centrality (0.095) - this node is a cross-community bridge._
-- **Why does `e()` connect `o` to `motion-CUEKfUlm.js`, `supabase-DDf878CM.js`, `index-Bn5bstj6.js`, `AdminControlSheet-Bpm6jjwC.js`, `Br`, `bu`, `handleOperation`, `PlayerTradeSheet-BbdhRWKM.js`, `TavernExpeditionArcade-CIUZgbPb.js`, `PlayerProfilePanel.tsx`, `vc`, `ue`, `e`, `aa`, `M`, `characterSheets.ts`, `pc`, `sc`, `._returnResult`, `MarketSection-CH49VJKx.js`, `._debug`?**
-  _High betweenness centrality (0.052) - this node is a cross-community bridge._
-- **Why does `getLocalSheets()` connect `characterSheets.ts` to `o`?**
-  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Why does `index()` connect `$r` to `supabase-DDf878CM.js`, `TavernPlinko.tsx`, `animeHub.remoteProvider.ts`, `.push`?**
+  _High betweenness centrality (0.098) - this node is a cross-community bridge._
+- **Why does `e()` connect `e` to `motion-CUEKfUlm.js`, `supabase-DDf878CM.js`, `index-Bn5bstj6.js`, `AdminControlSheet-Bpm6jjwC.js`, `icons-DyPfT9Qp.js`, `Br`, `bu`, `PlayerTradeSheet-BbdhRWKM.js`, `TavernExpeditionArcade-CIUZgbPb.js`, `PlayerProfilePanel.tsx`, `vc`, `ei`, `e`, `M`, `characterSheets.ts`, `.getUser`, `l`, `pc`, `o`, `sc`, `o`?**
+  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+- **Why does `getLocalSheets()` connect `characterSheets.ts` to `e`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `y()` (e.g. with `V()` and `Nt()`) actually correct?**
   _`y()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 65 inferred relationships involving `r()` (e.g. with `.deleteCookie()` and `as()`) actually correct?**
   _`r()` has 65 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Usage`, `What graphify is for`, `Step 0 - GitHub repos and multi-path merge (only if a URL or several paths)` to the rest of the system?**
-  _1373 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `[2026-07-09] Redistribucion desktop del Asedio`, `[2026-07-09] Versionado de artefactos Graphify para relevo`, `[2026-07-09] Pozo acumulativo de victoria para El Asedio` to the rest of the system?**
+  _1380 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `motion-CUEKfUlm.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.02529032258064516 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.024521374246000524 - nodes in this community are weakly interconnected._

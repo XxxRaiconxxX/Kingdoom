@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   ".codex/hooks.json": {
-    "mtime": 1783428829.2582386,
-    "ast_hash": "a1b25ce6e2a5417be7ccd843f0811eed",
+    "mtime": 1783611498.8443108,
+    "ast_hash": "0a8ae057aff66ea0e64d673474fb176d",
     "semantic_hash": ""
   },
   ".vscode/mcp.json": {
@@ -2175,8 +2175,8 @@
     "semantic_hash": ""
   },
   "AI_CHANGELOG.md": {
-    "mtime": 1783610763.7393188,
-    "ast_hash": "ef2bfa03d26099a84946cd8310f0dfd0",
+    "mtime": 1783611498.8443108,
+    "ast_hash": "21e4b2ff71c1dcda59f88604a4c852a1",
     "semantic_hash": ""
   },
   "README.md": {

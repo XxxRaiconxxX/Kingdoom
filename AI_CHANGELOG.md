@@ -8,6 +8,10 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-09] Redistribucion desktop del Asedio
+- Se reordeno el layout de escritorio del Asedio para que la cronica quede debajo del mapa en la columna amplia, reduciendo el espacio vacio al final del frente.
+- La cronica ahora reparte sus movimientos en una grilla responsiva cuando hay ancho disponible, manteniendo una sola columna en movil. [Codex]
+
 ### [2026-07-09] Versionado de artefactos Graphify para relevo
 - Se suben la skill local de Graphify para Codex, el filtro de skills de agentes y las salidas `graphify-out` generadas para consultar el grafo del repositorio.
 - El hook local de Codex queda portable usando `graphify hook-check` en vez de una ruta absoluta del equipo actual. [Codex]

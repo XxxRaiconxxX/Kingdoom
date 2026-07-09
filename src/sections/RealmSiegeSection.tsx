@@ -471,8 +471,8 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
             />
           </div>
 
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
-            <div className="space-y-5">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.55fr)] xl:items-start">
+            <div className="min-w-0 space-y-5">
               <FactionPanel
                 factions={siegeState.factions}
                 selectedFactionId={selectedFactionId}
@@ -497,9 +497,11 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
                 playerFactionId={siegeState.playerState?.factionId ?? null}
                 onSelectTerritory={setSelectedTerritoryId}
               />
+
+              <ActionLog actions={siegeState.recentActions} factions={siegeState.factions} />
             </div>
 
-            <aside className="space-y-5">
+            <aside className="min-w-0 space-y-5">
               <PrizePoolPanel
                 season={siegeState.season}
                 factions={siegeState.factions}
@@ -560,8 +562,6 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
                     : undefined
                 }
               />
-
-              <ActionLog actions={siegeState.recentActions} factions={siegeState.factions} />
             </aside>
           </div>
         </>
@@ -1354,14 +1354,14 @@ function ActionLog({
         </h3>
         <div className="kd-divider mt-3 h-px w-full max-w-48" />
       </div>
-      <div className="mt-4 space-y-2">
+      <div className="mt-4 grid gap-2 md:grid-cols-2 2xl:grid-cols-3">
         {actions.length > 0 ? (
           actions.slice(0, 6).map((action) => (
             <div
               key={action.id}
-              className="rounded-[1.1rem] border border-stone-800 bg-stone-950/45 px-4 py-3"
+              className="min-w-0 rounded-[1.1rem] border border-stone-800 bg-stone-950/45 px-4 py-3"
             >
-              <p className="text-sm font-bold text-stone-200">
+              <p className="break-words text-sm font-bold text-stone-200">
                 {describeAction(action, factionById)}
               </p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-stone-500">
@@ -1370,7 +1370,7 @@ function ActionLog({
             </div>
           ))
         ) : (
-          <p className="rounded-[1.1rem] border border-stone-800 bg-stone-950/45 px-4 py-3 text-sm text-stone-400">
+          <p className="rounded-[1.1rem] border border-stone-800 bg-stone-950/45 px-4 py-3 text-sm text-stone-400 md:col-span-2 2xl:col-span-3">
             Aun no hay movimientos registrados.
           </p>
         )}

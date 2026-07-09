@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, startTransition } from "react";
+import { useEffect, useMemo, useState, startTransition, type CSSProperties } from "react";
 import {
   ArrowLeft,
   Banknote,
@@ -9,10 +9,14 @@ import {
   Loader2,
   Lock,
   Shield,
-  Sparkles,
   Sword,
   TrendingUp,
 } from "lucide-react";
+import arcaniaCastle from "../assets/asedio/kingdom_arcania.png";
+import kaelumCastle from "../assets/asedio/kingdom_kaelum.png";
+import neutralCastle from "../assets/asedio/kingdom_neutral.png";
+import oakhavenCastle from "../assets/asedio/kingdom_oakhaven.png";
+import paramosCastle from "../assets/asedio/kingdom_paramos.png";
 import { SectionHeader } from "../components/SectionHeader";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import {
@@ -36,6 +40,18 @@ type RealmSiegeSectionProps = {
 };
 
 const DEFAULT_FACTION: RealmSiegeFactionId = "kaelum";
+const MAP_WIDTH = 900;
+const MAP_HEIGHT = 620;
+const CAPITAL_TERRITORIES = new Set(["kaelum", "oakhaven", "arcania", "paramos"]);
+const FACTION_ORDER: RealmSiegeFactionId[] = ["kaelum", "oakhaven", "arcania", "paramos"];
+
+const castleImageByOwner: Record<RealmSiegeFactionId | "neutral", string> = {
+  kaelum: kaelumCastle,
+  oakhaven: oakhavenCastle,
+  arcania: arcaniaCastle,
+  paramos: paramosCastle,
+  neutral: neutralCastle,
+};
 
 const factionFlavor: Record<RealmSiegeFactionId, string> = {
   kaelum: "Murallas altas, defensa estable y avance seguro.",
@@ -499,6 +515,14 @@ function FactionPanel({
   onSelectFaction: (factionId: RealmSiegeFactionId) => void;
   onJoinFaction: () => void;
 }) {
+  const orderedFactions = useMemo(
+    () =>
+      factions
+        .slice()
+        .sort((left, right) => FACTION_ORDER.indexOf(left.id) - FACTION_ORDER.indexOf(right.id)),
+    [factions]
+  );
+
   return (
     <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-5">
       <SectionHeader
@@ -512,7 +536,7 @@ function FactionPanel({
       />
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
-        {factions.map((faction) => {
+        {orderedFactions.map((faction) => {
           const isSelected = selectedFactionId === faction.id;
           const isLocked = faction.membersCount >= memberCap && !playerFaction;
 
@@ -522,36 +546,52 @@ function FactionPanel({
               type="button"
               onClick={() => onSelectFaction(faction.id)}
               disabled={Boolean(playerFaction) || isLocked}
-              className={`kd-touch rounded-[1.35rem] border p-4 text-left transition ${
+              className={`kd-touch group relative overflow-hidden rounded-[1.35rem] border p-4 text-left transition ${
                 isSelected
                   ? "border-amber-400/45 bg-amber-500/10 shadow-[0_0_28px_rgba(245,158,11,0.12)]"
                   : "border-stone-800 bg-stone-950/45 hover:border-stone-600"
               } disabled:cursor-not-allowed disabled:opacity-60`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-lg font-black text-stone-100">{faction.displayName}</p>
+              <span
+                className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100"
+                style={{
+                  background: `radial-gradient(circle at 18% 18%, ${faction.accent}2e, transparent 38%)`,
+                }}
+              />
+              <div className="relative flex items-center gap-4">
+                <div className="flex h-24 w-24 shrink-0 items-end justify-center rounded-[1.15rem] border border-stone-800 bg-stone-950/75 p-2">
+                  <img
+                    src={castleImageByOwner[faction.id]}
+                    alt={`Castillo de ${faction.displayName}`}
+                    className="max-h-full max-w-full object-contain drop-shadow-[0_12px_16px_rgba(0,0,0,0.62)] transition duration-300 group-hover:scale-105 group-hover:brightness-110"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-lg font-black text-stone-100">{faction.displayName}</p>
+                    <span
+                      className="rounded-full border px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em]"
+                      style={{
+                        borderColor: `${faction.accent}66`,
+                        backgroundColor: `${faction.accent}1f`,
+                        color: faction.accent,
+                      }}
+                    >
+                      {faction.membersCount}/{memberCap}
+                    </span>
+                  </div>
                   <p className="mt-2 text-xs leading-5 text-stone-400">
                     {factionFlavor[faction.id]}
                   </p>
+                  {faction.isAiManaged ? (
+                    <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-cyan-200">
+                      <Bot className="h-3.5 w-3.5" />
+                      IA activa si nadie entra
+                    </p>
+                  ) : null}
                 </div>
-                <span
-                  className="rounded-full border px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em]"
-                  style={{
-                    borderColor: `${faction.accent}66`,
-                    backgroundColor: `${faction.accent}1f`,
-                    color: faction.accent,
-                  }}
-                >
-                  {faction.membersCount}/{memberCap}
-                </span>
               </div>
-              {faction.isAiManaged ? (
-                <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-cyan-200">
-                  <Bot className="h-3.5 w-3.5" />
-                  IA activa si nadie entra
-                </p>
-              ) : null}
             </button>
           );
         })}
@@ -572,6 +612,64 @@ function FactionPanel({
   );
 }
 
+function toMapX(territory: RealmSiegeTerritory) {
+  return (territory.positionX / 100) * MAP_WIDTH;
+}
+
+function toMapY(territory: RealmSiegeTerritory) {
+  return (territory.positionY / 100) * MAP_HEIGHT;
+}
+
+function getTerritorySprite(isCapital: boolean) {
+  return isCapital
+    ? {
+        x: -62,
+        y: -110,
+        width: 124,
+        height: 116,
+        hitX: -78,
+        hitY: -114,
+        hitW: 156,
+        hitH: 194,
+        groundY: 38,
+        groundRx: 66,
+        groundRy: 20,
+        bannerW: 108,
+        bannerY: 48,
+        nameY: 62,
+        metaY: 76,
+        wallX: 56,
+        wallY: -84,
+        alertX: -72,
+        alertY: -104,
+        alertW: 144,
+        alertH: 164,
+      }
+    : {
+        x: -45,
+        y: -78,
+        width: 90,
+        height: 82,
+        hitX: -60,
+        hitY: -82,
+        hitW: 120,
+        hitH: 152,
+        groundY: 34,
+        groundRx: 51,
+        groundRy: 16,
+        bannerW: 90,
+        bannerY: 40,
+        nameY: 54,
+        metaY: 68,
+        wallX: 42,
+        wallY: -60,
+        alertX: -56,
+        alertY: -74,
+        alertW: 112,
+        alertH: 128,
+      };
+}
+
 function TerritoryMap({
   territories,
   factions,
@@ -585,7 +683,36 @@ function TerritoryMap({
   playerFactionId: RealmSiegeFactionId | null;
   onSelectTerritory: (territoryId: string) => void;
 }) {
-  const factionById = new Map(factions.map((faction) => [faction.id, faction]));
+  const factionById = useMemo(
+    () => new Map(factions.map((faction) => [faction.id, faction])),
+    [factions]
+  );
+  const territoryById = useMemo(
+    () => new Map(territories.map((territory) => [territory.id, territory])),
+    [territories]
+  );
+  const mapEdges = useMemo(() => {
+    const seen = new Set<string>();
+
+    return territories.flatMap((territory) =>
+      territory.adjacentTerritoryIds.flatMap((adjacentId) => {
+        const adjacent = territoryById.get(adjacentId);
+
+        if (!adjacent) {
+          return [];
+        }
+
+        const key = [territory.id, adjacent.id].sort().join("-");
+
+        if (seen.has(key)) {
+          return [];
+        }
+
+        seen.add(key);
+        return [{ from: territory, to: adjacent }];
+      })
+    );
+  }, [territories, territoryById]);
 
   return (
     <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-950/80 p-5">
@@ -596,48 +723,154 @@ function TerritoryMap({
       />
 
       <div className="mt-5 overflow-x-auto pb-2">
-        <div className="relative h-[34rem] min-w-[44rem] overflow-hidden rounded-[1.6rem] border border-amber-500/15 bg-[radial-gradient(circle_at_50%_45%,rgba(120,113,108,0.16),transparent_34%),linear-gradient(145deg,rgba(28,25,23,0.96),rgba(15,23,16,0.92))]">
-          <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(245,158,11,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.08)_1px,transparent_1px)] [background-size:48px_48px]" />
-          {territories.map((territory) => {
-            const owner = territory.ownerFactionId
-              ? factionById.get(territory.ownerFactionId)
-              : null;
-            const isSelected = selectedTerritoryId === territory.id;
-            const isOwn = Boolean(playerFactionId && territory.ownerFactionId === playerFactionId);
-
-            return (
-              <button
-                key={territory.id}
-                type="button"
-                onClick={() => onSelectTerritory(territory.id)}
-                className={`kd-touch absolute -translate-x-1/2 -translate-y-1/2 rounded-[1.15rem] border px-3 py-2 text-center transition ${
-                  isSelected
-                    ? "z-20 scale-105 border-amber-300 bg-amber-400/15 shadow-[0_0_34px_rgba(245,158,11,0.28)]"
-                    : "z-10 border-stone-700 bg-stone-950/80 hover:border-amber-500/35"
-                }`}
-                style={{
-                  left: `${territory.positionX}%`,
-                  top: `${territory.positionY}%`,
-                  boxShadow: isOwn
-                    ? `0 0 0 1px ${owner?.accent ?? "#f4c95d"}66, 0 0 30px ${owner?.accent ?? "#f4c95d"}24`
-                    : undefined,
-                }}
-              >
-                <Castle
-                  className="mx-auto h-8 w-8"
-                  style={{ color: owner?.accent ?? "#a8a29e" }}
+        <div className="siege-map-shell relative min-w-[48rem] overflow-hidden rounded-[1.6rem] border border-amber-500/15">
+          <svg
+            className="block h-auto w-full"
+            viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
+            role="img"
+            aria-label="Mapa interactivo de territorios del Asedio"
+          >
+            <defs>
+              <radialGradient id="siege-map-glow" cx="50%" cy="43%" r="68%">
+                <stop offset="0%" stopColor="rgba(245, 158, 11, 0.18)" />
+                <stop offset="52%" stopColor="rgba(15, 23, 16, 0.58)" />
+                <stop offset="100%" stopColor="rgba(12, 10, 9, 0.96)" />
+              </radialGradient>
+              <pattern id="siege-map-grid" width="42" height="42" patternUnits="userSpaceOnUse">
+                <path
+                  d="M 42 0 L 0 0 0 42"
+                  fill="none"
+                  stroke="rgba(245, 158, 11, 0.07)"
+                  strokeWidth="1"
                 />
-                <span className="mt-1 block text-[11px] font-black uppercase tracking-[0.12em] text-stone-100">
-                  {territory.shortName}
-                </span>
-                <span className="block text-[9px] uppercase tracking-[0.1em] text-stone-500">
-                  {owner?.displayName ?? "Neutral"}
-                </span>
-              </button>
-            );
-          })}
+              </pattern>
+            </defs>
+
+            <rect width={MAP_WIDTH} height={MAP_HEIGHT} fill="url(#siege-map-glow)" />
+            <rect width={MAP_WIDTH} height={MAP_HEIGHT} fill="url(#siege-map-grid)" opacity="0.72" />
+            <path
+              d="M20 122 C190 74 312 108 454 94 C604 78 698 90 880 126 L880 602 L20 602 Z"
+              fill="rgba(83, 78, 55, 0.12)"
+            />
+            <path
+              d="M26 436 C160 406 284 462 440 436 C590 410 700 426 874 390"
+              fill="none"
+              stroke="rgba(245, 158, 11, 0.08)"
+              strokeWidth="36"
+              strokeLinecap="round"
+            />
+
+            {mapEdges.map(({ from, to }) => (
+              <line
+                key={`${from.id}-${to.id}`}
+                className="siege-map-edge"
+                x1={toMapX(from)}
+                y1={toMapY(from)}
+                x2={toMapX(to)}
+                y2={toMapY(to)}
+              />
+            ))}
+
+            {territories.map((territory, index) => {
+              const ownerKey = territory.ownerFactionId ?? "neutral";
+              const owner = territory.ownerFactionId
+                ? factionById.get(territory.ownerFactionId)
+                : null;
+              const isSelected = selectedTerritoryId === territory.id;
+              const isOwn = Boolean(playerFactionId && territory.ownerFactionId === playerFactionId);
+              const isCapital = CAPITAL_TERRITORIES.has(territory.id);
+              const sprite = getTerritorySprite(isCapital);
+              const accent = owner?.accent ?? "#8b846e";
+              const ownerLabel = owner?.displayName ?? "Neutral";
+              const transformScale = isCapital ? 1 : 0.94;
+
+              return (
+                <g
+                  key={territory.id}
+                  className={`siege-territory ${isCapital ? "is-capital" : "is-outpost"} ${
+                    territory.ownerFactionId ? "" : "is-neutral"
+                  } ${isOwn ? "is-own" : ""} ${isSelected ? "is-selected" : ""}`}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${territory.displayName}, ${ownerLabel}`}
+                  transform={`translate(${toMapX(territory)} ${toMapY(territory)}) scale(${transformScale})`}
+                  style={
+                    {
+                      "--siege-accent": accent,
+                      "--siege-delay": `${index * -0.24}s`,
+                    } as CSSProperties
+                  }
+                  onClick={() => onSelectTerritory(territory.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onSelectTerritory(territory.id);
+                    }
+                  }}
+                >
+                  <rect
+                    className="siege-territory-hitbox"
+                    x={sprite.hitX}
+                    y={sprite.hitY}
+                    width={sprite.hitW}
+                    height={sprite.hitH}
+                    rx={isCapital ? 24 : 18}
+                  />
+                  <rect
+                    className="siege-territory-ring"
+                    x={sprite.alertX}
+                    y={sprite.alertY}
+                    width={sprite.alertW}
+                    height={sprite.alertH}
+                    rx={isCapital ? 24 : 18}
+                  />
+                  <ellipse
+                    className="siege-territory-ground"
+                    cx="0"
+                    cy={sprite.groundY}
+                    rx={sprite.groundRx}
+                    ry={sprite.groundRy}
+                  />
+                  <image
+                    className="siege-territory-castle"
+                    href={castleImageByOwner[ownerKey]}
+                    x={sprite.x}
+                    y={sprite.y}
+                    width={sprite.width}
+                    height={sprite.height}
+                    preserveAspectRatio="xMidYMid meet"
+                  />
+                  {territory.wallLevel > 0 ? (
+                    <g className="siege-territory-wall">
+                      <rect x={sprite.wallX} y={sprite.wallY} width="32" height="24" rx="7" />
+                      <text x={sprite.wallX + 16} y={sprite.wallY + 16}>
+                        M{territory.wallLevel}
+                      </text>
+                    </g>
+                  ) : null}
+                  <rect
+                    className="siege-territory-banner"
+                    x={-sprite.bannerW / 2}
+                    y={sprite.bannerY}
+                    width={sprite.bannerW}
+                    height="40"
+                    rx="8"
+                  />
+                  <text className="siege-territory-name" y={sprite.nameY}>
+                    {territory.shortName}
+                  </text>
+                  <text className="siege-territory-meta" y={sprite.metaY}>
+                    {ownerLabel}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
         </div>
       </div>
+      <p className="mt-3 text-xs leading-5 text-stone-500 md:hidden">
+        Desliza el mapa y toca un castillo para ver su detalle.
+      </p>
     </div>
   );
 }
@@ -790,6 +1023,8 @@ function TerritoryDetailPanel({
     return null;
   }
 
+  const castleOwner = territory.ownerFactionId ?? "neutral";
+
   return (
     <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-5">
       <SectionHeader
@@ -797,6 +1032,27 @@ function TerritoryDetailPanel({
         title={territory.displayName}
         description={`${territory.terrain}. Dueño: ${owner?.displayName ?? "Sin reclamar"}.`}
       />
+
+      <div className="mt-5 flex items-center gap-4 rounded-[1.35rem] border border-stone-800 bg-stone-950/45 p-4">
+        <div className="flex h-28 w-32 shrink-0 items-end justify-center rounded-[1.1rem] border border-amber-500/15 bg-[radial-gradient(circle_at_50%_20%,rgba(245,158,11,0.16),transparent_58%),rgba(12,10,9,0.72)] p-2">
+          <img
+            src={castleImageByOwner[castleOwner]}
+            alt={`Modelo de ${territory.displayName}`}
+            className="max-h-full max-w-full object-contain drop-shadow-[0_14px_18px_rgba(0,0,0,0.66)]"
+            loading="lazy"
+          />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-300">
+            Modelo del frente
+          </p>
+          <p className="mt-2 text-sm leading-6 text-stone-400">
+            {owner
+              ? `El territorio usa la arquitectura de ${owner.displayName}.`
+              : "Zona sin reclamar: fortificacion oscurecida hasta ser conquistada."}
+          </p>
+        </div>
+      </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <DetailMetric label="Defensa" value={territory.npcDefense.toLocaleString("es-PY")} icon={Shield} />

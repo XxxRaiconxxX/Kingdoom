@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-09] Restauracion visual del mapa de Asedio con castillos
+- Se incorporaron los cinco modelos visuales del Asedio en `src/assets/asedio/`: Kaelum-Gard, Oakhaven, Arcania, Los Paramos y neutral.
+- `RealmSiegeSection` reemplaza el mapa de botones con iconos por un SVG interactivo con castillos, conexiones entre territorios, anillos de control, badges de muralla y escala distinta para capitales/puestos.
+- Las tarjetas de eleccion de faccion y el panel lateral de territorio ahora muestran los modelos de castillo correspondientes para recuperar la direccion visual del prototipo pulido. [Codex]
+
 ### [2026-07-08] Hotfix de rutas SPA en Vercel para Asedio
 - Se agrego `vercel.json` en la raiz para reescribir rutas internas de la SPA hacia `index.html`.
 - Corrige el 404 directo al abrir `/asedio-reinos?returnTo=%2F` desde la tarjeta exclusiva del mercado en produccion. [Codex]

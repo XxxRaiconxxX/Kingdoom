@@ -2,12 +2,10 @@ import { useEffect, useMemo, useState, startTransition, type CSSProperties } fro
 import {
   ArrowLeft,
   Banknote,
-  Bot,
   Castle,
   Crown,
   Gem,
   Loader2,
-  Lock,
   Shield,
   Sword,
   TrendingUp,
@@ -256,39 +254,30 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
 
   return (
     <section
-      className="space-y-5"
+      className="space-y-4 md:space-y-5"
       data-market-entry={REALM_SIEGE_CATALOG_ENTRY.id}
       data-launch-mode="separate-window"
     >
-      <div className="kd-glass overflow-hidden rounded-[2rem] border border-amber-500/20 bg-stone-950/80">
-        <div className="relative isolate p-6 md:p-8">
+      <div className="kd-glass overflow-hidden rounded-[1.6rem] border border-amber-500/20 bg-stone-950/80 md:rounded-[2rem]">
+        <div className="relative isolate p-4 md:p-8">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.20),transparent_34%),radial-gradient(circle_at_80%_0%,rgba(59,130,246,0.18),transparent_30%),linear-gradient(135deg,rgba(28,25,23,0.98),rgba(12,10,9,0.88))]" />
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <SectionHeader
               eyebrow={REALM_SIEGE_CATALOG_ENTRY.eyebrow}
               title={REALM_SIEGE_CATALOG_ENTRY.title}
               description="Entrada especial del mercado: elige una faccion una sola vez, aporta al tesoro, cobra produccion por territorio y prepara el avance de una campana minima de una semana."
             />
-            <div className="flex flex-wrap gap-2">
-              {standalone ? (
-                <button
-                  type="button"
-                  onClick={handleReturnToMainPage}
-                  className="kd-touch inline-flex items-center gap-2 rounded-full border border-stone-700 bg-stone-950/70 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-stone-200 transition hover:border-amber-400/40 hover:text-amber-200"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Volver a la pagina principal
-                </button>
-              ) : null}
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-amber-200">
-                <Lock className="h-4 w-4" />
-                Faccion bloqueada
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-cyan-200">
-                <Bot className="h-4 w-4" />
-                IA para reinos vacios
-              </span>
-            </div>
+            {standalone ? (
+              <button
+                type="button"
+                onClick={handleReturnToMainPage}
+                aria-label="Volver a la pagina principal"
+                className="kd-touch inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-stone-700 bg-stone-950/70 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-stone-200 transition hover:border-amber-400/40 hover:text-amber-200 sm:mt-1"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Inicio
+              </button>
+            ) : null}
           </div>
         </div>
       </div>
@@ -304,7 +293,7 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
       ) : null}
 
       {player && !canUseSecureActions ? (
-        <div className="kd-glass rounded-[1.6rem] border border-cyan-500/20 bg-cyan-500/10 p-5">
+        <div className="kd-glass rounded-[1.6rem] border border-cyan-500/20 bg-cyan-500/10 p-4 md:p-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-200">
@@ -342,7 +331,7 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
 
       {siegeState ? (
         <>
-          <div className="grid gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3">
             <SiegeStatCard
               icon={Crown}
               label="Duracion minima"
@@ -365,7 +354,7 @@ export function RealmSiegeSection({ standalone = false }: RealmSiegeSectionProps
               icon={Shield}
               label="Cupo por reino"
               value={`${siegeState.season.kingdomMemberCap} jugadores`}
-              detail="Si queda vacio, entra IA."
+              detail="Maximo por faccion."
             />
           </div>
 
@@ -479,19 +468,19 @@ function SiegeStatCard({
   detail: string;
 }) {
   return (
-    <div className="kd-glass rounded-[1.5rem] border border-stone-800 bg-stone-900/75 p-4">
+    <div className="kd-glass rounded-[1.2rem] border border-stone-800 bg-stone-900/75 p-3 md:rounded-[1.5rem] md:p-4">
       <div className="flex items-center gap-3">
-        <span className="rounded-2xl bg-amber-500/10 p-2 text-amber-300">
+        <span className="rounded-xl bg-amber-500/10 p-2 text-amber-300 md:rounded-2xl">
           <Icon className="h-5 w-5" />
         </span>
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-stone-500">
+          <p className="text-[9px] font-black uppercase tracking-[0.16em] text-stone-500 md:text-[10px] md:tracking-[0.18em]">
             {label}
           </p>
-          <p className="mt-1 text-lg font-black text-stone-100">{value}</p>
+          <p className="mt-1 text-base font-black text-stone-100 md:text-lg">{value}</p>
         </div>
       </div>
-      <p className="mt-3 text-xs leading-5 text-stone-500">{detail}</p>
+      <p className="mt-2 text-[11px] leading-4 text-stone-500 md:mt-3 md:text-xs md:leading-5">{detail}</p>
     </div>
   );
 }
@@ -524,14 +513,14 @@ function FactionPanel({
   );
 
   return (
-    <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-5">
+    <div className="kd-glass rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4 md:rounded-[2rem] md:p-5">
       <SectionHeader
         eyebrow="Paso 1"
         title={playerFaction ? `Faccion fijada: ${playerFaction.displayName}` : "Elige tu reino"}
         description={
           playerFaction
-            ? "La eleccion queda bloqueada hasta que termine la temporada del Asedio."
-            : "Cada reino acepta hasta 3 jugadores. Si un reino queda vacio, Supabase lo marca para control por IA."
+            ? "La eleccion queda fija hasta que termine la temporada del Asedio."
+            : "Cada reino acepta hasta 3 jugadores. Elige con cuidado: tu faccion se mantiene durante la temporada."
         }
       />
 
@@ -559,7 +548,7 @@ function FactionPanel({
                 }}
               />
               <div className="relative flex items-center gap-4">
-                <div className="flex h-24 w-24 shrink-0 items-end justify-center rounded-[1.15rem] border border-stone-800 bg-stone-950/75 p-2">
+                <div className="flex h-20 w-20 shrink-0 items-end justify-center rounded-[1.15rem] border border-stone-800 bg-stone-950/75 p-2 sm:h-24 sm:w-24">
                   <img
                     src={castleImageByOwner[faction.id]}
                     alt={`Castillo de ${faction.displayName}`}
@@ -584,12 +573,6 @@ function FactionPanel({
                   <p className="mt-2 text-xs leading-5 text-stone-400">
                     {factionFlavor[faction.id]}
                   </p>
-                  {faction.isAiManaged ? (
-                    <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-cyan-200">
-                      <Bot className="h-3.5 w-3.5" />
-                      IA activa si nadie entra
-                    </p>
-                  ) : null}
                 </div>
               </div>
             </button>
@@ -715,7 +698,7 @@ function TerritoryMap({
   }, [territories, territoryById]);
 
   return (
-    <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-950/80 p-5">
+    <div className="kd-glass rounded-[1.6rem] border border-stone-800 bg-stone-950/80 p-4 md:rounded-[2rem] md:p-5">
       <SectionHeader
         eyebrow="Mapa vivo"
         title="Frente del Asedio"
@@ -723,7 +706,7 @@ function TerritoryMap({
       />
 
       <div className="mt-5 overflow-x-auto pb-2">
-        <div className="siege-map-shell relative min-w-[48rem] overflow-hidden rounded-[1.6rem] border border-amber-500/15">
+        <div className="siege-map-shell relative min-w-[42rem] overflow-hidden rounded-[1.35rem] border border-amber-500/15 sm:min-w-[48rem] md:rounded-[1.6rem]">
           <svg
             className="block h-auto w-full"
             viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
@@ -912,7 +895,7 @@ function EconomyPanel({
     : "Disponible";
 
   return (
-    <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-5">
+    <div className="kd-glass rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4 md:rounded-[2rem] md:p-5">
       <SectionHeader
         eyebrow="Tesoro"
         title={playerFaction ? `Tesoro de ${playerFaction.displayName}` : "Economia del frente"}
@@ -1026,14 +1009,14 @@ function TerritoryDetailPanel({
   const castleOwner = territory.ownerFactionId ?? "neutral";
 
   return (
-    <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-5">
+    <div className="kd-glass rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4 md:rounded-[2rem] md:p-5">
       <SectionHeader
         eyebrow={owner ? "Territorio controlado" : "Territorio neutral"}
         title={territory.displayName}
         description={`${territory.terrain}. Dueño: ${owner?.displayName ?? "Sin reclamar"}.`}
       />
 
-      <div className="mt-5 flex items-center gap-4 rounded-[1.35rem] border border-stone-800 bg-stone-950/45 p-4">
+      <div className="mt-5 flex items-center gap-3 rounded-[1.35rem] border border-stone-800 bg-stone-950/45 p-3 sm:gap-4 sm:p-4">
         <div className="flex h-28 w-32 shrink-0 items-end justify-center rounded-[1.1rem] border border-amber-500/15 bg-[radial-gradient(circle_at_50%_20%,rgba(245,158,11,0.16),transparent_58%),rgba(12,10,9,0.72)] p-2">
           <img
             src={castleImageByOwner[castleOwner]}
@@ -1123,8 +1106,17 @@ function ActionLog({
   const factionById = new Map(factions.map((faction) => [faction.id, faction.displayName]));
 
   return (
-    <div className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-5">
-      <SectionHeader eyebrow="Cronica" title="Ultimos movimientos" />
+    <div className="kd-glass rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4 md:rounded-[2rem] md:p-5">
+      <div>
+        <p className="kd-section-eyebrow text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-400/80">
+          <span className="kd-section-sigil" aria-hidden="true" />
+          Cronica
+        </p>
+        <h3 className="mt-2 max-w-full text-xl font-black leading-tight text-stone-100 sm:text-2xl xl:text-[1.45rem]">
+          Ultimos movimientos
+        </h3>
+        <div className="kd-divider mt-3 h-px w-full max-w-48" />
+      </div>
       <div className="mt-4 space-y-2">
         {actions.length > 0 ? (
           actions.slice(0, 6).map((action) => (

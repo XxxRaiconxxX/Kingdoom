@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-09] Ajuste responsive del encabezado y cronica del Asedio
+- Se simplifico el encabezado exclusivo del Asedio eliminando los chips visibles de bloqueo e IA.
+- El boton de retorno a la pagina inicial ahora es compacto y ocupa menos espacio en desktop y movil.
+- Se redujo el tamano del titulo "Ultimos movimientos" y se compactaron paddings/grillas en mobile para aprovechar mejor el ancho disponible. [Codex]
+
 ### [2026-07-09] Restauracion visual del mapa de Asedio con castillos
 - Se incorporaron los cinco modelos visuales del Asedio en `src/assets/asedio/`: Kaelum-Gard, Oakhaven, Arcania, Los Paramos y neutral.
 - `RealmSiegeSection` reemplaza el mapa de botones con iconos por un SVG interactivo con castillos, conexiones entre territorios, anillos de control, badges de muralla y escala distinta para capitales/puestos.

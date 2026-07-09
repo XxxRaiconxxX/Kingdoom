@@ -169,7 +169,7 @@ export default function App() {
         className="kd-ambient min-h-screen bg-stone-950 text-stone-300"
         data-kd-theme="market"
       >
-        <main className="kd-shell mx-auto min-h-screen w-full max-w-7xl px-4 py-5 md:px-6 md:py-8">
+        <main className="kd-shell mx-auto min-h-screen w-full max-w-7xl px-2.5 py-3 sm:px-4 sm:py-5 md:px-6 md:py-8">
           <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo El Asedio de los Reinos..." />}>
             <RealmSiegeSection standalone />
           </Suspense>

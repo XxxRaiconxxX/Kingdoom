@@ -7,7 +7,7 @@ export const REALM_SIEGE_CATALOG_ENTRY = {
   title: "El Asedio de los Reinos",
   eyebrow: "Catalogo exclusivo",
   description:
-    "Campana estrategica de una semana con facciones bloqueadas, tesoro diario, produccion por territorio e IA para reinos vacios.",
+    "Campana estrategica de una semana: elige faccion, fortalece el tesoro diario, produce por territorio y compite por conquistar el mapa.",
   route: "/asedio-reinos",
 } as const;
 

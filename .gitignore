@@ -23,3 +23,6 @@ android/app/build/
 android/capacitor-cordova-android-plugins/build/
 android/.gradle/
 android/local.properties
+# Graphify stays at repo root, but its outputs and Codex hooks are local machine state.
+.codex/
+graphify-out/

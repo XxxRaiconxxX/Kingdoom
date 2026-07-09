@@ -2,11 +2,16 @@
 
 Este changelog mantiene solo el periodo operativo reciente para que el relevo sea rapido y accionable.
 
-- Ventana conservada: 2026-05-06 a 2026-07-06.
+- Ventana conservada: 2026-05-06 a 2026-07-09.
 - Historico anterior retirado del changelog activo por limpieza operativa.
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-07
+
+### [2026-07-09] Graphify operativo y portable sin versionar estado local
+- Se agregaron `scripts/graphify-manager.mjs` y `docs/graphify/OPERATIONS.md`, junto con los comandos `npm run graphify:setup|doctor|update|rebuild|watch`, para unificar el mantenimiento del grafo en `Kingdoom-sync`.
+- `AGENTS.md`, `.agents/rules/graphify.md` y `.agents/workflows/graphify.md` quedaron alineados al mismo flujo operativo, mientras `.codex/skills/graphify/` se conserva versionado para que Codex mantenga `/graphify` en nuevos clones.
+- `.codex/hooks.json` y todo `graphify-out/` salen del indice de Git para volver a ser estado local por maquina, sin perder compatibilidad con Graphify ni con otros agentes. Validado con `npm run graphify:setup` y `npm run graphify:doctor`. [Codex]
 
 ### [2026-07-09] Redistribucion desktop del Asedio
 - Se reordeno el layout de escritorio del Asedio para que la cronica quede debajo del mapa en la columna amplia, reduciendo el espacio vacio al final del frente.

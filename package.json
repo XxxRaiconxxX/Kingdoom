@@ -12,7 +12,12 @@
     "mobile:start": "npm run start --prefix apps/mobile",
     "mobile:android": "npm run android --prefix apps/mobile",
     "mobile:web": "npm run web --prefix apps/mobile",
-    "mobile:typecheck": "npm run typecheck --prefix apps/mobile"
+    "mobile:typecheck": "npm run typecheck --prefix apps/mobile",
+    "graphify:setup": "node scripts/graphify-manager.mjs setup",
+    "graphify:doctor": "node scripts/graphify-manager.mjs doctor",
+    "graphify:update": "node scripts/graphify-manager.mjs update",
+    "graphify:rebuild": "node scripts/graphify-manager.mjs rebuild",
+    "graphify:watch": "graphify watch ."
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

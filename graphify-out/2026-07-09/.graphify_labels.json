@@ -213,5 +213,10 @@
   "211": "at",
   "212": "graphify.md",
   "213": "graphify.md",
-  "218": "platform.ts"
+  "214": "knowledge.ts",
+  "215": "playerNotifications.ts",
+  "216": "it",
+  "217": "normalizeMutationResult",
+  "218": "platform.ts",
+  "219": "scratchUtils.ts"
 }

@@ -2175,8 +2175,8 @@
     "semantic_hash": ""
   },
   "AI_CHANGELOG.md": {
-    "mtime": 1783605419.7438455,
-    "ast_hash": "6c5107e30f7c9d1be580fc09b83cb83d",
+    "mtime": 1783610763.7393188,
+    "ast_hash": "ef2bfa03d26099a84946cd8310f0dfd0",
     "semantic_hash": ""
   },
   "README.md": {
@@ -3190,18 +3190,18 @@
     "semantic_hash": ""
   },
   "src/sections/RealmSiegeSection.tsx": {
-    "mtime": 1783604688.9943707,
-    "ast_hash": "8f1dc1d71a7017dd19f5b91dd112cbf9",
+    "mtime": 1783610814.4621892,
+    "ast_hash": "2680395700ddaa528f9839918a29730a",
     "semantic_hash": ""
   },
   "src/utils/realmSiege.ts": {
-    "mtime": 1783605419.7418306,
-    "ast_hash": "05a97f50353c3c47ead4f5253ddc7b5a",
+    "mtime": 1783610736.9168289,
+    "ast_hash": "85686d20055cb4bf9cc7c0e80c551fd6",
     "semantic_hash": ""
   },
   "supabase/supabase_realm_siege.sql": {
-    "mtime": 1783546456.4920714,
-    "ast_hash": "8acde1d2ae9ed4482ae42e34d6bffa21",
+    "mtime": 1783610538.7966835,
+    "ast_hash": "d0f3ddd367b19408b1a3b7f32cf007f8",
     "semantic_hash": ""
   },
   "vercel.json": {

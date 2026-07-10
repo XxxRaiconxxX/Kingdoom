@@ -8,6 +8,10 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-10] Hotfix del menu admin oculto en escritorio
+- Se corrigio la prioridad CSS de `kd-admin-tabs` para que el menu de secciones del panel admin vuelva a mostrarse en escritorio aunque el estado inicial mantenga la clase `hidden`.
+- El comportamiento colapsable en movil se conserva: el selector sigue cerrado por defecto en pantallas chicas y se despliega solo al pulsar "Menu". [Codex]
+
 ### [2026-07-09] Graphify operativo y portable sin versionar estado local
 - Se agregaron `scripts/graphify-manager.mjs` y `docs/graphify/OPERATIONS.md`, junto con los comandos `npm run graphify:setup|doctor|update|rebuild|watch`, para unificar el mantenimiento del grafo en `Kingdoom-sync`.
 - `AGENTS.md`, `.agents/rules/graphify.md` y `.agents/workflows/graphify.md` quedaron alineados al mismo flujo operativo, mientras `.codex/skills/graphify/` se conserva versionado para que Codex mantenga `/graphify` en nuevos clones.

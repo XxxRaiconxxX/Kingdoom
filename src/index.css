@@ -405,6 +405,12 @@
   display: none !important;
 }
 
+@media (min-width: 640px) {
+  .kd-admin-tabs.hidden {
+    display: flex !important;
+  }
+}
+
 .kd-admin-tabs::-webkit-scrollbar {
   display: none;
 }

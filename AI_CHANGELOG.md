@@ -2,11 +2,20 @@
 
 Este changelog mantiene solo el periodo operativo reciente para que el relevo sea rapido y accionable.
 
-- Ventana conservada: 2026-05-06 a 2026-07-09.
+- Ventana conservada: 2026-05-06 a 2026-07-11.
 - Historico anterior retirado del changelog activo por limpieza operativa.
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-07
+
+### [2026-07-11] Auditoria extrema de rendimiento y transferencias seguras
+- Se reemplazo el reveal inicial basado en GSAP por Web Animations API, reduciendo el camino critico de `185.002` a `157.084` bytes gzip (`-15,1%`) y de 7 a 6 archivos iniciales sin cambiar el aspecto ni el soporte de movimiento reducido.
+- Se agrego `supabase/supabase_player_transfers.sql` con transferencias atomicas de oro y objetos, bloqueo de items financiados, autorizacion por sesion vinculada y notificacion dentro de la misma transaccion.
+- El panel de intercambios deja de hacer debitos/creditos separados con rollback parcial, exige vinculo seguro y refresca el saldo real tras completar la RPC.
+- La migracion reemplaza la politica abierta de `player_notifications` por lectura y marcado limitados al jugador vinculado.
+- `.env` se retiro del indice de Git conservando la copia local. Las claves historicamente expuestas deben rotarse en sus proveedores antes del siguiente despliegue.
+- Riesgo P0 abierto: `increment_gold` aun permite incrementos positivos desde clientes web y nueve minijuegos liquidan premios calculados en navegador. No se revoco para evitar romper produccion; requiere migrar cada juego a una RPC server-side verificable antes de considerar segura la economia web.
+- Validacion: `npx tsc --noEmit`, `npm run build`, muestra final de siete pasadas de Chrome (LCP mediano `444 ms`, CLS mediano `0`) y ejecucion integral de la migracion en PostgreSQL efimero con casos autorizado, no autorizado, saldo insuficiente y objeto bloqueado. El SQL debe aplicarse en Supabase antes de desplegar estos cambios. [Codex]
 
 ### [2026-07-10] Hotfix del menu admin oculto en escritorio
 - Se corrigio la prioridad CSS de `kd-admin-tabs` para que el menu de secciones del panel admin vuelva a mostrarse en escritorio aunque el estado inicial mantenga la clase `hidden`.

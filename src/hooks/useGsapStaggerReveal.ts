@@ -1,8 +1,5 @@
+import { useLayoutEffect } from "react";
 import type { RefObject } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
-
-gsap.registerPlugin(useGSAP);
 
 type GsapRevealOptions = {
   selector: string;
@@ -26,45 +23,34 @@ export function useGsapStaggerReveal(
     dependencies = [],
   }: GsapRevealOptions
 ) {
-  useGSAP(
-    () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        return;
-      }
-
-      const targets = gsap.utils.toArray<HTMLElement>(
-        selector,
-        containerRef.current ?? undefined
-      );
-
-      if (targets.length === 0) {
-        return;
-      }
-
-      gsap.set(targets, {
-        autoAlpha: 0,
-        y,
-        willChange: "transform,opacity",
-      });
-
-      const tween = gsap.to(targets, {
-        autoAlpha: 1,
-        y: 0,
-        duration,
-        delay,
-        stagger,
-        ease,
-        overwrite: "auto",
-        clearProps: "opacity,visibility,transform,will-change",
-      });
-
-      return () => {
-        tween.kill();
-      };
-    },
-    {
-      scope: containerRef,
-      dependencies: [...dependencies],
+  useLayoutEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
     }
-  );
+
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const targets = Array.from(container.querySelectorAll<HTMLElement>(selector));
+    const easing = ease === "power3.out" ? "cubic-bezier(0.22, 1, 0.36, 1)" : ease;
+    const animations = targets.map((target, index) =>
+      target.animate(
+        [
+          { opacity: 0, transform: `translateY(${y}px)` },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        {
+          duration: duration * 1000,
+          delay: (delay + stagger * index) * 1000,
+          easing,
+        }
+      )
+    );
+
+    return () => {
+      animations.forEach((animation) => animation.cancel());
+    };
+  }, [containerRef, delay, duration, ease, selector, stagger, y, ...dependencies]);
 }

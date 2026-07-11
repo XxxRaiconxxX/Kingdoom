@@ -1,14 +1,46 @@
 import { supabase } from "./supabaseClient";
 import { fetchPlayerByUsername } from "./players";
-import { createPlayerNotification } from "./playerNotifications";
-import type { PlayerAccount, InventoryEntry } from "../types";
+import type { InventoryEntry, PlayerAccount } from "../types";
+
+type RpcRow = Record<string, unknown>;
+
+function readRpcRow(data: unknown): RpcRow | null {
+  if (!Array.isArray(data) || data.length === 0) {
+    return null;
+  }
+
+  const row = data[0];
+  return row && typeof row === "object" ? (row as RpcRow) : null;
+}
+
+function readRpcMessage(row: RpcRow | null, fallback: string) {
+  return typeof row?.message === "string" && row.message.trim()
+    ? row.message
+    : fallback;
+}
+
+function getTransferErrorMessage(error: unknown, fallback: string) {
+  if (!error || typeof error !== "object") {
+    return fallback;
+  }
+
+  const details = error as { code?: unknown; message?: unknown };
+  const code = String(details.code ?? "");
+  const message = String(details.message ?? "");
+
+  if (code === "42883" || code === "PGRST202" || message.includes("transfer_player_")) {
+    return "Falta aplicar supabase_player_transfers.sql antes de habilitar intercambios.";
+  }
+
+  return fallback;
+}
 
 export async function transferGold(
   fromPlayer: PlayerAccount,
   toUsername: string,
   amount: number
 ): Promise<{ success: boolean; message: string; newGold?: number }> {
-  if (amount <= 0) {
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
     return { success: false, message: "La cantidad de oro debe ser mayor a 0." };
   }
 
@@ -16,49 +48,42 @@ export async function transferGold(
     return { success: false, message: "No tienes suficiente oro para enviar." };
   }
 
-  if (fromPlayer.username.toLowerCase() === toUsername.toLowerCase().trim()) {
-     return { success: false, message: "No puedes enviarte oro a ti mismo." };
-  }
-
   const targetPlayer = await fetchPlayerByUsername(toUsername);
   if (!targetPlayer) {
     return { success: false, message: "El jugador destinatario no existe." };
   }
 
-  // Deduct from sender
-  const newSenderGold = fromPlayer.gold - amount;
-  const { error: senderError } = await supabase
-    .from("players")
-    .update({ gold: newSenderGold })
-    .eq("id", fromPlayer.id);
-
-  if (senderError) {
-    return { success: false, message: "Ocurrió un error al descontar tu oro." };
+  if (targetPlayer.id === fromPlayer.id) {
+    return { success: false, message: "No puedes enviarte oro a ti mismo." };
   }
 
-  // Add to target
-  const { error: targetError } = await supabase
-    .from("players")
-    .update({ gold: targetPlayer.gold + amount })
-    .eq("id", targetPlayer.id);
-
-  if (targetError) {
-    // Attempt rollback (best effort)
-    await supabase.from("players").update({ gold: fromPlayer.gold }).eq("id", fromPlayer.id);
-    return { success: false, message: "Error al enviar oro. Operación cancelada." };
-  }
-
-  await createPlayerNotification({
-    playerId: targetPlayer.id,
-    senderPlayerId: fromPlayer.id,
-    senderName: fromPlayer.username,
-    kind: "gold",
-    title: "Oro recibido",
-    message: `${fromPlayer.username} te envio ${amount} de oro.`,
-    amount,
+  const { data, error } = await supabase.rpc("transfer_player_gold", {
+    p_from_player_id: fromPlayer.id,
+    p_to_player_id: targetPlayer.id,
+    p_amount: amount,
   });
 
-  return { success: true, message: "Oro enviado correctamente.", newGold: newSenderGold };
+  if (error) {
+    return {
+      success: false,
+      message: getTransferErrorMessage(error, "No se pudo completar la transferencia de oro."),
+    };
+  }
+
+  const row = readRpcRow(data);
+  if (row?.success !== true) {
+    return {
+      success: false,
+      message: readRpcMessage(row, "No se pudo completar la transferencia de oro."),
+    };
+  }
+
+  const newGold = Number(row.sender_gold);
+  return {
+    success: true,
+    message: readRpcMessage(row, "Oro enviado correctamente."),
+    ...(Number.isFinite(newGold) ? { newGold } : {}),
+  };
 }
 
 export async function transferItem(
@@ -67,16 +92,16 @@ export async function transferItem(
   item: InventoryEntry,
   amount: number
 ): Promise<{ success: boolean; message: string }> {
-  if (amount <= 0) {
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
     return { success: false, message: "La cantidad debe ser mayor a 0." };
+  }
+
+  if (item.isLocked) {
+    return { success: false, message: "Ese objeto está bloqueado por un plan de pago activo." };
   }
 
   if (item.quantity < amount) {
     return { success: false, message: "No tienes suficientes unidades de este objeto." };
-  }
-
-  if (fromPlayer.username.toLowerCase() === toUsername.toLowerCase().trim()) {
-    return { success: false, message: "No puedes enviarte objetos a ti mismo." };
   }
 
   const targetPlayer = await fetchPlayerByUsername(toUsername);
@@ -84,111 +109,29 @@ export async function transferItem(
     return { success: false, message: "El jugador destinatario no existe." };
   }
 
-  // Deduct/remove from sender
-  const newSenderQuantity = item.quantity - amount;
-  
-  if (newSenderQuantity === 0) {
-    const { error: deleteError } = await supabase
-      .from("player_inventory")
-      .delete()
-      .eq("id", item.id);
-      
-    if (deleteError) return { success: false, message: "Error al descontar tu objeto." };
-  } else {
-    const { error: updateError } = await supabase
-      .from("player_inventory")
-      .update({ quantity: newSenderQuantity })
-      .eq("id", item.id);
-      
-    if (updateError) return { success: false, message: "Error al actualizar tu inventario." };
+  if (targetPlayer.id === fromPlayer.id) {
+    return { success: false, message: "No puedes enviarte objetos a ti mismo." };
   }
 
-  // Add to target
-  // Check if target already has this item
-  const { data: existingTargetItem } = await supabase
-    .from("player_inventory")
-    .select("id, quantity")
-    .eq("player_id", targetPlayer.id)
-    .eq("item_id", item.itemId)
-    .maybeSingle();
-
-  if (existingTargetItem) {
-    const { error: targetUpdateError } = await supabase
-      .from("player_inventory")
-      .update({ quantity: existingTargetItem.quantity + amount })
-      .eq("id", existingTargetItem.id);
-
-    if (targetUpdateError) {
-      // Best effort rollback
-      if (newSenderQuantity === 0) {
-        await supabase.from("player_inventory").insert({
-          player_id: fromPlayer.id,
-          item_id: item.itemId,
-          item_name: item.itemName,
-          item_category: item.itemCategory,
-          item_description: item.itemDescription,
-          item_ability: item.itemAbility,
-          item_image_url: item.itemImageUrl,
-          item_image_fit: item.itemImageFit,
-          item_image_position: item.itemImagePosition,
-          item_rarity: item.itemRarity,
-          quantity: item.quantity,
-        });
-      } else {
-        await supabase.from("player_inventory").update({ quantity: item.quantity }).eq("id", item.id);
-      }
-      return { success: false, message: "Error al enviar el objeto. Operación cancelada." };
-    }
-  } else {
-    const { error: targetInsertError } = await supabase
-      .from("player_inventory")
-      .insert({
-        player_id: targetPlayer.id,
-        item_id: item.itemId,
-        item_name: item.itemName,
-        item_category: item.itemCategory,
-        item_description: item.itemDescription,
-        item_ability: item.itemAbility,
-        item_image_url: item.itemImageUrl,
-        item_image_fit: item.itemImageFit,
-        item_image_position: item.itemImagePosition,
-        item_rarity: item.itemRarity,
-        quantity: amount,
-      });
-
-    if (targetInsertError) {
-       // Best effort rollback
-       if (newSenderQuantity === 0) {
-         await supabase.from("player_inventory").insert({
-           player_id: fromPlayer.id,
-           item_id: item.itemId,
-           item_name: item.itemName,
-           item_category: item.itemCategory,
-           item_description: item.itemDescription,
-           item_ability: item.itemAbility,
-           item_image_url: item.itemImageUrl,
-           item_image_fit: item.itemImageFit,
-           item_image_position: item.itemImagePosition,
-           item_rarity: item.itemRarity,
-           quantity: item.quantity,
-         });
-       } else {
-         await supabase.from("player_inventory").update({ quantity: item.quantity }).eq("id", item.id);
-       }
-       return { success: false, message: "Error al añadir el objeto al destinatario. Operación cancelada." };
-    }
-  }
-
-  await createPlayerNotification({
-    playerId: targetPlayer.id,
-    senderPlayerId: fromPlayer.id,
-    senderName: fromPlayer.username,
-    kind: "item",
-    title: "Objeto recibido",
-    message: `${fromPlayer.username} te envio ${amount} x ${item.itemName}.`,
-    amount,
-    itemName: item.itemName,
+  const { data, error } = await supabase.rpc("transfer_player_item", {
+    p_from_player_id: fromPlayer.id,
+    p_to_player_id: targetPlayer.id,
+    p_inventory_id: item.id,
+    p_amount: amount,
   });
 
-  return { success: true, message: "Objeto enviado correctamente." };
+  if (error) {
+    return {
+      success: false,
+      message: getTransferErrorMessage(error, "No se pudo completar la transferencia del objeto."),
+    };
+  }
+
+  const row = readRpcRow(data);
+  return row?.success === true
+    ? { success: true, message: readRpcMessage(row, "Objeto enviado correctamente.") }
+    : {
+        success: false,
+        message: readRpcMessage(row, "No se pudo completar la transferencia del objeto."),
+      };
 }

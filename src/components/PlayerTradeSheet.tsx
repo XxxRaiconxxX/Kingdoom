@@ -21,7 +21,13 @@ const CATEGORY_ICONS = {
 type TradeMode = "gold" | "item";
 
 export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
-  const { player, inventoryRefreshToken, notifyInventoryChanged, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const {
+    player,
+    inventoryRefreshToken,
+    isPlayerSecureLinked,
+    notifyInventoryChanged,
+    refreshPlayer,
+  } = usePlayerSession();
   const playerId = player?.id ?? null;
   
   const [items, setItems] = useState<InventoryEntry[]>([]);
@@ -67,6 +73,14 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!player) return;
+
+    if (!isPlayerSecureLinked) {
+      setFeedback({
+        type: "error",
+        message: "Vincula primero este jugador con tu sesión segura desde el perfil.",
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     setFeedback(null);
@@ -82,9 +96,7 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
         const result = await transferGold(player, targetUsername, amount);
         if (result.success) {
           setFeedback({ type: "success", message: result.message });
-          if (result.newGold !== undefined) {
-             void setPlayerGold(result.newGold);
-          }
+          await refreshPlayer();
           setGoldAmount("");
         } else {
           setFeedback({ type: "error", message: result.message });
@@ -156,7 +168,13 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
 
         <div className="flex-1 overflow-y-auto px-5 py-5 md:px-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+            {!isPlayerSecureLinked ? (
+              <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+                <p>Vincula este jugador con tu sesión segura desde el perfil antes de transferir bienes.</p>
+              </div>
+            ) : null}
+
             {/* Target User */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-stone-300">
@@ -323,7 +341,7 @@ export function PlayerTradeSheet({ onClose }: { onClose: () => void }) {
 
             <button
               type="submit"
-              disabled={isSubmitting || (mode === "item" && !selectedItem)}
+              disabled={!isPlayerSecureLinked || isSubmitting || (mode === "item" && !selectedItem)}
               className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600 to-cyan-500 px-5 py-4 text-sm font-extrabold text-white transition hover:from-cyan-500 hover:to-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(100%)]">

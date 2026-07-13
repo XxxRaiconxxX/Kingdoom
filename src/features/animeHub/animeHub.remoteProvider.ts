@@ -67,7 +67,9 @@ const PLAYBACK_PROVIDERS: AnimePlaybackProviderId[] = [
 ];
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 15_000;
-const DIRECT_API_URL = import.meta.env.VITE_ANIME_HUB_API_URL?.trim() ?? "";
+const DIRECT_API_URL =
+  import.meta.env.VITE_ANIME_HUB_API_URL?.trim() ||
+  "https://scraping-web-anime-api.vercel.app";
 const DIRECT_API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY?.trim() ?? "";
 const PROXY_API_URL = import.meta.env.VITE_ANIME_PROXY_URL?.trim() ?? "";
 const cache = new Map<string, CacheEntry>();

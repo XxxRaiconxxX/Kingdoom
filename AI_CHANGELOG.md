@@ -8,6 +8,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-13] Hotfix de Portal Anime en GitHub Pages
+- Se adapto el provider del Portal Anime para detectar despliegues estaticos de GitHub Pages y usar el scraper autenticado directamente cuando el build recibe `VITE_ANIME_HUB_API_URL` y `VITE_ANIME_HUB_API_KEY`.
+- El workflow de Pages ahora inyecta `ANIME_HUB_API_URL`, `ANIME_HUB_API_KEY` y `ANIME_PROXY_URL` desde GitHub Actions Secrets durante `npm run build`, evitando que el bundle se publique sin credenciales anime.
+- Se mantiene el camino server-side por `/api/anime/proxy` para despliegues con backend disponible; el modo directo queda como compatibilidad operativa para Pages.
+- Validacion: scraper remoto con `Authorization` respondio 200 en TioAnime, mientras `/api/anime/proxy` en GitHub Pages/Vercel actual respondia 404; `npx tsc --noEmit`, `npm run build` con variables anime y `git diff --check` pasaron limpios. Riesgo: en GitHub Pages la clave `VITE_` queda incluida en el bundle estatico por limitacion del hosting. [Codex]
+
 ### [2026-07-13] Rework responsivo y endurecimiento de proveedores del Portal Anime
 - Se rediseño `AnimeHubSection` para movil y escritorio con selector de proveedor siempre visible, busquedas rapidas, resultados tactiles, estados de carga/error/vacio, filtro de episodios, diagnostico visible por fuente y animaciones compatibles con movimiento reducido. Al entrar sin sesion, el panel de perfil se compacta para priorizar el portal sin perder el acceso a "Conectar".
 - Se elimino la consulta vacia al abrir el portal y se protegieron busquedas, fichas y episodios contra respuestas asincronas atrasadas.

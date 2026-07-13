@@ -35,6 +35,10 @@ jobs:
         run: npm install
 
       - name: Build project
+        env:
+          VITE_ANIME_HUB_API_URL: ${{ secrets.ANIME_HUB_API_URL }}
+          VITE_ANIME_HUB_API_KEY: ${{ secrets.ANIME_HUB_API_KEY }}
+          VITE_ANIME_PROXY_URL: ${{ secrets.ANIME_PROXY_URL }}
         run: npm run build
 
       - name: Upload Pages artifact

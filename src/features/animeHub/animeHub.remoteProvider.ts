@@ -58,6 +58,7 @@ type ProxyResponse = {
 };
 
 type CacheEntry = { expiresAt: number; value: ProxyResponse };
+type ProxyParams = Record<string, string>;
 
 const PLAYBACK_PROVIDERS: AnimePlaybackProviderId[] = [
   "animeflv",
@@ -66,6 +67,9 @@ const PLAYBACK_PROVIDERS: AnimePlaybackProviderId[] = [
 ];
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 15_000;
+const DIRECT_API_URL = import.meta.env.VITE_ANIME_HUB_API_URL?.trim() ?? "";
+const DIRECT_API_KEY = import.meta.env.VITE_ANIME_HUB_API_KEY?.trim() ?? "";
+const PROXY_API_URL = import.meta.env.VITE_ANIME_PROXY_URL?.trim() ?? "";
 const cache = new Map<string, CacheEntry>();
 const inFlight = new Map<string, Promise<ProxyResponse>>();
 
@@ -266,10 +270,37 @@ function normalizeLinks(value: unknown): AnimeEpisodeLinks {
   };
 }
 
-async function requestProxy(params: Record<string, string>, ttl = CACHE_TTL_MS) {
-  const url = new URL("/api/anime/proxy", window.location.origin);
+function directProviderUrl(params: ProxyParams) {
+  if (!DIRECT_API_URL || !DIRECT_API_KEY || params.action === "metadata") return null;
+
+  const url = new URL(DIRECT_API_URL);
+  const basePath = url.pathname.replace(/\/$/, "");
+
+  if (params.action === "search") {
+    url.pathname = `${basePath}/api/search`;
+    url.searchParams.set("q", params.query ?? "");
+  } else if (params.action === "detail") {
+    url.pathname = `${basePath}/api/anime/${encodeURIComponent(params.id ?? "")}`;
+  } else if (params.action === "links") {
+    url.pathname = `${basePath}/api/episode/${encodeURIComponent(params.id ?? "")}`;
+  } else {
+    return null;
+  }
+
+  url.searchParams.set("source", params.provider ?? "animeflv");
+  return url;
+}
+
+function proxyProviderUrl(params: ProxyParams) {
+  const url = new URL(PROXY_API_URL || "/api/anime/proxy", window.location.origin);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
-  const key = url.toString();
+  return url;
+}
+
+async function requestProxy(params: ProxyParams, ttl = CACHE_TTL_MS) {
+  const directUrl = directProviderUrl(params);
+  const url = directUrl ?? proxyProviderUrl(params);
+  const key = `${directUrl ? "direct" : "proxy"}:${url.toString()}`;
   const cached = cache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.value;
 
@@ -281,14 +312,26 @@ async function requestProxy(params: Record<string, string>, ttl = CACHE_TTL_MS) 
     const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       const response = await fetch(url, {
-        headers: { Accept: "application/json" },
+        headers: {
+          Accept: "application/json",
+          ...(directUrl ? { Authorization: `Bearer ${DIRECT_API_KEY}` } : {}),
+        },
         signal: controller.signal,
       });
       const body = (await response.json().catch(() => null)) as ProxyResponse | null;
+      const value = directUrl
+        ? {
+            data: asRecord(body)?.data ?? body,
+            message: readString(asRecord(body), "message", "error"),
+            meta: {
+              provider: params.provider,
+              upstream: "direct",
+            },
+          }
+        : body ?? {};
       if (!response.ok) {
-        throw new Error(body?.message || `El servidor anime respondio ${response.status}.`);
+        throw new Error(value.message || `El servidor anime respondio ${response.status}.`);
       }
-      const value = body ?? {};
       cache.set(key, { expiresAt: Date.now() + ttl, value });
       return value;
     } finally {

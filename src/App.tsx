@@ -199,6 +199,7 @@ export default function App() {
           >
             <PlayerProfilePanel
               collapsed={isProfileCollapsed}
+              compactDisconnected={activeTab === "anime"}
               onCollapsedChange={setIsProfileCollapsed}
               showAnimeShortcut={activeTab === "home"}
               onOpenAnime={() => startTransition(() => setActiveTab("anime"))}

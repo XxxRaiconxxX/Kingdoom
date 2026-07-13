@@ -2,11 +2,20 @@
 
 Este changelog mantiene solo el periodo operativo reciente para que el relevo sea rapido y accionable.
 
-- Ventana conservada: 2026-05-06 a 2026-07-11.
+- Ventana conservada: 2026-05-06 a 2026-07-13.
 - Historico anterior retirado del changelog activo por limpieza operativa.
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-07
+
+### [2026-07-13] Rework responsivo y endurecimiento de proveedores del Portal Anime
+- Se rediseño `AnimeHubSection` para movil y escritorio con selector de proveedor siempre visible, busquedas rapidas, resultados tactiles, estados de carga/error/vacio, filtro de episodios, diagnostico visible por fuente y animaciones compatibles con movimiento reducido. Al entrar sin sesion, el panel de perfil se compacta para priorizar el portal sin perder el acceso a "Conectar".
+- Se elimino la consulta vacia al abrir el portal y se protegieron busquedas, fichas y episodios contra respuestas asincronas atrasadas.
+- El navegador deja de contener o enviar secretos a servicios externos: busqueda, detalle, enlaces y metadatos pasan por `/api/anime/proxy`, con timeout, cache CDN, deduplicacion cliente y cache temporal.
+- El modo automatico consulta en paralelo solo las fuentes realmente soportadas: AnimeFLV, TioAnime y GogoAnime. AnimeFLV incorpora respaldo mediante `animeflv.ahmedrangel.com`; Jikan incorpora Kitsu como respaldo de metadatos.
+- Se agrego un contrato ejecutable para rutas, alias y proveedores; los errores de red ahora activan el respaldo y no solo los errores HTTP.
+- El scraper embebido rota el encabezado de navegador por solicitud, elimina la clave predeterminada conocida y permite `Authorization` en CORS. Requiere configurar `ANIME_HUB_API_KEY` tanto en Kingdoom como en el despliegue del scraper.
+- Validacion: `node scripts/anime-provider-contract.selfcheck.mjs`, `npx tsc --noEmit`, compilacion aislada del proxy y `npm run build` exitosos. AnimeFLV y TioAnime respondieron desde infraestructura remota; la politica de la herramienta impidio probar rutas JSON parametrizadas y GogoAnime permanece sin confirmacion remota. [Codex]
 
 ### [2026-07-11] Auditoria extrema de rendimiento y transferencias seguras
 - Se reemplazo el reveal inicial basado en GSAP por Web Animations API, reduciendo el camino critico de `185.002` a `157.084` bytes gzip (`-15,1%`) y de 7 a 6 archivos iniciales sin cambiar el aspecto ni el soporte de movimiento reducido.

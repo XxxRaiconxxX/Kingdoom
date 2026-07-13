@@ -97,11 +97,13 @@ const PlayerTradeSheet = lazy(() =>
 
 export function PlayerProfilePanel({
   collapsed,
+  compactDisconnected = false,
   onCollapsedChange,
   showAnimeShortcut = false,
   onOpenAnime,
 }: {
   collapsed?: boolean;
+  compactDisconnected?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
   showAnimeShortcut?: boolean;
   onOpenAnime?: () => void;
@@ -189,7 +191,7 @@ export function PlayerProfilePanel({
     }
   }, []);
 
-  const isCollapsed = Boolean(collapsed && player);
+  const isCollapsed = Boolean(collapsed && (player || compactDisconnected));
 
   useEffect(() => {
     if (player) {
@@ -700,6 +702,25 @@ export function PlayerProfilePanel({
               </div>
             </div>
           </motion.div>
+        ) : isCollapsed && !player ? (
+          <div className="flex min-h-16 items-center justify-between gap-3 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-amber-400">
+                <UserRound className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-black text-stone-100">Sin perfil conectado</p>
+                <p className="text-xs text-stone-500">El Portal Anime funciona sin iniciar sesion.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => onCollapsedChange?.(false)}
+              className="min-h-11 shrink-0 rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 text-xs font-black text-amber-200 transition hover:bg-amber-400/20"
+            >
+              Conectar
+            </button>
+          </div>
         ) : player ? (
           isCollapsed ? (
             <div className="space-y-3">

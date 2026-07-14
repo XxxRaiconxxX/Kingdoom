@@ -7,7 +7,6 @@ import {
   BrainCircuit,
   CheckCircle2,
   CircleStop,
-  Clock3,
   Database,
   Feather,
   FileText,
@@ -718,8 +717,6 @@ export function ArchivistSection() {
       totalSources,
     };
   }, [liveState]);
-  const activeMode =
-    availableModes.find((option) => option.id === mode) ?? MODE_OPTIONS[0];
   const pendingActionPreview = pendingAction
     ? getActionPayloadPreview(pendingAction)
     : [];
@@ -1151,8 +1148,8 @@ export function ArchivistSection() {
         </div>
       </div>
 
-      <div className="grid items-start gap-4 xl:grid-cols-[19rem_minmax(0,1fr)]">
-        <aside className="order-2 space-y-3 xl:order-1 xl:sticky xl:top-5" aria-label="Controles del Archivista">
+      <div className={`grid items-start gap-4 ${isAdmin ? "xl:grid-cols-[19rem_minmax(0,1fr)]" : ""}`}>
+        {isAdmin ? <aside className="order-2 space-y-3 xl:order-1 xl:sticky xl:top-5" aria-label="Controles del Archivista">
           <div className="kd-glass rounded-[1.65rem] border border-cyan-500/12 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -1221,41 +1218,38 @@ export function ArchivistSection() {
               )}
             </div>
           </div>
-
-          {isAdmin ? (
-            <div className="kd-glass rounded-[1.65rem] border border-amber-500/15 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">Mesa de operaciones</p>
-                  <h2 className="mt-1 text-sm font-semibold text-stone-100">Acciones guiadas</h2>
-                </div>
-                <ShieldCheck className="h-5 w-5 text-amber-300/70" />
+          <div className="kd-glass rounded-[1.65rem] border border-amber-500/15 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">Mesa de operaciones</p>
+                <h2 className="mt-1 text-sm font-semibold text-stone-100">Acciones guiadas</h2>
               </div>
-              {!canExecuteAdminActions ? (
-                <p className="mt-3 rounded-xl border border-rose-400/15 bg-rose-500/8 px-3 py-2 text-[11px] leading-5 text-rose-100/80">
-                  Puedes preparar borradores, pero debes vincular la cuenta segura para ejecutarlos.
-                </p>
-              ) : null}
-              <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-1">
-                {ADMIN_ACTION_STARTERS.map(({ label, description, prompt, icon: Icon }) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => handleActionStarter(prompt)}
-                    disabled={isBusy}
-                    className="kd-touch flex min-h-14 items-center gap-3 rounded-[1.1rem] border border-stone-800 bg-stone-950/55 px-3 py-2.5 text-left text-stone-300 transition hover:border-amber-300/25 hover:bg-amber-500/8 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-45"
-                  >
-                    <Icon className="h-4 w-4 shrink-0 text-amber-300/75" />
-                    <span className="min-w-0">
-                      <span className="block text-[11px] font-bold uppercase tracking-[0.11em]">{label}</span>
-                      <span className="mt-0.5 hidden text-[10px] leading-4 text-stone-500 xl:block">{description}</span>
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <ShieldCheck className="h-5 w-5 text-amber-300/70" />
             </div>
-          ) : null}
-        </aside>
+            {!canExecuteAdminActions ? (
+              <p className="mt-3 rounded-xl border border-rose-400/15 bg-rose-500/8 px-3 py-2 text-[11px] leading-5 text-rose-100/80">
+                Puedes preparar borradores, pero debes vincular la cuenta segura para ejecutarlos.
+              </p>
+            ) : null}
+            <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-1">
+              {ADMIN_ACTION_STARTERS.map(({ label, description, prompt, icon: Icon }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => handleActionStarter(prompt)}
+                  disabled={isBusy}
+                  className="kd-touch flex min-h-14 items-center gap-3 rounded-[1.1rem] border border-stone-800 bg-stone-950/55 px-3 py-2.5 text-left text-stone-300 transition hover:border-amber-300/25 hover:bg-amber-500/8 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-amber-300/75" />
+                  <span className="min-w-0">
+                    <span className="block text-[11px] font-bold uppercase tracking-[0.11em]">{label}</span>
+                    <span className="mt-0.5 hidden text-[10px] leading-4 text-stone-500 xl:block">{description}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside> : null}
 
       <div className="kd-glass order-1 min-w-0 overflow-hidden rounded-[2rem] border border-cyan-500/12 bg-stone-900/80 shadow-2xl shadow-black/35 xl:order-2">
         <div className="border-b border-stone-800/80 px-4 py-4 md:px-5">
@@ -1266,12 +1260,7 @@ export function ArchivistSection() {
               </span>
               <div className="min-w-0">
                 <p className="truncate text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">Camara de consulta</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <h2 className="truncate text-sm font-semibold text-stone-100">Conversacion activa</h2>
-                  <span className="rounded-full border border-stone-700 bg-stone-950/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-stone-400">
-                    {activeMode.label}
-                  </span>
-                </div>
+                <h2 className="mt-1 truncate text-sm font-semibold text-stone-100">Conversacion activa</h2>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -1642,21 +1631,6 @@ export function ArchivistSection() {
                 </div>
               ) : null}
 
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-[9px] font-bold uppercase tracking-[0.14em] text-stone-500">
-                <span className="rounded-full border border-stone-800 bg-stone-950/50 px-2.5 py-1">
-                  {status === "loading" ? "Cargando" : status === "ready" ? "En linea" : status === "partial" ? "Contexto parcial" : "Con incidencia"}
-                </span>
-                <span className="rounded-full border border-stone-800 bg-stone-950/50 px-2.5 py-1">
-                  {player?.username ? `Sesion ${player.username}` : "Sin perfil conectado"}
-                </span>
-                <span className="rounded-full border border-stone-800 bg-stone-950/50 px-2.5 py-1">
-                  Modo {activeMode.label}
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-800 bg-stone-950/50 px-2.5 py-1">
-                  <Clock3 className="h-3 w-3" />
-                  {formatRefreshTime(liveState?.updatedAt)}
-                </span>
-              </div>
             </div>
           </div>
         </div>

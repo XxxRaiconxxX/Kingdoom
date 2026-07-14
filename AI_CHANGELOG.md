@@ -8,6 +8,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Archivista: vista de jugador mas limpia y sin telemetria interna
+- La vista no admin del Archivista deja de mostrar el panel lateral de `Modo de consulta` y `Fuentes del reino`; esos controles quedan reservados para staff, que es quien realmente necesita operar foco y diagnostico de fuentes.
+- Tambien se retiro la banda inferior de telemetria rapida (`En linea`, `Sesion X`, `Modo X` y hora) para no exponer metadatos internos que no aportan al jugador final.
+- La cabecera se simplifico eliminando la chapita redundante del modo activo, manteniendo el flujo de conversacion intacto y sin tocar acciones admin ni carga de contexto.
+- Validacion: `npx tsc --noEmit` y `npm run build`. Riesgo abierto: ninguno detectado; el cambio es de presentacion y visibilidad, no de logica. [Codex]
+
 ### [2026-07-14] Archivista 2.0: rework integral, acciones seguras y rendimiento
 - Se reconstruyo la experiencia del Archivista con identidad Kingdoom, cabecera de estado vivo, metricas, cinco modos de consulta, salud visible por fuente, accesos guiados de administracion, vistas previas de acciones y conversacion priorizada en movil.
 - La interfaz incorpora estados de carga/error/parcial, reintento, cancelacion, seguimiento de fuentes, preguntas sugeridas, follow-ups, adjuntos validados, historial acotado, autoscroll respetuoso y controles tactiles de al menos 46 px reales incluso bajo el escalado movil del sitio.

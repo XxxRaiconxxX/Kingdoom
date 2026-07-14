@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Archivista: etiquetas cortas y pista horizontal real en sugerencias
+- Las sugerencias del Archivista dejan de mostrar el texto completo dentro del chip y pasan a etiquetas mas cortas como `Eventos activos`, `Misiones abiertas` o `Item mas caro`.
+- La banda usa ahora un contenedor con `inline-flex` y `w-max` para forzar una sola pista horizontal real, con scroll lateral incluso cuando el navegador intente repartir el contenido.
+- Validacion: `npx tsc --noEmit` y `npm run build`. Riesgo abierto: ninguno detectado; es un ajuste visual y de layout. [Codex]
+
 ### [2026-07-14] Archivista: sugerencias compactas en carrusel horizontal
 - Las sugerencias rapidas del Archivista ahora viven en una sola fila horizontal con desplazamiento lateral, en lugar de crecer a multiples lineas.
 - Cada chip ocupa menos alto visual, limita su ancho y trunca el texto largo para conservar una cabecera mas compacta sin perder accesibilidad via `title`.

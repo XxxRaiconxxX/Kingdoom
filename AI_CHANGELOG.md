@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Hotfix de busquedas vacias en Portal Anime
+- Se normalizo el `404` de busqueda anime como "sin coincidencias" en lugar de error de proveedor, cubriendo tanto el modo directo al scraper como el proxy server-side.
+- El diagnostico de fuentes ya no marca AnimeFLV/TioAnime como "No disponible" cuando la serie buscada simplemente no existe en esa fuente.
+- Validacion: `node --experimental-strip-types scripts/anime-provider-contract.selfcheck.mjs`, `npx tsc --noEmit` y `npm run build` pasaron limpios. [Codex]
+
 ### [2026-07-14] Limpieza del apartado de app comunitaria en Home
 - Se elimino el flujo visible de descarga de app comunitaria del Home y el copy de onboarding que todavia indicaba "Descarga la app".
 - Se retiro el util de `siteSettings` dedicado exclusivamente a resolver la URL del APK, ya sin consumidores activos.

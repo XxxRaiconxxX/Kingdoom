@@ -26,6 +26,10 @@ export function normalizePlaybackProvider(value: string): PlaybackProvider | nul
     : null;
 }
 
+export function isEmptySearchStatus(action: PlaybackAction, status: number) {
+  return action === "search" && status === 404;
+}
+
 export function buildPrimaryProviderUrl(input: PrimaryRequestInput) {
   const url = new URL(input.baseUrl);
 

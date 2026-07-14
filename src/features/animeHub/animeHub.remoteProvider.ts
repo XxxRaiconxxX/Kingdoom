@@ -6,6 +6,7 @@ import type {
   AnimeSeriesDetail,
   AnimeSeriesSummary,
 } from "./animeHub.types";
+import { isEmptySearchStatus } from "../../../server/anime/providerContract";
 
 export const ANIME_PROVIDER_OPTIONS = [
   { id: "all", label: "Automatico" },
@@ -327,6 +328,15 @@ async function requestProxy(params: ProxyParams, ttl = CACHE_TTL_MS) {
             },
           }
         : body ?? {};
+      if (isEmptySearchStatus(params.action as "search" | "detail" | "links", response.status)) {
+        const emptyValue = {
+          data: [],
+          message: value.message || "Sin coincidencias.",
+          meta: value.meta,
+        };
+        cache.set(key, { expiresAt: Date.now() + ttl, value: emptyValue });
+        return emptyValue;
+      }
       if (!response.ok) {
         throw new Error(value.message || `El servidor anime respondio ${response.status}.`);
       }

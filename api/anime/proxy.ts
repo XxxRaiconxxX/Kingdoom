@@ -6,6 +6,7 @@ import {
 import {
   buildAnimeFlvFallbackUrl,
   buildPrimaryProviderUrl,
+  isEmptySearchStatus,
   normalizePlaybackProvider,
   type PlaybackAction,
   type PlaybackProvider,
@@ -174,6 +175,14 @@ async function requestPlayback(input: {
     query: input.query,
   });
   const primary = await fetchUpstream(primaryUrl, primaryHeaders());
+
+  if (isEmptySearchStatus(input.action, primary.status)) {
+    return {
+      data: [],
+      latencyMs: primary.latencyMs,
+      upstream: "primary",
+    };
+  }
 
   if (primary.ok) {
     return {

@@ -2,12 +2,15 @@ import assert from "node:assert/strict";
 import {
   buildAnimeFlvFallbackUrl,
   buildPrimaryProviderUrl,
+  isEmptySearchStatus,
   normalizePlaybackProvider,
 } from "../server/anime/providerContract.ts";
 
 assert.equal(normalizePlaybackProvider("anime-website"), null);
 assert.equal(normalizePlaybackProvider("animeflv"), "animeflv");
 assert.equal(normalizePlaybackProvider("jkanime"), null);
+assert.equal(isEmptySearchStatus("search", 404), true);
+assert.equal(isEmptySearchStatus("detail", 404), false);
 
 assert.equal(
   buildPrimaryProviderUrl({

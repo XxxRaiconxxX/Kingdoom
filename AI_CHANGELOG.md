@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Fallback de autenticacion directa para Portal Anime
+- Se reforzo el camino directo GitHub Pages -> scraper anime agregando `key` en la query ademas del header `Authorization`, para evitar 401 cuando el navegador o el hosting intermedio no entrega el header como espera el endpoint.
+- El scraper embebido acepta ahora la clave tanto por `Authorization: Bearer` como por `?key=`, manteniendo el mismo `ANIME_HUB_API_KEY` configurado en produccion.
+- Validacion: el scraper remoto respondio 200 con header y 401 sin credencial; CORS preflight acepta `Authorization`; `node --experimental-strip-types --check`, `npx tsc --noEmit`, `npm run build` y `git diff --check` pasaron limpios. [Codex]
+
 ### [2026-07-13] Hotfix de Portal Anime en GitHub Pages
 - El job de build queda asociado al environment `github-pages` para leer variables/secrets configurados ahi antes de generar el bundle estatico.
 - El workflow de Pages ahora acepta `ANIME_HUB_API_KEY`, `ANIME_HUB_API_URL` y `ANIME_PROXY_URL` tanto desde GitHub Actions Secrets como desde GitHub Actions Variables, para cubrir configuraciones no marcadas como secret.

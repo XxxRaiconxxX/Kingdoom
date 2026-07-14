@@ -290,6 +290,7 @@ function directProviderUrl(params: ProxyParams) {
   }
 
   url.searchParams.set("source", params.provider ?? "animeflv");
+  url.searchParams.set("key", DIRECT_API_KEY);
   return url;
 }
 

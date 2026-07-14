@@ -5,7 +5,7 @@ import {
   normalizePlaybackProvider,
 } from "../api/anime/providerContract.ts";
 
-assert.equal(normalizePlaybackProvider("anime-website"), "gogoanime");
+assert.equal(normalizePlaybackProvider("anime-website"), null);
 assert.equal(normalizePlaybackProvider("animeflv"), "animeflv");
 assert.equal(normalizePlaybackProvider("jkanime"), null);
 

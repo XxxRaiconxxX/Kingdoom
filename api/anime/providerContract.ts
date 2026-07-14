@@ -1,4 +1,4 @@
-export const PLAYBACK_PROVIDERS = ["animeflv", "tioanime", "gogoanime"] as const;
+export const PLAYBACK_PROVIDERS = ["animeflv", "tioanime"] as const;
 
 export type PlaybackProvider = (typeof PLAYBACK_PROVIDERS)[number];
 export type PlaybackAction = "search" | "detail" | "links";
@@ -21,7 +21,6 @@ type AnimeFlvFallbackInput = {
 };
 
 export function normalizePlaybackProvider(value: string): PlaybackProvider | null {
-  if (value === "anime-website") return "gogoanime";
   return PLAYBACK_PROVIDERS.includes(value as PlaybackProvider)
     ? (value as PlaybackProvider)
     : null;

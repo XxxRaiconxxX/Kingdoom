@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Archivista: sugerencias compactas en carrusel horizontal
+- Las sugerencias rapidas del Archivista ahora viven en una sola fila horizontal con desplazamiento lateral, en lugar de crecer a multiples lineas.
+- Cada chip ocupa menos alto visual, limita su ancho y trunca el texto largo para conservar una cabecera mas compacta sin perder accesibilidad via `title`.
+- Validacion: `npx tsc --noEmit` y `npm run build`. Riesgo abierto: ninguno detectado; es un ajuste de presentacion. [Codex]
+
 ### [2026-07-14] Archivista: vista de jugador mas limpia y sin telemetria interna
 - La vista no admin del Archivista deja de mostrar el panel lateral de `Modo de consulta` y `Fuentes del reino`; esos controles quedan reservados para staff, que es quien realmente necesita operar foco y diagnostico de fuentes.
 - Tambien se retiro la banda inferior de telemetria rapida (`En linea`, `Sesion X`, `Modo X` y hora) para no exponer metadatos internos que no aportan al jugador final.

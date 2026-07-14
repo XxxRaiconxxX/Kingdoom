@@ -1295,14 +1295,15 @@ export function ArchivistSection() {
             </div>
           </div>
 
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] md:flex-wrap md:overflow-x-visible [&::-webkit-scrollbar]:hidden" aria-label="Consultas sugeridas">
+          <div className="mt-4 flex flex-nowrap gap-2 overflow-x-auto pb-1 pr-1 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Consultas sugeridas">
             {quickPrompts.map((prompt) => (
               <button
                 key={prompt}
                 type="button"
                 onClick={() => void handleAsk(prompt)}
                 disabled={isBusy || status === "loading"}
-                className="kd-touch min-h-[52px] shrink-0 rounded-full border border-stone-700 bg-stone-950/70 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-stone-300 transition hover:border-cyan-300/30 hover:text-cyan-100 disabled:cursor-not-allowed disabled:opacity-45"
+                title={prompt}
+                className="kd-touch min-h-10 max-w-[14rem] shrink-0 snap-start overflow-hidden text-ellipsis whitespace-nowrap rounded-full border border-stone-700 bg-stone-950/70 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.1em] text-stone-300 transition hover:border-cyan-300/30 hover:text-cyan-100 disabled:cursor-not-allowed disabled:opacity-45"
               >
                 {prompt}
               </button>

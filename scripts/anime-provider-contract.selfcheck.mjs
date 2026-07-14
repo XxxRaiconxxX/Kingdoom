@@ -3,7 +3,7 @@ import {
   buildAnimeFlvFallbackUrl,
   buildPrimaryProviderUrl,
   normalizePlaybackProvider,
-} from "../api/anime/providerContract.ts";
+} from "../server/anime/providerContract.ts";
 
 assert.equal(normalizePlaybackProvider("anime-website"), null);
 assert.equal(normalizePlaybackProvider("animeflv"), "animeflv");

@@ -2,18 +2,18 @@ import {
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-} from "./_serverAiProviders.js";
+} from "../../server/admin/_serverAiProviders.js";
 import {
   ensureAiProvider,
   missingAiProviderMessage,
   readAiServerConfig,
   runAiJson,
-} from "./_aiOrchestrator.js";
+} from "../../server/admin/_aiOrchestrator.js";
 import {
   buildMagicBalancePrompt,
   normalizeMagicBalanceMode,
   type MagicBalanceMode,
-} from "./_aiPrompts.js";
+} from "../../server/admin/_aiPrompts.js";
 
 type AbilityLevel = {
   level: number;

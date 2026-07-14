@@ -2,13 +2,13 @@ import {
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-} from "./_serverAiProviders.js";
+} from "../../server/admin/_serverAiProviders.js";
 import {
   ensureAiProvider,
   missingAiProviderMessage,
   readAiServerConfig,
   runAiText,
-} from "./_aiOrchestrator.js";
+} from "../../server/admin/_aiOrchestrator.js";
 
 // Análisis "asistente" de una ficha de rol de Kingdoom (app kingdoom-fichas).
 // La validación dura (stats=12, poderes=5, catálogos) ya la hace el cliente.

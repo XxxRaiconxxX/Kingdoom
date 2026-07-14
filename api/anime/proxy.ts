@@ -2,14 +2,14 @@ import {
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-} from "../admin/_serverAiProviders.js";
+} from "../../server/admin/_serverAiProviders.js";
 import {
   buildAnimeFlvFallbackUrl,
   buildPrimaryProviderUrl,
   normalizePlaybackProvider,
   type PlaybackAction,
   type PlaybackProvider,
-} from "./providerContract.js";
+} from "../../server/anime/providerContract.js";
 
 declare const process: {
   env: Record<string, string | undefined>;

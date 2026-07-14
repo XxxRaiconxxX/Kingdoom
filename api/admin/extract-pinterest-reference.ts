@@ -2,7 +2,7 @@ import {
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-} from "./_serverAiProviders.js";
+} from "../../server/admin/_serverAiProviders.js";
 
 type PinterestReferencePayload = {
   imageUrl: string;

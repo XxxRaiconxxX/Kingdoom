@@ -8,6 +8,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Despliegue Vercel del Portal Anime y ajuste de funciones Hobby
+- Se conecto Vercel MCP oficialmente por OAuth (`https://mcp.vercel.com`) y se enlazo el checkout local al proyecto `xxxraiconxxxs-projects/kingdoom`.
+- El deploy productivo inicial fallo por el limite Hobby de 12 Serverless Functions; se movieron helpers internos desde `api/` hacia `server/` para que Vercel cuente solo rutas reales y mantenga los endpoints admin/anime sin superar el limite.
+- Se desplego produccion en Vercel y el alias `https://kingdoom.vercel.app` quedo apuntando al nuevo deployment.
+- Validacion: `npx tsc --noEmit`, `npm run build`, conteo `api-ts-route-files=12`, `vercel deploy --prod` exitoso y verificacion remota del chunk `AnimeHubSection-BG9sdvZh.js` sin GogoAnime ni `Authorization`, con AnimeFLV, TioAnime, scraper externo y `key` por query. [Codex]
+
 ### [2026-07-14] Hotfix de entorno Supabase para GitHub Pages
 - Se agregaron `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` al workflow de GitHub Pages con lectura desde secrets/variables y fallback publico, evitando que el bundle publicado rompa al iniciar en sesiones limpias.
 - La reproduccion con navegador automatizado mostro que la pagina publicada lanzaba `Faltan variables de entorno de Supabase...` antes de renderizar, lo que explica fallos en iPhone o navegadores sin cache previa.

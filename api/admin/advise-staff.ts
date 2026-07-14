@@ -2,23 +2,23 @@ import {
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-} from "./_serverAiProviders.js";
+} from "../../server/admin/_serverAiProviders.js";
 import {
   ensureAiProvider,
   missingAiProviderMessage,
   readAiServerConfig,
   runAiJson,
-} from "./_aiOrchestrator.js";
+} from "../../server/admin/_aiOrchestrator.js";
 import {
   buildStaffAdvisorPrompt,
   normalizeStaffAdvisorTaskType,
   type StaffAdvisorTaskType,
-} from "./_aiPrompts.js";
+} from "../../server/admin/_aiPrompts.js";
 import {
   getCachedAiResponse,
   setCachedAiResponse,
   stableCacheKey,
-} from "./_aiCache.js";
+} from "../../server/admin/_aiCache.js";
 
 type StaffAdvisorResult = {
   summary: string;

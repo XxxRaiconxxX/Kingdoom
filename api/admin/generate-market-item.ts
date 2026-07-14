@@ -2,13 +2,13 @@ import {
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-} from "./_serverAiProviders.js";
+} from "../../server/admin/_serverAiProviders.js";
 import {
   ensureAiProvider,
   missingAiProviderMessage,
   readAiServerConfig,
   runAiJson,
-} from "./_aiOrchestrator.js";
+} from "../../server/admin/_aiOrchestrator.js";
 
 type MarketCategoryId = "potions" | "armors" | "swords" | "others";
 type Rarity = "mythic" | "legendary" | "epic" | "rare" | "common";

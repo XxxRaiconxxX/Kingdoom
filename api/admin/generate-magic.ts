@@ -2,13 +2,13 @@ import {
   setCorsHeaders,
   type ApiRequest,
   type ApiResponse,
-} from "./_serverAiProviders.js";
+} from "../../server/admin/_serverAiProviders.js";
 import {
   ensureAiProvider,
   missingAiProviderMessage,
   readAiServerConfig,
   runAiText,
-} from "./_aiOrchestrator.js";
+} from "../../server/admin/_aiOrchestrator.js";
 
 type MagicAiRequest = {
   categoryTitle?: string;

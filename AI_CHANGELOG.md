@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Hotfix de entorno Supabase para GitHub Pages
+- Se agregaron `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` al workflow de GitHub Pages con lectura desde secrets/variables y fallback publico, evitando que el bundle publicado rompa al iniciar en sesiones limpias.
+- La reproduccion con navegador automatizado mostro que la pagina publicada lanzaba `Faltan variables de entorno de Supabase...` antes de renderizar, lo que explica fallos en iPhone o navegadores sin cache previa.
+- Validacion: `npx tsc --noEmit`, `npm run build` con Supabase + Anime env y `git diff --check` pasaron limpios. [Codex]
+
 ### [2026-07-14] Simplificacion CORS del Portal Anime en Pages
 - Se quito el header `Authorization` del modo directo GitHub Pages -> scraper, dejando la autenticacion por `?key=` que ya responde 200 en el scraper publicado.
 - Esto evita preflight CORS innecesario y reduce los falsos 401 visibles en DevTools cuando el hosting estatico llama al scraper directo.

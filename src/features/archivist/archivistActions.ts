@@ -1,4 +1,4 @@
-import type { BestiaryEntry, FloraEntry, KnowledgeDocument, MarketItem, PlayerAccount, RealmEvent, RealmMission } from "../../types";
+import type { AbilityLevel, BestiaryEntry, FloraEntry, KnowledgeDocument, MarketItem, PlayerAccount, RealmEvent, RealmMission } from "../../types";
 import { deleteRealmEvent, upsertRealmEvent } from "../../utils/events";
 import {
   deleteBestiaryEntry,
@@ -12,21 +12,17 @@ import {
 import { deleteKnowledgeDocument, slugifyKnowledgeId, upsertKnowledgeDocument } from "../../utils/knowledge";
 import { deleteMarketItem, slugifyMarketItem, upsertMarketItem } from "../market";
 import { deleteRealmMission, upsertRealmMission } from "../../utils/missions";
-import { createPlayerAccount, updatePlayerGold } from "../../utils/players";
+import { createPlayerAccount, incrementPlayerGold, updatePlayerGold } from "../../utils/players";
 import type { ArchivistActionDraft, ArchivistLiveContext } from "./archivist.types";
+import {
+  normalizeArchivistText as normalizeText,
+  resolveExactPlayerTargets,
+} from "./archivistActionGuards";
 
 type ExecutionResult = {
   status: "success" | "error";
   message: string;
 };
-
-function normalizeText(value: unknown) {
-  return String(value ?? "")
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
 
 function findByName<T extends { id?: string; title?: string; name?: string }>(
   items: T[],
@@ -199,6 +195,26 @@ function flattenMagicStyles(context: ArchivistLiveContext) {
   );
 }
 
+async function adjustPlayersGold(players: PlayerAccount[], delta: number) {
+  const results: Array<{ player: PlayerAccount; nextGold: number | null }> = [];
+
+  // ponytail: limita el fan-out; migrar a un RPC transaccional si el volumen crece.
+  for (let index = 0; index < players.length; index += 6) {
+    const batch = await Promise.all(
+      players.slice(index, index + 6).map(async (player) => ({
+        player,
+        nextGold: await incrementPlayerGold(player.id, delta).catch(() => null),
+      }))
+    );
+    results.push(...batch);
+  }
+
+  return {
+    updated: results.filter((result) => result.nextGold !== null),
+    failed: results.filter((result) => result.nextGold === null),
+  };
+}
+
 async function executePlayerAction(
   draft: ArchivistActionDraft,
   context: ArchivistLiveContext
@@ -224,8 +240,21 @@ async function executePlayerAction(
     if (amount <= 0) {
       return { status: "error", message: "La cantidad a dar debe ser mayor a 0." };
     }
-    const promises = context.players.map(player => updatePlayerGold(player.id, player.gold + amount));
-    await Promise.all(promises);
+
+    if (context.players.length === 0) {
+      return { status: "error", message: "No hay jugadores cargados para realizar la entrega." };
+    }
+
+    const result = await adjustPlayersGold(context.players, amount);
+
+    if (result.failed.length > 0) {
+      const failedNames = result.failed.map(({ player }) => player.username).join(", ");
+      return {
+        status: "error",
+        message: `La entrega quedo parcial: ${result.updated.length} actualizados y ${result.failed.length} sin cambios (${failedNames}). Refresca el registro antes de repetir la orden.`,
+      };
+    }
+
     return {
       status: "success",
       message: `Se entregaron ${amount.toLocaleString("es-PY")} de oro a todos los jugadores del reino (${context.players.length} jugadores en total).`,
@@ -236,27 +265,37 @@ async function executePlayerAction(
     if (amount <= 0) {
       return { status: "error", message: "La cantidad a dar debe ser mayor a 0." };
     }
-    const usernames = payload.usernames;
-    if (!Array.isArray(usernames) || usernames.length === 0) {
+    const usernames = ensureArray(payload.usernames);
+    if (usernames.length === 0) {
       return { status: "error", message: "Debe proveer una lista de nombres de usuario." };
     }
-    
-    // Find matching players (case insensitive substring match, same as player fuzzy search)
-    const foundPlayers = context.players.filter(p => 
-      usernames.some(u => p.username.toLowerCase().includes(String(u).toLowerCase()))
-    );
 
-    if (foundPlayers.length === 0) {
-      return { status: "error", message: "No se encontro a ninguno de los jugadores solicitados." };
+    const resolved = resolveExactPlayerTargets(context.players, usernames);
+    if (resolved.missing.length > 0 || resolved.ambiguous.length > 0) {
+      const details = [
+        resolved.missing.length > 0 ? `No encontrados: ${resolved.missing.join(", ")}.` : "",
+        resolved.ambiguous.length > 0 ? `Nombres ambiguos: ${resolved.ambiguous.join(", ")}.` : "",
+      ].filter(Boolean);
+      return {
+        status: "error",
+        message: `No se aplico ningun cambio. ${details.join(" ")} Usa los nombres exactos.`,
+      };
     }
 
-    const promises = foundPlayers.map(player => updatePlayerGold(player.id, player.gold + amount));
-    await Promise.all(promises);
-    
-    const names = foundPlayers.map(p => p.username).join(", ");
+    const result = await adjustPlayersGold(resolved.matches, amount);
+    if (result.failed.length > 0) {
+      const updatedNames = result.updated.map(({ player }) => player.username).join(", ") || "ninguno";
+      const failedNames = result.failed.map(({ player }) => player.username).join(", ");
+      return {
+        status: "error",
+        message: `La entrega quedo parcial. Actualizados: ${updatedNames}. Sin cambios: ${failedNames}. Refresca el registro antes de repetir la orden.`,
+      };
+    }
+
+    const names = resolved.matches.map((player) => player.username).join(", ");
     return {
       status: "success",
-      message: `Se entregaron ${amount.toLocaleString("es-PY")} de oro a ${foundPlayers.length} jugadores (${names}).`,
+      message: `Se entregaron ${amount.toLocaleString("es-PY")} de oro a ${resolved.matches.length} jugadores (${names}).`,
     };
   }
 
@@ -271,23 +310,37 @@ async function executePlayerAction(
     };
   }
 
-  const nextGold =
-    draft.kind === "set_player_gold"
-      ? amount
-      : draft.kind === "subtract_player_gold"
-        ? Math.max(0, player.gold - amount)
-        : player.gold + amount;
+  if (draft.kind === "set_player_gold") {
+    const updated = await updatePlayerGold(player.id, amount);
+    return updated
+      ? {
+          status: "success",
+          message: `Oro actualizado para ${player.username}. Nuevo total: ${amount.toLocaleString("es-PY")}.`,
+        }
+      : {
+          status: "error",
+          message: `No se pudo actualizar el oro de ${player.username}.`,
+        };
+  }
 
-  const updated = await updatePlayerGold(player.id, nextGold);
+  if (amount <= 0) {
+    return { status: "error", message: "La cantidad debe ser mayor a 0." };
+  }
 
-  return updated
+  const delta = draft.kind === "subtract_player_gold" ? -amount : amount;
+  const nextGold = await incrementPlayerGold(player.id, delta);
+
+  return nextGold !== null
     ? {
         status: "success",
         message: `Oro actualizado para ${player.username}. Nuevo total: ${nextGold.toLocaleString("es-PY")}.`,
       }
     : {
         status: "error",
-        message: `No se pudo actualizar el oro de ${player.username}.`,
+        message:
+          draft.kind === "subtract_player_gold"
+            ? `No se pudo descontar el oro de ${player.username}. Verifica su saldo actual.`
+            : `No se pudo agregar oro a ${player.username}.`,
       };
 }
 
@@ -451,7 +504,7 @@ async function executeMagicAction(
     description: ensureString(payload.description, current?.description ?? ""),
     levels:
       payload.levels && typeof payload.levels === "object"
-        ? (payload.levels as Record<number, any[]>)
+        ? (payload.levels as Record<number, AbilityLevel[]>)
         : current?.levels ?? {},
     sortOrder: Math.max(0, Math.floor(toNumber(payload.sortOrder, 0))),
   });

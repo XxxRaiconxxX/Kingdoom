@@ -70,6 +70,14 @@ export type ArchivistActionDraft = {
   payload: Record<string, unknown>;
 };
 
+export type ArchivistSourceStatus = {
+  id: "market" | "events" | "missions" | "grimoire" | "documents" | "players";
+  label: string;
+  status: "ready" | "fallback" | "error";
+  count: number;
+  message: string;
+};
+
 export type ArchivistStructuredAnswer = {
   answer: string;
   intent:
@@ -86,4 +94,6 @@ export type ArchivistLiveState = {
   status: "ready" | "partial";
   message: string;
   context: ArchivistLiveContext;
+  sources: ArchivistSourceStatus[];
+  updatedAt: string;
 };

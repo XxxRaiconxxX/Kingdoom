@@ -287,6 +287,14 @@
   --kd-accent-shadow: rgb(34 211 238 / 0.16);
 }
 
+.kd-ambient[data-kd-theme="archivist"] {
+  --kd-accent-rgb: 34 211 238;
+  --kd-accent-strong: rgb(165 243 252);
+  --kd-accent-soft: rgb(34 211 238 / 0.28);
+  --kd-accent-bg: rgb(34 211 238 / 0.11);
+  --kd-accent-shadow: rgb(34 211 238 / 0.18);
+}
+
 .kd-glass {
   position: relative;
   border-color: rgb(146 64 14 / 0.26) !important;

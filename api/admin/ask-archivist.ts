@@ -62,6 +62,35 @@ function isArchivistAction(value: string): value is (typeof ARCHIVIST_ACTIONS)[n
   return ARCHIVIST_ACTIONS.includes(value as (typeof ARCHIVIST_ACTIONS)[number]);
 }
 
+function readText(value: unknown, maxLength: number) {
+  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function sanitizeArchivistDocument(value: unknown): ArchivistPromptDocument | null {
+  if (!value || typeof value !== "object") return null;
+
+  const document = value as Record<string, unknown>;
+  const title = readText(document.title, 180);
+  const content = readText(document.content, 2600);
+
+  if (!title || !content) return null;
+
+  return {
+    title,
+    type: readText(document.type, 80) || "other",
+    category: readText(document.category, 120),
+    tags: Array.isArray(document.tags)
+      ? document.tags
+          .map((tag) => readText(tag, 80))
+          .filter(Boolean)
+          .slice(0, 16)
+      : [],
+    source: readText(document.source, 180),
+    summary: readText(document.summary, 500),
+    content,
+  };
+}
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   setCorsHeaders(req, res);
 
@@ -81,30 +110,37 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     });
   }
 
-  const body = (req.body ?? {}) as {
-    question?: string;
-    mode?: ArchivistMode;
-    documents?: ArchivistPromptDocument[];
-    topicMemory?: string[];
-    includeDebug?: boolean;
-    runtimeSummary?: string;
-    allowActions?: boolean;
-  };
-  const question = body.question?.trim() ?? "";
-  const documents = Array.isArray(body.documents) ? body.documents : [];
-  const mode = normalizeArchivistMode(body.mode);
+  const body =
+    req.body && typeof req.body === "object"
+      ? (req.body as Record<string, unknown>)
+      : {};
+  const rawQuestion = typeof body.question === "string" ? body.question.trim() : "";
+  const question = rawQuestion.slice(0, 2000);
+  const documents = Array.isArray(body.documents)
+    ? body.documents
+        .slice(0, 12)
+        .map(sanitizeArchivistDocument)
+        .filter((document): document is ArchivistPromptDocument => document !== null)
+    : [];
+  const mode = normalizeArchivistMode(readText(body.mode, 32) as ArchivistMode);
   const topicMemory = Array.isArray(body.topicMemory)
     ? body.topicMemory
-        .map((topic) => topic.trim())
+        .map((topic) => readText(topic, 1200))
         .filter(Boolean)
         .slice(0, 8)
     : [];
   const includeDebug = body.includeDebug === true;
-  const runtimeSummary = body.runtimeSummary?.trim() ?? "";
+  const runtimeSummary = readText(body.runtimeSummary, 16000);
   const allowActions = body.allowActions === true;
 
   if (!question) {
     return res.status(400).json({ message: "La pregunta esta vacia." });
+  }
+
+  if (rawQuestion.length > 2000) {
+    return res.status(400).json({
+      message: "La consulta es demasiado larga. Resume el pedido a menos de 2000 caracteres.",
+    });
   }
 
   if (documents.length === 0) {
@@ -125,7 +161,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         document.title,
         document.type,
         document.category,
-        document.content.slice(0, 240),
+        document.summary,
+        document.content,
       ]),
     ]);
     const cached = getCachedAiResponse<ArchivistResponsePayload>(cacheKey);

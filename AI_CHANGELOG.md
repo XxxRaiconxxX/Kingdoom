@@ -8,6 +8,16 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Archivista 2.0: rework integral, acciones seguras y rendimiento
+- Se reconstruyo la experiencia del Archivista con identidad Kingdoom, cabecera de estado vivo, metricas, cinco modos de consulta, salud visible por fuente, accesos guiados de administracion, vistas previas de acciones y conversacion priorizada en movil.
+- La interfaz incorpora estados de carga/error/parcial, reintento, cancelacion, seguimiento de fuentes, preguntas sugeridas, follow-ups, adjuntos validados, historial acotado, autoscroll respetuoso y controles tactiles de al menos 46 px reales incluso bajo el escalado movil del sitio.
+- La carga de mercado, eventos, misiones, grimorio, biblioteca y jugadores usa tolerancia a fallos por fuente; un conector rechazado ya no bloquea todo el Archivista y la UI muestra el origen degradado con texto accesible.
+- Las operaciones admin exigen sesion segura vinculada, muestran payload antes de confirmar y diferencian eliminaciones. Los ajustes de oro usan incrementos atomicos, coincidencia exacta de jugadores, deteccion de nombres ambiguos, concurrencia limitada y reportes honestos de resultados parciales.
+- Se corrigieron consultas IA obsoletas, cancelacion al cambiar bloqueo/privilegios, duplicacion de contexto, serializacion de imagenes, colisiones de cache por documentos, payloads sin limites y respuestas externas malformadas. El compositor deja de rerenderizar el historial por cada tecla y las tarjetas evitan procesar colecciones no solicitadas.
+- Se agrego `scripts/check-archivist-v2.mjs` para proteger coincidencias exactas, acentos, ausencia de matches parciales y ambiguedad. Graphify quedo actualizado a 4.881 nodos y 10.496 aristas.
+- Validacion: `node scripts/check-archivist-v2.mjs`, `npx tsc --noEmit`, `npm run build`, `npm run graphify:update` y Chrome headless real en 1440x1200/390x844 pasaron limpios; 5/5 fuentes sincronizadas, sin errores de consola/red ni overflow horizontal. El chunk diferido del Archivista queda en 70,05 kB (19,94 kB gzip), sin impactar el bundle inicial.
+- Riesgos heredados abiertos: `increment_gold` sigue siendo invocable desde clientes y la seguridad completa de la economia requiere migrar los minijuegos a liquidacion server-side; ademas, "Detener" cancela la espera del navegador pero el proveedor IA puede terminar su generacion en el servidor porque el orquestador compartido aun no propaga un `AbortSignal`. Este rework no amplia esos permisos. [Codex]
+
 ### [2026-07-14] Hotfix de busquedas vacias en Portal Anime
 - Se normalizo el `404` de busqueda anime como "sin coincidencias" en lugar de error de proveedor, cubriendo tanto el modo directo al scraper como el proxy server-side.
 - El diagnostico de fuentes ya no marca AnimeFLV/TioAnime como "No disponible" cuando la serie buscada simplemente no existe en esa fuente.

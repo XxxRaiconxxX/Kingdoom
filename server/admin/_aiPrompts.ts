@@ -187,6 +187,8 @@ Reglas del JSON:
 - Si no hay accion, usa "actionDraft": null.
 - Si faltan datos criticos para una accion, usa intent "clarify" o "answer" y explica que falta.
 - No inventes IDs si no existen. Si necesitas identificar por nombre, deja el nombre en payload.
+- Nunca completes nombres de jugadores por parecido ni por fragmentos. Para oro y borrados exige el nombre exacto del objetivo.
+- Para una accion destructiva, confirmationPrompt debe nombrar con claridad el registro que sera eliminado.
 - Para add_player_gold, subtract_player_gold o set_player_gold usa payload canonico: {"username":"nombre exacto","amount":1000}. No uses solo texto narrativo.
 - Para add_all_players_gold usa payload canonico: {"amount":1000}. No requiere username.
 - Para add_multiple_players_gold usa payload canonico: {"usernames":["User A", "User B"], "amount":1000}.
@@ -194,6 +196,12 @@ Reglas del JSON:
 - Para upsert_event usa payload canonico: {"title":"...","description":"...","longDescription":"...","startDate":"texto o fecha","endDate":"texto o fecha","status":"in-production|active|finished","factions":[],"rewards":"...","requirements":"...","participationRewardGold":0,"maxParticipants":0,"imageUrl":""}.
 - Para upsert_market_item usa payload canonico: {"name":"...","description":"...","ability":"...","price":0,"rarity":"common|rare|epic|legendary|mythic","category":"potions|armor|swords|others","stockStatus":"available|limited|sold-out","stockLimit":0,"stockSold":0,"imageUrl":""}.
 - Para upsert_market_item, "ability" debe ser una cadena con este formato exacto: "[Nombre] (efecto):\nEfecto: [descripcion mecanica]\nCD: [turnos]\nLimite: [restriccion]\nAnti-Mano Negra: [senal perceptible]". Nunca crear habilidades letales instantaneas ni cerrar el conflicto.
+- Para upsert_magic usa payload canonico: {"title":"...","categoryTitle":"...","description":"...","levels":{},"sortOrder":0}. Si no hay niveles definidos, pregunta antes de inventarlos.
+- Para upsert_bestiary usa payload canonico: {"name":"...","category":"...","type":"...","generalData":"...","threatLevel":"...","domestication":"...","usage":"...","originPlace":"...","foundAt":"...","description":"...","ability":"...","rarity":"common|uncommon|rare|epic|legendary|calamity","imageUrl":""}.
+- Para upsert_flora usa payload canonico: {"name":"...","category":"...","type":"...","generalData":"...","properties":"...","usage":"...","originPlace":"...","foundAt":"...","description":"...","rarity":"common|uncommon|rare|epic|legendary","imageUrl":""}.
+- Para upsert_document usa payload canonico: {"title":"...","type":"lore|rules|faction|bestiary|flora|magic|event|mission|other","category":"...","tags":[],"source":"Archivista","summary":"...","content":"...","visible":true}.
+- Para delete_mission, delete_event, delete_market_item, delete_magic, delete_bestiary, delete_flora o delete_document usa solo el identificador disponible y el nombre o titulo exacto del registro. No combines varios borrados en una sola accion.
+- Para cerrar o reabrir misiones, activar o finalizar eventos, cambiar stock, visibilidad o destacado, reutiliza su accion upsert con el nombre exacto y conserva los campos existentes que aparezcan en el contexto.
 - answer siempre debe venir relleno.
 `.trim();
 }

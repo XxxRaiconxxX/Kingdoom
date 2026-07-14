@@ -51,10 +51,22 @@ export async function askArchivistAi(input: {
   includeDebug?: boolean;
   runtimeSummary?: string;
   allowActions?: boolean;
+  signal?: AbortSignal;
 }): Promise<ArchivistAskResult> {
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 45000);
+  let timedOut = false;
+  const abortFromCaller = () => controller.abort();
+  const timeoutId = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, 45000);
   let response: Response;
+
+  if (input.signal?.aborted) {
+    controller.abort();
+  } else {
+    input.signal?.addEventListener("abort", abortFromCaller, { once: true });
+  }
 
   try {
     response = await fetch(getArchivistEndpoint(), {
@@ -62,20 +74,20 @@ export async function askArchivistAi(input: {
       headers: { "Content-Type": "application/json" },
       signal: controller.signal,
       body: JSON.stringify({
-        question: input.question,
+        question: input.question.trim().slice(0, 2000),
         mode: input.mode ?? "canon",
-        topicMemory: input.topicMemory ?? [],
-        documents: input.contextDocuments.map((document) => ({
-          title: document.title,
-          type: document.type,
-          category: document.category,
-          tags: document.tags,
-          source: document.source,
-          summary: document.summary,
-          content: document.content,
+        topicMemory: (input.topicMemory ?? []).slice(-8).map((entry) => entry.slice(0, 1200)),
+        documents: input.contextDocuments.slice(0, 12).map((document) => ({
+          title: document.title.slice(0, 180),
+          type: document.type.slice(0, 80),
+          category: document.category.slice(0, 120),
+          tags: document.tags.slice(0, 16).map((tag) => tag.slice(0, 80)),
+          source: document.source.slice(0, 180),
+          summary: document.summary.slice(0, 500),
+          content: document.content.slice(0, 2600),
         })),
         includeDebug: input.includeDebug ?? false,
-        runtimeSummary: input.runtimeSummary ?? "",
+        runtimeSummary: (input.runtimeSummary ?? "").slice(0, 16000),
         allowActions: input.allowActions ?? false,
       }),
     });
@@ -84,12 +96,15 @@ export async function askArchivistAi(input: {
       status: "error",
       message:
         error instanceof DOMException && error.name === "AbortError"
-          ? "El Archivista tardo demasiado en responder. El borrador pendiente sigue intacto."
+          ? timedOut
+            ? "El Archivista tardo demasiado en responder. El borrador pendiente sigue intacto."
+            : "La consulta fue detenida. El borrador pendiente sigue intacto."
           : "No se pudo consultar al Archivista. Revisa la conexion o el endpoint.",
       debug: null,
     };
   } finally {
     window.clearTimeout(timeoutId);
+    input.signal?.removeEventListener("abort", abortFromCaller);
   }
 
   const payload = await response.json().catch(() => null);
@@ -104,10 +119,34 @@ export async function askArchivistAi(input: {
     };
   }
 
+  const answer = typeof payload?.answer === "string" ? payload.answer.trim() : "";
+  if (!answer) {
+    return {
+      status: "error",
+      message: "El Archivista respondio sin contenido util. Intenta reformular la consulta.",
+      debug: payload?.debug ?? null,
+    };
+  }
+
+  const sources = Array.isArray(payload?.sources)
+    ? payload.sources.flatMap((source: unknown) => {
+        if (!source || typeof source !== "object") return [];
+        const entry = source as Record<string, unknown>;
+        if (typeof entry.title !== "string" || !entry.title.trim()) return [];
+        return [
+          {
+            title: entry.title.trim(),
+            type: typeof entry.type === "string" ? entry.type : "other",
+            category: typeof entry.category === "string" ? entry.category : "",
+          },
+        ];
+      })
+    : [];
+
   return {
     status: "ready",
-    answer: payload?.answer ?? "",
-    sources: Array.isArray(payload?.sources) ? payload.sources : [],
+    answer,
+    sources,
     intent:
       payload?.intent === "admin_action" ||
       payload?.intent === "clarify" ||

@@ -17,6 +17,7 @@ import type {
   ArchivistCardKind,
   ArchivistLiveContext,
   ArchivistLiveState,
+  ArchivistSourceStatus,
 } from "./archivist.types";
 
 const CARD_STOPWORDS = new Set([
@@ -252,13 +253,13 @@ export async function fetchArchivistLiveContext(options?: {
   const includeAdminData = options?.includeAdminData === true;
 
   const [
-    marketResult,
-    eventsResult,
-    missionsResult,
-    grimoireResult,
-    documentsResult,
-    playersResult,
-  ] = await Promise.all([
+    marketState,
+    eventsState,
+    missionsState,
+    grimoireState,
+    documentsState,
+    playersState,
+  ] = await Promise.allSettled([
     fetchMarketItems(),
     fetchRealmEvents(),
     includeAdminData ? fetchAdminRealmMissions() : fetchPublicRealmMissions(),
@@ -267,36 +268,85 @@ export async function fetchArchivistLiveContext(options?: {
     includeAdminData ? fetchAllPlayers() : Promise.resolve([]),
   ]);
 
-  const messages = [
-    marketResult.message,
-    eventsResult.message,
-    missionsResult.message,
-    grimoireResult.message,
-    documentsResult.message,
-  ]
-    .map((entry) => entry.trim())
-    .filter(Boolean);
+  const marketResult = marketState.status === "fulfilled" ? marketState.value : null;
+  const eventsResult = eventsState.status === "fulfilled" ? eventsState.value : null;
+  const missionsResult = missionsState.status === "fulfilled" ? missionsState.value : null;
+  const grimoireResult = grimoireState.status === "fulfilled" ? grimoireState.value : null;
+  const documentsResult = documentsState.status === "fulfilled" ? documentsState.value : null;
+  const playersResult = playersState.status === "fulfilled" ? playersState.value : [];
+
+  const sources: ArchivistSourceStatus[] = [
+    {
+      id: "market",
+      label: "Mercado",
+      status: marketResult ? (marketResult.status === "ready" ? "ready" : "fallback") : "error",
+      count: marketResult?.items.length ?? 0,
+      message: marketResult?.message ?? "No se pudo cargar el mercado.",
+    },
+    {
+      id: "events",
+      label: "Eventos",
+      status: eventsResult ? (eventsResult.status === "ready" ? "ready" : "fallback") : "error",
+      count: eventsResult?.events.length ?? 0,
+      message: eventsResult?.message ?? "No se pudieron cargar los eventos.",
+    },
+    {
+      id: "missions",
+      label: "Misiones",
+      status: missionsResult ? (missionsResult.status === "ready" ? "ready" : "fallback") : "error",
+      count: missionsResult?.missions.length ?? 0,
+      message: missionsResult?.message ?? "No se pudieron cargar las misiones.",
+    },
+    {
+      id: "grimoire",
+      label: "Grimorio",
+      status: grimoireResult ? (grimoireResult.status === "ready" ? "ready" : "fallback") : "error",
+      count: grimoireResult
+        ? grimoireResult.categories.length + grimoireResult.bestiary.length + grimoireResult.flora.length
+        : 0,
+      message: grimoireResult?.message ?? "No se pudo cargar el grimorio.",
+    },
+    {
+      id: "documents",
+      label: "Biblioteca",
+      status: documentsResult ? (documentsResult.status === "ready" ? "ready" : "error") : "error",
+      count: documentsResult?.documents.length ?? 0,
+      message: documentsResult?.message ?? "No se pudo cargar la biblioteca.",
+    },
+    ...(includeAdminData
+      ? [
+          {
+            id: "players" as const,
+            label: "Jugadores",
+            status: playersState.status === "fulfilled" ? ("ready" as const) : ("error" as const),
+            count: playersResult.length,
+            message:
+              playersState.status === "fulfilled"
+                ? ""
+                : "No se pudo cargar el registro de jugadores.",
+          },
+        ]
+      : []),
+  ];
+  const messages = Array.from(
+    new Set(sources.map((source) => source.message.trim()).filter(Boolean))
+  );
 
   return {
-    status:
-      marketResult.status === "ready" &&
-      eventsResult.status === "ready" &&
-      missionsResult.status === "ready" &&
-      grimoireResult.status === "ready" &&
-      documentsResult.status === "ready"
-        ? "ready"
-        : "partial",
-    message: messages[0] ?? "",
+    status: sources.every((source) => source.status === "ready") ? "ready" : "partial",
+    message: messages.join(" "),
     context: {
-      marketItems: marketResult.items,
-      events: eventsResult.events,
-      missions: missionsResult.missions,
-      grimoireCategories: grimoireResult.categories,
-      bestiary: grimoireResult.bestiary,
-      flora: grimoireResult.flora,
-      documents: documentsResult.documents,
+      marketItems: marketResult?.items ?? [],
+      events: eventsResult?.events ?? [],
+      missions: missionsResult?.missions ?? [],
+      grimoireCategories: grimoireResult?.categories ?? [],
+      bestiary: grimoireResult?.bestiary ?? [],
+      flora: grimoireResult?.flora ?? [],
+      documents: documentsResult?.documents ?? [],
       players: playersResult,
     },
+    sources,
+    updatedAt: new Date().toISOString(),
   };
 }
 
@@ -306,25 +356,27 @@ export function buildArchivistRuntimeSummary(
 ) {
   const activeEvents = context.events.filter((entry) => entry.status === "active");
   const publicMissions = context.missions.filter((entry) => entry.visible !== false);
+  const marketByPrice = [...context.marketItems].sort((left, right) => right.price - left.price);
+  const magicStyles = flattenMagicStyles(context.grimoireCategories);
+  const sortedByGold = [...context.players].sort((left, right) => right.gold - left.gold);
   const activeMissionTitles = publicMissions
     .filter((entry) => entry.status !== "closed")
     .slice(0, 8)
     .map((entry) => entry.title);
-  const expensiveMarket = [...context.marketItems]
-    .sort((left, right) => right.price - left.price)
+  const expensiveMarket = marketByPrice
     .slice(0, 4)
     .map((item) => `${item.name} (${item.price} oro, ${item.rarity})`);
-  const cheapMarket = [...context.marketItems]
-    .sort((left, right) => left.price - right.price)
+  const cheapMarket = marketByPrice
+    .slice(-4)
+    .reverse()
     .slice(0, 4)
     .map((item) => `${item.name} (${item.price} oro)`);
   const visibleEventTitles = activeEvents.slice(0, 8).map((entry) => entry.title);
   const visibleDocumentTitles = context.documents.slice(0, 8).map((entry) => entry.title);
-  const magicTitles = flattenMagicStyles(context.grimoireCategories)
+  const magicTitles = magicStyles
     .slice(0, 10)
     .map((entry) => `${entry.title} [${entry.categoryTitle}]`);
   const playerNames = context.players.slice(0, 50).map((entry) => entry.username);
-  const sortedByGold = [...context.players].sort((left, right) => right.gold - left.gold);
   const richestPlayers = sortedByGold
     .slice(0, 15)
     .map((entry) => `${entry.username}: ${entry.gold.toLocaleString("es-PY")} oro`);
@@ -339,7 +391,7 @@ export function buildArchivistRuntimeSummary(
     `Misiones visibles: ${publicMissions.length}.`,
     `Bestiario: ${context.bestiary.length} entradas.`,
     `Flora: ${context.flora.length} entradas.`,
-    `Magias: ${flattenMagicStyles(context.grimoireCategories).length} estilos.`,
+    `Magias: ${magicStyles.length} estilos.`,
     expensiveMarket.length > 0
       ? `Items mas caros ahora: ${expensiveMarket.join(" | ")}`
       : "",
@@ -394,8 +446,10 @@ export function pickArchivistCards(
     return [];
   }
 
+  const includesKind = (kind: ArchivistCardKind) =>
+    !inferredKinds || inferredKinds.has(kind);
   const pool: Array<{ score: number; card: ArchivistCard }> = [
-    ...context.marketItems.map((item) => ({
+    ...(includesKind("market") ? context.marketItems.map((item) => ({
       score:
         scoreMatch(tokens, [
           item.name,
@@ -406,8 +460,8 @@ export function pickArchivistCards(
           item.price,
         ]) + categoryBoost("market", rawTokens),
       card: toMarketCard(item),
-    })),
-    ...context.events.map((entry) => ({
+    })) : []),
+    ...(includesKind("event") ? context.events.map((entry) => ({
       score:
         scoreMatch(tokens, [
           entry.title,
@@ -417,8 +471,8 @@ export function pickArchivistCards(
           entry.requirements,
         ]) + categoryBoost("event", rawTokens),
       card: toEventCard(entry),
-    })),
-    ...context.missions.map((entry) => ({
+    })) : []),
+    ...(includesKind("mission") ? context.missions.map((entry) => ({
       score:
         scoreMatch(tokens, [
           entry.title,
@@ -428,14 +482,14 @@ export function pickArchivistCards(
           entry.status,
         ]) + categoryBoost("mission", rawTokens),
       card: toMissionCard(entry),
-    })),
-    ...flattenMagicStyles(context.grimoireCategories).map((entry) => ({
+    })) : []),
+    ...(includesKind("magic") ? flattenMagicStyles(context.grimoireCategories).map((entry) => ({
         score:
           scoreMatch(tokens, [entry.title, entry.description, entry.categoryTitle]) +
         categoryBoost("magic", rawTokens),
       card: toMagicCard(entry),
-    })),
-    ...context.bestiary.map((entry) => ({
+    })) : []),
+    ...(includesKind("bestiary") ? context.bestiary.map((entry) => ({
       score:
         scoreMatch(tokens, [
           entry.name,
@@ -445,8 +499,8 @@ export function pickArchivistCards(
           entry.threatLevel,
         ]) + categoryBoost("bestiary", rawTokens),
       card: toBestiaryCard(entry),
-    })),
-    ...context.flora.map((entry) => ({
+    })) : []),
+    ...(includesKind("flora") ? context.flora.map((entry) => ({
       score:
         scoreMatch(tokens, [
           entry.name,
@@ -456,12 +510,12 @@ export function pickArchivistCards(
           entry.properties,
         ]) + categoryBoost("flora", rawTokens),
       card: toFloraCard(entry),
-    })),
-    ...context.documents.map((entry) => ({
+    })) : []),
+    ...(includesKind("document") ? context.documents.map((entry) => ({
       score: scoreMatch(tokens, [entry.title, entry.summary, entry.category, entry.type]),
       card: toDocumentCard(entry),
-    })),
-    ...(options?.includeAdminData
+    })) : []),
+    ...(options?.includeAdminData && includesKind("player")
       ? context.players.map((entry) => ({
           score:
             scoreMatch(tokens, [entry.username, entry.gold]) +

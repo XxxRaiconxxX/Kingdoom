@@ -11,6 +11,7 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 ### [2026-07-14] Hotfix de busquedas vacias en Portal Anime
 - Se normalizo el `404` de busqueda anime como "sin coincidencias" en lugar de error de proveedor, cubriendo tanto el modo directo al scraper como el proxy server-side.
 - El diagnostico de fuentes ya no marca AnimeFLV/TioAnime como "No disponible" cuando la serie buscada simplemente no existe en esa fuente.
+- En Vercel el navegador vuelve a usar el proxy propio `/api/anime/proxy`; el modo directo con `key` queda reservado para GitHub Pages/static hosting, evitando divergencias entre el scraper externo y el proxy server-side.
 - Validacion: `node --experimental-strip-types scripts/anime-provider-contract.selfcheck.mjs`, `npx tsc --noEmit` y `npm run build` pasaron limpios. [Codex]
 
 ### [2026-07-14] Limpieza del apartado de app comunitaria en Home

@@ -272,7 +272,19 @@ function normalizeLinks(value: unknown): AnimeEpisodeLinks {
 }
 
 function directProviderUrl(params: ProxyParams) {
-  if (!DIRECT_API_URL || !DIRECT_API_KEY || params.action === "metadata") return null;
+  const usesStaticHosting =
+    typeof window !== "undefined" &&
+    (window.location.hostname.endsWith("github.io") || window.location.protocol === "file:");
+
+  if (
+    !usesStaticHosting ||
+    PROXY_API_URL ||
+    !DIRECT_API_URL ||
+    !DIRECT_API_KEY ||
+    params.action === "metadata"
+  ) {
+    return null;
+  }
 
   const url = new URL(DIRECT_API_URL);
   const basePath = url.pathname.replace(/\/$/, "");

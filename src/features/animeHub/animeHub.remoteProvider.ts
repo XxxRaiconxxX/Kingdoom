@@ -313,10 +313,7 @@ async function requestProxy(params: ProxyParams, ttl = CACHE_TTL_MS) {
     const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       const response = await fetch(url, {
-        headers: {
-          Accept: "application/json",
-          ...(directUrl ? { Authorization: `Bearer ${DIRECT_API_KEY}` } : {}),
-        },
+        headers: { Accept: "application/json" },
         signal: controller.signal,
       });
       const body = (await response.json().catch(() => null)) as ProxyResponse | null;

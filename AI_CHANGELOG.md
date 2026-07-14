@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Simplificacion CORS del Portal Anime en Pages
+- Se quito el header `Authorization` del modo directo GitHub Pages -> scraper, dejando la autenticacion por `?key=` que ya responde 200 en el scraper publicado.
+- Esto evita preflight CORS innecesario y reduce los falsos 401 visibles en DevTools cuando el hosting estatico llama al scraper directo.
+- Validacion: `npx tsc --noEmit`, `npm run build` y `git diff --check` pasaron limpios. [Codex]
+
 ### [2026-07-14] Recorte de proveedor inestable en Portal Anime
 - Se retiro GogoAnime del selector y del modo automatico del Portal Anime tras confirmar que el scraper remoto respondia 500 para esa fuente mientras AnimeFLV y TioAnime respondian 200 con `naruto`.
 - El contrato de proveedores queda limitado a AnimeFLV y TioAnime, evitando rondas automaticas con 401/500 visibles en DevTools y estados de "0 titulos" por mezcla de fuentes degradadas.

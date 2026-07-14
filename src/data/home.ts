@@ -1,11 +1,6 @@
 import { Crown, Dice5, Flame, Users } from "lucide-react";
 import type { HomeStat, JoinStep, KingdomAnnouncement } from "../types";
 
-export const COMMUNITY_APP_DOWNLOAD_FALLBACK_URL =
-  "https://raw.githubusercontent.com/XxxRaiconxxX/Kingdoom/main/app-debug.apk";
-export const COMMUNITY_APP_VERSION = "v1.0.0";
-export const COMMUNITY_APP_UPDATED_AT = "21/04/2026";
-
 export const HOME_STATS: HomeStat[] = [
   { value: "En progreso", label: "Personajes", icon: Users },
   { value: "4", label: "Facciones", icon: Flame },
@@ -35,9 +30,9 @@ export const KINGDOM_ANNOUNCEMENTS: KingdomAnnouncement[] = [
 
 export const JOIN_STEPS: JoinStep[] = [
   {
-    title: "Descarga la app o entra por web",
+    title: "Entra por la web del reino",
     description:
-      "Usa la app de la comunidad cuando este disponible o entra desde la web para revisar fichas, mercado y novedades.",
+      "Revisa fichas, misiones, eventos, mercado y grimorio desde el portal web oficial de Kingdoom.",
   },
   {
     title: "Conecta tu perfil y crea tu personaje",

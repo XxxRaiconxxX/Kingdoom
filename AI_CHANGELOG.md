@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-14] Limpieza del apartado de app comunitaria en Home
+- Se elimino el flujo visible de descarga de app comunitaria del Home y el copy de onboarding que todavia indicaba "Descarga la app".
+- Se retiro el util de `siteSettings` dedicado exclusivamente a resolver la URL del APK, ya sin consumidores activos.
+- Validacion: busqueda `rg` sin referencias visibles a la app comunitaria, `npx tsc --noEmit` y `npm run build` pasaron limpios. [Codex]
+
 ### [2026-07-14] Despliegue Vercel del Portal Anime y ajuste de funciones Hobby
 - Se conecto Vercel MCP oficialmente por OAuth (`https://mcp.vercel.com`) y se enlazo el checkout local al proyecto `xxxraiconxxxs-projects/kingdoom`.
 - El deploy productivo inicial fallo por el limite Hobby de 12 Serverless Functions; se movieron helpers internos desde `api/` hacia `server/` para que Vercel cuente solo rutas reales y mantenga los endpoints admin/anime sin superar el limite.

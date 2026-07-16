@@ -1,4 +1,4 @@
-export const PLAYBACK_PROVIDERS = ["animeflv", "tioanime"] as const;
+export const PLAYBACK_PROVIDERS = ["animeflv", "tioanime", "anichi"] as const;
 
 export type PlaybackProvider = (typeof PLAYBACK_PROVIDERS)[number];
 export type PlaybackAction = "search" | "detail" | "links";

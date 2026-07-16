@@ -2,11 +2,17 @@
 
 Este changelog mantiene solo el periodo operativo reciente para que el relevo sea rapido y accionable.
 
-- Ventana conservada: 2026-05-06 a 2026-07-13.
+- Ventana conservada: 2026-05-06 a 2026-07-16.
 - Historico anterior retirado del changelog activo por limpieza operativa.
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-07
+
+### [2026-07-16] Integracion experimental de AniChi en Portal Anime
+- Se agrego `AniChi (beta)` al selector y al modo automatico del Portal Anime mediante el contrato compartido `source=anichi`; sus fallos quedan aislados por la tolerancia existente y no bloquean AnimeFLV/TioAnime.
+- El subrepositorio autenticado del scraper incorpora busqueda, ficha, episodios y resolucion de servidores de AniChi. El navegador solo recibe enlaces HTTP(S) normalizados: no conoce los endpoints internos ni retransmite video, y la resolucion limita el fan-out a 12 servidores por episodio.
+- Se agrego una comprobacion e2e que valida la cadena real contra AniChi. Resultado observado: 5 resultados, 12 episodios y 9 servidores para `Solo Leveling`; el contrato compartido, TypeScript del scraper, TypeScript global, build y Graphify pasaron limpios. El audit de dependencias de produccion del scraper reporto 0 vulnerabilidades. El commit `e8fbcb8` del scraper fue publicado y la misma cadena se verifico contra su endpoint productivo.
+- Riesgos abiertos: AniChi fue lanzado recientemente, no publica una API ni un SLA y sus Terms of Use restringen copia, exhibicion, mirror e ingenieria inversa; la continuidad y autorizacion del conector no estan garantizadas. [Codex]
 
 ### [2026-07-14] Archivista: etiquetas cortas y pista horizontal real en sugerencias
 - Las sugerencias del Archivista dejan de mostrar el texto completo dentro del chip y pasan a etiquetas mas cortas como `Eventos activos`, `Misiones abiertas` o `Item mas caro`.

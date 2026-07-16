@@ -12,6 +12,7 @@ export const ANIME_PROVIDER_OPTIONS = [
   { id: "all", label: "Automatico" },
   { id: "animeflv", label: "AnimeFLV" },
   { id: "tioanime", label: "TioAnime" },
+  { id: "anichi", label: "AniChi (beta)" },
 ] as const;
 
 export type AnimeProviderId = (typeof ANIME_PROVIDER_OPTIONS)[number]["id"];
@@ -63,6 +64,7 @@ type ProxyParams = Record<string, string>;
 const PLAYBACK_PROVIDERS: AnimePlaybackProviderId[] = [
   "animeflv",
   "tioanime",
+  "anichi",
 ];
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 15_000;

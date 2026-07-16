@@ -87,6 +87,7 @@ export function AnimeHubSection() {
   const [episodeFilter, setEpisodeFilter] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [detailLoadFailed, setDetailLoadFailed] = useState(false);
   const [isEpisodeLoading, setIsEpisodeLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [feedback, setFeedback] = useState("Listo para explorar.");
@@ -127,16 +128,19 @@ export function AnimeHubSection() {
     resetEpisode();
     setSelectedSeries(summaryToDetail(series));
     setIsDetailLoading(true);
+    setDetailLoadFailed(false);
     setError("");
 
     try {
       const detail = await remoteAnimeHubProvider.getSeriesDetail(series.id);
       if (requestId !== detailRequest.current) return;
       setSelectedSeries(detail ?? summaryToDetail(series));
-      setFeedback(detail ? "Ficha y episodios actualizados." : "El proveedor entrego una ficha basica.");
+      setDetailLoadFailed(!detail);
+      setFeedback(detail ? "Ficha y episodios actualizados." : "No se pudo completar la ficha. Puedes reintentar.");
     } catch {
       if (requestId !== detailRequest.current) return;
-      setFeedback("Ficha basica disponible; el detalle no respondio.");
+      setDetailLoadFailed(true);
+      setFeedback("Ficha basica disponible; el detalle no respondio. Puedes reintentar.");
     } finally {
       if (requestId === detailRequest.current) setIsDetailLoading(false);
     }
@@ -155,6 +159,7 @@ export function AnimeHubSection() {
     setQuery(normalizedQuery);
     setIsSearching(true);
     setSelectedSeries(null);
+    setDetailLoadFailed(false);
     setError("");
     setFeedback("Consultando proveedores...");
 
@@ -410,7 +415,7 @@ export function AnimeHubSection() {
                       <h3 className="mt-4 text-wrap-balance font-serif text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">{selectedSeries.title}</h3>
                       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-bold text-stone-300 sm:text-sm">
                         <span>{selectedSeries.releaseWindow}</span>
-                        <span>{selectedSeries.episodeCount || selectedSeries.episodes.length} episodios</span>
+                        <span>{isDetailLoading ? "Cargando episodios..." : `${selectedSeries.episodeCount || selectedSeries.episodes.length} episodios`}</span>
                         {selectedSeries.score && <span className="text-amber-300">Puntaje {selectedSeries.score}</span>}
                       </div>
                       {selectedSeries.genres.length > 0 && (
@@ -444,7 +449,12 @@ export function AnimeHubSection() {
                           </label>
                         )}
                       </div>
-                      {selectedSeries.episodes.length ? (
+                      {isDetailLoading ? (
+                        <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/5 px-4 py-8 text-center text-sm font-bold text-cyan-200">
+                          <Activity className="mx-auto mb-2 h-5 w-5 animate-pulse" />
+                          Consultando ficha y episodios...
+                        </div>
+                      ) : selectedSeries.episodes.length ? (
                         <div className="grid max-h-[25rem] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-4 [scrollbar-color:rgba(34,211,238,.35)_transparent]">
                           {visibleEpisodes.map((episode) => (
                             <button
@@ -457,6 +467,17 @@ export function AnimeHubSection() {
                               <span className="block truncate text-sm font-black">{episode.number}</span>
                             </button>
                           ))}
+                        </div>
+                      ) : detailLoadFailed ? (
+                        <div className="rounded-2xl border border-amber-300/20 bg-amber-300/5 px-4 py-7 text-center text-sm text-stone-300">
+                          <p>La ficha no termino de cargar.</p>
+                          <button
+                            type="button"
+                            onClick={() => void loadSeries(selectedSeries)}
+                            className="mt-4 min-h-12 rounded-xl border border-amber-300/35 bg-amber-300/10 px-4 font-black text-amber-200 transition hover:bg-amber-300/20"
+                          >
+                            Reintentar ficha
+                          </button>
                         </div>
                       ) : (
                         <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 px-4 py-8 text-center text-sm text-stone-500">El proveedor no publico una lista de episodios para esta ficha.</div>

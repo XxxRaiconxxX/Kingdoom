@@ -8,6 +8,13 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-16] Hotfix de fichas AniChi para peliculas y respuestas transitorias
+- Se reprodujo la ficha de `Black Butler: Book of the Atlantic`: AniChi publica correctamente una pelicula como un unico episodio `Full`, pero una respuesta transitoria dejaba al portal mostrando solo el resumen de busqueda con `0 episodios`.
+- El scraper solicita ahora las fichas con cabeceras HTML, separadas de las llamadas AJAX, y reintenta una sola vez la cadena de detalle cuando AniChi devuelve una pagina o lista incompleta.
+- El Portal Anime diferencia entre carga, fallo real y ficha valida sin episodios. Mientras consulta muestra progreso, y ante un fallo ofrece `Reintentar ficha` en lugar de afirmar que el proveedor no publico capitulos.
+- La comprobacion e2e cubre ahora series y peliculas: 12 episodios para `Solo Leveling`, 1 episodio para `Black Butler: Book of the Atlantic` y 9 servidores. Pasaron TypeScript del scraper, contrato compartido, TypeScript global, build de 2.248 modulos y `git diff --check`; el scraper quedo publicado en `92ec68e` y su endpoint productivo confirmo la pelicula completa.
+- Riesgo abierto: AniChi sigue siendo una fuente externa sin API ni SLA; el reintento absorbe fallos transitorios, no cambios permanentes de su HTML. [Codex]
+
 ### [2026-07-16] Integracion experimental de AniChi en Portal Anime
 - Se agrego `AniChi (beta)` al selector y al modo automatico del Portal Anime mediante el contrato compartido `source=anichi`; sus fallos quedan aislados por la tolerancia existente y no bloquean AnimeFLV/TioAnime.
 - El subrepositorio autenticado del scraper incorpora busqueda, ficha, episodios y resolucion de servidores de AniChi. El navegador solo recibe enlaces HTTP(S) normalizados: no conoce los endpoints internos ni retransmite video, y la resolucion limita el fan-out a 12 servidores por episodio.

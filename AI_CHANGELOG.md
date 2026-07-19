@@ -12,6 +12,7 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Se agregó soporte para el nuevo proveedor `animeflvone` (`https://vww.animeflv.one/`) como opción de reproducción completa e independiente.
 - Modificado `server/anime/providerContract.ts` y el script de autoprueba `scripts/anime-provider-contract.selfcheck.mjs` para habilitar y validar el nuevo ID de proveedor.
 - Actualizado `src/features/animeHub/animeHub.remoteProvider.ts` para registrar "AnimeFLV (Completo)" en las opciones de reproducción del cliente (`ANIME_PROVIDER_OPTIONS`) y habilitarlo en la búsqueda automática distribuida (`PLAYBACK_PROVIDERS`). [Antigravity]
+- **fix**: Corregido `buildPrimaryProviderUrl` en `server/anime/providerContract.ts` y modificado `api/anime/proxy.ts` para reenviar los parámetros opcionales `series` y `episode` a la API de Scraping al solicitar los enlaces de reproducción. Esto soluciona la redirección directa oficial para evadir los 404 del reproductor integrado de AniChi. [Antigravity]
 
 ### [2026-07-19] Portal Anime: migración de AnimeFLV a su nuevo dominio
 - Se migró el scraper de AnimeFLV al nuevo dominio operativo `https://animeflv.or.at/` debido a que el dominio anterior eliminó todos los servidores de reproducción de video.

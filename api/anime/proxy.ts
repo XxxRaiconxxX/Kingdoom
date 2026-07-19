@@ -173,6 +173,8 @@ async function requestPlayback(input: {
     provider: input.provider,
     id: input.id,
     query: input.query,
+    series: input.series,
+    episode: input.episode,
   });
   const primary = await fetchUpstream(primaryUrl, primaryHeaders());
 

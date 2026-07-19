@@ -9,6 +9,8 @@ type PrimaryRequestInput = {
   provider: PlaybackProvider;
   id?: string;
   query?: string;
+  series?: string;
+  episode?: string;
 };
 
 type AnimeFlvFallbackInput = {
@@ -40,6 +42,8 @@ export function buildPrimaryProviderUrl(input: PrimaryRequestInput) {
     url.pathname = `${url.pathname.replace(/\/$/, "")}/api/anime/${encodeURIComponent(input.id ?? "")}`;
   } else {
     url.pathname = `${url.pathname.replace(/\/$/, "")}/api/episode/${encodeURIComponent(input.id ?? "")}`;
+    if (input.series) url.searchParams.set("series", input.series);
+    if (input.episode) url.searchParams.set("episode", input.episode);
   }
 
   url.searchParams.set("source", input.provider);

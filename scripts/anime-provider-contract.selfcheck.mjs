@@ -17,6 +17,18 @@ assert.equal(isEmptySearchStatus("detail", 404), false);
 assert.equal(
   buildPrimaryProviderUrl({
     baseUrl: "https://anime.example.com",
+    action: "links",
+    provider: "anichi",
+    id: "SHg5NnZ...",
+    series: "four-panel-heroes-yrgw2",
+    episode: "1"
+  }).toString(),
+  "https://anime.example.com/api/episode/SHg5NnZ...?series=four-panel-heroes-yrgw2&episode=1&source=anichi"
+);
+
+assert.equal(
+  buildPrimaryProviderUrl({
+    baseUrl: "https://anime.example.com",
     action: "search",
     provider: "tioanime",
     query: "one piece",

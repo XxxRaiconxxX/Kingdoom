@@ -8,6 +8,7 @@ import {
 
 assert.equal(normalizePlaybackProvider("anime-website"), null);
 assert.equal(normalizePlaybackProvider("animeflv"), "animeflv");
+assert.equal(normalizePlaybackProvider("animeflvone"), "animeflvone");
 assert.equal(normalizePlaybackProvider("anichi"), "anichi");
 assert.equal(normalizePlaybackProvider("jkanime"), null);
 assert.equal(isEmptySearchStatus("search", 404), true);

@@ -10,7 +10,8 @@ import { isEmptySearchStatus } from "../../../server/anime/providerContract";
 
 export const ANIME_PROVIDER_OPTIONS = [
   { id: "all", label: "Automatico" },
-  { id: "animeflv", label: "AnimeFLV" },
+  { id: "animeflv", label: "AnimeFLV (Recientes)" },
+  { id: "animeflvone", label: "AnimeFLV (Completo)" },
   { id: "tioanime", label: "TioAnime" },
   { id: "anichi", label: "AniChi (beta)" },
 ] as const;
@@ -63,6 +64,7 @@ type ProxyParams = Record<string, string>;
 
 const PLAYBACK_PROVIDERS: AnimePlaybackProviderId[] = [
   "animeflv",
+  "animeflvone",
   "tioanime",
   "anichi",
 ];

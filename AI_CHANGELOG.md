@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-19] Portal Anime: Integración de AnimeFLV (Completo) como nuevo proveedor
+- Se agregó soporte para el nuevo proveedor `animeflvone` (`https://vww.animeflv.one/`) como opción de reproducción completa e independiente.
+- Modificado `server/anime/providerContract.ts` y el script de autoprueba `scripts/anime-provider-contract.selfcheck.mjs` para habilitar y validar el nuevo ID de proveedor.
+- Actualizado `src/features/animeHub/animeHub.remoteProvider.ts` para registrar "AnimeFLV (Completo)" en las opciones de reproducción del cliente (`ANIME_PROVIDER_OPTIONS`) y habilitarlo en la búsqueda automática distribuida (`PLAYBACK_PROVIDERS`). [Antigravity]
+
 ### [2026-07-19] Portal Anime: migración de AnimeFLV a su nuevo dominio
 - Se migró el scraper de AnimeFLV al nuevo dominio operativo `https://animeflv.or.at/` debido a que el dominio anterior eliminó todos los servidores de reproducción de video.
 - Se rediseñó el sistema de selectores para soportar el formato WordPress/Yoast de la nueva web (búsqueda con parámetro `?s=`, metadatos detallados y episodios incrustados vía JSON `.animeflv-episodes-data`).

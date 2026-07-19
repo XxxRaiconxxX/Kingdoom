@@ -193,6 +193,12 @@ export function TavernCrash() {
     const m = typeof exactMultiplier === "number" ? exactMultiplier : multiplierRef.current;
     const winAmount = Math.floor(betRef.current * m);
     
+    // Asegurar el retiro en el estado del juego de forma síncrona
+    // para evitar que el loop de animación marque "colapso" durante la latencia de red.
+    setStatus("cashed_out");
+    statusRef.current = "cashed_out";
+    setLastWin(winAmount);
+    
     setUpdating(true);
     const success = await addPlayerGoldRef.current(winAmount);
     
@@ -205,10 +211,7 @@ export function TavernCrash() {
       );
     }
 
-    setLastWin(winAmount);
-    setStatus("cashed_out");
-    statusRef.current = "cashed_out";
-    // The updateMultiplier loop continues because statusRef.current is not "crashed"
+    // ponytail: simplificación intencional para desbloquear la UI tan pronto como termine la red.
     updatingRef.current = false;
     setUpdating(false);
   }, []);
@@ -241,8 +244,14 @@ export function TavernCrash() {
       multiplierRef.current = crashPointRef.current;
       pointsRef.current.push({ time: elapsedSeconds, multiplier: crashPointRef.current });
       redrawCanvas(crashPointRef.current, elapsedSeconds);
-      setStatus("crashed");
-      statusRef.current = "crashed";
+      
+      // Solo marcamos "crashed" si el jugador no aseguró su retiro ("cashed_out") previamente.
+      // Así la línea sigue subiendo y colapsa visualmente, pero respetando la victoria del jugador.
+      if (statusRef.current !== "cashed_out") {
+        setStatus("crashed");
+        statusRef.current = "crashed";
+      }
+      
       setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
       return; // Stop animation loop
     }

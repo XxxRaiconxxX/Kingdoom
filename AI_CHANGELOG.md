@@ -8,6 +8,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-19] El Multiplicador: solución de condición de carrera al retirar (cashout)
+- Se corrigió una condición de carrera donde el botón "Asegurar ahora" (retirar) no detenía la animación de inmediato debido a que la transacción asíncrona de base de datos (`addPlayerGold`) demoraba en resolverse, permitiendo que la animación continuara y colapsara el juego en la UI a pesar de haberse iniciado el retiro.
+- El estado local y el ref de estado ahora se actualizan de forma síncrona a `cashed_out` e instancian `lastWin` inmediatamente al hacer clic.
+- Se ajustó `updateMultiplier` para que, en caso de colapso de la animación, detenga el loop y registre el resultado en el historial de manera normal, pero no sobrescriba el estado del jugador a `crashed` si ya había retirado previamente (`cashed_out`).
+- Validación: `npx tsc --noEmit` y `npm run build` pasaron limpios. Riesgo abierto: ninguno nuevo; se mantiene el riesgo heredado de `increment_gold` expuesto a clientes. [Antigravity]
+
 ### [2026-07-16] Hotfix de fichas AniChi para peliculas y respuestas transitorias
 - Se reprodujo la ficha de `Black Butler: Book of the Atlantic`: AniChi publica correctamente una pelicula como un unico episodio `Full`, pero una respuesta transitoria dejaba al portal mostrando solo el resumen de busqueda con `0 episodios`.
 - El scraper solicita ahora las fichas con cabeceras HTML, separadas de las llamadas AJAX, y reintenta una sola vez la cadena de detalle cuando AniChi devuelve una pagina o lista incompleta.

@@ -8,6 +8,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-07
 
+### [2026-07-19] Portal Anime: migración de AnimeFLV a su nuevo dominio
+- Se migró el scraper de AnimeFLV al nuevo dominio operativo `https://animeflv.or.at/` debido a que el dominio anterior eliminó todos los servidores de reproducción de video.
+- Se rediseñó el sistema de selectores para soportar el formato WordPress/Yoast de la nueva web (búsqueda con parámetro `?s=`, metadatos detallados y episodios incrustados vía JSON `.animeflv-episodes-data`).
+- Se introdujo extracción nativa tanto para los servidores de reproducción (iframes decodificados de Base64) como para descargas directas (tabla de descargas), actualizando el backend `api/episode/[id].ts` para devolver de manera estructurada los objetos `stream` y `download`.
+- Validación: La API scraper local resolvió exitosamente la búsqueda, los detalles y el listado de servidores/descargas de "Black Torch". Los cambios fueron desplegados a producción de forma exitosa en el repositorio `Scraping-web-anime-api`. [Antigravity]
+
 ### [2026-07-19] El Multiplicador: solución de condición de carrera al retirar (cashout)
 - Se corrigió una condición de carrera donde el botón "Asegurar ahora" (retirar) no detenía la animación de inmediato debido a que la transacción asíncrona de base de datos (`addPlayerGold`) demoraba en resolverse, permitiendo que la animación continuara y colapsara el juego en la UI a pesar de haberse iniciado el retiro.
 - El estado local y el ref de estado ahora se actualizan de forma síncrona a `cashed_out` e instancian `lastWin` inmediatamente al hacer clic.

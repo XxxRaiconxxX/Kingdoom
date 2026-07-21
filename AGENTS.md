@@ -20,10 +20,12 @@ La divisiÃƒÆ’Ã‚Â³n es **por tarea, no por agente**.
   acÃƒÆ’Ã‚Â¡ cuando se le asigne.
 - **Dominio bot/backend (otro repo, `kingdoom-bot`):** fuera del alcance de
   este archivo salvo que se indique. No se toca desde acÃƒÆ’Ã‚Â¡.
+- **Dominio biblioteca/lore (otro repo, `kingdoom-library`):** aplicacion web estatica
+  nativa (HTML/CSS/JS) para el lore, guia de inicio y descarga de APKs.
 
 REGLA DE CARRIL: el agente trabaja en la tarea que se le pidiÃƒÆ’Ã‚Â³ y en el repo
-correspondiente (`Kingdoom-sync`). No cruza al repo del bot ni asume tareas
-de otra sesiÃƒÆ’Ã‚Â³n salvo pedido explÃƒÆ’Ã‚Â­cito.
+correspondiente. No cruza a otros repositorios ni asume tareas de otra sesion
+salvo pedido explÃƒÆ’Ã‚Â­cito.
 
 ## Project Overview
 
@@ -253,6 +255,7 @@ la trazabilidad de un repo con la del otro.
 |-----------------|-------------------------------------------------|---------------------------|
 | `Kingdoom-sync` | `AI_CHANGELOG.md` + `kingdoom-memory.jsonl` de `Kingdoom-sync` | GitHub (`origin`) |
 | `kingdoom-bot`  | `AI_CHANGELOG.md` + memoria propios de `kingdoom-bot`          | GitHub + Hugging Face |
+| `kingdoom-library` | `AI_CHANGELOG.md` + memoria propios de `kingdoom-library`      | GitHub (`origin`) |
 
 ÃƒÂ¢Ã¢â‚¬ÂºÃ¢â‚¬Â Si la tarea fue en `kingdoom-bot`, NO se toca el changelog ni la memoria de
    `Kingdoom-sync`, y viceversa. Cada repo lleva su propio historial.

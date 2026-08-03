@@ -6,6 +6,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Historico anterior retirado del changelog activo por limpieza operativa.
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
+## 2026-08
+
+### [2026-08-03] RPC upgrade_player_business: Ampliaciones Atómicas de Negocios
+- Se creó el procedimiento almacenado RPC `public.upgrade_player_business(p_business_id, p_player_id, p_upgrade_type, p_new_value, p_cost_gold)` en `supabase/supabase_player_business_upgrades.sql` para procesar de forma atómica el descuento de oro y el aumento de nivel, producción por hora o capacidad de almacenamiento de los negocios en Supabase. [Antigravity]
+
 ## 2026-07
 
 ### [2026-07-19] Portal Anime: Integración de AnimeFLV (Completo) como nuevo proveedor

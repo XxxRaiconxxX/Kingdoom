@@ -8,6 +8,10 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-08
 
+### [2026-08-10] Mecánica de Stock Limitado: Validación de Compra Atómica y Transición a Sold-Out
+- Se actualizó el procedimiento almacenado `purchase_market_item_v2` en Supabase y en `supabase/supabase_market_installments.sql` para validar que `(stock_sold + p_quantity) <= stock_limit` y realizar el incremento atómico de `stock_sold` al procesar la compra, haciendo la transición automática a `sold-out` cuando se alcanza el límite.
+- Se verificaron los tres niveles de la mecánica (frontend card/modal, rotación y backend RPC) con 15 pruebas automatizadas pasando con éxito. [Antigravity]
+
 ### [2026-08-10] Rotación de Mercado: Inclusión garantizada de ítems destacados (Featured Showcase)
 - Se corrigió `getMarketRotationState` en `src/features/market/market.rotation.ts` para que los ítems con estado destacado (`featured: true`) y stock disponible se incluyan siempre en la rotación activa del mercado y en la marquesina de ofertas, sin quedar bloqueados por el filtro probabilístico de rarezas cerradas (como el 10% de rareza legendaria).
 - Se sincronizó en la base de datos Supabase el ítem `Códice de la Pesadilla Viviente: El Ojo de Abadón` (`sword-codice-de-la-pesadilla-viviente-el-ojo-de-abadon`) con stock limitado activo y estado destacado. [Antigravity]

@@ -176,8 +176,13 @@ begin
     raise exception 'El item solicitado no existe.' using errcode = 'P0002';
   end if;
 
+  -- Validar estado de stock y limite disponible
   if v_item.stock_status = 'sold-out' then
     raise exception 'Ese item esta agotado.' using errcode = '22023';
+  end if;
+
+  if coalesce(v_item.stock_limit, 0) > 0 and (coalesce(v_item.stock_sold, 0) + p_quantity) > v_item.stock_limit then
+    raise exception 'No queda suficiente stock disponible para este item.' using errcode = '22023';
   end if;
 
   v_base_total := v_item.price * p_quantity;
@@ -213,6 +218,19 @@ begin
     update public.players
     set gold = gold + floor(v_base_total * (v_item.seller_cut_percentage / 100.0))
     where id = v_item.seller_id;
+  end if;
+
+  -- Descontar stock del item si tiene limite definido
+  if coalesce(v_item.stock_limit, 0) > 0 then
+    update public.market_items
+    set
+      stock_sold = coalesce(stock_sold, 0) + p_quantity,
+      stock_status = case
+        when (coalesce(stock_sold, 0) + p_quantity) >= stock_limit then 'sold-out'
+        else stock_status
+      end,
+      updated_at = now()
+    where id = v_item.id;
   end if;
 
   insert into public.market_orders (

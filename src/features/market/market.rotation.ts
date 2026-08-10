@@ -93,6 +93,17 @@ export function getMarketRotationState(
     }
   }
 
+  // Ensure featured items with available stock are always present in the market rotation
+  const featuredItems = items.filter((item) => item.featured && hasAvailableStock(item));
+  for (const item of featuredItems) {
+    if (!selectedItems.some((existing) => existing.id === item.id)) {
+      selectedItems.unshift(item);
+      if (!activeRarities.includes(item.rarity)) {
+        activeRarities.push(item.rarity);
+      }
+    }
+  }
+
   const nextRefreshAt = (windowId + 1) * MARKET_ROTATION_WINDOW_MS;
   const remainingMs = Math.max(0, nextRefreshAt - now);
   const remainingHours = Math.floor(remainingMs / 3600000);

@@ -8,6 +8,10 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-08
 
+### [2026-08-10] Rotación de Mercado: Inclusión garantizada de ítems destacados (Featured Showcase)
+- Se corrigió `getMarketRotationState` en `src/features/market/market.rotation.ts` para que los ítems con estado destacado (`featured: true`) y stock disponible se incluyan siempre en la rotación activa del mercado y en la marquesina de ofertas, sin quedar bloqueados por el filtro probabilístico de rarezas cerradas (como el 10% de rareza legendaria).
+- Se sincronizó en la base de datos Supabase el ítem `Códice de la Pesadilla Viviente: El Ojo de Abadón` (`sword-codice-de-la-pesadilla-viviente-el-ojo-de-abadon`) con stock limitado activo y estado destacado. [Antigravity]
+
 ### [2026-08-06] Actualización del Orden de Proveedores de IA
 - Se actualizó el orden global de redundancia de IA a `groq -> gemini -> openrouter -> nvidia` en `.env` y `.env.example`. [Antigravity]
 

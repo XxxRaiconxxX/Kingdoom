@@ -2,50 +2,50 @@
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:312e81,50:6d28d9,100:4c1d95&height=220&section=header&text=XxxRaiconxxX&fontSize=64&fontColor=ffffff&fontAlignY=38&animation=twinkling" width="100%" />
 
-<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=2800&pause=900&color=A78BFA&center=true&vCenter=true&multiline=true&repeat=true&width=850&height=90&lines=Software+Engineering+%7C+AI%2FML+%7C+Full+Stack;Building+systems%2C+products%2C+and+developer+experiences;Engineering+with+architecture%2C+performance%2C+and+product+thinking" alt="Typing SVG" /></a>
+<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=2800&pause=900&color=A78BFA&center=true&vCenter=true&multiline=true&repeat=true&width=850&height=90&lines=Ingenier%C3%ADa+de+Software+%7C+IA%2FML+%7C+Full+Stack;Construyendo+sistemas%2C+productos+y+experiencias+de+desarrollo;Arquitectura%2C+rendimiento+y+mentalidad+de+producto" alt="Animación de texto" /></a>
 
 <br />
 
-<img src="https://img.shields.io/badge/Software_Engineering-312E81?style=for-the-badge&logo=github&logoColor=white" />
-<img src="https://img.shields.io/badge/AI_%2F_ML-5B21B6?style=for-the-badge&logo=openai&logoColor=white" />
+<img src="https://img.shields.io/badge/Ingenier%C3%ADa_de_Software-312E81?style=for-the-badge&logo=github&logoColor=white" />
+<img src="https://img.shields.io/badge/IA_%2F_ML-5B21B6?style=for-the-badge&logo=openai&logoColor=white" />
 <img src="https://img.shields.io/badge/Full_Stack-6D28D9?style=for-the-badge&logo=react&logoColor=white" />
 <img src="https://img.shields.io/badge/Asunci%C3%B3n%2C_Paraguay-4C1D95?style=for-the-badge&logo=googlemaps&logoColor=white" />
 
 <br /><br />
 
-<a href="https://github.com/XxxRaiconxxX/Kingdoom"><img src="https://img.shields.io/badge/Portfolio-Kingdoom-6D28D9?style=for-the-badge&logo=github&logoColor=white" /></a>
+<a href="https://github.com/XxxRaiconxxX/Kingdoom"><img src="https://img.shields.io/badge/Portafolio-Kingdoom-6D28D9?style=for-the-badge&logo=github&logoColor=white" /></a>
 <a href="https://github.com/XxxRaiconxxX"><img src="https://img.shields.io/badge/GitHub-XxxRaiconxxX-111827?style=for-the-badge&logo=github&logoColor=white" /></a>
-<a href="mailto:XxxRaiconxxX@users.noreply.github.com"><img src="https://img.shields.io/badge/Email-Contact-4C1D95?style=for-the-badge&logo=gmail&logoColor=white" /></a>
+<a href="mailto:XxxRaiconxxX@users.noreply.github.com"><img src="https://img.shields.io/badge/Correo-Contacto-4C1D95?style=for-the-badge&logo=gmail&logoColor=white" /></a>
 
 <br /><br />
 
-<img src="https://komarev.com/ghpvc/?username=XxxRaiconxxX&style=for-the-badge&color=6D28D9&label=PROFILE+VIEWS" />
-<img src="https://img.shields.io/github/followers/XxxRaiconxxX?style=for-the-badge&color=5B21B6&label=FOLLOWERS" />
-<img src="https://img.shields.io/github/stars/XxxRaiconxxX?style=for-the-badge&color=4C1D95&label=STARS" />
+<img src="https://komarev.com/ghpvc/?username=XxxRaiconxxX&style=for-the-badge&color=6D28D9&label=VISITAS+AL+PERFIL" />
+<img src="https://img.shields.io/github/followers/XxxRaiconxxX?style=for-the-badge&color=5B21B6&label=SEGUIDORES" />
+<img src="https://img.shields.io/github/stars/XxxRaiconxxX?style=for-the-badge&color=4C1D95&label=ESTRELLAS" />
 
 </div>
 
 ---
 
-## About
+## Sobre mí
 
-I am an engineering-focused developer interested in building **reliable software systems, intelligent applications, and complete digital products** from architecture to production.
+Soy un desarrollador orientado a la ingeniería, interesado en construir **sistemas de software confiables, aplicaciones inteligentes y productos digitales completos**, desde la arquitectura hasta producción.
 
-My work sits at the intersection of **software engineering, artificial intelligence, full-stack development, automation, and product engineering**. I enjoy taking an idea from a rough concept and turning it into a structured system with clear boundaries, maintainable code, persistent data, polished interfaces, and an architecture that can evolve without collapsing under its own complexity.
+Mi trabajo se encuentra en la intersección entre **ingeniería de software, inteligencia artificial, desarrollo full stack, automatización e ingeniería de producto**. Me gusta tomar una idea que comienza como un concepto y convertirla en un sistema estructurado, con límites claros, código mantenible, datos persistentes, interfaces cuidadas y una arquitectura capaz de evolucionar sin colapsar bajo su propia complejidad.
 
-I approach development from a product perspective: technology is not the final objective. The objective is to build something useful, understandable, performant, secure, and capable of growing.
+Abordo el desarrollo desde una perspectiva de producto: la tecnología no es el objetivo final. El objetivo es construir algo útil, comprensible, eficiente, seguro y capaz de crecer.
 
-My engineering interests include **software architecture, AI application engineering, LLM integration, full-stack development, product engineering, cloud infrastructure, automation, developer experience, and performance engineering**.
+Mis principales intereses de ingeniería incluyen **arquitectura de software, ingeniería de aplicaciones con IA, integración de LLM, desarrollo full stack, ingeniería de producto, infraestructura cloud, automatización, experiencia del desarrollador y optimización de rendimiento**.
 
-### Open To
+### Abierto a
 
-**Collaborations · Open Source · AI Engineering · Full Stack Development · Product Engineering · Technical Projects**
+**Colaboraciones · Open Source · Ingeniería de IA · Desarrollo Full Stack · Ingeniería de Producto · Proyectos Técnicos**
 
 ---
 
-## Tech Stack
+## Stack Tecnológico
 
-### Languages
+### Lenguajes
 
 <div align="center"><img src="https://skillicons.dev/icons?i=ts,js,python,java,html,css,bash,sql&theme=dark" /></div>
 
@@ -53,175 +53,175 @@ My engineering interests include **software architecture, AI application enginee
 
 <div align="center"><img src="https://skillicons.dev/icons?i=react,nextjs,vite,tailwind,redux,threejs,figma&theme=dark" /></div>
 
-### Backend & Databases
+### Backend y Bases de Datos
 
 <div align="center"><img src="https://skillicons.dev/icons?i=nodejs,express,supabase,postgres,firebase,mongodb,graphql&theme=dark" /></div>
 
-### Cloud, DevOps & Tooling
+### Cloud, DevOps y Herramientas
 
 <div align="center"><img src="https://skillicons.dev/icons?i=vercel,github,githubactions,docker,git,npm,linux,vscode&theme=dark" /></div>
 
 ---
 
-## AI / ML Expertise
+## Experiencia en IA / ML
 
-| Domain | Proficiency | Details |
+| Dominio | Nivel | Detalles |
 |:---|:---:|:---|
-| **AI Application Engineering** | Advanced | Designing product experiences around LLMs, structured prompts, tool integrations, context, and reliable application flows. |
-| **LLM Integration** | Advanced | Connecting AI models to application logic, knowledge sources, APIs, and user-facing interfaces. |
-| **AI-Assisted Development** | Advanced | Using AI as an engineering multiplier for architecture, implementation, debugging, documentation, QA, and repository maintenance. |
-| **Knowledge Systems** | Advanced | Structuring domain-specific information for retrieval, contextual responses, and maintainable project memory. |
-| **Automation & Agents** | Intermediate+ | Building workflows where automated systems inspect context, execute operations, validate results, and recover from failures. |
-| **Prompt Engineering** | Advanced | Designing structured instructions, constraints, tool workflows, and context strategies for consistent AI behavior. |
-| **AI Product Design** | Intermediate+ | Translating AI capabilities into practical interfaces instead of isolated demonstrations. |
-| **ML Fundamentals** | Intermediate | Understanding the foundations required to evaluate, integrate, and reason about machine-learning systems. |
+| **Ingeniería de Aplicaciones con IA** | Avanzado | Diseño de experiencias de producto alrededor de LLM, prompts estructurados, herramientas, contexto y flujos confiables. |
+| **Integración de LLM** | Avanzado | Conexión de modelos de IA con lógica de aplicación, fuentes de conocimiento, APIs e interfaces orientadas al usuario. |
+| **Desarrollo Asistido por IA** | Avanzado | Uso de IA como multiplicador de ingeniería para arquitectura, implementación, depuración, documentación, QA y mantenimiento de repositorios. |
+| **Sistemas de Conocimiento** | Avanzado | Estructuración de información especializada para recuperación, respuestas contextuales y memoria mantenible de proyectos. |
+| **Automatización y Agentes** | Intermedio+ | Construcción de flujos donde sistemas automatizados inspeccionan contexto, ejecutan operaciones, validan resultados y se recuperan ante fallos. |
+| **Ingeniería de Prompts** | Avanzado | Diseño de instrucciones estructuradas, restricciones, flujos de herramientas y estrategias de contexto para obtener comportamiento consistente. |
+| **Diseño de Productos con IA** | Intermedio+ | Conversión de capacidades de IA en interfaces prácticas en lugar de simples demostraciones aisladas. |
+| **Fundamentos de ML** | Intermedio | Comprensión de fundamentos necesarios para evaluar, integrar y razonar sobre sistemas de machine learning. |
 
 ---
 
-## Featured Projects
+## Proyectos Destacados
 
 <details>
-<summary><strong>👑 Kingdoom — Digital Kingdom Platform</strong></summary>
+<summary><strong>👑 Kingdoom — Plataforma Digital del Reino</strong></summary>
 
 ### Kingdoom
 
-A large-scale digital companion platform for **Reino de las Sombras**, combining medieval roleplay, persistent economy, lore, player systems, interactive entertainment, intelligent knowledge access, and a mobile application into a single ecosystem.
+Plataforma digital de gran alcance para **Reino de las Sombras**, que combina rol medieval, economía persistente, lore, sistemas de jugadores, entretenimiento interactivo, acceso inteligente al conocimiento y aplicación móvil dentro de un único ecosistema.
 
-| Stack | Scale | Performance | Security | Impact | Repository |
+| Stack | Escala | Rendimiento | Seguridad | Impacto | Repositorio |
 |:---|:---|:---|:---|:---|:---|
-| React · TypeScript · Vite · Tailwind · Supabase · Expo · React Native | Multi-system web + mobile + API platform | Manual chunks, lazy-loaded domains, mobile-first UI, optimized data access | Supabase persistence, RPC-based critical operations, server-side hardening roadmap | Central digital infrastructure for the Kingdoom roleplay ecosystem | [Kingdoom](https://github.com/XxxRaiconxxX/Kingdoom) |
+| React · TypeScript · Vite · Tailwind · Supabase · Expo · React Native | Plataforma multisistema web + móvil + API | Chunks manuales, dominios con carga diferida, UI mobile-first y acceso optimizado a datos | Persistencia con Supabase, operaciones críticas mediante RPC y hoja de ruta de endurecimiento server-side | Infraestructura digital central del ecosistema de rol Kingdoom | [Kingdoom](https://github.com/XxxRaiconxxX/Kingdoom) |
 
-**Engineering scope**
+**Alcance de ingeniería**
 
-Kingdoom is designed as a product ecosystem rather than a conventional landing page. Its domains include **Kingdom & Lore**, **Market**, **Clandestine Tavern**, **Archivist**, **Grimoire & Library**, **Anime Portal**, **Mobile Application**, and **Graphify Operations**.
+Kingdoom está diseñado como un ecosistema de producto y no como una landing page convencional. Sus dominios incluyen **Reino y Lore**, **Mercado**, **Taberna Clandestina**, **Archivista**, **Grimorio y Biblioteca**, **Portal Anime**, **Aplicación Móvil** y **Operaciones Graphify**.
 
-The platform separates UI concerns, domain data, shared state, persistence, APIs, external providers, and operational tooling. Performance work includes explicit Vite manual chunks so large domains do not unnecessarily inflate the initial bundle.
+La plataforma separa responsabilidades de UI, datos de dominio, estado compartido, persistencia, APIs, proveedores externos y herramientas operativas. El trabajo de rendimiento incluye chunks manuales explícitos de Vite para evitar que los dominios grandes aumenten innecesariamente el bundle inicial.
 
-Supabase provides persistence for player state, economy, purchases, businesses, upgrades, and shared data. Critical economic operations are progressively moving toward atomic server-side RPCs to reduce trust in client-side calculations.
+Supabase proporciona persistencia para estado de jugadores, economía, compras, negocios, mejoras y datos compartidos. Las operaciones económicas críticas están evolucionando progresivamente hacia RPC server-side atómicas para reducir la confianza depositada en cálculos realizados en el cliente.
 
 </details>
 
 <details>
-<summary><strong>🤖 Kingdoom Bot — Automation & Kingdom Services</strong></summary>
+<summary><strong>🤖 Kingdoom Bot — Automatización y Servicios del Reino</strong></summary>
 
 ### Kingdoom Bot
 
-A dedicated repository supporting automation and service functionality around the Kingdoom ecosystem.
+Repositorio dedicado a funciones de automatización y servicios alrededor del ecosistema Kingdoom.
 
-| Stack | Scale | Performance | Security | Impact | Repository |
+| Stack | Escala | Rendimiento | Seguridad | Impacto | Repositorio |
 |:---|:---|:---|:---|:---|:---|
-| TypeScript / JavaScript · APIs · Automation | Service-oriented ecosystem component | Automation-oriented architecture | Environment-based secrets and service boundaries | Extends the kingdom beyond the browser experience | [Repository](https://github.com/XxxRaiconxxX/kingdoom-bot) |
+| TypeScript / JavaScript · APIs · Automatización | Componente orientado a servicios del ecosistema | Arquitectura orientada a automatización | Secretos mediante variables de entorno y límites entre servicios | Extiende el reino más allá de la experiencia del navegador | [Repositorio](https://github.com/XxxRaiconxxX/kingdoom-bot) |
 
-The project demonstrates a service-oriented approach where specialized responsibilities can evolve independently instead of being forced into a single frontend application.
+El proyecto demuestra un enfoque orientado a servicios, donde responsabilidades especializadas pueden evolucionar de manera independiente en lugar de concentrarse dentro de una única aplicación frontend.
 
 </details>
 
 <details>
-<summary><strong>📚 Kingdoom Library — Structured Knowledge</strong></summary>
+<summary><strong>📚 Kingdoom Library — Sistema de Conocimiento Estructurado</strong></summary>
 
 ### Kingdoom Library
 
-A dedicated repository for the knowledge and library side of the Kingdoom ecosystem.
+Repositorio dedicado al conocimiento y biblioteca del ecosistema Kingdoom.
 
-| Stack | Scale | Performance | Security | Impact | Repository |
+| Stack | Escala | Rendimiento | Seguridad | Impacto | Repositorio |
 |:---|:---|:---|:---|:---|:---|
-| Structured content · Web tooling · Kingdoom ecosystem | Focused domain repository | Separates large knowledge assets from the core application | Repository and deployment boundaries | Supports scalable knowledge delivery | [Repository](https://github.com/XxxRaiconxxX/kingdoom-library) |
+| Contenido estructurado · Herramientas web · Ecosistema Kingdoom | Repositorio de dominio especializado | Separa grandes volúmenes de conocimiento de la aplicación principal | Límites de repositorio y despliegue | Permite una entrega de conocimiento más escalable | [Repositorio](https://github.com/XxxRaiconxxX/kingdoom-library) |
 
-The separation allows large information domains to evolve independently while keeping the primary application focused on runtime experience and interaction.
+La separación permite que grandes dominios de información evolucionen independientemente, manteniendo la aplicación principal enfocada en la experiencia y la interacción en tiempo de ejecución.
 
 </details>
 
 <details>
-<summary><strong>🌐 Anime Platform & API Ecosystem</strong></summary>
+<summary><strong>🌐 Ecosistema de Plataforma Anime y APIs</strong></summary>
 
-### Anime Platform
+### Plataforma Anime
 
-A group of repositories dedicated to anime discovery, web experiences, scraping/API infrastructure, and provider-oriented content services.
+Conjunto de repositorios dedicados al descubrimiento de anime, experiencias web, infraestructura de scraping/API y servicios basados en proveedores.
 
-| Stack | Scale | Performance | Security | Impact | Repository |
+| Stack | Escala | Rendimiento | Seguridad | Impacto | Repositorio |
 |:---|:---|:---|:---|:---|:---|
-| Web · APIs · Scraping · TypeScript / JavaScript | Multi-repository service ecosystem | Provider separation and normalized responses | Secret separation and backend boundaries | Demonstrates API integration and service architecture | [Anime Website](https://github.com/XxxRaiconxxX/anime-website) · [Scraping API](https://github.com/XxxRaiconxxX/Scraping-web-anime-api) |
+| Web · APIs · Scraping · TypeScript / JavaScript | Ecosistema de servicios multirepositorio | Separación de proveedores y respuestas normalizadas | Separación de secretos y límites backend | Demuestra integración de APIs y arquitectura de servicios | [Anime Website](https://github.com/XxxRaiconxxX/anime-website) · [Scraping API](https://github.com/XxxRaiconxxX/Scraping-web-anime-api) |
 
-The work explores how frontend products can consume external providers through an abstraction layer rather than coupling the user experience directly to one upstream source.
+El trabajo explora cómo productos frontend pueden consumir proveedores externos mediante una capa de abstracción, evitando acoplar directamente la experiencia del usuario a una única fuente externa.
 
 </details>
 
 <details>
-<summary><strong>🧠 Yenny — Interactive Application</strong></summary>
+<summary><strong>🧠 Yenny — Aplicación Interactiva</strong></summary>
 
 ### Yenny-Myfriend
 
-An independent application project focused on creating an interactive digital experience.
+Proyecto de aplicación independiente centrado en la creación de una experiencia digital interactiva.
 
-| Stack | Scale | Performance | Security | Impact | Repository |
+| Stack | Escala | Rendimiento | Seguridad | Impacto | Repositorio |
 |:---|:---|:---|:---|:---|:---|
-| Web application · Interactive UI · AI-oriented concepts | Product-focused application | Client-side optimization and component-driven architecture | Application-level validation and controlled integrations | Demonstrates product-oriented experimentation | [Repository](https://github.com/XxxRaiconxxX/Yenny-Myfriend) |
+| Aplicación web · UI interactiva · Conceptos orientados a IA | Aplicación enfocada en producto | Optimización del cliente y arquitectura basada en componentes | Validación a nivel de aplicación e integraciones controladas | Demuestra experimentación orientada a producto | [Repositorio](https://github.com/XxxRaiconxxX/Yenny-Myfriend) |
 
-This project represents the product-engineering side of development: experimentation is used to discover useful interaction models and reusable engineering patterns.
+Este proyecto representa el lado de ingeniería de producto del desarrollo: la experimentación se utiliza para descubrir modelos de interacción útiles y patrones de ingeniería reutilizables.
 
 </details>
 
 ---
 
-## Experience
+## Experiencia
 
-### Independent Software Engineering & Product Development
+### Ingeniería de Software y Desarrollo de Producto Independiente
 
-**Ongoing**
+**En curso**
 
-Designing and implementing independent software products and digital ecosystems across frontend, backend, AI-assisted workflows, automation, data persistence, and deployment.
+Diseño e implementación de productos de software y ecosistemas digitales independientes en frontend, backend, flujos asistidos por IA, automatización, persistencia de datos y despliegue.
 
-**Scope of work**
+**Áreas de trabajo**
 
-- Architect applications from product requirements through implementation.
-- Design modular React and TypeScript systems with domain-oriented boundaries.
-- Integrate Supabase/PostgreSQL persistence and server-side operations.
-- Build APIs and external-provider integrations with failure isolation.
-- Develop AI-assisted workflows for engineering, documentation, knowledge retrieval, and automation.
-- Design mobile experiences using Expo and React Native.
-- Optimize large applications through code splitting, lazy loading, and domain-level bundling.
-- Maintain documentation, repository conventions, QA workflows, and AI memory systems.
-- Translate complex product ideas into maintainable, deployable software.
+- Diseñar aplicaciones completas desde los requisitos del producto hasta su implementación.
+- Construir sistemas modulares con React y TypeScript siguiendo límites orientados a dominio.
+- Integrar persistencia con Supabase/PostgreSQL y operaciones server-side.
+- Construir APIs e integraciones con proveedores externos y aislamiento ante fallos.
+- Desarrollar flujos asistidos por IA para ingeniería, documentación, recuperación de conocimiento y automatización.
+- Diseñar experiencias móviles con Expo y React Native.
+- Optimizar aplicaciones grandes mediante code splitting, lazy loading y bundling por dominio.
+- Mantener documentación, convenciones de repositorio, QA y sistemas de memoria para IA.
+- Convertir ideas complejas de producto en software mantenible y desplegable.
 
-**Skills**
+**Habilidades**
 
-`Software Architecture` `TypeScript` `React` `Full Stack` `AI Engineering` `Supabase` `PostgreSQL` `APIs` `Automation` `Mobile` `Vite` `Vercel` `GitHub`
+`Arquitectura de Software` `TypeScript` `React` `Full Stack` `Ingeniería de IA` `Supabase` `PostgreSQL` `APIs` `Automatización` `Mobile` `Vite` `Vercel` `GitHub`
 
 ---
 
-## Achievements
+## Logros
 
 <div align="center">
 
-| Recognition | Details |
+| Reconocimiento | Detalles |
 |:---|:---|
-| **Kingdoom Ecosystem** | Designed and developed a multi-domain digital platform combining web, mobile, persistent economy, knowledge systems, APIs, automation, and interactive experiences. |
-| **AI-Assisted Engineering** | Established structured AI workflows for architecture, implementation, documentation, QA, repository maintenance, and project memory. |
-| **Multi-Platform Development** | Extended product concepts from responsive web interfaces into Expo / React Native mobile architecture. |
-| **Domain-Oriented Architecture** | Separated large application domains into independently maintainable modules and optimized their loading strategy. |
-| **Open Source Presence** | Maintains multiple public repositories covering applications, APIs, automation, tooling, and experimental products. |
+| **Ecosistema Kingdoom** | Diseño y desarrollo de una plataforma multisistema que combina web, móvil, economía persistente, conocimiento, APIs, automatización y experiencias interactivas. |
+| **Ingeniería Asistida por IA** | Creación de flujos estructurados con IA para arquitectura, implementación, documentación, QA, mantenimiento de repositorios y memoria de proyectos. |
+| **Desarrollo Multiplataforma** | Evolución de conceptos de producto desde interfaces web responsive hacia arquitectura móvil con Expo / React Native. |
+| **Arquitectura Orientada a Dominios** | Separación de grandes dominios de aplicación en módulos mantenibles y optimización de su estrategia de carga. |
+| **Presencia Open Source** | Mantenimiento de repositorios públicos relacionados con aplicaciones, APIs, automatización, herramientas y productos experimentales. |
 
 </div>
 
 ---
 
-## Certifications
+## Certificaciones
 
 ### AWS
-<img src="https://img.shields.io/badge/AWS-Cloud_Engineering-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white" />
+<img src="https://img.shields.io/badge/AWS-Ingenier%C3%ADa_Cloud-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white" />
 
 ### Oracle
-<img src="https://img.shields.io/badge/Oracle-Technology-5B21B6?style=for-the-badge&logo=oracle&logoColor=white" />
+<img src="https://img.shields.io/badge/Oracle-Tecnolog%C3%ADa-5B21B6?style=for-the-badge&logo=oracle&logoColor=white" />
 
 ### NPTEL
-<img src="https://img.shields.io/badge/NPTEL-Technical_Learning-6D28D9?style=for-the-badge&logo=bookstack&logoColor=white" />
+<img src="https://img.shields.io/badge/NPTEL-Formaci%C3%B3n_T%C3%A9cnica-6D28D9?style=for-the-badge&logo=bookstack&logoColor=white" />
 
 ### Cisco
-<img src="https://img.shields.io/badge/Cisco-Networking-312E81?style=for-the-badge&logo=cisco&logoColor=white" />
+<img src="https://img.shields.io/badge/Cisco-Redes-312E81?style=for-the-badge&logo=cisco&logoColor=white" />
 
 ---
 
-## Coding Profiles
+## Perfiles de Programación
 
 <div align="center">
 <a href="https://leetcode.com/"><img src="https://img.shields.io/badge/LeetCode-111827?style=for-the-badge&logo=leetcode&logoColor=FFA116" /></a>
@@ -232,7 +232,7 @@ Designing and implementing independent software products and digital ecosystems 
 
 ---
 
-## GitHub Analytics
+## Analíticas de GitHub
 
 <div align="center">
 <a href="https://github.com/XxxRaiconxxX"><img height="180" src="https://github-readme-stats.vercel.app/api?username=XxxRaiconxxX&show_icons=true&hide_border=true&bg_color=0D1117&title_color=A78BFA&icon_color=8B5CF6&text_color=CBD5E1&ring_color=7C3AED&include_all_commits=true&count_private=true" /></a>
@@ -245,73 +245,73 @@ Designing and implementing independent software products and digital ecosystems 
 
 ---
 
-## GitHub Trophies
+## Trofeos de GitHub
 
 <div align="center"><a href="https://github.com/ryo-ma/github-profile-trophy"><img src="https://github-profile-trophy.vercel.app/?username=XxxRaiconxxX&theme=darkhub&no-frame=true&no-bg=true&margin-w=8&column=7" /></a></div>
 
 ---
 
-## Contribution Activity
+## Actividad de Contribución
 
-<div align="center"><a href="https://github.com/XxxRaiconxxX"><img src="https://github-readme-activity-graph.vercel.app/graph?username=XxxRaiconxxX&bg_color=0D1117&color=C4B5FD&line=7C3AED&point=A78BFA&area=true&hide_border=true&custom_title=XxxRaiconxxX%20Contribution%20Activity" width="95%" /></a></div>
-
----
-
-## Contribution Snake
-
-<div align="center"><img src="https://raw.githubusercontent.com/XxxRaiconxxX/XxxRaiconxxX/output/github-contribution-grid-snake-dark.svg" alt="GitHub contribution snake animation" /></div>
+<div align="center"><a href="https://github.com/XxxRaiconxxX"><img src="https://github-readme-activity-graph.vercel.app/graph?username=XxxRaiconxxX&bg_color=0D1117&color=C4B5FD&line=7C3AED&point=A78BFA&area=true&hide_border=true&custom_title=Actividad%20de%20Contribuciones%20de%20XxxRaiconxxX" width="95%" /></a></div>
 
 ---
 
-## Current Focus
+## Serpiente de Contribuciones
+
+<div align="center"><img src="https://raw.githubusercontent.com/XxxRaiconxxX/XxxRaiconxxX/output/github-contribution-grid-snake-dark.svg" alt="Animación de serpiente de contribuciones de GitHub" /></div>
+
+---
+
+## Enfoque Actual
 
 ```yaml
-profile:
-  identity: "XxxRaiconxxX"
-  location: "Asunción, Paraguay"
-  direction: "Software Engineering / AI / Full Stack"
+perfil:
+  identidad: "XxxRaiconxxX"
+  ubicación: "Asunción, Paraguay"
+  dirección: "Ingeniería de Software / IA / Full Stack"
 
-Learning:
-  - "Advanced software architecture"
-  - "AI application engineering"
-  - "Scalable backend and data systems"
-  - "Production-grade DevOps workflows"
+aprendiendo:
+  - "Arquitectura de software avanzada"
+  - "Ingeniería de aplicaciones con IA"
+  - "Backend y sistemas de datos escalables"
+  - "Flujos DevOps orientados a producción"
 
-Building:
-  - "Kingdoom digital ecosystem"
-  - "AI-assisted developer workflows"
-  - "Full-stack products and service integrations"
-  - "Mobile experiences with Expo and React Native"
+construyendo:
+  - "Ecosistema digital Kingdoom"
+  - "Flujos de desarrollo asistidos por IA"
+  - "Productos full stack e integraciones de servicios"
+  - "Experiencias móviles con Expo y React Native"
 
-Exploring:
-  - "LLM-powered applications"
-  - "Agentic workflows and automation"
-  - "Developer tooling"
-  - "Performance engineering"
+explorando:
+  - "Aplicaciones potenciadas por LLM"
+  - "Flujos agénticos y automatización"
+  - "Herramientas para desarrolladores"
+  - "Ingeniería de rendimiento"
 
-Open_To:
-  - "Open source collaboration"
-  - "AI engineering projects"
-  - "Full-stack development"
-  - "Product engineering"
+abierto_a:
+  - "Colaboraciones open source"
+  - "Proyectos de ingeniería de IA"
+  - "Desarrollo full stack"
+  - "Ingeniería de producto"
 ```
 
 ---
 
-## Connect
+## Conecta conmigo
 
 <div align="center">
-<a href="mailto:XxxRaiconxxX@users.noreply.github.com"><img src="https://img.shields.io/badge/Gmail-Contact-4C1D95?style=for-the-badge&logo=gmail&logoColor=white" /></a>
-<a href="https://www.linkedin.com/"><img src="https://img.shields.io/badge/LinkedIn-Professional_Profile-312E81?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
+<a href="mailto:XxxRaiconxxX@users.noreply.github.com"><img src="https://img.shields.io/badge/Gmail-Contacto-4C1D95?style=for-the-badge&logo=gmail&logoColor=white" /></a>
+<a href="https://www.linkedin.com/"><img src="https://img.shields.io/badge/LinkedIn-Perfil_Profesional-312E81?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
 <a href="https://github.com/XxxRaiconxxX"><img src="https://img.shields.io/badge/GitHub-XxxRaiconxxX-111827?style=for-the-badge&logo=github&logoColor=white" /></a>
-<a href="https://github.com/XxxRaiconxxX/Kingdoom"><img src="https://img.shields.io/badge/Portfolio-Kingdoom-6D28D9?style=for-the-badge&logo=github&logoColor=white" /></a>
+<a href="https://github.com/XxxRaiconxxX/Kingdoom"><img src="https://img.shields.io/badge/Portafolio-Kingdoom-6D28D9?style=for-the-badge&logo=github&logoColor=white" /></a>
 </div>
 
 ---
 
 <div align="center">
 
-> **“Build systems that are useful today, understandable tomorrow, and capable of becoming something much larger.”**
+> **“Construye sistemas que sean útiles hoy, comprensibles mañana y capaces de convertirse en algo mucho más grande.”**
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:4c1d95,50:6d28d9,100:312e81&height=130&section=footer" width="100%" />
 

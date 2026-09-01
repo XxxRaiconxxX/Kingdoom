@@ -262,37 +262,52 @@ async function requestGeminiText(input: {
   let lastError = "Gemini no respondio correctamente.";
   const attempts: AiAttemptDebug[] = [];
 
-  for (let index = 0; index < input.apiKeys.length; index += 1) {
-    const apiKey = input.apiKeys[index];
-    const keyIndex = index + 1;
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${input.model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: input.prompt }],
+  const fetchPromises = input.apiKeys.map((apiKey) =>
+    (async () => {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${input.model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
             },
-          ],
-          generationConfig: {
-            temperature: input.temperature,
-            topP: input.topP,
-            ...(input.responseMimeType
-              ? { responseMimeType: input.responseMimeType }
-              : {}),
-          },
-        }),
-      }
-    );
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: input.prompt }],
+                },
+              ],
+              generationConfig: {
+                temperature: input.temperature,
+                topP: input.topP,
+                ...(input.responseMimeType
+                  ? { responseMimeType: input.responseMimeType }
+                  : {}),
+              },
+            }),
+          }
+        );
 
-    if (response.ok) {
-      const payload = await response.json();
-      const text = sanitizeAiText(extractGeminiText(payload));
+        if (response.ok) {
+          const payload = await response.json();
+          return { ok: true, response, payload };
+        }
+        const errorMessage = await parseProviderError(response);
+        return { ok: false, errorMessage };
+      } catch (error) {
+        return { ok: false, errorMessage: error instanceof Error ? error.message : "Error desconocido" };
+      }
+    })()
+  );
+
+  for (let index = 0; index < input.apiKeys.length; index += 1) {
+    const keyIndex = index + 1;
+    const result = await fetchPromises[index];
+
+    if (result.ok) {
+      const text = sanitizeAiText(extractGeminiText(result.payload));
 
       if (!text) {
         attempts.push({
@@ -324,7 +339,7 @@ async function requestGeminiText(input: {
       };
     }
 
-    const errorMessage = await parseProviderError(response);
+    const errorMessage = result.errorMessage;
     lastError = errorMessage;
     const retryable = isRetryableAiError(errorMessage);
 
@@ -367,28 +382,43 @@ async function requestGroqText(input: {
     new Set([input.primaryModel, input.fallbackModel].filter(Boolean))
   );
 
-  for (let keyIndex = 0; keyIndex < input.apiKeys.length; keyIndex += 1) {
-    const apiKey = input.apiKeys[keyIndex];
+  const fetchPromises = input.apiKeys.map((apiKey) =>
+    models.map((model) =>
+      (async () => {
+        try {
+          const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model,
+              messages: [{ role: "user", content: input.prompt }],
+              temperature: input.temperature,
+              top_p: input.topP,
+            }),
+          });
+          if (response.ok) {
+            const payload = await response.json();
+            return { ok: true, response, payload };
+          }
+          const errorMessage = await parseProviderError(response);
+          return { ok: false, errorMessage };
+        } catch (error) {
+          return { ok: false, errorMessage: error instanceof Error ? error.message : "Error desconocido" };
+        }
+      })()
+    )
+  );
 
+  for (let keyIndex = 0; keyIndex < input.apiKeys.length; keyIndex += 1) {
     for (let modelIndex = 0; modelIndex < models.length; modelIndex += 1) {
       const model = models[modelIndex];
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: "user", content: input.prompt }],
-          temperature: input.temperature,
-          top_p: input.topP,
-        }),
-      });
+      const result = await fetchPromises[keyIndex][modelIndex];
 
-      if (response.ok) {
-        const payload = await response.json();
-        const text = sanitizeAiText(extractGroqText(payload));
+      if (result.ok) {
+        const text = sanitizeAiText(extractGroqText(result.payload));
 
         if (!text) {
           attempts.push({
@@ -423,7 +453,7 @@ async function requestGroqText(input: {
         };
       }
 
-      const errorMessage = await parseProviderError(response);
+      const errorMessage = result.errorMessage;
       lastError = errorMessage;
       const retryable = isRetryableAiError(errorMessage);
       const hasMoreAttempts =

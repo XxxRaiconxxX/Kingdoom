@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Wand2, AlertCircle, ImagePlus } from 'lucide-react';
 import type { CharacterSheet, CharacterStats } from '../types';
@@ -124,6 +124,21 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({
   const [saveError, setSaveError] = useState("");
   const isEditMode = mode === "edit";
 
+
+  const resetForm = useCallback(() => {
+    setRawText('');
+    setParsedData(null);
+    setPortraitFile(null);
+    setSaveError("");
+
+    setPortraitPreviewUrl((prev) => {
+      if (prev.startsWith("blob:")) {
+        URL.revokeObjectURL(prev);
+      }
+      return "";
+    });
+  }, []);
+
   useEffect(() => {
     return () => {
       if (portraitPreviewUrl.startsWith("blob:")) {
@@ -147,8 +162,7 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({
     }
 
     resetForm();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, isEditMode, initialSheet?.id]);
+  }, [isOpen, isEditMode, initialSheet, resetForm]);
 
   const handlePortraitSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -166,18 +180,6 @@ export const CharImportModal: React.FC<CharImportModalProps> = ({
     setSaveError("");
   };
 
-  const resetForm = () => {
-    setRawText('');
-    setParsedData(null);
-    setPortraitFile(null);
-    setSaveError("");
-
-    if (portraitPreviewUrl.startsWith("blob:")) {
-      URL.revokeObjectURL(portraitPreviewUrl);
-    }
-
-    setPortraitPreviewUrl("");
-  };
 
   const handleParse = () => {
     setIsParsing(true);

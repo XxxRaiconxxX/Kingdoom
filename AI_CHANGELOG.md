@@ -386,6 +386,9 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 ---
 
 ## Historial de Cambios (Changelog)
+### [14/06/2026] - [Autor: Jules]
+- **Mantenimiento**: Corrección del arreglo de dependencias en `useEffect` dentro de `CharImportModal` utilizando `useCallback` y actualizaciones funcionales de estado.
+
 
 ### [2026-06-21] - [Autor: Antigravity]
 *   **Archivos Modificados:** src/components/AnimeHubSection.tsx, src/features/animeHub/animeHub.remoteProvider.ts

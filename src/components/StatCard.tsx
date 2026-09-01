@@ -1,6 +1,7 @@
+import { memo } from "react";
 import type { LucideIcon } from "lucide-react";
 
-export function StatCard({
+export const StatCard = memo(function StatCard({
   icon: Icon,
   value,
   label,
@@ -23,4 +24,4 @@ export function StatCard({
       </p>
     </div>
   );
-}
+});

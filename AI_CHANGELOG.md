@@ -6,6 +6,14 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Historico anterior retirado del changelog activo por limpieza operativa.
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
+## 2026-09
+
+### [2026-09-01] Optimización de Carga de Perfil y Supabase Timeout Fix
+- Se auditó y resolvió el error de conexión y timeout (`AbortError`) al conectar perfiles de jugadores en la web.
+- Se eliminó el antipatrón de consultas en cascada y sondeo previo (`detectAuthUserIdSupport`, `detectRoleplayAccessSupport`) en `src/utils/players.ts`, sustituyéndolo por consultas directas con degradación limpia ante errores de esquema (`42703`/`42P01`).
+- Se amplió el timeout base de 8s a 15s (`PLAYER_QUERY_TIMEOUT_MS`) y se desacopló el enriquecimiento de roleplay a una consulta no bloqueante para evitar que metadatos secundarios interrumpan la sesión del jugador.
+- Se creó el script de autoverificación `scripts/verify-player-fetch.mjs` y se configuró `.env` local para resiliencia en desarrollo. [Antigravity]
+
 ## 2026-08
 
 ### [2026-08-10] Mecánica de Stock Limitado: Validación de Compra Atómica y Transición a Sold-Out

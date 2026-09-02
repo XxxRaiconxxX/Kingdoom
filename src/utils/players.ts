@@ -54,19 +54,24 @@ function getPlayersConnectionErrorMessage(error: unknown) {
 }
 
 async function runPlayerQueryWithTimeout<T>(
-  createQuery: () => PromiseLike<T> | T,
+  createQuery: (signal: AbortSignal) => PromiseLike<T> | T,
   timeoutMs: number = PLAYER_QUERY_TIMEOUT_MS
 ) {
+  const controller = new AbortController();
   let timeoutId = 0;
 
   const timeoutPromise = new Promise<T>((_, reject) => {
     timeoutId = window.setTimeout(() => {
+      controller.abort();
       reject(new DOMException("Supabase query timed out", "AbortError"));
     }, timeoutMs);
   });
 
   try {
-    return await Promise.race([Promise.resolve(createQuery()), timeoutPromise]);
+    return await Promise.race([
+      Promise.resolve(createQuery(controller.signal)),
+      timeoutPromise,
+    ]);
   } finally {
     window.clearTimeout(timeoutId);
   }
@@ -118,13 +123,14 @@ async function attachRoleplayAccess(player: PlayerAccount | null): Promise<Playe
   }
 
   try {
-    const { data, error } = await runPlayerQueryWithTimeout(() =>
+    const { data, error } = await runPlayerQueryWithTimeout((signal) =>
       supabase
         .from(roleplayAccessRelation)
         .select(
           "last_roleplay_at, grace_until, locked_at, lock_reason, is_exempt, exempt_reason"
         )
         .eq("player_id", player.id)
+        .abortSignal(signal)
         .maybeSingle(),
       4000
     );
@@ -139,13 +145,14 @@ async function attachRoleplayAccess(player: PlayerAccount | null): Promise<Playe
 
     if (isMissingRelationError(error) && roleplayAccessRelation === "player_roleplay_access_public") {
       roleplayAccessRelation = "player_roleplay_access";
-      const fallbackResult = await runPlayerQueryWithTimeout(() =>
+      const fallbackResult = await runPlayerQueryWithTimeout((signal) =>
         supabase
           .from("player_roleplay_access")
           .select(
             "last_roleplay_at, grace_until, locked_at, lock_reason, is_exempt, exempt_reason"
           )
           .eq("player_id", player.id)
+          .abortSignal(signal)
           .maybeSingle(),
         4000
       );
@@ -171,7 +178,7 @@ async function attachRoleplayAccessToMany(players: PlayerAccount[]): Promise<Pla
   }
 
   try {
-    const { data, error } = await runPlayerQueryWithTimeout(() =>
+    const { data, error } = await runPlayerQueryWithTimeout((signal) =>
       supabase
         .from(roleplayAccessRelation)
         .select(
@@ -180,7 +187,8 @@ async function attachRoleplayAccessToMany(players: PlayerAccount[]): Promise<Pla
         .in(
           "player_id",
           players.map((player) => player.id)
-        ),
+        )
+        .abortSignal(signal),
       5000
     );
 
@@ -215,21 +223,23 @@ export async function fetchPlayerByUsername(
 
   try {
     // ponytail: Consulta directa sin waterfall. Si auth_user_id no existe (42703), reintento inmediato sin esa columna.
-    let response = await runPlayerQueryWithTimeout(() =>
+    let response = await runPlayerQueryWithTimeout((signal) =>
       supabase
         .from("players")
         .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
         .ilike("username", normalizedUsername)
+        .abortSignal(signal)
         .maybeSingle()
     );
 
     if (response.error && response.error.code === "42703") {
       supportsAuthUserId = false;
-      response = await runPlayerQueryWithTimeout(() =>
+      response = await runPlayerQueryWithTimeout((signal) =>
         supabase
           .from("players")
           .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
           .ilike("username", normalizedUsername)
+          .abortSignal(signal)
           .maybeSingle()
       );
     } else if (!response.error) {
@@ -257,7 +267,7 @@ export async function fetchPlayerByAuthUserId(
 
   try {
     if (supportsPlayerAuthLinks !== false) {
-      const linkResult = await runPlayerQueryWithTimeout(() =>
+      const linkResult = await runPlayerQueryWithTimeout((signal) =>
         supabase
           .from("player_auth_links")
           .select(
@@ -265,6 +275,7 @@ export async function fetchPlayerByAuthUserId(
           )
           .eq("auth_user_id", normalizedAuthUserId)
           .limit(1)
+          .abortSignal(signal)
           .maybeSingle(),
         6000
       );
@@ -282,11 +293,12 @@ export async function fetchPlayerByAuthUserId(
     }
 
     if (supportsAuthUserId !== false) {
-      const directResult = await runPlayerQueryWithTimeout(() =>
+      const directResult = await runPlayerQueryWithTimeout((signal) =>
         supabase
           .from("players")
           .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
           .eq("auth_user_id", normalizedAuthUserId)
+          .abortSignal(signal)
           .maybeSingle()
       );
 
@@ -320,13 +332,14 @@ export async function isPlayerLinkedToAuthUser(
 
   try {
     if (supportsPlayerAuthLinks !== false) {
-      const linkCheck = await runPlayerQueryWithTimeout(() =>
+      const linkCheck = await runPlayerQueryWithTimeout((signal) =>
         supabase
           .from("player_auth_links")
           .select("player_id")
           .eq("player_id", normalizedPlayerId)
           .eq("auth_user_id", normalizedAuthUserId)
           .limit(1)
+          .abortSignal(signal)
           .maybeSingle(),
         5000
       );
@@ -340,13 +353,14 @@ export async function isPlayerLinkedToAuthUser(
     }
 
     if (supportsAuthUserId !== false) {
-      const directCheck = await runPlayerQueryWithTimeout(() =>
+      const directCheck = await runPlayerQueryWithTimeout((signal) =>
         supabase
           .from("players")
           .select("id")
           .eq("id", normalizedPlayerId)
           .eq("auth_user_id", normalizedAuthUserId)
           .limit(1)
+          .abortSignal(signal)
           .maybeSingle(),
         5000
       );
@@ -404,33 +418,43 @@ export async function touchPlayerActivity(playerId: string): Promise<boolean> {
 }
 
 export async function fetchAllPlayers(): Promise<PlayerAccount[]> {
-  const fullResponse = await runPlayerQueryWithTimeout(() =>
-    supabase
-      .from("players")
-      .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
-      .order("username", { ascending: true })
-  );
-
-  if (!fullResponse.error && fullResponse.data) {
-    supportsAuthUserId = true;
-    return await attachRoleplayAccessToMany((fullResponse.data as PlayerRow[]).map(mapPlayerRow));
-  }
-
-  if (fullResponse.error && fullResponse.error.code === "42703") {
-    supportsAuthUserId = false;
-    const fallbackResponse = await runPlayerQueryWithTimeout(() =>
+  try {
+    const fullResponse = await runPlayerQueryWithTimeout((signal) =>
       supabase
         .from("players")
-        .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
         .order("username", { ascending: true })
+        .abortSignal(signal)
     );
 
-    if (!fallbackResponse.error && fallbackResponse.data) {
-      return await attachRoleplayAccessToMany((fallbackResponse.data as PlayerRow[]).map(mapPlayerRow));
+    if (!fullResponse.error && fullResponse.data) {
+      supportsAuthUserId = true;
+      return await attachRoleplayAccessToMany((fullResponse.data as PlayerRow[]).map(mapPlayerRow));
     }
-  }
 
-  return [];
+    if (fullResponse.error && fullResponse.error.code === "42703") {
+      supportsAuthUserId = false;
+      const fallbackResponse = await runPlayerQueryWithTimeout((signal) =>
+        supabase
+          .from("players")
+          .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
+          .order("username", { ascending: true })
+          .abortSignal(signal)
+      );
+
+      if (!fallbackResponse.error && fallbackResponse.data) {
+        return await attachRoleplayAccessToMany((fallbackResponse.data as PlayerRow[]).map(mapPlayerRow));
+      }
+    }
+
+    return [];
+  } catch (error) {
+    if (isAbortLikeError(error)) {
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 export async function createPlayerAccount(input: {
@@ -456,37 +480,51 @@ export async function createPlayerAccount(input: {
     ...(input.authUserId ? { auth_user_id: input.authUserId.trim() } : {}),
   };
 
-  let result = await supabase
-    .from("players")
-    .insert(insertPayload)
-    .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
-    .single();
+  try {
+    let result = await runPlayerQueryWithTimeout((signal) =>
+      supabase
+        .from("players")
+        .insert(insertPayload)
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
+        .abortSignal(signal)
+        .single()
+    );
 
-  if (result.error && result.error.code === "42703") {
-    supportsAuthUserId = false;
-    result = await supabase
-      .from("players")
-      .insert({
-        username: normalizedUsername,
-        gold: Math.max(0, input.gold),
-        is_admin: Boolean(input.isAdmin),
-      })
-      .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
-      .single();
-  }
+    if (result.error && result.error.code === "42703") {
+      supportsAuthUserId = false;
+      result = await runPlayerQueryWithTimeout((signal) =>
+        supabase
+          .from("players")
+          .insert({
+            username: normalizedUsername,
+            gold: Math.max(0, input.gold),
+            is_admin: Boolean(input.isAdmin),
+          })
+          .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
+          .abortSignal(signal)
+          .single()
+      );
+    }
 
-  if (!result.error && result.data) {
+    if (!result.error && result.data) {
+      return {
+        status: "created" as const,
+        message: "Jugador creado correctamente.",
+        player: mapPlayerRow(result.data as PlayerRow),
+      };
+    }
+
+    if (result.error?.code === "23505") {
+      return {
+        status: "exists" as const,
+        message: "Ese jugador ya existe en la base de datos.",
+        player: null as PlayerAccount | null,
+      };
+    }
+  } catch (error) {
     return {
-      status: "created" as const,
-      message: "Jugador creado correctamente.",
-      player: mapPlayerRow(result.data as PlayerRow),
-    };
-  }
-
-  if (result.error?.code === "23505") {
-    return {
-      status: "exists" as const,
-      message: "Ese jugador ya existe en la base de datos.",
+      status: "error" as const,
+      message: getPlayersConnectionErrorMessage(error),
       player: null as PlayerAccount | null,
     };
   }
@@ -509,72 +547,90 @@ export async function linkPlayerToAuthUser(playerId: string, authUserId: string)
     };
   }
 
-  const { data: currentPlayer, error: playerError } = await supabase
-    .from("players")
-    .select("id, username, auth_user_id")
-    .eq("id", normalizedPlayerId)
-    .maybeSingle();
+  try {
+    const { data: currentPlayer, error: playerError } = await runPlayerQueryWithTimeout((signal) =>
+      supabase
+        .from("players")
+        .select("id, username, auth_user_id")
+        .eq("id", normalizedPlayerId)
+        .abortSignal(signal)
+        .maybeSingle()
+    );
 
-  if (playerError || !currentPlayer) {
-    return {
-      status: "error" as const,
-      message: "No se pudo leer el jugador que quieres vincular.",
-    };
-  }
-
-  if (supportsPlayerAuthLinks !== false) {
-    const linkInsert = await supabase.from("player_auth_links").insert({
-      player_id: normalizedPlayerId,
-      auth_user_id: normalizedAuthUserId,
-    });
-
-    if (!linkInsert.error || linkInsert.error.code === "23505") {
-      supportsPlayerAuthLinks = true;
+    if (playerError || !currentPlayer) {
       return {
-        status: "linked" as const,
-        message: "Jugador vinculado correctamente con la cuenta segura.",
+        status: "error" as const,
+        message: "No se pudo leer el jugador que quieres vincular.",
       };
     }
 
-    if (linkInsert.error.code === "42P01") {
-      supportsPlayerAuthLinks = false;
+    if (supportsPlayerAuthLinks !== false) {
+      const linkInsert = await runPlayerQueryWithTimeout((signal) =>
+        supabase
+          .from("player_auth_links")
+          .insert({
+            player_id: normalizedPlayerId,
+            auth_user_id: normalizedAuthUserId,
+          })
+          .abortSignal(signal)
+      );
+
+      if (!linkInsert.error || linkInsert.error.code === "23505") {
+        supportsPlayerAuthLinks = true;
+        return {
+          status: "linked" as const,
+          message: "Jugador vinculado correctamente con la cuenta segura.",
+        };
+      }
+
+      if (linkInsert.error.code === "42P01") {
+        supportsPlayerAuthLinks = false;
+      }
     }
-  }
 
-  if (
-    currentPlayer.auth_user_id &&
-    String(currentPlayer.auth_user_id) !== normalizedAuthUserId
-  ) {
-    return {
-      status: "claimed" as const,
-      message: `El jugador ${currentPlayer.username} ya esta ligado a otra cuenta segura.`,
-    };
-  }
-
-  const { error } = await supabase
-    .from("players")
-    .update({ auth_user_id: normalizedAuthUserId })
-    .eq("id", normalizedPlayerId);
-
-  if (error) {
-    if (error.code === "42703") {
-      supportsAuthUserId = false;
+    if (
+      currentPlayer.auth_user_id &&
+      String(currentPlayer.auth_user_id) !== normalizedAuthUserId
+    ) {
       return {
-        status: "unavailable" as const,
-        message: "La vinculacion segura aun no esta activada en Supabase.",
+        status: "claimed" as const,
+        message: `El jugador ${currentPlayer.username} ya esta ligado a otra cuenta segura.`,
+      };
+    }
+
+    const { error } = await runPlayerQueryWithTimeout((signal) =>
+      supabase
+        .from("players")
+        .update({ auth_user_id: normalizedAuthUserId })
+        .eq("id", normalizedPlayerId)
+        .abortSignal(signal)
+    );
+
+    if (error) {
+      if (error.code === "42703") {
+        supportsAuthUserId = false;
+        return {
+          status: "unavailable" as const,
+          message: "La vinculacion segura aun no esta activada en Supabase.",
+        };
+      }
+
+      return {
+        status: "error" as const,
+        message: "No se pudo guardar la vinculacion segura del jugador.",
       };
     }
 
     return {
+      status: "linked" as const,
+      message: "Jugador vinculado correctamente con la cuenta segura.",
+    };
+  } catch (error) {
+    return {
       status: "error" as const,
-      message: "No se pudo guardar la vinculacion segura del jugador.",
+      message: getPlayersConnectionErrorMessage(error),
     };
   }
-
-  return {
-    status: "linked" as const,
-    message: "Jugador vinculado correctamente con la cuenta segura.",
-  };
 }
 
 export async function uploadPlayerAvatarGif(

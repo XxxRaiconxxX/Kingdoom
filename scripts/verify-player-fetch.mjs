@@ -8,7 +8,7 @@ const supabase = createClient(url, anon);
 async function testFetchPlayer() {
   console.log("-> Probando consulta directa de jugador 'Nothing'...");
   const t0 = Date.now();
-  
+
   const { data, error } = await supabase
     .from("players")
     .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
@@ -23,7 +23,7 @@ async function testFetchPlayer() {
   assert.equal(data.username, "Nothing");
   assert.equal(typeof data.gold, "number");
   assert.ok(data.gold > 0, "El oro debe ser un número positivo");
-  
+
   console.log("-> Probando consulta de jugador inexistente...");
   const { data: noData, error: noError } = await supabase
     .from("players")

@@ -8,6 +8,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-09
 
+### [2026-09-02] Cancelacion Real y Resiliencia de Operaciones de Perfil
+- Se agrego `AbortController` con `.abortSignal(signal)` a las consultas de lectura, enriquecimiento de roleplay y operaciones de autenticacion en `src/utils/players.ts`.
+- `fetchAllPlayers` ahora degrada los abortos por timeout a una lista vacia, pero propaga excepciones inesperadas para no ocultar errores de programacion.
+- Se eliminaron los espacios finales del script `scripts/verify-player-fetch.mjs`.
+- Validado con `node scripts/verify-player-fetch.mjs`, `npx tsc --noEmit`, `npm run build` y `git diff --check`. [Codex]
+
 ### [2026-09-01] Optimización de Carga de Perfil y Supabase Timeout Fix
 - Se auditó y resolvió el error de conexión y timeout (`AbortError`) al conectar perfiles de jugadores en la web.
 - Se eliminó el antipatrón de consultas en cascada y sondeo previo (`detectAuthUserIdSupport`, `detectRoleplayAccessSupport`) en `src/utils/players.ts`, sustituyéndolo por consultas directas con degradación limpia ante errores de esquema (`42703`/`42P01`).

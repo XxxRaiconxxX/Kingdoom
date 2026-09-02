@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+import { publicSupabase, supabase } from "./supabaseClient";
 import { getGifDuration } from "./gifUtils";
 import type { PlayerAccount } from "../types";
 
@@ -124,7 +124,7 @@ async function attachRoleplayAccess(player: PlayerAccount | null): Promise<Playe
 
   try {
     const { data, error } = await runPlayerQueryWithTimeout((signal) =>
-      supabase
+      publicSupabase
         .from(roleplayAccessRelation)
         .select(
           "last_roleplay_at, grace_until, locked_at, lock_reason, is_exempt, exempt_reason"
@@ -146,7 +146,7 @@ async function attachRoleplayAccess(player: PlayerAccount | null): Promise<Playe
     if (isMissingRelationError(error) && roleplayAccessRelation === "player_roleplay_access_public") {
       roleplayAccessRelation = "player_roleplay_access";
       const fallbackResult = await runPlayerQueryWithTimeout((signal) =>
-        supabase
+        publicSupabase
           .from("player_roleplay_access")
           .select(
             "last_roleplay_at, grace_until, locked_at, lock_reason, is_exempt, exempt_reason"
@@ -179,7 +179,7 @@ async function attachRoleplayAccessToMany(players: PlayerAccount[]): Promise<Pla
 
   try {
     const { data, error } = await runPlayerQueryWithTimeout((signal) =>
-      supabase
+      publicSupabase
         .from(roleplayAccessRelation)
         .select(
           "player_id, last_roleplay_at, grace_until, locked_at, lock_reason, is_exempt, exempt_reason"
@@ -224,7 +224,7 @@ export async function fetchPlayerByUsername(
   try {
     // ponytail: Consulta directa sin waterfall. Si auth_user_id no existe (42703), reintento inmediato sin esa columna.
     let response = await runPlayerQueryWithTimeout((signal) =>
-      supabase
+      publicSupabase
         .from("players")
         .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
         .ilike("username", normalizedUsername)
@@ -235,7 +235,7 @@ export async function fetchPlayerByUsername(
     if (response.error && response.error.code === "42703") {
       supportsAuthUserId = false;
       response = await runPlayerQueryWithTimeout((signal) =>
-        supabase
+        publicSupabase
           .from("players")
           .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
           .ilike("username", normalizedUsername)

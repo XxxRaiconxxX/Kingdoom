@@ -17,3 +17,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storageKey: "kingdoom.supabase.auth",
   },
 });
+
+export const publicSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
+});

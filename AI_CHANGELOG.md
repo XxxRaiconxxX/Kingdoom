@@ -8,6 +8,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-09
 
+### [2026-09-02] Cliente Publico de Perfil sin Bloqueo de Auth
+- Se agrego `publicSupabase` con sesion persistente desactivada para que la carga publica del perfil no espere a `auth.getSession()` ni a locks de almacenamiento del navegador.
+- `fetchPlayerByUsername` y el enriquecimiento de roleplay usan el cliente efimero; las escrituras y consultas vinculadas a Auth conservan el cliente autenticado.
+- Validado con `node scripts/verify-player-fetch.mjs`, `npx tsc --noEmit`, `npm run build` y `git diff --check`. [Codex]
+
 ### [2026-09-02] Cancelacion Real y Resiliencia de Operaciones de Perfil
 - Se agrego `AbortController` con `.abortSignal(signal)` a las consultas de lectura, enriquecimiento de roleplay y operaciones de autenticacion en `src/utils/players.ts`.
 - `fetchAllPlayers` ahora degrada los abortos por timeout a una lista vacia, pero propaga excepciones inesperadas para no ocultar errores de programacion.

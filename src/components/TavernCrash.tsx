@@ -611,12 +611,12 @@ export function TavernCrash() {
                     ) : (
                         <button
                             onClick={handleStart}
-                            disabled={hasPendingPayout || bet <= 0 || bet > player.gold || updating || status === "starting" || (status === "cashed_out" && multiplier < crashPointRef.current)}
+                            disabled={hasPendingPayout || bet <= 0 || bet > player.gold || updating || status === "starting"}
                             className="w-full group relative overflow-hidden rounded-2xl bg-stone-100 py-5 font-black text-stone-900 transition hover:bg-white active:scale-95 disabled:opacity-30"
                         >
                             <span className="relative z-10 flex items-center justify-center gap-2 uppercase tracking-tighter">
                                 <TrendingUp className="h-5 w-5" />
-                                {status === "starting" ? "CARGANDO..." : status === "cashed_out" && multiplier < (crashPointRef.current || 0) ? "ESPERANDO COLAPSO..." : "INICIAR RONDA"}
+                                {status === "starting" ? "CARGANDO..." : "INICIAR RONDA"}
                             </span>
                         </button>
                     )}

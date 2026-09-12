@@ -519,7 +519,9 @@ export function TavernScratch() {
                       <span className="font-bold text-amber-400">
                         +{batchResult.refundedGold} ORO
                       </span>{" "}
-                      por los tickets devueltos por el limite diario.
+                      {batchResult.refundedTickets > 0
+                        ? "por los tickets no usados al alcanzar el limite diario."
+                        : "como bono de consolacion por la tanda jugada."}
                     </p>
                   </div>
                 ) : null}

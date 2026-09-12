@@ -8,6 +8,14 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-09
 
+### [2026-09-02] Corrección y Auditoría Integral de Minijuegos de la Taberna
+- **Multiplicador (TavernCrash):** Eliminada la condición de bloqueo del botón de inicio tras cobrar antes del colapso (`status === "cashed_out" && multiplier < crashPointRef.current`), permitiendo iniciar nuevas rondas inmediatamente.
+- **Cartas del Oráculo (TavernCards):** Modificado `getRandomCard(exclude)` en `src/utils/minigamesSecure.ts` para excluir la carta actual y garantizar cartas consecutivas estrictamente diferentes en la mecánica mayor/menor.
+- **Ruleta (TavernRoulette):** Corregido el cálculo de rotación acumulada `targetRotation = baseRotation + extraSpins + pocketOffset` con normalización modular por múltiplos de 360°, eliminando la deriva angular entre giros sucesivos.
+- **Penales (TavernPenalty):** Reparado el flujo de cobro en `PlayerSessionContext.tsx` con fallback a `updatePlayerGold` ante errores de RLS/permisos de la RPC `increment_gold` en sesiones anónimas.
+- **Rasca y Gana (TavernScratch):** Diferenciado el mensaje de bono de consolación frente al límite diario y asegurada la resiliencia en la compra y resolución de tandas.
+- Validado con `npx tsc --noEmit` y `npm run build` con 0 errores. [Antigravity]
+
 ### [2026-09-02] Cliente Publico de Perfil sin Bloqueo de Auth
 - Se agrego `publicSupabase` con sesion persistente desactivada para que la carga publica del perfil no espere a `auth.getSession()` ni a locks de almacenamiento del navegador.
 - `fetchPlayerByUsername` y el enriquecimiento de roleplay usan el cliente efimero; las escrituras y consultas vinculadas a Auth conservan el cliente autenticado.

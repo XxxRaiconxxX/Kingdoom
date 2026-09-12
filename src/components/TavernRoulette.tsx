@@ -174,8 +174,10 @@ export function TavernRoulette() {
     const result = resolveRouletteRound(snapshot, winningPocket);
     const winningIndex = getWinningPocketIndex(winningPocket);
     const extraSpins = 6 * 360;
-    const targetRotation =
-      wheelRotation + extraSpins - winningIndex * SEGMENT_ANGLE - POCKET_CENTER_OFFSET;
+    const baseRotation = Math.ceil(wheelRotation / 360) * 360;
+    const pocketAngle = winningIndex * SEGMENT_ANGLE + POCKET_CENTER_OFFSET;
+    const pocketOffset = (360 - (pocketAngle % 360)) % 360;
+    const targetRotation = baseRotation + extraSpins + pocketOffset;
 
     setWheelRotation(targetRotation);
     setPhase("spinning");

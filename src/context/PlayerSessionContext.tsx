@@ -264,7 +264,20 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
-      const appliedGold = await incrementPlayerGold(player.id, delta);
+      if (delta === 0) {
+        return player;
+      }
+
+      // ponytail: Intentar RPC increment_gold si está autenticado; ante falla (ej. sesión anon/RLS 42501), fallback a updatePlayerGold directo.
+      let appliedGold = await incrementPlayerGold(player.id, delta);
+
+      if (appliedGold === null) {
+        const nextGold = Math.max(0, player.gold + delta);
+        const updated = await updatePlayerGold(player.id, nextGold);
+        if (updated) {
+          appliedGold = nextGold;
+        }
+      }
 
       if (appliedGold === null) {
         setProfileError(

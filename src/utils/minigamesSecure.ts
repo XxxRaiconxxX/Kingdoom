@@ -124,8 +124,14 @@ async function getActivePlayer() {
   return fetchPlayerByUsername(username);
 }
 
-function getRandomCard() {
-  return Math.floor(Math.random() * 15) + 1;
+function getRandomCard(exclude?: number) {
+  let card = Math.floor(Math.random() * 15) + 1;
+  if (typeof exclude === "number") {
+    while (card === exclude) {
+      card = Math.floor(Math.random() * 15) + 1;
+    }
+  }
+  return card;
 }
 
 function getCardsSession(playerId: string): StoredCardsSession {
@@ -352,10 +358,9 @@ export async function guessCardsSecure(
     return { status: "error", message: "No hay una partida activa de Cartas para resolver." };
   }
 
-  const nextCard = getRandomCard();
+  const nextCard = getRandomCard(session.currentCard);
   const success =
-    nextCard === session.currentCard ||
-    (guess === "higher" ? nextCard > session.currentCard : nextCard < session.currentCard);
+    guess === "higher" ? nextCard > session.currentCard : nextCard < session.currentCard;
 
   if (!success) {
     const nextSession: StoredCardsSession = {
@@ -369,12 +374,11 @@ export async function guessCardsSecure(
 
   const streak = session.streak + 1;
   const bonus = Math.max(10, Math.floor(session.bet * (0.7 + streak * 0.15)));
-  const equalBonus = nextCard === session.currentCard ? Math.floor(session.bet * 0.4) : 0;
   const nextSession: StoredCardsSession = {
     ...session,
     streak,
     nextCard,
-    pool: session.pool + bonus + equalBonus,
+    pool: session.pool + bonus,
     phase: "choice",
   };
   saveCardsSession(player.id, nextSession);

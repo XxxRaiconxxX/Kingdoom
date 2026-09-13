@@ -1,5 +1,5 @@
-import type { ApiRequest, ApiResponse } from "../../server/admin/_serverAiProviders.js";
-import { createSupabaseAdminClient } from "../../server/admin/_supabaseAdmin.js";
+import type { ApiRequest, ApiResponse } from "./_serverAiProviders.js";
+import { createSupabaseAdminClient } from "./_supabaseAdmin.js";
 
 const AUTH_DOMAIN = "auth.kingdoom.local";
 
@@ -11,9 +11,7 @@ function bearer(req: ApiRequest) {
   return String(req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
 }
 
-export default async function handler(req: ApiRequest, res: ApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ message: "Metodo no permitido." });
-
+export async function handleStaffPasswordReset(req: ApiRequest, res: ApiResponse) {
   const token = bearer(req);
   if (!token) return res.status(401).json({ message: "Falta la sesion segura del staff." });
 
@@ -26,13 +24,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     .select("id, is_admin")
     .eq("auth_user_id", actorData.user.id)
     .maybeSingle();
-  if (!actor?.is_admin) return res.status(403).json({ message: "Solo un administrador puede restablecer contraseñas." });
+  if (!actor?.is_admin) return res.status(403).json({ message: "Solo un administrador puede restablecer contrasenas." });
 
   const body = (req.body ?? {}) as { action?: string; username?: string; password?: string };
   const username = body.username?.trim() ?? "";
   const password = body.password ?? "";
   if (body.action !== "reset" || username.length < 2 || password.length < 8) {
-    return res.status(400).json({ message: "Usuario y contraseña válida son obligatorios." });
+    return res.status(400).json({ message: "Usuario y contrasena valida son obligatorios." });
   }
 
   const { data: player } = await supabase
@@ -49,10 +47,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const users = (usersData?.users ?? []) as Array<{ id: string; email?: string | null }>;
     userId = users.find((user) => user.email === authEmail(player.username))?.id ?? null;
   }
-  if (!userId) return res.status(409).json({ message: "La cuenta aún no fue activada por el jugador." });
+  if (!userId) return res.status(409).json({ message: "La cuenta aun no fue activada por el jugador." });
 
   const { error: updateError } = await supabase.auth.admin.updateUserById(userId, { password });
-  if (updateError) return res.status(502).json({ message: `No se pudo actualizar la contraseña. ${updateError.message}` });
+  if (updateError) return res.status(502).json({ message: `No se pudo actualizar la contrasena. ${updateError.message}` });
   await supabase.auth.admin.signOut(userId, "global").catch(() => undefined);
   return res.status(200).json({ ok: true, username: player.username });
 }

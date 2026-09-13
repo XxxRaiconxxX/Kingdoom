@@ -19,6 +19,7 @@ import {
   setCachedAiResponse,
   stableCacheKey,
 } from "../../server/admin/_aiCache.js";
+import { handleStaffPasswordReset } from "../../server/admin/_staffAuth.js";
 
 type StaffAdvisorResult = {
   summary: string;
@@ -79,6 +80,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Metodo no permitido." });
+  }
+
+  if ((req.body as { action?: string } | undefined)?.action === "reset") {
+    return handleStaffPasswordReset(req, res);
   }
 
   const aiConfig = readAiServerConfig();

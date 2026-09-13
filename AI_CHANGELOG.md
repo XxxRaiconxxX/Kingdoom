@@ -421,6 +421,10 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 ### [Fecha: 13/09/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `api/admin/advise-staff.ts`, `server/admin/_staffAuth.ts`, `vercel.json`, eliminada `api/auth/staff.ts`.
+*   **Resumen de Tareas:** Reducido el conteo de funciones Serverless de Vercel de 13 a 12 para cumplir el limite Hobby, conservando la ruta publica `/api/auth/staff` mediante rewrite.
+*   **Validacion:** Conteo de funciones `12`, `npx tsc --noEmit`, compilacion de funciones API y `npm run build` superados.
+### [Fecha: 13/09/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `supabase/migrations/20260913170000_player_access_codes_acl_hardening.sql`.
 *   **Resumen de Tareas:** Aplicada la migracion de codigos de acceso y revocado el permiso heredado de `anon` sobre `link_player_access`.
 *   **Validacion:** Tabla y funciones existen, RLS activo, `verify_player_access_code` conserva acceso anonimo para validar el OTP y `link_player_access` queda restringida a `authenticated`/`service_role`.

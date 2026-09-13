@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/auth/staff",
+      "destination": "/api/admin/advise-staff"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

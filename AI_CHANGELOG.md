@@ -421,6 +421,10 @@ Su proposito es mantener un historial claro de los cambios en el proyecto **King
 
 ## Historial de Cambios (Changelog)
 ### [Fecha: 13/09/2026] - [Autor: Codex]
+*   **Archivos Modificados:** `supabase/migrations/20260913170000_player_access_codes_acl_hardening.sql`.
+*   **Resumen de Tareas:** Aplicada la migracion de codigos de acceso y revocado el permiso heredado de `anon` sobre `link_player_access`.
+*   **Validacion:** Tabla y funciones existen, RLS activo, `verify_player_access_code` conserva acceso anonimo para validar el OTP y `link_player_access` queda restringida a `authenticated`/`service_role`.
+### [Fecha: 13/09/2026] - [Autor: Codex]
 *   **Archivos Modificados:** `api/auth/staff.ts`, `src/utils/kingdoomAuth.ts`.
 *   **Resumen de Tareas:** Corregido el fallo de compilacion de Vercel en el endpoint de reset de staff y endurecido el primer acceso.
 *   **Validacion:** TypeScript de frontend y funciones API, `npm run build` y `git diff --check` superados.

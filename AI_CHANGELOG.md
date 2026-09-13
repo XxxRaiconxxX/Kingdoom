@@ -7,6 +7,10 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-09
+### [2026-09-13] Reparacion de memoria operativa
+- Se corrigio un byte invalido de codificacion y se elimino una linea vacia que rompia la lectura estricta de JSONL.
+- La memoria queda validada con UTF-8 estricto y 358 registros JSON validos. [Codex]
+
 ### [2026-09-13] Correccion del envio de Primer acceso
 - El boton Crear acceso ahora usa submit explicito y estado aria-busy para evitar clics silenciosos.
 - Se muestra el estado Verificando el codigo de WhatsApp mientras se valida la activacion.

@@ -7,6 +7,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-09
+### [2026-09-13] Modal de acceso: layout responsive y estado de creacion
+- El modal usa un portal en document.body para evitar recortes por el stacking context del panel padre.
+- El overlay permite desplazamiento vertical y el boton muestra "Creando acceso..." con opacidad reducida mientras procesa.
+- Validado con npx tsc --noEmit, npm run build y prueba interactiva local con agent-browser. [Codex]
+
 ### [2026-09-13] Primer acceso: submit tolerante y bloque de acceso visible
 - Se desactivo la validacion nativa silenciosa del formulario y se agrego validacion explicita de usuario, codigo y contrasena.
 - La activacion ahora muestra feedback inmediato y devuelve error si la RPC tarda mas de 15 segundos.

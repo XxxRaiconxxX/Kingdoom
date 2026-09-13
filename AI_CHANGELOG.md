@@ -7,6 +7,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-09
+### [2026-09-13] Primer acceso: submit tolerante y bloque de acceso visible
+- Se desactivo la validacion nativa silenciosa del formulario y se agrego validacion explicita de usuario, codigo y contrasena.
+- La activacion ahora muestra feedback inmediato y devuelve error si la RPC tarda mas de 15 segundos.
+- El distintivo de acceso seguro queda fuera del borde superior del marco del modal para evitar recortes.
+- Validado con npx tsc --noEmit, npm run build y git diff --check. [Codex]
+
 ### [2026-09-13] Reparacion de memoria operativa
 - Se corrigio un byte invalido de codificacion y se elimino una linea vacia que rompia la lectura estricta de JSONL.
 - La memoria queda validada con UTF-8 estricto y 358 registros JSON validos. [Codex]

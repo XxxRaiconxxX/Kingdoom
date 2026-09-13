@@ -7,6 +7,10 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-09
+### [2026-09-13] Correccion del envio de Primer acceso
+- El boton Crear acceso ahora usa submit explicito y estado aria-busy para evitar clics silenciosos.
+- Se muestra el estado Verificando el codigo de WhatsApp mientras se valida la activacion.
+- Validado con npx tsc --noEmit, npm run build y git diff --check. [Codex]
 
 ### [2026-09-13] Acceso seguro de jugadores y staff
 - Se aÃ±adiÃ³ el modal animado real de autenticaciÃ³n con usuario/contraseÃ±a, recordar usuario y primer acceso mediante cÃ³digo WhatsApp de un solo uso.

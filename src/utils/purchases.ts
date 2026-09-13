@@ -6,6 +6,7 @@ type PurchaseMarketItemResult =
       orderRef: string;
       remainingGold: number;
       totalPrice: number;
+      paidNow: number;
       itemName: string;
       inventorySynced: boolean;
     }
@@ -18,6 +19,7 @@ type PurchaseMarketItemRpcRow = {
   order_ref: string;
   remaining_gold: number;
   total_price: number;
+  paid_now: number;
   item_name: string;
   inventory_synced: boolean;
 };
@@ -63,11 +65,16 @@ export async function purchaseMarketItemSecure(input: {
     };
   }
 
+  if (![row.remaining_gold, row.total_price, row.paid_now].every(Number.isSafeInteger)) {
+    return { status: "error", message: "La compra segura devolvio importes invalidos." };
+  }
+
   return {
     status: "success",
     orderRef: row.order_ref,
     remainingGold: row.remaining_gold,
     totalPrice: row.total_price,
+    paidNow: row.paid_now,
     itemName: row.item_name,
     inventorySynced: Boolean(row.inventory_synced),
   };

@@ -1,0 +1,13 @@
+﻿import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+const purchase = await readFile(new URL('../supabase/supabase_market_installments.sql', import.meta.url), 'utf8');
+const migration = await readFile(new URL('../supabase/migrations/20260912112245_market_purchase_security_recovery.sql', import.meta.url), 'utf8');
+assert.match(purchase, /p_installments is null or p_installments not in \(1, 3, 6\)/);
+assert.match(purchase, /p_installments > 1 and v_item\.category = 'potions'/);
+assert.match(purchase, /where market_orders\.order_ref = trim\(p_order_ref\)/);
+assert.doesNotMatch(purchase, /insert into public\.player_auth_links/);
+assert.doesNotMatch(purchase, /select \* into v_player[\s\S]{0,500}auth\.role\(\) = 'authenticated'/);
+assert.match(migration, /revoke insert, update, delete on public\.players from anon, authenticated/);
+assert.match(migration, /revoke insert, update, delete on public\.player_inventory from anon, authenticated/);
+assert.match(migration, /Players can read own inventory/);
+console.log('PASS: purchase SQL guards, ownership binding, duplicate receipts and write RLS lockdown');

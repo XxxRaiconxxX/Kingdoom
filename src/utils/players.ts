@@ -13,6 +13,8 @@ type PlayerRow = {
   max_character_sheets?: number | null;
 };
 
+type PublicPlayerRow = Pick<PlayerRow, "id" | "username" | "avatar_gif_url" | "max_character_sheets">;
+
 // ponytail: consultamos columnas completas directamente sin sondeo previo. Si la columna o tabla no existe (42703 / 42P01), se degrada limpiamente.
 let supportsAuthUserId: boolean | null = null;
 let supportsPlayerAuthLinks: boolean | null = null;
@@ -222,35 +224,34 @@ export async function fetchPlayerByUsername(
   }
 
   try {
-    // ponytail: Consulta directa sin waterfall. Si auth_user_id no existe (42703), reintento inmediato sin esa columna.
-    let response = await runPlayerQueryWithTimeout((signal) =>
+    const publicResponse = await runPlayerQueryWithTimeout((signal) =>
       publicSupabase
-        .from("players")
-        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
+        .from("player_profiles_public")
+        .select("id, username, avatar_gif_url, max_character_sheets")
         .ilike("username", normalizedUsername)
         .abortSignal(signal)
         .maybeSingle()
     );
 
-    if (response.error && response.error.code === "42703") {
-      supportsAuthUserId = false;
-      response = await runPlayerQueryWithTimeout((signal) =>
-        publicSupabase
-          .from("players")
-          .select("id, username, gold, is_admin, phone, avatar_gif_url, max_character_sheets")
-          .ilike("username", normalizedUsername)
-          .abortSignal(signal)
-          .maybeSingle()
-      );
-    } else if (!response.error) {
-      supportsAuthUserId = true;
-    }
-
-    if (response.error || !response.data) {
+    if (publicResponse.error || !publicResponse.data) {
       return null;
     }
 
-    return await attachRoleplayAccess(mapPlayerRow(response.data as PlayerRow));
+    const publicPlayer = publicResponse.data as PublicPlayerRow;
+    const privateResponse = await runPlayerQueryWithTimeout((signal) =>
+      supabase
+        .from("players")
+        .select("id, username, gold, is_admin, auth_user_id, phone, avatar_gif_url, max_character_sheets")
+        .eq("id", publicPlayer.id)
+        .abortSignal(signal)
+        .maybeSingle()
+    );
+
+    const playerRow: PlayerRow = privateResponse.error || !privateResponse.data
+      ? { ...publicPlayer, gold: 0, is_admin: false, auth_user_id: null, phone: null }
+      : privateResponse.data as PlayerRow;
+
+    return await attachRoleplayAccess(mapPlayerRow(playerRow));
   } catch (error) {
     throw new Error(getPlayersConnectionErrorMessage(error));
   }
@@ -383,29 +384,42 @@ export async function updatePlayerGold(
   playerId: string,
   nextGold: number
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from("players")
-    .update({ gold: Math.max(0, nextGold) })
-    .eq("id", playerId);
+  if (!Number.isSafeInteger(nextGold) || nextGold < 0 || nextGold > 2147483647) {
+    return false;
+  }
 
-  return !error;
+  const { data, error } = await supabase
+    .from("players")
+    .update({ gold: nextGold })
+    .eq("id", playerId)
+    .select("id")
+    .maybeSingle();
+
+  // RLS can hide the target row without returning an error.
+  return !error && data?.id === playerId;
 }
 
 export async function incrementPlayerGold(
   playerId: string,
   delta: number
 ): Promise<number | null> {
+  if (!Number.isSafeInteger(delta) || delta === 0 || Math.abs(delta) > 2147483647) {
+    return null;
+  }
+
   const { data, error } = await supabase.rpc("increment_gold", {
     p_player_id: playerId,
-    p_amount: Math.trunc(delta),
+    p_amount: delta,
   });
 
   if (error || !Array.isArray(data) || !data[0]?.success) {
     return null;
   }
 
-  const nextGold = Number(data[0].new_gold);
-  return Number.isFinite(nextGold) ? nextGold : null;
+  const nextGold = data[0].new_gold;
+  return Number.isSafeInteger(nextGold) && nextGold >= 0 && nextGold <= 2147483647
+    ? nextGold
+    : null;
 }
 
 export async function touchPlayerActivity(playerId: string): Promise<boolean> {
@@ -537,100 +551,14 @@ export async function createPlayerAccount(input: {
 }
 
 export async function linkPlayerToAuthUser(playerId: string, authUserId: string) {
-  const normalizedPlayerId = playerId.trim();
-  const normalizedAuthUserId = authUserId.trim();
-
-  if (!normalizedPlayerId || !normalizedAuthUserId) {
-    return {
-      status: "error" as const,
-      message: "Faltan datos para vincular la cuenta segura con el jugador.",
-    };
+  if (!playerId.trim() || !authUserId.trim()) {
+    return { status: "error" as const, message: "Faltan datos para comprobar la vinculacion." };
   }
-
-  try {
-    const { data: currentPlayer, error: playerError } = await runPlayerQueryWithTimeout((signal) =>
-      supabase
-        .from("players")
-        .select("id, username, auth_user_id")
-        .eq("id", normalizedPlayerId)
-        .abortSignal(signal)
-        .maybeSingle()
-    );
-
-    if (playerError || !currentPlayer) {
-      return {
-        status: "error" as const,
-        message: "No se pudo leer el jugador que quieres vincular.",
-      };
-    }
-
-    if (supportsPlayerAuthLinks !== false) {
-      const linkInsert = await runPlayerQueryWithTimeout((signal) =>
-        supabase
-          .from("player_auth_links")
-          .insert({
-            player_id: normalizedPlayerId,
-            auth_user_id: normalizedAuthUserId,
-          })
-          .abortSignal(signal)
-      );
-
-      if (!linkInsert.error || linkInsert.error.code === "23505") {
-        supportsPlayerAuthLinks = true;
-        return {
-          status: "linked" as const,
-          message: "Jugador vinculado correctamente con la cuenta segura.",
-        };
-      }
-
-      if (linkInsert.error.code === "42P01") {
-        supportsPlayerAuthLinks = false;
-      }
-    }
-
-    if (
-      currentPlayer.auth_user_id &&
-      String(currentPlayer.auth_user_id) !== normalizedAuthUserId
-    ) {
-      return {
-        status: "claimed" as const,
-        message: `El jugador ${currentPlayer.username} ya esta ligado a otra cuenta segura.`,
-      };
-    }
-
-    const { error } = await runPlayerQueryWithTimeout((signal) =>
-      supabase
-        .from("players")
-        .update({ auth_user_id: normalizedAuthUserId })
-        .eq("id", normalizedPlayerId)
-        .abortSignal(signal)
-    );
-
-    if (error) {
-      if (error.code === "42703") {
-        supportsAuthUserId = false;
-        return {
-          status: "unavailable" as const,
-          message: "La vinculacion segura aun no esta activada en Supabase.",
-        };
-      }
-
-      return {
-        status: "error" as const,
-        message: "No se pudo guardar la vinculacion segura del jugador.",
-      };
-    }
-
-    return {
-      status: "linked" as const,
-      message: "Jugador vinculado correctamente con la cuenta segura.",
-    };
-  } catch (error) {
-    return {
-      status: "error" as const,
-      message: getPlayersConnectionErrorMessage(error),
-    };
-  }
+  // Knowing a profile name is not proof of ownership. Only staff can approve links.
+  const linked = await isPlayerLinkedToAuthUser(playerId, authUserId);
+  return linked
+    ? { status: "linked" as const, message: "Vinculacion aprobada. Tu perfil ya puede participar." }
+    : { status: "unavailable" as const, message: "Vinculacion pendiente. Solicita al staff que verifique tu identidad y apruebe esta sesion." };
 }
 
 export async function uploadPlayerAvatarGif(

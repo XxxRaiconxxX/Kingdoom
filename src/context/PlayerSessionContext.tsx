@@ -14,7 +14,6 @@ import {
   incrementPlayerGold,
   isPlayerLinkedToAuthUser,
   linkPlayerToAuthUser,
-  updatePlayerGold,
   touchPlayerActivity,
 } from "../utils/players";
 import { supabase } from "../utils/supabaseClient";
@@ -53,7 +52,6 @@ type PlayerSessionContextValue = {
     status: "success" | "warning" | "error";
     message: string;
   }>;
-  setPlayerGold: (nextGold: number) => Promise<PlayerAccount | null>;
   addPlayerGold: (delta: number) => Promise<PlayerAccount | null>;
   notifyInventoryChanged: () => void;
   setProfileError: (message: string) => void;
@@ -159,7 +157,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     if (result.status === "linked") {
       const refreshed = await fetchPlayerByUsername(player.username);
       if (refreshed) {
-        setPlayer(refreshed);
+        setPlayer((current) => current?.id === player.id ? refreshed : current);
       }
       setIsPlayerSecureLinked(true);
       return {
@@ -167,12 +165,8 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
         message: result.message,
       };
     }
-
     return {
-      status:
-        result.status === "claimed" || result.status === "unavailable"
-          ? ("warning" as const)
-          : ("error" as const),
+      status: result.status === "unavailable" ? ("warning" as const) : ("error" as const),
       message: result.message,
     };
   }, [player, secureAuthUserId, secureSessionError]);
@@ -211,7 +205,7 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       JSON.stringify(player) === JSON.stringify(freshPlayer);
     const nextPlayer = isUnchanged ? player : freshPlayer;
 
-    setPlayer(nextPlayer);
+    setPlayer((current) => current?.id === player.id ? nextPlayer : current);
 
     // Throttle: el polling corre cada 10s pero la marca de actividad en la BD
     // no necesita esa granularidad (es un UPDATE por usuario conectado).
@@ -229,35 +223,6 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
     return nextPlayer;
   }, [clearPlayer, player]);
 
-  const setPlayerGold = useCallback(
-    async (nextGold: number) => {
-      if (!player) {
-        return null;
-      }
-
-      const safeGold = Math.max(0, nextGold);
-      const previousGold = player.gold;
-      
-      // Update local state optimistically
-      const nextPlayer = { ...player, gold: safeGold };
-      setPlayer(nextPlayer);
-
-      const updated = await updatePlayerGold(player.id, safeGold);
-
-      if (!updated) {
-        // Rollback state on error
-        setPlayer({ ...player, gold: previousGold });
-        setProfileError(
-          "No se pudo actualizar el oro del jugador. Intenta refrescar el perfil."
-        );
-        return null;
-      }
-
-      return nextPlayer;
-    },
-    [player]
-  );
-
   const addPlayerGold = useCallback(
     async (delta: number) => {
       if (!player) {
@@ -268,16 +233,8 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
         return player;
       }
 
-      // ponytail: Intentar RPC increment_gold si está autenticado; ante falla (ej. sesión anon/RLS 42501), fallback a updatePlayerGold directo.
-      let appliedGold = await incrementPlayerGold(player.id, delta);
-
-      if (appliedGold === null) {
-        const nextGold = Math.max(0, player.gold + delta);
-        const updated = await updatePlayerGold(player.id, nextGold);
-        if (updated) {
-          appliedGold = nextGold;
-        }
-      }
+      // A rejected or uncertain transaction must never become an absolute write.
+      const appliedGold = await incrementPlayerGold(player.id, delta);
 
       if (appliedGold === null) {
         setProfileError(
@@ -287,7 +244,9 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       }
 
       const nextPlayer = { ...player, gold: appliedGold };
-      setPlayer(nextPlayer);
+      setPlayer((current) =>
+        current?.id === player.id ? { ...current, gold: appliedGold } : current
+      );
       return nextPlayer;
     },
     [player]
@@ -487,7 +446,6 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       clearPlayer,
       refreshPlayer,
       linkCurrentPlayerToSecureSession,
-      setPlayerGold,
       addPlayerGold,
       notifyInventoryChanged,
       setProfileError,
@@ -509,7 +467,6 @@ export function PlayerSessionProvider({ children }: { children: ReactNode }) {
       secureAuthUserId,
       secureSessionError,
       addPlayerGold,
-      setPlayerGold,
     ]
   );
 

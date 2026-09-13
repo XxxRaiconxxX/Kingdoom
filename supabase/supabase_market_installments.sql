@@ -101,7 +101,7 @@ begin
     raise exception 'Falta el identificador del pedido.' using errcode = '22023';
   end if;
   
-  if p_installments not in (1, 3, 6) then
+  if p_installments is null or p_installments not in (1, 3, 6) then
     raise exception 'Las cuotas solo pueden ser 1, 3 o 6.' using errcode = '22023';
   end if;
 
@@ -122,36 +122,16 @@ begin
     )
   for update;
 
-  -- Si no se encontro con las condiciones anteriores, permitir sesion anonima nueva
-  -- (jugadores del bot que aun no vincularon su cuenta en la web).
-  if v_player.id is null and auth.role() = 'authenticated' and v_auth_user_id is not null then
-    select *
-    into v_player
-    from public.players
-    where id = p_player_id
-    for update;
-  end if;
-
   if v_player.id is null then
     raise exception 'Tu cuenta segura aun no esta vinculada a un jugador del reino.' using errcode = '42501';
   end if;
 
-  -- Auto-vincular la sesion anonima con el jugador si aun no esta vinculada.
-  -- Solo aplica para jugadores del bot (auth_user_id IS NULL en players).
-  if v_auth_user_id is not null and auth.role() <> 'service_role' then
-    select exists(
-      select 1 from public.player_auth_links pal
-      where pal.player_id = v_player.id
-        and pal.auth_user_id = v_auth_user_id
-    ) into v_is_linked;
-
-    if not v_is_linked and v_player.auth_user_id is null then
-      insert into public.player_auth_links (player_id, auth_user_id)
-      values (v_player.id, v_auth_user_id)
-      on conflict do nothing;
-    end if;
-  end if;
   
+  -- La vinculacion ocurre en un flujo de identidad aprobado; nunca se crea al comprar.
+  if exists (select 1 from public.market_orders where market_orders.order_ref = trim(p_order_ref)) then
+    raise exception 'El identificador del pedido ya fue procesado.' using errcode = '23505';
+  end if;
+
   -- Verificar penalización
   -- Asumimos que si tiene planes defaulteados recientes (últimos 14 días) no puede comprar a cuotas
   if p_installments > 1 then
@@ -174,6 +154,10 @@ begin
 
   if v_item.id is null then
     raise exception 'El item solicitado no existe.' using errcode = 'P0002';
+  end if;
+
+  if p_installments > 1 and v_item.category = 'potions' then
+    raise exception 'Las pociones y consumibles no admiten financiacion.' using errcode = '22023';
   end if;
 
   -- Validar estado de stock y limite disponible

@@ -120,7 +120,7 @@ function PredictionChip({ prediction }: { prediction: RealmExchangePrediction })
 }
 
 export function RealmStockExchange() {
-  const { player, isHydrating, refreshPlayer, setPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [selectedAssetId, setSelectedAssetId] = useState(REALM_EXCHANGE_ASSETS[0].id);
   const [state, setState] = useState<RealmExchangePlayerState>(() => ({
     positions: [],
@@ -191,7 +191,7 @@ export function RealmStockExchange() {
   }, [player]);
 
   useEffect(() => {
-    if (!player || isUpdating || predictionSettlementLockRef.current) {
+    if (!player || isUpdating || operationLockRef.current || predictionSettlementLockRef.current) {
       return;
     }
 
@@ -230,6 +230,7 @@ export function RealmStockExchange() {
       state: currentState,
       resolvedPredictions: resolved,
     }).then(async (result) => {
+      if (playerRef.current?.id !== player.id) return;
       if (result.status === "error") {
         setFeedback(result.message);
         return;
@@ -243,6 +244,8 @@ export function RealmStockExchange() {
           ? `Prediccion resuelta. Cobraste ${formatGold(result.payoutGold)} de oro.`
           : result.message
       );
+    }).catch(() => {
+      setFeedback("No se pudo comprobar la liquidaci?n. Actualiza la cartera.");
     }).finally(() => {
       predictionSettlementLockRef.current = false;
       setIsUpdating(false);
@@ -250,143 +253,57 @@ export function RealmStockExchange() {
   }, [isUpdating, now, player, refreshPlayer, state]);
 
   async function applyOperation(
-    result:
-      | Awaited<ReturnType<typeof buyAssetSharesSecure>>
-      | Awaited<ReturnType<typeof sellAssetSharesSecure>>
+    operation: () => ReturnType<typeof buyAssetSharesSecure> | ReturnType<typeof sellAssetSharesSecure>
   ) {
     const currentPlayer = playerRef.current;
-
-    if (!currentPlayer || result.status === "error") {
-      setFeedback(result.message);
-      return;
-    }
-
-    if (operationLockRef.current) {
-      return;
-    }
-
+    if (!currentPlayer || operationLockRef.current || predictionSettlementLockRef.current) return;
+    // Lock before calling the RPC, not after its response.
     operationLockRef.current = true;
     setIsUpdating(true);
-    const previousState = stateRef.current;
-    const remoteApplied = "remoteApplied" in result && result.remoteApplied;
-
-    if (remoteApplied) {
+    try {
+      const result = await operation();
+      if (playerRef.current?.id !== currentPlayer.id) return;
+      if (result.status === "error") {
+        setFeedback(result.message);
+        return;
+      }
       stateRef.current = result.state;
       setState(result.state);
       await refreshPlayer();
       setFeedback(result.message);
+    } catch {
+      setFeedback("No se pudo confirmar la operaci?n. Refresca la cartera antes de reintentar.");
+    } finally {
       operationLockRef.current = false;
       setIsUpdating(false);
-      return;
     }
-
-    const isPayout = result.nextGold > currentPlayer.gold;
-
-    if (isPayout) {
-      stateRef.current = result.state;
-      setState(result.state);
-
-      const saved = await saveExchangeState(currentPlayer.id, result.state);
-
-      if (!saved) {
-        stateRef.current = previousState;
-        setState(previousState);
-        setFeedback("No se pudo asegurar la venta. No se acredito oro para evitar cobro duplicado.");
-        operationLockRef.current = false;
-        setIsUpdating(false);
-        return;
-      }
-    }
-
-    const updated = await setPlayerGold(result.nextGold);
-
-    if (!updated) {
-      setFeedback("No se pudo actualizar el oro del jugador.");
-      if (isPayout) {
-        stateRef.current = previousState;
-        setState(previousState);
-        await saveExchangeState(currentPlayer.id, previousState);
-      }
-      operationLockRef.current = false;
-      setIsUpdating(false);
-      return;
-    }
-
-    if (!isPayout) {
-      stateRef.current = result.state;
-      setState(result.state);
-
-      const saved = await saveExchangeState(currentPlayer.id, result.state);
-
-      if (!saved) {
-        setFeedback("Operacion aplicada al oro, pero la cartera quedo pendiente de sincronizacion.");
-        operationLockRef.current = false;
-        setIsUpdating(false);
-        return;
-      }
-    }
-
-    setFeedback(result.message);
-    operationLockRef.current = false;
-    setIsUpdating(false);
   }
 
-  async function handleBuy() {
+  function handleBuy() {
     const currentPlayer = playerRef.current;
-
-    if (!currentPlayer || operationLockRef.current) {
-      return;
-    }
-
-    await applyOperation(
-      await buyAssetSharesSecure({
-        playerId: currentPlayer.id,
-        state: stateRef.current,
-        asset: selectedAsset,
-        gold: currentPlayer.gold,
-        lots: tradeLots,
-        at: now,
-      })
-    );
+    if (!currentPlayer) return;
+    return applyOperation(() => buyAssetSharesSecure({
+      playerId: currentPlayer.id, state: stateRef.current, asset: selectedAsset,
+      gold: currentPlayer.gold, lots: tradeLots, at: now,
+    }));
   }
 
-  async function handleSell() {
+  function handleSell() {
     const currentPlayer = playerRef.current;
-
-    if (!currentPlayer || operationLockRef.current) {
-      return;
-    }
-
-    await applyOperation(
-      await sellAssetSharesSecure({
-        playerId: currentPlayer.id,
-        state: stateRef.current,
-        asset: selectedAsset,
-        gold: currentPlayer.gold,
-        lots: tradeLots,
-        at: now,
-      })
-    );
+    if (!currentPlayer) return;
+    return applyOperation(() => sellAssetSharesSecure({
+      playerId: currentPlayer.id, state: stateRef.current, asset: selectedAsset,
+      gold: currentPlayer.gold, lots: tradeLots, at: now,
+    }));
   }
 
-  async function handlePrediction(direction: "up" | "down") {
+  function handlePrediction(direction: "up" | "down") {
     const currentPlayer = playerRef.current;
-
-    if (!currentPlayer || operationLockRef.current) {
-      return;
-    }
-
-    await applyOperation(
-      await openAssetPredictionSecure({
-        playerId: currentPlayer.id,
-        state: stateRef.current,
-        asset: selectedAsset,
-        gold: currentPlayer.gold,
-        direction,
-        stakeGold,
-        at: now,
-      })
-    );
+    if (!currentPlayer) return;
+    return applyOperation(() => openAssetPredictionSecure({
+      playerId: currentPlayer.id, state: stateRef.current, asset: selectedAsset,
+      gold: currentPlayer.gold, direction, stakeGold, at: now,
+    }));
   }
 
   const disabled = !player || isUpdating || isHydrating;

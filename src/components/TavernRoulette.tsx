@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Coins, RefreshCw, RotateCcw, Trash2, UserRound } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
@@ -63,24 +63,34 @@ export function TavernRoulette() {
   const [roundResult, setRoundResult] = useState<RouletteRoundResult | null>(null);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [updating, setUpdating] = useState(false);
-  const [pendingPayout, setPendingPayout] = useState(0);
+  const spinningRef = useRef(false);
+  const timerRef = useRef<number>();
+  const mountedRef = useRef(true);
   const [settlementMessage, setSettlementMessage] = useState("");
 
   const wheelGradient = useMemo(() => buildWheelGradient(), []);
   const totalBet = useMemo(() => sumBets(bets), [bets]);
-  const hasPendingPayout = pendingPayout > 0;
-  const canSpin = Boolean(player && totalBet > 0 && player.gold >= totalBet && phase !== "spinning" && !updating && !hasPendingPayout);
+  const canSpin = Boolean(player && totalBet > 0 && player.gold >= totalBet && phase !== "spinning" && !updating);
   const highlightedWinningIds = useMemo(() => new Set(roundResult?.winningBets.map((bet) => bet.id) ?? []), [roundResult]);
   const isSpinning = phase === "spinning";
 
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      window.clearTimeout(timerRef.current);
+    };
+  }, []);
+
   async function handleRefresh() {
+    if (spinningRef.current) return;
     setUpdating(true);
     await refreshPlayer();
     setUpdating(false);
   }
 
   function handlePlaceBet(id: RouletteBetId) {
-    if (!player || phase === "spinning" || hasPendingPayout) {
+    if (!player || phase === "spinning" || spinningRef.current) {
       return;
     }
 
@@ -106,7 +116,7 @@ export function TavernRoulette() {
   }
 
   function handleClearBets() {
-    if (phase === "spinning" || hasPendingPayout) {
+    if (phase === "spinning" || spinningRef.current) {
       return;
     }
 
@@ -117,7 +127,7 @@ export function TavernRoulette() {
   }
 
   function handleDoubleBets() {
-    if (!player || phase === "spinning" || hasPendingPayout || totalBet <= 0) {
+    if (!player || phase === "spinning" || spinningRef.current || totalBet <= 0) {
       return;
     }
 
@@ -136,7 +146,7 @@ export function TavernRoulette() {
   }
 
   function handleRebet() {
-    if (!player || phase === "spinning" || hasPendingPayout) {
+    if (!player || phase === "spinning" || spinningRef.current) {
       return;
     }
 
@@ -152,26 +162,26 @@ export function TavernRoulette() {
   }
 
   async function handleSpin() {
-    if (!player || !canSpin) {
+    if (!player || !canSpin || spinningRef.current) {
       return;
     }
 
+    spinningRef.current = true;
     setUpdating(true);
     setSettlementMessage("");
     const snapshot = { ...bets };
     const betCost = sumBets(snapshot);
-    const deducted = await addPlayerGold(-betCost);
-
-    if (!deducted) {
-      setSettlementMessage("No se pudo descontar la apuesta. Refresca tu perfil e intenta de nuevo.");
-      setUpdating(false);
-      return;
-    }
-
-    setLastSubmittedBets(snapshot);
-
     const winningPocket = spinRoulette();
     const result = resolveRouletteRound(snapshot, winningPocket);
+    // One balance delta, committed before the wheel reveals its result.
+    const settled = await addPlayerGold(result.totalPayout - betCost).catch(() => null);
+    if (!settled || !mountedRef.current) {
+      spinningRef.current = false;
+      setUpdating(false);
+      if (!settled) setSettlementMessage("No se pudo procesar la apuesta. Refresca tu perfil.");
+      return;
+    }
+    setLastSubmittedBets(snapshot);
     const winningIndex = getWinningPocketIndex(winningPocket);
     const extraSpins = 6 * 360;
     const baseRotation = Math.ceil(wheelRotation / 360) * 360;
@@ -182,44 +192,14 @@ export function TavernRoulette() {
     setWheelRotation(targetRotation);
     setPhase("spinning");
 
-    window.setTimeout(async () => {
-      if (result.totalPayout > 0) {
-        const credited = await addPlayerGold(result.totalPayout);
-        if (!credited) {
-          setPendingPayout(result.totalPayout);
-          setSettlementMessage(
-            `Premio pendiente: ${result.totalPayout.toLocaleString("es-PY")} de oro. Reintenta el cobro antes de girar otra vez.`
-          );
-        }
-      }
-
+    timerRef.current = window.setTimeout(() => {
       setRoundResult(result);
       setLastNumbers((current) => [winningPocket, ...current].slice(0, 10));
       setBets({});
       setPhase("resolved");
       setUpdating(false);
+      spinningRef.current = false;
     }, SPIN_DURATION_MS);
-  }
-
-  async function handleRetryPendingPayout() {
-    if (!pendingPayout || updating) {
-      return;
-    }
-
-    setUpdating(true);
-    const credited = await addPlayerGold(pendingPayout);
-
-    if (!credited) {
-      setSettlementMessage(
-        `No se pudo acreditar el premio pendiente de ${pendingPayout.toLocaleString("es-PY")} oro. Refresca tu perfil y vuelve a intentar.`
-      );
-      setUpdating(false);
-      return;
-    }
-
-    setSettlementMessage(`Premio pendiente cobrado: ${pendingPayout.toLocaleString("es-PY")} oro.`);
-    setPendingPayout(0);
-    setUpdating(false);
   }
 
   if (isHydrating) {
@@ -577,21 +557,21 @@ export function TavernRoulette() {
                 <ActionButton
                   label="Repetir"
                   icon={RotateCcw}
-                  disabled={hasPendingPayout || isSpinning || sumBets(lastSubmittedBets) <= 0 || sumBets(lastSubmittedBets) > player.gold}
+                  disabled={updating || isSpinning || sumBets(lastSubmittedBets) <= 0 || sumBets(lastSubmittedBets) > player.gold}
                   tone="secondary"
                   onClick={handleRebet}
                 />
                 <ActionButton
                   label="x2 apuesta"
                   icon={Coins}
-                  disabled={hasPendingPayout || isSpinning || totalBet <= 0 || totalBet * 2 > player.gold}
+                  disabled={updating || isSpinning || totalBet <= 0 || totalBet * 2 > player.gold}
                   tone="secondary"
                   onClick={handleDoubleBets}
                 />
                 <ActionButton
                   label="Limpiar"
                   icon={Trash2}
-                  disabled={hasPendingPayout || isSpinning || totalBet <= 0}
+                  disabled={updating || isSpinning || totalBet <= 0}
                   tone="secondary"
                   onClick={handleClearBets}
                 />
@@ -624,9 +604,7 @@ export function TavernRoulette() {
                         Resultado de la ronda
                       </p>
                       <p className="mt-2 text-xl font-black text-stone-50">
-                        {hasPendingPayout
-                          ? `Premio pendiente: ${pendingPayout.toLocaleString("es-PY")} de oro`
-                          : roundResult.totalPayout > 0
+                        {roundResult.totalPayout > 0
                           ? `Cobraste ${roundResult.totalPayout} de oro`
                           : "La casa se queda esta ronda"}
                       </p>
@@ -639,26 +617,7 @@ export function TavernRoulette() {
                       <p className="mt-1">Ganancia neta: <span className={`font-black ${roundResult.totalPayout > roundResult.totalBet ? "text-emerald-300" : "text-rose-300"}`}>{roundResult.totalPayout - roundResult.totalBet}</span></p>
                     </div>
                   </div>
-                  {settlementMessage ? (
-                    <div className={`mt-4 flex flex-col gap-3 rounded-2xl border p-3 text-sm font-bold sm:flex-row sm:items-center sm:justify-between ${
-                      hasPendingPayout
-                        ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
-                        : "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
-                    }`}>
-                      <span>{settlementMessage}</span>
-                      {hasPendingPayout ? (
-                        <button
-                          type="button"
-                          onClick={() => void handleRetryPendingPayout()}
-                          disabled={updating}
-                          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          <Coins className="h-4 w-4" />
-                          Reintentar cobro
-                        </button>
-                      ) : null}
-                    </div>
-                  ) : null}
+
                 </motion.div>
               ) : null}
             </AnimatePresence>

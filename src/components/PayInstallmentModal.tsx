@@ -43,6 +43,13 @@ export default function PayInstallmentModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const paymentLockRef = useRef(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const successTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => {
+    clearTimeout(closeTimerRef.current);
+    clearTimeout(successTimerRef.current);
+  }, []);
   const overlayRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -87,20 +94,32 @@ export default function PayInstallmentModal({
   }, []);
 
   const handleClose = () => {
+    if (paymentLockRef.current) return;
     if (overlayRef.current) overlayRef.current.style.opacity = "0";
     if (sheetRef.current) {
       sheetRef.current.style.opacity = "0";
       sheetRef.current.style.transform = "translateY(16px) scale(0.98)";
     }
-    setTimeout(onClose, 180);
+    closeTimerRef.current = setTimeout(onClose, 180);
   };
 
   const handlePay = async () => {
+    if (paymentLockRef.current || success || !hasEnoughGold || amountDue <= 0) return;
+    paymentLockRef.current = true;
     setError(null);
     setLoading(true);
-    const res = await onPay(playerId, plan.id, mode, advanceCount);
+    let res: Awaited<ReturnType<Props["onPay"]>>;
+    try {
+      res = await onPay(playerId, plan.id, mode, advanceCount);
+    } catch {
+      setError("No se pudo confirmar el pago. Actualiza tus cuotas antes de reintentar.");
+      setLoading(false);
+      paymentLockRef.current = false;
+      return;
+    }
     setLoading(false);
     if (res.status === "error") {
+      paymentLockRef.current = false;
       setError(res.message ?? "Error desconocido.");
       return;
     }
@@ -109,7 +128,7 @@ export default function PayInstallmentModal({
         ? "¡Deuda liquidada! El artículo es tuyo."
         : `Pagaste ${fmt(res.amountPaid ?? 0)} monedas.`
     );
-    setTimeout(() => {
+    successTimerRef.current = setTimeout(() => {
       onSuccess({
         amountPaid: res.amountPaid ?? 0,
         newPlayerGold: res.newPlayerGold ?? 0,
@@ -522,7 +541,7 @@ export default function PayInstallmentModal({
         }}
       >
         {/* Sheet */}
-        <div ref={sheetRef} className="pim-sheet" role="dialog" aria-modal="true">
+        <div ref={sheetRef} className="pim-sheet" role="dialog" aria-modal="true" aria-label="Pagar cuotas">
 
           {/* Mobile drag handle */}
           <div className="pim-handle" />
@@ -537,6 +556,7 @@ export default function PayInstallmentModal({
               className="pim-close-btn"
               onClick={handleClose}
               aria-label="Cerrar"
+              disabled={loading || !!success}
             >
               ✕
             </button>
@@ -572,7 +592,7 @@ export default function PayInstallmentModal({
               {/* Opción 1 — Pagar 1 cuota */}
               <div
                 className={`pim-option${mode === "one" ? " active" : ""}`}
-                onClick={() => !success && setMode("one")}
+                onClick={() => !loading && !success && setMode("one")}
               >
                 <div className="pim-option-row">
                   <div className="pim-radio" />
@@ -592,7 +612,7 @@ export default function PayInstallmentModal({
               {canAdvance && (
                 <div
                   className={`pim-option${mode === "advance" ? " active" : ""}`}
-                  onClick={() => !success && setMode("advance")}
+                  onClick={() => !loading && !success && setMode("advance")}
                 >
                   <div className="pim-option-row">
                     <div className="pim-radio" />
@@ -648,7 +668,7 @@ export default function PayInstallmentModal({
               {/* Opción 3 — Liquidar total */}
               <div
                 className={`pim-option${mode === "total" ? " active" : ""}`}
-                onClick={() => !success && setMode("total")}
+                onClick={() => !loading && !success && setMode("total")}
               >
                 <div className="pim-option-row">
                   <div className="pim-radio" />

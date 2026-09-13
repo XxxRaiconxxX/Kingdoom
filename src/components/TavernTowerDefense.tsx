@@ -576,6 +576,8 @@ export function TavernTowerDefense() {
   const [victoryToken, setVictoryToken] = useState(0);
   const [pendingReward, setPendingReward] = useState(0);
   const [isRewardUpdating, setIsRewardUpdating] = useState(false);
+  const rewardBusyRef = useRef(false);
+  const attemptedVictoryRef = useRef(0);
   const hasPendingReward = pendingReward > 0;
 
   const difficulty = useMemo(
@@ -1036,7 +1038,7 @@ export function TavernTowerDefense() {
   }, [drawRuntime, updateRuntime]);
 
   useEffect(() => {
-    if (!victoryToken) {
+    if (!victoryToken || attemptedVictoryRef.current === victoryToken || rewardBusyRef.current) {
       return;
     }
 
@@ -1053,9 +1055,12 @@ export function TavernTowerDefense() {
         return;
       }
 
-      const updated = await addPlayerGold(difficulty.reward);
+      attemptedVictoryRef.current = victoryToken;
+      rewardBusyRef.current = true;
+      const updated = await addPlayerGold(difficulty.reward).catch(() => null);
 
       if (!updated) {
+        rewardBusyRef.current = false;
         setPendingReward(difficulty.reward);
         setNotice(
           `Victoria lograda, pero el cobro de ${difficulty.reward.toLocaleString("es-PY")} oro quedo pendiente. Reintenta antes de otra oleada.`
@@ -1064,6 +1069,7 @@ export function TavernTowerDefense() {
       }
 
       window.localStorage.setItem(key, "claimed");
+      rewardBusyRef.current = false;
       setPendingReward(0);
       setNotice(`Recompensa cobrada: +${difficulty.reward.toLocaleString("es-PY")} oro.`);
     }
@@ -1072,15 +1078,17 @@ export function TavernTowerDefense() {
   }, [addPlayerGold, difficulty, player, victoryToken]);
 
   async function retryPendingReward() {
-    if (!player || !pendingReward || isRewardUpdating) {
+    if (!player || !pendingReward || isRewardUpdating || rewardBusyRef.current) {
       return;
     }
 
+    rewardBusyRef.current = true;
     setIsRewardUpdating(true);
-    const updated = await addPlayerGold(pendingReward);
+    const updated = await addPlayerGold(pendingReward).catch(() => null);
     setIsRewardUpdating(false);
 
     if (!updated) {
+      rewardBusyRef.current = false;
       setNotice(
         `No se pudo acreditar el cobro pendiente de ${pendingReward.toLocaleString("es-PY")} oro. Refresca e intenta otra vez.`
       );
@@ -1088,6 +1096,7 @@ export function TavernTowerDefense() {
     }
 
     window.localStorage.setItem(rewardKey(player.id, difficulty.id), "claimed");
+    rewardBusyRef.current = false;
     setNotice(`Recompensa pendiente cobrada: +${pendingReward.toLocaleString("es-PY")} oro.`);
     setPendingReward(0);
   }

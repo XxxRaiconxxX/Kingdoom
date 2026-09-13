@@ -174,7 +174,7 @@ const purchaseResult = await purchaseMarketItemSecure({
         : " Las pociones no se guardan en el inventario persistente.";
 
       setFeedbackMessage(
-        `Compra segura confirmada. Se descontaron ${purchaseResult.totalPrice} de oro de tu perfil activo.${inventoryMessage}${formspreeWarning}`
+        `Compra segura confirmada. ${formValues.installments > 1 ? `Se cobraron ${purchaseResult.paidNow} de oro ahora; el total financiado es ${purchaseResult.totalPrice}.` : `Se cobraron ${purchaseResult.paidNow} de oro de tu perfil activo.`}${inventoryMessage}${formspreeWarning}`
       );
     } catch {
       setOrderId(purchaseResult.orderRef);
@@ -183,7 +183,7 @@ const purchaseResult = await purchaseMarketItemSecure({
       void refreshPlayer();
       notifyInventoryChanged();
       setFeedbackMessage(
-        `Compra confirmada. Se descontaron ${purchaseResult.totalPrice} de oro y el pedido quedo registrado. Revisa el aviso externo manualmente.`
+        `Compra confirmada. ${formValues.installments > 1 ? `Se cobraron ${purchaseResult.paidNow} de oro ahora; el total financiado es ${purchaseResult.totalPrice}.` : `Se cobraron ${purchaseResult.paidNow} de oro y el pedido quedo registrado.`} Revisa el aviso externo manualmente.`
       );
     }
   }

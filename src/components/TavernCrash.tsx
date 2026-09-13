@@ -36,6 +36,8 @@ export function TavernCrash() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>();
+  const startTimerRef = useRef<number>();
+  const mountedRef = useRef(true);
   const startTimeRef = useRef<number>(0);
   const crashPointRef = useRef<number>(0);
   const pointsRef = useRef<Point[]>([]);
@@ -190,7 +192,12 @@ export function TavernCrash() {
     if (statusRef.current !== "rising" || updatingRef.current || !playerRef.current) return;
 
     updatingRef.current = true;
-    const m = typeof exactMultiplier === "number" ? exactMultiplier : multiplierRef.current;
+    const elapsed = Math.max(0, (performance.now() - startTimeRef.current) / 1000);
+    const m = typeof exactMultiplier === "number" ? exactMultiplier : Math.pow(1.065, elapsed);
+    if (!Number.isFinite(m) || m >= crashPointRef.current) {
+      updatingRef.current = false;
+      return;
+    }
     const winAmount = Math.floor(betRef.current * m);
     
     // Asegurar el retiro en el estado del juego de forma síncrona
@@ -228,6 +235,7 @@ export function TavernCrash() {
     // No hacemos return para que el loop siga y muestre hasta dónde hubiera llegado
     if (
       autoCashOutRef.current >= 1.01 &&
+      autoCashOutRef.current < crashPointRef.current &&
       currentMult >= autoCashOutRef.current &&
       statusRef.current === "rising" &&
       !autoCashedRef.current &&
@@ -274,12 +282,14 @@ export function TavernCrash() {
   }, [handleCashOut, redrawCanvas]);
 
   const handleStart = async () => {
-    if (!player || bet <= 0 || bet > player.gold || updating || updatingRef.current || hasPendingPayout) return;
+    if (!player || !Number.isSafeInteger(bet) || bet <= 0 || bet > player.gold || updating || updatingRef.current || hasPendingPayout || statusRef.current === "starting" || statusRef.current === "rising") return;
 
     updatingRef.current = true;
+    betRef.current = bet;
     setUpdating(true);
     setSettlementMessage("");
     const success = await addPlayerGold(-bet);
+    if (!mountedRef.current) return;
     if (!success) {
       updatingRef.current = false;
       setUpdating(false);
@@ -321,10 +331,10 @@ export function TavernCrash() {
     setUpdating(false);
     updatingRef.current = false;
 
-    setTimeout(() => {
+    startTimerRef.current = window.setTimeout(() => {
       setStatus("rising");
       statusRef.current = "rising";
-      startTimeRef.current = 0;
+      startTimeRef.current = performance.now();
       requestRef.current = requestAnimationFrame(updateMultiplier);
     }, 1200);
   };
@@ -386,7 +396,10 @@ export function TavernCrash() {
 
   // Global cleanup effect
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+        mountedRef.current = false;
+        window.clearTimeout(startTimerRef.current);
         if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
   }, []);

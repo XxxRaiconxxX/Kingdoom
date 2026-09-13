@@ -1,17 +1,5 @@
-import { fetchPlayerByUsername, updatePlayerGold } from "./players";
-import {
-  buildScratchDateKey,
-  getDailyScratchConfig,
-  NORMAL_MAX_PRIZE,
-  NORMAL_MIN_PRIZE,
-  VIP_JACKPOT_CHANCE,
-  VIP_JACKPOT_PRIZE,
-} from "./scratchUtils";
-
-const PLAYER_STORAGE_KEY = "kingdoom.active-player";
-const SCRATCH_TOTALS_KEY = "kingdoom.scratch.daily-totals.v1";
-
-type ScratchTotalsStore = Record<string, number>;
+import { supabase } from "./supabaseClient";
+import { requestGameRpc } from "./minigamesSecure";
 
 export type ScratchDailyStateResult =
   | {
@@ -47,175 +35,42 @@ export type ScratchBatchPlayResult =
       message: string;
     };
 
-function readTotalsStore(): ScratchTotalsStore {
-  if (typeof window === "undefined") {
-    return {};
-  }
-
+export async function fetchScratchDailyState(dateKey: string): Promise<ScratchDailyStateResult> {
   try {
-    const raw = window.localStorage.getItem(SCRATCH_TOTALS_KEY);
-    return raw ? (JSON.parse(raw) as ScratchTotalsStore) : {};
+    const { data, error } = await supabase.from("player_scratch_daily_totals")
+      .select("gross_wins").eq("date_key", dateKey).maybeSingle();
+    if (error) throw error;
+    return { status: "ready", grossWins: Number(data?.gross_wins ?? 0) };
   } catch {
-    return {};
+    return { status: "unavailable", grossWins: 0, message: "No se pudo consultar el l?mite diario de esta sesi?n." };
   }
 }
 
-function writeTotalsStore(store: ScratchTotalsStore) {
-  if (typeof window === "undefined") {
-    return;
+export async function playScratchBatchSecure(quantity: number): Promise<ScratchBatchPlayResult> {
+  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 250) {
+    return { status: "error", message: "Elige entre 1 y 250 tickets." };
   }
-
-  window.localStorage.setItem(SCRATCH_TOTALS_KEY, JSON.stringify(store));
-}
-
-function buildScratchPlayerKey(playerId: string, dateKey: string) {
-  return `${playerId}:${dateKey}`;
-}
-
-function getStoredGrossWins(playerId: string, dateKey: string) {
-  const store = readTotalsStore();
-  return Number(store[buildScratchPlayerKey(playerId, dateKey)] ?? 0);
-}
-
-function setStoredGrossWins(playerId: string, dateKey: string, grossWins: number) {
-  const store = readTotalsStore();
-  store[buildScratchPlayerKey(playerId, dateKey)] = grossWins;
-  writeTotalsStore(store);
-}
-
-async function getActivePlayer() {
-  if (typeof window === "undefined") {
-    return null;
+  const result = await requestGameRpc("play_scratch_batch", { p_quantity: quantity });
+  if (result.status === "error") return result;
+  const r = result.row;
+  const fields = ["total_cost", "cost_per_ticket", "quantity", "used_tickets", "winning_tickets", "jackpot_wins", "losing_tickets", "total_prize", "refunded_tickets", "refunded_gold", "remaining_gold", "daily_gross_wins", "max_daily_limit"];
+  if (!fields.every(key => Number.isSafeInteger(r[key]) && Number(r[key]) >= 0) || typeof r.date_key !== "string") {
+    return { status: "error", message: "Respuesta de Rasca inv?lida. Actualiza tu saldo antes de reintentar." };
   }
-
-  const username = window.localStorage.getItem(PLAYER_STORAGE_KEY)?.trim();
-  if (!username) {
-    return null;
-  }
-
-  return fetchPlayerByUsername(username);
-}
-
-function randomPrize() {
-  return Math.floor(Math.random() * (NORMAL_MAX_PRIZE - NORMAL_MIN_PRIZE + 1)) + NORMAL_MIN_PRIZE;
-}
-
-export async function fetchScratchDailyState(
-  dateKey: string
-): Promise<ScratchDailyStateResult> {
-  const player = await getActivePlayer();
-
-  if (!player) {
-    return {
-      status: "unavailable",
-      grossWins: 0,
-      message: "Conecta tu perfil del reino antes de usar Rasca y gana.",
-    };
-  }
-
-  return {
-    status: "ready",
-    grossWins: getStoredGrossWins(player.id, dateKey),
-  };
-}
-
-export async function playScratchBatchSecure(
-  quantity: number
-): Promise<ScratchBatchPlayResult> {
-  const player = await getActivePlayer();
-
-  if (!player) {
-    return {
-      status: "error",
-      message: "Conecta tu perfil del reino antes de usar Rasca y gana.",
-    };
-  }
-
-  const safeQuantity = Math.max(1, Math.floor(quantity));
-  const config = getDailyScratchConfig();
-  const startingGold = player.gold;
-  const totalCost = config.cost * safeQuantity;
-
-  if (startingGold < totalCost) {
-    return {
-      status: "error",
-      message: "No tienes suficiente oro para comprar esa tanda de tickets.",
-    };
-  }
-
-  let dailyGrossWins = getStoredGrossWins(player.id, config.dateKey);
-  let usedTickets = 0;
-  let winningTickets = 0;
-  let jackpotWins = 0;
-  let totalPrize = 0;
-
-  for (let index = 0; index < safeQuantity; index += 1) {
-    if (dailyGrossWins >= config.maxDailyLimit) {
-      break;
-    }
-
-    usedTickets += 1;
-
-    let ticketPrize = 0;
-    if (Math.random() < VIP_JACKPOT_CHANCE) {
-      ticketPrize = VIP_JACKPOT_PRIZE;
-      jackpotWins += 1;
-      winningTickets += 1;
-    } else if (Math.random() < config.winChance) {
-      ticketPrize = randomPrize();
-      winningTickets += 1;
-    }
-
-    ticketPrize = Math.min(ticketPrize, Math.max(0, config.maxDailyLimit - dailyGrossWins));
-    totalPrize += ticketPrize;
-    dailyGrossWins += ticketPrize;
-
-    if (dailyGrossWins >= config.maxDailyLimit) {
-      break;
-    }
-  }
-
-  const refundedTickets = Math.max(0, safeQuantity - usedTickets);
-  const losingTickets = Math.max(0, usedTickets - winningTickets);
-  let refundedGold = refundedTickets * config.cost;
-
-  if (losingTickets > 0) {
-    if (safeQuantity > 50) {
-      if (Math.random() < 0.5) {
-        refundedGold += losingTickets * config.cost;
-      }
-    } else {
-      refundedGold += Math.floor(losingTickets * config.cost * 0.5);
-    }
-  }
-
-  const remainingGold = Math.max(0, startingGold - totalCost + refundedGold + totalPrize);
-  const updated = await updatePlayerGold(player.id, remainingGold);
-
-  if (!updated) {
-    return {
-      status: "error",
-      message: "No se pudo actualizar el oro del jugador tras resolver el rasca.",
-    };
-  }
-
-  setStoredGrossWins(player.id, config.dateKey, dailyGrossWins);
-
-  return {
-    status: "success",
-    totalCost,
-    costPerTicket: config.cost,
-    quantity: safeQuantity,
-    usedTickets,
-    winningTickets,
-    jackpotWins,
-    losingTickets,
-    totalPrize,
-    refundedTickets,
-    refundedGold,
-    remainingGold,
-    dailyGrossWins,
-    maxDailyLimit: config.maxDailyLimit,
-    dateKey: buildScratchDateKey(),
+  return { status: "success",
+    totalCost: Number(r.total_cost),
+    costPerTicket: Number(r.cost_per_ticket),
+    quantity: Number(r.quantity),
+    usedTickets: Number(r.used_tickets),
+    winningTickets: Number(r.winning_tickets),
+    jackpotWins: Number(r.jackpot_wins),
+    losingTickets: Number(r.losing_tickets),
+    totalPrize: Number(r.total_prize),
+    refundedTickets: Number(r.refunded_tickets),
+    refundedGold: Number(r.refunded_gold),
+    remainingGold: Number(r.remaining_gold),
+    dailyGrossWins: Number(r.daily_gross_wins),
+    maxDailyLimit: Number(r.max_daily_limit),
+    dateKey: r.date_key,
   };
 }

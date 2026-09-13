@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Coins, RefreshCw, Sparkles, Ticket, UserRound } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
@@ -41,6 +41,9 @@ export function TavernScratch() {
   const [updating, setUpdating] = useState(false);
   const [dailyGrossWins, setDailyGrossWins] = useState(0);
   const [scratchError, setScratchError] = useState("");
+  const scratchingRef = useRef(false);
+  const revealTimerRef = useRef<number>();
+  const mountedRef = useRef(true);
 
   const dailyConfig = useMemo(() => getDailyScratchConfig(), []);
   const limitReached = dailyGrossWins >= dailyConfig.maxDailyLimit;
@@ -93,7 +96,16 @@ export function TavernScratch() {
     };
   }, [dailyConfig.dateKey, player]);
 
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      window.clearTimeout(revealTimerRef.current);
+    };
+  }, []);
+
   async function handleRefresh() {
+    if (scratchingRef.current) return;
     setUpdating(true);
     const refreshed = await refreshPlayer();
 
@@ -120,15 +132,16 @@ export function TavernScratch() {
   }
 
   async function scratchTicket() {
-    if (!player || updating || phase !== "ready") {
+    if (!player || updating || scratchingRef.current || phase !== "ready") {
       return;
     }
 
+    scratchingRef.current = true;
+    setUpdating(true);
     setPhase("scratching");
-
-    window.setTimeout(async () => {
-      setUpdating(true);
+    try {
       const result = await playScratchBatchSecure(quantity);
+      if (!mountedRef.current) return;
 
       if (result.status === "error") {
         setUpdating(false);
@@ -152,9 +165,18 @@ export function TavernScratch() {
       });
       setDailyGrossWins(result.dailyGrossWins);
       await refreshPlayer();
+      if (!mountedRef.current) return;
+      revealTimerRef.current = window.setTimeout(() => {
+        setUpdating(false);
+        setPhase("revealed");
+      }, quantity > 1 ? 2000 : 950);
+    } catch {
+      setScratchError("No se pudo procesar el boleto. Refresca tu perfil.");
       setUpdating(false);
-      setPhase("revealed");
-    }, quantity > 1 ? 2000 : 950);
+      setPhase("buy");
+    } finally {
+      scratchingRef.current = false;
+    }
   }
 
   function resetScratch() {

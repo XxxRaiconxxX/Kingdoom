@@ -527,7 +527,12 @@ export async function sellAssetSharesSecure(input: {
   });
 
   if (error) {
-    return result;
+    return {
+      status: "error" as const,
+      message: "No se pudo confirmar la venta. Actualiza la cartera antes de reintentar.",
+      state: input.state,
+      nextGold: input.gold,
+    };
   }
 
   const row = Array.isArray(data) ? data[0] : data;

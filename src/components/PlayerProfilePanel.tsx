@@ -37,6 +37,7 @@ import type {
   RankTier,
 } from "../types";
 import { PlayerNotificationBell } from "./PlayerNotificationBell";
+import { KingdoomAuthModal } from "./KingdoomAuthModal";
 import { RankBadge } from "./RankBadge";
 import { RoleplayLockNotice } from "./RoleplayLockNotice";
 import {
@@ -114,6 +115,7 @@ export function PlayerProfilePanel({
     isHydrating,
     isSecureSessionReady,
     secureSessionError,
+    secureAuthUserId,
     isPlayerSecureLinked,
     isLinkingSecureAccount,
     isSubmittingProfile,
@@ -125,6 +127,7 @@ export function PlayerProfilePanel({
     setProfileError,
   } = usePlayerSession();
   const [usernameInput, setUsernameInput] = useState("");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isTradeOpen, setIsTradeOpen] = useState(false);
@@ -710,7 +713,7 @@ export function PlayerProfilePanel({
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-black text-stone-100">Sin perfil conectado</p>
-                <p className="text-xs text-stone-500">El Portal Anime funciona sin iniciar sesion.</p>
+                <p className="text-xs text-stone-500">Conecta tu perfil para participar.</p>
               </div>
             </div>
             <button
@@ -923,9 +926,16 @@ export function PlayerProfilePanel({
                               Cuenta segura requerida
                             </p>
                             <p className="mt-1 leading-6 text-cyan-50/90">
-                              Tu perfil aun no esta enlazado a la sesión segura de Supabase.
-                              Vincúlala una vez para poder participar en misiones y realizar compras en el mercado.
+                              Para activar compras y misiones, pide al staff que verifique tu identidad
+                              y apruebe la vinculaci?n de este navegador.
                             </p>
+                            {secureAuthUserId ? (
+                              <label className="mt-3 block text-xs text-cyan-100">
+                                Identificador de sesi?n para el staff
+                                <input readOnly value={secureAuthUserId} onFocus={(event) => event.currentTarget.select()}
+                                  className="mt-1 w-full min-w-0 rounded-lg border border-cyan-400/20 bg-stone-950/70 p-2 font-mono text-xs" />
+                              </label>
+                            ) : null}
                             {secureSessionError ? (
                               <p className="mt-2 text-xs text-rose-200">{secureSessionError}</p>
                             ) : null}
@@ -942,12 +952,12 @@ export function PlayerProfilePanel({
                             {isLinkingSecureAccount ? (
                               <>
                                 <Loader2 className="h-4 w-4 animate-spin" />
-                                Vinculando...
+                                Comprobando...
                               </>
                             ) : (
                               <>
                                 <ShieldCheck className="h-4 w-4" />
-                                Vincular cuenta segura
+                                Comprobar vinculaci?n
                               </>
                             )}
                           </button>
@@ -1432,6 +1442,14 @@ export function PlayerProfilePanel({
                 onSubmit={handleSubmit}
                 className="grid gap-4 md:grid-cols-[1fr_auto]"
               >
+                <button
+                  type="button"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="md:col-span-2 flex items-center justify-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-3 text-sm font-extrabold text-cyan-100 transition hover:bg-cyan-300/15"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  Entrar con usuario y contraseña
+                </button>
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-stone-200">
                     Nombre del jugador registrado
@@ -1606,6 +1624,16 @@ export function PlayerProfilePanel({
             </div>
           </div>
         </div>
+      ) : null}
+
+      {isAuthModalOpen ? (
+        <KingdoomAuthModal
+          initialUsername={usernameInput}
+          onClose={() => setIsAuthModalOpen(false)}
+          onAuthenticated={(authenticatedPlayer) => {
+            void connectPlayer(authenticatedPlayer.username);
+          }}
+        />
       ) : null}
     </section>
   );

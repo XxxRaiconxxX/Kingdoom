@@ -195,6 +195,8 @@ function buildVisibleStrip(center: SymbolId): [SymbolId, SymbolId, SymbolId] {
 export function TavernSlots() {
   const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
   const intervalRefs = useRef<number[]>([]);
+  const spinningRef = useRef(false);
+  const mountedRef = useRef(true);
   const timeoutRefs = useRef<number[]>([]);
   const dateKey = useMemo(() => buildScratchDateKey(), []);
   const [phase, setPhase] = useState<SlotPhase>("betting");
@@ -227,12 +229,13 @@ export function TavernSlots() {
     setDailyNetWins(getPlayerDailySlotsNetWins(player.id, dateKey));
   }, [dateKey, player]);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
       clearTimers();
-    },
-    []
-  );
+    };
+  }, []);
 
   function clearTimers() {
     intervalRefs.current.forEach((id) => window.clearInterval(id));
@@ -276,34 +279,41 @@ export function TavernSlots() {
       setMessage("No se pudo actualizar el oro. Refresca tu perfil.");
       setUpdating(false);
       setPhase("resolved");
-      return;
+      return null;
     }
 
     if (cappedNetWin > 0) {
       setDailyNetWins(addPlayerDailySlotsNetWins(player.id, dateKey, cappedNetWin));
     }
 
-    setLastPrize(finalPayout);
-    setLastOutcome(outcome);
-    setMessage(
-      outcome.multiplier <= 0
+    return {
+      prize: finalPayout,
+      message: outcome.multiplier <= 0
         ? "La maquina retuvo la apuesta."
         : cappedNetWin < rawNetWin
           ? `Cobro limitado: ${finalPayout.toLocaleString("es-PY")} oro.`
-          : `Cobras ${finalPayout.toLocaleString("es-PY")} oro.`
-    );
-    setUpdating(false);
-    setPhase("resolved");
+          : `Cobras ${finalPayout.toLocaleString("es-PY")} oro.`,
+    };
   }
 
-  function spin() {
-    if (!canSpin || !player) {
+  async function spin() {
+    if (!canSpin || !player || spinningRef.current) {
       return;
     }
 
+    spinningRef.current = true;
+    setUpdating(true);
     clearTimers();
     const lockedBet = safeBet;
     const outcome = generateSpinOutcome();
+    // Settle before revealing reels; leaving the screen cannot cancel a loss.
+    const settled = await resolveSpin(outcome, lockedBet).catch(() => null);
+    if (!settled || !mountedRef.current) {
+      spinningRef.current = false;
+      setUpdating(false);
+      if (!settled) setMessage("No se pudo procesar la apuesta. Refresca tu perfil.");
+      return;
+    }
     setBet(lockedBet);
     setLastOutcome(null);
     setLastPrize(0);
@@ -333,7 +343,12 @@ export function TavernSlots() {
     }
 
     const finalTimeout = window.setTimeout(() => {
-      void resolveSpin(outcome, lockedBet);
+      setLastOutcome(outcome);
+      setLastPrize(settled.prize);
+      setMessage(settled.message);
+      setPhase("resolved");
+      setUpdating(false);
+      spinningRef.current = false;
     }, REEL_STOP_DELAYS[2] + 320);
     timeoutRefs.current.push(finalTimeout);
   }

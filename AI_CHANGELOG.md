@@ -8,6 +8,13 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 
 ## 2026-09
 
+### [2026-09-13] Acceso seguro de jugadores y staff
+- Se añadió el modal animado real de autenticación con usuario/contraseña, recordar usuario y primer acceso mediante código WhatsApp de un solo uso.
+- Se añadió el endpoint protegido `api/auth/staff.ts` para que administradores restablezcan contraseñas y revoquen sesiones.
+- Se añadió la migración `player_access_codes` con hash SHA-256, caducidad, uso único y límite de cinco intentos.
+- El frontend enlaza el perfil al usuario de Supabase mediante RPC de seguridad; el acceso antiguo queda disponible durante la transición.
+- Validado con `npx tsc --noEmit`, `npm run build` y `git diff --check`. [Codex]
+
 ### [2026-09-02] Corrección y Auditoría Integral de Minijuegos de la Taberna
 - **Multiplicador (TavernCrash):** Eliminada la condición de bloqueo del botón de inicio tras cobrar antes del colapso (`status === "cashed_out" && multiplier < crashPointRef.current`), permitiendo iniciar nuevas rondas inmediatamente.
 - **Cartas del Oráculo (TavernCards):** Modificado `getRandomCard(exclude)` en `src/utils/minigamesSecure.ts` para excluir la carta actual y garantizar cartas consecutivas estrictamente diferentes en la mecánica mayor/menor.

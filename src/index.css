@@ -675,6 +675,24 @@
   }
 }
 
+@media (min-width: 768px) {
+  .kd-primary-nav {
+    top: 1rem;
+    bottom: auto;
+  }
+
+  .kd-primary-nav .kd-bottom-nav {
+    padding: 0.5rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.3);
+  }
+
+  .kd-primary-shell {
+    padding-top: 7.5rem;
+    padding-bottom: 3rem;
+  }
+}
+
 @media (max-width: 767px) {
   .kd-ambient,
   .kd-shell,
@@ -688,12 +706,11 @@
   }
 
   .kd-shell {
-    width: 100dvw !important;
-    max-width: 100dvw !important;
-    margin-inline: auto !important;
-    padding-inline: 0 !important;
-    transform: scale(0.9);
-    transform-origin: top center;
+    width: 100%;
+    max-width: 48rem;
+    margin-inline: auto;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
   }
 
   .kd-shell::before {
@@ -702,13 +719,12 @@
   }
 
   .kd-bottom-nav {
-    width: min(calc(100dvw - 1rem), 22rem) !important;
-    max-width: min(100%, calc(100dvw - 1rem));
+    width: 100%;
+    max-width: 30rem;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0.35rem;
     padding-inline: 0.55rem;
-    transform: scale(0.9);
-    transform-origin: bottom center;
+
   }
 
   .kd-nav-item {
@@ -743,29 +759,18 @@
 }
 
 @media (max-width: 420px) {
-  .kd-shell {
-    width: 100dvw !important;
-    max-width: 100dvw !important;
-    transform: scale(0.9);
-    transform-origin: top center;
-  }
-
   .kd-hero-panel h1 {
     font-size: clamp(2rem, 8.4vw, 2.45rem);
   }
 
-  nav.fixed {
-    overflow-x: hidden;
-    padding-inline: 0.15rem;
+  .kd-primary-nav {
+    padding-inline: 0.5rem;
   }
 
   .kd-bottom-nav {
-    width: min(calc(100dvw - 1rem), 21rem) !important;
-    max-width: min(calc(100dvw - 1rem), 21rem) !important;
     gap: 0.25rem;
     padding-inline: 0.25rem;
-    transform: scale(0.9);
-    transform-origin: bottom center;
+
   }
 
   .kd-nav-icon-shell {
@@ -774,7 +779,7 @@
   }
 
   .kd-nav-item {
-    font-size: 0.54rem;
+    font-size: 0.625rem;
   }
 }
 
@@ -1144,4 +1149,27 @@
   .market-sheen-epic {
     animation: market-sheen-sweep 6.6s ease-in-out infinite;
   }
+}
+
+/* Tavern: readable choices on touch screens, full catalogue on desktop. */
+.kd-tavern {
+  background-image: radial-gradient(ellipse at top left, rgb(159 18 57 / 0.12), transparent 60%);
+}
+.kd-tavern-selector {
+  display: flex;
+  gap: 0.625rem;
+  overflow-x: auto;
+  padding-block: 0.25rem 0.75rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(120 113 108 / 0.6) transparent;
+}
+.kd-tavern-option { flex: 0 0 7.75rem; min-width: 0; scroll-snap-align: start; }
+.kd-tavern-option:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+@media (min-width: 768px) {
+  .kd-tavern-selector { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); overflow: visible; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pim-sheet, .pim-overlay { transition: none; }
+  .pim-shimmer { animation: none; display: none; }
 }

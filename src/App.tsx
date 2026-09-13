@@ -11,6 +11,7 @@ import {
   Store,
 } from "lucide-react";
 import { EventCard } from "./components/EventCard";
+import { AuthFlowPreview } from "./components/AuthFlowPreview";
 import { ExpandableText } from "./components/ExpandableText";
 import { SectionHeader } from "./components/SectionHeader";
 import { StatCard } from "./components/StatCard";
@@ -158,6 +159,10 @@ export default function App() {
   const [isProfileCollapsed, setIsProfileCollapsed] = useState(false);
   const [isRealmSiegeStandalone] = useState(isRealmSiegeStandaloneRoute);
 
+  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("auth-preview") === "1") {
+    return <AuthFlowPreview />;
+  }
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     startTransition(() => setIsProfileCollapsed(activeTab !== "home"));
@@ -183,7 +188,8 @@ export default function App() {
       className="kd-ambient min-h-screen bg-stone-950 text-stone-300"
       data-kd-theme={activeTab}
     >
-      <main className="kd-shell mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6 md:pt-8">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-amber-300 focus:p-3 focus:text-stone-950">Saltar al contenido</a>
+      <main id="main-content" tabIndex={-1} className="kd-shell kd-primary-shell mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6">
         <div className="mb-5">
           <Suspense
             fallback={
@@ -199,7 +205,7 @@ export default function App() {
           >
             <PlayerProfilePanel
               collapsed={isProfileCollapsed}
-              compactDisconnected={activeTab === "anime"}
+              compactDisconnected={activeTab !== "home"}
               onCollapsedChange={setIsProfileCollapsed}
               showAnimeShortcut={activeTab === "home"}
               onOpenAnime={() => startTransition(() => setActiveTab("anime"))}
@@ -240,7 +246,7 @@ export default function App() {
         </div>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4">
+      <nav aria-label="Navegación principal" className="kd-primary-nav fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4">
         <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-5 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id || (id === "home" && activeTab === "anime");

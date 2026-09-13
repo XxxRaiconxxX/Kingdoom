@@ -404,13 +404,19 @@ export function TavernPenalty() {
   const [shotState, setShotState] = useState<ShotState>(DEFAULT_SHOT);
   const [message, setMessage] = useState("Supera 4 penales seguidos para llegar al x8.");
   const [dailyNetWins, setDailyNetWins] = useState(0);
-  const [updating, setUpdating] = useState(false);
+  const [updating, setUpdatingState] = useState(false);
+  const updatingRef = useRef(false);
+  const settledRef = useRef(false);
+  function setUpdating(value: boolean) {
+    updatingRef.current = value;
+    setUpdatingState(value);
+  }
 
   const balance = player?.gold ?? 0;
   const dateKey = useMemo(() => buildScratchDateKey(), []);
   const maxAllowedBet = Math.max(1, balance);
   const safeBet = clamp(Math.round(bet || 0), 1, maxAllowedBet);
-  const canShoot = Boolean(player && phase === "aiming" && safeBet > 0 && safeBet <= balance && !updating);
+  const canShoot = Boolean(player && phase === "aiming" && lockedBet > 0 && !updating);
   const currentMultiplier = getRoundMultiplier(roundIndex);
   const remainingDailyNet = Math.max(0, MAX_DAILY_PENALTY_WIN_LIMIT - dailyNetWins);
   const limitReached = dailyNetWins >= MAX_DAILY_PENALTY_WIN_LIMIT;
@@ -487,6 +493,7 @@ export function TavernPenalty() {
   }
 
   async function handleRefresh() {
+    if (updatingRef.current) return;
     setUpdating(true);
     await refreshPlayer();
     if (player) {
@@ -495,11 +502,19 @@ export function TavernPenalty() {
     setUpdating(false);
   }
 
-  function startAiming() {
-    if (!player || safeBet > balance || updating || limitReached) {
+  async function startAiming() {
+    if (!player || safeBet > balance || updatingRef.current || limitReached || phase !== "betting") {
       return;
     }
 
+    setUpdating(true);
+    const debited = await addPlayerGold(-safeBet).catch(() => null);
+    setUpdating(false);
+    if (!debited) {
+      setMessage("No se pudo reservar la apuesta. Refresca tu perfil.");
+      return;
+    }
+    settledRef.current = false;
     setBet(safeBet);
     setLockedBet(safeBet);
     setRoundIndex(0);
@@ -518,10 +533,11 @@ export function TavernPenalty() {
   }
 
   function shoot() {
-    if (!canShoot || !shotState.shot || !player) {
+    if (!canShoot || !shotState.shot || !player || updatingRef.current) {
       return;
     }
 
+    setUpdating(true);
     timeoutRefs.current.forEach((id) => window.clearTimeout(id));
     timeoutRefs.current = [];
     const shot = shotState.shot;
@@ -556,7 +572,7 @@ export function TavernPenalty() {
       const rawNetWin = result === "goal" ? Math.floor(stake * (currentMultiplier - 1)) : 0;
       const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
       const prize = result === "goal" ? stake + cappedNetWin : 0;
-      const updated = await addPlayerGold(-stake + prize);
+      const updated = await addPlayerGold(prize).catch(() => null);
 
       if (!updated) {
         setMessage("No se pudo actualizar el oro. Refresca tu perfil.");
@@ -565,6 +581,7 @@ export function TavernPenalty() {
         return;
       }
 
+      settledRef.current = true;
       setPhase("resolved");
       if (result === "goal") {
         if (cappedNetWin > 0) {
@@ -586,7 +603,7 @@ export function TavernPenalty() {
   }
 
   function continueRun() {
-    if (phase !== "resolved" || shotState.result !== "goal" || roundIndex >= MAX_ROUNDS - 1) {
+    if (updatingRef.current || settledRef.current || phase !== "resolved" || shotState.result !== "goal" || roundIndex >= MAX_ROUNDS - 1) {
       return;
     }
 
@@ -598,7 +615,7 @@ export function TavernPenalty() {
   }
 
   async function cashOutRun() {
-    if (!player || phase !== "resolved" || shotState.result !== "goal" || updating) {
+    if (!player || phase !== "resolved" || shotState.result !== "goal" || updatingRef.current || settledRef.current) {
       return;
     }
 
@@ -607,7 +624,7 @@ export function TavernPenalty() {
     const rawNetWin = Math.floor(stake * (currentMultiplier - 1));
     const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
     const prize = stake + cappedNetWin;
-    const updated = await addPlayerGold(-stake + prize);
+    const updated = await addPlayerGold(prize).catch(() => null);
 
     if (!updated) {
       setMessage("No se pudo cobrar. Refresca tu perfil.");
@@ -615,6 +632,7 @@ export function TavernPenalty() {
       return;
     }
 
+    settledRef.current = true;
     if (cappedNetWin > 0) {
       const nextDailyWins = addPlayerDailyPenaltyNetWins(player.id, dateKey, cappedNetWin);
       setDailyNetWins(nextDailyWins);
@@ -629,6 +647,7 @@ export function TavernPenalty() {
   }
 
   function resetRound() {
+    if (updatingRef.current || (roundIndex === MAX_ROUNDS - 1 && shotState.result === "goal" && !settledRef.current)) return;
     timeoutRefs.current.forEach((id) => window.clearTimeout(id));
     timeoutRefs.current = [];
     setPhase("betting");
@@ -811,11 +830,12 @@ export function TavernPenalty() {
                   Disparar
                 </button>
               ) : null}
-              {phase === "resolved" && shotState.result === "goal" && roundIndex < MAX_ROUNDS - 1 ? (
+              {phase === "resolved" && shotState.result === "goal" && !settledRef.current ? (
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={continueRun}
+                    disabled={updating || roundIndex >= MAX_ROUNDS - 1}
                     className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-3 py-3 text-sm font-black text-black transition active:scale-[0.98]"
                   >
                     Seguir
@@ -834,6 +854,7 @@ export function TavernPenalty() {
                 <button
                   type="button"
                   onClick={resetRound}
+                  disabled={updating || (roundIndex === MAX_ROUNDS - 1 && shotState.result === "goal" && !settledRef.current)}
                   className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-sm font-black text-black transition active:scale-[0.98]"
                 >
                   <RefreshCw className="h-4 w-4" />

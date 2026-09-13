@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Box,
   Castle,
@@ -266,6 +266,8 @@ const PurchaseModal = lazy(() =>
 
 export function MarketSection() {
   const { player } = usePlayerSession();
+  const reduceMotion = useReducedMotion();
+  const [hasOpenedTavern, setHasOpenedTavern] = useState(false);
   const isRoleplayLocked = Boolean(player?.roleplayAccess?.isLocked);
   const marketRevealRef = useRef<HTMLElement | null>(null);
   const nativeApp = isNativeApp();
@@ -568,7 +570,8 @@ export function MarketSection() {
 
       <details
         data-gsap-market
-        className="kd-glass kd-hover-lift group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-6"
+        onToggle={(event) => { if (event.currentTarget.open) setHasOpenedTavern(true); }}
+        className="kd-glass kd-tavern group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-4 sm:p-6"
       >
         <summary className="kd-touch flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
@@ -579,7 +582,8 @@ export function MarketSection() {
               <p className="text-xs uppercase tracking-[0.2em] text-amber-400/80">
                 Taberna clandestina
               </p>
-              <h3 className="mt-2 text-xl font-bold text-stone-100">Juegos de azar</h3>
+              <h3 className="mt-2 text-xl font-bold text-stone-100">Elige tu mesa</h3>
+              <p className="mt-1 text-sm text-stone-400">Azar, estrategia y aventuras del reino.</p>
             </div>
           </div>
           <div className="flex shrink-0 items-center justify-end sm:justify-start">
@@ -590,7 +594,7 @@ export function MarketSection() {
         </summary>
 
         <div className="mt-5 border-t border-stone-800 pt-5">
-          <div className="flex w-full gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="kd-tavern-selector" role="group" aria-label="Elegir juego de la Taberna">
             {tavernModes.map((mode) => {
               const Icon = mode.icon;
               const active = tavernMode === mode.id;
@@ -611,7 +615,7 @@ export function MarketSection() {
                         }
                       : undefined
                   }
-                  className={`kd-touch relative flex min-w-[4.9rem] max-w-[5.4rem] shrink-0 flex-col items-center gap-1 overflow-hidden rounded-2xl border px-2 py-2 text-center transition sm:min-w-[8.2rem] sm:max-w-none sm:items-start sm:gap-2 sm:px-3 sm:py-3 sm:text-left ${
+                  className={`kd-touch kd-tavern-option relative flex flex-col items-start gap-2 overflow-hidden rounded-2xl border p-3 text-left transition ${
                     active
                       ? "text-stone-100"
                       : "border-stone-800 bg-stone-950/55 text-stone-400 hover:border-stone-600 hover:bg-stone-900/70 hover:text-stone-200"
@@ -619,7 +623,9 @@ export function MarketSection() {
                 >
                   {/* Barra superior de acento del color del juego en el boton activo */}
                   {active ? (
-                    <span
+                    <motion.span
+                      layoutId="tavern-selection"
+                      transition={{ duration: reduceMotion ? 0 : 0.2 }}
                       className="pointer-events-none absolute inset-x-0 top-0 h-0.5"
                       style={{ background: `linear-gradient(90deg, transparent, rgb(${accent}), transparent)` }}
                     />
@@ -630,7 +636,7 @@ export function MarketSection() {
                       style={{ color: active ? `rgb(${accent})` : undefined }}
                     />
                     <span
-                      className="rounded-full border px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.08em] sm:px-2 sm:text-[9px] sm:tracking-[0.12em]"
+                      className="rounded-full border px-1.5 py-0.5 text-[10px] font-black uppercase tracking-[0.08em] sm:px-2 sm:text-[10px] sm:tracking-[0.12em]"
                       style={{
                         borderColor: `rgb(${accent} / 0.4)`,
                         background: `rgb(${accent} / 0.12)`,
@@ -640,7 +646,7 @@ export function MarketSection() {
                       {mode.status}
                     </span>
                   </span>
-                  <span className="block w-full truncate text-[10px] font-black uppercase tracking-[0.08em] sm:text-xs sm:tracking-[0.14em]">
+                  <span className="block w-full truncate text-xs font-black uppercase tracking-[0.08em] sm:text-xs sm:tracking-[0.14em]">
                     <span className="sm:hidden">{mode.shortLabel}</span>
                     <span className="hidden sm:inline">{mode.label}</span>
                   </span>
@@ -654,16 +660,18 @@ export function MarketSection() {
               <button
                 type="button"
                 onClick={() => setIsTavernInfoOpen((current) => !current)}
+                aria-expanded={isTavernInfoOpen}
+                aria-controls="tavern-mode-description"
                 className="kd-touch flex w-full items-center justify-between gap-3 text-left text-xs font-bold uppercase tracking-[0.16em] text-stone-300"
               >
                 <span className="inline-flex items-center gap-2">
                   <Info className="h-4 w-4 text-amber-300" />
-                  Info del modo
+                  {currentTavernMode.label}
                 </span>
                 <ChevronDown className={`h-4 w-4 transition ${isTavernInfoOpen ? "rotate-180 text-amber-300" : "text-stone-500"}`} />
               </button>
               {isTavernInfoOpen ? (
-                <p className="mt-3 text-sm leading-6 text-stone-400">
+                <p id="tavern-mode-description" className="mt-3 text-sm leading-6 text-stone-400">
                   {currentTavernMode.description}
                 </p>
               ) : null}
@@ -671,9 +679,15 @@ export function MarketSection() {
           ) : null}
 
           <div className="mt-5 pb-[calc(env(safe-area-inset-bottom)+7rem)] md:pb-0">
-            <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la mesa de juego..." />}>
-              {tavernContent}
-            </Suspense>
+            {hasOpenedTavern ? (
+              <motion.div key={`${tavernMode}:${player?.id ?? "guest"}`}
+                initial={reduceMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18 }} role="region" aria-label={currentTavernMode.label}>
+                <Suspense fallback={<EmbeddedLoadingCard message="Abriendo la mesa de juego..." />}>
+                  {tavernContent}
+                </Suspense>
+              </motion.div>
+            ) : null}
           </div>
         </div>
       </details>

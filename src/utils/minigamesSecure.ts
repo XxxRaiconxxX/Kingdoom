@@ -1,11 +1,5 @@
-import { buildScratchDateKey, getPlayerDailyCardsGrossWins, MAX_DAILY_CARDS_WIN_LIMIT } from "./scratchUtils";
-import { fetchPlayerByUsername, updatePlayerGold } from "./players";
-
-const PLAYER_STORAGE_KEY = "kingdoom.active-player";
-const CARDS_SESSION_KEY = "kingdoom.cards.session.v1";
-const CHEST_STREAK_KEY = "kingdoom.chests.streak.v1";
-const CRASH_STATE_KEY = "kingdoom.crash.state.v1";
-const CRASH_HISTORY_KEY = "kingdoom.crash.history.v1";
+import { supabase } from "./supabaseClient";
+import { fetchPlayerByUsername } from "./players";
 
 export type CardsSessionState = {
   bet: number;
@@ -30,18 +24,6 @@ export type CardsActionResult =
       message: string;
     };
 
-export type RouletteSpinResult =
-  | {
-      status: "success";
-      multiplier: number;
-      winnings: number;
-      remainingGold: number;
-    }
-  | {
-      status: "error";
-      message: string;
-    };
-
 export type ChestRoundResult =
   | {
       status: "success";
@@ -56,635 +38,75 @@ export type ChestRoundResult =
       message: string;
     };
 
-export type CrashSessionStateResult =
-  | {
-      status: "success";
-      session: {
-        phase: "betting" | "starting" | "rising" | "crashed" | "cashed_out";
-        bet: number;
-        multiplier: number;
-        lastWin: number;
-        autoCashOut: number;
-        startedAt?: number;
-      };
-      remainingGold: number;
-      history: number[];
-    }
-  | {
-      status: "error";
-      message: string;
-    };
-
-type StoredCardsSession = Omit<CardsSessionState, "dailyWins" | "remainingNet">;
-type CardsStore = Record<string, StoredCardsSession>;
-type NumberStore = Record<string, number>;
-type CrashState = {
-  phase: "betting" | "starting" | "rising" | "crashed" | "cashed_out";
-  bet: number;
-  multiplier: number;
-  lastWin: number;
-  autoCashOut: number;
-  startedAt?: number;
-  crashAt?: number;
-};
-type CrashStore = Record<string, CrashState>;
-type CrashHistoryStore = Record<string, number[]>;
-
-function readJsonStore<T>(key: string): T {
-  if (typeof window === "undefined") {
-    return {} as T;
-  }
-
+// RPCs resolve RNG, balance and session together; never write a browser-computed balance.
+export async function requestGameRpc(name: string, args: Record<string, string | number> = {}) {
   try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : ({} as T);
-  } catch {
-    return {} as T;
-  }
-}
-
-function writeJsonStore<T>(key: string, store: T) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.localStorage.setItem(key, JSON.stringify(store));
-}
-
-async function getActivePlayer() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const username = window.localStorage.getItem(PLAYER_STORAGE_KEY)?.trim();
-  if (!username) {
-    return null;
-  }
-
-  return fetchPlayerByUsername(username);
-}
-
-function getRandomCard(exclude?: number) {
-  let card = Math.floor(Math.random() * 15) + 1;
-  if (typeof exclude === "number") {
-    while (card === exclude) {
-      card = Math.floor(Math.random() * 15) + 1;
+    const username = window.localStorage.getItem("kingdoom.active-player")?.trim();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!username || !session) throw new Error("Conecta tu perfil y su sesi?n aprobada antes de jugar.");
+    const player = await fetchPlayerByUsername(username);
+    if (player?.authUserId !== session.user.id) {
+      throw new Error("El staff debe aprobar este navegador como sesi?n principal del perfil antes de jugar.");
     }
+    const { data, error } = await supabase.rpc(name, args);
+    if (error) throw new Error(error.message);
+    const row: Record<string, unknown> | null = Array.isArray(data) ? data[0] : data;
+    if (!row || typeof row !== "object") throw new Error("El servidor no devolvi? un resultado. Refresca tu saldo antes de reintentar.");
+    return { status: "success" as const, row };
+  } catch (error) {
+    return { status: "error" as const, message: error instanceof Error ? error.message : "No se pudo confirmar la partida. Refresca tu saldo antes de reintentar." };
   }
-  return card;
 }
 
-function getCardsSession(playerId: string): StoredCardsSession {
-  const store = readJsonStore<CardsStore>(CARDS_SESSION_KEY);
-  return (
-    store[playerId] ?? {
-      bet: 0,
-      pool: 0,
-      streak: 0,
-      currentCard: 0,
-      nextCard: 0,
-      phase: "betting",
-    }
-  );
+function validAmounts(values: unknown[]) {
+  return values.every(value => Number.isSafeInteger(value) && Number(value) >= 0);
 }
 
-function saveCardsSession(playerId: string, session: StoredCardsSession) {
-  const store = readJsonStore<CardsStore>(CARDS_SESSION_KEY);
-  store[playerId] = session;
-  writeJsonStore(CARDS_SESSION_KEY, store);
-}
-
-function buildCardsResponse(playerId: string, remainingGold: number, session: StoredCardsSession): CardsActionResult {
-  const dateKey = buildScratchDateKey();
-  const dailyWins = getPlayerDailyCardsGrossWins(playerId, dateKey);
+async function cardsAction(name: string, args?: Record<string, string | number>): Promise<CardsActionResult> {
+  const result = await requestGameRpc(name, args);
+  if (result.status === "error") return result;
+  const r = result.row;
+  if (!validAmounts([r.bet_amount, r.pool_amount, r.streak_count, r.current_card, r.next_card,
+    r.daily_wins, r.remaining_net_limit, r.remaining_gold]) ||
+    !["betting", "playing", "choice", "gameOver"].includes(String(r.phase_state))) {
+    return { status: "error", message: "Respuesta de Cartas inv?lida. Actualiza la partida." };
+  }
   return {
-    status: "success",
-    remainingGold,
+    status: "success", remainingGold: Number(r.remaining_gold),
+    ...(r.cashout_amount !== undefined ? { cashoutAmount: Number(r.cashout_amount) } : {}),
     session: {
-      ...session,
-      dailyWins,
-      remainingNet: Math.max(0, MAX_DAILY_CARDS_WIN_LIMIT - dailyWins),
+      bet: Number(r.bet_amount), pool: Number(r.pool_amount), streak: Number(r.streak_count),
+      currentCard: Number(r.current_card), nextCard: Number(r.next_card),
+      phase: r.phase_state as CardsSessionState["phase"], dailyWins: Number(r.daily_wins),
+      remainingNet: Number(r.remaining_net_limit),
     },
   };
 }
 
-function chooseRouletteMultiplier() {
-  const roll = Math.random();
-  if (roll < 0.485) return 0;
-  if (roll < 0.685) return 0.5;
-  if (roll < 0.885) return 2;
-  if (roll < 0.965) return 3;
-  if (roll < 0.995) return 5;
-  return 10;
+export const fetchCardsSession = () => cardsAction("get_cards_session_state");
+export const continueCardsSecure = () => cardsAction("continue_cards_game");
+export const cashOutCardsSecure = () => cardsAction("cash_out_cards_game");
+export const guessCardsSecure = (guess: "higher" | "lower") => cardsAction("guess_cards_round", { p_guess: guess });
+export function startCardsGameSecure(bet: number): Promise<CardsActionResult> {
+  if (!Number.isSafeInteger(bet) || bet < 1 || bet > 2147483647) {
+    return Promise.resolve({ status: "error", message: "La apuesta debe ser un entero positivo." });
+  }
+  return cardsAction("start_cards_game", { p_bet: bet });
 }
 
-function getChestStreak(playerId: string) {
-  const store = readJsonStore<NumberStore>(CHEST_STREAK_KEY);
-  return Number(store[playerId] ?? 0);
-}
-
-function setChestStreak(playerId: string, value: number) {
-  const store = readJsonStore<NumberStore>(CHEST_STREAK_KEY);
-  store[playerId] = value;
-  writeJsonStore(CHEST_STREAK_KEY, store);
-}
-
-function weightedChestResult(streak: number): "x2" | "x1" | "x0" {
-  const difficultyLevel = Math.floor(streak / 2);
-  const x2Chance = Math.max(0.12, 0.34 - difficultyLevel * 0.06);
-  const x1Chance = Math.max(0.22, 0.41 - difficultyLevel * 0.03);
-  const roll = Math.random();
-
-  if (roll < x2Chance) {
-    return "x2";
+export async function playChestRoundSecure(input: { bet: number; selectedChest: number }): Promise<ChestRoundResult> {
+  if (!Number.isSafeInteger(input.bet) || input.bet < 1 || input.bet > 1073741823 ||
+    !Number.isInteger(input.selectedChest) || input.selectedChest < 0 || input.selectedChest > 2) {
+    return { status: "error", message: "Apuesta o cofre inv?lido." };
   }
-
-  if (roll < x2Chance + x1Chance) {
-    return "x1";
+  const result = await requestGameRpc("play_chest_round", { p_bet: input.bet, p_selected_chest: input.selectedChest });
+  if (result.status === "error") return result;
+  const r = result.row;
+  if (!validAmounts([r.selected_chest, r.payout, r.remaining_gold, r.next_streak]) ||
+    r.selected_chest !== input.selectedChest || !Array.isArray(r.chest_results) || r.chest_results.length !== 3 ||
+    !r.chest_results.every(value => ["x0", "x1", "x2"].includes(value))) {
+    return { status: "error", message: "Respuesta de Cofres inv?lida. Actualiza tu saldo." };
   }
-
-  return "x0";
-}
-
-function getCrashState(playerId: string): CrashState {
-  const store = readJsonStore<CrashStore>(CRASH_STATE_KEY);
-  return (
-    store[playerId] ?? {
-      phase: "betting",
-      bet: 0,
-      multiplier: 1,
-      lastWin: 0,
-      autoCashOut: 0,
-    }
-  );
-}
-
-function saveCrashState(playerId: string, state: CrashState) {
-  const store = readJsonStore<CrashStore>(CRASH_STATE_KEY);
-  store[playerId] = state;
-  writeJsonStore(CRASH_STATE_KEY, store);
-}
-
-function getCrashHistory(playerId: string) {
-  const store = readJsonStore<CrashHistoryStore>(CRASH_HISTORY_KEY);
-  return store[playerId] ?? [];
-}
-
-function pushCrashHistory(playerId: string, value: number) {
-  const store = readJsonStore<CrashHistoryStore>(CRASH_HISTORY_KEY);
-  const next = [value, ...(store[playerId] ?? [])].slice(0, 12);
-  store[playerId] = next;
-  writeJsonStore(CRASH_HISTORY_KEY, store);
-  return next;
-}
-
-export function getCrashGrowthMultiplier(elapsedSeconds: number) {
-  const safeElapsed = Math.max(0, elapsedSeconds);
-  return Number(Math.exp(safeElapsed * 0.17).toFixed(2));
-}
-
-function randomCrashAt() {
-  const roll = Math.random();
-  if (roll < 0.05) return 1.01;
-  if (roll < 0.39) return 1.05 + Math.random() * 1.25;
-  if (roll < 0.72) return 2.30 + Math.random() * 1.9;
-  if (roll < 0.94) return 4.2 + Math.random() * 4.0;
-  return 8.2 + Math.random() * 9.8;
-}
-
-async function resolveCrashState(playerId: string, playerGold: number) {
-  const state = getCrashState(playerId);
-  if (state.phase !== "rising" || !state.startedAt || !state.crashAt) {
-    return {
-      state,
-      history: getCrashHistory(playerId),
-      remainingGold: playerGold,
-    };
-  }
-
-  const elapsedSeconds = Math.max(0, (Date.now() - state.startedAt) / 1000);
-  const growth = getCrashGrowthMultiplier(elapsedSeconds);
-  const autoTarget = state.autoCashOut >= 1.01 ? state.autoCashOut : null;
-
-  if (autoTarget && growth >= autoTarget) {
-    const payout = Math.floor(state.bet * autoTarget);
-    const remainingGold = playerGold + payout;
-    await updatePlayerGold(playerId, remainingGold);
-    const nextState: CrashState = {
-      ...state,
-      phase: "cashed_out",
-      multiplier: Number(autoTarget.toFixed(2)),
-      lastWin: payout,
-    };
-    const history = pushCrashHistory(playerId, Number(autoTarget.toFixed(2)));
-    saveCrashState(playerId, nextState);
-    return { state: nextState, history, remainingGold };
-  }
-
-  if (growth >= state.crashAt) {
-    const crashPoint = Number(state.crashAt.toFixed(2));
-    const nextState: CrashState = {
-      ...state,
-      phase: "crashed",
-      multiplier: crashPoint,
-      lastWin: 0,
-    };
-    const history = pushCrashHistory(playerId, crashPoint);
-    saveCrashState(playerId, nextState);
-    return { state: nextState, history, remainingGold: playerGold };
-  }
-
-  const nextState: CrashState = {
-    ...state,
-    multiplier: growth,
-  };
-  saveCrashState(playerId, nextState);
-  return {
-    state: nextState,
-    history: getCrashHistory(playerId),
-    remainingGold: playerGold,
-  };
-}
-
-export async function fetchCardsSession(): Promise<CardsActionResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar Cartas." };
-  }
-
-  return buildCardsResponse(player.id, player.gold, getCardsSession(player.id));
-}
-
-export async function startCardsGameSecure(
-  bet: number
-): Promise<CardsActionResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar Cartas." };
-  }
-
-  const safeBet = Math.max(1, Math.floor(bet));
-  if (player.gold < safeBet) {
-    return { status: "error", message: "No tienes oro suficiente para esa apuesta." };
-  }
-
-  const updated = await updatePlayerGold(player.id, player.gold - safeBet);
-  if (!updated) {
-    return { status: "error", message: "No se pudo descontar el oro para iniciar Cartas." };
-  }
-
-  const session: StoredCardsSession = {
-    bet: safeBet,
-    pool: safeBet,
-    streak: 0,
-    currentCard: getRandomCard(),
-    nextCard: 0,
-    phase: "playing",
-  };
-  saveCardsSession(player.id, session);
-  return buildCardsResponse(player.id, player.gold - safeBet, session);
-}
-
-export async function guessCardsSecure(
-  guess: "higher" | "lower"
-): Promise<CardsActionResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar Cartas." };
-  }
-
-  const session = getCardsSession(player.id);
-  if (session.phase !== "playing" || session.bet <= 0 || session.currentCard <= 0) {
-    return { status: "error", message: "No hay una partida activa de Cartas para resolver." };
-  }
-
-  const nextCard = getRandomCard(session.currentCard);
-  const success =
-    guess === "higher" ? nextCard > session.currentCard : nextCard < session.currentCard;
-
-  if (!success) {
-    const nextSession: StoredCardsSession = {
-      ...session,
-      nextCard,
-      phase: "gameOver",
-    };
-    saveCardsSession(player.id, nextSession);
-    return buildCardsResponse(player.id, player.gold, nextSession);
-  }
-
-  const streak = session.streak + 1;
-  const bonus = Math.max(10, Math.floor(session.bet * (0.7 + streak * 0.15)));
-  const nextSession: StoredCardsSession = {
-    ...session,
-    streak,
-    nextCard,
-    pool: session.pool + bonus,
-    phase: "choice",
-  };
-  saveCardsSession(player.id, nextSession);
-  return buildCardsResponse(player.id, player.gold, nextSession);
-}
-
-export async function continueCardsSecure(): Promise<CardsActionResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar Cartas." };
-  }
-
-  const session = getCardsSession(player.id);
-  if (session.phase !== "choice") {
-    return { status: "error", message: "La partida de Cartas no esta esperando tu decision." };
-  }
-
-  const nextSession: StoredCardsSession = {
-    ...session,
-    currentCard: session.nextCard,
-    nextCard: 0,
-    phase: "playing",
-  };
-  saveCardsSession(player.id, nextSession);
-  return buildCardsResponse(player.id, player.gold, nextSession);
-}
-
-export async function cashOutCardsSecure(): Promise<CardsActionResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar Cartas." };
-  }
-
-  const session = getCardsSession(player.id);
-  if (session.phase !== "choice") {
-    return { status: "error", message: "Todavia no puedes cobrar esta partida." };
-  }
-
-  const dateKey = buildScratchDateKey();
-  const dailyWins = getPlayerDailyCardsGrossWins(player.id, dateKey);
-  const remainingNet = Math.max(0, MAX_DAILY_CARDS_WIN_LIMIT - dailyWins);
-  const rawNetWin = Math.max(0, session.pool - session.bet);
-  const cappedNetWin = Math.min(rawNetWin, remainingNet);
-  const cashoutAmount = session.bet + cappedNetWin;
-  const nextGold = player.gold + cashoutAmount;
-
-  const updated = await updatePlayerGold(player.id, nextGold);
-  if (!updated) {
-    return { status: "error", message: "No se pudo pagar el cobro de Cartas." };
-  }
-
-  if (cappedNetWin > 0 && typeof window !== "undefined") {
-    const current = getPlayerDailyCardsGrossWins(player.id, dateKey);
-    window.localStorage.setItem(
-      `kingdoom.daily-cards.${player.id}.${dateKey}`,
-      String(current + cappedNetWin)
-    );
-  }
-
-  const resetSession: StoredCardsSession = {
-    bet: 0,
-    pool: 0,
-    streak: 0,
-    currentCard: 0,
-    nextCard: 0,
-    phase: "betting",
-  };
-  saveCardsSession(player.id, resetSession);
-  const response = buildCardsResponse(player.id, nextGold, resetSession);
-  if (response.status === "error") {
-    return response;
-  }
-
-  return {
-    ...response,
-    cashoutAmount,
-  };
-}
-
-export async function spinRouletteSecure(
-  bet: number
-): Promise<RouletteSpinResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar la Ruleta." };
-  }
-
-  const safeBet = Math.max(1, Math.floor(bet));
-  if (player.gold < safeBet) {
-    return { status: "error", message: "No tienes oro suficiente para esa apuesta." };
-  }
-
-  const multiplier = chooseRouletteMultiplier();
-  const winnings = Math.floor(safeBet * multiplier);
-  const remainingGold = Math.max(0, player.gold - safeBet + winnings);
-  const updated = await updatePlayerGold(player.id, remainingGold);
-
-  if (!updated) {
-    return { status: "error", message: "No se pudo actualizar el oro tras girar la ruleta." };
-  }
-
-  return {
-    status: "success",
-    multiplier,
-    winnings,
-    remainingGold,
-  };
-}
-
-export async function playChestRoundSecure(input: {
-  bet: number;
-  selectedChest: number;
-}): Promise<ChestRoundResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de abrir cofres." };
-  }
-
-  const safeBet = Math.max(1, Math.floor(input.bet));
-  if (player.gold < safeBet) {
-    return { status: "error", message: "No tienes oro suficiente para abrir esa ronda." };
-  }
-
-  const currentStreak = getChestStreak(player.id);
-  const selectedResult = weightedChestResult(currentStreak);
-  const otherResults: Array<"x2" | "x1" | "x0"> = [weightedChestResult(currentStreak), weightedChestResult(currentStreak)];
-  const chestResults: Array<"x2" | "x1" | "x0"> = [otherResults[0], otherResults[1], otherResults[1]];
-  chestResults[input.selectedChest] = selectedResult;
-  chestResults[(input.selectedChest + 1) % 3] = otherResults[0];
-  chestResults[(input.selectedChest + 2) % 3] = otherResults[1];
-
-  const payout = selectedResult === "x2" ? safeBet * 2 : selectedResult === "x1" ? safeBet : 0;
-  const remainingGold = Math.max(0, player.gold - safeBet + payout);
-  const updated = await updatePlayerGold(player.id, remainingGold);
-
-  if (!updated) {
-    return { status: "error", message: "No se pudo actualizar el oro tras abrir el cofre." };
-  }
-
-  const nextStreak = payout > 0 ? currentStreak + 1 : 0;
-  setChestStreak(player.id, nextStreak);
-
-  return {
-    status: "success",
-    selectedChest: input.selectedChest,
-    chestResults,
-    payout,
-    remainingGold,
-    nextStreak,
-  };
-}
-
-export async function fetchCrashSessionState(): Promise<CrashSessionStateResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar Crash." };
-  }
-
-  const resolved = await resolveCrashState(player.id, player.gold);
-  return {
-    status: "success",
-    session: {
-      phase: resolved.state.phase,
-      bet: resolved.state.bet,
-      multiplier: resolved.state.multiplier,
-      lastWin: resolved.state.lastWin,
-      autoCashOut: resolved.state.autoCashOut,
-      startedAt: resolved.state.startedAt,
-    },
-    remainingGold: resolved.remainingGold,
-    history: resolved.history,
-  };
-}
-
-export async function startCrashGameSecure(input: {
-  bet: number;
-  autoCashOut: number;
-}): Promise<CrashSessionStateResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar Crash." };
-  }
-
-  const safeBet = Math.max(1, Math.floor(input.bet));
-  if (player.gold < safeBet) {
-    return { status: "error", message: "No tienes oro suficiente para esa ronda de Crash." };
-  }
-
-  const remainingGold = player.gold - safeBet;
-  const updated = await updatePlayerGold(player.id, remainingGold);
-  if (!updated) {
-    return { status: "error", message: "No se pudo descontar el oro para iniciar Crash." };
-  }
-
-  const state: CrashState = {
-    phase: "rising",
-    bet: safeBet,
-    multiplier: 1,
-    lastWin: 0,
-    autoCashOut: input.autoCashOut >= 1.01 ? Number(input.autoCashOut.toFixed(2)) : 0,
-    startedAt: Date.now(),
-    crashAt: Number(randomCrashAt().toFixed(2)),
-  };
-  saveCrashState(player.id, state);
-
-  return {
-    status: "success",
-    session: {
-      phase: state.phase,
-      bet: state.bet,
-      multiplier: state.multiplier,
-      lastWin: state.lastWin,
-      autoCashOut: state.autoCashOut,
-      startedAt: state.startedAt,
-    },
-    remainingGold,
-    history: getCrashHistory(player.id),
-  };
-}
-
-export async function cashOutCrashSecure(input?: {
-  multiplier?: number;
-  requestedAt?: number;
-}): Promise<CrashSessionStateResult> {
-  const player = await getActivePlayer();
-  if (!player) {
-    return { status: "error", message: "Conecta tu perfil del reino antes de usar Crash." };
-  }
-
-  const state = getCrashState(player.id);
-  if (state.phase !== "rising" || !state.startedAt || !state.crashAt) {
-    const resolved = await resolveCrashState(player.id, player.gold);
-    return {
-      status: "success",
-      session: {
-        phase: resolved.state.phase,
-        bet: resolved.state.bet,
-        multiplier: resolved.state.multiplier,
-        lastWin: resolved.state.lastWin,
-        autoCashOut: resolved.state.autoCashOut,
-        startedAt: resolved.state.startedAt,
-      },
-      remainingGold: resolved.remainingGold,
-      history: resolved.history,
-    };
-  }
-
-  const requestedAt = input?.requestedAt ?? Date.now();
-  const elapsedAtRequest = Math.max(0, (requestedAt - state.startedAt) / 1000);
-  const requestGrowth = getCrashGrowthMultiplier(elapsedAtRequest);
-  const crashPoint = Number(state.crashAt.toFixed(2));
-
-  if (requestGrowth >= state.crashAt) {
-    const nextState: CrashState = {
-      ...state,
-      phase: "crashed",
-      multiplier: crashPoint,
-      lastWin: 0,
-    };
-    const history = pushCrashHistory(player.id, crashPoint);
-    saveCrashState(player.id, nextState);
-
-    return {
-      status: "success",
-      session: {
-        phase: nextState.phase,
-        bet: nextState.bet,
-        multiplier: nextState.multiplier,
-        lastWin: nextState.lastWin,
-        autoCashOut: nextState.autoCashOut,
-        startedAt: nextState.startedAt,
-      },
-      remainingGold: player.gold,
-      history,
-    };
-  }
-
-  const clickedMultiplier = input?.multiplier && input.multiplier >= 1 ? input.multiplier : requestGrowth;
-  const cashOutMultiplier = Number(Math.min(clickedMultiplier, requestGrowth).toFixed(2));
-  const payout = Math.floor(state.bet * cashOutMultiplier);
-  const remainingGold = player.gold + payout;
-  const updated = await updatePlayerGold(player.id, remainingGold);
-  if (!updated) {
-    return { status: "error", message: "No se pudo asegurar el retiro en Crash." };
-  }
-
-  const nextState: CrashState = {
-    ...state,
-    phase: "cashed_out",
-    multiplier: cashOutMultiplier,
-    lastWin: payout,
-  };
-  const history = pushCrashHistory(player.id, Number(nextState.multiplier.toFixed(2)));
-  saveCrashState(player.id, nextState);
-
-  return {
-    status: "success",
-    session: {
-      phase: nextState.phase,
-      bet: nextState.bet,
-      multiplier: nextState.multiplier,
-      lastWin: nextState.lastWin,
-      autoCashOut: nextState.autoCashOut,
-      startedAt: nextState.startedAt,
-    },
-    remainingGold,
-    history,
-  };
+  return { status: "success", selectedChest: Number(r.selected_chest),
+    chestResults: r.chest_results, payout: Number(r.payout), remainingGold: Number(r.remaining_gold), nextStreak: Number(r.next_streak) };
 }

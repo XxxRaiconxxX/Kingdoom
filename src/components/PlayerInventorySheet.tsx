@@ -50,7 +50,7 @@ export function PlayerInventorySheet({
 }: {
   onClose: () => void;
 }) {
-  const { player, inventoryRefreshToken } = usePlayerSession();
+  const { player, refreshPlayer, inventoryRefreshToken } = usePlayerSession();
   const playerId = player?.id ?? null;
 
   // --- Inventory state ---
@@ -356,9 +356,10 @@ export function PlayerInventorySheet({
               mode: mode as PayInstallmentMode,
               advanceCount: advCount,
             });
+            if (res.status === "success") await refreshPlayer();
             return res;
           }}
-          onSuccess={async ({ planCompleted, planId, newPlayerGold }) => {
+          onSuccess={async ({ planCompleted }) => {
             setPayingPlan(null);
             // Refresh plans and inventory
             if (!playerId) return;
@@ -376,8 +377,6 @@ export function PlayerInventorySheet({
               setPlans(plansResult.plans);
               setPlansStatus(plansResult.plans.length === 0 ? "empty" : "ready");
             }
-            // Update player gold in local state via re-fetch (gold is in player context)
-            void newPlayerGold; // consumed by modal; context will re-sync on next load
           }}
         />
       )}

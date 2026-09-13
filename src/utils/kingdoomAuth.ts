@@ -50,18 +50,23 @@ export async function activateKingdoomAccount(input: {
     return result;
   }
 
-  if (result.data.session) {
-    const { data: linked, error: linkError } = await supabase.rpc(
-      "link_player_access",
-      { p_player_id: verified }
-    );
+  if (!result.data.session) {
+    return {
+      data: null,
+      error: new Error("La cuenta requiere confirmacion de correo en Supabase; desactiva esa confirmacion para el acceso del reino."),
+    };
+  }
 
-    if (linkError || linked !== true) {
-      return {
-        data: null,
-        error: linkError ?? new Error("La cuenta no pudo vincularse al perfil."),
-      };
-    }
+  const { data: linked, error: linkError } = await supabase.rpc(
+    "link_player_access",
+    { p_player_id: verified }
+  );
+
+  if (linkError || linked !== true) {
+    return {
+      data: null,
+      error: linkError ?? new Error("La cuenta no pudo vincularse al perfil."),
+    };
   }
 
   return result;

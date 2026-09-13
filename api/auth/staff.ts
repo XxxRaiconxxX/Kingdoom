@@ -44,9 +44,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   let userId = player.auth_user_id as string | null;
   if (!userId) {
-    const { data: users, error: usersError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const { data: usersData, error: usersError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (usersError) return res.status(502).json({ message: "No se pudo consultar Auth." });
-    userId = users.users.find((user) => user.email === authEmail(player.username))?.id ?? null;
+    const users = (usersData?.users ?? []) as Array<{ id: string; email?: string | null }>;
+    userId = users.find((user) => user.email === authEmail(player.username))?.id ?? null;
   }
   if (!userId) return res.status(409).json({ message: "La cuenta aún no fue activada por el jugador." });
 

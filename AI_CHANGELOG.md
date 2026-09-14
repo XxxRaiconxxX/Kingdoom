@@ -2272,3 +2272,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - Se reemplazo `auth.kingdoom.local` por `auth.kingdoom.app` en el cliente de acceso y el reset administrativo porque Supabase rechazaba el dominio `.local` como correo invalido.
 - El formato visible del usuario no cambia; solo cambia el correo interno que usa Supabase Auth.
 - Validado con `npx tsc --noEmit`, `npm run build` y `git diff --check`.
+
+### [2026-09-14] Migraciones remotas de minijuegos aplicadas
+- Se aplicaron en Supabase las migraciones `minigames_cards_roulette`, `minigames_chests_crash` y `minigames_scratch`.
+- Se crearon las tablas y RPC transaccionales que faltaban para Cartas, Cofres, Crash, Ruleta y Rasca y gana.
+- Se verifico que las RPC rechazan llamadas anonimas y requieren una sesion segura vinculada al jugador.
+- El mensaje de limite diario de Rasca se debia a que `player_scratch_daily_totals` no existia en el proyecto remoto.

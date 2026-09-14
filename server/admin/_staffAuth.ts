@@ -1,7 +1,7 @@
 import type { ApiRequest, ApiResponse } from "./_serverAiProviders.js";
 import { createSupabaseAdminClient } from "./_supabaseAdmin.js";
 
-const AUTH_DOMAIN = "auth.kingdoom.local";
+const AUTH_DOMAIN = "auth.kingdoom.app";
 
 function authEmail(username: string) {
   return `${encodeURIComponent(username.trim().toLowerCase())}@${AUTH_DOMAIN}`;

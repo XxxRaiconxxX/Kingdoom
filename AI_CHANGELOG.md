@@ -2268,3 +2268,7 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
     *   Se documentaron y agregaron pautas explÃ­citas sobre el uso de `graphify affected` para anÃ¡lisis de impacto antes de refactorizar componentes o bases de datos, `graphify global` para cruzar dependencias inter-repositorios, y comandos de visualizaciÃ³n grÃ¡fica (`callflow-html` y `tree`).
 *   **Notas/Advertencias:** Ninguna.
 
+### [2026-09-14] Dominio valido para cuentas Auth internas
+- Se reemplazo `auth.kingdoom.local` por `auth.kingdoom.app` en el cliente de acceso y el reset administrativo porque Supabase rechazaba el dominio `.local` como correo invalido.
+- El formato visible del usuario no cambia; solo cambia el correo interno que usa Supabase Auth.
+- Validado con `npx tsc --noEmit`, `npm run build` y `git diff --check`.

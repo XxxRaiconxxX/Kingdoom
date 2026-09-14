@@ -1,6 +1,6 @@
 import { supabase } from "./supabaseClient";
 
-const AUTH_DOMAIN = "auth.kingdoom.local";
+const AUTH_DOMAIN = "auth.kingdoom.app";
 
 export function normalizeKingdoomUsername(username: string) {
   return username.trim().replace(/\s+/g, " ");

@@ -584,15 +584,15 @@ begin
 end;
 $$;
 
-revoke all on function public.ensure_chest_streak_row(uuid) from public;
-revoke all on function public.ensure_crash_session_row(uuid) from public;
-revoke all on function public.generate_crash_point() from public;
-revoke all on function public.get_crash_multiplier_for_elapsed(double precision) from public;
-revoke all on function public.finalize_crash_session(uuid, text, numeric) from public;
-revoke all on function public.play_chest_round(integer, integer) from public;
-revoke all on function public.start_crash_game(integer, numeric) from public;
-revoke all on function public.get_crash_session_state() from public;
-revoke all on function public.cash_out_crash_game() from public;
+revoke all on function public.ensure_chest_streak_row(uuid) from public, anon;
+revoke all on function public.ensure_crash_session_row(uuid) from public, anon;
+revoke all on function public.generate_crash_point() from public, anon;
+revoke all on function public.get_crash_multiplier_for_elapsed(double precision) from public, anon;
+revoke all on function public.finalize_crash_session(uuid, text, numeric) from public, anon;
+revoke all on function public.play_chest_round(integer, integer) from public, anon;
+revoke all on function public.start_crash_game(integer, numeric) from public, anon;
+revoke all on function public.get_crash_session_state() from public, anon;
+revoke all on function public.cash_out_crash_game() from public, anon;
 
 grant execute on function public.play_chest_round(integer, integer) to authenticated;
 grant execute on function public.start_crash_game(integer, numeric) to authenticated;

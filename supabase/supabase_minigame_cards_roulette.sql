@@ -606,15 +606,15 @@ begin
 end;
 $$;
 
-revoke all on function public.get_current_player_for_game() from public;
-revoke all on function public.ensure_cards_daily_totals(uuid, text) from public;
-revoke all on function public.ensure_cards_session_row(uuid) from public;
-revoke all on function public.get_cards_session_state() from public;
-revoke all on function public.start_cards_game(integer) from public;
-revoke all on function public.guess_cards_round(text) from public;
-revoke all on function public.continue_cards_game() from public;
-revoke all on function public.cash_out_cards_game() from public;
-revoke all on function public.spin_roulette_game(integer) from public;
+revoke all on function public.get_current_player_for_game() from public, anon;
+revoke all on function public.ensure_cards_daily_totals(uuid, text) from public, anon;
+revoke all on function public.ensure_cards_session_row(uuid) from public, anon;
+revoke all on function public.get_cards_session_state() from public, anon;
+revoke all on function public.start_cards_game(integer) from public, anon;
+revoke all on function public.guess_cards_round(text) from public, anon;
+revoke all on function public.continue_cards_game() from public, anon;
+revoke all on function public.cash_out_cards_game() from public, anon;
+revoke all on function public.spin_roulette_game(integer) from public, anon;
 
 grant execute on function public.get_cards_session_state() to authenticated;
 grant execute on function public.start_cards_game(integer) to authenticated;

@@ -2278,3 +2278,4 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - Se crearon las tablas y RPC transaccionales que faltaban para Cartas, Cofres, Crash, Ruleta y Rasca y gana.
 - Se verifico que las RPC rechazan llamadas anonimas y requieren una sesion segura vinculada al jugador.
 - El mensaje de limite diario de Rasca se debia a que `player_scratch_daily_totals` no existia en el proyecto remoto.
+- Se revoco explicitamente `EXECUTE` para `anon` en todas las RPC de minijuegos; los permisos heredados antiguos no se eliminaban solo con `REVOKE ... FROM public`.

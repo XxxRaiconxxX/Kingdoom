@@ -303,5 +303,5 @@ begin
 end;
 $$;
 
-revoke all on function public.play_scratch_batch(integer) from public;
+revoke all on function public.play_scratch_batch(integer) from public, anon;
 grant execute on function public.play_scratch_batch(integer) to authenticated;

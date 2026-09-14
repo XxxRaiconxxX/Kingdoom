@@ -2279,3 +2279,8 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - Se verifico que las RPC rechazan llamadas anonimas y requieren una sesion segura vinculada al jugador.
 - El mensaje de limite diario de Rasca se debia a que `player_scratch_daily_totals` no existia en el proyecto remoto.
 - Se revoco explicitamente `EXECUTE` para `anon` en todas las RPC de minijuegos; los permisos heredados antiguos no se eliminaban solo con `REVOKE ... FROM public`.
+
+### [2026-09-14] Recuperación de contraseña admin por código WhatsApp
+- `Reset staff` separa dos caminos: un administrador autenticado puede restablecer cualquier cuenta; un administrador sin sesión puede recuperar su propia cuenta con un código WhatsApp de 6 dígitos validado en servidor.
+- La recuperación comprueba que el jugador existe, que `is_admin` está activo, que el código no caducó ni fue usado y actualiza la contraseña mediante Auth Admin.
+- Se invalida la sesión global después del cambio para obligar a iniciar sesión con la nueva contraseña.

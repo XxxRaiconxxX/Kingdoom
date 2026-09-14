@@ -82,7 +82,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ message: "Metodo no permitido." });
   }
 
-  if ((req.body as { action?: string } | undefined)?.action === "reset") {
+  if (["reset", "recover"].includes((req.body as { action?: string } | undefined)?.action ?? "")) {
     return handleStaffPasswordReset(req, res);
   }
 

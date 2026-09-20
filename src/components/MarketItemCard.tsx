@@ -122,7 +122,8 @@ export function MarketItemCard({
 
   return (
     <article
-      className={`kd-hover-lift relative overflow-hidden rounded-[1.5rem] border ${style.card}`}
+      data-rarity={item.rarity}
+      className={`realm-rarity-card kd-hover-lift relative overflow-hidden rounded-[1.5rem] border ${style.card}`}
     >
       {style.glow ? (
         <>
@@ -177,7 +178,7 @@ export function MarketItemCard({
           <h4 className="text-base font-bold text-stone-100 md:text-lg">{item.name}</h4>
           <div className="flex flex-wrap justify-end gap-1.5 md:gap-2">
             <span
-              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold md:px-3 md:text-xs ${style.badge}`}
+              className={`realm-rarity-badge shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold md:px-3 md:text-xs ${style.badge}`}
             >
               {style.label}
             </span>

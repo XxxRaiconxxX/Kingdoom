@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import {
@@ -38,6 +38,7 @@ import type {
 } from "../types";
 import { PlayerNotificationBell } from "./PlayerNotificationBell";
 import { KingdoomAuthModal } from "./KingdoomAuthModal";
+import { AnimeIcon } from "./AnimeIcon";
 import { RankBadge } from "./RankBadge";
 import { RoleplayLockNotice } from "./RoleplayLockNotice";
 import {
@@ -128,6 +129,7 @@ export function PlayerProfilePanel({
   } = usePlayerSession();
   const [usernameInput, setUsernameInput] = useState("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isTradeOpen, setIsTradeOpen] = useState(false);
@@ -613,7 +615,7 @@ export function PlayerProfilePanel({
   );
 
   return (
-    <section className="kd-glass relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-4 sm:p-5 shadow-2xl shadow-black/20 md:p-6">
+    <section data-profile-tools={Boolean(player || showAnimeShortcut)} className={`kd-glass realm-player-profile relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-4 sm:p-5 md:p-6 ${isCollapsed ? "realm-player-profile-compact" : ""}`}>
       <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.18),transparent_62%)] blur-2xl" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
       {player || showAnimeShortcut ? (
@@ -622,14 +624,11 @@ export function PlayerProfilePanel({
             <button
               type="button"
               onClick={onOpenAnime}
-              className="group inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-rose-400/35 bg-white/95 p-1.5 shadow-[0_14px_34px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:border-rose-300/70 hover:shadow-[0_18px_38px_rgba(127,29,29,0.4)]"
+              className="realm-anime-shortcut inline-flex h-11 w-11 items-center justify-center rounded-xl border"
               title="Abrir portal anime"
+              aria-label="Portal anime"
             >
-              <img loading="lazy" decoding="async" 
-                src={`${import.meta.env.BASE_URL}icons/anime-torii.png`}
-                alt="Portal anime"
-                className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.04]"
-              />
+              <AnimeIcon className="h-6 w-6" />
             </button>
           ) : null}
           {player ? (
@@ -638,19 +637,20 @@ export function PlayerProfilePanel({
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-3 pr-28 md:pr-32">
+      <div className="realm-profile-heading flex flex-col gap-3 pr-28 md:pr-32">
         <div className="space-y-2">
           <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
             <span className="h-2 w-2 rounded-full bg-amber-400/80 shadow-[0_0_14px_rgba(251,191,36,0.45)]" />
             Perfil del reino
           </p>
           <h2 className="text-2xl font-black text-stone-100 md:text-3xl">
-            Tu sesion de jugador
+            Tu lugar en el reino
           </h2>
         </div>
       </div>
 
-      <div className="mt-5">
+      {!isCollapsed && onCollapsedChange ? <button type="button" className="realm-profile-collapse" onClick={() => onCollapsedChange(true)} aria-label="Contraer perfil"><ChevronDown aria-hidden="true" className="h-4 w-4 rotate-180" /> Contraer</button> : null}
+      <div className="realm-profile-body mt-5">
         {(isHydrating || (!isMinimumHydrationTimeMet && window.localStorage.getItem("kingdoom.active-player-gif"))) ? (
           (() => {
             const cachedGif = window.localStorage.getItem("kingdoom.active-player-gif");
@@ -719,7 +719,7 @@ export function PlayerProfilePanel({
             <button
               type="button"
               onClick={() => onCollapsedChange?.(false)}
-              className="min-h-11 shrink-0 rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 text-xs font-black text-amber-200 transition hover:bg-amber-400/20"
+              className="realm-entry-button min-h-11 shrink-0 px-3 text-xs font-semibold"
             >
               Conectar
             </button>
@@ -727,8 +727,8 @@ export function PlayerProfilePanel({
         ) : player ? (
           isCollapsed ? (
             <div className="space-y-3">
-              <div className="rounded-[1.6rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.94),rgba(12,10,9,0.8))] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.2)]">
-                <div className="flex items-start justify-between gap-3">
+              <div className="realm-profile-summary rounded-[1.6rem] border border-stone-800 bg-[linear-gradient(135deg,rgba(24,24,20,0.94),rgba(12,10,9,0.8))] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.2)]">
+                <div className="realm-summary-identity flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3 text-amber-400">
                       <UserRound className="h-5 w-5" />
@@ -760,11 +760,11 @@ export function PlayerProfilePanel({
                   </button>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="realm-summary-balances mt-4 grid grid-cols-2 gap-2">
                   <ProfileQuickAction
                     icon={WalletCards}
                     label="Oro"
-                    value={String(player.gold)}
+                    value={player.gold.toLocaleString("es-PY")}
                     tone="gold"
                     onClick={() => setIsInventoryOpen(true)}
                   />
@@ -777,16 +777,17 @@ export function PlayerProfilePanel({
                   />
                 </div>
 
-                <div className="mt-3">
+                <div className="realm-summary-rank mt-3">
                   <RankBadge
                     rank={rankName}
                     tier={rankTier}
                     points={rankPoints}
                     size="sm"
+                    className="realm-summary-rank-badge"
                   />
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="realm-summary-actions mt-3 flex flex-wrap gap-2">
                   {isAdmin ? (
                     <ProfileMiniButton
                       icon={ShieldCheck}
@@ -1445,7 +1446,7 @@ export function PlayerProfilePanel({
                 <button
                   type="button"
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="md:col-span-2 flex items-center justify-center gap-2 rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-4 py-3 text-sm font-extrabold text-cyan-100 transition hover:bg-cyan-300/15"
+                  className="realm-entry-button md:col-span-2 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold"
                 >
                   <ShieldCheck className="h-4 w-4" />
                   Entrar con usuario y contraseña
@@ -1629,7 +1630,7 @@ export function PlayerProfilePanel({
       {isAuthModalOpen ? (
         <KingdoomAuthModal
           initialUsername={usernameInput}
-          onClose={() => setIsAuthModalOpen(false)}
+          onClose={closeAuthModal}
           onAuthenticated={(authenticatedPlayer) => {
             void connectPlayer(authenticatedPlayer.username);
           }}

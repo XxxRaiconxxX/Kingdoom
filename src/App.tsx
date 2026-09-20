@@ -1,15 +1,18 @@
-import { lazy, Suspense, useEffect, useRef, useState, startTransition } from "react";
+import { lazy, Suspense, useEffect, useId, useRef, useState, startTransition } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import {
   Bell,
   Castle,
   ChevronDown,
-  FileSearch,
-  Home,
-  Library,
+  ChevronRight,
+  Compass,
   Sparkles,
   Store,
+  Swords,
+  UserRound,
 } from "lucide-react";
+import { RealmNavigation, REALM_NAVIGATION, KINGDOOM_EMBLEM } from "./components/RealmNavigation";
 import { EventCard } from "./components/EventCard";
 import { AuthFlowPreview } from "./components/AuthFlowPreview";
 import { ExpandableText } from "./components/ExpandableText";
@@ -28,7 +31,6 @@ import { useGsapStaggerReveal } from "./hooks/useGsapStaggerReveal";
 import { supabase } from "./utils/supabaseClient";
 import type {
   HomeStat,
-  NavItem,
   RealmEvent,
   RealmEventParticipant,
   RealmMission,
@@ -73,14 +75,6 @@ const missionClaimStatusLabels = {
 const loadEventUtils = () => import("./utils/events");
 const loadMissionUtils = () => import("./utils/missions");
 const loadCharacterSheetUtils = () => import("./utils/characterSheets");
-
-const NAV_ITEMS: NavItem[] = [
-  { id: "home", label: "Inicio", icon: Home },
-  { id: "grimoire", label: "Grimorio", icon: Sparkles },
-  { id: "library", label: "Biblioteca", icon: Library },
-  { id: "market", label: "Mercado", icon: Store },
-  { id: "archivist", label: "Archivista", icon: FileSearch },
-];
 
 const loadLibrarySection = () =>
   import("./components/LibrarySection").then((module) => ({
@@ -156,17 +150,30 @@ function isRealmSiegeStandaloneRoute() {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
-  const [isProfileCollapsed, setIsProfileCollapsed] = useState(false);
+  const [isProfileCollapsed, setIsProfileCollapsed] = useState(true);
   const [isRealmSiegeStandalone] = useState(isRealmSiegeStandaloneRoute);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const previousTab = useRef(activeTab);
+  const { player } = usePlayerSession();
+  const activeDestination = REALM_NAVIGATION.find((item) => item.id === activeTab);
+  const navigateTo = (tab: TabId) => startTransition(() => setActiveTab(tab));
+  const openProfile = () => {
+    setIsProfileCollapsed(false);
+    document.getElementById("player-profile")?.scrollIntoView({ block: "start" });
+  };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    startTransition(() => setIsProfileCollapsed(true));
+    if (previousTab.current !== activeTab) {
+      stageRef.current?.focus({ preventScroll: true });
+      previousTab.current = activeTab;
+    }
+  }, [activeTab]);
 
   if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("auth-preview") === "1") {
     return <AuthFlowPreview />;
   }
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    startTransition(() => setIsProfileCollapsed(activeTab !== "home"));
-  }, [activeTab]);
 
   if (isRealmSiegeStandalone) {
     return (
@@ -185,39 +192,45 @@ export default function App() {
 
   return (
     <div
-      className="kd-ambient min-h-screen bg-stone-950 text-stone-300"
+      className="kd-ambient realm-app min-h-screen bg-stone-950 text-stone-300"
       data-kd-theme={activeTab}
     >
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-amber-300 focus:p-3 focus:text-stone-950">Saltar al contenido</a>
-      <main id="main-content" tabIndex={-1} className="kd-shell kd-primary-shell mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5 md:max-w-6xl md:px-6">
-        <div className="mb-5">
+      <RealmNavigation activeTab={activeTab} onNavigate={navigateTo} onPreload={preloadTab} />
+      <div className="realm-workspace">
+      <header className="realm-topbar">
+        <button className="realm-mobile-brand" onClick={() => navigateTo("home")} aria-label="Kingdoom, ir al inicio"><img className="realm-logo" src={KINGDOOM_EMBLEM} width="48" height="48" alt="" /><span>Kingdoom</span></button>
+        <div className="realm-location"><span>Reino de las Sombras</span><ChevronRight aria-hidden="true" /><strong>{activeDestination?.label ?? "Portal anime"}</strong></div>
+        <button className="realm-profile-trigger realm-entry-button" onClick={openProfile} aria-expanded={!isProfileCollapsed} aria-controls="player-profile"><UserRound aria-hidden="true" /><span>{player?.username ?? "Entrar al reino"}</span><ChevronDown aria-hidden="true" /></button>
+      </header>
+      <main id="main-content" tabIndex={-1} className="realm-main">
+        <div id="player-profile" className="realm-profile-area">
           <Suspense
             fallback={
-              <div className="kd-glass rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-5 md:p-6">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 w-28 rounded bg-stone-700/50" />
-                  <div className="h-8 w-56 rounded bg-stone-700/50" />
-                  <div className="h-4 w-full rounded bg-stone-800/60" />
-                  <div className="h-20 rounded-2xl bg-stone-800/60" />
-                </div>
+              <div role="status" aria-label="Cargando perfil" className="kd-glass flex min-h-20 items-center gap-3 rounded-2xl px-4">
+                <div className="h-10 w-10 animate-pulse rounded-xl bg-stone-700/50" />
+                <div className="h-4 w-40 animate-pulse rounded bg-stone-700/50" />
               </div>
             }
           >
             <PlayerProfilePanel
               collapsed={isProfileCollapsed}
-              compactDisconnected={activeTab !== "home"}
+              compactDisconnected
               onCollapsedChange={setIsProfileCollapsed}
               showAnimeShortcut={activeTab === "home"}
-              onOpenAnime={() => startTransition(() => setActiveTab("anime"))}
+              onOpenAnime={() => navigateTo("anime")}
             />
           </Suspense>
         </div>
 
         <div
           key={activeTab}
-          className="kd-stage animate-[content-fade-in_180ms_ease-out]"
+          ref={stageRef}
+          tabIndex={-1}
+          aria-label={activeDestination?.label ?? "Portal anime"}
+          className="kd-stage realm-stage"
         >
-          {activeTab === "home" ? <HomeSection /> : null}
+          {activeTab === "home" ? <HomeSection onNavigate={navigateTo} onConnect={openProfile} /> : null}
           {activeTab === "grimoire" ? (
             <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el grimorio prohibido..." />}>
               <GrimoireSection />
@@ -246,48 +259,13 @@ export default function App() {
         </div>
       </main>
 
-      <nav aria-label="Navegación principal" className="kd-primary-nav fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-4">
-        <div className="kd-bottom-nav mx-auto grid max-w-md grid-cols-5 gap-2 px-3 pb-safe pt-3 md:max-w-6xl">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-            const isActive = activeTab === id || (id === "home" && activeTab === "anime");
-
-            return (
-              <button
-                key={id}
-                type="button"
-                onMouseEnter={() => preloadTab(id)}
-                onFocus={() => preloadTab(id)}
-                onTouchStart={() => preloadTab(id)}
-                onClick={() => {
-                  startTransition(() => setActiveTab(id));
-                }}
-                aria-current={isActive ? "page" : undefined}
-                className={`kd-nav-item kd-touch flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-[10px] font-semibold transition md:min-h-14 md:flex-row md:gap-2 md:text-xs ${
-                  isActive
-                    ? "border-[color:var(--kd-accent-soft)] bg-[color:var(--kd-accent-bg)] text-[color:var(--kd-accent-strong)] shadow-[0_0_24px_var(--kd-accent-shadow)]"
-                    : "border-transparent bg-stone-900/65 text-stone-400"
-                }`}
-              >
-                <span
-                  className={`kd-nav-icon-shell flex h-9 w-9 items-center justify-center rounded-2xl transition ${
-                    isActive
-                      ? "bg-[color:var(--kd-accent-bg)] text-[color:var(--kd-accent-strong)]"
-                      : "bg-stone-950/45 text-stone-500"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                </span>
-                <span>{label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+      <footer className="realm-page-footer"><Castle aria-hidden="true" /><span>Kingdoom · Cada historia deja su huella.</span><button onClick={() => navigateTo("library")}>Conoce el reino</button></footer>
+      </div>
     </div>
   );
 }
 
-function HomeSection() {
+function HomeSection({ onNavigate, onConnect }: { onNavigate: (tab: TabId) => void; onConnect: () => void }) {
   const homeRevealRef = useRef<HTMLElement | null>(null);
   const { player, isHydrating } = usePlayerSession();
   const StatusIcon = KINGDOM_STATUS.icon;
@@ -317,7 +295,7 @@ function HomeSection() {
     stagger: 0.09,
     y: 20,
     delay: 0.04,
-    dependencies: [events.length, missions.length],
+    dependencies: [],
   });
 
   useEffect(() => {
@@ -655,73 +633,39 @@ function HomeSection() {
 
   return (
     <section ref={homeRevealRef} className="space-y-5">
-      <div
-        data-gsap-home
-        className="kd-glass kd-hero-panel kd-stagger overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30 md:p-8"
-      >
-        <div className="kd-hero-orb pointer-events-none absolute -right-20 -top-24 h-56 w-56 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.22),transparent_62%)] blur-sm" />
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
-          <Castle className="h-4 w-4" />
-          Reino vivo por WhatsApp
-        </div>
-
-        <h1 className="text-4xl font-black leading-none text-stone-100 md:text-5xl">
-          Reino de las Sombras
-        </h1>
-
-        <p className="mt-4 max-w-3xl text-sm leading-6 text-stone-300/90 md:text-base">
-          Intrigas de corte, guerra entre facciones y reliquias prohibidas en un
-          reino donde cada decision puede convertirte en leyenda o condenarte al
-          olvido.
-        </p>
-
-        <div className="mt-5 grid grid-cols-3 gap-3 md:max-w-xl">
-          {homeStats.map((stat) => (
-            <StatCard
-              key={stat.label}
-              icon={stat.icon}
-              value={stat.value}
-              label={stat.label}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div data-gsap-home className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
-        <div className="kd-glass kd-hover-lift rounded-3xl border border-stone-800 bg-stone-900/75 p-5 md:p-6">
-          <h2 className="text-lg font-bold text-stone-100">La noche se mueve</h2>
-          <p className="mt-2 text-sm leading-6 text-stone-400">
-            Participa en asedios, pactos secretos, cacerias y duelos narrativos
-            con estetica medieval oscura y progresion competitiva.
-          </p>
-        </div>
-
-        <div className="kd-glass kd-hover-lift rounded-3xl border border-stone-800 bg-gradient-to-br from-stone-900 to-stone-950 p-5 md:p-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-amber-400/80">
-                {KINGDOM_STATUS.eyebrow}
-              </p>
-              <p className="mt-2 text-2xl font-black text-stone-100">
-                {KINGDOM_STATUS.title}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3">
-              <StatusIcon className="h-6 w-6 text-amber-400" />
-            </div>
+      <div className="realm-hero">
+        <img className="realm-hero-art" src={`${import.meta.env.BASE_URL}img/realm-citadel.webp`} alt="" width="1536" height="1024" fetchPriority="high" />
+        <div className="realm-hero-mist" aria-hidden="true" />
+        <div className="realm-embers" aria-hidden="true">{Array.from({ length: 12 }, (_, index) => <i key={index} />)}</div>
+        <div className="realm-hero-seal"><img className="realm-logo" src={KINGDOOM_EMBLEM} alt="Escudo de Kingdoom: dos grifos, un castillo y el dado 20" width="220" height="220" /><span>Kingdoom</span></div>
+        <div className="realm-hero-content">
+          <p className="realm-hero-kicker"><span aria-hidden="true" /> Un mundo de rol por descubrir</p>
+          <h1>Reino de<br />las Sombras</h1>
+          <p className="realm-hero-description">Entre coronas y cenizas, tu historia está por escribirse. Elige tu camino, forja alianzas y deja tu huella en el reino.</p>
+          <div className="realm-hero-actions">
+            <a className="realm-button realm-button-primary" href="#realm-missions"><Swords aria-hidden="true" /> Explorar misiones</a>
+            <button className="realm-button realm-button-quiet" onClick={() => onNavigate("library")}><Compass aria-hidden="true" /> Descubrir el mundo</button>
           </div>
-          <p className="mt-3 text-sm leading-6 text-stone-400">
-            {KINGDOM_STATUS.description}
-          </p>
         </div>
+        <div className="realm-hero-caption"><Castle aria-hidden="true" /><span>Las fronteras guardan historias.<br /><strong>La siguiente puede ser la tuya.</strong></span></div>
+      </div>
+      <div className="realm-overview" data-gsap-home>
+        <div className="realm-stats">{homeStats.map((stat) => <StatCard key={stat.label} icon={stat.icon} value={stat.value} label={stat.label} />)}</div>
+        <div className="realm-world-state"><StatusIcon aria-hidden="true" /><div><span>{KINGDOM_STATUS.eyebrow}</span><strong>{KINGDOM_STATUS.title}</strong></div></div>
+      </div>
+      <div className="realm-paths" aria-label="Caminos del reino">
+        <button onClick={() => onNavigate("grimoire")}><span className="realm-path-icon"><Sparkles aria-hidden="true" /></span><span><strong>Despierta tu poder</strong><small>Magias, criaturas y secretos</small></span><ChevronRight aria-hidden="true" /></button>
+        <button onClick={() => onNavigate("market")}><span className="realm-path-icon"><Store aria-hidden="true" /></span><span><strong>Visita el mercado</strong><small>Reliquias, comercio y taberna</small></span><ChevronRight aria-hidden="true" /></button>
+        <button onClick={onConnect}><span className="realm-path-icon"><UserRound aria-hidden="true" /></span><span><strong>{player ? "Tu personaje te espera" : "Comienza tu historia"}</strong><small>{player ? "Abre tu perfil y tus fichas" : "Conecta tu perfil al reino"}</small></span><ChevronRight aria-hidden="true" /></button>
       </div>
 
       <div
+        id="realm-missions"
         data-gsap-home
-        className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:560px]"
+        className="realm-content-block"
       >
         <SectionHeader
-          eyebrow="Tablero operativo"
+          eyebrow="El tablón de las aventuras"
           title="Misiones del reino"
           rightSlot={
             <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
@@ -729,7 +673,8 @@ function HomeSection() {
             </span>
           }
         />
-        <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div id="realm-mission-list" className="realm-adventure-grid mt-5 grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <AnimatePresence initial={false}>
           {(showAllMissions ? missions : missions.slice(0, 3)).map((mission) => {
             const hasPersistedMission = isSupabaseRecordId(mission.id);
             const missionClaim = mission.id
@@ -760,22 +705,28 @@ function HomeSection() {
               />
             );
           })}
+          </AnimatePresence>
         </div>
         {missions.length > 3 && (
           <div className="mt-6 flex justify-center">
             <button
+              type="button"
+              aria-expanded={showAllMissions}
+              aria-controls="realm-mission-list"
               onClick={() => setShowAllMissions(!showAllMissions)}
-              className="kd-touch rounded-full border border-stone-700 bg-stone-900 px-6 py-2 text-sm font-semibold text-stone-300 transition hover:border-cyan-500/50 hover:bg-stone-800 hover:text-cyan-100"
+              className="realm-disclosure realm-show-missions"
             >
               {showAllMissions ? "Ocultar misiones" : `Ver todas las misiones (${missions.length})`}
+              <ChevronDown aria-hidden="true" className={showAllMissions ? "rotate-180" : ""} />
             </button>
           </div>
         )}
       </div>
 
       <div
+        id="realm-events"
         data-gsap-home
-        className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6 [content-visibility:auto] [contain-intrinsic-size:760px]"
+        className="realm-content-block"
       >
         <SectionHeader
           eyebrow="Agenda del reino"
@@ -786,7 +737,7 @@ function HomeSection() {
             </span>
           }
         />
-        <div className="kd-stagger mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="realm-adventure-grid mt-5 grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
           {events.map((event) => {
             const eventId = event.id ?? "";
             const hasPersistedEvent = isSupabaseRecordId(eventId);
@@ -958,6 +909,8 @@ function MissionCard({
 }) {
   const [showEvidenceForm, setShowEvidenceForm] = useState(false);
   const [showMissionDetails, setShowMissionDetails] = useState(false);
+  const detailId = useId();
+  const reduceMotion = useReducedMotion();
   const [proofText, setProofText] = useState(claim?.proofText ?? "");
   const [proofImageFile, setProofImageFile] = useState<File | null>(null);
   const [proofImagePreview, setProofImagePreview] = useState("");
@@ -988,7 +941,10 @@ function MissionCard({
   }, [proofImagePreview]);
 
   return (
-    <article className="kd-hover-lift rounded-[1.6rem] border border-emerald-500/15 bg-stone-950/45 p-4">
+    <motion.article className="realm-mission-card realm-adventure-card rounded-2xl border p-5" data-difficulty={mission.difficulty} data-expanded={showMissionDetails}
+      layout="position" initial={{ opacity: 0, y: reduceMotion ? 0 : 24 }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }} exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.96 }} transition={{ duration: reduceMotion ? 0 : 0.45 }}>
+      <div className="realm-card-insignia" aria-hidden="true"><Swords /></div>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -1005,9 +961,9 @@ function MissionCard({
             {mission.title}
           </h3>
         </div>
-        <div className="shrink-0 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-right">
+        <div className="realm-reward shrink-0 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-right">
           <p className="text-lg font-black leading-none text-amber-300">
-            {mission.rewardGold}
+            {mission.rewardGold.toLocaleString("es")}
           </p>
           <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-200/70">
             oro
@@ -1017,16 +973,14 @@ function MissionCard({
 
       <div className="mt-3 space-y-3">
         <p
-          className={`text-sm leading-6 text-stone-400 ${
-            showMissionDetails ? "" : "line-clamp-3"
-          }`}
+          className="line-clamp-3 text-sm leading-6 text-stone-400"
         >
           {mission.description}
         </p>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <span className="rounded-full border border-stone-700 bg-stone-950/70 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-300">
+        <span className="realm-difficulty-badge">
           {missionDifficultyLabels[mission.difficulty]}
         </span>
         <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-200">
@@ -1042,28 +996,27 @@ function MissionCard({
         ) : null}
       </div>
 
-      <div className="mt-4 rounded-2xl border border-stone-800 bg-black/20 px-3 py-3">
+      <div className="realm-mission-scroll mt-4">
         <button
           type="button"
+          aria-expanded={showMissionDetails}
+          aria-controls={detailId}
           onClick={() => setShowMissionDetails((current) => !current)}
-          className="kd-touch inline-flex w-full items-center justify-between gap-3 text-left"
+          className="realm-disclosure"
         >
-          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-stone-300">
-            {showMissionDetails ? "Ocultar detalle de mision" : "Ver detalle de mision"}
+          <span>
+            {showMissionDetails ? "Cerrar pergamino" : "Desplegar misión"}
           </span>
-          <span className="text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
-            {showMissionDetails ? "Cerrar" : "Desplegar"}
-          </span>
+          <ChevronDown aria-hidden="true" className={showMissionDetails ? "rotate-180" : ""} />
         </button>
-        <div className="mt-3 border-t border-stone-800 pt-3">
-          <p
-            className={`text-xs leading-5 text-stone-400 ${
-              showMissionDetails ? "" : "line-clamp-4"
-            }`}
-          >
-            {mission.instructions}
-          </p>
-        </div>
+        <AnimatePresence initial={false}>
+          {showMissionDetails && <motion.div id={detailId} className="realm-unfold" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: reduceMotion ? 0 : 0.38, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="realm-parchment">
+              <h4>La encomienda</h4><p>{mission.description}</p>
+              <h4>Tu objetivo</h4><p>{mission.instructions || "Consulta los detalles con el director de la misión."}</p>
+            </div>
+          </motion.div>}
+        </AnimatePresence>
       </div>
 
       {mission.id ? (
@@ -1179,7 +1132,7 @@ function MissionCard({
         </p>
       ) : null}
 
-    </article>
+    </motion.article>
   );
 }
 
@@ -1210,8 +1163,8 @@ function CollapsiblePanel({
 
 function FullscreenLoadingOverlay({ message }: { message: string }) {
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-[2rem] border border-stone-800 bg-stone-950 px-5 py-6 text-center shadow-2xl shadow-black/40">
+    <div role="status" aria-live="polite" className="realm-loading">
+      <div className="realm-loading-card">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
           Cargando
         </p>

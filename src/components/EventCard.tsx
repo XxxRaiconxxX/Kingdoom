@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Castle, ChevronDown, Users } from "lucide-react";
+import { useId, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ChevronDown, Users } from "lucide-react";
+import { KINGDOOM_EMBLEM } from "./RealmNavigation";
 import type { EventStatus, RealmEvent, RealmEventParticipant } from "../types";
 
 const eventStatusStyles: Record<
@@ -53,6 +55,8 @@ export function EventCard({
 }: EventCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const detailId = useId();
+  const reduceMotion = useReducedMotion();
   const statusStyle = eventStatusStyles[event.status] ?? eventStatusStyles["in-production"];
   const factions = Array.isArray(event.factions) ? event.factions : [];
   const maxParticipants = Math.max(0, event.maxParticipants ?? 0);
@@ -66,7 +70,8 @@ export function EventCard({
       : `${participants.length} sin limite`;
 
   return (
-    <article className="kd-glass kd-hover-lift overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/80">
+    <motion.article className="realm-event-card realm-adventure-card overflow-hidden rounded-2xl border" data-event-status={event.status} data-expanded={expanded}
+      layout="position" initial={{ opacity: 0, y: reduceMotion ? 0 : 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: reduceMotion ? 0 : 0.45 }}>
       <div className="relative aspect-[16/10] bg-stone-950 lg:aspect-[16/9]">
         {!imageFailed && event.imageUrl ? (
           <img loading="lazy" decoding="async" 
@@ -79,8 +84,8 @@ export function EventCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-900 to-stone-950">
-            <Castle className="h-10 w-10 text-amber-400" />
+          <div className="realm-event-cover flex h-full w-full items-center justify-center">
+            <img className="realm-logo" src={KINGDOOM_EMBLEM} alt="" width="140" height="140" />
           </div>
         )}
 
@@ -164,9 +169,11 @@ export function EventCard({
         <button
           type="button"
           onClick={() => setExpanded((current) => !current)}
-          className="kd-touch flex w-full items-center justify-between rounded-2xl border border-stone-800 bg-stone-950/45 px-4 py-3 text-left text-sm font-semibold text-stone-200 transition hover:border-stone-700"
+          aria-expanded={expanded}
+          aria-controls={detailId}
+          className="realm-disclosure"
         >
-          <span>Ver detalles del evento</span>
+          <span>{expanded ? "Cerrar crónica del evento" : "Desplegar crónica del evento"}</span>
           <span
             className={`transition-transform duration-200 ${
               expanded ? "rotate-180" : ""
@@ -176,8 +183,10 @@ export function EventCard({
           </span>
         </button>
 
+        <AnimatePresence initial={false}>
         {expanded ? (
-          <div className="grid gap-3 rounded-[1.4rem] border border-stone-800 bg-stone-950/45 p-4 lg:grid-cols-2">
+          <motion.div id={detailId} className="realm-unfold" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: reduceMotion ? 0 : 0.38, ease: [0.22, 1, 0.36, 1] }}>
+          <div className="realm-parchment grid gap-4">
             <DetailRow label="Cronica" value={event.longDescription} />
             <DetailRow label="Facciones" value={factions.length > 0 ? factions.join(" - ") : "Sin facciones definidas."} />
             <DetailRow label="Requisitos" value={event.requirements} />
@@ -206,9 +215,11 @@ export function EventCard({
               }
             />
           </div>
+          </motion.div>
         ) : null}
+        </AnimatePresence>
       </div>
-    </article>
+    </motion.article>
   );
 }
 

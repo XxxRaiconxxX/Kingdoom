@@ -7,6 +7,20 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-09
+### [2026-09-19] Densidad de escritorio y publicación del diseño
+- Contenido general al 94 % desde 1100 px; el margen compensa la escala para conservar intacta la barra lateral y el ancho útil. Móvil y tableta mantienen su escala; las animaciones y transiciones se conservan.
+- Incluidos en la entrega los cambios visuales pendientes: identidad negro/dorado, emblema, portadas por sección, decoraciones anime y perfil responsive compacto.
+- Ampliada la comprobación de densidad con escala de contenido, separación de la barra lateral y selección de anchos. Los logs temporales de Vite/preview quedan excluidos de Git. [Codex]
+- Comprobación local a 1358 px: escala 0.94, barra lateral de 210.48 px intacta, separación de 0 px y ausencia de desbordamiento horizontal. `git diff --cached --check` correcto; compilación pendiente al preparar el commit por lentitud del entorno.
+
+### [2026-09-18] Rediseño visual responsive: fortaleza nocturna
+- Incorporadas a Codex las skills `frontend-design` y `ui-ux-pro-max` desde repositorios con más de 50K estrellas, aplicadas junto a `kingdoom-designer` y `kingdoom-frontend`; fuentes y decisiones en `docs/design/kingdoom-visual-system.md`.
+- Nueva portada ilustrada en WebP, paleta piedra/bosque/latón y tipografía Cinzel/Manrope. Navegación lateral en escritorio y barra inferior en móvil; perfil compacto, accesos a misiones/mercado y cabeceras consistentes en las seis secciones.
+- Transiciones de sección de 220 ms, controles con foco y estado accesible, respeto de movimiento reducido en CSS/Framer Motion y gestión de foco/Escape en el modal de acceso. Sin dependencias nuevas ni cambios en oro, inventarios o RPCs.
+- Corregido el escaneo de desarrollo de Vite tras observar `@emotion/is-prop-valid` sin resolver desde un asset compilado de Android y una excepción `useContext`; `optimizeDeps.entries` limita la entrada a `index.html`.
+- Validado con `npx tsc --noEmit`, `npm run build`, `git diff --check` y pruebas de navegador de las seis secciones a 390/1440 px, portada a 375/768/1024/1920 px, filtros, mapas, teclado, modal y movimiento reducido. `scripts/check-realm-ui.py` conserva la prueba y `artifacts/realm-ui/` sus capturas.
+- Graphify actualizado: 9613 nodos y 16134 relaciones; avisos de extracción SQL y metadatos antiguos, sin bloquear la actualización. Validación de interfaz pública, sin operaciones autenticadas o transacciones reales. [Codex]
+
 ### [2026-09-13] Modal de acceso: layout responsive y estado de creacion
 - El modal usa un portal en document.body para evitar recortes por el stacking context del panel padre.
 - El overlay permite desplazamiento vertical y el boton muestra "Creando acceso..." con opacidad reducida mientras procesa.

@@ -23,6 +23,7 @@ import { FilterPill } from "../components/FilterPill";
 import { MarketItemCard } from "../components/MarketItemCard";
 import { RoleplayLockNotice } from "../components/RoleplayLockNotice";
 import { SectionHeader } from "../components/SectionHeader";
+import { RealmSectionHero } from "../components/RealmSectionHero";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "../data/market";
 import { useGsapStaggerReveal } from "../hooks/useGsapStaggerReveal";
@@ -440,13 +441,15 @@ export function MarketSection() {
 
   return (
     <section ref={marketRevealRef} className="space-y-5">
+      <RealmSectionHero section="market" />
       <div
         data-gsap-market
-        className="kd-glass kd-stagger rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6"
+        className="kd-glass realm-section-intro border border-stone-800 p-6 md:p-8"
       >
         <SectionHeader
           eyebrow="Mercado negro"
           title="Catalogos del reino"
+          description="Equipa tu próxima aventura. Encuentra reliquias, visita la taberna o disputa el destino de los reinos."
           rightSlot={
             <div className="flex flex-wrap justify-end gap-2">
               <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
@@ -458,6 +461,10 @@ export function MarketSection() {
             </div>
           }
         />
+        <nav className="realm-market-shortcuts" aria-label="Secciones del mercado">
+          <a href="#realm-catalogue">Explorar objetos</a>
+          <a href="#realm-tavern">Ir a la taberna</a>
+        </nav>
       </div>
 
       <div
@@ -489,7 +496,7 @@ export function MarketSection() {
                     Ventana independiente
                   </span>
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-200">
-                    Supabase economico
+                    Economía del reino
                   </span>
                 </div>
               </div>
@@ -571,6 +578,7 @@ export function MarketSection() {
       <details
         data-gsap-market
         onToggle={(event) => { if (event.currentTarget.open) setHasOpenedTavern(true); }}
+        id="realm-tavern"
         className="kd-glass kd-tavern group rounded-[2rem] border border-rose-500/15 bg-stone-900/75 p-4 sm:p-6"
       >
         <summary className="kd-touch flex cursor-pointer list-none flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -712,11 +720,12 @@ export function MarketSection() {
       ) : null}
 
       <div
+        id="realm-catalogue"
         data-gsap-market
         className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6"
       >
         <SectionHeader
-          eyebrow="Filtrar catalogo"
+          eyebrow="Elige tu equipamiento"
           title="Categorias del mercado"
         />
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -740,6 +749,7 @@ export function MarketSection() {
         <button
           type="button"
           onClick={() => setIsAdvancedFiltersOpen((current) => !current)}
+          aria-expanded={isAdvancedFiltersOpen}
           className="kd-touch mt-4 inline-flex items-center gap-2 rounded-full border border-stone-700 bg-stone-900/70 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-stone-300 transition hover:border-amber-500/25 hover:text-stone-100"
         >
           <ChevronDown

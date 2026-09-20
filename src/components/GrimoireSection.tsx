@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionHeader } from "./SectionHeader";
+import { RealmSectionHero } from "./RealmSectionHero";
 import type { BestiaryEntry, FloraEntry, GrimoireCategory, MagicStyle, AbilityLevel } from "../types";
 import { getOptimizedImageUrl } from "../utils/imageUtils";
 import { fetchGrimoireContent } from "../utils/grimoireContent";
@@ -122,7 +123,8 @@ export function GrimoireSection() {
   if (grimoireData.length === 0) {
     return (
       <section className="space-y-6">
-        <div className="kd-glass rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 shadow-2xl shadow-black/40 md:p-8">
+        <RealmSectionHero section="grimoire" />
+        <div id="realm-grimoire-content" className="kd-glass rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 shadow-2xl shadow-black/40 md:p-8">
           <SectionHeader
             eyebrow="Conocimiento Prohibido"
             title="Grimorio de Poderes"
@@ -135,17 +137,19 @@ export function GrimoireSection() {
 
   return (
     <section className="space-y-6">
-      <div className="kd-glass kd-stagger rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 shadow-2xl shadow-black/40 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <RealmSectionHero section="grimoire" />
+      <div id="realm-grimoire-content" className="kd-glass realm-section-intro border border-stone-800 p-6 md:p-8">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
           <SectionHeader
             eyebrow="Conocimiento Prohibido"
-            title="Grimorio de Poderes"
+            title="Elige tu disciplina"
             description="Explora las escuelas de magia del reino, sus fundamentos fisicos y sus limites eticos. Todo poder tiene un precio y una restriccion."
           />
           <div className="flex w-full flex-col gap-3 md:w-auto md:items-end">
-            <div className="flex w-full shrink-0 rounded-2xl border border-stone-800 bg-stone-950/50 p-1.5 md:w-auto">
+            <div className="realm-segmented" role="group" aria-label="Contenido del grimorio">
               <button
                 type="button"
+                aria-pressed={mode === "magic"}
                 onClick={() => {
                   setMode("magic");
                   setSearchQuery("");
@@ -161,6 +165,7 @@ export function GrimoireSection() {
               </button>
               <button
                 type="button"
+                aria-pressed={mode === "bestiary"}
                 onClick={() => {
                   setMode("bestiary");
                   setSearchQuery("");
@@ -176,6 +181,7 @@ export function GrimoireSection() {
               </button>
               <button
                 type="button"
+                aria-pressed={mode === "flora"}
                 onClick={() => {
                   setMode("flora");
                   setSearchQuery("");
@@ -195,6 +201,7 @@ export function GrimoireSection() {
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500 transition group-focus-within:text-amber-400" />
               <input
                 type="text"
+                aria-label="Buscar en el grimorio"
                 placeholder={
                   mode === "magic"
                     ? "Buscar habilidad o fundamento..."
@@ -211,10 +218,12 @@ export function GrimoireSection() {
         </div>
 
         {mode === "magic" ? (
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="realm-grimoire-categories mt-6 flex flex-wrap gap-2">
             {grimoireData.map((category) => (
               <button
                 key={category.id}
+                type="button"
+                aria-pressed={!isSearching && selectedCategoryId === category.id}
                 onClick={() => {
                   setSelectedCategoryId(category.id);
                   setSearchQuery("");
@@ -344,7 +353,8 @@ function FloraView({
           {entries.map((entry) => (
             <article
               key={entry.id}
-              className="kd-glass kd-hover-lift overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-900/60 shadow-xl shadow-black/20"
+              data-rarity={entry.rarity}
+              className="realm-rarity-card kd-glass kd-hover-lift overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-900/60 shadow-xl shadow-black/20"
             >
               <div className="relative h-52 border-b border-stone-800 bg-stone-950">
                 {entry.imageUrl ? (
@@ -358,7 +368,7 @@ function FloraView({
                     <Flower2 className="h-12 w-12" />
                   </div>
                 )}
-                <div className="absolute left-4 top-4 rounded-full border border-stone-700 bg-stone-950/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-amber-300 backdrop-blur">
+                <div className="realm-rarity-badge absolute left-4 top-4 rounded-full border border-stone-700 bg-stone-950/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-amber-300 backdrop-blur">
                   {getBestiaryRarityLabel(entry.rarity)}
                 </div>
               </div>
@@ -489,7 +499,8 @@ function BestiaryView({
           {entries.map((entry) => (
             <article
               key={entry.id}
-              className="kd-glass kd-hover-lift overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-900/60 shadow-xl shadow-black/20"
+              data-rarity={entry.rarity}
+              className="realm-rarity-card kd-glass kd-hover-lift overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-900/60 shadow-xl shadow-black/20"
             >
               <div className="relative h-52 border-b border-stone-800 bg-stone-950">
                 {entry.imageUrl ? (
@@ -503,7 +514,7 @@ function BestiaryView({
                     <PawPrint className="h-12 w-12" />
                   </div>
                 )}
-                <div className="absolute left-4 top-4 rounded-full border border-stone-700 bg-stone-950/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-amber-300 backdrop-blur">
+                <div className="realm-rarity-badge absolute left-4 top-4 rounded-full border border-stone-700 bg-stone-950/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-amber-300 backdrop-blur">
                   {getBestiaryRarityLabel(entry.rarity)}
                 </div>
               </div>
@@ -817,29 +828,31 @@ function MagicStylePanel({
   }, [hasMatch, normalizedQuery]);
 
   return (
-    <div className={`kd-glass kd-hover-lift overflow-hidden rounded-[2.5rem] border transition-all duration-300 ${
+    <div className={`kd-glass realm-grimoire-entry overflow-hidden rounded-2xl border transition-colors duration-200 ${
       isOpen ? "border-stone-700 bg-stone-900/60 shadow-xl" : "border-stone-800 bg-stone-900/40"
     }`}>
       <button 
+        type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
-        className="kd-touch flex w-full items-start justify-between p-6 text-left transition hover:bg-stone-800/20 md:p-8"
+        className="kd-touch flex w-full items-start justify-between gap-3 p-5 text-left transition hover:bg-stone-800/20 md:p-6"
       >
-        <div className="flex items-start gap-5">
-          <div className={`rounded-2xl transition-colors p-4 border shadow-[0_0_15px_rgba(245,158,11,0.05)] ${
+        <div className="flex min-w-0 items-start gap-3 md:gap-5">
+          <div className={`shrink-0 rounded-xl transition-colors p-3 border ${
             isOpen ? "bg-amber-500 text-stone-950 border-amber-400" : "bg-stone-800 text-stone-400 border-stone-700"
           }`}>
             <Zap className="h-6 w-6" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
-              <h3 className="text-2xl font-black text-stone-100 uppercase tracking-tight">{style.title}</h3>
+              <h3 className="text-lg font-semibold text-stone-100 tracking-tight md:text-xl">{style.title}</h3>
               {showCategoryTag && style.categoryTitle && (
                 <span className="px-2 py-0.5 rounded-lg bg-stone-800 text-[10px] font-black text-stone-500 uppercase tracking-widest border border-stone-700">
                   {style.categoryTitle}
                 </span>
               )}
             </div>
-            <p className="text-sm text-amber-500/60 font-medium font-serif italic">Fundamento Arcano</p>
+            <p className="mt-1 text-xs text-stone-400">Fundamento arcano</p>
           </div>
         </div>
         <div className={`mt-2 rounded-xl bg-stone-800 p-2 text-stone-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-amber-500' : ''}`}>

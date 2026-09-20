@@ -35,15 +35,17 @@ export function LibrarySection() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[2.5rem] border border-stone-800 bg-stone-900/80 p-6 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="kd-glass realm-section-intro realm-library-intro border border-stone-800 p-6 md:p-8">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
           <SectionHeader
             eyebrow="Archivos del Gremio"
             title="Biblioteca del Reino"
-            description="Consulta las cronicas, leyes y la geopolitica de Aethelgardia en un solo lugar."
+            description="Cada frontera tiene una historia. Descubre las crónicas, las leyes y los territorios de Aethelgardia."
           />
-          <div className="flex bg-stone-950/50 p-1.5 rounded-2xl border border-stone-800 shrink-0">
+          <div className="realm-segmented" role="group" aria-label="Contenido de la biblioteca">
             <button
+              type="button"
+              aria-pressed={activeTab === "lore"}
               onClick={() => setActiveTab("lore")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
                 activeTab === "lore" 
@@ -55,6 +57,8 @@ export function LibrarySection() {
               Cronicas y Leyes
             </button>
             <button
+              type="button"
+              aria-pressed={activeTab === "world"}
               onClick={() => setActiveTab("world")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
                 activeTab === "world" 

@@ -1097,7 +1097,7 @@ export function ArchivistSection() {
 
   return (
     <section className="space-y-4" aria-label="Archivista de Argentis">
-      <div className="kd-glass overflow-hidden rounded-[2rem] border border-cyan-500/15 bg-stone-900/85 shadow-2xl shadow-black/40">
+      <div className="kd-glass realm-section-intro overflow-hidden border border-cyan-500/15">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_0%,rgba(34,211,238,0.16),transparent_32%),linear-gradient(115deg,transparent_25%,rgba(245,158,11,0.06)_52%,transparent_72%)]"
@@ -1105,7 +1105,7 @@ export function ArchivistSection() {
         <div className="relative px-5 py-6 md:px-7 md:py-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <SectionHeader eyebrow="Archivo vivo v2.0" title="Archivista de Argentis" />
+              <SectionHeader eyebrow="La memoria del reino" title="Archivista de Argentis" />
               <p className="mt-3 max-w-xl text-sm leading-6 text-stone-400">
                 Consulta el canon, cruza el estado actual del reino y prepara operaciones revisables sin perder el control humano.
               </p>

@@ -14,14 +14,12 @@ export function SectionHeader({
   rightSlot,
 }: SectionHeaderProps) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-4">
+    <div className="realm-section-header flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-4">
       <div>
         <p className="kd-section-eyebrow text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
-          <span className="kd-section-sigil" aria-hidden="true" />
           {eyebrow}
         </p>
         <h2 className="mt-2 text-2xl font-black text-stone-100 md:text-3xl">{title}</h2>
-        <div className="kd-divider mt-3 h-px w-full max-w-72" />
         {description ? (
           <p className="mt-3 max-w-xl text-sm leading-6 text-stone-400">
             {description}

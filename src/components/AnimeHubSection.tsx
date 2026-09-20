@@ -10,7 +10,6 @@ import {
   Activity,
   Download,
   ExternalLink,
-  Film,
   Gauge,
   Layers3,
   PlayCircle,
@@ -21,6 +20,8 @@ import {
   WifiOff,
 } from "lucide-react";
 import { ExpandableText } from "./ExpandableText";
+import { AnimeIcon } from "./AnimeIcon";
+import { RealmSectionHero } from "./RealmSectionHero";
 import {
   ANIME_PROVIDER_OPTIONS,
   getAnimeProviderDiagnostics,
@@ -220,22 +221,23 @@ export function AnimeHubSection() {
   }
 
   return (
-    <section className="relative isolate overflow-hidden rounded-[2rem] border border-amber-200/10 bg-[#090a0d] text-stone-100 shadow-[0_28px_90px_rgba(0,0,0,0.38)]">
+    <section className="realm-anime relative isolate overflow-hidden rounded-[1.25rem] border border-stone-800 bg-stone-950 text-stone-100">
+      <RealmSectionHero section="anime" />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_5%,rgba(245,158,11,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(34,211,238,0.11),transparent_30%),linear-gradient(145deg,#090a0d_0%,#11100d_48%,#080b0e_100%)]" />
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:44px_44px]" />
 
-      <header className="border-b border-white/10 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+      <header className="realm-anime-search-panel border-b border-white/10 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-2xl">
-            <div className="mb-2 flex items-center gap-2 text-[0.68rem] font-black uppercase tracking-[0.25em] text-amber-300">
-              <Sparkles className="h-4 w-4" />
-              Portal Anime
+            <div className="mb-3 flex items-center gap-2 text-xs font-medium text-amber-300">
+              <AnimeIcon className="h-5 w-5" />
+              Tu siguiente episodio
             </div>
-            <h2 className="font-serif text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
-              Encuentra tu proxima historia
-            </h2>
+            <h3 className="font-serif text-2xl font-semibold tracking-tight text-stone-100 sm:text-3xl">
+              El viaje empieza aquí
+            </h3>
             <p className="mt-2 max-w-xl text-sm leading-6 text-stone-400 sm:text-base">
-              Kingdoom consulta varias fuentes desde su servidor y reune resultados, episodios y enlaces en un solo lugar.
+              Explora series, encuentra episodios y elige tu próxima aventura en un solo lugar.
             </p>
           </div>
 
@@ -301,9 +303,9 @@ export function AnimeHubSection() {
 
           {!hasSearched && !isSearching && (
             <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
-              <Film className="h-9 w-9 text-amber-300" />
+              <AnimeIcon className="realm-anime-crest h-12 w-12 text-amber-300" />
               <p className="mt-4 text-base font-black text-white">Empieza con una busqueda</p>
-              <p className="mt-1 text-sm leading-6 text-stone-400">No consumimos recursos hasta que escribas un titulo.</p>
+              <p className="mt-1 text-sm leading-6 text-stone-400">Grandes batallas, mundos imposibles y personajes que se quedan contigo.</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {QUICK_SEARCHES.map((title) => (
                   <button
@@ -532,7 +534,7 @@ export function AnimeHubSection() {
             ) : (
               <motion.div key="anime-empty" initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} className="grid min-h-[30rem] place-items-center rounded-[1.75rem] border border-dashed border-white/10 bg-black/20 px-6 py-12 text-center lg:min-h-[43rem]">
                 <div className="max-w-sm">
-                  <div className="mx-auto grid h-20 w-20 place-items-center rounded-[1.75rem] border border-amber-300/20 bg-amber-300/10 text-amber-300 shadow-[0_18px_50px_rgba(251,191,36,.08)]"><Film className="h-9 w-9" /></div>
+                  <div className="mx-auto grid h-20 w-20 place-items-center rounded-[1.75rem] border border-pink-300/30 bg-pink-300/10 text-pink-200"><AnimeIcon className="realm-anime-crest h-12 w-12" /></div>
                   <h3 className="mt-6 font-serif text-2xl font-black text-white">Tu portal esta preparado</h3>
                   <p className="mt-2 text-sm leading-6 text-stone-500">Busca una serie para ver su informacion, episodios y servidores disponibles.</p>
                 </div>

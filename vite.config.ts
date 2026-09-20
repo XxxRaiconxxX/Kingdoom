@@ -22,6 +22,8 @@ const debugChunkModules: Plugin = {
 export default defineConfig({
   base: "./",
   plugins: [react(), tailwindcss(), debugChunkModules],
+  // Android keeps built HTML alongside the SPA; it is not a dev-server entry.
+  optimizeDeps: { entries: ["index.html"] },
   server: {
     proxy: {
       "/api": {

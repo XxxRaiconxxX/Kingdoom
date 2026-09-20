@@ -28,3 +28,7 @@ android/local.properties
 graphify-out/
 
 .vercel
+
+# Local Vite / preview process logs
+/artifacts/*.log
+/artifacts/realm-ui/*.log

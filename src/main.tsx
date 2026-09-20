@@ -1,5 +1,6 @@
 import { lazy, StrictMode, Suspense, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { MotionConfig } from "framer-motion";
 import App from "./App";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { PlayerSessionProvider } from "./context/PlayerSessionContext";
@@ -47,7 +48,9 @@ createRoot(rootElement).render(
   <StrictMode>
     <AppErrorBoundary>
       <PlayerSessionProvider>
-        <App />
+        <MotionConfig reducedMotion="user">
+          <App />
+        </MotionConfig>
         <DeferredVercelInsights />
       </PlayerSessionProvider>
     </AppErrorBoundary>

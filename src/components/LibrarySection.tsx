@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { 
   ScrollText, 
   Map, 
@@ -234,6 +235,35 @@ function DossierBlock({ label, text }: { label: string; text: string }) {
 function WorldSubSection() {
   const [activeMap, setActiveMap] = useState<"vyralis" | "geopolitica">("vyralis");
   const [mapViewerOpen, setMapViewerOpen] = useState(false);
+  const mapDialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!mapViewerOpen) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    mapDialogRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMapViewerOpen(false);
+      if (event.key !== "Tab") return;
+      const controls = Array.from(mapDialogRef.current?.querySelectorAll<HTMLElement>("button, a[href]") ?? []);
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
+    };
+  }, [mapViewerOpen]);
 
   const mapInfo =
     activeMap === "vyralis"
@@ -351,43 +381,46 @@ function WorldSubSection() {
         </div>
       </div>
 
-      <AnimatePresence>
+      {createPortal(<AnimatePresence>
         {mapViewerOpen ? (
           <motion.div
-            className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-sm"
+            className="realm-map-overlay fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={(event) => { if (event.target === event.currentTarget) setMapViewerOpen(false); }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
+              ref={mapDialogRef}
               initial={{ y: 18, opacity: 0, scale: 0.98 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 18, opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/50"
+              className="realm-map-dialog w-full max-w-5xl overflow-hidden rounded-[2rem] border border-stone-800 bg-stone-950 shadow-2xl shadow-black/50"
               role="dialog"
               aria-modal="true"
+              aria-labelledby="realm-map-title"
             >
               <div className="flex items-start justify-between gap-4 border-b border-stone-800 px-5 py-4">
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-400/80">
                     Mapa y mundo
                   </p>
-                  <p className="mt-1 truncate text-sm font-bold text-stone-100">
+                  <p id="realm-map-title" className="mt-1 text-sm font-bold text-stone-100">
                     {mapInfo.title}
                   </p>
                 </div>
                 <button
                   onClick={() => setMapViewerOpen(false)}
                   type="button"
-                  className="rounded-2xl border border-stone-800 bg-stone-900/60 p-2 text-stone-300 transition hover:bg-stone-900"
+                  className="min-h-11 min-w-11 shrink-0 rounded-2xl border border-stone-800 bg-stone-900/60 p-2 text-stone-300 transition hover:bg-stone-900"
                   aria-label="Cerrar"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="max-h-[78vh] overflow-auto bg-black/20">
+              <div className="realm-map-scroll min-h-0 overflow-auto bg-black/20">
                 <img loading="lazy" decoding="async" 
                   src={mapInfo.src}
                   alt={mapInfo.alt}
@@ -401,7 +434,7 @@ function WorldSubSection() {
                   href={mapInfo.src}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full border border-stone-800 bg-stone-900/70 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-stone-200 transition hover:bg-stone-900"
+                  className="inline-flex min-h-11 items-center rounded-full border border-stone-800 bg-stone-900/70 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-stone-200 transition hover:bg-stone-900"
                 >
                   Abrir archivo
                 </a>
@@ -409,7 +442,7 @@ function WorldSubSection() {
             </motion.div>
           </motion.div>
         ) : null}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
     </div>
   );
 }

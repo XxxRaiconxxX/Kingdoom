@@ -615,7 +615,7 @@ export function PlayerProfilePanel({
   );
 
   return (
-    <section data-profile-tools={Boolean(player || showAnimeShortcut)} className={`kd-glass realm-player-profile relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-4 sm:p-5 md:p-6 ${isCollapsed ? "realm-player-profile-compact" : ""}`}>
+    <section data-profile-tools={Boolean(player || showAnimeShortcut)} data-profile-tool-count={Number(Boolean(player)) + Number(showAnimeShortcut)} className={`kd-glass realm-player-profile relative overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-4 sm:p-5 md:p-6 ${isCollapsed ? "realm-player-profile-compact" : ""}`}>
       <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border border-amber-400/10 bg-[radial-gradient(circle,rgba(245,158,11,0.18),transparent_62%)] blur-2xl" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
       {player || showAnimeShortcut ? (
@@ -706,13 +706,13 @@ export function PlayerProfilePanel({
             </div>
           </motion.div>
         ) : isCollapsed && !player ? (
-          <div className="flex min-h-16 items-center justify-between gap-3 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
+          <div className="realm-profile-guest flex min-h-16 items-center justify-between gap-3 rounded-[1.5rem] border border-stone-800 bg-stone-950/45 px-4 py-3">
             <div className="flex min-w-0 items-center gap-3">
               <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-2.5 text-amber-400">
                 <UserRound className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-black text-stone-100">Sin perfil conectado</p>
+                <p className="text-sm font-black text-stone-100">Sin perfil conectado</p>
                 <p className="text-xs text-stone-500">Conecta tu perfil para participar.</p>
               </div>
             </div>

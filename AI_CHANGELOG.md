@@ -7,6 +7,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-09
+### [2026-09-20] Auditoría de proporciones, superposiciones y movimiento
+- Corregidos el visor de mapas fuera del viewport, el recorte de pestañas/texto a 360 px y la superposición del acceso anime con el botón Panel del perfil conectado.
+- Ajustados el espacio entre botones y leyendas durante la entrada animada y el ancho de lectura de la tarjeta del Asedio en móvil. Añadidas respuestas de pulsación, brillo y desplazamiento; se mantienen las animaciones existentes y la escala de escritorio.
+- Prueba reproducible en `scripts/check-realm-layout.py`, evidencias en `artifacts/realm-ui/layout-audit/` y alcance documentado en `docs/design/layout-audit.md`. El perfil y el Grimorio se prueban con datos locales, sin escrituras remotas. [Codex]
+- Validación: 37 comprobaciones de navegador correctas, con anchos 360/700/1358/1920 px y ventana adicional 844 × 390; `npx tsc --noEmit`, `npm run build` (2257 módulos, 1 min 20 s) y `git diff --check` correctos. Publicación en `origin/main` solicitada por el usuario; resultado del push verificado en el reporte de entrega.
+
 ### [2026-09-19] Densidad de escritorio y publicación del diseño
 - Contenido general al 94 % desde 1100 px; el margen compensa la escala para conservar intacta la barra lateral y el ancho útil. Móvil y tableta mantienen su escala; las animaciones y transiciones se conservan.
 - Incluidos en la entrega los cambios visuales pendientes: identidad negro/dorado, emblema, portadas por sección, decoraciones anime y perfil responsive compacto.

@@ -1,0 +1,152 @@
+[
+  {
+    "width": 360,
+    "section": "home",
+    "issues": []
+  },
+  {
+    "width": 360,
+    "section": "grimoire",
+    "issues": []
+  },
+  {
+    "width": 360,
+    "section": "library",
+    "issues": []
+  },
+  {
+    "width": 360,
+    "section": "market",
+    "issues": []
+  },
+  {
+    "width": 360,
+    "section": "archivist",
+    "issues": []
+  },
+  {
+    "width": 360,
+    "section": "anime",
+    "issues": []
+  },
+  {
+    "map": "PASS",
+    "width": 360,
+    "height": 844
+  },
+  {
+    "width": 360,
+    "section": "connected-profile",
+    "issues": []
+  },
+  {
+    "width": 700,
+    "section": "home",
+    "issues": []
+  },
+  {
+    "width": 700,
+    "section": "grimoire",
+    "issues": []
+  },
+  {
+    "width": 700,
+    "section": "library",
+    "issues": []
+  },
+  {
+    "width": 700,
+    "section": "market",
+    "issues": []
+  },
+  {
+    "width": 700,
+    "section": "archivist",
+    "issues": []
+  },
+  {
+    "width": 700,
+    "section": "anime",
+    "issues": []
+  },
+  {
+    "map": "PASS",
+    "width": 700,
+    "height": 844
+  },
+  {
+    "width": 1358,
+    "section": "home",
+    "issues": []
+  },
+  {
+    "width": 1358,
+    "section": "grimoire",
+    "issues": []
+  },
+  {
+    "width": 1358,
+    "section": "library",
+    "issues": []
+  },
+  {
+    "width": 1358,
+    "section": "market",
+    "issues": []
+  },
+  {
+    "width": 1358,
+    "section": "archivist",
+    "issues": []
+  },
+  {
+    "width": 1358,
+    "section": "anime",
+    "issues": []
+  },
+  {
+    "map": "PASS",
+    "width": 1358,
+    "height": 900
+  },
+  {
+    "width": 1358,
+    "section": "connected-profile",
+    "issues": []
+  },
+  {
+    "width": 1920,
+    "section": "home",
+    "issues": []
+  },
+  {
+    "width": 1920,
+    "section": "grimoire",
+    "issues": []
+  },
+  {
+    "width": 1920,
+    "section": "library",
+    "issues": []
+  },
+  {
+    "width": 1920,
+    "section": "market",
+    "issues": []
+  },
+  {
+    "width": 1920,
+    "section": "archivist",
+    "issues": []
+  },
+  {
+    "width": 1920,
+    "section": "anime",
+    "issues": []
+  },
+  {
+    "map": "PASS",
+    "width": 1920,
+    "height": 900
+  }
+]

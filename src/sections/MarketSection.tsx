@@ -474,11 +474,11 @@ export function MarketSection() {
         <div className="relative isolate p-6">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_0%,rgba(245,158,11,0.22),transparent_32%),radial-gradient(circle_at_80%_25%,rgba(59,130,246,0.15),transparent_30%),linear-gradient(135deg,rgba(28,25,23,0.98),rgba(12,10,9,0.9))]" />
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-3 text-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.12)]">
+            <div className="realm-market-feature-copy flex items-start gap-4">
+              <div className="realm-market-feature-icon rounded-2xl border border-amber-400/20 bg-amber-500/10 p-3 text-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.12)]">
                 <Castle className="h-7 w-7" />
               </div>
-              <div>
+              <div className="realm-market-feature-text">
                 <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-300">
                   {REALM_SIEGE_CATALOG_ENTRY.eyebrow}
                 </p>

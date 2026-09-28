@@ -7,6 +7,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-09
+### [2026-09-28] Identidad oficial y build web
+- Incorporado el logo oficial de Kingdoom como favicon, apple-touch-icon y vista previa Open Graph/Twitter mediante `public/img/kingdoom-logo.png` y `public/img/kingdoom-logo.jpg`.
+- Instaladas las dependencias locales necesarias sin añadir dependencias globales.
+- Validado con `npm run build`, `npx tsc --noEmit` y `git diff --check`; build de Vite correcto y TypeScript sin errores. [Hermes]
+
 ### [2026-09-20] Auditoría de proporciones, superposiciones y movimiento
 - Corregidos el visor de mapas fuera del viewport, el recorte de pestañas/texto a 360 px y la superposición del acceso anime con el botón Panel del perfil conectado.
 - Ajustados el espacio entre botones y leyendas durante la entrada animada y el ancho de lectura de la tarjeta del Asedio en móvil. Añadidas respuestas de pulsación, brillo y desplazamiento; se mantienen las animaciones existentes y la escala de escritorio.

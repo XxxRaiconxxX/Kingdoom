@@ -67,7 +67,7 @@ export function buildAnimeFlvFallbackUrl(input: AnimeFlvFallbackInput) {
   }
 
   if (input.action === "links" && input.series && input.episode) {
-    url.pathname = `${basePath}/anime/${encodeURIComponent(input.series)}/episode/${encodeURIComponent(input.episode)}`;
+    url.pathname = `${basePath}/anime/${encodeURIComponent(input.series)}/${encodeURIComponent(input.episode)}`;
     return url;
   }
 

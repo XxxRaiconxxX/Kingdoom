@@ -43,7 +43,7 @@ assert.equal(
     series: "one-piece-tv",
     episode: "1",
   })?.toString(),
-  "https://animeflv.example.com/api/anime/one-piece-tv/episode/1"
+  "https://animeflv.example.com/api/anime/one-piece-tv/1"
 );
 
 console.log("Anime provider contract: OK");

@@ -6,6 +6,13 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Historico anterior retirado del changelog activo por limpieza operativa.
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
+## 2026-10
+### [2026-10-11] Correccion y publicacion del Portal Anime
+- Corregida la ruta del respaldo AnimeAV1 para episodios, que usaba un segmento `/episode/` inexistente.
+- El proxy ahora normaliza respuestas con `embeds` y descargas con URL directa, y envia el encabezado JSON:API requerido por Kitsu para metadatos.
+- Validado con busquedas reales de AnimeFLV, AnimeFLV Completo, TioAnime y AniChi; `npx tsc --noEmit`, `npm run build`, el contrato de proveedores y `git diff --check` pasaron correctamente. [Codex]
+- Publicado en `origin/main`; la verificacion posterior debe confirmar el workflow de GitHub Pages y el endpoint de metadatos.
+
 ## 2026-09
 ### [2026-09-20] Auditoría de proporciones, superposiciones y movimiento
 - Corregidos el visor de mapas fuera del viewport, el recorte de pestañas/texto a 360 px y la superposición del acceso anime con el botón Panel del perfil conectado.

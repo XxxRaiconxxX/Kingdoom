@@ -117,7 +117,7 @@ async function fetchUpstream(url: URL, headers?: HeadersInit): Promise<UpstreamR
 
 function normalizeLinks(value: unknown) {
   const payload = asRecord(unwrapPayload(value));
-  const directStream = asArray(payload?.stream);
+  const directStream = asArray(payload?.stream ?? payload?.streams ?? payload?.embeds);
   const directDownload = asArray(payload?.download ?? payload?.downloads);
   const servers = asArray(payload?.servers);
 
@@ -140,7 +140,7 @@ function normalizeLinks(value: unknown) {
   const download = downloadSource
     .map((entry) => {
       const record = asRecord(entry);
-      const url = readString(record, "download", "downloadUrl");
+      const url = readString(record, "download", "downloadUrl", "url", "link");
       if (!url) return null;
       return {
         server: readString(record, "server", "name") || "Descarga",
@@ -299,7 +299,9 @@ async function requestMetadata(query: string) {
   kitsuUrl.searchParams.set("filter[text]", query);
   kitsuUrl.searchParams.set("page[limit]", "1");
   kitsuUrl.searchParams.set("include", "categories");
-  const kitsu = await fetchUpstream(kitsuUrl);
+  const kitsu = await fetchUpstream(kitsuUrl, {
+    Accept: "application/vnd.api+json",
+  });
   const kitsuData = kitsu.ok ? normalizeKitsuMetadata(kitsu.payload) : null;
 
   if (!kitsuData) {

@@ -388,15 +388,16 @@ export async function updatePlayerGold(
     return false;
   }
 
-  const { data, error } = await supabase
-    .from("players")
-    .update({ gold: nextGold })
-    .eq("id", playerId)
-    .select("id")
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("admin_set_player_gold", {
+    p_player_id: playerId,
+    p_new_gold: nextGold,
+  });
 
-  // RLS can hide the target row without returning an error.
-  return !error && data?.id === playerId;
+  if (error || !Array.isArray(data) || !data[0]?.success) {
+    return false;
+  }
+
+  return data[0].new_gold === nextGold;
 }
 
 export async function incrementPlayerGold(

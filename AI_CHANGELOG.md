@@ -7,6 +7,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-10
+### [2026-10-11] Publicacion de seguridad de operaciones de oro
+- El panel admin usa `admin_set_player_gold` con autorizacion de administrador y bloqueo de fila, en lugar de actualizar `players` directamente.
+- `increment_gold` valida permisos, saldo y limites enteros; se revoco su ejecucion para `anon`.
+- Se incluyeron la migracion `20261010120000_secure_admin_gold_operations.sql` y su prueba estatica. Validado con TypeScript, build y `git diff --check`. [Codex]
+- La migracion remota y la acreditacion autorizada de Loudjack ya fueron verificadas antes de esta publicacion.
+
 ### [2026-10-11] Correccion y publicacion del Portal Anime
 - Corregida la ruta del respaldo AnimeAV1 para episodios, que usaba un segmento `/episode/` inexistente.
 - El proxy ahora normaliza respuestas con `embeds` y descargas con URL directa, y envia el encabezado JSON:API requerido por Kitsu para metadatos.

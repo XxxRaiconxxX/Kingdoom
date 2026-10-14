@@ -191,9 +191,9 @@ begin
 
   select *
   into v_daily_state
-  from public.player_scratch_daily_totals
-  where player_id = v_player.id
-    and date_key = v_date_key
+  from public.player_scratch_daily_totals as daily_totals
+  where daily_totals.player_id = v_player.id
+    and daily_totals.date_key = v_date_key
   for update;
 
   v_existing_gross := coalesce(v_daily_state.gross_wins, 0);
@@ -247,12 +247,12 @@ begin
   set gold = v_remaining_gold
   where id = v_player.id;
 
-  update public.player_scratch_daily_totals
+  update public.player_scratch_daily_totals as daily_totals
   set
     gross_wins = v_existing_gross + v_total_prize,
     updated_at = now()
-  where player_id = v_player.id
-    and date_key = v_date_key;
+  where daily_totals.player_id = v_player.id
+    and daily_totals.date_key = v_date_key;
 
   insert into public.scratch_runs (
     player_id,

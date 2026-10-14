@@ -1,0 +1,191 @@
+create or replace function public.play_scratch_batch(
+  p_quantity integer
+)
+returns table (
+  total_cost integer,
+  cost_per_ticket integer,
+  quantity integer,
+  used_tickets integer,
+  winning_tickets integer,
+  jackpot_wins integer,
+  losing_tickets integer,
+  total_prize integer,
+  refunded_tickets integer,
+  refunded_gold integer,
+  remaining_gold integer,
+  daily_gross_wins integer,
+  max_daily_limit integer,
+  date_key text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_auth_user_id uuid;
+  v_player public.players%rowtype;
+  v_daily_state public.player_scratch_daily_totals%rowtype;
+  v_date_key text := to_char(timezone('America/Asuncion', now()), 'YYYY-MM-DD');
+  v_cost integer;
+  v_win_chance double precision;
+  v_limit integer;
+  v_existing_gross integer := 0;
+  v_remaining_limit integer;
+  v_total_cost integer := 0;
+  v_total_prize integer := 0;
+  v_refunded_tickets integer := 0;
+  v_refunded_gold integer := 0;
+  v_remaining_gold integer := 0;
+  v_used_tickets integer := 0;
+  v_winning_tickets integer := 0;
+  v_jackpot_wins integer := 0;
+  v_losing_tickets integer := 0;
+  v_ticket_won boolean;
+  v_roll_prize integer;
+  v_index integer;
+begin
+  v_auth_user_id := auth.uid();
+
+  if v_auth_user_id is null then
+    raise exception 'Debes iniciar sesion antes de jugar Rasca y gana.' using errcode = '42501';
+  end if;
+
+  if p_quantity is null or p_quantity < 1 or p_quantity > 250 then
+    raise exception 'La cantidad de tickets debe estar entre 1 y 250.' using errcode = '22023';
+  end if;
+
+  select *
+  into v_player
+  from public.players
+  where auth_user_id = v_auth_user_id
+  limit 1
+  for update;
+
+  if v_player.id is null then
+    raise exception 'Tu cuenta segura aun no esta vinculada a un jugador del reino.' using errcode = '42501';
+  end if;
+
+  select cfg.cost, cfg.win_chance, cfg.max_daily_limit, cfg.date_key
+  into v_cost, v_win_chance, v_limit, v_date_key
+  from public.get_daily_scratch_config(v_date_key) cfg;
+
+  insert into public.player_scratch_daily_totals (player_id, date_key, gross_wins)
+  values (v_player.id, v_date_key, 0)
+  on conflict (player_id, date_key) do nothing;
+
+  select *
+  into v_daily_state
+  from public.player_scratch_daily_totals as daily_totals
+  where daily_totals.player_id = v_player.id
+    and daily_totals.date_key = v_date_key
+  for update;
+
+  v_existing_gross := coalesce(v_daily_state.gross_wins, 0);
+
+  if v_existing_gross >= v_limit then
+    raise exception 'Ya alcanzaste el limite diario del Rasca y gana. Vuelve manana.' using errcode = '22023';
+  end if;
+
+  v_total_cost := v_cost * p_quantity;
+
+  if v_player.gold < v_total_cost then
+    raise exception 'No tienes suficiente oro para comprar esa tanda de tickets.' using errcode = '22023';
+  end if;
+
+  v_remaining_limit := greatest(v_limit - v_existing_gross, 0);
+
+  for v_index in 1..p_quantity loop
+    exit when v_total_prize >= v_remaining_limit;
+
+    v_used_tickets := v_used_tickets + 1;
+    v_ticket_won := false;
+
+    if random() < v_win_chance then
+      v_roll_prize := floor(random() * (2500 - 200 + 1) + 200)::integer;
+      v_total_prize := v_total_prize + v_roll_prize;
+      v_ticket_won := true;
+    end if;
+
+    if random() < 0.05 then
+      v_total_prize := v_total_prize + 10000;
+      v_jackpot_wins := v_jackpot_wins + 1;
+      v_ticket_won := true;
+    end if;
+
+    if v_ticket_won then
+      v_winning_tickets := v_winning_tickets + 1;
+    end if;
+
+    if v_total_prize >= v_remaining_limit then
+      v_total_prize := v_remaining_limit;
+      exit;
+    end if;
+  end loop;
+
+  v_losing_tickets := greatest(v_used_tickets - v_winning_tickets, 0);
+  v_refunded_tickets := greatest(p_quantity - v_used_tickets, 0);
+  v_refunded_gold := v_refunded_tickets * v_cost;
+  v_remaining_gold := greatest(v_player.gold - v_total_cost + v_refunded_gold + v_total_prize, 0);
+
+  update public.players
+  set gold = v_remaining_gold
+  where id = v_player.id;
+
+  update public.player_scratch_daily_totals as daily_totals
+  set
+    gross_wins = v_existing_gross + v_total_prize,
+    updated_at = now()
+  where daily_totals.player_id = v_player.id
+    and daily_totals.date_key = v_date_key;
+
+  insert into public.scratch_runs (
+    player_id,
+    date_key,
+    quantity,
+    used_tickets,
+    winning_tickets,
+    jackpot_wins,
+    losing_tickets,
+    ticket_cost,
+    total_cost,
+    total_prize,
+    refunded_tickets,
+    refunded_gold,
+    remaining_gold
+  ) values (
+    v_player.id,
+    v_date_key,
+    p_quantity,
+    v_used_tickets,
+    v_winning_tickets,
+    v_jackpot_wins,
+    v_losing_tickets,
+    v_cost,
+    v_total_cost,
+    v_total_prize,
+    v_refunded_tickets,
+    v_refunded_gold,
+    v_remaining_gold
+  );
+
+  return query
+  select
+    v_total_cost,
+    v_cost,
+    p_quantity,
+    v_used_tickets,
+    v_winning_tickets,
+    v_jackpot_wins,
+    v_losing_tickets,
+    v_total_prize,
+    v_refunded_tickets,
+    v_refunded_gold,
+    v_remaining_gold,
+    v_existing_gross + v_total_prize,
+    v_limit,
+    v_date_key;
+end;
+$$;
+
+revoke all on function public.play_scratch_batch(integer) from public, anon;
+grant execute on function public.play_scratch_batch(integer) to authenticated;

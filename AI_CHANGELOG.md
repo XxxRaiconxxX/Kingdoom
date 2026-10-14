@@ -7,6 +7,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-10
+### [2026-10-14] Correccion de acceso seguro tras primer acceso web
+- El perfil conectado por nombre ahora distingue entre una cuenta segura ya creada (`authUserId`) y una vinculacion aun pendiente.
+- Cuando el acceso ya existe pero el navegador usa otra sesion, la tarjeta muestra directamente `Entrar con usuario y contraseña` y abre el modal existente, sin enlazar sesiones anonimas automaticamente.
+- Validado con `npx tsc --noEmit`, `npm run build` y `git diff --check`. No se modificaron RLS, migraciones ni credenciales. [Hermes]
+
 ### [2026-10-11] Publicacion de seguridad de operaciones de oro
 - El panel admin usa `admin_set_player_gold` con autorizacion de administrador y bloqueo de fila, en lugar de actualizar `players` directamente.
 - `increment_gold` valida permisos, saldo y limites enteros; se revoco su ejecucion para `anon`.

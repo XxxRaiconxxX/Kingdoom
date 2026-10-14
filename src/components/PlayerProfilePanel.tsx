@@ -927,8 +927,9 @@ export function PlayerProfilePanel({
                               Cuenta segura requerida
                             </p>
                             <p className="mt-1 leading-6 text-cyan-50/90">
-                              Para activar compras y misiones, pide al staff que verifique tu identidad
-                              y apruebe la vinculaci?n de este navegador.
+                              {player.authUserId
+                                ? "Tu acceso seguro ya existe. Este navegador debe iniciar sesión con tu usuario y contraseña para activar compras y misiones."
+                                : "Para activar compras y misiones, pide al staff que verifique tu identidad y apruebe la vinculaci?n de este navegador."}
                             </p>
                             {secureAuthUserId ? (
                               <label className="mt-3 block text-xs text-cyan-100">
@@ -962,6 +963,16 @@ export function PlayerProfilePanel({
                               </>
                             )}
                           </button>
+                          {player.authUserId ? (
+                            <button
+                              type="button"
+                              onClick={() => setIsAuthModalOpen(true)}
+                              className="inline-flex min-w-[14rem] items-center justify-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-400/15 px-4 py-3 text-sm font-extrabold text-amber-50 transition hover:border-amber-300/45 hover:bg-amber-400/20"
+                            >
+                              <ShieldCheck className="h-4 w-4" />
+                              Entrar con usuario y contraseña
+                            </button>
+                          ) : null}
                         </div>
                         {secureLinkFeedback ? (
                           <p className="mt-3 text-xs text-cyan-100/90">{secureLinkFeedback}</p>

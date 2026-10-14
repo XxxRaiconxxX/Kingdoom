@@ -17,12 +17,14 @@ export function KingdoomAuthModal({
   onClose,
   onAuthenticated,
   initialUsername = "",
+  initialMode = "login",
 }: {
   onClose: () => void;
   onAuthenticated: (player: PlayerAccount) => void;
   initialUsername?: string;
+  initialMode?: "login" | "first-access";
 }) {
-  const [mode, setMode] = useState<AuthMode>("login");
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [username, setUsername] = useState(initialUsername);
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");

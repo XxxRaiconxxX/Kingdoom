@@ -7,6 +7,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-10
+### [2026-10-14] Flujo general de primer acceso seguro para perfiles con WhatsApp
+- Perfiles con WhatsApp vinculado pero sin `authUserId` ahora muestran `Crear acceso seguro con !codigo` y abren el modal directamente en Primer acceso.
+- Se conserva el login para cuentas seguras existentes y la aprobación del staff para perfiles sin WhatsApp; no se enlazan sesiones anónimas automáticamente.
+- Reproducido con Loudjack (`c83c2743`) y validado con Vitest, `npx tsc --noEmit`, `npm run build` y `git diff --check`. [Hermes]
+
 ### [2026-10-14] Correccion de acceso seguro tras primer acceso web
 - El perfil conectado por nombre ahora distingue entre una cuenta segura ya creada (`authUserId`) y una vinculacion aun pendiente.
 - Cuando el acceso ya existe pero el navegador usa otra sesion, la tarjeta muestra directamente `Entrar con usuario y contraseña` y abre el modal existente, sin enlazar sesiones anonimas automaticamente.

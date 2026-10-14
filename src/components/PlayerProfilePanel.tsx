@@ -66,6 +66,10 @@ import {
 } from "../utils/pveProgress";
 import { fetchPlayerMonthlyRankSnapshot } from "../utils/playerRanks";
 
+export function shouldOfferFirstAccess(player: { phone?: string | null; authUserId?: string | null }) {
+  return Boolean(player.phone && !player.authUserId);
+}
+
 const CharImportModal = lazy(() =>
   import("./CharImportModal").then((module) => ({
     default: module.CharImportModal,
@@ -129,6 +133,7 @@ export function PlayerProfilePanel({
   } = usePlayerSession();
   const [usernameInput, setUsernameInput] = useState("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authInitialMode, setAuthInitialMode] = useState<"login" | "first-access">("login");
   const closeAuthModal = useCallback(() => setIsAuthModalOpen(false), []);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -929,7 +934,9 @@ export function PlayerProfilePanel({
                             <p className="mt-1 leading-6 text-cyan-50/90">
                               {player.authUserId
                                 ? "Tu acceso seguro ya existe. Este navegador debe iniciar sesión con tu usuario y contraseña para activar compras y misiones."
-                                : "Para activar compras y misiones, pide al staff que verifique tu identidad y apruebe la vinculaci?n de este navegador."}
+                                : player.phone
+                                  ? "Tu WhatsApp ya está vinculado. Pide !codigo al bot y crea tu acceso seguro aquí, sin aprobación manual del staff."
+                                  : "Para activar compras y misiones, pide al staff que verifique tu identidad y apruebe la vinculación de este navegador."}
                             </p>
                             {secureAuthUserId ? (
                               <label className="mt-3 block text-xs text-cyan-100">
@@ -966,11 +973,26 @@ export function PlayerProfilePanel({
                           {player.authUserId ? (
                             <button
                               type="button"
-                              onClick={() => setIsAuthModalOpen(true)}
+                              onClick={() => {
+                                setAuthInitialMode("login");
+                                setIsAuthModalOpen(true);
+                              }}
                               className="inline-flex min-w-[14rem] items-center justify-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-400/15 px-4 py-3 text-sm font-extrabold text-amber-50 transition hover:border-amber-300/45 hover:bg-amber-400/20"
                             >
                               <ShieldCheck className="h-4 w-4" />
                               Entrar con usuario y contraseña
+                            </button>
+                          ) : shouldOfferFirstAccess(player) ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAuthInitialMode("first-access");
+                                setIsAuthModalOpen(true);
+                              }}
+                              className="inline-flex min-w-[14rem] items-center justify-center gap-2 rounded-2xl border border-amber-400/25 bg-amber-400/15 px-4 py-3 text-sm font-extrabold text-amber-50 transition hover:border-amber-300/45 hover:bg-amber-400/20"
+                            >
+                              <ShieldCheck className="h-4 w-4" />
+                              Crear acceso seguro con !codigo
                             </button>
                           ) : null}
                         </div>
@@ -1640,7 +1662,8 @@ export function PlayerProfilePanel({
 
       {isAuthModalOpen ? (
         <KingdoomAuthModal
-          initialUsername={usernameInput}
+          initialUsername={player?.username ?? usernameInput}
+          initialMode={authInitialMode}
           onClose={closeAuthModal}
           onAuthenticated={(authenticatedPlayer) => {
             void connectPlayer(authenticatedPlayer.username);

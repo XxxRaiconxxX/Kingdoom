@@ -24,48 +24,41 @@ export async function activateKingdoomAccount(input: {
   code: string;
 }) {
   const username = normalizeKingdoomUsername(input.username);
-  const { data: verified, error: verifyError } = await supabase.rpc(
-    "verify_player_access_code",
-    { p_username: username, p_code: input.code.trim() }
-  );
-
-  if (verifyError) {
-    return { data: null, error: verifyError };
-  }
-
-  if (!verified) {
-    return {
-      data: null,
-      error: new Error("El codigo es invalido, ya fue usado o caduco."),
-    };
-  }
-
-  const result = await supabase.auth.signUp({
+  let result = await supabase.auth.signUp({
     email: getKingdoomAuthEmail(username),
     password: input.password,
     options: { data: { username } },
   });
 
-  if (result.error || !result.data.user) {
+  const canRetryExistingAccount = result.error?.message.toLowerCase().includes("already registered") ||
+    result.error?.message.toLowerCase().includes("already exists");
+  if (result.error && !canRetryExistingAccount) {
     return result;
   }
 
   if (!result.data.session) {
+    result = await supabase.auth.signInWithPassword({
+      email: getKingdoomAuthEmail(username),
+      password: input.password,
+    });
+  }
+
+  if (result.error || !result.data.user || !result.data.session) {
     return {
       data: null,
-      error: new Error("La cuenta requiere confirmacion de correo en Supabase; desactiva esa confirmacion para el acceso del reino."),
+      error: result.error ?? new Error("No se pudo iniciar la cuenta segura."),
     };
   }
 
-  const { data: linked, error: linkError } = await supabase.rpc(
-    "link_player_access",
-    { p_player_id: verified }
+  const { data: playerId, error: activationError } = await supabase.rpc(
+    "activate_player_access",
+    { p_username: username, p_code: input.code.trim() }
   );
 
-  if (linkError || linked !== true) {
+  if (activationError || !playerId) {
     return {
-      data: null,
-      error: linkError ?? new Error("La cuenta no pudo vincularse al perfil."),
+      data: result.data,
+      error: activationError ?? new Error("El codigo es invalido, ya fue usado o caduco."),
     };
   }
 

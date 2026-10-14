@@ -70,6 +70,10 @@ export function shouldOfferFirstAccess(player: { phone?: string | null; authUser
   return Boolean(player.phone && !player.authUserId);
 }
 
+export function shouldOfferManualApproval(player: { phone?: string | null; authUserId?: string | null }) {
+  return !player.phone && !player.authUserId;
+}
+
 const CharImportModal = lazy(() =>
   import("./CharImportModal").then((module) => ({
     default: module.CharImportModal,
@@ -858,9 +862,11 @@ export function PlayerProfilePanel({
                               Cuenta segura:{" "}
                               {isPlayerSecureLinked
                                 ? "Activa ✅"
-                                : isSecureSessionReady
-                                  ? "Pendiente"
-                                  : "Preparando"}
+                                : shouldOfferFirstAccess(player)
+                                  ? "Primer acceso"
+                                  : isSecureSessionReady
+                                    ? "Pendiente"
+                                    : "Preparando"}
                             </span>
                           </div>
                           <div className="mt-2 flex flex-wrap gap-2">
@@ -938,18 +944,18 @@ export function PlayerProfilePanel({
                                   ? "Tu WhatsApp ya está vinculado. Pide !codigo al bot y crea tu acceso seguro aquí, sin aprobación manual del staff."
                                   : "Para activar compras y misiones, pide al staff que verifique tu identidad y apruebe la vinculación de este navegador."}
                             </p>
-                            {secureAuthUserId ? (
+                            {!player.phone && secureAuthUserId ? (
                               <label className="mt-3 block text-xs text-cyan-100">
                                 Identificador de sesi?n para el staff
                                 <input readOnly value={secureAuthUserId} onFocus={(event) => event.currentTarget.select()}
                                   className="mt-1 w-full min-w-0 rounded-lg border border-cyan-400/20 bg-stone-950/70 p-2 font-mono text-xs" />
                               </label>
                             ) : null}
-                            {secureSessionError ? (
+                            {shouldOfferManualApproval(player) && secureSessionError ? (
                               <p className="mt-2 text-xs text-rose-200">{secureSessionError}</p>
                             ) : null}
                           </div>
-                          <button
+                          {shouldOfferManualApproval(player) ? <button
                             type="button"
                             disabled={!isSecureSessionReady || isLinkingSecureAccount}
                             onClick={async () => {
@@ -969,7 +975,7 @@ export function PlayerProfilePanel({
                                 Comprobar vinculaci?n
                               </>
                             )}
-                          </button>
+                          </button> : null}
                           {player.authUserId ? (
                             <button
                               type="button"

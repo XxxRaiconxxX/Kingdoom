@@ -7,6 +7,11 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
 ## 2026-10
+### [2026-10-14] Activacion atomica de primer acceso para perfiles legacy
+- Se añade `activate_player_access`, que valida el codigo despues de crear/iniciar la cuenta Auth, bloquea jugador y codigo, y solo consume el codigo tras validacion; se revoca el RPC cliente `link_player_access`.
+- Se hace backfill idempotente de enlaces Auth existentes y la UI reserva primer acceso a perfiles con WhatsApp, login a Auth existente y aprobacion manual a perfiles sin WhatsApp.
+- Validacion: Vitest focalizado, TypeScript, build y `git diff --check`.
+
 ### [2026-10-14] Flujo general de primer acceso seguro para perfiles con WhatsApp
 - Perfiles con WhatsApp vinculado pero sin `authUserId` ahora muestran `Crear acceso seguro con !codigo` y abren el modal directamente en Primer acceso.
 - Se conserva el login para cuentas seguras existentes y la aprobación del staff para perfiles sin WhatsApp; no se enlazan sesiones anónimas automáticamente.

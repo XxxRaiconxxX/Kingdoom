@@ -13,7 +13,6 @@
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
 [![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
-[![GitHub Pages](https://img.shields.io/badge/Deploy-GitHub_Pages-111827?style=for-the-badge&logo=github&logoColor=white)](https://pages.github.com/)
 
 <br />
 
@@ -274,7 +273,6 @@ Kingdoom/
 
 ### Deploy & Tooling
 
-![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-222222?style=flat-square&logo=github&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)
 
@@ -349,14 +347,6 @@ Las operaciones económicas críticas se están orientando hacia **RPCs y operac
 ---
 
 ## 🌐 Despliegue
-
-### GitHub Pages
-
-La SPA utiliza una base relativa para facilitar el despliegue:
-
-```ts
-base: "./"
-```
 
 ### Vercel
 

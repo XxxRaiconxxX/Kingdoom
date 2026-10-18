@@ -1,4 +1,4 @@
-import { FileSearch, Home, Library, Sparkles, Store } from "lucide-react";
+import { Home, Landmark, Library, Sparkles, Store } from "lucide-react";
 import { AnimeIcon } from "./AnimeIcon";
 import { motion } from "framer-motion";
 import type { TabId } from "../types";
@@ -10,7 +10,7 @@ export const REALM_NAVIGATION = [
   { id: "grimoire", label: "Grimorio", description: "Magia, criaturas y flora", icon: Sparkles },
   { id: "library", label: "Biblioteca", description: "Crónicas y territorios", icon: Library },
   { id: "market", label: "Mercado", description: "Comercio y taberna", icon: Store },
-  { id: "archivist", label: "Archivista", description: "El conocimiento de Argentis", icon: FileSearch },
+  { id: "bank", label: "Banco", description: "Oro, crédito y reputación", icon: Landmark },
 ] as const;
 
 export function RealmNavigation({ activeTab, onNavigate, onPreload }: {

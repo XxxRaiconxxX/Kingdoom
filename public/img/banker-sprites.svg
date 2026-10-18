@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="2304" viewBox="0 0 1536 2304" shape-rendering="crispEdges" role="img" aria-labelledby="banker-title banker-description">
+  <title id="banker-title">Hoja de sprites del banquero del reino</title>
+  <desc id="banker-description">Nueve filas de seis fotogramas de 256 píxeles: idle, greeting, deposit_explain, loan_calculating, loan_approved, payment_reminder, delinquent, success y error_help.</desc>
+  <defs>
+    <g id="banker-pose">
+      <rect x="40" y="218" width="176" height="14" fill="#0f0c12" opacity=".65" />
+      <rect x="52" y="48" width="152" height="94" fill="#19151d" />
+      <rect x="70" y="30" width="116" height="28" fill="#e0a72d" />
+      <rect x="58" y="58" width="24" height="64" fill="#d99562" />
+      <rect x="174" y="58" width="24" height="64" fill="#d99562" />
+      <rect x="82" y="58" width="92" height="72" fill="#d99562" />
+      <rect x="72" y="78" width="22" height="18" fill="#171419" />
+      <rect x="162" y="78" width="22" height="18" fill="#171419" />
+      <rect x="98" y="106" width="60" height="10" fill="#7c3f34" />
+      <rect x="48" y="130" width="160" height="84" fill="#27635d" />
+      <rect x="72" y="130" width="112" height="84" fill="#347d72" />
+      <rect x="118" y="132" width="20" height="82" fill="#e0a72d" />
+      <rect x="34" y="164" width="40" height="30" fill="#d99562" />
+      <rect x="182" y="164" width="40" height="30" fill="#d99562" />
+      <rect x="82" y="208" width="34" height="28" fill="#19151a" />
+      <rect x="140" y="208" width="34" height="28" fill="#19151a" />
+    </g>
+    <g id="banker-greeting">
+      <use href="#banker-pose" />
+      <rect x="194" y="142" width="28" height="22" fill="#d99562" />
+      <rect x="202" y="120" width="12" height="24" fill="#d99562" />
+      <rect x="214" y="114" width="10" height="12" fill="#e0a72d" />
+    </g>
+    <g id="banker-deposit-explain">
+      <use href="#banker-pose" />
+      <rect x="20" y="132" width="40" height="52" fill="#d4af37" />
+      <rect x="28" y="144" width="24" height="8" fill="#19151d" />
+      <rect x="28" y="160" width="18" height="8" fill="#19151d" />
+    </g>
+    <g id="banker-loan-calculating">
+      <use href="#banker-pose" />
+      <rect x="18" y="142" width="48" height="38" fill="#c4d6d8" />
+      <rect x="26" y="150" width="32" height="6" fill="#27635d" />
+      <rect x="26" y="162" width="24" height="6" fill="#27635d" />
+      <rect x="26" y="174" width="30" height="6" fill="#e0a72d" />
+    </g>
+    <g id="banker-loan-approved">
+      <use href="#banker-pose" />
+      <rect x="190" y="126" width="42" height="42" fill="#8fe3a6" />
+      <rect x="198" y="144" width="26" height="10" fill="#1e513d" />
+    </g>
+    <g id="banker-payment-reminder">
+      <use href="#banker-pose" />
+      <rect x="18" y="136" width="40" height="48" fill="#e0a72d" />
+      <rect x="26" y="146" width="24" height="8" fill="#19151d" />
+      <rect x="26" y="162" width="16" height="8" fill="#19151d" />
+    </g>
+    <g id="banker-delinquent">
+      <use href="#banker-pose" />
+      <rect x="188" y="126" width="46" height="46" fill="#bd5b63" />
+      <rect x="206" y="136" width="10" height="26" fill="#35141a" />
+      <rect x="198" y="144" width="26" height="10" fill="#35141a" />
+    </g>
+    <g id="banker-success">
+      <use href="#banker-pose" />
+      <rect x="190" y="126" width="42" height="42" fill="#8fe3a6" />
+      <rect x="198" y="144" width="12" height="10" fill="#1e513d" />
+      <rect x="208" y="136" width="10" height="10" fill="#1e513d" />
+      <rect x="218" y="126" width="10" height="10" fill="#1e513d" />
+    </g>
+    <g id="banker-error-help">
+      <use href="#banker-pose" />
+      <rect x="18" y="126" width="46" height="46" fill="#e8a0a5" />
+      <rect x="36" y="136" width="10" height="24" fill="#5a2027" />
+      <rect x="36" y="164" width="10" height="10" fill="#5a2027" />
+    </g>
+  </defs>
+
+  <!-- Row 1: idle -->
+  <g id="row-idle">
+    <use href="#banker-pose" x="0" y="0" />
+    <use href="#banker-pose" x="256" y="0" transform="translate(1 0)" />
+    <use href="#banker-pose" x="512" y="0" transform="translate(0 1)" />
+    <use href="#banker-pose" x="768" y="0" transform="translate(-1 0)" />
+    <use href="#banker-pose" x="1024" y="0" transform="translate(0 -1)" />
+    <use href="#banker-pose" x="1280" y="0" />
+  </g>
+  <!-- Row 2: greeting -->
+  <g id="row-greeting">
+    <use href="#banker-greeting" x="0" y="256" />
+    <use href="#banker-greeting" x="256" y="256" transform="translate(1 0)" />
+    <use href="#banker-greeting" x="512" y="256" transform="translate(0 -1)" />
+    <use href="#banker-greeting" x="768" y="256" transform="translate(-1 0)" />
+    <use href="#banker-greeting" x="1024" y="256" transform="translate(0 1)" />
+    <use href="#banker-greeting" x="1280" y="256" />
+  </g>
+  <!-- Row 3: deposit_explain -->
+  <g id="row-deposit_explain">
+    <use href="#banker-deposit-explain" x="0" y="512" />
+    <use href="#banker-deposit-explain" x="256" y="512" transform="translate(1 0)" />
+    <use href="#banker-deposit-explain" x="512" y="512" transform="translate(0 1)" />
+    <use href="#banker-deposit-explain" x="768" y="512" transform="translate(-1 0)" />
+    <use href="#banker-deposit-explain" x="1024" y="512" transform="translate(0 -1)" />
+    <use href="#banker-deposit-explain" x="1280" y="512" />
+  </g>
+  <!-- Row 4: loan_calculating -->
+  <g id="row-loan_calculating">
+    <use href="#banker-loan-calculating" x="0" y="768" />
+    <use href="#banker-loan-calculating" x="256" y="768" transform="translate(1 0)" />
+    <use href="#banker-loan-calculating" x="512" y="768" transform="translate(0 1)" />
+    <use href="#banker-loan-calculating" x="768" y="768" transform="translate(-1 0)" />
+    <use href="#banker-loan-calculating" x="1024" y="768" transform="translate(0 -1)" />
+    <use href="#banker-loan-calculating" x="1280" y="768" />
+  </g>
+  <!-- Row 5: loan_approved -->
+  <g id="row-loan_approved">
+    <use href="#banker-loan-approved" x="0" y="1024" />
+    <use href="#banker-loan-approved" x="256" y="1024" transform="translate(1 0)" />
+    <use href="#banker-loan-approved" x="512" y="1024" transform="translate(0 1)" />
+    <use href="#banker-loan-approved" x="768" y="1024" transform="translate(-1 0)" />
+    <use href="#banker-loan-approved" x="1024" y="1024" transform="translate(0 -1)" />
+    <use href="#banker-loan-approved" x="1280" y="1024" />
+  </g>
+  <!-- Row 6: payment_reminder -->
+  <g id="row-payment_reminder">
+    <use href="#banker-payment-reminder" x="0" y="1280" />
+    <use href="#banker-payment-reminder" x="256" y="1280" transform="translate(1 0)" />
+    <use href="#banker-payment-reminder" x="512" y="1280" transform="translate(0 1)" />
+    <use href="#banker-payment-reminder" x="768" y="1280" transform="translate(-1 0)" />
+    <use href="#banker-payment-reminder" x="1024" y="1280" transform="translate(0 -1)" />
+    <use href="#banker-payment-reminder" x="1280" y="1280" />
+  </g>
+  <!-- Row 7: delinquent -->
+  <g id="row-delinquent">
+    <use href="#banker-delinquent" x="0" y="1536" />
+    <use href="#banker-delinquent" x="256" y="1536" transform="translate(1 0)" />
+    <use href="#banker-delinquent" x="512" y="1536" transform="translate(0 1)" />
+    <use href="#banker-delinquent" x="768" y="1536" transform="translate(-1 0)" />
+    <use href="#banker-delinquent" x="1024" y="1536" transform="translate(0 -1)" />
+    <use href="#banker-delinquent" x="1280" y="1536" />
+  </g>
+  <!-- Row 8: success -->
+  <g id="row-success">
+    <use href="#banker-success" x="0" y="1792" />
+    <use href="#banker-success" x="256" y="1792" transform="translate(1 0)" />
+    <use href="#banker-success" x="512" y="1792" transform="translate(0 1)" />
+    <use href="#banker-success" x="768" y="1792" transform="translate(-1 0)" />
+    <use href="#banker-success" x="1024" y="1792" transform="translate(0 -1)" />
+    <use href="#banker-success" x="1280" y="1792" />
+  </g>
+  <!-- Row 9: error_help -->
+  <g id="row-error_help">
+    <use href="#banker-error-help" x="0" y="2048" />
+    <use href="#banker-error-help" x="256" y="2048" transform="translate(1 0)" />
+    <use href="#banker-error-help" x="512" y="2048" transform="translate(0 1)" />
+    <use href="#banker-error-help" x="768" y="2048" transform="translate(-1 0)" />
+    <use href="#banker-error-help" x="1024" y="2048" transform="translate(0 -1)" />
+    <use href="#banker-error-help" x="1280" y="2048" />
+  </g>
+</svg>

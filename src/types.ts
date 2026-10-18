@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-export type TabId = "home" | "grimoire" | "library" | "market" | "anime" | "archivist";
+export type TabId = "home" | "grimoire" | "library" | "market" | "anime" | "bank";
 export type Rarity = "mythic" | "legendary" | "epic" | "rare" | "common";
 export type PlayerStatus = "alive" | "dead";
 export type MarketCategoryId = "potions" | "armors" | "swords" | "others";
@@ -40,6 +40,121 @@ export type PlayerAccount = {
     isLocked: boolean;
   };
 };
+
+export type BankLoanStatus = "active" | "in_mora" | "paid" | "cancelled";
+export type BankInstallmentStatus = "scheduled" | "paid" | "in_mora" | "cancelled";
+export type BankTransactionType =
+  | "deposit"
+  | "withdrawal"
+  | "interest_credit"
+  | "loan_disbursement"
+  | "loan_payment"
+  | "loan_early_payment";
+
+export type BankSnapshot = {
+  player: {
+    id: string;
+    gold: number;
+  };
+  account: {
+    playerId: string;
+    depositPrincipalGold: number;
+    depositInterestResidue: number;
+    depositBalanceGold: number;
+    depositLastAccruedAt: string;
+    creditLimitGold: number;
+    onTimeStreak: number;
+    creditTier: number;
+    lastDelinquencyAt: string | null;
+  };
+  credit: {
+    exposureGold: number;
+    availableLimitGold: number;
+    aprBps: number;
+  };
+  loans: BankLoan[];
+  installments: BankInstallment[];
+  transactions: BankTransaction[];
+};
+
+export type BankLoan = {
+  id: string;
+  playerId: string;
+  principalGold: number;
+  aprBps: number;
+  termMonths: number;
+  totalDueGold: number;
+  outstandingDueGold: number;
+  paidInstallments: number;
+  status: BankLoanStatus;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+};
+
+export type BankInstallment = {
+  id: string;
+  loanId: string;
+  installmentNumber: number;
+  dueAt: string;
+  principalDueGold: number;
+  interestDueGold: number;
+  amountDueGold: number;
+  status: BankInstallmentStatus;
+  paidAt: string | null;
+  attemptCount: number;
+  createdAt: string;
+};
+
+export type BankTransaction = {
+  id: string;
+  playerId: string;
+  operationType: BankTransactionType;
+  amountGold: number;
+  playerGoldAfter: number;
+  referenceType: string | null;
+  referenceId: string | null;
+  idempotencyKey: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+};
+
+export type BankDepositResult = {
+  success: boolean;
+  transactionId: string;
+  playerGold: number;
+  depositPrincipalGold: number;
+  depositInterestResidue: number;
+  message: string;
+};
+
+export type BankWithdrawResult = BankDepositResult & {
+  withdrawnInterestGold: number;
+};
+
+export type BankCreateLoanResult = {
+  success: boolean;
+  loanId: string;
+  playerGold: number;
+  totalDueGold: number;
+  outstandingDueGold: number;
+  creditLimitGold: number;
+  aprBps: number;
+  message: string;
+};
+
+export type BankPayLoanResult = {
+  success: boolean;
+  loanId: string;
+  paidGold: number;
+  playerGold: number;
+  outstandingDueGold: number;
+  creditLimitGold: number;
+  onTimeStreak: number;
+  message: string;
+};
+
+export type BankPayLoanEarlyResult = Omit<BankPayLoanResult, "outstandingDueGold">;
 
 export type BusinessProposalStatus =
   | "pending"

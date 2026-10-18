@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useId, useRef, useState, startTransition } from "react";
+import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState, startTransition } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import {
@@ -7,10 +7,12 @@ import {
   ChevronDown,
   ChevronRight,
   Compass,
+  HelpCircle,
   Sparkles,
   Store,
   Swords,
   UserRound,
+  X,
 } from "lucide-react";
 import { RealmNavigation, REALM_NAVIGATION, KINGDOOM_EMBLEM } from "./components/RealmNavigation";
 import { EventCard } from "./components/EventCard";
@@ -88,6 +90,10 @@ const loadMarketSection = () =>
   import("./sections/MarketSection").then((module) => ({
     default: module.MarketSection,
   }));
+const loadBankSection = () =>
+  import("./components/BankSection").then((module) => ({
+    default: module.BankSection,
+  }));
 const loadRealmSiegeSection = () =>
   import("./sections/RealmSiegeSection").then((module) => ({
     default: module.RealmSiegeSection,
@@ -107,6 +113,7 @@ const loadPlayerProfilePanel = () =>
 const LibrarySection = lazy(loadLibrarySection);
 const GrimoireSection = lazy(loadGrimoireSection);
 const MarketSection = lazy(loadMarketSection);
+const BankSection = lazy(loadBankSection);
 const RealmSiegeSection = lazy(loadRealmSiegeSection);
 const ArchivistSection = lazy(loadArchivistSection);
 const AnimeHubSection = lazy(loadAnimeHubSection);
@@ -123,11 +130,11 @@ function preloadTab(tabId: TabId) {
     case "market":
       void loadMarketSection();
       break;
+    case "bank":
+      void loadBankSection();
+      break;
     case "anime":
       void loadAnimeHubSection();
-      break;
-    case "archivist":
-      void loadArchivistSection();
       break;
     default:
       break;
@@ -246,14 +253,14 @@ export default function App() {
               <MarketSection />
             </Suspense>
           ) : null}
+          {activeTab === "bank" ? (
+            <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo la bóveda del reino..." />}>
+              <BankSection />
+            </Suspense>
+          ) : null}
           {activeTab === "anime" ? (
             <Suspense fallback={<FullscreenLoadingOverlay message="Inicializando el portal anime..." />}>
               <AnimeHubSection />
-            </Suspense>
-          ) : null}
-          {activeTab === "archivist" ? (
-            <Suspense fallback={<FullscreenLoadingOverlay message="Abriendo el archivo de Argentis..." />}>
-              <ArchivistSection />
             </Suspense>
           ) : null}
         </div>
@@ -265,8 +272,151 @@ export default function App() {
   );
 }
 
+function ArchivistHelpDialog({
+  open,
+  onClose,
+  triggerRef,
+}: {
+  open: boolean;
+  onClose: () => void;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const focusTimer = window.setTimeout(() => {
+      closeButtonRef.current?.focus({ preventScroll: true });
+    }, 0);
+
+    function getFocusableElements() {
+      if (!dialogRef.current) {
+        return [];
+      }
+
+      return Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length === 0) {
+        event.preventDefault();
+        dialogRef.current?.focus({ preventScroll: true });
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && (activeElement === firstElement || !dialogRef.current?.contains(activeElement))) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && (activeElement === lastElement || !dialogRef.current?.contains(activeElement))) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose, open]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    return () => {
+      triggerRef.current?.focus({ preventScroll: true });
+    };
+  }, [open, triggerRef]);
+
+  return (
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          className="fixed inset-0 z-[90] flex items-end justify-center bg-stone-950/80 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.18 }}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              onClose();
+            }
+          }}
+        >
+          <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            tabIndex={-1}
+            className="flex max-h-[calc(100dvh-5rem)] w-full max-w-6xl flex-col overflow-hidden rounded-[1.75rem] border border-amber-500/20 bg-stone-900 text-stone-200 shadow-2xl shadow-black/60 sm:max-h-[calc(100dvh-3rem)]"
+            initial={{ opacity: 0, y: reduceMotion ? 0 : 16, scale: reduceMotion ? 1 : 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: reduceMotion ? 0 : 10, scale: reduceMotion ? 1 : 0.985 }}
+            transition={{ duration: reduceMotion ? 0 : 0.2 }}
+          >
+            <div className="flex shrink-0 items-center justify-between gap-4 border-b border-stone-800 px-4 py-3 sm:px-5">
+              <h2 id={titleId} className="text-sm font-black uppercase tracking-[0.16em] text-amber-200">
+                Ayuda del Archivista
+              </h2>
+              <button
+                ref={closeButtonRef}
+                type="button"
+                onClick={onClose}
+                aria-label="Cerrar ayuda del Archivista"
+                className="rounded-full border border-stone-700 p-2 text-stone-400 transition hover:border-amber-300/60 hover:text-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              >
+                <X aria-hidden="true" className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="min-h-0 overflow-y-auto p-2 sm:p-3">
+              <Suspense
+                fallback={
+                  <div role="status" aria-live="polite" className="flex min-h-28 items-center justify-center rounded-2xl border border-stone-800 bg-stone-950/40 text-sm text-stone-400">
+                    Abriendo al Archivista...
+                  </div>
+                }
+              >
+                <ArchivistSection />
+              </Suspense>
+            </div>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
+}
+
 function HomeSection({ onNavigate, onConnect }: { onNavigate: (tab: TabId) => void; onConnect: () => void }) {
   const homeRevealRef = useRef<HTMLElement | null>(null);
+  const archivistTriggerRef = useRef<HTMLButtonElement>(null);
   const { player, isHydrating } = usePlayerSession();
   const StatusIcon = KINGDOM_STATUS.icon;
   const [events, setEvents] = useState(ACTIVE_EVENTS);
@@ -288,6 +438,7 @@ function HomeSection({ onNavigate, onConnect }: { onNavigate: (tab: TabId) => vo
     Record<string, RealmEventParticipant>
   >({});
   const [characterCount, setCharacterCount] = useState<number | null>(null);
+  const [isArchivistOpen, setIsArchivistOpen] = useState(false);
 
   useGsapStaggerReveal(homeRevealRef, {
     selector: "[data-gsap-home]",
@@ -631,8 +782,27 @@ function HomeSection({ onNavigate, onConnect }: { onNavigate: (tab: TabId) => vo
     }
   }
 
+  const closeArchivistHelp = useCallback(() => setIsArchivistOpen(false), []);
+
   return (
-    <section ref={homeRevealRef} className="space-y-5">
+    <section ref={homeRevealRef} className="space-y-5 pb-24 sm:pb-8">
+      <button
+        ref={archivistTriggerRef}
+        type="button"
+        onClick={() => setIsArchivistOpen(true)}
+        aria-label="Abrir ayuda del Archivista"
+        aria-haspopup="dialog"
+        aria-expanded={isArchivistOpen}
+        className="fixed right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-amber-400/30 bg-stone-900/95 text-amber-200 shadow-lg shadow-black/30 transition hover:border-amber-300 hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-300 sm:right-6"
+        style={{ bottom: "max(1rem, env(safe-area-inset-bottom))" }}
+      >
+        <HelpCircle aria-hidden="true" className="h-5 w-5" />
+      </button>
+      <ArchivistHelpDialog
+        open={isArchivistOpen}
+        onClose={closeArchivistHelp}
+        triggerRef={archivistTriggerRef}
+      />
       <div className="realm-hero">
         <img className="realm-hero-art" src={`${import.meta.env.BASE_URL}img/realm-citadel.webp`} alt="" width="1536" height="1024" fetchPriority="high" />
         <div className="realm-hero-mist" aria-hidden="true" />

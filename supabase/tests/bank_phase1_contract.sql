@@ -11,6 +11,7 @@ declare
   v_payment numeric;
   v_create_loan_definition text;
   v_pay_loan_definition text;
+  v_pay_loan_early_definition text;
   v_table_name text;
   v_signature text;
 begin
@@ -122,6 +123,15 @@ begin
      or v_pay_loan_definition not like '%v_installment.due_at < clock_timestamp()%'
   then
     raise exception 'bank_pay_loan no trata correctamente una cuota vencida aun en estado scheduled';
+  end if;
+
+  select pg_get_functiondef('public.bank_pay_loan_early(uuid,uuid,text)'::regprocedure)
+    into v_pay_loan_early_definition;
+  if v_pay_loan_early_definition like '%where loan_id = v_loan.id%'
+     or v_pay_loan_early_definition not like '%update public.bank_loan_installments as i%'
+     or v_pay_loan_early_definition not like '%where i.loan_id = v_loan.id%'
+  then
+    raise exception 'bank_pay_loan_early conserva una referencia ambigua a loan_id';
   end if;
 
   foreach v_table_name in array array[

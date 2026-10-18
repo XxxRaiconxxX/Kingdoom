@@ -1347,10 +1347,10 @@ begin
   update public.players
      set gold = v_next_gold::integer
    where id = v_player.id;
-  update public.bank_loan_installments
+  update public.bank_loan_installments as i
      set status = 'cancelled', paid_at = null, attempt_count = attempt_count + 1
-   where loan_id = v_loan.id
-     and status in ('scheduled', 'in_mora');
+   where i.loan_id = v_loan.id
+     and i.status in ('scheduled', 'in_mora');
   update public.bank_loans
      set outstanding_due_gold = 0,
          paid_installments = (

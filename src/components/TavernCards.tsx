@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDownCircle,
@@ -50,10 +50,7 @@ export function TavernCards() {
   const [updating, setUpdating] = useState(false);
   const [cardsError, setCardsError] = useState("");
 
-  const limitReached = dailyWins >= MAX_DAILY_CARDS_WIN_LIMIT;
   const canCashOut = streak >= 2 && phase === "choice";
-  const maxTotalCashout = useMemo(() => bet + remainingNet, [bet, remainingNet]);
-  const isContinueBlocked = pool >= maxTotalCashout && canCashOut;
 
   useEffect(() => {
     let active = true;
@@ -213,15 +210,6 @@ function applySession(session: CardsSessionState, overrideBet = true) {
       <CardsMessage
         title="Cartas del Oraculo"
         description="Conecta tu perfil del reino en el panel superior para jugar."
-      />
-    );
-  }
-
-  if (limitReached && phase === "betting") {
-    return (
-      <CardsMessage
-        title="Limite diario alcanzado"
-        description={`Has alcanzado el limite de ${MAX_DAILY_CARDS_WIN_LIMIT.toLocaleString()} de oro en ganancias netas hoy. La taberna cierra esta mesa por hoy. Vuelve manana.`}
       />
     );
   }
@@ -454,11 +442,6 @@ function applySession(session: CardsSessionState, overrideBet = true) {
                 <span className="flex items-center gap-2 text-3xl font-black text-amber-400">
                   <Coins className="h-6 w-6" /> {pool}
                 </span>
-                {pool > maxTotalCashout && (
-                  <span className="mt-2 text-[10px] font-bold uppercase tracking-widest text-amber-500">
-                    Solo cobraras {maxTotalCashout.toLocaleString()} por el limite diario
-                  </span>
-                )}
                 {!canCashOut && (
                   <span className="mt-2 text-[10px] font-bold uppercase tracking-widest text-stone-500">
                     Plantarse se desbloquea desde la ronda 2
@@ -474,7 +457,7 @@ function applySession(session: CardsSessionState, overrideBet = true) {
               <button
                 type="button"
                 onClick={() => void handleContinue()}
-                disabled={isContinueBlocked || updating}
+                disabled={updating}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-amber-500 py-5 font-black text-stone-950 shadow-lg shadow-amber-900/20 transition-all hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
               >
                 <RefreshCw className="h-5 w-5" />

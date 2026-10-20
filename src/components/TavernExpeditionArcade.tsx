@@ -30,6 +30,7 @@ import { getPlayerSheets, saveCharacterSheet } from "../utils/characterSheets";
 import type { CharacterSheet, CharacterStats, PveCombatStats, PvePlayerProgress, PveStatKey } from "../types";
 import {
   createTavernIdempotencyKey,
+  settleConfiguredTavernRun,
   startConfiguredTavernRun,
   stepConfiguredTavernRun,
 } from "../utils/minigamesSecure";
@@ -346,6 +347,51 @@ function getSheetSummary(sheet: CharacterSheet | null) {
   return [sheet.race, sheet.profession].filter(Boolean).join(" · ") || "Ficha lista para expedicion";
 }
 
+function rollChance(chance: number) {
+  return Math.random() < chance;
+}
+
+function randomBetween(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function clampChance(value: number) {
+  return Math.min(0.95, Math.max(0, value));
+}
+
+function getDifficultyCritMultiplier(difficulty: "controlled" | "medium" | "hard") {
+  switch (difficulty) {
+    case "hard":
+      return HARD_CRIT_MULTIPLIER;
+    case "medium":
+      return MEDIUM_CRIT_MULTIPLIER;
+    default:
+      return CONTROLLED_CRIT_MULTIPLIER;
+  }
+}
+
+function getPlayerCritLabel(difficulty: "controlled" | "medium" | "hard") {
+  switch (difficulty) {
+    case "hard":
+      return "juicio del verdugo";
+    case "medium":
+      return "ruptura brutal";
+    default:
+      return "corte preciso";
+  }
+}
+
+function getEnemyCritLabel(difficulty: "controlled" | "medium" | "hard") {
+  switch (difficulty) {
+    case "hard":
+      return "desgarro del vacio";
+    case "medium":
+      return "embestida severa";
+    default:
+      return "contraataque certero";
+  }
+}
+
 export function TavernExpeditionArcade() {
   const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const playerId = player?.id ?? null;
@@ -553,56 +599,261 @@ export function TavernExpeditionArcade() {
       return;
     }
 
-    const currentBattle = battle;
-    const currentProgress = progress;
-    const currentEncounter = selectedEncounter;
-    setIsUpdating(true);
-    try {
-      const serverResult = await stepConfiguredTavernRun(
-        "expedition_arcade",
-        serverRunId,
-        "advance",
-        createTavernIdempotencyKey("expedition-arcade", `step-${currentBattle.turn}`),
-      );
-      const status = String(serverResult.status);
-      const step = Number(serverResult.step ?? currentBattle.turn);
-      const reward = Number(serverResult.payout ?? 0);
-      const result: CombatResult = status === "won" ? "victory" : status === "lost" ? "defeat" : "active";
-      const nextBattle: ArcadeBattleState = {
-        ...currentBattle,
-        playerHp: result === "defeat" ? 0 : currentBattle.playerHp,
-        enemyHp: result === "victory" ? 0 : currentBattle.enemyHp,
-        turn: step + 1,
-        result,
-        reward,
-        expReward: result === "victory" ? currentEncounter.expReward : 0,
-        logs: [
-          createLog(
-            result === "victory"
-              ? `El servidor confirma la victoria y acredita ${reward.toLocaleString("es-PY")} oro.`
-              : result === "defeat"
-                ? "El servidor confirma la derrota de la expedicion."
-                : `Avance server-side ${step} confirmado.`,
-            result === "victory" ? "good" : result === "defeat" ? "bad" : "neutral",
-          ),
-          ...currentBattle.logs,
-        ].slice(0, 8),
-      };
-      setBattle(nextBattle);
-      if (result === "victory") {
-        const expResult = grantPveExperience(currentProgress, currentEncounter.expReward);
-        savePveProgress(expResult.progress);
-        setProgress(expResult.progress);
-        await refreshPlayer();
-      }
-      return;
-    } catch (error) {
-      setSettlementMessage(error instanceof Error ? error.message : "No se pudo confirmar la accion server-side.");
-    } finally {
-      setIsUpdating(false);
-    }
-    return;
+    let nextPlayerHp = battle.playerHp;
+    let nextEnemyHp = battle.enemyHp;
+    let nextCooldown = Math.max(0, battle.abilityCooldown - 1);
+    let nextPhaseTwo = battle.phaseTwoTriggered;
+    let result: CombatResult = "active";
+    let reward = 0;
+    let expReward = 0;
+    let awardedPoint = false;
+    let levelsGained = 0;
+    let milestonePointsGained = 0;
+    let levelAfter = safeProgress.level;
+    const logs: CombatLog[] = [];
+    const mutator = battle.mutator;
 
+    if (action === "attack" || action === "ability") {
+      const baseDamage =
+        action === "attack"
+          ? 12 + effectiveStats.strength * STRENGTH_ATTACK_BONUS
+          : 20 + effectiveStats.strength * STRENGTH_ABILITY_BONUS;
+
+      const rawDamage = Math.floor(
+        baseDamage *
+          (action === "attack"
+            ? mutator.playerDamageMultiplier ?? 1
+            : mutator.abilityDamageMultiplier ?? mutator.playerDamageMultiplier ?? 1)
+      );
+      const critChance =
+        (action === "attack" ? ATTACK_CRIT_CHANCE : ABILITY_CRIT_CHANCE) +
+        (mutator.playerCritChanceBonus ?? 0);
+      const wasCrit = rollChance(critChance);
+      const critMultiplier =
+        getDifficultyCritMultiplier(selectedEncounter.difficulty) +
+        (mutator.playerCritMultiplierBonus ?? 0);
+      let inflictedDamage = wasCrit ? Math.floor(rawDamage * critMultiplier) : rawDamage;
+
+      if (action === "ability") {
+        nextCooldown = 2;
+      }
+
+      if (rollChance(clampChance(selectedEncounter.enemyEvasionChance + (mutator.enemyEvasionBonus ?? 0)))) {
+        inflictedDamage = 0;
+        logs.push(
+          createLog(
+            `${selectedEncounter.enemyName} se desplaza a tiempo y esquiva por completo tu ${action === "attack" ? "ataque" : "habilidad"}.`,
+            "bad"
+          )
+        );
+      } else if (rollChance(clampChance(selectedEncounter.enemyGuardChance + (mutator.enemyGuardBonus ?? 0)))) {
+        inflictedDamage = Math.max(6, Math.floor(inflictedDamage * 0.45));
+        logs.push(
+          createLog(
+            `${selectedEncounter.enemyName} levanta defensa y reduce el impacto. Solo entran ${inflictedDamage} puntos.`,
+            "warn"
+          )
+        );
+      } else {
+        logs.push(
+          createLog(
+            `${action === "attack" ? "Golpe directo" : "Tecnica cargada"} por ${inflictedDamage}${wasCrit ? ` con ${getPlayerCritLabel(selectedEncounter.difficulty)}` : ""}.`,
+            wasCrit ? "good" : "neutral"
+          )
+        );
+      }
+
+      nextEnemyHp = Math.max(0, nextEnemyHp - inflictedDamage);
+
+      const canTriggerPhaseTwo =
+        !nextPhaseTwo &&
+        nextEnemyHp > 0 &&
+        nextEnemyHp <= Math.floor(battle.enemyMaxHp * 0.35) &&
+        rollChance(clampChance(selectedEncounter.phaseTwoChance + (mutator.phaseTwoBonus ?? 0)));
+
+      if (canTriggerPhaseTwo) {
+        nextPhaseTwo = true;
+        const healAmount = Math.floor(battle.enemyMaxHp * 0.5);
+        nextEnemyHp = Math.min(battle.enemyMaxHp, nextEnemyHp + healAmount);
+        logs.push(
+          createLog(
+            `${selectedEncounter.enemyName} entra en segunda fase y recupera ${healAmount} de vida.`,
+            "bad"
+          )
+        );
+      }
+
+      if (nextEnemyHp <= 0) {
+        result = "victory";
+      }
+    }
+
+    if (action === "defend") {
+      logs.push(
+        createLog(
+          "Adoptas postura defensiva y preparas un paso corto para cortar el ritmo rival.",
+          "neutral"
+        )
+      );
+    }
+
+    if (result === "active") {
+      let enemyDamage = randomBetween(
+        selectedEncounter.enemyAttackMin,
+        selectedEncounter.enemyAttackMax
+      );
+
+      enemyDamage = Math.floor(enemyDamage * (mutator.enemyDamageMultiplier ?? 1));
+
+      if (
+        rollChance(
+          (selectedEncounter.difficulty === "hard"
+            ? 0.2
+            : selectedEncounter.difficulty === "medium"
+              ? 0.15
+              : 0.1) + (mutator.enemyCritChanceBonus ?? 0)
+        )
+      ) {
+        enemyDamage = Math.floor(
+          enemyDamage *
+            (1.6 +
+              (selectedEncounter.difficulty === "hard"
+                ? 0.15
+                : selectedEncounter.difficulty === "medium"
+                  ? 0.08
+                  : 0))
+        );
+        logs.push(
+          createLog(
+            `${selectedEncounter.enemyName} conecta ${getEnemyCritLabel(selectedEncounter.difficulty)}.`,
+            "bad"
+          )
+        );
+      }
+
+      if (action === "defend") {
+        const dodgeChance =
+          DEFENSE_DODGE_CHANCE + effectiveStats.defense * 0.03 + (mutator.dodgeBonus ?? 0);
+        const reduceChance = DEFENSE_REDUCE_CHANCE + effectiveStats.defense * 0.05;
+
+        if (rollChance(dodgeChance)) {
+          enemyDamage = 0;
+          logs.push(createLog("Lees la embestida y esquivas todo el dano.", "good"));
+        } else if (rollChance(reduceChance)) {
+          enemyDamage = Math.max(
+            3,
+            Math.floor(enemyDamage * 0.4) - effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION
+          );
+          logs.push(
+            createLog(
+              `Tu defensa absorbe la mayor parte del impacto. Solo recibes ${enemyDamage}.`,
+              "good"
+            )
+          );
+        } else {
+          enemyDamage = Math.max(
+            1,
+            enemyDamage - effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION
+          );
+          logs.push(
+            createLog(`La defensa no cierra a tiempo y aun asi recibes ${enemyDamage}.`, "warn")
+          );
+        }
+      } else {
+        enemyDamage = Math.max(1, enemyDamage - effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION);
+        logs.push(
+          createLog(`${selectedEncounter.enemyName} responde y te hiere por ${enemyDamage}.`, "bad")
+        );
+      }
+
+      nextPlayerHp = Math.max(0, nextPlayerHp - enemyDamage);
+
+      if (nextPlayerHp <= 0) {
+        result = "defeat";
+        logs.push(createLog("Tu resistencia colapsa. La caceria termina en derrota.", "bad"));
+      }
+    }
+
+    if (result === "victory" || result === "defeat") {
+      setIsUpdating(true);
+      try {
+        const serverResult = await settleConfiguredTavernRun(
+          "expedition_arcade",
+          serverRunId,
+          result === "victory" ? "victory" : "defeat",
+          createTavernIdempotencyKey("expedition-arcade", `settle-${serverRunId}-${battle.turn}`)
+        );
+        reward = Number(serverResult.payout ?? 0);
+      } catch (error) {
+        setSettlementMessage(error instanceof Error ? error.message : "Error al liquidar en el servidor.");
+      } finally {
+        setIsUpdating(false);
+      }
+
+      if (result === "victory") {
+        expReward = selectedEncounter.expReward;
+        const pointChance = getVictoryPointChance(selectedEncounter.difficulty);
+        awardedPoint = rollChance(pointChance);
+        const expProjection = grantPveExperience(progress, expReward);
+        levelsGained = expProjection.levelsGained;
+        milestonePointsGained = expProjection.milestonePoints;
+        levelAfter = expProjection.progress.level;
+
+        let nextProgress = expProjection.progress;
+        if (awardedPoint) {
+          nextProgress = grantVictoryPoint(nextProgress, {
+            countHardVictory: selectedEncounter.difficulty === "hard",
+          });
+        }
+        savePveProgress(nextProgress);
+        setProgress(nextProgress);
+        await refreshPlayer();
+
+        if (awardedPoint) {
+          logs.push(
+            createLog(
+              `Objetivo abatido. El gremio liquida ${reward} de oro, sumas ${expReward} exp y cae 1 punto de mejora.`,
+              "good"
+            )
+          );
+        } else {
+          logs.push(
+            createLog(
+              `Objetivo abatido. El gremio liquida ${reward} de oro y sumas ${expReward} exp, pero esta vez no cayo punto de mejora.`,
+              "good"
+            )
+          );
+        }
+
+        if (levelsGained > 0) {
+          logs.push(
+            createLog(
+              `${activeSheet?.name || "Tu ficha"} sube a nivel ${levelAfter}${milestonePointsGained > 0 ? ` y gana ${milestonePointsGained} punto extra por hito de nivel.` : "."}`,
+              "good"
+            )
+          );
+        }
+      }
+    }
+
+    const nextBattle: ArcadeBattleState = {
+      ...battle,
+      playerHp: nextPlayerHp,
+      enemyHp: nextEnemyHp,
+      turn: battle.turn + 1,
+      abilityCooldown: nextCooldown,
+      phaseTwoTriggered: nextPhaseTwo,
+      result,
+      reward,
+      expReward,
+      awardedPoint,
+      levelsGained,
+      milestonePointsGained,
+      levelAfter,
+      mutator,
+      logs: [...logs, ...battle.logs].slice(0, 8),
+    };
+    setBattle(nextBattle);
   }
 
   function resetBattle() {

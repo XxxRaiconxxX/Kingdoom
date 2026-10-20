@@ -191,11 +191,37 @@ export async function startConfiguredTavernRun(game: "expedition" | "expedition_
   return result.row;
 }
 
-export async function stepConfiguredTavernRun(game: "expedition" | "expedition_arcade", sessionId: string, action: "advance" | "retreat", idempotencyKey: string) {
+export async function stepConfiguredTavernRun(
+  game: "expedition" | "expedition_arcade",
+  sessionId: string,
+  action: "advance" | "retreat" | "victory" | "defeat",
+  idempotencyKey: string
+) {
   const rpcName = game === "expedition" ? "step_expedition_run" : "step_expedition_arcade_run";
   const result = await requestGameRpc(rpcName, { p_session_id: sessionId, p_action: action, p_idempotency_key: idempotencyKey });
   if (result.status === "error") throw new Error(result.message);
   return asServerObject(result.row, "el paso de expedicion");
+}
+
+export async function settleConfiguredTavernRun(
+  game: "expedition" | "expedition_arcade",
+  sessionId: string,
+  outcome: "victory" | "defeat" | "retreat",
+  idempotencyKey: string
+) {
+  const rpcName = game === "expedition" ? "step_expedition_run" : "step_expedition_arcade_run";
+  const result = await requestGameRpc(rpcName, {
+    p_session_id: sessionId,
+    p_action: outcome,
+    p_idempotency_key: idempotencyKey,
+  });
+  if (result.status === "error") throw new Error(result.message);
+  const row = asServerObject(result.row, "la liquidacion de expedicion");
+  return {
+    status: String(row.status),
+    payout: asServerInteger(row.payout, "el botin de expedicion"),
+    newGold: row.newGold !== null && row.newGold !== undefined ? asServerInteger(row.newGold, "el saldo final") : undefined,
+  };
 }
 
 export async function submitTowerDefenseSecure(mode: "frontier" | "siege" | "abyss", wave: number, score: number, idempotencyKey: string) {

@@ -14,6 +14,7 @@ import { NARRATIVE_ENCOUNTERS } from "../data/pve";
 import type { NarrativeEncounter } from "../data/pve";
 import {
   createTavernIdempotencyKey,
+  settleConfiguredTavernRun,
   startConfiguredTavernRun,
   stepConfiguredTavernRun,
 } from "../utils/minigamesSecure";
@@ -65,6 +66,10 @@ function toneClasses(tone: BattleLogEntry["tone"]) {
     default:
       return "border-stone-800 bg-stone-950/55 text-stone-300";
   }
+}
+
+function randomBetween(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export function TavernExpedition() {
@@ -136,48 +141,127 @@ export function TavernExpedition() {
       return;
     }
 
-    setIsUpdating(true);
-    try {
-      const serverResult = await stepConfiguredTavernRun(
-        "expedition",
-        serverRunId,
-        action === "retreat" ? "retreat" : "advance",
-        createTavernIdempotencyKey("expedition", `step-${battle.turn}`),
-      );
-      const status = String(serverResult.status);
-      const payout = Number(serverResult.payout ?? 0);
-      const step = Number(serverResult.step ?? battle.turn);
-      const outcome: BattleOutcome =
-        status === "won" ? "victory" : status === "lost" ? "defeat" : status === "cashed_out" ? "retreat" : null;
-      const logTone: BattleLogEntry["tone"] = outcome === "victory" ? "good" : outcome ? "bad" : "neutral";
-      const logText = outcome === "victory"
-        ? `El servidor confirma la victoria. Botin acreditado: ${payout.toLocaleString("es-PY")} oro.`
-        : outcome === "defeat"
-          ? "El servidor confirma que la expedicion se pierde."
-          : outcome === "retreat"
-            ? `Retirada confirmada. Recuperas ${payout.toLocaleString("es-PY")} oro.`
-            : `El servidor confirma el avance ${step}. Puedes tomar otra decision.`;
-      setBattle({
-        ...battle,
-        playerHp: outcome === "defeat" ? 0 : battle.playerHp,
-        enemyHp: outcome === "victory" ? 0 : battle.enemyHp,
-        turn: step + 1,
-        guardActive: action === "guard",
-        abilityCooldown: action === "ability" ? 2 : Math.max(0, battle.abilityCooldown - 1),
-        result: outcome,
-        reward: payout,
-        logs: [{ id: crypto.randomUUID(), tone: logTone, text: logText }, ...battle.logs].slice(0, 10),
+    let nextPlayerHp = battle.playerHp;
+    let nextEnemyHp = battle.enemyHp;
+    let nextGuardActive = false;
+    let nextAbilityCooldown = Math.max(0, battle.abilityCooldown - 1);
+    let outcome: BattleOutcome = null;
+    let payout = 0;
+    const logs: BattleLogEntry[] = [];
+
+    if (action === "retreat") {
+      outcome = "retreat";
+      logs.push({
+        id: crypto.randomUUID(),
+        tone: "neutral",
+        text: "Te retiras antes del golpe final y buscas asegurar provisiones.",
       });
-      if (outcome) {
+    } else {
+      if (action === "attack") {
+        const dealt = randomBetween(14, 24);
+        nextEnemyHp = Math.max(0, nextEnemyHp - dealt);
+        logs.push({
+          id: crypto.randomUUID(),
+          tone: "good",
+          text: `Tu acero encuentra una abertura y arrancas ${dealt} puntos de resistencia a ${selectedEncounter.enemyName}.`,
+        });
+      }
+
+      if (action === "guard") {
+        nextGuardActive = true;
+        const brace = randomBetween(4, 8);
+        nextPlayerHp = Math.min(INITIAL_PLAYER_HP, nextPlayerHp + brace);
+        logs.push({
+          id: crypto.randomUUID(),
+          tone: "neutral",
+          text: `Adoptas postura defensiva, estabilizas la respiracion y recuperas ${brace} de temple.`,
+        });
+      }
+
+      if (action === "ability") {
+        const dealt = randomBetween(26, 42);
+        nextEnemyHp = Math.max(0, nextEnemyHp - dealt);
+        nextAbilityCooldown = 2;
+        logs.push({
+          id: crypto.randomUUID(),
+          tone: "good",
+          text: `Canalizas tu recurso arcano y descargas una tecnica mayor por ${dealt} de dano narrativo.`,
+        });
+      }
+
+      if (nextEnemyHp <= 0) {
+        outcome = "victory";
+      } else {
+        const baseEnemyDamage = randomBetween(
+          selectedEncounter.enemyAttackMin,
+          selectedEncounter.enemyAttackMax
+        );
+        const enemyDamage = nextGuardActive
+          ? Math.max(4, Math.floor(baseEnemyDamage * 0.45))
+          : baseEnemyDamage;
+
+        nextPlayerHp = Math.max(0, nextPlayerHp - enemyDamage);
+        logs.push({
+          id: crypto.randomUUID(),
+          tone: "bad",
+          text: `${selectedEncounter.enemyName} responde con violencia y te hiere por ${enemyDamage}.`,
+        });
+
+        if (nextPlayerHp <= 0) {
+          outcome = "defeat";
+          logs.push({
+            id: crypto.randomUUID(),
+            tone: "bad",
+            text: "Tu expedicion se rompe. El contrato queda perdido y debes volver al reino con las manos vacias.",
+          });
+        }
+      }
+    }
+
+    if (outcome) {
+      setIsUpdating(true);
+      try {
+        const serverResult = await settleConfiguredTavernRun(
+          "expedition",
+          serverRunId,
+          outcome,
+          createTavernIdempotencyKey("expedition", `settle-${serverRunId}-${battle.turn}`)
+        );
+        payout = Number(serverResult.payout ?? 0);
+        if (outcome === "victory") {
+          logs.push({
+            id: crypto.randomUUID(),
+            tone: "lore",
+            text: `${selectedEncounter.enemyName} cae entre ecos y ruinas. El botin acreditado asciende a ${payout.toLocaleString("es-PY")} de oro.`,
+          });
+        } else if (outcome === "retreat") {
+          logs.push({
+            id: crypto.randomUUID(),
+            tone: "neutral",
+            text: `Retirada confirmada por el gremio. Rescatas ${payout.toLocaleString("es-PY")} de oro.`,
+          });
+        }
         await refreshPlayer();
         setPhase("resolved");
         setSettlementMessage("");
+      } catch (error) {
+        setSettlementMessage(error instanceof Error ? error.message : "No se pudo confirmar la accion server-side.");
+      } finally {
+        setIsUpdating(false);
       }
-    } catch (error) {
-      setSettlementMessage(error instanceof Error ? error.message : "No se pudo confirmar la accion server-side.");
-    } finally {
-      setIsUpdating(false);
     }
+
+    setBattle({
+      ...battle,
+      playerHp: nextPlayerHp,
+      enemyHp: nextEnemyHp,
+      turn: battle.turn + 1,
+      guardActive: nextGuardActive,
+      abilityCooldown: nextAbilityCooldown,
+      result: outcome,
+      reward: payout,
+      logs: [...logs, ...battle.logs].slice(0, 10),
+    });
   }
 
   function resetExpedition() {

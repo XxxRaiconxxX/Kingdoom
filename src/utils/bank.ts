@@ -85,6 +85,11 @@ function asInteger(value: unknown, label: string): number {
   return value;
 }
 
+function asNullableInteger(value: unknown, label: string): number | null {
+  if (value === null || value === undefined) return null;
+  return asInteger(value, label);
+}
+
 function asNumber(value: unknown, label: string): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     throw new Error(`La respuesta del Banco contiene ${label} invalido.`);
@@ -196,7 +201,9 @@ function parseLoan(value: unknown): BankLoan {
     playerId: asUuid(row.player_id, "el jugador del prestamo"),
     principalGold: asInteger(row.principal_gold, "el principal del prestamo"),
     aprBps: asInteger(row.apr_bps, "el APR del prestamo"),
-    termMonths: asInteger(row.term_months, "el plazo del prestamo"),
+    termMonths: asNullableInteger(row.term_months, "el plazo mensual del prestamo"),
+    termWeeks: asNullableInteger(row.term_weeks, "el plazo semanal del prestamo"),
+    cadenceDays: asInteger(row.cadence_days ?? 30, "la cadencia del prestamo"),
     totalDueGold: asInteger(row.total_due_gold, "el total del prestamo"),
     outstandingDueGold: asInteger(row.outstanding_due_gold, "el saldo del prestamo"),
     paidInstallments: asInteger(row.paid_installments, "las cuotas pagadas"),
@@ -362,6 +369,83 @@ export async function bankWithdrawDeposit(
     depositInterestResidue: asNumber(row.deposit_interest_residue, "el interes protegido"),
     withdrawnInterestGold: asInteger(row.withdrawn_interest_gold, "el interes retirado"),
     message: asString(row.message, "el mensaje del retiro"),
+  };
+}
+
+export type BankWeeklyLoanResult = {
+  success: true;
+  loanId: string;
+  principalGold: number;
+  termWeeks: number;
+  totalDueGold: number;
+  weeklyPayment: number;
+  cadenceDays: number;
+  message: string;
+};
+
+export type BankWeeklyEarlyPaymentResult = {
+  success: true;
+  loanId: string;
+  settlementGold: number;
+  commissionGold: number;
+  newGold: number;
+  message: string;
+};
+
+export async function bankCreateWeeklyLoan(
+  playerId: string,
+  amount: number,
+  termWeeks: number,
+  requestHash: string,
+): Promise<BankWeeklyLoanResult> {
+  assertPlayerId(playerId);
+  const normalizedAmount = assertPositiveInteger(amount, "El prestamo semanal");
+  if (![4, 8, 12].includes(termWeeks)) {
+    throw new Error("El plazo semanal debe ser de 4, 8 o 12 semanas.");
+  }
+  const normalizedKey = assertIdempotencyKey(requestHash);
+  const row = asRecord(
+    await callBankRpc("bank_create_weekly_loan", {
+      p_amount: normalizedAmount,
+      p_term_weeks: termWeeks,
+      p_request_hash: normalizedKey,
+    }),
+    "resultado del prestamo semanal",
+  );
+  return {
+    success: true,
+    loanId: asUuid(row.loanId, "el prestamo semanal creado"),
+    principalGold: asInteger(row.principal, "el principal semanal"),
+    termWeeks: asInteger(row.termWeeks, "el plazo semanal"),
+    totalDueGold: asInteger(row.totalDue, "el total semanal"),
+    weeklyPayment: asInteger(row.weeklyPayment, "la cuota semanal"),
+    cadenceDays: asInteger(row.cadenceDays, "la cadencia semanal"),
+    message: "Prestamo semanal aprobado.",
+  };
+}
+
+export async function bankPayWeeklyLoanEarly(
+  playerId: string,
+  loanId: string,
+  requestHash: string,
+): Promise<BankWeeklyEarlyPaymentResult> {
+  assertPlayerId(playerId);
+  const normalizedLoanId = asUuid(loanId, "el prestamo semanal");
+  const normalizedKey = assertIdempotencyKey(requestHash);
+  const row = asRecord(
+    await callBankRpc("bank_pay_weekly_loan_early", {
+      p_loan_id: normalizedLoanId,
+      p_request_hash: normalizedKey,
+    }),
+    "resultado de la liquidacion semanal",
+  );
+  return {
+    success: true,
+    loanId: asUuid(row.loanId, "el prestamo semanal liquidado"),
+    settlementGold: asInteger(row.settlement, "la liquidacion semanal"),
+    commissionGold: asInteger(row.commission, "la comision semanal"),
+    newGold: asInteger(row.newGold, "el oro posterior a la liquidacion"),
+    message: "Prestamo semanal liquidado. Solo se cobro la comision minima o el interes proporcional aplicable.",
   };
 }
 

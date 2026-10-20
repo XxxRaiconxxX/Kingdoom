@@ -82,7 +82,9 @@ export type BankLoan = {
   playerId: string;
   principalGold: number;
   aprBps: number;
-  termMonths: number;
+  termMonths: number | null;
+  termWeeks: number | null;
+  cadenceDays: number;
   totalDueGold: number;
   outstandingDueGold: number;
   paidInstallments: number;

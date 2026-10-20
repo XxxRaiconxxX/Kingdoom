@@ -53,6 +53,7 @@ export async function playScratchBatchSecure(quantity: number): Promise<ScratchB
   const result = await requestGameRpc("play_scratch_batch", { p_quantity: quantity });
   if (result.status === "error") return result;
   const r = result.row;
+  if (!r || typeof r !== "object" || Array.isArray(r)) return { status: "error", message: "Respuesta de Rasca inválida." };
   const fields = ["total_cost", "cost_per_ticket", "quantity", "used_tickets", "winning_tickets", "jackpot_wins", "losing_tickets", "total_prize", "refunded_tickets", "refunded_gold", "remaining_gold", "daily_gross_wins", "max_daily_limit"];
   if (!fields.every(key => Number.isSafeInteger(r[key]) && Number(r[key]) >= 0) || typeof r.date_key !== "string") {
     return { status: "error", message: "Respuesta de Rasca inv?lida. Actualiza tu saldo antes de reintentar." };

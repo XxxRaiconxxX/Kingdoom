@@ -15,10 +15,7 @@ import {
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { ARCADE_ENCOUNTERS } from "../data/pve";
 import {
-  consumeEncounterAttempt,
   createDefaultPveProgress,
-  getEncounterUsageCount,
-  getNextResetAt,
   getPvePower,
   getPveProgressToNextLevel,
   grantPveExperience,
@@ -31,6 +28,11 @@ import {
 } from "../utils/pveProgress";
 import { getPlayerSheets, saveCharacterSheet } from "../utils/characterSheets";
 import type { CharacterSheet, CharacterStats, PveCombatStats, PvePlayerProgress, PveStatKey } from "../types";
+import {
+  createTavernIdempotencyKey,
+  startConfiguredTavernRun,
+  stepConfiguredTavernRun,
+} from "../utils/minigamesSecure";
 
 type CombatAction = "attack" | "ability" | "defend";
 type CombatResult = "idle" | "active" | "victory" | "defeat";
@@ -237,18 +239,6 @@ const CONTRACT_MUTATORS: Record<"controlled" | "medium" | "hard", EncounterMutat
   ],
 };
 
-function rollChance(chance: number) {
-  return Math.random() < chance;
-}
-
-function randomBetween(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function clampChance(value: number) {
-  return Math.min(0.95, Math.max(0, value));
-}
-
 function difficultyLabel(difficulty: "controlled" | "medium" | "hard") {
   switch (difficulty) {
     case "hard":
@@ -268,39 +258,6 @@ function difficultyTone(difficulty: "controlled" | "medium" | "hard") {
       return "border-amber-500/25 bg-amber-500/10 text-amber-200";
     default:
       return "border-emerald-500/25 bg-emerald-500/10 text-emerald-200";
-  }
-}
-
-function getDifficultyCritMultiplier(difficulty: "controlled" | "medium" | "hard") {
-  switch (difficulty) {
-    case "hard":
-      return HARD_CRIT_MULTIPLIER;
-    case "medium":
-      return MEDIUM_CRIT_MULTIPLIER;
-    default:
-      return CONTROLLED_CRIT_MULTIPLIER;
-  }
-}
-
-function getPlayerCritLabel(difficulty: "controlled" | "medium" | "hard") {
-  switch (difficulty) {
-    case "hard":
-      return "juicio del verdugo";
-    case "medium":
-      return "ruptura brutal";
-    default:
-      return "corte preciso";
-  }
-}
-
-function getEnemyCritLabel(difficulty: "controlled" | "medium" | "hard") {
-  switch (difficulty) {
-    case "hard":
-      return "desgarro del vacio";
-    case "medium":
-      return "embestida severa";
-    default:
-      return "contraataque certero";
   }
 }
 
@@ -390,7 +347,7 @@ function getSheetSummary(sheet: CharacterSheet | null) {
 }
 
 export function TavernExpeditionArcade() {
-  const { player, isHydrating, addPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const playerId = player?.id ?? null;
   const [selectedEncounterId, setSelectedEncounterId] = useState(
     ARCADE_ENCOUNTERS[0]?.id ?? ""
@@ -402,9 +359,8 @@ export function TavernExpeditionArcade() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showUpgrades, setShowUpgrades] = useState(false);
   const [showContracts, setShowContracts] = useState(false);
-  const [pendingPayout, setPendingPayout] = useState(0);
   const [settlementMessage, setSettlementMessage] = useState("");
-  const hasPendingPayout = pendingPayout > 0;
+  const [serverRunId, setServerRunId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -512,7 +468,7 @@ export function TavernExpeditionArcade() {
   }, [safeProgress.level, selectedEncounter]);
 
   function handleSelectActiveSheet(sheetId: string) {
-    if (!player || battle?.result === "active" || hasPendingPayout) {
+    if (!player || battle?.result === "active") {
       return;
     }
 
@@ -523,35 +479,31 @@ export function TavernExpeditionArcade() {
   }
 
   async function startRun() {
-    if (!player || !selectedEncounter || isUpdating || hasPendingPayout || !progress || !activeSheetId || !activeSheet) {
+    if (!player || !selectedEncounter || isUpdating || !progress || !activeSheetId || !activeSheet) {
       return;
     }
 
-    const windowMs = selectedEncounter.windowHours * 60 * 60 * 1000;
-    const attemptsUsed = getEncounterUsageCount(progress, selectedEncounter.id, windowMs);
-    const attemptsLeft = selectedEncounter.maxAttemptsPerWindow - attemptsUsed;
-
-    if (attemptsLeft <= 0 || player.gold < selectedEncounter.entryFee || selectedEncounterLocked) {
+    if (player.gold < selectedEncounter.entryFee) {
       return;
     }
 
     setIsUpdating(true);
-    const updatedPlayer = await addPlayerGold(-selectedEncounter.entryFee);
-    setIsUpdating(false);
-
-    if (!updatedPlayer) {
+    let runId: string;
+    try {
+      runId = await startConfiguredTavernRun(
+        "expedition_arcade",
+        selectedEncounter.id,
+        createTavernIdempotencyKey("expedition-arcade", "start"),
+      );
+    } catch (error) {
+      setIsUpdating(false);
+      setSettlementMessage(error instanceof Error ? error.message : "No se pudo abrir la expedicion server-side.");
       return;
     }
+    setIsUpdating(false);
+    setServerRunId(runId);
 
     setSettlementMessage("");
-
-    const nextProgress = consumeEncounterAttempt(
-      progress,
-      selectedEncounter.id,
-      windowMs
-    );
-    savePveProgress(nextProgress);
-    setProgress(nextProgress);
 
     const mutator = getRandomEncounterMutator(selectedEncounter.difficulty);
 
@@ -596,277 +548,66 @@ export function TavernExpeditionArcade() {
       return;
     }
 
-    let nextPlayerHp = battle.playerHp;
-    let nextEnemyHp = battle.enemyHp;
-    let nextCooldown = Math.max(0, battle.abilityCooldown - 1);
-    let nextPhaseTwo = battle.phaseTwoTriggered;
-    let result: CombatResult = "active";
-    let reward = 0;
-    let expReward = 0;
-    let awardedPoint = false;
-    let levelsGained = 0;
-    let milestonePointsGained = 0;
-    let levelAfter = safeProgress.level;
-    const logs: CombatLog[] = [];
-    const mutator = battle.mutator;
-
-    if (action === "attack" || action === "ability") {
-      const baseDamage =
-        action === "attack"
-          ? randomBetween(17, 29) + effectiveStats.strength * STRENGTH_ATTACK_BONUS
-          : randomBetween(28, 44) +
-            effectiveStats.strength * STRENGTH_ABILITY_BONUS +
-            sheetBonuses.ability * 3;
-      const rawDamage = Math.floor(
-        baseDamage *
-          (action === "attack"
-            ? mutator.playerDamageMultiplier ?? 1
-            : mutator.abilityDamageMultiplier ?? mutator.playerDamageMultiplier ?? 1)
-      );
-      const critChance =
-        (action === "attack" ? ATTACK_CRIT_CHANCE : ABILITY_CRIT_CHANCE) +
-        (mutator.playerCritChanceBonus ?? 0);
-      const wasCrit = rollChance(critChance);
-      const critMultiplier =
-        getDifficultyCritMultiplier(selectedEncounter.difficulty) +
-        (mutator.playerCritMultiplierBonus ?? 0);
-      let inflictedDamage = wasCrit ? Math.floor(rawDamage * critMultiplier) : rawDamage;
-
-      if (action === "ability") {
-        nextCooldown = 2;
-      }
-
-      if (rollChance(clampChance(selectedEncounter.enemyEvasionChance + (mutator.enemyEvasionBonus ?? 0)))) {
-        inflictedDamage = 0;
-        logs.push(
-          createLog(
-            `${selectedEncounter.enemyName} se desplaza a tiempo y esquiva por completo tu ${action === "attack" ? "ataque" : "habilidad"}.`,
-            "bad"
-          )
-        );
-      } else if (rollChance(clampChance(selectedEncounter.enemyGuardChance + (mutator.enemyGuardBonus ?? 0)))) {
-        inflictedDamage = Math.max(6, Math.floor(inflictedDamage * 0.45));
-        logs.push(
-          createLog(
-            `${selectedEncounter.enemyName} levanta defensa y reduce el impacto. Solo entran ${inflictedDamage} puntos.`,
-            "warn"
-          )
-        );
-      } else {
-        logs.push(
-          createLog(
-            `${action === "attack" ? "Golpe directo" : "Tecnica cargada"} por ${inflictedDamage}${wasCrit ? ` con ${getPlayerCritLabel(selectedEncounter.difficulty)}` : ""}.`,
-            wasCrit ? "good" : "neutral"
-          )
-        );
-      }
-
-      nextEnemyHp = Math.max(0, nextEnemyHp - inflictedDamage);
-
-      const canTriggerPhaseTwo =
-        !nextPhaseTwo &&
-        nextEnemyHp > 0 &&
-        nextEnemyHp <= Math.floor(battle.enemyMaxHp * 0.35) &&
-        rollChance(clampChance(selectedEncounter.phaseTwoChance + (mutator.phaseTwoBonus ?? 0)));
-
-      if (canTriggerPhaseTwo) {
-        nextPhaseTwo = true;
-        const healAmount = Math.floor(battle.enemyMaxHp * 0.5);
-        nextEnemyHp = Math.min(battle.enemyMaxHp, nextEnemyHp + healAmount);
-        logs.push(
-          createLog(
-            `${selectedEncounter.enemyName} entra en segunda fase y recupera ${healAmount} de vida.`,
-            "bad"
-          )
-        );
-      }
-
-      if (nextEnemyHp <= 0) {
-        const baseReward = randomBetween(selectedEncounter.rewardMin, selectedEncounter.rewardMax);
-        reward = Math.floor(baseReward * mutator.rewardMultiplier);
-        expReward = selectedEncounter.expReward;
-        result = "victory";
-
-        const pointChance = getVictoryPointChance(selectedEncounter.difficulty);
-        awardedPoint = rollChance(pointChance);
-        const expProjection = grantPveExperience(progress, expReward);
-        levelsGained = expProjection.levelsGained;
-        milestonePointsGained = expProjection.milestonePoints;
-        levelAfter = expProjection.progress.level;
-
-        if (awardedPoint) {
-          logs.push(
-            createLog(
-              `Objetivo abatido. El gremio liquida ${reward} de oro${reward > baseReward ? ` gracias a ${mutator.name}` : ""}, sumas ${expReward} exp y cae 1 punto de mejora.`,
-              "good"
-            )
-          );
-        } else {
-          logs.push(
-            createLog(
-              `Objetivo abatido. El gremio liquida ${reward} de oro${reward > baseReward ? ` gracias a ${mutator.name}` : ""} y sumas ${expReward} exp, pero esta vez no cayo punto de mejora.`,
-              "good"
-            )
-          );
-        }
-
-        if (levelsGained > 0) {
-          logs.push(
-            createLog(
-              `${activeSheet?.name || "Tu ficha"} sube a nivel ${levelAfter}${milestonePointsGained > 0 ? ` y gana ${milestonePointsGained} punto extra por hito de nivel.` : "."}`,
-              "good"
-            )
-          );
-        }
-      }
+    if (!serverRunId) {
+      setSettlementMessage("La sesión server-side de Arcade no está disponible.");
+      return;
     }
 
-    if (action === "defend") {
-      logs.push(
-        createLog(
-          "Adoptas postura defensiva y preparas un paso corto para cortar el ritmo rival.",
-          "neutral"
-        )
+    const currentBattle = battle;
+    const currentProgress = progress;
+    const currentEncounter = selectedEncounter;
+    setIsUpdating(true);
+    try {
+      const serverResult = await stepConfiguredTavernRun(
+        "expedition_arcade",
+        serverRunId,
+        "advance",
+        createTavernIdempotencyKey("expedition-arcade", `step-${currentBattle.turn}`),
       );
-    }
-
-    if (result === "active") {
-      let enemyDamage = randomBetween(
-        selectedEncounter.enemyAttackMin,
-        selectedEncounter.enemyAttackMax
-      );
-
-      enemyDamage = Math.floor(enemyDamage * (mutator.enemyDamageMultiplier ?? 1));
-
-      if (
-        rollChance(
-          (selectedEncounter.difficulty === "hard"
-            ? 0.2
-            : selectedEncounter.difficulty === "medium"
-              ? 0.15
-              : 0.1) + (mutator.enemyCritChanceBonus ?? 0)
-        )
-      ) {
-        enemyDamage = Math.floor(enemyDamage * (1.6 + (selectedEncounter.difficulty === "hard" ? 0.15 : selectedEncounter.difficulty === "medium" ? 0.08 : 0)));
-        logs.push(createLog(`${selectedEncounter.enemyName} conecta ${getEnemyCritLabel(selectedEncounter.difficulty)}.`, "bad"));
+      const status = String(serverResult.status);
+      const step = Number(serverResult.step ?? currentBattle.turn);
+      const reward = Number(serverResult.payout ?? 0);
+      const result: CombatResult = status === "won" ? "victory" : status === "lost" ? "defeat" : "active";
+      const nextBattle: ArcadeBattleState = {
+        ...currentBattle,
+        playerHp: result === "defeat" ? 0 : currentBattle.playerHp,
+        enemyHp: result === "victory" ? 0 : currentBattle.enemyHp,
+        turn: step + 1,
+        result,
+        reward,
+        expReward: result === "victory" ? currentEncounter.expReward : 0,
+        logs: [
+          createLog(
+            result === "victory"
+              ? `El servidor confirma la victoria y acredita ${reward.toLocaleString("es-PY")} oro.`
+              : result === "defeat"
+                ? "El servidor confirma la derrota de la expedicion."
+                : `Avance server-side ${step} confirmado.`,
+            result === "victory" ? "good" : result === "defeat" ? "bad" : "neutral",
+          ),
+          ...currentBattle.logs,
+        ].slice(0, 8),
+      };
+      setBattle(nextBattle);
+      if (result === "victory") {
+        const expResult = grantPveExperience(currentProgress, currentEncounter.expReward);
+        savePveProgress(expResult.progress);
+        setProgress(expResult.progress);
+        await refreshPlayer();
       }
-
-      if (action === "defend") {
-        const dodgeChance =
-          DEFENSE_DODGE_CHANCE + effectiveStats.defense * 0.03 + (mutator.dodgeBonus ?? 0);
-        const reduceChance = DEFENSE_REDUCE_CHANCE + effectiveStats.defense * 0.05;
-
-        if (rollChance(dodgeChance)) {
-          enemyDamage = 0;
-          logs.push(createLog("Lees la embestida y esquivas todo el dano.", "good"));
-        } else if (rollChance(reduceChance)) {
-          enemyDamage = Math.max(
-            3,
-            Math.floor(enemyDamage * 0.4) - effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION
-          );
-          logs.push(
-            createLog(
-              `Tu defensa absorbe la mayor parte del impacto. Solo recibes ${enemyDamage}.`,
-              "good"
-            )
-          );
-        } else {
-          enemyDamage = Math.max(
-            1,
-            enemyDamage - effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION
-          );
-          logs.push(
-            createLog(`La defensa no cierra a tiempo y aun asi recibes ${enemyDamage}.`, "warn")
-          );
-        }
-      } else {
-        enemyDamage = Math.max(1, enemyDamage - effectiveStats.defense * DEFENSE_DAMAGE_REDUCTION);
-        logs.push(
-          createLog(`${selectedEncounter.enemyName} responde y te hiere por ${enemyDamage}.`, "bad")
-        );
-      }
-
-      nextPlayerHp = Math.max(0, nextPlayerHp - enemyDamage);
-
-      if (nextPlayerHp <= 0) {
-        result = "defeat";
-        logs.push(createLog("Tu resistencia colapsa. La caceria termina en derrota.", "bad"));
-      }
-    }
-
-    const nextBattle: ArcadeBattleState = {
-      ...battle,
-      playerHp: nextPlayerHp,
-      enemyHp: nextEnemyHp,
-      turn: battle.turn + 1,
-      abilityCooldown: nextCooldown,
-      phaseTwoTriggered: nextPhaseTwo,
-      result,
-      reward,
-      expReward,
-      awardedPoint,
-      levelsGained,
-      milestonePointsGained,
-      levelAfter,
-      mutator,
-      logs: [...logs, ...battle.logs].slice(0, 8),
-    };
-
-    setBattle(nextBattle);
-
-    if (result === "victory" && reward > 0) {
-      setIsUpdating(true);
-      const updatedPlayer = await addPlayerGold(reward);
-
-      const expResult = grantPveExperience(progress, expReward);
-      let nextProgress = expResult.progress;
-      if (awardedPoint) {
-        nextProgress = grantVictoryPoint(nextProgress, {
-          countHardVictory: selectedEncounter.difficulty === "hard",
-        });
-      }
-      savePveProgress(nextProgress);
-      setProgress(nextProgress);
-
-      if (!updatedPlayer) {
-        setPendingPayout(reward);
-        setSettlementMessage(
-          `Oro pendiente: ${reward.toLocaleString("es-PY")}. La experiencia ya fue registrada; reintenta el cobro antes de otro combate.`
-        );
-      } else {
-        setSettlementMessage("");
-      }
-
+      return;
+    } catch (error) {
+      setSettlementMessage(error instanceof Error ? error.message : "No se pudo confirmar la accion server-side.");
+    } finally {
       setIsUpdating(false);
     }
+    return;
+
   }
 
   function resetBattle() {
-    if (hasPendingPayout) {
-      return;
-    }
-
     setBattle(null);
-  }
-
-  async function handleRetryPendingPayout() {
-    if (!pendingPayout || isUpdating) {
-      return;
-    }
-
-    setIsUpdating(true);
-    const updatedPlayer = await addPlayerGold(pendingPayout);
-    setIsUpdating(false);
-
-    if (!updatedPlayer) {
-      setSettlementMessage(
-        `No se pudo acreditar el oro pendiente de ${pendingPayout.toLocaleString("es-PY")}. Refresca e intenta otra vez.`
-      );
-      return;
-    }
-
-    setSettlementMessage(`Oro pendiente acreditado: ${pendingPayout.toLocaleString("es-PY")}.`);
-    setPendingPayout(0);
+    setServerRunId(null);
   }
 
   async function upgradeStat(stat: PveStatKey) {
@@ -970,7 +711,7 @@ export function TavernExpeditionArcade() {
                 <button
                   key={sheet.id}
                   type="button"
-                  disabled={battle?.result === "active" || hasPendingPayout}
+                  disabled={battle?.result === "active"}
                   onClick={() => handleSelectActiveSheet(sheet.id)}
                   className={`rounded-[1.2rem] border px-3 py-3 text-left transition ${
                     active
@@ -1082,7 +823,7 @@ export function TavernExpeditionArcade() {
                       value={effectiveStats[upgrade.stat]}
                       hint={`PvE ${safeProgress.stats[upgrade.stat]} | Ficha +${sheetValue}`}
                       detail={upgrade.detail(effectiveStats[upgrade.stat])}
-                      disabled={safeProgress.availablePoints <= 0 || battle?.result === "active" || isUpdating || hasPendingPayout}
+                      disabled={safeProgress.availablePoints <= 0 || battle?.result === "active" || isUpdating}
                       onUpgrade={() => void upgradeStat(upgrade.stat)}
                     />
                   );
@@ -1113,10 +854,6 @@ export function TavernExpeditionArcade() {
               {ARCADE_ENCOUNTERS.map((encounter) => {
                 const active = encounter.id === selectedEncounterId;
                 const locked = safeProgress.level < encounter.minLevel;
-                const windowMs = encounter.windowHours * 60 * 60 * 1000;
-                const used = getEncounterUsageCount(safeProgress, encounter.id, windowMs);
-                const remaining = Math.max(0, encounter.maxAttemptsPerWindow - used);
-                const nextResetAt = getNextResetAt(safeProgress, encounter.id, windowMs);
 
                 return (
                   <button
@@ -1132,7 +869,7 @@ export function TavernExpeditionArcade() {
                         ? "border-amber-400/30 bg-amber-500/10 shadow-[0_0_16px_rgba(245,158,11,0.08)]"
                         : "border-stone-800 bg-stone-950/50"
                     } ${locked ? "opacity-60" : ""}`}
-                    disabled={locked || hasPendingPayout}
+                    disabled={locked}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -1158,8 +895,8 @@ export function TavernExpeditionArcade() {
                     </div>
 
                     <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.16em] text-stone-500">
-                      <span>{remaining}/{encounter.maxAttemptsPerWindow} usos</span>
-                      <span>reset {formatResetDistance(nextResetAt)}</span>
+                      <span>Tope server-side: {encounter.maxAttemptsPerWindow} usos / {encounter.windowHours} h</span>
+                      <span>Se valida al iniciar</span>
                     </div>
                   </button>
                 );
@@ -1198,32 +935,18 @@ export function TavernExpeditionArcade() {
                 disabled={
                   selectedEncounterLocked ||
                   isUpdating ||
-                  hasPendingPayout ||
                   player.gold < selectedEncounter.entryFee ||
-                  battle?.result === "active" ||
-                  getEncounterUsageCount(
-                    safeProgress,
-                    selectedEncounter.id,
-                    selectedEncounter.windowHours * 60 * 60 * 1000
-                  ) >= selectedEncounter.maxAttemptsPerWindow
+                  battle?.result === "active"
                 }
                 className="mt-4 w-full rounded-2xl bg-amber-500 px-4 py-4 text-sm font-black text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {selectedEncounterLocked
                   ? `Bloqueado hasta nivel ${selectedEncounter.minLevel}`
-                  : hasPendingPayout
-                    ? "Oro pendiente"
                   : player.gold < selectedEncounter.entryFee
                   ? "Oro insuficiente"
                   : battle?.result === "active"
                     ? "Combate en curso"
-                    : getEncounterUsageCount(
-                        safeProgress,
-                        selectedEncounter.id,
-                        selectedEncounter.windowHours * 60 * 60 * 1000
-                      ) >= selectedEncounter.maxAttemptsPerWindow
-                      ? "Limite alcanzado"
-                      : "Iniciar caceria"}
+                    : "Iniciar caceria"}
               </button>
 
               {willLevelSoon ? (
@@ -1310,29 +1033,14 @@ export function TavernExpeditionArcade() {
                         </div>
                       ) : null}
                       {settlementMessage ? (
-                        <div className={`mt-3 rounded-2xl border p-3 text-sm font-bold ${
-                          hasPendingPayout
-                            ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
-                            : "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
-                        }`}>
+                        <div className="mt-3 rounded-2xl border border-cyan-300/25 bg-cyan-400/10 p-3 text-sm font-bold text-cyan-100">
                           <p>{settlementMessage}</p>
-                          {hasPendingPayout ? (
-                            <button
-                              type="button"
-                              onClick={() => void handleRetryPendingPayout()}
-                              disabled={isUpdating}
-                              className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <Coins className="h-4 w-4" />
-                              Reintentar cobro
-                            </button>
-                          ) : null}
                         </div>
                       ) : null}
                       <button
                         type="button"
                         onClick={resetBattle}
-                        disabled={hasPendingPayout}
+                        disabled={isUpdating}
                         className="mt-3 w-full rounded-2xl bg-stone-100 px-4 py-3 text-sm font-black text-stone-950 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Reiniciar combate

@@ -1,16 +1,22 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { 
-  Flame, 
-  Coins, 
-  RefreshCw, 
-  UserRound, 
-  TrendingUp, 
-  AlertOctagon, 
+import {
+  Flame,
+  Coins,
+  RefreshCw,
+  UserRound,
+  TrendingUp,
+  AlertOctagon,
   History as HistoryIcon,
-  Zap
+  Zap,
 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
+import {
+  cashOutCrashGameSecure,
+  fetchCrashSessionSecure,
+  startCrashGameSecure,
+  type CrashSessionState,
+} from "../utils/minigamesSecure";
 
 type GameStatus = "betting" | "starting" | "rising" | "crashed" | "cashed_out";
 
@@ -20,7 +26,7 @@ interface Point {
 }
 
 export function TavernCrash() {
-  const { player, isHydrating, addPlayerGold } = usePlayerSession();
+  const { player, isHydrating } = usePlayerSession();
   
   const [status, setStatus] = useState<GameStatus>("betting");
   const [bet, setBet] = useState(0);
@@ -29,35 +35,18 @@ export function TavernCrash() {
   const [updating, setUpdating] = useState(false);
   const [lastWin, setLastWin] = useState(0);
   const [autoCashOutStr, setAutoCashOutStr] = useState<string>("");
-  const [pendingPayout, setPendingPayout] = useState(0);
   const [settlementMessage, setSettlementMessage] = useState("");
   const autoCashOut = parseFloat(autoCashOutStr) || 0;
-  const hasPendingPayout = pendingPayout > 0;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const requestRef = useRef<number>();
-  const startTimerRef = useRef<number>();
   const mountedRef = useRef(true);
-  const startTimeRef = useRef<number>(0);
-  const crashPointRef = useRef<number>(0);
   const pointsRef = useRef<Point[]>([]);
   const logicalSizeRef = useRef({ width: 0, height: 0 });
-  
-  // Refs para evitar stale closures en el animation loop
+
   const statusRef = useRef<GameStatus>("betting");
   const autoCashOutRef = useRef<number>(0);
-  const autoCashedRef = useRef<boolean>(false); // guardia para no disparar auto cashout dos veces
-  const betRef = useRef(bet);
-  const playerRef = useRef(player);
-  const updatingRef = useRef(updating);
-  const multiplierRef = useRef(multiplier);
-  const addPlayerGoldRef = useRef(addPlayerGold);
 
-  // Mantener refs sincronizados (statusRef y updatingRef mutan sincrónicamente, NO usar useEffect)
   useEffect(() => { autoCashOutRef.current = autoCashOut; }, [autoCashOut]);
-  useEffect(() => { betRef.current = bet; }, [bet]);
-  useEffect(() => { playerRef.current = player; }, [player]);
-  useEffect(() => { addPlayerGoldRef.current = addPlayerGold; }, [addPlayerGold]);
 
   const redrawCanvas = useCallback((nextMultiplier: number, elapsedSeconds: number) => {
     const canvas = canvasRef.current;
@@ -74,12 +63,6 @@ export function TavernCrash() {
       elapsedSeconds,
     );
   }, []);
-
-  const generateCrashPoint = () => {
-    if (Math.random() < 0.015) return 1.00;
-    const point = 0.995 / (1 - Math.random());
-    return Math.min(Math.max(point, 1.01), 1000);
-  };
 
   const drawGraph = (ctx: CanvasRenderingContext2D, width: number, height: number, currentMultiplier: number, elapsed: number) => {
     ctx.clearRect(0, 0, width, height);
@@ -176,7 +159,7 @@ export function TavernCrash() {
         ctx.closePath();
         ctx.fill();
 
-        if (statusRef.current === "rising" || (statusRef.current === "cashed_out" && currentMultiplier < crashPointRef.current)) {
+        if (statusRef.current === "rising") {
             const head = pointsRef.current[pointsRef.current.length - 1];
             ctx.fillStyle = "#fff";
             ctx.shadowBlur = 20;
@@ -188,180 +171,78 @@ export function TavernCrash() {
     }
   };
 
-  const handleCashOut = useCallback(async (exactMultiplier?: number) => {
-    if (statusRef.current !== "rising" || updatingRef.current || !playerRef.current) return;
+  const applyServerState = useCallback((next: CrashSessionState) => {
+    if (!mountedRef.current) return;
+    statusRef.current = next.phase;
+    setStatus(next.phase);
+    setBet(next.betAmount);
+    setMultiplier(next.currentMultiplier);
+    setLastWin(next.lastWin);
+    setHistory(next.historyValues.slice(0, 10));
 
-    updatingRef.current = true;
-    const elapsed = Math.max(0, (performance.now() - startTimeRef.current) / 1000);
-    const m = typeof exactMultiplier === "number" ? exactMultiplier : Math.pow(1.065, elapsed);
-    if (!Number.isFinite(m) || m >= crashPointRef.current) {
-      updatingRef.current = false;
-      return;
+    if (next.phase === "starting" || next.phase === "rising") {
+      const lastPoint = pointsRef.current[pointsRef.current.length - 1];
+      if (!lastPoint || next.currentMultiplier !== lastPoint.multiplier) {
+        pointsRef.current.push({ time: pointsRef.current.length * 0.5, multiplier: next.currentMultiplier });
+      }
     }
-    const winAmount = Math.floor(betRef.current * m);
-    
-    // Asegurar el retiro en el estado del juego de forma síncrona
-    // para evitar que el loop de animación marque "colapso" durante la latencia de red.
-    setStatus("cashed_out");
-    statusRef.current = "cashed_out";
-    setLastWin(winAmount);
-    
+    const elapsed = Math.max(0, (pointsRef.current.length - 1) * 0.5);
+    redrawCanvas(next.currentMultiplier, elapsed);
+  }, [redrawCanvas]);
+
+  const syncServerState = useCallback(async () => {
+    try {
+      const next = await fetchCrashSessionSecure();
+      applyServerState(next);
+    } catch (error) {
+      if (mountedRef.current) {
+        setSettlementMessage(error instanceof Error ? error.message : "No se pudo sincronizar Crash.");
+      }
+    }
+  }, [applyServerState]);
+
+  const handleCashOut = useCallback(async () => {
+    if (statusRef.current !== "rising" || updating || !player) return;
     setUpdating(true);
-    const success = await addPlayerGoldRef.current(winAmount);
-    
-    if (success) {
-      setSettlementMessage("");
-    } else {
-      setPendingPayout(winAmount);
-      setSettlementMessage(
-        `Cobro pendiente: ${winAmount.toLocaleString("es-PY")} oro. Reintenta antes de iniciar otra ronda.`
-      );
+    try {
+      const next = await cashOutCrashGameSecure();
+      applyServerState(next);
+      setSettlementMessage("Retiro confirmado por el servidor.");
+    } catch (error) {
+      setSettlementMessage(error instanceof Error ? error.message : "No se pudo confirmar el retiro.");
+    } finally {
+      if (mountedRef.current) setUpdating(false);
     }
-
-    // ponytail: simplificación intencional para desbloquear la UI tan pronto como termine la red.
-    updatingRef.current = false;
-    setUpdating(false);
-  }, []);
-
-  const updateMultiplier = useCallback((time: number) => {
-    if (!startTimeRef.current) {
-      startTimeRef.current = time;
-    }
-    
-    const elapsedSeconds = (time - startTimeRef.current) / 1000;
-    const currentMult = Math.pow(1.065, elapsedSeconds);
-
-    // ✅ Auto cashout: se activa si el multiplicador alcanzó el objetivo
-    // No hacemos return para que el loop siga y muestre hasta dónde hubiera llegado
-    if (
-      autoCashOutRef.current >= 1.01 &&
-      autoCashOutRef.current < crashPointRef.current &&
-      currentMult >= autoCashOutRef.current &&
-      statusRef.current === "rising" &&
-      !autoCashedRef.current &&
-      !updatingRef.current
-    ) {
-      autoCashedRef.current = true;
-      handleCashOut(autoCashOutRef.current);
-      // Loop continúa intencionalmente — igual que el cashout manual
-    }
-    
-    // Core game step: Check for crash
-    if (currentMult >= crashPointRef.current) {
-      setMultiplier(crashPointRef.current);
-      multiplierRef.current = crashPointRef.current;
-      pointsRef.current.push({ time: elapsedSeconds, multiplier: crashPointRef.current });
-      redrawCanvas(crashPointRef.current, elapsedSeconds);
-      
-      // Solo marcamos "crashed" si el jugador no aseguró su retiro ("cashed_out") previamente.
-      // Así la línea sigue subiendo y colapsa visualmente, pero respetando la victoria del jugador.
-      if (statusRef.current !== "cashed_out") {
-        setStatus("crashed");
-        statusRef.current = "crashed";
-      }
-      
-      setHistory(prev => [crashPointRef.current, ...prev].slice(0, 10));
-      return; // Stop animation loop
-    }
-
-    setMultiplier(currentMult);
-    multiplierRef.current = currentMult;
-    pointsRef.current.push({ time: elapsedSeconds, multiplier: currentMult });
-
-    // Handle physical drawing
-    const canvas = canvasRef.current;
-    if (canvas && logicalSizeRef.current.width > 0) {
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        drawGraph(ctx, logicalSizeRef.current.width, logicalSizeRef.current.height, currentMult, elapsedSeconds);
-      }
-    }
-
-    // Schedule next frame unless crashed
-    requestRef.current = requestAnimationFrame(updateMultiplier);
-  }, [handleCashOut, redrawCanvas]);
+  }, [applyServerState, player, updating]);
 
   const handleStart = async () => {
-    if (!player || !Number.isSafeInteger(bet) || bet <= 0 || bet > player.gold || updating || updatingRef.current || hasPendingPayout || statusRef.current === "starting" || statusRef.current === "rising") return;
+    if (!player || !Number.isSafeInteger(bet) || bet <= 0 || bet > player.gold || updating || statusRef.current === "starting" || statusRef.current === "rising") return;
 
-    updatingRef.current = true;
-    betRef.current = bet;
     setUpdating(true);
-    setSettlementMessage("");
-    const success = await addPlayerGold(-bet);
-    if (!mountedRef.current) return;
-    if (!success) {
-      updatingRef.current = false;
-      setUpdating(false);
-      return;
+    setSettlementMessage("El servidor está iniciando la ronda...");
+    try {
+      pointsRef.current = [{ time: 0, multiplier: 1 }];
+      const next = await startCrashGameSecure(bet, autoCashOut >= 1.01 ? autoCashOut : null);
+      applyServerState(next);
+      setSettlementMessage("Ronda iniciada. El multiplicador y el resultado los controla el servidor.");
+    } catch (error) {
+      setSettlementMessage(error instanceof Error ? error.message : "No se pudo iniciar Crash.");
+    } finally {
+      if (mountedRef.current) setUpdating(false);
     }
-
-    if (requestRef.current) {
-      cancelAnimationFrame(requestRef.current);
-      requestRef.current = undefined;
-    }
-
-    startTimeRef.current = 0;
-    setMultiplier(1.0);
-    multiplierRef.current = 1.0;
-    setLastWin(0);
-    autoCashedRef.current = false;
-    pointsRef.current = [{ time: 0, multiplier: 1.0 }];
-    redrawCanvas(1.0, 0);
-
-    const crashPoint = generateCrashPoint();
-    crashPointRef.current = crashPoint;
-
-    if (crashPoint <= 1.00) {
-      setMultiplier(1.00);
-      multiplierRef.current = 1.0;
-      pointsRef.current = [{ time: 0, multiplier: 1.0 }];
-      redrawCanvas(1.0, 0);
-      setStatus("crashed");
-      statusRef.current = "crashed";
-      setHistory(prev => [1.00, ...prev].slice(0, 10));
-      setLastWin(0);
-      updatingRef.current = false;
-      setUpdating(false);
-      return;
-    }
-
-    setStatus("starting");
-    statusRef.current = "starting";
-    setUpdating(false);
-    updatingRef.current = false;
-
-    startTimerRef.current = window.setTimeout(() => {
-      setStatus("rising");
-      statusRef.current = "rising";
-      startTimeRef.current = performance.now();
-      requestRef.current = requestAnimationFrame(updateMultiplier);
-    }, 1200);
   };
 
-  const handleRetryPendingPayout = async () => {
-    if (!pendingPayout || updating || updatingRef.current) return;
+  useEffect(() => {
+    if (player) void syncServerState();
+  }, [player, syncServerState]);
 
-    updatingRef.current = true;
-    setUpdating(true);
-    const success = await addPlayerGoldRef.current(pendingPayout);
-
-    if (!success) {
-      setSettlementMessage(
-        `No se pudo acreditar el cobro pendiente de ${pendingPayout.toLocaleString("es-PY")} oro. Refresca e intenta otra vez.`
-      );
-      updatingRef.current = false;
-      setUpdating(false);
-      return;
-    }
-
-    setSettlementMessage(`Cobro pendiente acreditado: ${pendingPayout.toLocaleString("es-PY")} oro.`);
-    setPendingPayout(0);
-    updatingRef.current = false;
-    setUpdating(false);
-  };
-
-
+  useEffect(() => {
+    if (status !== "starting" && status !== "rising") return;
+    const pollId = window.setInterval(() => {
+      void syncServerState();
+    }, 500);
+    return () => window.clearInterval(pollId);
+  }, [status, syncServerState]);
 
   // Resize Effect (Static relative to game state)
   useEffect(() => {
@@ -399,8 +280,6 @@ export function TavernCrash() {
     mountedRef.current = true;
     return () => {
         mountedRef.current = false;
-        window.clearTimeout(startTimerRef.current);
-        if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
   }, []);
 
@@ -546,7 +425,7 @@ export function TavernCrash() {
                               }
                             }}
 
-                            disabled={status === "rising" || status === "starting" || hasPendingPayout}
+                            disabled={status === "rising" || status === "starting"}
                             className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 text-lg font-black text-stone-100 focus:outline-none focus:border-amber-500/50 transition"
                         />
                     </div>
@@ -555,14 +434,14 @@ export function TavernCrash() {
                     <div className="grid grid-cols-2 gap-2 mb-4">
                          <button 
                             onClick={() => setBet(Math.floor(player.gold / 2))}
-                            disabled={status === "rising" || status === "starting" || hasPendingPayout}
+                            disabled={status === "rising" || status === "starting"}
                             className="py-2 rounded-xl bg-stone-800 text-[10px] font-black text-stone-400 hover:text-stone-100 transition"
                          >
                             50% SALDO
                          </button>
                          <button 
                             onClick={() => setBet(player.gold)}
-                            disabled={status === "rising" || status === "starting" || hasPendingPayout}
+                            disabled={status === "rising" || status === "starting"}
                             className="py-2 rounded-xl bg-stone-800 text-[10px] font-black text-stone-400 hover:text-stone-100 transition"
                          >
                             ALL IN
@@ -586,7 +465,7 @@ export function TavernCrash() {
                             if ((val.match(/\./g) || []).length > 1) return;
                             setAutoCashOutStr(val);
                           }}
-                          disabled={status === "rising" || status === "starting" || hasPendingPayout}
+                          disabled={status === "rising" || status === "starting"}
                           placeholder="Ej: 1.50  (0 = desactivado)"
                           className="w-full rounded-xl border border-stone-700 bg-stone-950 px-4 py-3 pr-8 text-base font-black text-amber-400 placeholder:text-stone-600 placeholder:font-normal focus:outline-none focus:border-amber-500/50 transition"
                         />
@@ -617,14 +496,14 @@ export function TavernCrash() {
                                 </span>
                                 <span className="flex items-center gap-2 text-xl font-black">
                                     <Coins className="h-5 w-5" />
-                                    {Math.floor(bet * multiplier)}
+                                    {lastWin.toLocaleString("es-PY")}
                                 </span>
                             </span>
                         </button>
                     ) : (
                         <button
                             onClick={handleStart}
-                            disabled={hasPendingPayout || bet <= 0 || bet > player.gold || updating || status === "starting"}
+                            disabled={bet <= 0 || bet > player.gold || updating || status === "starting"}
                             className="w-full group relative overflow-hidden rounded-2xl bg-stone-100 py-5 font-black text-stone-900 transition hover:bg-white active:scale-95 disabled:opacity-30"
                         >
                             <span className="relative z-10 flex items-center justify-center gap-2 uppercase tracking-tighter">
@@ -634,23 +513,8 @@ export function TavernCrash() {
                         </button>
                     )}
                     {settlementMessage ? (
-                      <div className={`rounded-2xl border p-3 text-xs font-bold leading-5 ${
-                        hasPendingPayout
-                          ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
-                          : "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
-                      }`}>
+                      <div className="rounded-2xl border border-cyan-300/25 bg-cyan-400/10 p-3 text-xs font-bold leading-5 text-cyan-100">
                         <p>{settlementMessage}</p>
-                        {hasPendingPayout ? (
-                          <button
-                            type="button"
-                            onClick={() => void handleRetryPendingPayout()}
-                            disabled={updating}
-                            className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            <Coins className="h-4 w-4" />
-                            Reintentar cobro
-                          </button>
-                        ) : null}
                       </div>
                     ) : null}
                 </div>

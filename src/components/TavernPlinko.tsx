@@ -1,21 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Coins, Gem, RefreshCw, Sparkles, Wand2 } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
+import { MAX_DAILY_PLINKO_WIN_LIMIT } from "../utils/scratchUtils";
 import {
-  buildScratchDateKey,
-  getPlayerDailyPlinkoNetWins,
-  MAX_DAILY_PLINKO_WIN_LIMIT,
-} from "../utils/scratchUtils";
-import {
-  computePlinkoPath,
   getPlinkoExpectedReturn,
-  getPlinkoMultiplier,
   PLINKO_MULTIPLIERS,
   PLINKO_ROWS,
   PLINKO_SLOTS,
-  saveDailyResult,
   type PlinkoPath,
 } from "../utils/plinkUtils";
+import {
+  createTavernIdempotencyKey,
+  playPlinkoSecure,
+} from "../utils/minigamesSecure";
 
 type PlinkoPhase = "betting" | "dropping" | "resolved";
 
@@ -245,16 +242,14 @@ function polygon(ctx: CanvasRenderingContext2D, x: number, y: number, radius: nu
 }
 
 export function TavernPlinko() {
-  const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const trailsRef = useRef<Record<number, Array<{ x: number; y: number; alpha: number }>>>({});
   
-  const dateKey = useMemo(() => buildScratchDateKey(), []);
   const [phase, setPhase] = useState<PlinkoPhase>("betting");
   const [bet, setBet] = useState(1000);
   const [quantity, setQuantity] = useState(1);
-  const [dailyNetWins, setDailyNetWins] = useState(0);
   
   const [lastSlots, setLastSlots] = useState<Record<number, number> | null>(null);
   const [lastTotalPrize, setLastTotalPrize] = useState<number | null>(null);
@@ -264,26 +259,12 @@ export function TavernPlinko() {
   const [updating, setUpdating] = useState(false);
 
   const balance = player?.gold ?? 0;
-  const remainingDailyNet = Math.max(0, MAX_DAILY_PLINKO_WIN_LIMIT - dailyNetWins);
-  const limitReached = dailyNetWins >= MAX_DAILY_PLINKO_WIN_LIMIT;
-  const showClosedState = limitReached && phase === "betting";
-  
   const parsedBet = Math.floor(Number.isFinite(bet) ? Math.max(0, bet) : 0);
   const totalStake = parsedBet * quantity;
   const hasEnoughGold = totalStake > 0 && totalStake <= balance;
-  
   const canDrop = Boolean(
-    player && phase !== "dropping" && !updating && !limitReached && hasEnoughGold
+    player && phase !== "dropping" && !updating && hasEnoughGold
   );
-
-  useEffect(() => {
-    if (!player) {
-      setDailyNetWins(0);
-      return;
-    }
-
-    setDailyNetWins(getPlayerDailyPlinkoNetWins(player.id, dateKey));
-  }, [dateKey, player]);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
@@ -305,8 +286,7 @@ export function TavernPlinko() {
 
   async function refreshState() {
     setUpdating(true);
-    const fresh = await refreshPlayer();
-    if (fresh) setDailyNetWins(getPlayerDailyPlinkoNetWins(fresh.id, dateKey));
+    await refreshPlayer();
     setUpdating(false);
   }
 
@@ -325,25 +305,25 @@ export function TavernPlinko() {
       return;
     }
 
-    const paths = Array.from({ length: quantity }, () => computePlinkoPath());
-    let totalRawPrize = 0;
-    paths.forEach((p) => {
-      totalRawPrize += Math.floor(parsedBet * getPlinkoMultiplier(p.slot));
-    });
-
-    const rawNet = totalRawPrize - finalStake;
-    const cappedNet = rawNet > 0 ? Math.min(rawNet, remainingDailyNet) : rawNet;
-    const finalPrize = rawNet > 0 ? finalStake + cappedNet : totalRawPrize;
-    const updated = await addPlayerGold(-finalStake + finalPrize);
-    if (!updated) {
+    let serverRound;
+    try {
+      serverRound = await playPlinkoSecure(parsedBet, quantity, createTavernIdempotencyKey("plinko"));
+    } catch (error) {
       setUpdating(false);
-      setMessage("No se pudo procesar la apuesta. Intenta refrescar tu perfil.");
+      setMessage(error instanceof Error ? error.message : "No se pudo procesar la apuesta. Intenta refrescar tu perfil.");
       return;
     }
-
-    if (cappedNet > 0) {
-      setDailyNetWins(saveDailyResult(player.id, dateKey, cappedNet));
+    const outcomeRows = Array.isArray(serverRound.outcome) ? serverRound.outcome : [];
+    const paths: PlinkoPath[] = outcomeRows.map((row) => {
+      const slot = clamp(Number((row as Record<string, unknown>).slot ?? 0), 0, PLINKO_SLOTS - 1);
+      const rights = Math.min(PLINKO_ROWS, slot);
+      return { slot, decisions: Array.from({ length: PLINKO_ROWS }, (_, index) => index < rights ? "R" : "L") as PlinkoPath["decisions"] };
+    });
+    while (paths.length < quantity) {
+      paths.push({ slot: 0, decisions: Array.from({ length: PLINKO_ROWS }, () => "L") as PlinkoPath["decisions"] });
     }
+    const finalPrize = serverRound.payout;
+    await refreshPlayer();
 
     const pointsArray = paths.map((p) => buildAnimationPoints(p));
     const ctx = canvasRef.current?.getContext("2d");
@@ -429,17 +409,13 @@ export function TavernPlinko() {
         setLastTotalPrize(finalPrize);
         setLastTotalBet(finalStake);
 
-        if (cappedNet > 0 && rawNet > cappedNet) {
-          setMessage(`Tope diario aplicado. Cobras ${finalPrize.toLocaleString("es-PY")} oro neto en total.`);
-        } else {
-          setMessage(
-            finalPrize > finalStake
-              ? `¡Victoria! Recuperas apuesta y ganas ${(finalPrize - finalStake).toLocaleString("es-PY")} oro neto.`
-              : finalPrize === finalStake
-                ? "Ni gloria ni tragedia. Recuperaste tu inversion."
-                : `Perdida de ${(finalStake - finalPrize).toLocaleString("es-PY")} oro. La torre reclama su peaje.`
-          );
-        }
+        setMessage(
+          finalPrize > finalStake
+            ? `¡Victoria! Recuperas apuesta y ganas ${(finalPrize - finalStake).toLocaleString("es-PY")} oro neto.`
+            : finalPrize === finalStake
+              ? "Ni gloria ni tragedia. Recuperaste tu inversion."
+              : `Perdida de ${(finalStake - finalPrize).toLocaleString("es-PY")} oro. La torre reclama su peaje.`
+        );
         return;
       }
 
@@ -457,15 +433,6 @@ export function TavernPlinko() {
     return <PlinkoMessage title="Torre del Mago" description="Conecta tu perfil para lanzar la esfera runica." />;
   }
 
-  if (showClosedState) {
-    return (
-      <PlinkoMessage
-        title="Torre cerrada"
-        description={`Ya ganaste ${MAX_DAILY_PLINKO_WIN_LIMIT.toLocaleString("es-PY")} de oro neto hoy en la Torre del Mago.`}
-      />
-    );
-  }
-
   return (
     <div className="relative overflow-hidden rounded-[2rem] border border-amber-500/20 bg-[#080b08] p-4 shadow-[inset_0_0_55px_rgba(0,0,0,0.72)] md:p-6">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(20,184,166,0.18),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(245,158,11,0.18),transparent_28%)]" />
@@ -479,7 +446,7 @@ export function TavernPlinko() {
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">
               <StatChip label="Oro" value={balance.toLocaleString("es-PY")} />
-              <StatChip label="Hoy" value={`${dailyNetWins.toLocaleString("es-PY")}`} />
+              <StatChip label="Límite server" value={MAX_DAILY_PLINKO_WIN_LIMIT.toLocaleString("es-PY")} />
               <StatChip label="RTP" value={`${Math.round(EXPECTED_RETURN * 100)}%`} />
             </div>
           </div>
@@ -585,11 +552,6 @@ export function TavernPlinko() {
                 Saldo insuficiente
               </p>
             )}
-            {limitReached && (
-              <p className="mt-2 text-right text-[11px] font-black uppercase tracking-widest text-stone-500">
-                Límite diario
-              </p>
-            )}
           </div>
 
           <button
@@ -603,10 +565,8 @@ export function TavernPlinko() {
               ? "Cayendo..."
               : updating
                 ? "Procesando..."
-                : limitReached
-                  ? "Límite diario alcanzado"
-                  : !hasEnoughGold && parsedBet > 0
-                    ? "Oro insuficiente"
+                : !hasEnoughGold && parsedBet > 0
+                  ? "Oro insuficiente"
                     : parsedBet <= 0
                       ? "Apuesta inválida"
                       : "Lanzar esferas"}
@@ -632,17 +592,8 @@ export function TavernPlinko() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.14em] text-stone-500">
-              <span>Ganancia diaria</span>
-              <span>{remainingDailyNet.toLocaleString("es-PY")} libres</span>
-            </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-900">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-amber-300 to-orange-500"
-                style={{ width: `${clamp((dailyNetWins / MAX_DAILY_PLINKO_WIN_LIMIT) * 100, 0, 100)}%` }}
-              />
-            </div>
+          <div className="mt-4 rounded-2xl border border-cyan-500/15 bg-cyan-500/5 p-3 text-xs font-bold text-cyan-100">
+            Límite neto diario de {MAX_DAILY_PLINKO_WIN_LIMIT.toLocaleString("es-PY")} aplicado por el servidor; este cliente no mantiene un contador financiero local.
           </div>
         </aside>
       </div>

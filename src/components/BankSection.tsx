@@ -18,6 +18,7 @@ import {
   Sparkles,
   TrendingUp,
   WalletCards,
+  X,
 } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { usePlayerSession } from "../context/PlayerSessionContext";
@@ -27,11 +28,12 @@ import type {
   BankSnapshot,
 } from "../types";
 import {
-  bankCreateLoan,
+  bankCreateWeeklyLoan,
   bankDeposit,
   bankGetSnapshot,
   bankPayLoan,
   bankPayLoanEarly,
+  bankPayWeeklyLoanEarly,
   bankWithdrawDeposit,
   createBankIdempotencyKey,
 } from "../utils/bank";
@@ -81,6 +83,7 @@ type BankerPose =
 type BankEffect = "none" | "deposit" | "withdraw" | "approved" | "rejected" | "payment";
 
 type BankAction = "deposit" | "withdraw" | "loan" | "payment" | "reputation" | "transactions";
+type BankTabId = "overview" | "loans" | "transactions" | "reputation";
 
 const BANKER_DURATIONS: Record<BankerPose, number[]> = {
   idle: [140, 140, 140, 140, 140, 140],
@@ -111,6 +114,126 @@ const BANKER_COPY: Record<BankerPose, string> = {
   payment: "Cuota registrada en el libro.",
   tap: "Las llaves tintinean. ¿Qué necesitas?",
 };
+
+const BANKER_MOCK_PLAYER_ID = "00000000-0000-4000-8000-000000000001";
+
+function createBankerMockSnapshot(): BankSnapshot {
+  const now = "2026-10-18T12:00:00.000Z";
+  const activeLoanId = "00000000-0000-4000-8000-000000000002";
+  const paidLoanId = "00000000-0000-4000-8000-000000000003";
+  return {
+    player: { id: BANKER_MOCK_PLAYER_ID, gold: 94190 },
+    account: {
+      playerId: BANKER_MOCK_PLAYER_ID,
+      depositPrincipalGold: 4025,
+      depositInterestResidue: 12,
+      depositBalanceGold: 4025,
+      depositLastAccruedAt: now,
+      creditLimitGold: 5000,
+      onTimeStreak: 4,
+      creditTier: 1,
+      lastDelinquencyAt: null,
+    },
+    credit: { exposureGold: 1000, availableLimitGold: 4000, aprBps: 480 },
+    loans: [
+      {
+        id: activeLoanId,
+        playerId: BANKER_MOCK_PLAYER_ID,
+        principalGold: 1000,
+        aprBps: 480,
+        termMonths: 3,
+        termWeeks: null,
+        cadenceDays: 30,
+        totalDueGold: 1040,
+        outstandingDueGold: 700,
+        paidInstallments: 1,
+        status: "active",
+        createdAt: "2026-09-18T12:00:00.000Z",
+        updatedAt: now,
+        closedAt: null,
+      },
+      {
+        id: paidLoanId,
+        playerId: BANKER_MOCK_PLAYER_ID,
+        principalGold: 4025,
+        aprBps: 520,
+        termMonths: 3,
+        termWeeks: null,
+        cadenceDays: 30,
+        totalDueGold: 4080,
+        outstandingDueGold: 0,
+        paidInstallments: 3,
+        status: "paid",
+        createdAt: "2026-06-18T12:00:00.000Z",
+        updatedAt: "2026-09-18T12:00:00.000Z",
+        closedAt: "2026-09-18T12:00:00.000Z",
+      },
+    ],
+    installments: [
+      {
+        id: "00000000-0000-4000-8000-000000000012",
+        loanId: activeLoanId,
+        installmentNumber: 1,
+        dueAt: "2026-10-01T12:00:00.000Z",
+        principalDueGold: 330,
+        interestDueGold: 16,
+        amountDueGold: 346,
+        status: "paid",
+        paidAt: "2026-09-30T12:00:00.000Z",
+        attemptCount: 1,
+        createdAt: "2026-09-18T12:00:00.000Z",
+      },
+      {
+        id: "00000000-0000-4000-8000-000000000013",
+        loanId: activeLoanId,
+        installmentNumber: 2,
+        dueAt: "2026-11-01T12:00:00.000Z",
+        principalDueGold: 340,
+        interestDueGold: 16,
+        amountDueGold: 356,
+        status: "scheduled",
+        paidAt: null,
+        attemptCount: 0,
+        createdAt: "2026-09-18T12:00:00.000Z",
+      },
+      {
+        id: "00000000-0000-4000-8000-000000000014",
+        loanId: activeLoanId,
+        installmentNumber: 3,
+        dueAt: "2026-12-01T12:00:00.000Z",
+        principalDueGold: 330,
+        interestDueGold: 8,
+        amountDueGold: 338,
+        status: "scheduled",
+        paidAt: null,
+        attemptCount: 0,
+        createdAt: "2026-09-18T12:00:00.000Z",
+      },
+      ...[1, 2, 3].map((installmentNumber) => ({
+        id: `00000000-0000-4000-8000-00000000001${installmentNumber}`,
+        loanId: paidLoanId,
+        installmentNumber,
+        dueAt: `2026-0${installmentNumber + 6}-18T12:00:00.000Z`,
+        principalDueGold: 1300,
+        interestDueGold: 60,
+        amountDueGold: 1360,
+        status: "paid" as const,
+        paidAt: `2026-0${installmentNumber + 6}-17T12:00:00.000Z`,
+        attemptCount: 1,
+        createdAt: "2026-06-18T12:00:00.000Z",
+      })),
+    ],
+    transactions: [
+      { id: "00000000-0000-4000-8000-000000000021", playerId: BANKER_MOCK_PLAYER_ID, operationType: "loan_payment", amountGold: -346, playerGoldAfter: 94190, referenceType: "bank_loan", referenceId: activeLoanId, idempotencyKey: "mock-payment-1", metadata: {}, createdAt: "2026-09-30T12:00:00.000Z" },
+      { id: "00000000-0000-4000-8000-000000000022", playerId: BANKER_MOCK_PLAYER_ID, operationType: "deposit", amountGold: -4025, playerGoldAfter: 94536, referenceType: "bank_account", referenceId: null, idempotencyKey: "mock-deposit-1", metadata: {}, createdAt: "2026-09-20T12:00:00.000Z" },
+      { id: "00000000-0000-4000-8000-000000000023", playerId: BANKER_MOCK_PLAYER_ID, operationType: "loan_disbursement", amountGold: 1000, playerGoldAfter: 98561, referenceType: "bank_loan", referenceId: activeLoanId, idempotencyKey: "mock-loan-1", metadata: {}, createdAt: "2026-09-18T12:00:00.000Z" },
+    ],
+  };
+}
+
+function isBankerMockEnabled() {
+  return import.meta.env.DEV && new URLSearchParams(window.location.search).get("bankerMock") === "1";
+}
 
 function BankerSprite({
   pose,
@@ -179,9 +302,9 @@ function BankerSprite({
         .banker-v3-stage-backdrop { z-index:0; overflow:hidden; }
         .banker-v3-stage-backdrop img { object-fit:cover; opacity:.25; filter:blur(6px); transform:scale(1.1); }
         .banker-v3-stage-backdrop-overlay { z-index:1; background:radial-gradient(ellipse at center, rgba(16,26,22,.48) 0%, rgba(5,9,8,.76) 68%, rgba(3,5,5,.94) 100%); }
-        .banker-v3-stage { position:relative; width:256px; height:320px; flex:none; overflow:hidden; border:1px solid rgba(245,158,11,.25); border-radius:1.5rem; background:#09090b; box-shadow:0 18px 48px rgba(0,0,0,.35); image-rendering:pixelated; }
-        .banker-v3-stage { z-index:2; }
-        .banker-v3-layer { position:absolute; left:0; top:0; width:1536px; height:2880px; max-width:none; image-rendering:pixelated; user-select:none; pointer-events:none; }
+        .banker-v3-stage { position:relative; width:var(--banker-frame-width); height:var(--banker-frame-height); flex:none; overflow:hidden; border:1px solid rgba(245,158,11,.25); border-radius:1.5rem; background:#09090b; box-shadow:0 18px 48px rgba(0,0,0,.35); image-rendering:pixelated; }
+        .banker-v3-stage { --banker-frame-width:256px; --banker-frame-height:320px; --banker-frame-scale:4; --banker-frame-shift:-1280px; z-index:2; }
+        .banker-v3-layer { position:absolute; left:0; top:0; width:calc(384px * var(--banker-frame-scale)); height:calc(720px * var(--banker-frame-scale)); max-width:none; image-rendering:pixelated; user-select:none; pointer-events:none; }
         .banker-v3-row-1 .banker-v3-layer-animated { top:-320px; }
         .banker-v3-row-2 .banker-v3-layer-animated { top:-640px; }
         .banker-v3-row-3 .banker-v3-layer-animated { top:-960px; }
@@ -190,7 +313,7 @@ function BankerSprite({
         .banker-v3-row-6 .banker-v3-layer-animated { top:-1920px; }
         .banker-v3-row-7 .banker-v3-layer-animated { top:-2240px; }
         .banker-v3-row-8 .banker-v3-layer-animated { top:-2560px; }
-        .banker-v3-layer-animated { --banker-frame-shift:-1280px; animation:banker-v3-frames ${duration}ms steps(5,end) infinite; animation-play-state:paused; }
+        .banker-v3-layer-animated { animation:banker-v3-frames ${duration}ms steps(5,end) infinite; animation-play-state:paused; }
         .banker-v3-stage-live .banker-v3-layer-animated { animation-play-state:running; }
         @keyframes banker-v3-frames { from { transform:translate3d(0,0,0); } to { transform:translate3d(var(--banker-frame-shift),0,0); } }
         .banker-v3-stage:focus-visible { outline:2px solid #f6d365; outline-offset:4px; }
@@ -234,30 +357,116 @@ function BankerSprite({
         @keyframes bank-count-up { from { --bank-count:0; } to { --bank-count:var(--bank-count-target); } }
         .bank-count-up { animation:bank-count-up 600ms ease-out both; }
         .bank-main-card { container-type:inline-size; }
-        .bank-horizontal-layout { display:flex; flex-direction:column; gap:0; }
-        .bank-context-column { min-width:0; }
-        .bank-action-grid { width:100%; }
-        .banker-v3-stage-wrap { width:100%; }
-        @container (min-width:760px) {
-          .bank-horizontal-layout { display:grid; grid-template-columns:320px minmax(0,1fr); align-items:center; gap:28px; }
-          .bank-horizontal-layout > .banker-v3-stage-wrap { width:320px; min-height:400px; }
-          .bank-context-column { display:flex; flex-direction:column; justify-content:center; gap:24px; }
-          .bank-context-column > .mt-5 { margin-top:0; }
-          .bank-context-column .banker-dialogue { max-width:none; margin:0; }
-          .bank-context-column .banker-dialogue::after { bottom:50%; left:-8px; transform:translateY(50%) rotate(45deg); border:0; border-left:2px solid #d8b45b; border-bottom:2px solid #d8b45b; }
+        .kd-ambient:has(.bank-main-card), #root:has(.bank-main-card), body:has(.bank-main-card), html:has(.bank-main-card) { overflow-x:clip !important; overflow-y:visible !important; }
+        .bank-desktop-grid { display:block; }
+        .bank-left-column, .bank-workspace { min-width:0; }
+        .banker-stage-ribbon { position:relative; z-index:4; display:inline-flex; align-items:center; gap:.4rem; margin:.7rem auto 0; white-space:nowrap; border:1px solid rgba(246,211,101,.55); border-radius:999px; background:rgba(8,15,13,.88); padding:.45rem .75rem; color:#fff0b0; font-size:.68rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; box-shadow:0 6px 18px rgba(0,0,0,.35); }
+        .banker-stage-ribbon svg { width:1rem; height:1rem; }
+        .banker-scene-shell { display:flex; flex-direction:column; align-items:stretch; }
+        .banker-scene-shell .banker-v3-stage-wrap { flex-shrink:0; }
+        .banker-stage-ribbon { align-self:center; }
+        .bank-hud { margin-top:1rem; }
+        .bank-hud-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.6rem; }
+        .bank-hud-chip { min-width:0; border:1px solid rgba(216,181,91,.2); border-radius:.9rem; background:rgba(5,9,8,.62); padding:.65rem .7rem; }
+        .bank-hud-chip p { margin:0; }
+        .bank-hud-chip-label { color:#918b80; font-size:.62rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+        .bank-hud-chip-value { margin-top:.25rem !important; color:#fff8e8; font-size:.9rem; font-weight:900; }
+        .banker-dialogue { margin-top:1rem; }
+        .bank-operation-panel { border:1px solid rgba(216,181,91,.22); border-radius:1.25rem; background:rgba(5,9,8,.48); padding:1rem; }
+        .bank-operation-header { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:.75rem; color:#fff0b0; font-size:.68rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+        .bank-operation-close { display:inline-flex; min-height:2rem; min-width:2rem; align-items:center; justify-content:center; border:1px solid rgba(216,181,91,.3); border-radius:.65rem; color:#d6d3d1; }
+        .bank-operation-close:hover, .bank-operation-close:focus-visible { border-color:#f6d365; color:#fff0b0; }
+        .bank-tabs-header { display:flex; align-items:center; gap:.65rem; }
+        .bank-tabs-header .bank-tab-list { flex:1; }
+        .bank-operation-panel form { display:grid; gap:.7rem; }
+        .bank-operation-panel form > button { min-height:48px; }
+        .bank-operation-panel .bank-operation-fields { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:.7rem; }
+        .bank-mobile-sheet-root { display:none; }
+        .bank-mobile-sheet { --bank-sheet-drag:0px; }
+        @keyframes bank-sheet-up { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(var(--bank-sheet-drag)); } }
+        .bank-tab-list { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.35rem; border:1px solid rgba(120,113,108,.45); border-radius:1rem; background:rgba(5,9,8,.7); padding:.35rem; }
+        .bank-tab { min-height:2.6rem; border-radius:.7rem; color:#a8a29e; font-size:.68rem; font-weight:900; letter-spacing:.06em; text-transform:uppercase; transition:background 180ms,color 180ms; }
+        .bank-tab[aria-selected="true"] { background:rgba(246,211,101,.15); color:#fff0b0; box-shadow:inset 0 0 0 1px rgba(246,211,101,.28); }
+        .bank-tab:focus-visible { outline:2px solid #f6d365; outline-offset:2px; }
+        .bank-tab-panel { margin-top:1rem; }
+        .bank-summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
+        .bank-summary-card { border:1px solid rgba(120,113,108,.45); border-radius:1rem; background:rgba(5,9,8,.48); padding:1rem; }
+        .bank-summary-progress { height:.55rem; overflow:hidden; border-radius:999px; background:#292524; }
+        .bank-summary-progress > span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#2dd4bf,#f6d365); }
+        .bank-loan-group + .bank-loan-group { margin-top:1.25rem; }
+        .bank-loan-group-title { color:#e7e5e4; font-size:.72rem; font-weight:900; letter-spacing:.13em; text-transform:uppercase; }
+        .bank-loan-history .bank-loan-progress { background:#34d399 !important; }
+        @container (min-width:900px) {
+          .bank-desktop-grid { display:grid; grid-template-columns:minmax(320px,360px) minmax(0,1fr); align-items:start; gap:16px; }
+          .bank-left-column { position:sticky; top:92px; align-self:start; }
+          .bank-left-column .banker-v3-stage-wrap { width:100%; min-height:400px; }
+          .bank-left-column .banker-dialogue { margin-top:.35rem; }
+          .bank-left-column .banker-dialogue::after { top:-10px; bottom:auto; left:50%; transform:translateX(-50%) rotate(225deg); border:0; border-right:2px solid #d8b45b; border-bottom:2px solid #d8b45b; }
+          .bank-left-column .bank-hud { margin-top:.65rem; }
+          .bank-left-column .bank-hud-grid { gap:.4rem; }
+          .bank-left-column .bank-hud-chip { padding:.45rem .5rem; }
+          .bank-left-column .bank-hud-chip-value { font-size:.78rem; }
+          .bank-left-column .banker-stage-ribbon { margin-top:.4rem; }
+          .bank-workspace { display:flex; min-width:0; flex-direction:column; gap:.65rem; }
+          .bank-action-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+          .bank-main-card { margin-top:-1rem; padding:.25rem 1rem; }
+        }
+        @media (min-width:1100px) {
+          .bank-left-column { top:76px; }
+        }
+        .bank-mobile-sheet-root { display:none; }
+        @media (max-width:899px) {
+          .bank-hero { min-height:180px; height:180px; max-height:180px; }
+          .bank-hero-copy { padding:.85rem .75rem; }
+          .bank-hero h1 { font-size:clamp(1.7rem,8vw,2.2rem); line-height:1.05; }
+          .bank-hero-copy > p:not(.bank-hero-eyebrow) { display:none; }
+          .bank-hero-action { min-height:48px; margin-top:.7rem; padding:.7rem .85rem; }
+          .bank-main-card { padding:.75rem; }
+          .bank-left-column { display:flex; flex-direction:column; }
+          .banker-scene-shell { order:1; position:relative; }
+          .banker-stage-ribbon { position:absolute; top:.7rem; right:.7rem; z-index:4; margin:0; padding:.3rem .45rem; font-size:.56rem; }
+          .banker-dialogue { order:2; z-index:3; margin-top:.75rem; }
+                    .banker-dialogue::after { top:-9px; bottom:auto; left:50%; width:14px; height:14px; transform:translateX(-50%) rotate(45deg); background:#0c0a09; border:0; border-left:2px solid #d8b45b; border-top:2px solid #d8b45b; z-index:2; }
+          .bank-hud { order:3; margin-top:.75rem; }
+          .bank-hud-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.35rem; overflow:visible; padding-bottom:0; }
+          .bank-hud-chip { padding:.38rem .35rem; border-radius:.7rem; }
+          .bank-hud-chip-label { font-size:.53rem; letter-spacing:.03em; white-space:nowrap; }
+          .bank-hud-chip-value { margin-top:.15rem !important; font-size:.72rem; white-space:nowrap; }
+          .bank-hud-chip-apr { margin-top:.1rem; font-size:.55rem; white-space:nowrap; }
+          .bank-action-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; }
+          .bank-action-button { min-height:64px; flex-direction:column; gap:.35rem; padding:.55rem .3rem; text-align:center; line-height:1.1; }
+          .bank-tabs-header { display:block; }
+          .bank-tabs-header > .bank-tab-list { display:flex; gap:.35rem; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:thin; }
+          .bank-tab { flex:0 0 7.5rem; min-width:0; min-height:2.8rem; scroll-snap-align:start; }
+          .bank-tabs-header > button { width:100%; min-height:44px; margin-top:.5rem; }
+          .bank-tab-panel { margin-top:.75rem; padding:.75rem; }
+          .bank-summary-grid { grid-template-columns:1fr; }
+          .bank-operation-panel { display:none; }
+          .bank-mobile-sheet-root { position:fixed; z-index:100; inset:0; display:block; pointer-events:auto; }
+          .bank-mobile-sheet-backdrop { position:absolute; inset:0; width:100%; height:100%; border:0; background:transparent; }
+          .bank-mobile-sheet { position:absolute; right:0; bottom:calc(76px + env(safe-area-inset-bottom)); left:0; max-height:min(60dvh,calc(100dvh - 120px)); overflow-y:auto; transform:translateY(var(--bank-sheet-drag)); border-top:2px solid #d8b45b; border-radius:1.25rem 1.25rem 0 0; background:#080d0b; box-shadow:0 -18px 48px rgba(0,0,0,.48); padding:.55rem .85rem calc(16px + env(safe-area-inset-bottom)); animation:bank-sheet-up 220ms ease-out both; transition:transform 220ms ease-out; touch-action:pan-y; }
+          .bank-mobile-sheet-handle { width:3rem; height:.3rem; margin:0 auto .7rem; border-radius:99px; background:#d8b45b; touch-action:none; }
+          .bank-mobile-sheet-header { display:flex; justify-content:flex-end; min-height:2rem; margin-bottom:.35rem; }
+          .bank-mobile-sheet-body { max-height:none; overflow:visible; }
+          .bank-mobile-sheet .bank-operation-panel { display:block; border:0; background:transparent; padding:0; }
+          .bank-mobile-sheet .bank-operation-fields { grid-template-columns:1fr; gap:.7rem; }
+          .bank-mobile-sheet form > button, .bank-mobile-sheet .bank-operation-panel > div > button { position:sticky; bottom:0; z-index:2; width:100%; min-height:48px; margin-top:.35rem; background:#172018; box-shadow:0 -8px 12px rgba(8,13,11,.94); }
+          .bank-mobile-sheet form > p { margin-top:.1rem; margin-bottom:.35rem; }
+        }
+        @media (max-width:339px) {
+          .bank-hud-grid { display:flex; gap:.4rem; overflow-x:auto; padding-bottom:.25rem; scroll-snap-type:x mandatory; }
+          .bank-hud-chip { flex:0 0 8.4rem; scroll-snap-align:start; }
         }
         .banker-v3-stage-wrap::before { content:""; position:absolute; inset:5% 10%; z-index:1; border-radius:50%; background:radial-gradient(ellipse at center, rgba(246,211,101,.24) 0%, rgba(75,146,110,.2) 34%, rgba(246,211,101,.06) 52%, transparent 76%); filter:blur(20px); opacity:.62; animation:bank-banker-breathe 6s ease-in-out infinite; pointer-events:none; }
         .banker-v3-stage-wrap::after { content:""; position:absolute; inset:0; z-index:1; border-radius:inherit; background:radial-gradient(ellipse at center, rgba(8,16,13,.04) 0%, rgba(5,9,8,.5) 68%, rgba(0,0,0,.82) 100%); pointer-events:none; }
         @keyframes bank-section-entry { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         @keyframes bank-divider-shine { from { transform:translateX(0); } to { transform:translateX(650%); } }
         @keyframes bank-banker-breathe { 0%,100% { opacity:.4; transform:scale(.94); } 50% { opacity:.8; transform:scale(1.06); } }
-        @media (prefers-reduced-motion:reduce) { .bank-action-button, .bank-action-button::after, .bank-rules-content, .bank-rules-chevron, .bank-count-up { animation:none; transition:none; } .bank-count-up::before { content:none; } .bank-count-up-fallback { display:inline; } }
+        @media (prefers-reduced-motion:reduce) { .bank-action-button, .bank-action-button::after, .bank-rules-content, .bank-rules-chevron, .bank-count-up, .bank-mobile-sheet, .banker-v3-stage-wrap, .bank-hero, .banker-v3-stage-wrap::before { animation:none !important; transition:none !important; } .bank-count-up::before { content:none; } .bank-count-up-fallback { display:inline; } }
         @media (min-width:768px) {
-          .bank-hero { max-height:min(430px, 56.25vw); }
-          .banker-v3-layer-animated { --banker-frame-shift:-1600px; }
+          .bank-hero { max-height:min(160px, 56.25vw); }
+          .banker-v3-stage { --banker-frame-width:320px; --banker-frame-height:400px; --banker-frame-scale:5; --banker-frame-shift:-1600px; }
           .banker-v3-stage-wrap { min-height:400px; }
-          .banker-v3-stage { width:320px; height:400px; }
-          .banker-v3-layer { width:1920px; height:3600px; }
           .banker-v3-row-1 .banker-v3-layer-animated { top:-400px; }
           .banker-v3-row-2 .banker-v3-layer-animated { top:-800px; }
           .banker-v3-row-3 .banker-v3-layer-animated { top:-1200px; }
@@ -340,10 +549,12 @@ const BANK_ACTIONS: Array<{ key: BankAction; label: string; icon: typeof Landmar
 
 function BankActionGrid({
   locked,
+  selectedAction = null,
   onAction,
 }: {
   locked: boolean;
-  onAction: (action: BankAction) => void;
+  selectedAction?: BankAction | null;
+  onAction: (action: BankAction, trigger: HTMLButtonElement) => void;
 }) {
   const [shaking, setShaking] = useState<BankAction | null>(null);
   const shakeTimerRef = useRef<number | null>(null);
@@ -352,13 +563,13 @@ function BankActionGrid({
     if (shakeTimerRef.current !== null) window.clearTimeout(shakeTimerRef.current);
   }, []);
 
-  const handleAction = (key: BankAction) => {
+  const handleAction = (key: BankAction, trigger: HTMLButtonElement) => {
     if (locked) {
       setShaking(key);
       if (shakeTimerRef.current !== null) window.clearTimeout(shakeTimerRef.current);
       shakeTimerRef.current = window.setTimeout(() => setShaking(null), 300);
     }
-    onAction(key);
+    onAction(key, trigger);
   };
 
   return (
@@ -368,10 +579,12 @@ function BankActionGrid({
           key={key}
           type="button"
           data-bank-action={key}
-          className={`bank-action-button inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-stone-700 bg-stone-950/70 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-stone-200 transition hover:border-amber-300/60 hover:bg-amber-400/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300 ${shaking === key ? "bank-action-locked-shake" : ""}`}
+          data-selected={selectedAction === key}
+          className={`bank-action-button inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-stone-700 bg-stone-950/70 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-stone-200 transition hover:border-amber-300/60 hover:bg-amber-400/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300 ${selectedAction === key ? "border-amber-300 bg-amber-300/15 text-amber-100" : ""} ${shaking === key ? "bank-action-locked-shake" : ""}`}
           style={{ "--bank-action-delay": `${index * 60}ms` } as CSSProperties}
           aria-disabled={locked}
-          onClick={() => handleAction(key)}
+          aria-pressed={selectedAction === key}
+          onClick={(event) => handleAction(key, event.currentTarget)}
         >
           {locked ? <LockKeyhole aria-hidden="true" className="h-4 w-4 text-amber-300" /> : <Icon aria-hidden="true" className="h-4 w-4 text-amber-300" />}
           {label}
@@ -490,6 +703,10 @@ function LoanCard({
   const dueInstallments = unpaidInstallments.filter((item) => new Date(item.dueAt).getTime() <= Date.now());
   const nextInstallment = unpaidInstallments[0];
   const isPending = pendingAction.startsWith(`loan:${loan.id}`);
+  const isSettled = loan.status === "paid";
+  const installmentTotal = (loan.termWeeks ?? loan.termMonths ?? installments.length) || 1;
+  const termLabel = loan.termWeeks ? `${loan.termWeeks} semanas · semanal` : `${loan.termMonths ?? installmentTotal} meses`;
+  const progressPercent = isSettled ? 100 : Math.min(100, (loan.paidInstallments / installmentTotal) * 100);
 
   return (
     <article className="rounded-[1.5rem] border border-stone-800 bg-stone-950/55 p-5">
@@ -499,7 +716,7 @@ function LoanCard({
             <CreditCard aria-hidden="true" className="h-4 w-4 text-cyan-300" />
             <h3 className="font-bold text-stone-100">Préstamo de {formatGold(loan.principalGold)}</h3>
           </div>
-          <p className="mt-2 text-xs text-stone-500">Abierto {formatDate(loan.createdAt)} · {loan.termMonths} meses · APR {(loan.aprBps / 100).toFixed(2)}%</p>
+          <p className="mt-2 text-xs text-stone-500">Abierto {formatDate(loan.createdAt)} · {termLabel} · APR {(loan.aprBps / 100).toFixed(2)}%</p>
         </div>
         <span className={`rounded-full border px-3 py-1 text-xs font-bold ${loan.status === "in_mora" ? "border-rose-400/30 bg-rose-400/10 text-rose-200" : "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"}`}>
           {loanStatusLabel(loan.status)}
@@ -509,11 +726,11 @@ function LoanCard({
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <div><p className="text-xs text-stone-500">Saldo pendiente</p><p className="mt-1 font-bold text-stone-100">{formatGold(loan.outstandingDueGold)}</p></div>
         <div><p className="text-xs text-stone-500">Total pactado</p><p className="mt-1 font-bold text-stone-100">{formatGold(loan.totalDueGold)}</p></div>
-        <div><p className="text-xs text-stone-500">Cuotas</p><p className="mt-1 font-bold text-stone-100">{loan.paidInstallments}/{loan.termMonths} pagadas</p></div>
+        <div><p className="text-xs text-stone-500">Cuotas</p><p className="mt-1 font-bold text-stone-100">{loan.paidInstallments}/{installmentTotal} pagadas</p></div>
       </div>
 
-      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-800" aria-label={`${loan.paidInstallments} de ${loan.termMonths} cuotas pagadas`} role="progressbar" aria-valuemin={0} aria-valuemax={loan.termMonths} aria-valuenow={loan.paidInstallments}>
-        <span className="bank-loan-progress block h-full rounded-full bg-amber-300" style={{ width: `${Math.min(100, (loan.paidInstallments / loan.termMonths) * 100)}%`, transition: "width 600ms ease-out" }} />
+      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-800" aria-label={`${loan.paidInstallments} de ${installmentTotal} cuotas pagadas`} role="progressbar" aria-valuemin={0} aria-valuemax={installmentTotal} aria-valuenow={isSettled ? installmentTotal : loan.paidInstallments}>
+        <span className={`bank-loan-progress block h-full rounded-full ${isSettled ? "bg-emerald-400" : "bg-amber-300"}`} style={{ width: `${progressPercent}%`, transition: "width 600ms ease-out" }} />
       </div>
 
       {nextInstallment ? (
@@ -630,7 +847,7 @@ function BankHero({ description }: { description: string }) {
         .bank-hero-action { display:inline-flex; min-height:48px; align-items:center; margin-top:1.5rem; border:1px solid rgba(246,211,101,.7); border-radius:.8rem; background:rgba(14,24,19,.82); padding:.75rem 1rem; color:#fff4ce; font-size:.75rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; transition:transform 180ms, box-shadow 180ms, background 180ms; }
         .bank-hero-action:hover, .bank-hero-action:focus-visible { transform:translateY(-2px); background:rgba(246,211,101,.16); box-shadow:0 0 24px rgba(246,211,101,.25); }
         .bank-hero-action:focus-visible { outline:2px solid #f6d365; outline-offset:4px; }
-        @media (min-width:768px) { .bank-hero { min-height:0; height:320px; max-height:min(320px, 56.25vw); } .bank-hero-copy { padding:2rem; } .bank-hero h1 { font-size:clamp(2rem,4vw,3rem); } .bank-hero-copy > p:not(.bank-hero-eyebrow) { margin-top:.8rem; line-height:1.5; } .bank-hero-action { margin-top:1rem; } }
+        @media (min-width:768px) { .bank-hero { min-height:0; height:150px; max-height:min(150px, 56.25vw); } .bank-hero-copy { padding:1rem 1.5rem; } .bank-hero h1 { font-size:clamp(1.65rem,3vw,2.4rem); white-space:nowrap; } .bank-hero-copy > p:not(.bank-hero-eyebrow) { margin-top:.45rem; line-height:1.35; } .bank-hero-action { margin-top:.55rem; min-height:40px; } }
         @media (max-width:767px) { .bank-hero { display:flex; align-items:flex-end; min-height:380px; max-height:380px; border-radius:17px; } .bank-hero-copy { align-self:flex-end; padding:1.2rem 1rem; } .bank-hero h1 { font-size:clamp(2rem,10vw,3rem); } .bank-hero-copy > p:not(.bank-hero-eyebrow) { margin-top:.75rem; font-size:.82rem; line-height:1.55; } .bank-hero-action { margin-top:1rem; } .bank-hero-art { object-position:70% 20%; } .bank-hero-particle:nth-child(n+13) { display:none; } }
         @media (prefers-reduced-motion:reduce) { .bank-hero-action, .bank-hero-particle, .bank-hero, .bank-hero-art, .bank-section-divider, .banker-v3-stage-wrap::before { animation:none; transition:none; } .bank-hero-art { transform:none; } .bank-hero-particle { opacity:.2; } }
         @media (prefers-reduced-motion:reduce) { .bank-hero-action { transition:none; } }
@@ -672,11 +889,20 @@ function BankHero({ description }: { description: string }) {
 
 export function BankSection() {
   const { player, isHydrating, isSecureSessionReady, isPlayerSecureLinked } = usePlayerSession();
+  const bankMockEnabled = isBankerMockEnabled();
+  const mockSnapshot = useMemo(() => createBankerMockSnapshot(), []);
   const [snapshot, setSnapshot] = useState<BankSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState("");
   const [pendingAction, setPendingAction] = useState("");
+  const [selectedAction, setSelectedAction] = useState<BankAction | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetDragY, setSheetDragY] = useState(0);
+  const sheetRef = useRef<HTMLElement | null>(null);
+  const sheetTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const sheetDragStartYRef = useRef<number | null>(null);
+  const [activeTab, setActiveTab] = useState<BankTabId>("overview");
   const pendingActionRef = useRef(false);
   const [bankerPose, setBankerPose] = useState<BankerPose>("idle");
   const [bankerMessage, setBankerMessage] = useState(BANKER_COPY.idle);
@@ -692,15 +918,78 @@ export function BankSection() {
   const [depositAmount, setDepositAmount] = useState("300");
   const [withdrawAmount, setWithdrawAmount] = useState("300");
   const [loanAmount, setLoanAmount] = useState("250");
-  const [loanTerm, setLoanTerm] = useState("3");
+  const [loanTerm, setLoanTerm] = useState("4");
 
-  const canOperate = Boolean(
+  const canOperate = bankMockEnabled || Boolean(
     player &&
       !isHydrating &&
       isSecureSessionReady &&
       isPlayerSecureLinked &&
       UUID_PATTERN.test(player.id),
   );
+
+  const closeOperationSheet = useCallback(() => {
+    setSheetOpen(false);
+    setSheetDragY(0);
+    setSelectedAction(null);
+    window.setTimeout(() => sheetTriggerRef.current?.focus(), 0);
+  }, []);
+
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    const getFocusable = () => Array.from(sheet.querySelectorAll<HTMLElement>("button, input, select, textarea, [tabindex]:not([tabindex='-1'])")).filter((node) => !node.hasAttribute("disabled"));
+    const focusFirst = () => getFocusable()[0]?.focus();
+    const focusAndReveal = () => {
+      if (window.matchMedia("(max-width: 899px)").matches) {
+        const stage = document.querySelector<HTMLElement>(".banker-v3-stage");
+        if (stage) window.scrollTo({ top: Math.max(0, stage.getBoundingClientRect().top + window.scrollY - 40), behavior: "auto" });
+      }
+      focusFirst();
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeOperationSheet();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = getFocusable();
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.setTimeout(focusAndReveal, 0);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [closeOperationSheet, sheetOpen]);
+
+  const handleSheetPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    sheetDragStartYRef.current = event.clientY;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleSheetPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (sheetDragStartYRef.current === null) return;
+    setSheetDragY(Math.max(0, event.clientY - sheetDragStartYRef.current));
+  };
+
+  const handleSheetPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (sheetDragStartYRef.current !== null && event.clientY - sheetDragStartYRef.current > 80) closeOperationSheet();
+    else setSheetDragY(0);
+    sheetDragStartYRef.current = null;
+  };
 
 
   const triggerBankerEffect = useCallback((effect: BankEffect) => {
@@ -786,6 +1075,12 @@ export function BankSection() {
   }, [enqueueBankerPose, isHydrating]);
 
   const refreshSnapshot = useCallback(async () => {
+    if (bankMockEnabled) {
+      setError("");
+      setSnapshot(mockSnapshot);
+      setIsLoading(false);
+      return;
+    }
     if (!canOperate || !player) {
       setSnapshot(null);
       setIsLoading(false);
@@ -802,7 +1097,7 @@ export function BankSection() {
     } finally {
       setIsLoading(false);
     }
-  }, [canOperate, player]);
+  }, [bankMockEnabled, canOperate, mockSnapshot, player]);
 
   useEffect(() => {
     setFeedback("");
@@ -814,6 +1109,10 @@ export function BankSection() {
     operation: () => Promise<{ message: string }>,
     successPose: BankerPose,
   ) {
+    if (bankMockEnabled) {
+      setFeedback("Vista de demostración: la operación está deshabilitada.");
+      return;
+    }
     if (pendingActionRef.current) return;
     pendingActionRef.current = true;
     setPendingAction(action);
@@ -878,9 +1177,9 @@ export function BankSection() {
     try {
       const amount = parseFormInteger(loanAmount, "El prestamo");
       const term = parseFormInteger(loanTerm, "El plazo");
-      if (!window.confirm(`Vas a solicitar ${formatGold(amount)} a ${term} meses. ¿Confirmas la solicitud?`)) return;
+      if (!window.confirm(`Vas a solicitar ${formatGold(amount)} a ${term} semanas. La cuota vencerá semanalmente. ¿Confirmas la solicitud?`)) return;
       void runAction("create-loan", () =>
-        bankCreateLoan(player.id, amount, term, createBankIdempotencyKey("create-loan")),
+        bankCreateWeeklyLoan(player.id, amount, term, createBankIdempotencyKey("create-weekly-loan")),
         "approved",
       );
     } catch (validationError) {
@@ -903,7 +1202,9 @@ export function BankSection() {
     if (!player) return;
     if (!window.confirm(`La liquidacion anticipada de este prestamo cobrara el saldo calculado hoy y eliminara intereses futuros. ¿Confirmas?`)) return;
     void runAction(`loan:${loan.id}:early`, () =>
-      bankPayLoanEarly(player.id, loan.id, createBankIdempotencyKey("pay-loan-early")),
+      loan.cadenceDays === 7
+        ? bankPayWeeklyLoanEarly(player.id, loan.id, createBankIdempotencyKey("pay-weekly-loan-early"))
+        : bankPayLoanEarly(player.id, loan.id, createBankIdempotencyKey("pay-loan-early")),
       "payment",
     );
   }
@@ -916,21 +1217,30 @@ export function BankSection() {
   }, [snapshot]);
 
 
-  function focusBankPanel(panel: BankAction) {
-    if (panel === "reputation" || panel === "transactions") {
-      const target = document.querySelector<HTMLElement>(`[data-bank-panel="${panel}"]`);
-      target?.scrollIntoView({ behavior: "smooth", block: "center" });
-      target?.focus({ preventScroll: true });
+  function handleBankAction(panel: BankAction, trigger: HTMLButtonElement) {
+    if (panel === "reputation") {
+      setSheetOpen(false);
+      setSelectedAction(null);
+      setActiveTab("reputation");
       return;
     }
-    const target = document.querySelector<HTMLElement>(`[data-bank-panel="${panel}"]`);
-    target?.scrollIntoView({ behavior: "smooth", block: "center" });
-    const focusable = target?.querySelector<HTMLElement>("input, select, button");
-    focusable?.focus({ preventScroll: true });
-  }
-
-  function handleBankAction(panel: BankAction) {
-    focusBankPanel(panel);
+    if (panel === "transactions") {
+      setSheetOpen(false);
+      setSelectedAction(null);
+      setActiveTab("transactions");
+      return;
+    }
+    sheetTriggerRef.current = trigger;
+    setSelectedAction(panel);
+    setSheetDragY(0);
+    setSheetOpen(true);
+    if (panel === "payment") setActiveTab("loans");
+    window.setTimeout(() => {
+      if (!window.matchMedia("(max-width: 899px)").matches) return;
+      const stage = document.querySelector<HTMLElement>(".banker-v3-stage");
+      if (!stage) return;
+      window.scrollTo({ top: Math.max(0, stage.getBoundingClientRect().top + window.scrollY - 40), behavior: "auto" });
+    }, 50);
   }
 
   function handleVisitorAction() {
@@ -968,39 +1278,23 @@ export function BankSection() {
 
   if (isHydrating) return <BankLoadingSkeleton />;
 
-  if (!player || !canOperate) {
+  if ((!player && !bankMockEnabled) || !canOperate) {
     return (
-      <section className="space-y-5">
+      <section className="space-y-3">
         <BankHero description="Conoce la bóveda y sus reglas. Vincula un perfil para operar sin exponer saldos en modo visitante." />
         <div className="bank-atmosphere-card bank-main-card kd-glass rounded-[2rem] border border-amber-500/20 bg-stone-900/75 p-4 sm:p-6">
-          <div className="bank-horizontal-layout">
-            <BankerSprite pose={debugPose ?? bankerPose} effect={activeBankerEffect} loopEffect={debugEffect !== "none"} onTap={handleVisitorAction} />
-            <div className="bank-context-column">
-              <div className="flex flex-wrap items-center justify-center gap-3 banker-dialogue rounded-xl bg-stone-950/80 px-4 py-3 text-center text-sm text-amber-100" aria-live="polite">
-                <span>{bankerDisplayMessage}</span>
-                {visitorNeedsConnect ? (
-                  <button type="button" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-amber-300/40 bg-amber-300/15 px-4 py-2.5 text-xs font-extrabold uppercase tracking-[0.12em] text-amber-100 hover:bg-amber-300/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300" onClick={handleConnectClick}>
-                    <LockKeyhole aria-hidden="true" className="h-4 w-4" /> Conectar
-                  </button>
-                ) : null}
-              </div>
-              <div className="mt-5"><BankActionGrid locked onAction={handleVisitorAction} /></div>
-              <div className="mt-5 rounded-2xl border border-stone-800 bg-stone-950/45 p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-300/80">Modo lectura</p>
-                <p className="mt-2 text-sm leading-6 text-stone-400">Las operaciones requieren un perfil vinculado a una sesión segura. Aquí no se muestran saldos ni datos de cuenta.</p>
-              </div>
+          <div className="bank-desktop-grid">
+            <div className="bank-left-column">
+              <div className="banker-scene-shell"><BankerSprite pose={debugPose ?? bankerPose} effect={activeBankerEffect} loopEffect={debugEffect !== "none"} onTap={handleVisitorAction} /><span className="banker-stage-ribbon"><LockKeyhole aria-hidden="true" /> Vincula tu perfil</span></div>
+              <div className="banker-dialogue rounded-xl bg-stone-950/80 px-3 py-2 text-center text-sm text-amber-100" aria-live="polite"><span>{bankerDisplayMessage}</span>{visitorNeedsConnect ? <button type="button" className="ml-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-amber-300/40 bg-amber-300/15 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.12em] text-amber-100 hover:bg-amber-300/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300" onClick={handleConnectClick}><LockKeyhole aria-hidden="true" className="h-4 w-4" /> Conectar</button> : null}</div>
             </div>
+            <div className="bank-workspace"><BankActionGrid locked onAction={handleVisitorAction} /><div className="rounded-2xl border border-stone-800 bg-stone-950/45 p-4"><p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-300/80">Modo lectura</p><p className="mt-2 text-sm leading-6 text-stone-400">Las operaciones requieren un perfil vinculado. Aquí no se muestran saldos ni datos de cuenta.</p></div></div>
           </div>
+          <details className="bank-atmosphere-card bank-rules mt-5 rounded-[2rem] border border-stone-800 bg-stone-900/70 p-5">
+            <summary className="cursor-pointer list-none font-black text-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300">Reglas del Banco <span className="bank-rules-chevron" aria-hidden="true">⌄</span></summary>
+            <div className="bank-rules-content"><div><ul className="mt-4 grid gap-3 text-sm leading-6 text-stone-400 sm:grid-cols-2"><li>El depósito mínimo es de 300 de oro y su principal protegido llega hasta 25.000.</li><li>El depósito acumula interés; el saldo disponible y el depósito protegido se muestran por separado.</li><li>Los préstamos semanales parten de un importe positivo, con plazos de 4, 8 o 12 semanas y APR calculado por tier.</li><li>La reputación mejora con pagos puntuales y condiciona tu APR futuro.</li></ul></div></div>
+          </details>
         </div>
-        <details className="bank-atmosphere-card bank-rules rounded-[2rem] border border-stone-800 bg-stone-900/70 p-5">
-          <summary className="cursor-pointer list-none font-black text-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300">Reglas del Banco <span className="bank-rules-chevron" aria-hidden="true">⌄</span></summary>
-          <div className="bank-rules-content"><div><ul className="mt-4 space-y-3 text-sm leading-6 text-stone-400">
-            <li>El depósito mínimo es de 300 de oro y su principal protegido llega hasta 25.000.</li>
-            <li>El depósito acumula interés; el saldo disponible y el depósito protegido se muestran por separado.</li>
-            <li>Los préstamos parten de 250 de oro, con plazos de 3, 6 o 12 meses y límite de exposición.</li>
-            <li>La reputación mejora con pagos puntuales y condiciona tu APR futuro.</li>
-          </ul></div></div>
-        </details>
       </section>
     );
   }
@@ -1010,66 +1304,102 @@ export function BankSection() {
   }
 
   if (error && !snapshot) {
-    return <section className="space-y-5"><SectionHeader eyebrow="Banco de Kingdoom" title="El libro mayor no responde" /><div role="alert" className="rounded-[1.5rem] border border-rose-400/30 bg-rose-400/10 p-5 text-sm leading-6 text-rose-100"><div className="flex items-start gap-3"><CircleAlert aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" /><div><p>{error}</p><ActionButton variant="quiet" onClick={() => void refreshSnapshot()}><RefreshCw aria-hidden="true" className="h-4 w-4" /> Reintentar</ActionButton></div></div></div></section>;
+    return <section className="space-y-3"><SectionHeader eyebrow="Banco de Kingdoom" title="El libro mayor no responde" /><div role="alert" className="rounded-[1.5rem] border border-rose-400/30 bg-rose-400/10 p-5 text-sm leading-6 text-rose-100"><div className="flex items-start gap-3"><CircleAlert aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" /><div><p>{error}</p><ActionButton variant="quiet" onClick={() => void refreshSnapshot()}><RefreshCw aria-hidden="true" className="h-4 w-4" /> Reintentar</ActionButton></div></div></div></section>;
   }
 
   if (!snapshot) return null;
 
   const activeLoans = snapshot.loans.filter((loan) => loan.status === "active" || loan.status === "in_mora");
+  const historyLoans = snapshot.loans.filter((loan) => loan.status === "paid" || loan.status === "cancelled");
   const creditTierLabel = ["Iniciado", "Custodio", "Patrono"][snapshot.account.creditTier] ?? "Iniciado";
+  const operationDisabled = Boolean(pendingAction) || bankMockEnabled;
+
+  const renderOperationPanel = () => {
+    if (!selectedAction) return null;
+    if (selectedAction === "deposit") {
+      return <form onSubmit={handleDeposit}>
+        <div className="flex items-center gap-2"><ArrowDownLeft aria-hidden="true" className="h-5 w-5 text-emerald-300" /><h2 className="font-black text-stone-100">Proteger oro</h2></div>
+        <div className="bank-operation-fields"><label className="block text-xs font-bold uppercase tracking-[0.14em] text-stone-400" htmlFor="bank-deposit-amount">Cantidad<input id="bank-deposit-amount" type="number" min="300" step="1" inputMode="numeric" value={depositAmount} onChange={(event) => setDepositAmount(event.target.value)} disabled={bankMockEnabled} className="mt-2 min-h-11 w-full rounded-xl border border-stone-700 bg-stone-950 px-3 text-stone-100 outline-none focus:border-emerald-300/60" /></label><div className="self-end text-xs leading-5 text-stone-500">Mínimo 300 · máximo de principal 25.000.</div></div>
+        <ActionButton type="submit" disabled={operationDisabled}>{pendingAction === "deposit" ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" /> : <ArrowDownLeft aria-hidden="true" className="h-4 w-4" />} Depositar</ActionButton>
+      </form>;
+    }
+    if (selectedAction === "withdraw") {
+      return <form onSubmit={handleWithdraw}>
+        <div className="flex items-center gap-2"><ArrowUpRight aria-hidden="true" className="h-5 w-5 text-amber-300" /><h2 className="font-black text-stone-100">Retirar del depósito</h2></div>
+        <div className="bank-operation-fields"><label className="block text-xs font-bold uppercase tracking-[0.14em] text-stone-400" htmlFor="bank-withdraw-amount">Cantidad<input id="bank-withdraw-amount" type="number" min="1" step="1" inputMode="numeric" value={withdrawAmount} onChange={(event) => setWithdrawAmount(event.target.value)} disabled={bankMockEnabled} className="mt-2 min-h-11 w-full rounded-xl border border-stone-700 bg-stone-950 px-3 text-stone-100 outline-none focus:border-amber-300/60" /></label><div className="self-end text-xs leading-5 text-stone-500">Se confirmará antes de devolver oro a tu saldo.</div></div>
+        <ActionButton type="submit" variant="quiet" disabled={operationDisabled}>{pendingAction === "withdraw" ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" /> : <ArrowUpRight aria-hidden="true" className="h-4 w-4" />} Retirar</ActionButton>
+      </form>;
+    }
+    if (selectedAction === "loan") {
+      return <form onSubmit={handleCreateLoan}>
+        <div className="flex items-center gap-2"><CreditCard aria-hidden="true" className="h-5 w-5 text-cyan-300" /><h2 className="font-black text-stone-100">Solicitar préstamo</h2></div>
+        <div className="bank-operation-fields"><label className="block text-xs font-bold uppercase tracking-[0.14em] text-stone-400" htmlFor="bank-loan-amount">Cantidad<input id="bank-loan-amount" type="number" min="1" step="1" inputMode="numeric" value={loanAmount} onChange={(event) => setLoanAmount(event.target.value)} disabled={bankMockEnabled} className="mt-2 min-h-11 w-full rounded-xl border border-stone-700 bg-stone-950 px-3 text-stone-100 outline-none focus:border-cyan-300/60" /></label><label className="block text-xs font-bold uppercase tracking-[0.14em] text-stone-400" htmlFor="bank-loan-term">Plazo semanal<select id="bank-loan-term" value={loanTerm} onChange={(event) => setLoanTerm(event.target.value)} disabled={bankMockEnabled} className="mt-2 min-h-11 w-full rounded-xl border border-stone-700 bg-stone-950 px-3 text-stone-100 outline-none focus:border-cyan-300/60"><option value="4">4 semanas</option><option value="8">8 semanas</option><option value="12">12 semanas</option></select></label></div>
+        <p className="text-xs text-stone-500">APR calculado según tu reputación y exposición disponible.</p><ActionButton type="submit" variant="quiet" disabled={operationDisabled}>{pendingAction === "create-loan" ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" /> : <CreditCard aria-hidden="true" className="h-4 w-4" />} Solicitar</ActionButton>
+      </form>;
+    }
+    if (selectedAction === "payment") {
+      return <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-black text-stone-100">Pagar cuota</p><p className="mt-1 text-sm text-stone-500">{nextInstallment ? `Próxima cuota: ${formatGold(nextInstallment.amountDueGold)} · ${formatDate(nextInstallment.dueAt)}` : "No tienes cuotas pendientes."}</p></div><ActionButton variant="quiet" onClick={() => setActiveTab("loans")}>{nextInstallment ? "Pagar cuota" : "Ver préstamos"}</ActionButton></div>;
+    }
+    if (selectedAction === "reputation") {
+      return <div className="flex items-center gap-3"><Sparkles aria-hidden="true" className="h-5 w-5 text-amber-300" /><div><p className="font-black text-stone-100">Tu reputación es {creditTierLabel}</p><p className="mt-1 text-sm text-stone-500">La racha puntual ajusta tu APR futuro.</p></div></div>;
+    }
+    return <div className="flex items-center gap-3"><ReceiptText aria-hidden="true" className="h-5 w-5 text-amber-300" /><div><p className="font-black text-stone-100">Movimientos recientes</p><p className="mt-1 text-sm text-stone-500">Consulta el libro mayor en la pestaña Movimientos.</p></div></div>;
+  };
+
+  const renderTabPanel = () => {
+    if (activeTab === "overview") {
+      const exposurePercent = snapshot.account.creditLimitGold > 0 ? Math.min(100, (snapshot.credit.exposureGold / snapshot.account.creditLimitGold) * 100) : 0;
+      return <div className="bank-summary-grid"><div className="bank-summary-card"><p className="text-xs font-bold uppercase tracking-[0.14em] text-cyan-300/80">Exposición</p><p className="mt-2 text-2xl font-black text-stone-100">{formatGold(snapshot.credit.exposureGold)}</p><div className="bank-summary-progress mt-4" role="progressbar" aria-label="Exposición frente al límite" aria-valuemin={0} aria-valuemax={snapshot.account.creditLimitGold} aria-valuenow={snapshot.credit.exposureGold}><span style={{ width: `${exposurePercent}%` }} /></div><p className="mt-2 text-xs text-stone-500">Usado sobre tu capacidad actual.</p></div><div className="bank-summary-card"><p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-300/80">Disponible ahora</p><p className="mt-2 text-2xl font-black text-stone-100">{formatGold(snapshot.credit.availableLimitGold)}</p><p className="mt-3 text-sm leading-6 text-stone-500">Puedes solicitar crédito sin superar la exposición permitida.</p></div></div>;
+    }
+    if (activeTab === "loans") {
+      return <div><section className="bank-loan-group"><div className="flex items-center justify-between gap-3"><h3 className="bank-loan-group-title">Activos</h3><span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-200">{activeLoans.length} activos</span></div><div className="mt-4 space-y-4">{activeLoans.length ? activeLoans.map((loan) => <LoanCard key={loan.id} loan={loan} installments={snapshot.installments.filter((item) => item.loanId === loan.id)} pendingAction={pendingAction} onPay={handlePayLoan} onPayEarly={handlePayLoanEarly} />) : <div className="rounded-2xl border border-dashed border-stone-700 bg-stone-950/35 p-6 text-center text-sm text-stone-500">No tienes préstamos activos.</div>}</div></section><section className="bank-loan-group bank-loan-history"><h3 className="bank-loan-group-title">Historial</h3><div className="mt-4 space-y-4">{historyLoans.length ? historyLoans.map((loan) => <LoanCard key={loan.id} loan={loan} installments={snapshot.installments.filter((item) => item.loanId === loan.id)} pendingAction={pendingAction} onPay={handlePayLoan} onPayEarly={handlePayLoanEarly} />) : <div className="rounded-2xl border border-dashed border-stone-700 bg-stone-950/35 p-6 text-center text-sm text-stone-500">Todavía no hay préstamos liquidados.</div>}</div></section></div>;
+    }
+    if (activeTab === "reputation") {
+      return <div className="rounded-2xl border border-stone-800 bg-stone-950/35 p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300/80">Reputación</p><h3 className="mt-2 text-2xl font-black text-stone-100">{creditTierLabel}</h3></div><Sparkles aria-hidden="true" className="h-6 w-6 text-amber-300" /></div><div className="mt-5 grid gap-3 sm:grid-cols-3"><div><p className="text-xs text-stone-500">Racha puntual</p><p className="mt-1 text-lg font-black text-stone-100">{snapshot.account.onTimeStreak}</p></div><div><p className="text-xs text-stone-500">Límite total</p><p className="mt-1 text-lg font-black text-stone-100">{formatGold(snapshot.account.creditLimitGold)}</p></div><div><p className="text-xs text-stone-500">APR actual</p><p className="mt-1 text-lg font-black text-stone-100">{(snapshot.credit.aprBps / 100).toFixed(2)}%</p></div></div></div>;
+    }
+    return snapshot.transactions.length ? <div className="divide-y divide-stone-800">{snapshot.transactions.slice(0, 12).map((transaction) => <div key={transaction.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0"><div className="flex min-w-0 items-center gap-3"><span className={`rounded-xl p-2 ${transaction.amountGold >= 0 ? "bg-emerald-500/10 text-emerald-300" : "bg-rose-500/10 text-rose-300"}`}>{transaction.amountGold >= 0 ? <ArrowDownLeft aria-hidden="true" className="h-4 w-4" /> : <ArrowUpRight aria-hidden="true" className="h-4 w-4" />}</span><div className="min-w-0"><p className="truncate text-sm font-bold text-stone-200">{operationLabel(transaction.operationType)}</p><p className="text-xs text-stone-500">{formatDate(transaction.createdAt)}</p></div></div><p className={`text-sm font-black ${transaction.amountGold >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{transaction.amountGold > 0 ? "+" : ""}{formatGold(transaction.amountGold)}</p></div>)}</div> : <div className="rounded-2xl border border-dashed border-stone-700 bg-stone-950/35 p-6 text-center text-sm text-stone-500">Aún no hay movimientos.</div>;
+  };
 
   return (
-    <section className="space-y-5">
-      <BankHero description="Tu bóveda, crédito y movimientos en un solo libro mayor. Cada RPC del Banco vuelve a validar la operación en el servidor." />
-      <div className="flex justify-end"><ActionButton variant="quiet" disabled={Boolean(pendingAction) || isLoading} onClick={() => void refreshSnapshot()}><RefreshCw aria-hidden="true" className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} /> Actualizar</ActionButton></div>
+    <section className="space-y-3">
+          <BankHero description="Tu bóveda, tu crédito y tus movimientos, guardados en un solo libro mayor." />
 
-      <div className="bank-atmosphere-card bank-main-card kd-glass rounded-[2rem] border border-amber-500/20 bg-stone-900/75 p-4 sm:p-6">
-        <div className="bank-horizontal-layout">
-          <BankerSprite pose={debugPose ?? bankerPose} effect={activeBankerEffect} loopEffect={debugEffect !== "none"} onTap={() => enqueueBankerPose("tap")} />
-          <div className="bank-context-column">
-            <div className="banker-dialogue rounded-xl bg-stone-950/80 px-4 py-3 text-center text-sm text-amber-100" aria-live="polite">{bankerDisplayMessage}</div>
-            <div className="mt-5"><BankActionGrid onAction={handleBankAction} locked={false} /></div>
+
+          <div className="bank-atmosphere-card bank-main-card kd-glass rounded-[2rem] border border-amber-500/20 bg-stone-900/75 p-4 sm:p-6">
+            <div className="bank-desktop-grid">
+              <div className="bank-left-column">
+                <div className="banker-scene-shell"><BankerSprite pose={debugPose ?? bankerPose} effect={activeBankerEffect} loopEffect={debugEffect !== "none"} onTap={() => enqueueBankerPose("tap")} /><span className="banker-stage-ribbon"><Sparkles aria-hidden="true" /> {creditTierLabel}</span></div>
+                <div className="banker-dialogue rounded-xl bg-stone-950/80 px-3 py-2 text-center text-sm text-amber-100" aria-live="polite">{bankerDisplayMessage}</div>
+                <div className="bank-hud" aria-label="Resumen de cuenta"><div className="bank-hud-grid"><div className="bank-hud-chip"><WalletCards aria-hidden="true" className="h-4 w-4 text-amber-300" /><p className="bank-hud-chip-label">Saldo</p><p className="bank-hud-chip-value">{formatGold(snapshot.player.gold)}</p></div><div className="bank-hud-chip"><LockKeyhole aria-hidden="true" className="h-4 w-4 text-emerald-300" /><p className="bank-hud-chip-label">Protegido</p><p className="bank-hud-chip-value">{formatGold(snapshot.account.depositBalanceGold)}</p></div><div className="bank-hud-chip"><CreditCard aria-hidden="true" className="h-4 w-4 text-cyan-300" /><p className="bank-hud-chip-label">Crédito</p><p className="bank-hud-chip-value">{formatGold(snapshot.credit.availableLimitGold)}</p><p className="bank-hud-chip-apr text-[.65rem] text-stone-500">APR {(snapshot.credit.aprBps / 100).toFixed(2)}%</p></div></div></div>
+              </div>
+              <div className="bank-workspace">
+                {bankMockEnabled ? <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-xs font-bold text-cyan-100" role="status">Vista de demostración · operaciones deshabilitadas</div> : null}
+                <BankActionGrid onAction={handleBankAction} locked={false} selectedAction={selectedAction} />
+                {selectedAction ? <div className="bank-operation-panel" aria-label="Operación del Banco"><div className="bank-operation-header"><button type="button" className="bank-operation-close" aria-label="Cerrar operación" onClick={closeOperationSheet}><X aria-hidden="true" className="h-4 w-4" /></button></div>{renderOperationPanel()}</div> : null}
+                <div className="bank-tabs">
+                  <div className="bank-tabs-header"><div className="bank-tab-list" role="tablist" aria-label="Secciones del Banco">
+                    {([ ["overview", "Resumen"], ["loans", "Préstamos"], ["transactions", "Movimientos"], ["reputation", "Reputación"] ] as Array<[BankTabId, string]>).map(([tab, label]) => <button key={tab} type="button" role="tab" className="bank-tab" aria-selected={activeTab === tab} aria-controls={`bank-tabpanel-${tab}`} id={`bank-tab-${tab}`} onClick={() => setActiveTab(tab)}>{label}</button>)}
+                  </div><ActionButton variant="quiet" disabled={Boolean(pendingAction) || isLoading || bankMockEnabled} onClick={() => void refreshSnapshot()}><RefreshCw aria-hidden="true" className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} /> Actualizar</ActionButton></div>
+                  <div className="bank-tab-panel rounded-[1.5rem] border border-stone-800 bg-stone-900/60 p-4 sm:p-5" role="tabpanel" tabIndex={0} id={`bank-tabpanel-${activeTab}`} aria-labelledby={`bank-tab-${activeTab}`}>{renderTabPanel()}</div>
+                </div>
+              </div>
+            </div>
+            {error ? <div role="alert" className="mt-5 flex items-start gap-3 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100"><CircleAlert aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />{error}</div> : null}
+            {feedback ? <div role="status" aria-live="polite" className="mt-5 flex items-start gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100"><Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />{feedback}</div> : null}
+            <details className="bank-atmosphere-card bank-rules mt-5 rounded-[2rem] border border-stone-800 bg-stone-900/70 p-5">
+              <summary className="cursor-pointer list-none font-black text-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300">Reglas del Banco <span className="bank-rules-chevron" aria-hidden="true">⌄</span></summary>
+              <div className="bank-rules-content"><div><ul className="mt-4 grid gap-3 text-sm leading-6 text-stone-400 sm:grid-cols-2"><li>El depósito mínimo es de 300 de oro y su principal protegido llega hasta 25.000.</li><li>El depósito acumula interés y se mantiene separado del saldo disponible.</li><li>Los préstamos semanales parten de un importe positivo, con plazos de 4, 8 o 12 semanas y APR calculado por tier.</li><li>La reputación mejora con pagos puntuales y condiciona tu APR futuro.</li></ul></div></div>
+            </details>
+
           </div>
-        </div>
-      </div>
-
-      <details className="bank-atmosphere-card bank-rules rounded-[2rem] border border-stone-800 bg-stone-900/70 p-5">
-        <summary className="cursor-pointer list-none font-black text-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300">Reglas del Banco <span className="bank-rules-chevron" aria-hidden="true">⌄</span></summary>
-        <div className="bank-rules-content"><div><ul className="mt-4 grid gap-3 text-sm leading-6 text-stone-400 sm:grid-cols-2">
-          <li>El depósito mínimo es de 300 de oro y su principal protegido llega hasta 25.000.</li>
-          <li>El depósito acumula interés y se mantiene separado del saldo disponible.</li>
-          <li>Los préstamos parten de 250 de oro, con plazos de 3, 6 o 12 meses.</li>
-          <li>La reputación mejora con pagos puntuales y condiciona tu APR futuro.</li>
-        </ul></div></div>
-      </details>
-
-      {error ? <div role="alert" className="flex items-start gap-3 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100"><CircleAlert aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />{error}</div> : null}
-      {feedback ? <div role="status" aria-live="polite" className="flex items-start gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100"><Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />{feedback}</div> : null}
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <BankMetric label="Saldo disponible" value={formatGold(snapshot.player.gold)} detail="Oro libre para tus aventuras" icon={WalletCards} tone="amber" />
-        <BankMetric label="Depósito protegido" value={formatGold(snapshot.account.depositBalanceGold)} detail={`Principal ${formatGold(snapshot.account.depositPrincipalGold)}`} icon={LockKeyhole} tone="emerald" />
-        <BankMetric label="Exposición" value={formatGold(snapshot.credit.exposureGold)} detail={`Límite ${formatGold(snapshot.account.creditLimitGold)}`} icon={CreditCard} tone="cyan" />
-        <BankMetric label="Disponible de crédito" value={formatGold(snapshot.credit.availableLimitGold)} detail={`APR actual ${(snapshot.credit.aprBps / 100).toFixed(2)}%`} icon={TrendingUp} tone="rose" />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
-        <div data-bank-panel="reputation" tabIndex={-1} className="kd-glass rounded-[2rem] border border-stone-800 bg-stone-900/75 p-5 sm:p-6">
-          <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300/80">Reputación</p><h2 className="mt-2 text-xl font-black text-stone-100">{creditTierLabel}</h2></div><Sparkles aria-hidden="true" className="h-6 w-6 text-amber-300" /></div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3"><div className="rounded-xl border border-stone-800 bg-stone-950/45 p-3"><p className="text-xs text-stone-500">Racha puntual</p><p className="mt-1 text-lg font-black text-stone-100">{snapshot.account.onTimeStreak}</p></div><div className="rounded-xl border border-stone-800 bg-stone-950/45 p-3"><p className="text-xs text-stone-500">Límite total</p><p className="mt-1 text-lg font-black text-stone-100">{formatGold(snapshot.account.creditLimitGold)}</p></div><div className="rounded-xl border border-stone-800 bg-stone-950/45 p-3"><p className="text-xs text-stone-500">Próxima cuota</p><p className="mt-1 text-lg font-black text-stone-100">{nextInstallment ? formatGold(nextInstallment.amountDueGold) : "Sin cuotas"}</p></div></div>
-        </div>
-        <div className="rounded-[2rem] border border-amber-500/20 bg-amber-500/10 p-5 sm:p-6"><div className="flex items-start gap-3"><Banknote aria-hidden="true" className="mt-0.5 h-5 w-5 text-amber-200" /><div><h2 className="font-black text-amber-100">Una bóveda con reglas claras</h2><p className="mt-2 text-sm leading-6 text-amber-100/70">El depósito protegido no se mezcla con tu saldo disponible. Cada movimiento deja una huella idempotente en el libro mayor.</p></div></div></div>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-3">
-        <form data-bank-panel="deposit" onSubmit={handleDeposit} className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-5"><div className="flex items-center gap-2"><ArrowDownLeft aria-hidden="true" className="h-5 w-5 text-emerald-300" /><h2 className="font-black text-stone-100">Proteger oro</h2></div><label className="mt-4 block text-xs font-bold uppercase tracking-[0.14em] text-stone-400" htmlFor="bank-deposit-amount">Cantidad</label><input id="bank-deposit-amount" type="number" min="300" step="1" inputMode="numeric" value={depositAmount} onChange={(event) => setDepositAmount(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-stone-700 bg-stone-950 px-3 text-stone-100 outline-none focus:border-emerald-300/60" /><p className="mt-2 text-xs text-stone-500">Mínimo 300 · máximo de principal 25.000.</p><ActionButton type="submit" disabled={Boolean(pendingAction)}>{pendingAction === "deposit" ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" /> : <ArrowDownLeft aria-hidden="true" className="h-4 w-4" />} Depositar</ActionButton></form>
-        <form data-bank-panel="withdraw" onSubmit={handleWithdraw} className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-5"><div className="flex items-center gap-2"><ArrowUpRight aria-hidden="true" className="h-5 w-5 text-amber-300" /><h2 className="font-black text-stone-100">Retirar del depósito</h2></div><label className="mt-4 block text-xs font-bold uppercase tracking-[0.14em] text-stone-400" htmlFor="bank-withdraw-amount">Cantidad</label><input id="bank-withdraw-amount" type="number" min="1" step="1" inputMode="numeric" value={withdrawAmount} onChange={(event) => setWithdrawAmount(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-stone-700 bg-stone-950 px-3 text-stone-100 outline-none focus:border-amber-300/60" /><p className="mt-2 text-xs text-stone-500">Se confirmará antes de devolver oro a tu saldo.</p><ActionButton type="submit" variant="quiet" disabled={Boolean(pendingAction)}>{pendingAction === "withdraw" ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" /> : <ArrowUpRight aria-hidden="true" className="h-4 w-4" />} Retirar</ActionButton></form>
-        <form data-bank-panel="loan" onSubmit={handleCreateLoan} className="rounded-[1.5rem] border border-stone-800 bg-stone-950/45 p-5"><div className="flex items-center gap-2"><CreditCard aria-hidden="true" className="h-5 w-5 text-cyan-300" /><h2 className="font-black text-stone-100">Solicitar préstamo</h2></div><label className="mt-4 block text-xs font-bold uppercase tracking-[0.14em] text-stone-400" htmlFor="bank-loan-amount">Cantidad</label><input id="bank-loan-amount" type="number" min="250" step="1" inputMode="numeric" value={loanAmount} onChange={(event) => setLoanAmount(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-stone-700 bg-stone-950 px-3 text-stone-100 outline-none focus:border-cyan-300/60" /><label className="mt-3 block text-xs font-bold uppercase tracking-[0.14em] text-stone-400" htmlFor="bank-loan-term">Plazo</label><select id="bank-loan-term" value={loanTerm} onChange={(event) => setLoanTerm(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border border-stone-700 bg-stone-950 px-3 text-stone-100 outline-none focus:border-cyan-300/60"><option value="3">3 meses</option><option value="6">6 meses</option><option value="12">12 meses</option></select><p className="mt-2 text-xs text-stone-500">APR calculado según tu reputación y exposición disponible.</p><ActionButton type="submit" variant="quiet" disabled={Boolean(pendingAction)}>{pendingAction === "create-loan" ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" /> : <CreditCard aria-hidden="true" className="h-4 w-4" />} Solicitar</ActionButton></form>
-      </div>
-
-      <div data-bank-panel="payment" tabIndex={-1} className="rounded-[2rem] border border-stone-800 bg-stone-900/70 p-5 sm:p-6"><div className="flex items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-300/80">Crédito vivo</p><h2 className="mt-2 text-2xl font-black text-stone-100">Tus préstamos</h2></div><span className="rounded-full border border-stone-700 bg-stone-950/55 px-3 py-1 text-xs font-bold text-stone-400">{activeLoans.length} activos</span></div><div className="mt-5 space-y-4">{snapshot.loans.length ? snapshot.loans.map((loan) => <LoanCard key={loan.id} loan={loan} installments={snapshot.installments.filter((item) => item.loanId === loan.id)} pendingAction={pendingAction} onPay={handlePayLoan} onPayEarly={handlePayLoanEarly} />) : <div className="rounded-2xl border border-dashed border-stone-700 bg-stone-950/35 p-6 text-center text-sm text-stone-500">Todavía no tienes préstamos. Tu límite disponible es {formatGold(snapshot.credit.availableLimitGold)}.</div>}</div></div>
-
-      <div data-bank-panel="transactions" tabIndex={-1} className="rounded-[2rem] border border-stone-800 bg-stone-900/70 p-5 sm:p-6"><div className="flex items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300/80">Libro mayor</p><h2 className="mt-2 text-2xl font-black text-stone-100">Movimientos recientes</h2></div><ReceiptText aria-hidden="true" className="h-6 w-6 text-amber-300" /></div>{snapshot.transactions.length ? <div className="mt-5 divide-y divide-stone-800">{snapshot.transactions.slice(0, 12).map((transaction) => <div key={transaction.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0"><div className="flex min-w-0 items-center gap-3"><span className={`rounded-xl p-2 ${transaction.amountGold >= 0 ? "bg-emerald-500/10 text-emerald-300" : "bg-rose-500/10 text-rose-300"}`}>{transaction.amountGold >= 0 ? <ArrowDownLeft aria-hidden="true" className="h-4 w-4" /> : <ArrowUpRight aria-hidden="true" className="h-4 w-4" />}</span><div className="min-w-0"><p className="truncate text-sm font-bold text-stone-200">{operationLabel(transaction.operationType)}</p><p className="text-xs text-stone-500">{formatDate(transaction.createdAt)}</p></div></div><p className={`text-sm font-black ${transaction.amountGold >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{transaction.amountGold > 0 ? "+" : ""}{formatGold(transaction.amountGold)}</p></div>)}</div> : <div className="mt-5 rounded-2xl border border-dashed border-stone-700 bg-stone-950/35 p-6 text-center text-sm text-stone-500">Aún no hay movimientos. El primer depósito aparecerá aquí.</div>}</div>
-    </section>
-  );
-}
+          {sheetOpen ? <div className="bank-mobile-sheet-root" onClick={(event) => { if (event.target === event.currentTarget) closeOperationSheet(); }}>
+            <button type="button" className="bank-mobile-sheet-backdrop" aria-label="Cerrar operación" onClick={closeOperationSheet} />
+            <section ref={sheetRef} className="bank-mobile-sheet" role="dialog" aria-modal="true" aria-label="Operación del Banco" style={{ "--bank-sheet-drag": `${sheetDragY}px` } as CSSProperties}>
+              <div className="bank-mobile-sheet-handle" aria-hidden="true" onPointerDown={handleSheetPointerDown} onPointerMove={handleSheetPointerMove} onPointerUp={handleSheetPointerUp} onPointerCancel={handleSheetPointerUp} />
+              <div className="bank-mobile-sheet-header"><button type="button" className="bank-operation-close" aria-label="Cerrar operación" onClick={closeOperationSheet}><X aria-hidden="true" className="h-5 w-5" /></button></div>
+              <div className="bank-mobile-sheet-body"><div className="bank-operation-panel">{renderOperationPanel()}</div></div>
+            </section>
+          </div> : null}
+        </section>
+      );
+    }

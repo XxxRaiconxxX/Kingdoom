@@ -12,6 +12,11 @@ import {
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import { NARRATIVE_ENCOUNTERS } from "../data/pve";
 import type { NarrativeEncounter } from "../data/pve";
+import {
+  createTavernIdempotencyKey,
+  startConfiguredTavernRun,
+  stepConfiguredTavernRun,
+} from "../utils/minigamesSecure";
 
 type ExpeditionPhase = "select" | "battle" | "resolved";
 type BattleAction = "attack" | "guard" | "ability" | "retreat";
@@ -38,10 +43,6 @@ type BattleState = {
 
 const INITIAL_PLAYER_HP = 100;
 
-function randomBetween(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 function threatLabel(level: NarrativeEncounter["enemyThreat"]) {
   switch (level) {
     case "high":
@@ -67,16 +68,15 @@ function toneClasses(tone: BattleLogEntry["tone"]) {
 }
 
 export function TavernExpedition() {
-  const { player, isHydrating, addPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [selectedEncounterId, setSelectedEncounterId] = useState<string>(
     NARRATIVE_ENCOUNTERS[0]?.id ?? ""
   );
   const [phase, setPhase] = useState<ExpeditionPhase>("select");
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [pendingPayout, setPendingPayout] = useState(0);
   const [settlementMessage, setSettlementMessage] = useState("");
-  const hasPendingPayout = pendingPayout > 0;
+  const [serverRunId, setServerRunId] = useState<string | null>(null);
 
   const selectedEncounter = useMemo(
     () =>
@@ -86,7 +86,7 @@ export function TavernExpedition() {
   );
 
   async function startEncounter() {
-    if (!player || !selectedEncounter || isUpdating || hasPendingPayout) {
+    if (!player || !selectedEncounter || isUpdating) {
       return;
     }
 
@@ -95,12 +95,20 @@ export function TavernExpedition() {
     }
 
     setIsUpdating(true);
-    const updated = await addPlayerGold(-selectedEncounter.entryFee);
-    setIsUpdating(false);
-
-    if (!updated) {
+    let runId: string;
+    try {
+      runId = await startConfiguredTavernRun(
+        "expedition",
+        ["forest", "ruins", "abyss"][NARRATIVE_ENCOUNTERS.indexOf(selectedEncounter)] ?? "forest",
+        createTavernIdempotencyKey("expedition", "start"),
+      );
+    } catch (error) {
+      setIsUpdating(false);
+      setSettlementMessage(error instanceof Error ? error.message : "No se pudo abrir el contrato server-side.");
       return;
     }
+    setIsUpdating(false);
+    setServerRunId(runId);
 
     setBattle({
       encounterId: selectedEncounter.id,
@@ -124,158 +132,60 @@ export function TavernExpedition() {
   }
 
   async function resolveBattle(action: BattleAction) {
-    if (!player || !battle || !selectedEncounter || battle.result || isUpdating) {
-      return;
-    }
-
-    let nextPlayerHp = battle.playerHp;
-    let nextEnemyHp = battle.enemyHp;
-    let nextGuardActive = false;
-    let nextAbilityCooldown = Math.max(0, battle.abilityCooldown - 1);
-    let outcome: BattleOutcome = null;
-    let payout = 0;
-    const logs: BattleLogEntry[] = [];
-
-    if (action === "retreat") {
-      payout = Math.floor(battle.entryFee * 0.35);
-      outcome = "retreat";
-      logs.push({
-        id: crypto.randomUUID(),
-        tone: "neutral",
-        text: `Te retiras antes del golpe final. Recuperas ${payout} de oro en provisiones y rutas vendidas al mercado negro.`,
-      });
-    } else {
-      if (action === "attack") {
-        const dealt = randomBetween(14, 24);
-        nextEnemyHp = Math.max(0, nextEnemyHp - dealt);
-        logs.push({
-          id: crypto.randomUUID(),
-          tone: "good",
-          text: `Tu acero encuentra una abertura y arrancas ${dealt} puntos de resistencia a ${selectedEncounter.enemyName}.`,
-        });
-      }
-
-      if (action === "guard") {
-        nextGuardActive = true;
-        const brace = randomBetween(4, 8);
-        nextPlayerHp = Math.min(INITIAL_PLAYER_HP, nextPlayerHp + brace);
-        logs.push({
-          id: crypto.randomUUID(),
-          tone: "neutral",
-          text: `Adoptas postura defensiva, estabilizas la respiracion y recuperas ${brace} de temple.`,
-        });
-      }
-
-      if (action === "ability") {
-        const dealt = randomBetween(26, 42);
-        nextEnemyHp = Math.max(0, nextEnemyHp - dealt);
-        nextAbilityCooldown = 2;
-        logs.push({
-          id: crypto.randomUUID(),
-          tone: "good",
-          text: `Canalizas tu recurso arcano y descargas una tecnica mayor por ${dealt} de dano narrativo.`,
-        });
-      }
-
-      if (nextEnemyHp <= 0) {
-        payout = randomBetween(selectedEncounter.rewardMin, selectedEncounter.rewardMax);
-        outcome = "victory";
-        logs.push({
-          id: crypto.randomUUID(),
-          tone: "lore",
-          text: `${selectedEncounter.enemyName} cae entre ecos y ruinas. El botin asciende a ${payout} de oro.`,
-        });
-      } else {
-        const baseEnemyDamage = randomBetween(
-          selectedEncounter.enemyAttackMin,
-          selectedEncounter.enemyAttackMax
-        );
-        const enemyDamage = nextGuardActive
-          ? Math.max(4, Math.floor(baseEnemyDamage * 0.45))
-          : baseEnemyDamage;
-
-        nextPlayerHp = Math.max(0, nextPlayerHp - enemyDamage);
-        logs.push({
-          id: crypto.randomUUID(),
-          tone: "bad",
-          text: `${selectedEncounter.enemyName} responde con violencia y te hiere por ${enemyDamage}.`,
-        });
-
-        if (nextPlayerHp <= 0) {
-          outcome = "defeat";
-          logs.push({
-            id: crypto.randomUUID(),
-            tone: "bad",
-            text: "Tu expedicion se rompe. El contrato queda perdido y debes volver al reino con las manos vacias.",
-          });
-        }
-      }
-    }
-
-    const nextBattle: BattleState = {
-      ...battle,
-      playerHp: nextPlayerHp,
-      enemyHp: nextEnemyHp,
-      turn: battle.turn + 1,
-      guardActive: nextGuardActive,
-      abilityCooldown: nextAbilityCooldown,
-      result: outcome,
-      reward: payout,
-      logs: [...logs, ...battle.logs].slice(0, 10),
-    };
-
-    setBattle(nextBattle);
-
-    if (!outcome) {
-      return;
-    }
-
-    if (payout > 0) {
-      setIsUpdating(true);
-      const updated = await addPlayerGold(payout);
-      setIsUpdating(false);
-
-      if (!updated) {
-        setPendingPayout(payout);
-        setSettlementMessage(
-          `Cobro pendiente: ${payout.toLocaleString("es-PY")} oro. Reintenta antes de tomar otro contrato.`
-        );
-      } else {
-        setSettlementMessage("");
-      }
-    }
-
-    setPhase("resolved");
-  }
-
-  function resetExpedition() {
-    if (hasPendingPayout) {
-      return;
-    }
-
-    setBattle(null);
-    setPhase("select");
-  }
-
-  async function handleRetryPendingPayout() {
-    if (!pendingPayout || isUpdating) {
+    if (!player || !battle || !selectedEncounter || !serverRunId || battle.result || isUpdating) {
       return;
     }
 
     setIsUpdating(true);
-    const updated = await addPlayerGold(pendingPayout);
-    setIsUpdating(false);
-
-    if (!updated) {
-      setSettlementMessage(
-        `No se pudo acreditar el cobro pendiente de ${pendingPayout.toLocaleString("es-PY")} oro. Refresca e intenta otra vez.`
+    try {
+      const serverResult = await stepConfiguredTavernRun(
+        "expedition",
+        serverRunId,
+        action === "retreat" ? "retreat" : "advance",
+        createTavernIdempotencyKey("expedition", `step-${battle.turn}`),
       );
-      return;
+      const status = String(serverResult.status);
+      const payout = Number(serverResult.payout ?? 0);
+      const step = Number(serverResult.step ?? battle.turn);
+      const outcome: BattleOutcome =
+        status === "won" ? "victory" : status === "lost" ? "defeat" : status === "cashed_out" ? "retreat" : null;
+      const logTone: BattleLogEntry["tone"] = outcome === "victory" ? "good" : outcome ? "bad" : "neutral";
+      const logText = outcome === "victory"
+        ? `El servidor confirma la victoria. Botin acreditado: ${payout.toLocaleString("es-PY")} oro.`
+        : outcome === "defeat"
+          ? "El servidor confirma que la expedicion se pierde."
+          : outcome === "retreat"
+            ? `Retirada confirmada. Recuperas ${payout.toLocaleString("es-PY")} oro.`
+            : `El servidor confirma el avance ${step}. Puedes tomar otra decision.`;
+      setBattle({
+        ...battle,
+        playerHp: outcome === "defeat" ? 0 : battle.playerHp,
+        enemyHp: outcome === "victory" ? 0 : battle.enemyHp,
+        turn: step + 1,
+        guardActive: action === "guard",
+        abilityCooldown: action === "ability" ? 2 : Math.max(0, battle.abilityCooldown - 1),
+        result: outcome,
+        reward: payout,
+        logs: [{ id: crypto.randomUUID(), tone: logTone, text: logText }, ...battle.logs].slice(0, 10),
+      });
+      if (outcome) {
+        await refreshPlayer();
+        setPhase("resolved");
+        setSettlementMessage("");
+      }
+    } catch (error) {
+      setSettlementMessage(error instanceof Error ? error.message : "No se pudo confirmar la accion server-side.");
+    } finally {
+      setIsUpdating(false);
     }
-
-    setSettlementMessage(`Cobro pendiente acreditado: ${pendingPayout.toLocaleString("es-PY")} oro.`);
-    setPendingPayout(0);
   }
+
+  function resetExpedition() {
+    setBattle(null);
+    setServerRunId(null);
+    setPhase("select");
+  }
+
 
   if (isHydrating) {
     return <ExpeditionPlaceholder title="Expedicion narrativa" description="Preparando los contratos del reino..." />;
@@ -386,12 +296,10 @@ export function TavernExpedition() {
               <button
                 type="button"
                 onClick={() => void startEncounter()}
-                disabled={isUpdating || hasPendingPayout || player.gold < selectedEncounter.entryFee}
+                disabled={isUpdating || player.gold < selectedEncounter.entryFee}
                 className="mt-6 w-full rounded-2xl bg-amber-500 px-4 py-4 text-sm font-black text-stone-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {hasPendingPayout
-                  ? "Cobro pendiente"
-                  : player.gold < selectedEncounter.entryFee
+                {player.gold < selectedEncounter.entryFee
                   ? "Oro insuficiente para este contrato"
                   : "Aceptar contrato"}
               </button>
@@ -517,37 +425,21 @@ export function TavernExpedition() {
                     Cierre del contrato
                   </p>
                   <p className="mt-2 text-sm leading-6 text-stone-300">
-                    {hasPendingPayout
-                      ? `Cobro pendiente: ${pendingPayout.toLocaleString("es-PY")} oro. Reintenta antes de seguir.`
-                      : battle.result === "victory"
+                    {battle.result === "victory"
                       ? `Cobras ${battle.reward} de oro y vuelves al reino con la historia intacta.`
                       : battle.result === "retreat"
                         ? `Recuperas ${battle.reward} de oro y conservas solo fragmentos del contrato.`
                         : "La expedicion se pierde. Esta vez el reino se queda sin botin."}
                   </p>
                   {settlementMessage ? (
-                    <div className={`mt-4 rounded-2xl border p-3 text-sm font-bold ${
-                      hasPendingPayout
-                        ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
-                        : "border-emerald-300/25 bg-emerald-400/10 text-emerald-100"
-                    }`}>
+                    <div className="mt-4 rounded-2xl border border-cyan-300/25 bg-cyan-400/10 p-3 text-sm font-bold text-cyan-100">
                       <p>{settlementMessage}</p>
-                      {hasPendingPayout ? (
-                        <button
-                          type="button"
-                          onClick={() => void handleRetryPendingPayout()}
-                          disabled={isUpdating}
-                          className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Reintentar cobro
-                        </button>
-                      ) : null}
                     </div>
                   ) : null}
                   <button
                     type="button"
                     onClick={resetExpedition}
-                    disabled={hasPendingPayout}
+                    disabled={isUpdating}
                     className="mt-4 w-full rounded-2xl bg-stone-100 px-4 py-3 text-sm font-black text-stone-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Tomar otro contrato

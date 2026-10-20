@@ -1,7 +1,7 @@
 import { supabase } from "./supabaseClient";
 import type { HorseProfile, HorseRaceResult } from "./horseRaceUtils";
 
-export type HorseRaceSessionStatus = "betting" | "closed" | "running" | "finished";
+export type HorseRaceSessionStatus = "betting" | "closed" | "running" | "finished" | "cancelled";
 
 export type PublicHorseRaceSession = {
   id: string;
@@ -10,7 +10,7 @@ export type PublicHorseRaceSession = {
   horses: HorseProfile[];
   result: HorseRaceResult | null;
   winnerId: string | null;
-  targetBets: number;
+  bettingClosesAt: string;
   createdBy: string | null;
   startedAt: string | null;
   finishedAt: string | null;
@@ -27,7 +27,7 @@ export type PublicHorseRaceBet = {
   betAmount: number;
   odds: number;
   payout: number;
-  status: "placed" | "won" | "lost" | "paid";
+  status: "placed" | "won" | "lost" | "paid" | "refunded";
   createdAt: string;
   updatedAt: string;
 };
@@ -43,8 +43,9 @@ type SessionRow = {
   horses: HorseProfile[] | string;
   result: HorseRaceResult | string | null;
   winner_id: string | null;
-  target_bets?: number | null;
-  created_by: string | null;
+  placements?: string[] | string | null;
+  server_odds?: Record<string, number> | string | null;
+  betting_closes_at?: string | null;
   started_at: string | null;
   finished_at: string | null;
   created_at: string;
@@ -54,13 +55,14 @@ type SessionRow = {
 type BetRow = {
   id: string;
   session_id: string;
-  player_id: string;
+  player_id?: string | null;
   horse_id: string;
-  horse_name: string;
+  horse_name?: string | null;
   bet_amount: number;
-  odds: number | string;
+  server_odds?: number | string | null;
+  odds?: number | string | null;
   payout: number;
-  status: "placed" | "won" | "lost" | "paid";
+  status: "placed" | "won" | "lost" | "paid" | "refunded";
   created_at: string;
   updated_at: string;
 };
@@ -78,16 +80,51 @@ function parseJsonValue<T>(value: T | string | null, fallback: T): T {
   }
 }
 
+function mapServerResult(
+  row: SessionRow,
+  horses: HorseProfile[]
+): HorseRaceResult | null {
+  const payload = parseJsonValue<{ winnerId?: string; placements?: string[] }>(row.result, {});
+  const placements = parseJsonValue<string[]>(row.placements ?? payload.placements ?? null, []);
+  const winnerId = row.winner_id ?? payload.winnerId ?? placements[0] ?? null;
+  if (!winnerId || placements.length === 0) return null;
+
+  const durationMs = 4000;
+  const initialPositions = Object.fromEntries(horses.map((horse) => [horse.id, 0]));
+  const finalPositions = Object.fromEntries(
+    horses.map((horse) => {
+      const place = Math.max(0, placements.indexOf(horse.id));
+      return [horse.id, Math.max(0.12, 1 - place * 0.14)];
+    })
+  );
+  const stamina = Object.fromEntries(horses.map((horse) => [horse.id, 0]));
+
+  return {
+    raceId: row.id,
+    horses,
+    frames: [
+      { time: 0, positions: initialPositions, stamina },
+      { time: durationMs, positions: finalPositions, stamina },
+    ],
+    placements,
+    winnerId,
+    finishTimeMs: durationMs,
+    durationMs,
+  };
+}
+
 function mapSession(row: SessionRow): PublicHorseRaceSession {
+  const horses = parseJsonValue<HorseProfile[]>(row.horses, []);
+  const serverOdds = parseJsonValue<Record<string, number>>(row.server_odds ?? null, {});
   return {
     id: row.id,
     title: row.title,
     status: row.status,
-    horses: parseJsonValue<HorseProfile[]>(row.horses, []),
-    result: parseJsonValue<HorseRaceResult | null>(row.result, null),
+    horses: horses.map((horse) => ({ ...horse, odds: Number(serverOdds[horse.id] ?? horse.odds) })),
+    result: mapServerResult(row, horses),
     winnerId: row.winner_id,
-    targetBets: Number(row.target_bets ?? 2),
-    createdBy: row.created_by,
+    bettingClosesAt: row.betting_closes_at ?? row.created_at,
+    createdBy: null,
     startedAt: row.started_at,
     finishedAt: row.finished_at,
     createdAt: row.created_at,
@@ -99,11 +136,11 @@ function mapBet(row: BetRow): PublicHorseRaceBet {
   return {
     id: row.id,
     sessionId: row.session_id,
-    playerId: row.player_id,
+    playerId: row.player_id ?? "",
     horseId: row.horse_id,
-    horseName: row.horse_name,
+    horseName: row.horse_name ?? row.horse_id,
     betAmount: row.bet_amount,
-    odds: Number(row.odds),
+    odds: Number(row.server_odds ?? row.odds ?? 0),
     payout: row.payout,
     status: row.status,
     createdAt: row.created_at,
@@ -119,12 +156,16 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function firstRpcRow<T>(value: T | T[] | null): T | null {
+  return Array.isArray(value) ? value[0] ?? null : value;
+}
+
 export async function detectHorseRaceOnlineSupport() {
   if (onlineSupport !== null) {
     return onlineSupport;
   }
 
-  const { error } = await supabase.from("horse_race_sessions").select("id").limit(1);
+  const { error } = await supabase.from("horse_race_server_sessions_public").select("id").limit(1);
   onlineSupport = !error;
   return onlineSupport;
 }
@@ -138,12 +179,12 @@ export async function fetchPublicHorseRaceSessions(): Promise<
     return {
       status: "unavailable",
       data: [],
-      message: "Ejecuta supabase_horse_race_online.sql para activar salas online.",
+      message: "Las carreras server-side aun no estan activas.",
     };
   }
 
   const { data, error } = await supabase
-    .from("horse_race_sessions")
+    .from("horse_race_server_sessions_public")
     .select("*")
     .neq("status", "finished")
     .order("created_at", { ascending: false })
@@ -178,7 +219,7 @@ export async function fetchPublicHorseRaceBets(sessionId: string): Promise<
   }
 
   const { data, error } = await supabase
-    .from("horse_race_bets")
+    .from("horse_race_server_bets_public")
     .select("*")
     .eq("session_id", sessionId)
     .order("created_at", { ascending: true });
@@ -194,48 +235,42 @@ export async function fetchPublicHorseRaceBets(sessionId: string): Promise<
   return { status: "success", data: (data as BetRow[]).map(mapBet) };
 }
 
+async function readServerSession(sessionId: string): Promise<PublicHorseRaceSession | null> {
+  const { data, error } = await supabase
+    .from("horse_race_server_sessions_public")
+    .select("*")
+    .eq("id", sessionId)
+    .maybeSingle();
+  return error || !data ? null : mapSession(data as SessionRow);
+}
+
 export async function createPublicHorseRaceSession(input: {
   playerId: string;
   title: string;
   horses: HorseProfile[];
-  targetBets: number;
+  targetBets?: number;
 }): Promise<HorseRaceOnlineResult<PublicHorseRaceSession | null>> {
-  const { data, error } = await supabase.rpc("create_public_horse_race_session", {
-    p_creator_player_id: input.playerId,
+  void input.playerId;
+  void input.targetBets;
+  const { data, error } = await supabase.rpc("create_server_horse_race", {
     p_title: input.title,
     p_horses: input.horses,
-    p_target_bets: input.targetBets,
+    p_betting_seconds: 300,
   });
-
-  if (error || !data) {
-    return {
-      status: "error",
-      data: null,
-      message: getErrorMessage(error, "No se pudo crear la sala online."),
-    };
+  const row = firstRpcRow<{ session_id: string }>(data);
+  if (error || !row?.session_id) {
+    return { status: "error", data: null, message: getErrorMessage(error, "No se pudo crear la sala online.") };
   }
-
-  return { status: "success", data: mapSession(data as SessionRow), message: "Sala online creada." };
+  const session = await readServerSession(row.session_id);
+  return { status: session ? "success" : "error", data: session, message: session ? "Sala online creada." : "La sala fue creada pero no se pudo leer." };
 }
 
 export async function closePublicHorseRaceBets(input: {
   adminPlayerId: string;
   sessionId: string;
 }): Promise<HorseRaceOnlineResult<PublicHorseRaceSession | null>> {
-  const { data, error } = await supabase.rpc("close_public_horse_race_bets", {
-    p_admin_player_id: input.adminPlayerId,
-    p_session_id: input.sessionId,
-  });
-
-  if (error || !data) {
-    return {
-      status: "error",
-      data: null,
-      message: getErrorMessage(error, "No se pudieron cerrar las apuestas."),
-    };
-  }
-
-  return { status: "success", data: mapSession(data as SessionRow), message: "Apuestas cerradas." };
+  void input.adminPlayerId;
+  return startPublicHorseRace({ adminPlayerId: "", sessionId: input.sessionId, result: null });
 }
 
 export async function placePublicHorseRaceBet(input: {
@@ -246,48 +281,32 @@ export async function placePublicHorseRaceBet(input: {
   betAmount: number;
   odds: number;
 }): Promise<HorseRaceOnlineResult<PublicHorseRaceBet | null>> {
-  const { data, error } = await supabase.rpc("place_public_horse_race_bet", {
+  void input.playerId;
+  void input.horseName;
+  void input.odds;
+  const { error } = await supabase.rpc("place_server_horse_race_bet", {
     p_session_id: input.sessionId,
-    p_player_id: input.playerId,
     p_horse_id: input.horseId,
-    p_horse_name: input.horseName,
-    p_bet_amount: Math.max(1, Math.floor(input.betAmount)),
-    p_odds: input.odds,
+    p_bet_amount: input.betAmount,
+    p_idempotency_key: `web-horse:${input.sessionId}:${input.horseId}:${input.betAmount}`,
   });
-
-  if (error || !data) {
-    return {
-      status: "error",
-      data: null,
-      message: getErrorMessage(error, "No se pudo registrar la apuesta online."),
-    };
-  }
-
-  return { status: "success", data: mapBet(data as BetRow), message: "Apuesta online registrada." };
+  return error
+    ? { status: "error", data: null, message: getErrorMessage(error, "No se pudo registrar la apuesta.") }
+    : { status: "success", data: null, message: "Apuesta registrada." };
 }
 
 export async function startPublicHorseRace(input: {
   adminPlayerId: string;
   sessionId: string;
-  result: HorseRaceResult;
+  result: HorseRaceResult | null;
 }): Promise<HorseRaceOnlineResult<PublicHorseRaceSession | null>> {
-  const { data, error } = await supabase.rpc("start_public_horse_race", {
-    p_admin_player_id: input.adminPlayerId,
-    p_session_id: input.sessionId,
-    p_result: input.result,
-    p_winner_id: input.result.winnerId,
-    p_placements: input.result.placements,
-  });
-
-  if (error || !data) {
-    return {
-      status: "error",
-      data: null,
-      message: getErrorMessage(error, "No se pudo iniciar la carrera online."),
-    };
-  }
-
-  return { status: "success", data: mapSession(data as SessionRow), message: "Carrera online iniciada." };
+  void input.adminPlayerId;
+  void input.result;
+  const { error } = await supabase.rpc("start_server_horse_race", { p_session_id: input.sessionId });
+  const session = error ? null : await readServerSession(input.sessionId);
+  return error || !session
+    ? { status: "error", data: session, message: getErrorMessage(error, "La carrera aun no esta lista para iniciar.") }
+    : { status: "success", data: session, message: "Carrera online iniciada." };
 }
 
 export async function maybeStartPublicHorseRace(input: {
@@ -295,43 +314,19 @@ export async function maybeStartPublicHorseRace(input: {
   sessionId: string;
   result: HorseRaceResult;
 }): Promise<HorseRaceOnlineResult<PublicHorseRaceSession | null>> {
-  const { data, error } = await supabase.rpc("maybe_start_public_horse_race", {
-    p_player_id: input.playerId,
-    p_session_id: input.sessionId,
-    p_result: input.result,
-    p_winner_id: input.result.winnerId,
-    p_placements: input.result.placements,
-  });
-
-  if (error || !data) {
-    return {
-      status: "error",
-      data: null,
-      message: getErrorMessage(error, "La carrera aun no esta lista para iniciar."),
-    };
-  }
-
-  return { status: "success", data: mapSession(data as SessionRow), message: "Cupo completo. Carrera iniciada." };
+  return startPublicHorseRace({ adminPlayerId: input.playerId, sessionId: input.sessionId, result: input.result });
 }
 
 export async function settlePublicHorseRace(input: {
   playerId: string;
   sessionId: string;
 }): Promise<HorseRaceOnlineResult<PublicHorseRaceSession | null>> {
-  const { data, error } = await supabase.rpc("settle_public_horse_race", {
-    p_player_id: input.playerId,
-    p_session_id: input.sessionId,
-  });
-
-  if (error || !data) {
-    return {
-      status: "error",
-      data: null,
-      message: getErrorMessage(error, "No se pudo liquidar la carrera online."),
-    };
-  }
-
-  return { status: "success", data: mapSession(data as SessionRow), message: "Pagos liquidados." };
+  void input.playerId;
+  const { error } = await supabase.rpc("settle_server_horse_race", { p_session_id: input.sessionId });
+  const session = error ? null : await readServerSession(input.sessionId);
+  return error || !session
+    ? { status: "error", data: session, message: getErrorMessage(error, "No se pudo liquidar la carrera online.") }
+    : { status: "success", data: session, message: "Pagos liquidados." };
 }
 
 export function subscribeToPublicHorseRace(
@@ -342,7 +337,7 @@ export function subscribeToPublicHorseRace(
     .channel(`horse-race-${sessionId || "lobby"}`)
     .on(
       "postgres_changes",
-      { event: "*", schema: "public", table: "horse_race_sessions" },
+      { event: "*", schema: "public", table: "horse_race_server_sessions" },
       onChange
     );
 
@@ -352,14 +347,14 @@ export function subscribeToPublicHorseRace(
       {
         event: "*",
         schema: "public",
-        table: "horse_race_bets",
+        table: "horse_race_server_bets",
         filter: `session_id=eq.${sessionId}`,
       },
       onChange
     )
     : channel.on(
       "postgres_changes",
-      { event: "*", schema: "public", table: "horse_race_bets" },
+      { event: "*", schema: "public", table: "horse_race_server_bets" },
       onChange
     );
 

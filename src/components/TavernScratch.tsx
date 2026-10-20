@@ -46,14 +46,12 @@ export function TavernScratch() {
   const mountedRef = useRef(true);
 
   const dailyConfig = useMemo(() => getDailyScratchConfig(), []);
-  const limitReached = dailyGrossWins >= dailyConfig.maxDailyLimit;
   const totalCost = dailyConfig.cost * quantity;
   const canBuy = Boolean(
     player &&
       player.gold >= totalCost &&
       !updating &&
-      quantity > 0 &&
-      !limitReached
+      quantity > 0
   );
   const maxBuyQuantity = player ? Math.floor(player.gold / dailyConfig.cost) : 0;
 
@@ -213,15 +211,6 @@ export function TavernScratch() {
       <ScratchMessage
         title="Rasca y gana"
         description="Conecta tu perfil del reino en el panel superior para comprar tu ticket sin volver a iniciar sesion."
-      />
-    );
-  }
-
-  if (limitReached && phase === "buy") {
-    return (
-      <ScratchMessage
-        title="Limite diario alcanzado"
-        description={`El Reino ya registro ${dailyGrossWins} de oro en premios hoy, muy cerca o por encima del limite de ${dailyConfig.maxDailyLimit}. Esta mesa vuelve a abrir manana.`}
       />
     );
   }

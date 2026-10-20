@@ -2337,3 +2337,9 @@ ode --check src/handlers/blackjack.js en kingdoom-bot. El azar sigue usando Math
 - `Reset staff` separa dos caminos: un administrador autenticado puede restablecer cualquier cuenta; un administrador sin sesión puede recuperar su propia cuenta con un código WhatsApp de 6 dígitos validado en servidor.
 - La recuperación comprueba que el jugador existe, que `is_admin` está activo, que el código no caducó ni fue usado y actualiza la contraseña mediante Auth Admin.
 - Se invalida la sesión global después del cambio para obligar a iniciar sesión con la nueva contraseña.
+
+### [2026-10-19] Alineación server-side de juegos y Banco V2 revisada por Astra
+- Se alinearon las 16 rutas web autorizadas con RPC server-side para carreras, Banco semanal, Slots, Roulette, Plinko, Penalties, Expedición, Arcade, Tower Defense, Crash y Scratch.
+- Astra (gpt-6-astra) emitió PASS sin hallazgos bloqueantes; Ponytail full mantuvo la allowlist mínima y excluyó backups, propuestas SQL, secretos y artefactos.
+- Validado con build, TypeScript dirigido, PGlite T2/T3/T4, matemáticas bancarias, RTP, diff check y escaneo de secretos. El TypeScript integral agotó el timeout y no quedó proceso activo; no se ejecutó staging ni smoke UI remoto.
+- No se aplicaron migraciones remotas ni hubo commit, push o deploy en esta revisión.

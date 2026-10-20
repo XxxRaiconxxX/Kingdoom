@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Coins, Crosshair, RefreshCw, Shield, Trophy, Zap } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
-import keeperSprites from "../assets/penalty-keeper-sprites.png";
 import {
-  addPlayerDailyPenaltyNetWins,
-  buildScratchDateKey,
-  getPlayerDailyPenaltyNetWins,
-  MAX_DAILY_PENALTY_WIN_LIMIT,
-} from "../utils/scratchUtils";
+  createTavernIdempotencyKey,
+  startPenaltySecure,
+  stepPenaltySecure,
+} from "../utils/minigamesSecure";
+import keeperSprites from "../assets/penalty-keeper-sprites.png";
+import { MAX_DAILY_PENALTY_WIN_LIMIT } from "../utils/scratchUtils";
 import type { ReactNode } from "react";
 
 type DirectionId =
@@ -21,6 +21,7 @@ type DirectionId =
 
 type Phase = "betting" | "aiming" | "charging" | "resolved";
 type Result = "goal" | "save" | "post" | null;
+type ServerPenaltyStatus = "active" | "lost" | "won" | null;
 type KeeperPose = "idle" | "leftLow" | "leftMid" | "leftHigh" | "centerHigh" | "rightLow" | "rightMid" | "rightHigh";
 
 type Direction = {
@@ -396,14 +397,15 @@ export function TavernPenalty() {
   const keeperImageRef = useRef<HTMLImageElement | null>(null);
   const frameRef = useRef(0);
   const timeoutRefs = useRef<number[]>([]);
-  const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [phase, setPhase] = useState<Phase>("betting");
   const [bet, setBet] = useState(100);
   const [roundIndex, setRoundIndex] = useState(0);
   const [lockedBet, setLockedBet] = useState(0);
+  const [serverSessionId, setServerSessionId] = useState<string | null>(null);
+  const [serverPenaltyStatus, setServerPenaltyStatus] = useState<ServerPenaltyStatus>(null);
   const [shotState, setShotState] = useState<ShotState>(DEFAULT_SHOT);
   const [message, setMessage] = useState("Supera 4 penales seguidos para llegar al x8.");
-  const [dailyNetWins, setDailyNetWins] = useState(0);
   const [updating, setUpdatingState] = useState(false);
   const updatingRef = useRef(false);
   const settledRef = useRef(false);
@@ -413,27 +415,15 @@ export function TavernPenalty() {
   }
 
   const balance = player?.gold ?? 0;
-  const dateKey = useMemo(() => buildScratchDateKey(), []);
   const maxAllowedBet = Math.max(1, balance);
   const safeBet = clamp(Math.round(bet || 0), 1, maxAllowedBet);
   const canShoot = Boolean(player && phase === "aiming" && lockedBet > 0 && !updating);
   const currentMultiplier = getRoundMultiplier(roundIndex);
-  const remainingDailyNet = Math.max(0, MAX_DAILY_PENALTY_WIN_LIMIT - dailyNetWins);
-  const limitReached = dailyNetWins >= MAX_DAILY_PENALTY_WIN_LIMIT;
   const activeStake = lockedBet || safeBet;
   const potentialNetWin = activeStake * (currentMultiplier - 1);
-  const potentialPrize = activeStake + Math.min(potentialNetWin, remainingDailyNet);
+  const potentialPrize = activeStake + potentialNetWin;
   const completedRoundBonus = phase === "resolved" && shotState.result === "goal" ? 1 : 0;
   const progressPercent = ((roundIndex + completedRoundBonus) / MAX_ROUNDS) * 100;
-
-  useEffect(() => {
-    if (!player) {
-      setDailyNetWins(0);
-      return;
-    }
-
-    setDailyNetWins(getPlayerDailyPenaltyNetWins(player.id, dateKey));
-  }, [dateKey, player]);
 
   useEffect(() => {
     const image = new Image();
@@ -496,25 +486,27 @@ export function TavernPenalty() {
     if (updatingRef.current) return;
     setUpdating(true);
     await refreshPlayer();
-    if (player) {
-      setDailyNetWins(getPlayerDailyPenaltyNetWins(player.id, dateKey));
-    }
     setUpdating(false);
   }
 
   async function startAiming() {
-    if (!player || safeBet > balance || updatingRef.current || limitReached || phase !== "betting") {
+    if (!player || safeBet > balance || updatingRef.current || phase !== "betting") {
       return;
     }
 
     setUpdating(true);
-    const debited = await addPlayerGold(-safeBet).catch(() => null);
-    setUpdating(false);
-    if (!debited) {
-      setMessage("No se pudo reservar la apuesta. Refresca tu perfil.");
+    let sessionId: string;
+    try {
+      sessionId = await startPenaltySecure(safeBet, createTavernIdempotencyKey("penalties", "start"));
+    } catch (error) {
+      setUpdating(false);
+      setMessage(error instanceof Error ? error.message : "No se pudo abrir la tanda. Refresca tu perfil.");
       return;
     }
+    setUpdating(false);
     settledRef.current = false;
+    setServerSessionId(sessionId);
+    setServerPenaltyStatus("active");
     setBet(safeBet);
     setLockedBet(safeBet);
     setRoundIndex(0);
@@ -559,51 +551,46 @@ export function TavernPenalty() {
     queue(() => setMessage("Contacto limpio."), CONTACT_MS);
     queue(() => setMessage("El portero reacciona."), CONTACT_MS + keeperDelay);
     queue(async () => {
+      if (!serverSessionId) {
+        setUpdating(false);
+        setMessage("La sesión server-side de Penalties no está disponible.");
+        return;
+      }
       setUpdating(true);
-      const stake = lockedBet || safeBet;
-
-      if (result === "goal" && roundIndex < MAX_ROUNDS - 1) {
-        setPhase("resolved");
-        setMessage(`Gol. Racha x${currentMultiplier}. Siguiente ronda: x${getRoundMultiplier(roundIndex + 1)}.`);
-        setUpdating(false);
-        return;
-      }
-
-      const rawNetWin = result === "goal" ? Math.floor(stake * (currentMultiplier - 1)) : 0;
-      const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
-      const prize = result === "goal" ? stake + cappedNetWin : 0;
-      const updated = await addPlayerGold(prize).catch(() => null);
-
-      if (!updated) {
-        setMessage("No se pudo actualizar el oro. Refresca tu perfil.");
-        setUpdating(false);
-        setPhase("resolved");
-        return;
-      }
-
-      settledRef.current = true;
-      setPhase("resolved");
-      if (result === "goal") {
-        if (cappedNetWin > 0) {
-          const nextDailyWins = addPlayerDailyPenaltyNetWins(player.id, dateKey, cappedNetWin);
-          setDailyNetWins(nextDailyWins);
-        }
-        setMessage(
-          cappedNetWin < rawNetWin
-            ? `Cobras ${prize.toLocaleString("es-PY")} oro por el limite diario.`
-            : `Tanda perfecta. Cobras ${prize.toLocaleString("es-PY")} oro.`
+      try {
+        const serverShot = shot.startsWith("left") ? "left" : shot.startsWith("right") ? "right" : "center";
+        const serverResult = await stepPenaltySecure(
+          serverSessionId,
+          serverShot,
+          createTavernIdempotencyKey("penalties", `step-${roundIndex + 1}`),
         );
-      } else if (result === "post") {
-        setMessage("Al poste. Pierdes la apuesta de la tanda.");
-      } else {
-        setMessage("Atajada. Pierdes la apuesta de la tanda.");
+        const serverStatus = String(serverResult.status) as Exclude<ServerPenaltyStatus, null>;
+        setServerPenaltyStatus(serverStatus);
+        const serverRound = Number(serverResult.round ?? roundIndex + 1);
+        const serverPayout = Number(serverResult.payout ?? 0);
+        setRoundIndex(Math.max(0, serverRound - 1));
+        setPhase("resolved");
+        if (serverStatus === "active") {
+          setMessage(`Gol. Racha x${getRoundMultiplier(serverRound - 1)}. Puedes continuar.`);
+        } else {
+          settledRef.current = true;
+          await refreshPlayer();
+          setMessage(
+            serverStatus === "won"
+              ? `Tanda perfecta. Cobras ${serverPayout.toLocaleString("es-PY")} oro.`
+              : "Atajada o desvío. Pierdes la apuesta de la tanda.",
+          );
+        }
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "No se pudo confirmar el disparo server-side.");
+      } finally {
+        setUpdating(false);
       }
-      setUpdating(false);
     }, RESULT_MS);
   }
 
   function continueRun() {
-    if (updatingRef.current || settledRef.current || phase !== "resolved" || shotState.result !== "goal" || roundIndex >= MAX_ROUNDS - 1) {
+    if (updatingRef.current || settledRef.current || phase !== "resolved" || serverPenaltyStatus !== "active" || roundIndex >= MAX_ROUNDS - 1) {
       return;
     }
 
@@ -614,38 +601,6 @@ export function TavernPenalty() {
     setMessage(`Ronda ${nextRound + 1}. Multiplicador x${getRoundMultiplier(nextRound)}.`);
   }
 
-  async function cashOutRun() {
-    if (!player || phase !== "resolved" || shotState.result !== "goal" || updatingRef.current || settledRef.current) {
-      return;
-    }
-
-    setUpdating(true);
-    const stake = lockedBet || safeBet;
-    const rawNetWin = Math.floor(stake * (currentMultiplier - 1));
-    const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
-    const prize = stake + cappedNetWin;
-    const updated = await addPlayerGold(prize).catch(() => null);
-
-    if (!updated) {
-      setMessage("No se pudo cobrar. Refresca tu perfil.");
-      setUpdating(false);
-      return;
-    }
-
-    settledRef.current = true;
-    if (cappedNetWin > 0) {
-      const nextDailyWins = addPlayerDailyPenaltyNetWins(player.id, dateKey, cappedNetWin);
-      setDailyNetWins(nextDailyWins);
-    }
-    setMessage(
-      cappedNetWin < rawNetWin
-        ? `Cobro limitado: ${prize.toLocaleString("es-PY")} oro.`
-        : `Cobro seguro: ${prize.toLocaleString("es-PY")} oro.`
-    );
-    setUpdating(false);
-    setRoundIndex(MAX_ROUNDS - 1);
-  }
-
   function resetRound() {
     if (updatingRef.current || (roundIndex === MAX_ROUNDS - 1 && shotState.result === "goal" && !settledRef.current)) return;
     timeoutRefs.current.forEach((id) => window.clearTimeout(id));
@@ -653,6 +608,8 @@ export function TavernPenalty() {
     setPhase("betting");
     setRoundIndex(0);
     setLockedBet(0);
+    setServerSessionId(null);
+    setServerPenaltyStatus(null);
     setShotState(DEFAULT_SHOT);
     setMessage("Supera 4 penales seguidos para llegar al x8.");
   }
@@ -663,15 +620,6 @@ export function TavernPenalty() {
 
   if (!player) {
     return <PenaltyMessage title="Penal del Reino" description="Conecta tu perfil para apostar en la tanda." />;
-  }
-
-  if (limitReached && phase === "betting") {
-    return (
-      <PenaltyMessage
-        title="Limite diario alcanzado"
-        description={`Ya ganaste ${MAX_DAILY_PENALTY_WIN_LIMIT.toLocaleString("es-PY")} de oro neto hoy en Penales. La tanda vuelve manana.`}
-      />
-    );
   }
 
   return (
@@ -758,19 +706,8 @@ export function TavernPenalty() {
 
         <aside className="space-y-3">
           <Panel title="Apuesta" icon={<Coins className="h-4 w-4" />}>
-            <div className="mb-3 rounded-2xl border border-amber-500/15 bg-black/35 px-3 py-2">
-              <div className="flex justify-between text-[9px] font-black uppercase tracking-[0.14em] text-stone-500">
-                <span>Ganancia diaria</span>
-                <span className="text-amber-300">
-                  {dailyNetWins.toLocaleString("es-PY")} / {MAX_DAILY_PENALTY_WIN_LIMIT.toLocaleString("es-PY")}
-                </span>
-              </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-900">
-                <div
-                  className="h-full rounded-full bg-amber-500 transition-all"
-                  style={{ width: `${clamp((dailyNetWins / MAX_DAILY_PENALTY_WIN_LIMIT) * 100, 0, 100)}%` }}
-                />
-              </div>
+            <div className="mb-3 rounded-2xl border border-amber-500/15 bg-black/35 px-3 py-2 text-xs font-bold text-amber-100">
+              Tope neto diario de {MAX_DAILY_PENALTY_WIN_LIMIT.toLocaleString("es-PY")} aplicado por el servidor; no se usa un contador financiero local.
             </div>
             <input
               type="text"
@@ -830,25 +767,15 @@ export function TavernPenalty() {
                   Disparar
                 </button>
               ) : null}
-              {phase === "resolved" && shotState.result === "goal" && !settledRef.current ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={continueRun}
-                    disabled={updating || roundIndex >= MAX_ROUNDS - 1}
-                    className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-3 py-3 text-sm font-black text-black transition active:scale-[0.98]"
-                  >
-                    Seguir
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void cashOutRun()}
-                    disabled={updating}
-                    className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-400/35 bg-amber-500/10 px-3 py-3 text-sm font-black text-amber-100 transition active:scale-[0.98] disabled:opacity-50"
-                  >
-                    Cobrar
-                  </button>
-                </div>
+              {phase === "resolved" && serverPenaltyStatus === "active" && !settledRef.current ? (
+                <button
+                  type="button"
+                  onClick={continueRun}
+                  disabled={updating || roundIndex >= MAX_ROUNDS - 1}
+                  className="kd-touch inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-3 py-3 text-sm font-black text-black transition active:scale-[0.98]"
+                >
+                  Seguir
+                </button>
               ) : null}
               {phase === "resolved" ? (
                 <button

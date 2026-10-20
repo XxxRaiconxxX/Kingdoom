@@ -2,6 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Coins, Crosshair, Gem, Play, RotateCcw, Shield, Skull, Sparkles, Swords } from "lucide-react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
 import type { PointerEvent, ReactNode } from "react";
+import {
+  createTavernIdempotencyKey,
+  submitTowerDefenseSecure,
+} from "../utils/minigamesSecure";
 
 type DifficultyId = "frontier" | "siege" | "abyss";
 type MapId = "northGate" | "emberRoad" | "lostBridge";
@@ -567,7 +571,7 @@ export function TavernTowerDefense() {
   const selectedTowerRef = useRef<TowerBlueprint>(TOWERS[0]);
   const pathCellsRef = useRef(buildPathCells(MAPS[0].path));
   const victoryTokenRef = useRef(0);
-  const { player, addPlayerGold } = usePlayerSession();
+  const { player, refreshPlayer } = usePlayerSession();
   const [difficultyId, setDifficultyId] = useState<DifficultyId>("frontier");
   const [mapId, setMapId] = useState<MapId>("northGate");
   const [selectedTowerId, setSelectedTowerId] = useState<TowerId>("sentinel");
@@ -1044,62 +1048,34 @@ export function TavernTowerDefense() {
 
     async function awardVictoryGold() {
       if (!player) {
-        setNotice(`Victoria lograda. Conecta tu perfil para cobrar ${difficulty.reward} oro.`);
-        return;
-      }
-
-      const key = rewardKey(player.id, difficulty.id);
-
-      if (window.localStorage.getItem(key)) {
-        setNotice("Victoria registrada. La recompensa de hoy para esta dificultad ya fue cobrada.");
+        setNotice("Victoria lograda. Conecta tu perfil para reclamar la liquidación server-side.");
         return;
       }
 
       attemptedVictoryRef.current = victoryToken;
       rewardBusyRef.current = true;
-      const updated = await addPlayerGold(difficulty.reward).catch(() => null);
-
-      if (!updated) {
-        rewardBusyRef.current = false;
-        setPendingReward(difficulty.reward);
-        setNotice(
-          `Victoria lograda, pero el cobro de ${difficulty.reward.toLocaleString("es-PY")} oro quedo pendiente. Reintenta antes de otra oleada.`
+      setIsRewardUpdating(true);
+      try {
+        const result = await submitTowerDefenseSecure(
+          difficulty.id,
+          MAX_WAVE,
+          Math.max(0, Math.floor(runtimeRef.current?.score ?? 0)),
+          createTavernIdempotencyKey("tower-defense", difficulty.id),
         );
-        return;
+        await refreshPlayer();
+        setPendingReward(0);
+        setNotice(`Recompensa server-side acreditada: +${result.payout.toLocaleString("es-PY")} oro.`);
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : "No se pudo liquidar Tower Defense server-side.");
+        attemptedVictoryRef.current = 0;
+      } finally {
+        setIsRewardUpdating(false);
+        rewardBusyRef.current = false;
       }
-
-      window.localStorage.setItem(key, "claimed");
-      rewardBusyRef.current = false;
-      setPendingReward(0);
-      setNotice(`Recompensa cobrada: +${difficulty.reward.toLocaleString("es-PY")} oro.`);
     }
 
     void awardVictoryGold();
-  }, [addPlayerGold, difficulty, player, victoryToken]);
-
-  async function retryPendingReward() {
-    if (!player || !pendingReward || isRewardUpdating || rewardBusyRef.current) {
-      return;
-    }
-
-    rewardBusyRef.current = true;
-    setIsRewardUpdating(true);
-    const updated = await addPlayerGold(pendingReward).catch(() => null);
-    setIsRewardUpdating(false);
-
-    if (!updated) {
-      rewardBusyRef.current = false;
-      setNotice(
-        `No se pudo acreditar el cobro pendiente de ${pendingReward.toLocaleString("es-PY")} oro. Refresca e intenta otra vez.`
-      );
-      return;
-    }
-
-    window.localStorage.setItem(rewardKey(player.id, difficulty.id), "claimed");
-    rewardBusyRef.current = false;
-    setNotice(`Recompensa pendiente cobrada: +${pendingReward.toLocaleString("es-PY")} oro.`);
-    setPendingReward(0);
-  }
+  }, [difficulty, player, refreshPlayer, victoryToken]);
 
   return (
     <div className="overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-[#03170c] shadow-2xl shadow-emerald-950/30">
@@ -1269,17 +1245,6 @@ export function TavernTowerDefense() {
               <div className="mt-3 rounded-2xl border border-amber-400/25 bg-amber-500/10 p-3 text-sm font-bold leading-6 text-amber-100">
                 <Coins className="mr-2 inline h-4 w-4" />
                 {notice}
-                {hasPendingReward ? (
-                  <button
-                    type="button"
-                    onClick={() => void retryPendingReward()}
-                    disabled={isRewardUpdating}
-                    className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300 px-3 py-2 text-xs font-black uppercase tracking-[0.12em] text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <Coins className="h-4 w-4" />
-                    Reintentar cobro
-                  </button>
-                ) : null}
               </div>
             ) : null}
           </Panel>

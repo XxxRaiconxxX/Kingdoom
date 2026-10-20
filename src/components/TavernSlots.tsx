@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Coins,
@@ -16,12 +16,11 @@ import {
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { usePlayerSession } from "../context/PlayerSessionContext";
+import { MAX_DAILY_SLOTS_WIN_LIMIT } from "../utils/scratchUtils";
 import {
-  addPlayerDailySlotsNetWins,
-  buildScratchDateKey,
-  getPlayerDailySlotsNetWins,
-  MAX_DAILY_SLOTS_WIN_LIMIT,
-} from "../utils/scratchUtils";
+  createTavernIdempotencyKey,
+  playSlotsSecure,
+} from "../utils/minigamesSecure";
 
 type SlotPhase = "betting" | "spinning" | "resolved";
 type SymbolId = "crown" | "gem" | "sword" | "potion" | "shield" | "skull";
@@ -110,82 +109,19 @@ function getSymbol(id: SymbolId) {
   return SYMBOLS.find((symbol) => symbol.id === id) ?? SYMBOLS[0];
 }
 
-function countSymbols(reels: [SymbolId, SymbolId, SymbolId]) {
-  return reels.reduce<Record<SymbolId, number>>(
-    (counts, symbol) => {
-      counts[symbol] += 1;
-      return counts;
-    },
-    {
-      crown: 0,
-      gem: 0,
-      sword: 0,
-      potion: 0,
-      shield: 0,
-      skull: 0,
-    }
-  );
-}
-
-function resolveMultiplier(reels: [SymbolId, SymbolId, SymbolId]) {
-  const counts = countSymbols(reels);
-  const triple = SYMBOL_IDS.find((symbol) => counts[symbol] === 3);
-  const pair = SYMBOL_IDS.find((symbol) => counts[symbol] === 2 && symbol !== "skull");
-
-  if (triple === "crown") return 15;
-  if (triple === "gem") return 6;
-  if (triple === "sword") return 10;
-  if (triple === "potion") return 6;
-  if (triple === "shield") return 4;
-  if (pair) return 1.5;
-  return 0;
-}
-
-function buildLosingReels(): [SymbolId, SymbolId, SymbolId] {
-  const first = randomSymbol();
-  const second = randomSymbol([first]);
-  const third = randomSymbol([first, second]);
-  return [first, second, third];
-}
-
-function buildPairReels(): [SymbolId, SymbolId, SymbolId] {
-  const pair = randomSymbol(["skull"]);
-  const odd = randomSymbol([pair]);
-  const reels: [SymbolId, SymbolId, SymbolId] = [pair, pair, odd];
-  return reels.sort(() => Math.random() - 0.5) as [SymbolId, SymbolId, SymbolId];
-}
-
-function generateSpinOutcome(): SpinOutcome {
-  const roll = Math.random();
-  let reels: [SymbolId, SymbolId, SymbolId];
-
-  if (roll < 0.005) {
-    reels = ["crown", "crown", "crown"];
-  } else if (roll < 0.025) {
-    reels = ["gem", "gem", "gem"];
-  } else if (roll < 0.035) {
-    reels = ["sword", "sword", "sword"];
-  } else if (roll < 0.050) {
-    reels = ["potion", "potion", "potion"];
-  } else if (roll < 0.070) {
-    reels = ["shield", "shield", "shield"];
-  } else if (roll < 0.370) {
-    reels = buildPairReels();
-  } else {
-    reels = buildLosingReels();
-  }
-
-  const multiplier = resolveMultiplier(reels);
-  const title =
-    multiplier >= 8
-      ? "Tesoro mayor"
-      : multiplier >= 2
-        ? "Cobro noble"
-        : multiplier > 0
-          ? "Recuperas ventaja"
-          : "Sin premio";
-
-  return { reels, multiplier, title };
+function buildServerSpinOutcome(multiplier: number): SpinOutcome {
+  const reels: [SymbolId, SymbolId, SymbolId] = multiplier === 15
+    ? ["crown", "crown", "crown"]
+    : multiplier === 10
+      ? ["sword", "sword", "sword"]
+      : multiplier === 6
+        ? ["gem", "gem", "gem"]
+        : multiplier === 4
+          ? ["shield", "shield", "shield"]
+          : multiplier > 0
+            ? ["potion", "potion", "sword"]
+            : ["crown", "gem", "sword"];
+  return { reels, multiplier, title: multiplier > 0 ? `Premio x${multiplier}` : "Sin premio" };
 }
 
 function buildVisibleStrip(center: SymbolId): [SymbolId, SymbolId, SymbolId] {
@@ -193,12 +129,11 @@ function buildVisibleStrip(center: SymbolId): [SymbolId, SymbolId, SymbolId] {
 }
 
 export function TavernSlots() {
-  const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const intervalRefs = useRef<number[]>([]);
   const spinningRef = useRef(false);
   const mountedRef = useRef(true);
   const timeoutRefs = useRef<number[]>([]);
-  const dateKey = useMemo(() => buildScratchDateKey(), []);
   const [phase, setPhase] = useState<SlotPhase>("betting");
   const [bet, setBet] = useState(100);
   const [visibleReels, setVisibleReels] = useState<[SymbolId[], SymbolId[], SymbolId[]]>([
@@ -206,7 +141,6 @@ export function TavernSlots() {
     buildVisibleStrip(INITIAL_REELS[1]),
     buildVisibleStrip(INITIAL_REELS[2]),
   ]);
-  const [dailyNetWins, setDailyNetWins] = useState(0);
   const [lastOutcome, setLastOutcome] = useState<SpinOutcome | null>(null);
   const [lastPrize, setLastPrize] = useState(0);
   const [message, setMessage] = useState("Elige apuesta y gira la maquina.");
@@ -215,19 +149,8 @@ export function TavernSlots() {
   const balance = player?.gold ?? 0;
   const maxAllowedBet = Math.max(1, balance);
   const safeBet = clamp(Math.floor(Number.isFinite(bet) ? bet : 0), 1, maxAllowedBet);
-  const remainingDailyNet = Math.max(0, MAX_DAILY_SLOTS_WIN_LIMIT - dailyNetWins);
-  const limitReached = dailyNetWins >= MAX_DAILY_SLOTS_WIN_LIMIT;
-  const canSpin = Boolean(player && !updating && phase !== "spinning" && safeBet > 0 && safeBet <= balance && !limitReached);
-  const potentialTopPrize = safeBet + Math.min(safeBet * 11, remainingDailyNet);
-
-  useEffect(() => {
-    if (!player) {
-      setDailyNetWins(0);
-      return;
-    }
-
-    setDailyNetWins(getPlayerDailySlotsNetWins(player.id, dateKey));
-  }, [dateKey, player]);
+  const canSpin = Boolean(player && !updating && phase !== "spinning" && safeBet > 0 && safeBet <= balance);
+  const potentialTopPrize = safeBet * 12;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -247,9 +170,6 @@ export function TavernSlots() {
   async function handleRefresh() {
     setUpdating(true);
     await refreshPlayer();
-    if (player) {
-      setDailyNetWins(getPlayerDailySlotsNetWins(player.id, dateKey));
-    }
     setUpdating(false);
   }
 
@@ -264,38 +184,6 @@ export function TavernSlots() {
     setBet(clamp(parseInt(raw, 10) || 0, 0, maxAllowedBet));
   }
 
-  async function resolveSpin(outcome: SpinOutcome, lockedBet: number) {
-    if (!player) {
-      return;
-    }
-
-    const rawPayout = Math.floor(lockedBet * outcome.multiplier);
-    const rawNetWin = Math.max(0, rawPayout - lockedBet);
-    const cappedNetWin = Math.min(rawNetWin, remainingDailyNet);
-    const finalPayout = outcome.multiplier > 0 ? lockedBet + cappedNetWin : 0;
-    const updated = await addPlayerGold(-lockedBet + finalPayout);
-
-    if (!updated) {
-      setMessage("No se pudo actualizar el oro. Refresca tu perfil.");
-      setUpdating(false);
-      setPhase("resolved");
-      return null;
-    }
-
-    if (cappedNetWin > 0) {
-      setDailyNetWins(addPlayerDailySlotsNetWins(player.id, dateKey, cappedNetWin));
-    }
-
-    return {
-      prize: finalPayout,
-      message: outcome.multiplier <= 0
-        ? "La maquina retuvo la apuesta."
-        : cappedNetWin < rawNetWin
-          ? `Cobro limitado: ${finalPayout.toLocaleString("es-PY")} oro.`
-          : `Cobras ${finalPayout.toLocaleString("es-PY")} oro.`,
-    };
-  }
-
   async function spin() {
     if (!canSpin || !player || spinningRef.current) {
       return;
@@ -305,15 +193,26 @@ export function TavernSlots() {
     setUpdating(true);
     clearTimers();
     const lockedBet = safeBet;
-    const outcome = generateSpinOutcome();
-    // Settle before revealing reels; leaving the screen cannot cancel a loss.
-    const settled = await resolveSpin(outcome, lockedBet).catch(() => null);
-    if (!settled || !mountedRef.current) {
+    let serverRound;
+    try {
+      serverRound = await playSlotsSecure(lockedBet, createTavernIdempotencyKey("slots"));
+    } catch (error) {
       spinningRef.current = false;
       setUpdating(false);
-      if (!settled) setMessage("No se pudo procesar la apuesta. Refresca tu perfil.");
+      setMessage(error instanceof Error ? error.message : "No se pudo procesar la apuesta. Refresca tu perfil.");
       return;
     }
+    const serverOutcome = serverRound.outcome && typeof serverRound.outcome === "object" && !Array.isArray(serverRound.outcome)
+      ? serverRound.outcome as Record<string, unknown>
+      : {};
+    const outcome = buildServerSpinOutcome(Number(serverOutcome.multiplier ?? 0));
+    const settled = {
+      prize: serverRound.payout,
+      message: serverRound.payout > 0
+        ? `Cobras ${serverRound.payout.toLocaleString("es-PY")} oro.`
+        : "La maquina retuvo la apuesta.",
+    };
+    await refreshPlayer();
     setBet(lockedBet);
     setLastOutcome(null);
     setLastPrize(0);
@@ -370,15 +269,6 @@ export function TavernSlots() {
 
   if (!player) {
     return <SlotsMessage title="Maquina del Tesoro" description="Conecta tu perfil para usar la maquina." />;
-  }
-
-  if (limitReached && phase === "betting") {
-    return (
-      <SlotsMessage
-        title="Limite diario alcanzado"
-        description={`Ya ganaste ${MAX_DAILY_SLOTS_WIN_LIMIT.toLocaleString("es-PY")} de oro neto hoy en Slots.`}
-      />
-    );
   }
 
   return (
@@ -492,19 +382,10 @@ export function TavernSlots() {
             </button>
           </Panel>
 
-          <Panel title="Limite diario" icon={<Sparkles className="h-4 w-4" />}>
-            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.14em] text-stone-500">
-              <span>Ganancia neta</span>
-              <span className="text-cyan-200">
-                {dailyNetWins.toLocaleString("es-PY")} / {MAX_DAILY_SLOTS_WIN_LIMIT.toLocaleString("es-PY")}
-              </span>
-            </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-black">
-              <div
-                className="h-full rounded-full bg-cyan-300 transition-all"
-                style={{ width: `${clamp((dailyNetWins / MAX_DAILY_SLOTS_WIN_LIMIT) * 100, 0, 100)}%` }}
-              />
-            </div>
+          <Panel title="Límite server-side" icon={<Sparkles className="h-4 w-4" />}>
+            <p className="text-xs font-bold leading-5 text-cyan-100">
+              Tope neto diario de {MAX_DAILY_SLOTS_WIN_LIMIT.toLocaleString("es-PY")} aplicado por el servidor; el cliente no mantiene un contador financiero local.
+            </p>
             <button
               type="button"
               onClick={() => void handleRefresh()}

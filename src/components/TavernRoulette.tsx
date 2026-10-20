@@ -12,11 +12,14 @@ import {
   resolveRouletteRound,
   ROULETTE_CHIPS,
   ROULETTE_NUMBER_GRID,
-  spinRoulette,
   type RouletteBetId,
   type RoulettePocket,
   type RouletteRoundResult,
 } from "../utils/rouletteEngine";
+import {
+  createTavernIdempotencyKey,
+  playRouletteSecure,
+} from "../utils/minigamesSecure";
 
 const SPIN_DURATION_MS = 6600;
 const SEGMENT_ANGLE = 360 / ROULETTE_WHEEL_ORDER.length;
@@ -54,7 +57,7 @@ function buildWheelGradient() {
 }
 
 export function TavernRoulette() {
-  const { player, isHydrating, refreshPlayer, addPlayerGold } = usePlayerSession();
+  const { player, isHydrating, refreshPlayer } = usePlayerSession();
   const [phase, setPhase] = useState<RoulettePhase>("betting");
   const [selectedChip, setSelectedChip] = useState<number>(ROULETTE_CHIPS[2]);
   const [bets, setBets] = useState<RouletteBets>({});
@@ -170,19 +173,36 @@ export function TavernRoulette() {
     setUpdating(true);
     setSettlementMessage("");
     const snapshot = { ...bets };
-    const betCost = sumBets(snapshot);
-    const winningPocket = spinRoulette();
-    const result = resolveRouletteRound(snapshot, winningPocket);
-    // One balance delta, committed before the wheel reveals its result.
-    const settled = await addPlayerGold(result.totalPayout - betCost).catch(() => null);
-    if (!settled || !mountedRef.current) {
+    let serverRound;
+    try {
+      serverRound = await playRouletteSecure(snapshot as Record<string, number>, createTavernIdempotencyKey("roulette"));
+    } catch (error) {
       spinningRef.current = false;
       setUpdating(false);
-      if (!settled) setSettlementMessage("No se pudo procesar la apuesta. Refresca tu perfil.");
+      setSettlementMessage(error instanceof Error ? error.message : "No se pudo procesar la apuesta. Refresca tu perfil.");
       return;
     }
-    setLastSubmittedBets(snapshot);
+    const serverOutcome = serverRound.outcome && typeof serverRound.outcome === "object" && !Array.isArray(serverRound.outcome)
+      ? serverRound.outcome as Record<string, unknown>
+      : {};
+    const rawWinningPocket = String(serverOutcome.winningPocket) as RoulettePocket;
+    if (!ROULETTE_WHEEL_ORDER.includes(rawWinningPocket)) {
+      spinningRef.current = false;
+      setUpdating(false);
+      setSettlementMessage("El servidor devolvio un resultado de ruleta invalido.");
+      return;
+    }
+    const winningPocket = rawWinningPocket;
     const winningIndex = getWinningPocketIndex(winningPocket);
+    const visualResult = resolveRouletteRound(snapshot, winningPocket);
+    const result: RouletteRoundResult = {
+      ...visualResult,
+      totalBet: serverRound.bet,
+      totalPayout: serverRound.payout,
+    };
+    await refreshPlayer();
+    if (!mountedRef.current) return;
+    setLastSubmittedBets(snapshot);
     const extraSpins = 6 * 360;
     const baseRotation = Math.ceil(wheelRotation / 360) * 360;
     const pocketAngle = winningIndex * SEGMENT_ANGLE + POCKET_CENTER_OFFSET;

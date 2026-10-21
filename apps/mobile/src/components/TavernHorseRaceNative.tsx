@@ -16,7 +16,7 @@ import {
 } from "@/src/utils/horseRaceUtils";
 
 type RacePhase = "idle" | "racing" | "finished";
-const MAX_DAILY_HORSE_NET_WIN = 350000;
+const MAX_DAILY_HORSE_NET_WIN = 100000;
 const BET_PRESETS = [100, 500, 1000];
 
 function clamp(value: number, min: number, max: number) {

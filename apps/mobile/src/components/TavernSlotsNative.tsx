@@ -44,7 +44,7 @@ const SYMBOLS: SlotSymbol[] = [
 const SYMBOL_IDS = SYMBOLS.map((symbol) => symbol.id);
 const INITIAL_REELS: [SlotSymbolId, SlotSymbolId, SlotSymbolId] = ["sword", "crown", "shield"];
 const BET_PRESETS = [100, 500, 1000];
-const MAX_DAILY_SLOTS_NET_WIN = 350000;
+const MAX_DAILY_SLOTS_NET_WIN = 100000;
 const REEL_STOP_DELAYS = [760, 1100, 1460];
 
 function clamp(value: number, min: number, max: number) {

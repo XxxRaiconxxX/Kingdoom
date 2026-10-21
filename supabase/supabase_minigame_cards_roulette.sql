@@ -229,7 +229,7 @@ begin
     coalesce(v_session.next_card, 0),
     v_session.phase_state,
     v_daily_wins,
-    greatest(350000 - v_daily_wins, 0),
+    greatest(100000 - v_daily_wins, 0),
     v_player.gold;
 end;
 $$;
@@ -265,7 +265,7 @@ begin
   v_session := public.ensure_cards_session_row(v_player.id);
   v_daily_wins := public.ensure_cards_daily_totals(v_player.id, v_date_key);
 
-  if v_daily_wins >= 350000 then
+  if v_daily_wins >= 100000 then
     raise exception 'Ya alcanzaste el limite diario de Cartas. Vuelve manana.' using errcode = '22023';
   end if;
 
@@ -305,7 +305,7 @@ begin
     0,
     v_session.phase_state,
     v_daily_wins,
-    greatest(350000 - v_daily_wins, 0),
+    greatest(100000 - v_daily_wins, 0),
     v_player.gold;
 end;
 $$;
@@ -385,7 +385,7 @@ begin
     coalesce(v_session.next_card, 0),
     v_session.phase_state,
     v_daily_wins,
-    greatest(350000 - v_daily_wins, 0),
+    greatest(100000 - v_daily_wins, 0),
     v_player.gold;
 end;
 $$;
@@ -438,7 +438,7 @@ begin
     0,
     v_session.phase_state,
     v_daily_wins,
-    greatest(350000 - v_daily_wins, 0),
+    greatest(100000 - v_daily_wins, 0),
     v_player.gold;
 end;
 $$;
@@ -477,7 +477,7 @@ begin
     raise exception 'Plantarse solo se desbloquea desde la ronda 2 en una decision valida.' using errcode = '22023';
   end if;
 
-  v_allowed_total := v_session.bet_amount + greatest(350000 - v_daily_wins, 0);
+  v_allowed_total := v_session.bet_amount + greatest(100000 - v_daily_wins, 0);
   v_cashout := least(v_session.pool_amount, v_allowed_total);
   v_net_win := greatest(v_cashout - v_session.bet_amount, 0);
 
@@ -532,7 +532,7 @@ begin
     0,
     v_session.phase_state,
     v_daily_wins + v_net_win,
-    greatest(350000 - (v_daily_wins + v_net_win), 0),
+    greatest(100000 - (v_daily_wins + v_net_win), 0),
     v_player.gold,
     v_cashout;
 end;

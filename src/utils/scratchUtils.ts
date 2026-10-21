@@ -56,7 +56,7 @@ export function getDailyScratchConfig(): DailyScratchConfig {
     winChance = 0.25 + normalizedSeed * 0.15;
   }
 
-  const maxDailyLimit = Math.floor(seed * (150000 - 10000 + 1)) + 10000;
+  const maxDailyLimit = Math.floor(seed * (100000 - 10000 + 1)) + 10000;
 
   return {
     cost,
@@ -67,11 +67,11 @@ export function getDailyScratchConfig(): DailyScratchConfig {
 }
 
 // -- TavernCards daily limit -------------------------------------------------
-export const MAX_DAILY_CARDS_WIN_LIMIT = 350000;
-export const MAX_DAILY_PENALTY_WIN_LIMIT = 350000;
-export const MAX_DAILY_SLOTS_WIN_LIMIT = 350000;
-export const MAX_DAILY_PLINKO_WIN_LIMIT = 350000;
-export const MAX_DAILY_HORSE_RACE_WIN_LIMIT = 350000;
+export const MAX_DAILY_CARDS_WIN_LIMIT = 100000;
+export const MAX_DAILY_PENALTY_WIN_LIMIT = 100000;
+export const MAX_DAILY_SLOTS_WIN_LIMIT = 100000;
+export const MAX_DAILY_PLINKO_WIN_LIMIT = 100000;
+export const MAX_DAILY_HORSE_RACE_WIN_LIMIT = 100000;
 
 export function getPlayerDailyCardsGrossWins(
   playerId: string,

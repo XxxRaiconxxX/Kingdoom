@@ -107,7 +107,7 @@ begin
     win_chance := 0.25 + (v_normalized_seed * 0.15);
   end if;
 
-  max_daily_limit := floor(v_seed * (150000 - 10000 + 1))::integer + 10000;
+  max_daily_limit := floor(v_seed * (100000 - 10000 + 1))::integer + 10000;
   date_key := trim(p_date_key);
 
   return next;

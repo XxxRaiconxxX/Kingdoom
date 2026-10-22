@@ -6,6 +6,12 @@ Este changelog mantiene solo el periodo operativo reciente para que el relevo se
 - Historico anterior retirado del changelog activo por limpieza operativa.
 - Entradas agrupadas por mes y ordenadas de mas reciente a mas antigua.
 
+### [2026-10-21] Publicacion del limite semanal de crecimiento autonomo de negocios
+- Supabase A aplica limite server-side de +50% por semana sobre la base congelada y +100% acumulado para produccion y almacen.
+- Al alcanzar el +100%, la RPC rechaza la ampliacion y exige negociacion con staff; la politica cubre RPC dual e individual, con inicializacion automatica para negocios nuevos.
+- Validacion: contrato `BUSINESS_WEEKLY_CAP_CONTRACT_OK`, RPC remota con rollback para limite semanal/total, ACL solo `service_role`, `npx tsc --noEmit` y `git diff --check`. [Hermes]
+
+
 ## 2026-10
 ### [2026-10-14] Activacion atomica de primer acceso para perfiles legacy
 - Se añade `activate_player_access`, que valida el codigo despues de crear/iniciar la cuenta Auth, bloquea jugador y codigo, y solo consume el codigo tras validacion; se revoca el RPC cliente `link_player_access`.
